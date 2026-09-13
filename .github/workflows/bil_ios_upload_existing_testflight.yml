@@ -1,0 +1,106 @@
+name: BIL iOS upload existing build 17 to TestFlight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  upload-existing-ios-17:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - name: Require App Store Connect credentials
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
+          test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
+          test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
+
+      - name: Download validated IPA from successful run 35
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifact
+          gh run download 34767069084             --repo bilhealth-admin/Body-Intelligence             --name bil-ios-signed-ipa-6004b78e8c06f6e419ebe6042296baf17a6d0c62             --dir artifact
+
+      - name: Verify exact validated candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifact/BIL-build-number.txt
+          grep -Fxq 'BUILD_NUMBER=17' artifact/BIL-build-number.txt
+          test -f artifact/BIL-source-head.txt
+          grep -Fxq '6004b78e8c06f6e419ebe6042296baf17a6d0c62' artifact/BIL-source-head.txt
+
+          IPA="$(find artifact -type f -name '*.ipa' -print -quit)"
+          test -s "$IPA"
+
+          EXPECTED_SHA="$(awk '{print $1}' artifact/BIL-ios-ipa.sha256)"
+          ACTUAL_SHA="$(shasum -a 256 "$IPA" | awk '{print $1}')"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+
+          echo "IPA=$IPA" >> "$GITHUB_ENV"
+          echo "VALIDATED_IPA_SHA256=$ACTUAL_SHA" >> "$GITHUB_ENV"
+
+      - name: Install App Store Connect API key
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          ASC_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          python3 - "$ASC_KEY_PATH" <<'PY'
+          import base64
+          import binascii
+          import os
+          import pathlib
+          import sys
+
+          try:
+              decoded = base64.b64decode(
+                  os.environ['ASC_PRIVATE_KEY_BASE64'],
+                  validate=True,
+              )
+          except (KeyError, ValueError, binascii.Error) as error:
+              raise SystemExit(f'Invalid App Store Connect key Base64: {error}')
+          pathlib.Path(sys.argv[1]).write_bytes(decoded)
+          PY
+          chmod 600 "$ASC_KEY_PATH"
+
+      - name: Revalidate exact IPA with App Store Connect
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcrun altool --validate-app             -f "$IPA"             -t ios             --apiKey "$ASC_KEY_ID"             --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Upload exact validated IPA to TestFlight
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcrun altool --upload-app             -f "$IPA"             -t ios             --apiKey "$ASC_KEY_ID"             --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Remove ephemeral App Store Connect key
+        if: always()
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        run: |
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
