@@ -171,10 +171,14 @@ void main() {
           find.descendant(of: badgeFinder, matching: find.byType(Container)),
         );
         final decoration = container.decoration! as BoxDecoration;
-        expect((decoration.gradient! as LinearGradient).colors, [
-          Color.lerp(spec.accent(Brightness.light), Colors.white, .18)!,
-          spec.accent(Brightness.light),
-        ], reason: '${platform.name}:${item.id}:container');
+        expect(
+          (decoration.gradient! as LinearGradient).colors,
+          [
+            Color.lerp(spec.accent(Brightness.light), Colors.white, .18)!,
+            spec.accent(Brightness.light),
+          ],
+          reason: '${platform.name}:${item.id}:container',
+        );
       }
       expect(tester.takeException(), isNull, reason: platform.name);
     }

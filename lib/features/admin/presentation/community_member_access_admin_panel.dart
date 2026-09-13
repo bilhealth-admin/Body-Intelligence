@@ -354,39 +354,38 @@ class _CommunityMemberAccessAdminPanelState
   Future<void> _confirmAndReinstate(CommunitySuspendedMemberEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) =>
-          AlertDialog(
-            key: const Key('admin-community-reinstate-confirmation'),
-            title: Text(
+      builder: (dialogContext) => AlertDialog(
+        key: const Key('admin-community-reinstate-confirmation'),
+        title: Text(
+          _copy(
+            'Restore Community access?',
+            ar: 'إعادة دخول المجتمع؟',
+            fr: 'Rétablir l’accès à la communauté ?',
+            es: '¿Restaurar acceso a la comunidad?',
+            tr: 'Topluluk erişimi geri verilsin mi?',
+          ),
+        ),
+        content: Text(entry.email),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.strings.text('Cancel')),
+          ),
+          FilledButton(
+            key: const Key('admin-community-reinstate-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
               _copy(
-                'Restore Community access?',
-                ar: 'إعادة دخول المجتمع؟',
-                fr: 'Rétablir l’accès à la communauté ?',
-                es: '¿Restaurar acceso a la comunidad?',
-                tr: 'Topluluk erişimi geri verilsin mi?',
+                'Restore',
+                ar: 'إعادة',
+                fr: 'Rétablir',
+                es: 'Restaurar',
+                tr: 'Geri ver',
               ),
             ),
-            content: Text(entry.email),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: Text(context.strings.text('Cancel')),
-              ),
-              FilledButton(
-                key: const Key('admin-community-reinstate-confirm'),
-                onPressed: () => Navigator.pop(dialogContext, true),
-                child: Text(
-                  _copy(
-                    'Restore',
-                    ar: 'إعادة',
-                    fr: 'Rétablir',
-                    es: 'Restaurar',
-                    tr: 'Geri ver',
-                  ),
-                ),
-              ),
-            ],
           ),
+        ],
+      ),
     );
     if (confirmed != true || !mounted || _mutating) return;
 
