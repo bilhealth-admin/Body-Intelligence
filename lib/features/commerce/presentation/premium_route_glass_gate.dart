@@ -91,15 +91,25 @@ class _RetainedAiCoachSurface extends ConsumerStatefulWidget {
 class _RetainedAiCoachSurfaceState
     extends ConsumerState<_RetainedAiCoachSurface> {
   bool _contentMounted = false;
+  bool? _lastVerifiedAccess;
 
   @override
   Widget build(BuildContext context) {
     final credits = ref.watch(aiCoachCreditAccessProvider);
-    final unavailable = credits.hasError;
-    // A refresh retains the last verified result, not a locally inferred
-    // entitlement. Every request is still authorized by the server. Errors,
-    // an exhausted balance and a new account all fail closed.
-    final allowed = !unavailable && credits.asData?.value == true;
+    final freshAccess = credits.asData?.value;
+    if (freshAccess != null) {
+      _lastVerifiedAccess = freshAccess;
+    }
+
+    // Keep the last server-verified result while the same account silently
+    // revalidates. The parent widget is keyed by verified entitlement owner,
+    // so an auth/account change recreates this state and cannot inherit another
+    // member's cached access.
+    //
+    // This is presentation continuity only. AI reservations/settlement remain
+    // server-authoritative, so stale UI cannot spend unavailable credit.
+    final allowed = (freshAccess ?? _lastVerifiedAccess) == true;
+    final unavailable = credits.hasError && _lastVerifiedAccess == null;
     if (allowed || unavailable || (!unavailable && !credits.isLoading)) {
       _contentMounted = true;
     }
