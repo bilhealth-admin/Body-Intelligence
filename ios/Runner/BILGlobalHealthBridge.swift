@@ -14,7 +14,11 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // HKQueryAnchor continues each page and later incremental refreshes without
   // restarting the backfill.
   private static let initialHistoryDays = 365
-  private static let readPageLimit = 100
+  // Keep each platform-channel payload small enough that decoding and
+  // handoff on Flutter's UI isolate cannot create a visible freeze. The Dart
+  // runtime keeps paging from the returned per-type anchors until the current
+  // foreground synchronization budget is exhausted.
+  private static let readPageLimit = 25
   private let store: HKHealthStore
   private let channelName: String
   private let healthQueryQueue = DispatchQueue(label: "com.bilhealth.apple-health.read")
