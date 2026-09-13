@@ -106,7 +106,7 @@ Future<CommunityPostImageDraft> prepareCommunityPostImageAsync(
         compressed.lengthInBytes > communityPostImageMaxBytes) {
       throw const FormatException('community_image_compression_limit');
     }
-    return validateCommunityPostImageAsync(compressed);
+    return await validateCommunityPostImageAsync(compressed);
   } on CommunityPostImageException {
     rethrow;
   } on Object {
