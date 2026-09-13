@@ -48,3 +48,45 @@ jobs:
           test/connected_health/connected_health_contract_test.dart
           test/connected_health/health_devices_review_regression_test.dart
           test/features/connected_health/health_controller_disposal_test.dart
+
+  ios-compile:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - name: Check out Build 18 candidate
+        uses: actions/checkout@v4
+
+      - name: Install Flutter release toolchain
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Sanitize deferred iOS ads plugin graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --defer-ios-google-mobile-ads
+          python3 tool/release/sanitize_ios_deferred_ads_swift_package.py --project-root .
+
+      - name: Compile iOS release without signing or upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ios --release --no-codesign --no-pub \
+            --build-number 18 \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
+            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
+            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
+            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
+            --dart-define=BIL_ADS_ENABLED=false \
+            --dart-define=BIL_AD_PROVIDER_READY=false \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
