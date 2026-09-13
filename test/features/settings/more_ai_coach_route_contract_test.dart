@@ -268,7 +268,19 @@ void main() {
       await tester.pump();
       await tester.pumpAndSettle();
       expect(find.text('BIL AI BOOST'), findsWidgets);
-      expect(find.text('Coach surface'), findsNothing);
+      expect(find.text('Coach surface'), findsOneWidget);
+      final retainedSurface = find.byKey(
+        const ValueKey('ai-coach-retained-content'),
+      );
+      final retainedAbsorber = find.descendant(
+        of: retainedSurface,
+        matching: find.byType(AbsorbPointer),
+      );
+      expect(retainedAbsorber, findsOneWidget);
+      expect(
+        tester.widget<AbsorbPointer>(retainedAbsorber).absorbing,
+        isTrue,
+      );
     },
   );
 
