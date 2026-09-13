@@ -681,7 +681,10 @@ class AppRouter {
           ),
           GoRoute(path: '/foods', builder: (_, _) => const FoodPage()),
           GoRoute(path: '/history', builder: (_, _) => const ProgressPage()),
-          GoRoute(path: '/weight-history', builder: (_, _) => const HistoryPage()),
+          GoRoute(
+            path: '/weight-history',
+            builder: (_, _) => const HistoryPage(),
+          ),
           GoRoute(
             path: '/analytics',
             builder: (_, _) => const AnalyticsPage(showDashboardBack: true),

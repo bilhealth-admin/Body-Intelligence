@@ -393,93 +393,91 @@ void main() {
     localeIndex++
   ) {
     final locale = AppLocalizations.supportedLocales[localeIndex];
-    testWidgets(
-      '25-locale full onboarding matrix ${locale.toLanguageTag()}',
-      (tester) async {
-        var rendered = 0;
-        for (var stepIndex = 0; stepIndex < photoSteps.length; stepIndex++) {
-          final step = photoSteps[stepIndex];
-          for (var scaleIndex = 0; scaleIndex < 2; scaleIndex++) {
-            final scale = scaleIndex == 0 ? 1.0 : 2.0;
-            final dark = (localeIndex + stepIndex + scaleIndex).isOdd;
-            await render(
-              tester,
-              draft: valid(
-                step: step,
-                sex: step == 'hips' || localeIndex.isOdd ? 'female' : 'male',
-              ),
-              size: const Size(390, 844),
-              locale: locale,
-              themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-              textScale: scale,
-              platform: (localeIndex + stepIndex).isEven
-                  ? TargetPlatform.iOS
-                  : TargetPlatform.android,
-            );
-            rendered++;
+    testWidgets('25-locale full onboarding matrix ${locale.toLanguageTag()}', (
+      tester,
+    ) async {
+      var rendered = 0;
+      for (var stepIndex = 0; stepIndex < photoSteps.length; stepIndex++) {
+        final step = photoSteps[stepIndex];
+        for (var scaleIndex = 0; scaleIndex < 2; scaleIndex++) {
+          final scale = scaleIndex == 0 ? 1.0 : 2.0;
+          final dark = (localeIndex + stepIndex + scaleIndex).isOdd;
+          await render(
+            tester,
+            draft: valid(
+              step: step,
+              sex: step == 'hips' || localeIndex.isOdd ? 'female' : 'male',
+            ),
+            size: const Size(390, 844),
+            locale: locale,
+            themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+            textScale: scale,
+            platform: (localeIndex + stepIndex).isEven
+                ? TargetPlatform.iOS
+                : TargetPlatform.android,
+          );
+          rendered++;
 
-            expect(
-              find.byKey(const Key('onboarding-step-title')),
-              findsOneWidget,
-              reason: '${locale.toLanguageTag()} $step ${scale}x title',
-            );
-            expect(
-              find.byKey(Key('onboarding-photo-$step')),
-              findsOneWidget,
-              reason: '${locale.toLanguageTag()} $step ${scale}x photo',
-            );
-            final footer = tester.getRect(
-              find.byKey(const Key('onboarding-next')),
-            );
-            expect(
-              footer.top,
-              greaterThanOrEqualTo(0),
-              reason: '${locale.toLanguageTag()} $step ${scale}x footer top',
-            );
-            expect(
-              footer.bottom,
-              lessThanOrEqualTo(844),
-              reason: '${locale.toLanguageTag()} $step ${scale}x footer bottom',
-            );
+          expect(
+            find.byKey(const Key('onboarding-step-title')),
+            findsOneWidget,
+            reason: '${locale.toLanguageTag()} $step ${scale}x title',
+          );
+          expect(
+            find.byKey(Key('onboarding-photo-$step')),
+            findsOneWidget,
+            reason: '${locale.toLanguageTag()} $step ${scale}x photo',
+          );
+          final footer = tester.getRect(
+            find.byKey(const Key('onboarding-next')),
+          );
+          expect(
+            footer.top,
+            greaterThanOrEqualTo(0),
+            reason: '${locale.toLanguageTag()} $step ${scale}x footer top',
+          );
+          expect(
+            footer.bottom,
+            lessThanOrEqualTo(844),
+            reason: '${locale.toLanguageTag()} $step ${scale}x footer bottom',
+          );
 
-            // Detect an actual runtime fallback, not invariant terms such as
-            // BIL, AI Coach, Apple Health, units, or numeric values. A source
-            // phrase is forbidden only when this locale has a distinct value.
-            if (locale.languageCode != 'en') {
-              final fallbackCandidates = OnboardingRuntimeCopy.englishKeys
-                  .where(
-                    (source) =>
-                        OnboardingRuntimeCopy.resolve(source, locale) != source,
-                  )
-                  .toSet();
-              final visibleText = tester
-                  .widgetList<Text>(find.byType(Text))
-                  .map((widget) => widget.data)
-                  .whereType<String>();
-              for (final value in visibleText) {
-                expect(
-                  fallbackCandidates.any(
-                    (source) =>
-                        value == source ||
-                        (source.length >= 12 && value.contains(source)),
-                  ),
-                  isFalse,
-                  reason:
-                      '${locale.toLanguageTag()} $step ${scale}x English fallback: $value',
-                );
-              }
+          // Detect an actual runtime fallback, not invariant terms such as
+          // BIL, AI Coach, Apple Health, units, or numeric values. A source
+          // phrase is forbidden only when this locale has a distinct value.
+          if (locale.languageCode != 'en') {
+            final fallbackCandidates = OnboardingRuntimeCopy.englishKeys
+                .where(
+                  (source) =>
+                      OnboardingRuntimeCopy.resolve(source, locale) != source,
+                )
+                .toSet();
+            final visibleText = tester
+                .widgetList<Text>(find.byType(Text))
+                .map((widget) => widget.data)
+                .whereType<String>();
+            for (final value in visibleText) {
+              expect(
+                fallbackCandidates.any(
+                  (source) =>
+                      value == source ||
+                      (source.length >= 12 && value.contains(source)),
+                ),
+                isFalse,
+                reason:
+                    '${locale.toLanguageTag()} $step ${scale}x English fallback: $value',
+              );
             }
-            expect(
-              tester.takeException(),
-              isNull,
-              reason: '${locale.toLanguageTag()} $step ${scale}x',
-            );
           }
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${locale.toLanguageTag()} $step ${scale}x',
+          );
         }
-        expect(rendered, 32);
-      },
-      timeout: const Timeout(Duration(minutes: 2)),
-    );
+      }
+      expect(rendered, 32);
+    }, timeout: const Timeout(Duration(minutes: 2)));
   }
 
   testWidgets('safe areas and a visible keyboard keep the footer reachable', (

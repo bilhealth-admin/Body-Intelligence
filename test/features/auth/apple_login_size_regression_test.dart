@@ -128,19 +128,17 @@ void main() {
     }
   }
 
-  testWidgets(
-    'all released locales retain equal native provider dimensions',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(390, 1100));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      for (final locale in AppLocalizations.supportedLocales) {
-        await tester.pumpWidget(
-          _login(locale: locale, brightness: Brightness.light, scale: 1),
-        );
-        await tester.pumpAndSettle();
-        _expectProviderSizes(tester, locale, 1);
-      }
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+  testWidgets('all released locales retain equal native provider dimensions', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 1100));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    for (final locale in AppLocalizations.supportedLocales) {
+      await tester.pumpWidget(
+        _login(locale: locale, brightness: Brightness.light, scale: 1),
+      );
+      await tester.pumpAndSettle();
+      _expectProviderSizes(tester, locale, 1);
+    }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }
