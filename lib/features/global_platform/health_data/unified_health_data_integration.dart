@@ -621,7 +621,17 @@ final class UnifiedHealthDataRuntime {
     Set<String> parentRecordIds,
   ) async {
     if (parentRecordIds.isEmpty) return;
+    var workSinceUiYield = 0;
+
+    Future<void> cooperateWithUi() async {
+      workSinceUiYield++;
+      if (workSinceUiYield < _recordsPerUiYield) return;
+      workSinceUiYield = 0;
+      await _yieldHealthSyncTurn();
+    }
+
     for (final row in await store.list('health_signals')) {
+      await cooperateWithUi();
       if (row['providerId'] != providerId) continue;
       final recordId = row['recordId'];
       final attributes = row['attributes'] as Map?;
@@ -639,6 +649,7 @@ final class UnifiedHealthDataRuntime {
     // are absent from health_signals but still have a health_seen fingerprint.
     for (final parentRecordId in parentRecordIds) {
       for (final type in BilHealthScope.read) {
+        await cooperateWithUi();
         final identity = '$providerId:$parentRecordId:${type.name}';
         await store.remove('health_signals', identity);
         await store.remove('health_seen', identity);
