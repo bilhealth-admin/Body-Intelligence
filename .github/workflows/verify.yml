@@ -35,9 +35,26 @@ jobs:
       - name: Check formatting
         shell: pwsh
         run: |
-          $targets = @('lib', 'test')
-          if (Test-Path integration_test) { $targets += 'integration_test' }
-          dart format --output=none --set-exit-if-changed @targets
+          if ("${{ github.event_name }}" -eq "pull_request") {
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            $targets = git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- '*.dart' |
+              Where-Object {
+                (Test-Path $_) -and (
+                  $_ -like 'lib/*' -or
+                  $_ -like 'test/*' -or
+                  $_ -like 'integration_test/*'
+                )
+              }
+            if (-not $targets) {
+              Write-Host "No changed Dart files to format-check."
+              exit 0
+            }
+            dart format --output=none --set-exit-if-changed @targets
+          } else {
+            $targets = @('lib', 'test')
+            if (Test-Path integration_test) { $targets += 'integration_test' }
+            dart format --output=none --set-exit-if-changed @targets
+          }
 
       - name: Analyze complete source
         run: flutter analyze --no-pub
