@@ -248,13 +248,13 @@ void main() {
           ),
           weeklyReportProvider.overrideWith((ref) async => _storeWeeklyReport),
           analyticsClockProvider.overrideWithValue(
-            () => DateTime.utc(2026, 8, 30, 9, 41, 12),
+            () => DateTime(2026, 8, 30, 9, 41, 12),
           ),
           selectedLogDateProvider.overrideWith(
             (ref) => DateTime(2026, 8, 30, 9, 41, 12),
           ),
           premiumProfileClockProvider.overrideWithValue(
-            () => DateTime(2026, 8, 30, 9, 41, 12),
+            () => DateTime.utc(2026, 8, 30, 9, 41, 12),
           ),
           liveHealthNowProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
