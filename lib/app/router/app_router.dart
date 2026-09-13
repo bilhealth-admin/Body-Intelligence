@@ -100,10 +100,7 @@ part 'app_route_redirect.dart';
 class AppRouter {
   static Future<bool> Function()? nativeAuthCallbackRetry;
 
-  /// A billing surface is an overlay journey, not a destination that should
-  /// grow the back stack. StoreKit may return control to Flutter more than
-  /// once for a single cancelled transaction, so a second request for the
-  /// already-visible Plans route must be ignored.
+  /// Ignore duplicate Plans navigation from repeated billing callbacks.
   static bool blocksDuplicatePlansNavigation(Uri current, Uri next) =>
       current.path == '/plans' && next.path == '/plans';
 
