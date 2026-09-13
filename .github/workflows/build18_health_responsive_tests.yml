@@ -1,0 +1,50 @@
+name: build18-health-responsive-tests
+
+on:
+  push:
+    branches:
+      - codex/build18-ai-coach-no-loading-flash-20260913
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build18-health-responsive-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  health:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out Build 18 candidate
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Analyze health changes
+        run: >
+          flutter analyze --no-pub
+          lib/features/global_platform/health_data/unified_health_data_integration.dart
+          lib/features/global_platform/intelligence/global_health_evidence_graph.dart
+          lib/features/connected_health/providers/connected_health_provider.dart
+          lib/features/connected_health/providers/connected_health_native_gateway.dart
+          test/features/global_platform/apple_health_runtime_test.dart
+          test/features/global_platform/global_health_evidence_graph_test.dart
+
+      - name: Run responsive Health sync regressions
+        run: >
+          flutter test --no-pub
+          test/features/global_platform/apple_health_runtime_test.dart
+          test/features/global_platform/global_health_evidence_graph_test.dart
+          test/connected_health/connected_health_contract_test.dart
+          test/connected_health/health_devices_review_regression_test.dart
+          test/features/connected_health/health_controller_disposal_test.dart
