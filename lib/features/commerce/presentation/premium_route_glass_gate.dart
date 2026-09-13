@@ -72,7 +72,7 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     }
     return _RetainedAiCoachSurface(
       // Never retain a previous member's screen across an account change.
-      key: ValueKey(ref.watch(verifiedEntitlementOwnerProvider).asData?.value),
+      key: ValueKey(ref.watch(verifiedEntitlementOwnerIdProvider)),
       child: child,
     );
   }
