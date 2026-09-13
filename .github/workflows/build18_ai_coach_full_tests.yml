@@ -1,0 +1,43 @@
+name: build18-ai-coach-full-tests
+
+on:
+  push:
+    branches:
+      - codex/build18-ai-coach-no-loading-flash-20260913
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build18-ai-coach-full-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out Build 18 candidate
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Analyze complete source
+        run: flutter analyze --no-pub
+
+      - name: Run AI Coach regression tests
+        run: >
+          flutter test --no-pub
+          test/features/commerce/ai_coach_credit_access_policy_test.dart
+          test/features/settings/more_ai_coach_route_contract_test.dart
+
+      - name: Run complete test suite including goldens
+        run: flutter test --no-pub
