@@ -199,9 +199,10 @@ void main() {
       activityLevel: 'light',
       exercises: true,
     );
-    await PreferencesRepository(
-      db,
-    ).set('timezoneName', 'Egypt Daylight Time');
+    await PreferencesRepository(db).set(
+      'timezoneName',
+      'Egypt Daylight Time',
+    );
     if (trends) {
       final weights = WeightRepository(db);
       final now = DateTime(2026, 8, 5);
