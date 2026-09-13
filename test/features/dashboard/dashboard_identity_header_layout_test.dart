@@ -141,7 +141,7 @@ void main() {
     expect(placeholder.color, Colors.white);
   });
 
-  testWidgets('a member photo remains an unmodified image provider', (
+  testWidgets('a member photo remains an unmodified foreground image provider', (
     tester,
   ) async {
     final onePixelPng = base64Decode(
@@ -161,7 +161,11 @@ void main() {
         matching: find.byType(CircleAvatar),
       ),
     );
-    expect(avatar.backgroundImage, isA<MemoryImage>());
+    // The freshly selected local photo must stay on the foreground layer so a
+    // delayed cached NetworkImage cannot replace it during an unrelated
+    // Dashboard rebuild. This is still the original MemoryImage provider.
+    expect(avatar.foregroundImage, isA<MemoryImage>());
+    expect(avatar.backgroundImage, isNull);
     expect(avatar.child, isNull);
   });
 }

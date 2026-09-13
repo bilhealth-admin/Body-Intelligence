@@ -138,6 +138,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         lastClearWritingLanguageTag = restoredWritingLanguage;
         introVisible = restored.isEmpty;
         conversationReady = true;
+        animatedResponseIds.clear();
         messages
           ..clear()
           ..addAll(restored);

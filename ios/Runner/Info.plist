@@ -68,7 +68,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Body Intelligence Log</string>
+	<string>Body Intelligence Log™</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -104,9 +104,47 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Body Intelligence Log</string>
+	<string>Body Intelligence Log™</string>
+	<!-- Native Google Sign-In uses BIL's reviewed iOS and web OAuth clients. -->
+	<key>GIDClientID</key>
+	<string>1041595138122-1bpu2k7vs1fjkkm1d3tg6o0rnn4i15fh.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>1041595138122-hpe2ke9c5rpphijvmk2ssvsbggvbp14j.apps.googleusercontent.com</string>
+	<!-- Meta's native iOS SDK exchanges its short-lived proof directly with Supabase. -->
+	<key>FacebookAppID</key>
+	<string>1384055070498598</string>
+	<key>FacebookClientToken</key>
+	<string>511dd100843bb0cee6b0bbc6af140ebf</string>
+	<key>FacebookDisplayName</key>
+	<string>Body Intelligence Log™</string>
 	<key>CFBundleURLTypes</key>
-	<array><dict><key>CFBundleURLSchemes</key><array><string>bil</string></array></dict></array>
+	<array>
+		<!-- BIL's existing authenticated callback scheme. -->
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bil</string>
+			</array>
+		</dict>
+		<!-- Google returns from its native system sheet through this scheme. -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1041595138122-1bpu2k7vs1fjkkm1d3tg6o0rnn4i15fh</string>
+			</array>
+		</dict>
+		<!-- Meta's native app callback. The plugin owns the iOS scene callback. -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1384055070498598</string>
+			</array>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundlePackageType</key>
@@ -122,6 +160,11 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>

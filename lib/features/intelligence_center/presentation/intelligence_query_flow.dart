@@ -145,7 +145,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               ? IntelligenceMessageModality.voice
               : IntelligenceMessageModality.text,
         );
-        _updateState(() => messages.add(message));
+        _updateState(() {
+          messages.add(message);
+          animatedResponseIds.add(message.id);
+        });
         _scrollToLatest();
         unawaited(_saveConversation());
         if (autoSpeakReply) {
@@ -266,7 +269,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                 ? IntelligenceMessageModality.voice
                 : IntelligenceMessageModality.text,
           );
-          _updateState(() => messages.add(localMessage));
+          _updateState(() {
+            messages.add(localMessage);
+            animatedResponseIds.add(localMessage.id);
+          });
           if (autoSpeakReply) {
             await _speakCoachText(localMessage.text, questionLocale);
             await _resumeLiveCallIfNeeded(generation);
@@ -328,7 +334,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                 message.text == presented.text,
           );
       _updateState(() {
-        if (!repeatedServiceNotice) messages.add(presented);
+        if (!repeatedServiceNotice) {
+          messages.add(presented);
+          animatedResponseIds.add(presented.id);
+        }
         lastServiceStatus = reply.serviceStatus;
         lastRuntime = reply.runtime;
         if (coachServiceStatusAllowsSameRequestRetry(reply.serviceStatus)) {
@@ -386,23 +395,23 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           autoSpeak: autoSpeakReply,
           channel: inputChannel,
         );
-        messages.add(
-          IntelligenceMessage(
-            id: 'coach-error-${DateTime.now().microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.safety,
-            text: tr(
-              'AI Coach could not prepare your context. Your data was not changed; try again.',
-              'تعذر تجهيز سياق AI Coach الآن. لم تتغير بياناتك؛ أعد المحاولة.',
-            ),
-            createdAt: DateTime.now(),
-            evidence: const ['local-coach-runtime'],
-            confidence: 1,
-            modality: autoSpeakReply
-                ? IntelligenceMessageModality.voice
-                : IntelligenceMessageModality.text,
+        final errorMessage = IntelligenceMessage(
+          id: 'coach-error-${DateTime.now().microsecondsSinceEpoch}',
+          role: IntelligenceMessageRole.bil,
+          kind: IntelligenceMessageKind.safety,
+          text: tr(
+            'AI Coach could not prepare your context. Your data was not changed; try again.',
+            'تعذر تجهيز سياق AI Coach الآن. لم تتغير بياناتك؛ أعد المحاولة.',
           ),
+          createdAt: DateTime.now(),
+          evidence: const ['local-coach-runtime'],
+          confidence: 1,
+          modality: autoSpeakReply
+              ? IntelligenceMessageModality.voice
+              : IntelligenceMessageModality.text,
         );
+        messages.add(errorMessage);
+        animatedResponseIds.add(errorMessage.id);
       });
       _scrollToLatest();
       unawaited(_saveConversation());

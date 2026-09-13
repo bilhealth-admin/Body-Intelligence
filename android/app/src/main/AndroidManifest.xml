@@ -60,6 +60,9 @@
     <uses-permission
         android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"
         tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE"
+        tools:node="remove" />
 
     <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
@@ -99,6 +102,22 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${bilAdMobAndroidAppId}" />
+        <!-- Meta's SDK completes its own native Android sign-in and returns a
+             short-lived token directly to BIL. No Supabase browser callback is
+             used for Facebook on Android. Keep all automatic event and ad-ID
+             collection disabled: BIL uses contextual ads only. -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="false" />
+        <meta-data
+            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="false" />
         <activity
             android:name=".PermissionsRationaleActivity"
             android:exported="true"
@@ -151,9 +170,9 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Dart applies the audited route allow-list. Registering the
-                     custom scheme here lets future allow-listed routes work
-                     without broad HTTPS domain verification claims. -->
+                <!-- Preserve BIL's established custom-scheme routes such as
+                     notification and community links. OAuth itself is still
+                     accepted only by Dart's exact auth-callback allow-list. -->
                 <data android:scheme="bil"/>
             </intent-filter>
             <!-- Credential-bearing authentication callbacks use verified
@@ -208,11 +227,6 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
-        </intent>
-        <!-- Lets the strict Facebook OAuth bridge resolve a Custom Tabs
-             provider on Android 11+ without granting broad package access. -->
-        <intent>
-            <action android:name="android.support.customtabs.action.CustomTabsService"/>
         </intent>
     </queries>
 </manifest>

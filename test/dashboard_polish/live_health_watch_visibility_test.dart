@@ -179,15 +179,27 @@ void main() {
     });
   }
 
-  testWidgets('unverified, source-less, and invalid signals stay hidden', (
+  testWidgets('iPhone HealthKit readings do not require Apple Watch evidence', (
     tester,
   ) async {
-    for (final snapshot in [
-      _snapshot(
-        status: ConnectedHealthStatus.synchronized,
-        verified: false,
-        signals: [_signal('steps', 100, 'steps')],
+    await tester.pumpWidget(
+      _subject(
+        _snapshot(
+          status: ConnectedHealthStatus.synchronized,
+          verified: false,
+          source: 'Apple Health',
+          signals: [_signal('steps', 100, 'count', source: 'iPhone')],
+        ),
       ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+    expect(find.text('100'), findsOneWidget);
+  });
+
+  testWidgets('source-less and invalid signals stay hidden', (tester) async {
+    for (final snapshot in [
       _snapshot(
         status: ConnectedHealthStatus.synchronized,
         verified: true,

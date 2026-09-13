@@ -9,18 +9,40 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // A first foreground import must not ask HealthKit for an account's entire
   // lifetime in one unbounded query. One year still preserves useful Apple
   // Watch history (sleep, workouts, heart rate and daily activity), while the
-  // per-type page limit keeps each platform-channel reply bounded. The
-  // existing per-type HKQueryAnchor continues each page and later incremental
-  // refreshes without restarting the backfill.
+  // per-type page limit keeps each platform-channel reply bounded enough for
+  // the Flutter main isolate to remain responsive. The existing per-type
+  // HKQueryAnchor continues each page and later incremental refreshes without
+  // restarting the backfill.
   private static let initialHistoryDays = 365
-  private static let readPageLimit = 500
+  private static let readPageLimit = 100
   private let store: HKHealthStore
   private let channelName: String
+  private let healthQueryQueue = DispatchQueue(label: "com.bilhealth.apple-health.read")
+  private let activeReadLock = NSLock()
+  private var activeReadResult: FlutterResult?
+  private var activeReadQueries: [HKQuery] = []
+  private var backgroundObserver: NSObjectProtocol?
 
   init(store: HKHealthStore = HKHealthStore(), channelName: String = "bil/apple_health") {
     self.store = store
     self.channelName = channelName
     super.init()
+    backgroundObserver = NotificationCenter.default.addObserver(
+      forName: UIApplication.didEnterBackgroundNotification,
+      object: nil,
+      queue: nil
+    ) { [weak self] _ in
+      self?.cancelActiveReadChanges(
+        message: "HealthKit reading stopped because the app entered the background."
+      )
+    }
+  }
+
+  deinit {
+    if let backgroundObserver {
+      NotificationCenter.default.removeObserver(backgroundObserver)
+    }
+    _ = cancelActiveReadChanges(message: "HealthKit bridge was released.")
   }
 
   static func register(with registrar: FlutterPluginRegistrar) {
@@ -69,6 +91,12 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       }
     case "readChanges":
       readChanges(arguments: call.arguments, result: result)
+    case "cancelReadChanges":
+      result([
+        "cancelled": cancelActiveReadChanges(
+          message: "HealthKit reading was cancelled by BIL."
+        ),
+      ])
     case "readDailyTotals":
       readDailyTotals(arguments: call.arguments, result: result)
     case "write":
@@ -140,62 +168,149 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     guard HKHealthStore.isHealthDataAvailable() else {
       result(error("unavailable", "HealthKit is unavailable on this device.")); return
     }
+    guard beginActiveRead(result: result) else {
+      result(error("read_in_progress", "A HealthKit read is already in progress.")); return
+    }
     let args = arguments as? [String: Any]
-    let names = (args?["types"] as? [String]) ?? Self.supportedTypeNames
+    let names = ((args?["types"] as? [String]) ?? Self.supportedTypeNames)
+      .filter { sampleType($0) != nil }
+      .sorted()
     let asOf = ISO8601DateFormatter().date(from: args?["asOf"] as? String ?? "") ?? Date()
     let anchors = decodeAnchors(args?["anchor"] as? String)
-    let group = DispatchGroup()
-    let lock = NSLock()
-    var records: [[String: Any]] = []
-    var deleted: [String] = []
-    var nextAnchors = anchors
-    var pageHasMore = false
-    var firstError: Error?
     let historyStart = asOf.addingTimeInterval(
       -TimeInterval(Self.initialHistoryDays * 24 * 60 * 60)
     )
-
-    for name in names {
-      guard let type = sampleType(name) else { continue }
-      group.enter()
-      // Keep the same bounded historical window while an anchored page is
-      // being drained. Moving `asOf` forward on later syncs never resets the
-      // anchor; it only admits newly observed samples into the query scope.
-      let predicate = HKQuery.predicateForSamples(
-        withStart: historyStart,
-        end: asOf,
-        options: []
-      )
-      let query = HKAnchoredObjectQuery(
-        type: type,
-        predicate: predicate,
-        anchor: anchors[name],
-        limit: Self.readPageLimit
-      ) {
-        [weak self] _, samples, deletedObjects, newAnchor, queryError in
-        defer { group.leave() }
-        guard let self else { return }
-        lock.lock(); defer { lock.unlock() }
-        if let queryError { firstError = firstError ?? queryError; return }
-        records.append(contentsOf: (samples ?? []).compactMap { self.serialize(sample: $0, logicalType: name) })
-        deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
-        if (samples?.count ?? 0) + (deletedObjects?.count ?? 0) >= Self.readPageLimit {
-          pageHasMore = true
-        }
-        if let newAnchor { nextAnchors[name] = newAnchor }
-      }
-      store.execute(query)
-    }
-
-    group.notify(queue: .main) {
-      if let firstError { result(self.error("query_failed", firstError.localizedDescription)); return }
-      result([
-        "records": records,
-        "deletedIds": deleted,
-        "nextAnchor": self.encodeAnchors(nextAnchors),
-        "hasMore": pageHasMore,
+    guard !names.isEmpty else {
+      completeActiveRead([
+        "records": [], "deletedIds": [], "nextAnchor": encodeAnchors(anchors), "hasMore": false,
       ])
+      return
     }
+
+    // HealthKit executes every query asynchronously. Run one bounded query at
+    // a time rather than creating a burst of all supported types, and keep the
+    // response assembly off the main thread. The persisted anchor makes later
+    // explicit syncs continue exactly where this page stopped.
+    healthQueryQueue.async { [weak self] in
+      guard let self else { return }
+      var nextIndex = 0
+      var records: [[String: Any]] = []
+      var deleted: [String] = []
+      var nextAnchors = anchors
+      var pageHasMore = false
+
+      func executeNext() {
+        guard self.isActiveRead else { return }
+        guard nextIndex < names.count else {
+          self.completeActiveRead([
+            "records": records,
+            "deletedIds": deleted,
+            "nextAnchor": self.encodeAnchors(nextAnchors),
+            "hasMore": pageHasMore,
+          ])
+          return
+        }
+
+        let name = names[nextIndex]
+        nextIndex += 1
+        guard let type = self.sampleType(name) else {
+          executeNext()
+          return
+        }
+        let predicate = HKQuery.predicateForSamples(
+          withStart: historyStart,
+          end: asOf,
+          options: []
+        )
+        let query = HKAnchoredObjectQuery(
+          type: type,
+          predicate: predicate,
+          anchor: anchors[name],
+          limit: Self.readPageLimit
+        ) { [weak self] query, samples, deletedObjects, newAnchor, queryError in
+          guard let self else { return }
+          self.healthQueryQueue.async {
+            self.removeActiveReadQuery(query)
+            guard self.isActiveRead else { return }
+            if let queryError {
+              self.completeActiveRead(
+                self.error("query_failed", queryError.localizedDescription)
+              )
+              return
+            }
+            records.append(
+              contentsOf: (samples ?? []).compactMap {
+                self.serialize(sample: $0, logicalType: name)
+              }
+            )
+            deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
+            if (samples?.count ?? 0) + (deletedObjects?.count ?? 0) >= Self.readPageLimit {
+              pageHasMore = true
+            }
+            if let newAnchor { nextAnchors[name] = newAnchor }
+            executeNext()
+          }
+        }
+        guard self.registerActiveReadQuery(query) else { return }
+        self.store.execute(query)
+      }
+
+      executeNext()
+    }
+  }
+
+  private var isActiveRead: Bool {
+    activeReadLock.lock(); defer { activeReadLock.unlock() }
+    return activeReadResult != nil
+  }
+
+  private func beginActiveRead(result: @escaping FlutterResult) -> Bool {
+    activeReadLock.lock(); defer { activeReadLock.unlock() }
+    guard activeReadResult == nil else { return false }
+    activeReadResult = result
+    activeReadQueries.removeAll(keepingCapacity: true)
+    return true
+  }
+
+  private func registerActiveReadQuery(_ query: HKQuery) -> Bool {
+    activeReadLock.lock(); defer { activeReadLock.unlock() }
+    guard activeReadResult != nil else { return false }
+    activeReadQueries.append(query)
+    return true
+  }
+
+  private func removeActiveReadQuery(_ query: HKQuery) {
+    activeReadLock.lock(); defer { activeReadLock.unlock() }
+    activeReadQueries.removeAll { $0 === query }
+  }
+
+  private func completeActiveRead(_ value: Any?) {
+    let callback: FlutterResult?
+    activeReadLock.lock()
+    callback = activeReadResult
+    activeReadResult = nil
+    activeReadQueries.removeAll(keepingCapacity: true)
+    activeReadLock.unlock()
+    guard let callback else { return }
+    DispatchQueue.main.async { callback(value) }
+  }
+
+  @discardableResult
+  private func cancelActiveReadChanges(message: String) -> Bool {
+    let callback: FlutterResult?
+    let queries: [HKQuery]
+    activeReadLock.lock()
+    callback = activeReadResult
+    queries = activeReadQueries
+    activeReadResult = nil
+    activeReadQueries.removeAll(keepingCapacity: true)
+    activeReadLock.unlock()
+    guard let callback else { return false }
+    for query in queries { store.stop(query) }
+    DispatchQueue.main.async {
+      callback(self.error("read_cancelled", message))
+    }
+    return true
   }
 
   /// One-shot statistics, not an observer/background query. HealthKit merges

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../global_platform/core/global_platform_core.dart';
 import '../../global_platform/health_data/unified_health_data_integration.dart';
@@ -37,6 +39,13 @@ abstract interface class ConnectedHealthStartupPermissionGateway {
   Future<ConnectedHealthSnapshot?> requestStartupPermissions();
 }
 
+/// Implemented only by gateways that can stop an active native read.  The
+/// iOS controller uses this after a foreground deadline or app backgrounding;
+/// Android and Bluetooth flows are intentionally not affected.
+abstract interface class ConnectedHealthCancellableSyncGateway {
+  Future<void> cancelSynchronization();
+}
+
 final connectedHealthGatewayProvider = Provider<ConnectedHealthGateway>((ref) {
   final ready = GlobalNativeIntegrationHost.instance.productFlows;
   return ready == null
@@ -51,7 +60,8 @@ final class DeferredConnectedHealthGateway
     implements
         ConnectedHealthGateway,
         ConnectedHealthDailyActivityGateway,
-        ConnectedHealthStartupPermissionGateway {
+        ConnectedHealthStartupPermissionGateway,
+        ConnectedHealthCancellableSyncGateway {
   Future<NativeConnectedHealthGateway> _native() async {
     final host = GlobalNativeIntegrationHost.instance;
     await host.initialize();
@@ -73,6 +83,10 @@ final class DeferredConnectedHealthGateway
   @override
   Future<ConnectedHealthSnapshot> synchronize() async =>
       (await _native()).synchronize();
+
+  @override
+  Future<void> cancelSynchronization() async =>
+      (await _native()).cancelSynchronization();
 
   @override
   Future<ConnectedHealthSnapshot> loadDailyActivity() async =>
@@ -120,16 +134,33 @@ enum _HealthMutation {
 }
 
 final class ConnectedHealthController
-    extends StateNotifier<AsyncValue<ConnectedHealthSnapshot>> {
-  static const Duration _defaultSynchronizationTimeout = Duration(seconds: 25);
+    extends StateNotifier<AsyncValue<ConnectedHealthSnapshot>>
+    with WidgetsBindingObserver {
+  static const Duration _defaultSynchronizationTimeout = Duration(seconds: 12);
+
+  // ConnectedHealthController is also used by non-widget workers and unit
+  // tests. Those callers have no WidgetsBinding, whereas a running iOS app
+  // always does. Keep lifecycle cancellation for the app without making the
+  // health domain depend on a rendered Flutter view.
+  static WidgetsBinding? _activeWidgetsBinding() {
+    try {
+      return WidgetsBinding.instance;
+    } on FlutterError {
+      return null;
+    }
+  }
 
   ConnectedHealthController(this._gateway, {Duration? synchronizationTimeout})
     : _synchronizationTimeout =
           synchronizationTimeout ?? _defaultSynchronizationTimeout,
-      super(const AsyncValue.data(ConnectedHealthSnapshot.unavailable()));
+      _widgetsBinding = _activeWidgetsBinding(),
+      super(const AsyncValue.data(ConnectedHealthSnapshot.unavailable())) {
+    _widgetsBinding?.addObserver(this);
+  }
 
   final ConnectedHealthGateway _gateway;
   final Duration _synchronizationTimeout;
+  final WidgetsBinding? _widgetsBinding;
   Future<void>? _mutationTask;
   _HealthMutation? _mutationKind;
   Future<void>? _refreshTask;
@@ -202,6 +233,7 @@ final class ConnectedHealthController
     late final Future<void> task;
     task =
         _performMutation(
+          kind,
           operation,
           previousMutation: existing,
           previousRefresh: activeRefresh,
@@ -218,6 +250,7 @@ final class ConnectedHealthController
   }
 
   Future<void> _performMutation(
+    _HealthMutation kind,
     Future<ConnectedHealthSnapshot> Function() operation, {
     Future<void>? previousMutation,
     Future<void>? previousRefresh,
@@ -239,6 +272,10 @@ final class ConnectedHealthController
       state = AsyncValue.data(transitioned.copyWith(isBusy: true));
     } else {
       state = const AsyncValue.loading();
+    }
+    if (kind == _HealthMutation.synchronize) {
+      await _yieldIosSynchronizationFrame();
+      if (!mounted) return;
     }
     final result = await AsyncValue.guard(operation);
     if (!mounted) return;
@@ -321,10 +358,12 @@ final class ConnectedHealthController
       try {
         return await _readNativeOnce().timeout(_synchronizationTimeout);
       } on TimeoutException {
+        _cancelIosNativeSynchronization();
         if (!mounted) return const ConnectedHealthSnapshot.unavailable();
-        // Native reads cannot be cancelled safely once handed to HealthKit or
-        // Health Connect. End the visible wait honestly instead of trapping
-        // the whole Apps & Devices surface in a permanent busy state.
+        // iOS actively stops the owned HealthKit query above. Android keeps
+        // its existing Health Connect behavior. In either case, end the
+        // visible wait honestly instead of trapping Apps & Devices in a
+        // permanent busy state.
         return (state.value ?? const ConnectedHealthSnapshot.unavailable())
             .copyWith(
               status: ConnectedHealthStatus.degraded,
@@ -337,6 +376,55 @@ final class ConnectedHealthController
       clearFailure: true,
     ),
   );
+
+  Future<void> _yieldIosSynchronizationFrame() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
+    // Publish `isBusy` before the platform channel begins its HealthKit work.
+    // This keeps the indicator animating rather than drawing its first frame
+    // only after a potentially expensive native response.
+    await Future<void>.delayed(Duration.zero);
+    final binding = _widgetsBinding;
+    if (binding != null && binding.schedulerPhase != SchedulerPhase.idle) {
+      await binding.endOfFrame;
+    }
+  }
+
+  void _cancelIosNativeSynchronization() {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
+    final gateway = _gateway;
+    if (gateway is! ConnectedHealthCancellableSyncGateway) return;
+    unawaited(
+      _ignoreNativeCancellationFailure(
+        gateway as ConnectedHealthCancellableSyncGateway,
+      ),
+    );
+  }
+
+  Future<void> _ignoreNativeCancellationFailure(
+    ConnectedHealthCancellableSyncGateway gateway,
+  ) async {
+    try {
+      await gateway.cancelSynchronization();
+    } on Object {
+      // The timeout result remains the user-facing truth even if the bridge
+      // already completed between the deadline and the cancellation request.
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _cancelIosNativeSynchronization();
+    }
+  }
+
+  @override
+  void dispose() {
+    _widgetsBinding?.removeObserver(this);
+    _cancelIosNativeSynchronization();
+    super.dispose();
+  }
 
   Future<void> requestPermissions() async {
     await _runMutation(_HealthMutation.permissions, () async {

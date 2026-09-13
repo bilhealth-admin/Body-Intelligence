@@ -8,7 +8,8 @@ final class MethodChannelHealthBridge
         NativeHealthBridge,
         NativeHealthCapabilityBridge,
         NativeHealthAuthorizationReviewBridge,
-        NativeHealthDailyTotalsBridge {
+        NativeHealthDailyTotalsBridge,
+        NativeHealthCancellableReadBridge {
   MethodChannelHealthBridge({required String channelName})
     : _channel = MethodChannel(channelName);
 
@@ -126,6 +127,10 @@ final class MethodChannelHealthBridge
       changesTokenExpired: raw?['changesTokenExpired'] == true,
     );
   }
+
+  @override
+  Future<void> cancelReadChanges() =>
+      _channel.invokeMethod<void>('cancelReadChanges');
 
   @override
   Future<void> write(List<GlobalHealthSignal> signals) async {

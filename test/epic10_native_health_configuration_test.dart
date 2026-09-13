@@ -96,12 +96,16 @@ void main() {
       final readChanges = ios.substring(readStart, readEnd);
 
       expect(ios, contains('private static let initialHistoryDays = 365'));
-      expect(ios, contains('private static let readPageLimit = 500'));
+      expect(ios, contains('private static let readPageLimit = 100'));
       expect(readChanges, contains('withStart: historyStart'));
       expect(readChanges, contains('anchor: anchors[name]'));
       expect(readChanges, contains('limit: Self.readPageLimit'));
       expect(readChanges, contains('nextAnchors[name] = newAnchor'));
       expect(readChanges, contains('"hasMore": pageHasMore'));
+      expect(readChanges, contains('healthQueryQueue.async'));
+      expect(readChanges, contains('func executeNext()'));
+      expect(ios, contains('case "cancelReadChanges"'));
+      expect(ios, contains('store.stop(query)'));
       expect(readChanges, isNot(contains('withStart: nil')));
       expect(readChanges, isNot(contains('HKObjectQueryNoLimit')));
     },

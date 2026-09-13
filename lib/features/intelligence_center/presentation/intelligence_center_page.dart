@@ -147,6 +147,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   bool introVisible = true;
   bool conversationReady = false;
   bool conversationLoadFailed = false;
+  CoachContextSnapshot? lastCoachContextSnapshot;
   bool conversationHistoryOpening = false;
   bool coachMenuOpening = false;
   String? activeConversationId;
@@ -162,6 +163,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final messageRuntimes = <String, CoachAnswerRuntime>{};
   final messageFeedback = <String, bool>{};
   final reportedMessages = <String>{};
+  // Keep the typing treatment limited to BIL replies created in this mounted
+  // session. Previously saved messages must remain immediate for browsing.
+  final animatedResponseIds = <String>{};
   static const _speechPolicy = CoachSpeechPolicy();
   static const _voiceTurnPolicy = CoachVoiceTurnPolicy();
 
@@ -380,7 +384,14 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final coachContext = ref.watch(coachContextSnapshotProvider);
-    final snapshot = coachContext.asData?.value;
+    final currentCoachContext = coachContext.asData?.value;
+    if (currentCoachContext != null) {
+      lastCoachContextSnapshot = currentCoachContext;
+    }
+    // A background context refresh must not temporarily erase the brief or
+    // make the conversation appear to reload. Keep the last valid snapshot
+    // until the updated one arrives.
+    final snapshot = currentCoachContext ?? lastCoachContextSnapshot;
     final dailyBrief = snapshot == null
         ? null
         : const CoachDailyBriefEngine().build(
@@ -452,7 +463,11 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                       onStop: _stopLiveCall,
                       liveCallActive: voiceMode == _CoachVoiceMode.liveCall,
                       liveCallPaused: liveCallPaused,
-                      active: listening || sending,
+                      active: listening,
+                      waiting:
+                          sending ||
+                          (!conversationReady && !conversationLoadFailed),
+                      restoring: !conversationReady && !conversationLoadFailed,
                       status: coachStatus,
                       onBack: () {
                         if (context.canPop()) {
@@ -472,11 +487,6 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                         ),
                         onDismiss: () {},
                         onRetry: () => unawaited(_loadConversation()),
-                      )
-                    else if (!conversationReady)
-                      const LinearProgressIndicator(
-                        key: ValueKey('ai-coach-conversation-restoring'),
-                        minHeight: 2,
                       ),
                     Expanded(
                       child: ChatHistoryViewport(

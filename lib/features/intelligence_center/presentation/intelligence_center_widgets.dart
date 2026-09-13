@@ -91,6 +91,8 @@ class _CoachHero extends StatelessWidget {
     required this.onHistory,
     required this.onMenu,
     required this.active,
+    required this.waiting,
+    required this.restoring,
     required this.status,
     required this.liveCallActive,
     required this.liveCallPaused,
@@ -103,6 +105,8 @@ class _CoachHero extends StatelessWidget {
   final VoidCallback onHistory;
   final VoidCallback onMenu;
   final bool active;
+  final bool waiting;
+  final bool restoring;
   final String status;
   final bool liveCallActive;
   final bool liveCallPaused;
@@ -215,6 +219,8 @@ class _CoachHero extends StatelessWidget {
                 liveRegion: true,
                 child: _CoachStatusBadge(
                   active: active,
+                  waiting: waiting,
+                  restoring: restoring,
                   status: status,
                   light: light,
                 ),
@@ -272,18 +278,22 @@ class _CoachHero extends StatelessWidget {
 class _CoachStatusBadge extends StatelessWidget {
   const _CoachStatusBadge({
     required this.active,
+    required this.waiting,
+    required this.restoring,
     required this.status,
     required this.light,
   });
 
   final bool active;
+  final bool waiting;
+  final bool restoring;
   final String status;
   final Color light;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: active ? .14 : .08),
+      color: Colors.white.withValues(alpha: active || waiting ? .14 : .08),
       borderRadius: BorderRadius.circular(999),
       border: Border.all(color: light.withValues(alpha: .22)),
     ),
@@ -292,7 +302,18 @@ class _CoachStatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          active
+          waiting
+              ? SizedBox.square(
+                  key: restoring
+                      ? const ValueKey('ai-coach-conversation-restoring')
+                      : null,
+                  dimension: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: light,
+                  ),
+                )
+              : active
               ? _VoiceListeningWave(color: light, compact: true)
               : Container(
                   width: 6,

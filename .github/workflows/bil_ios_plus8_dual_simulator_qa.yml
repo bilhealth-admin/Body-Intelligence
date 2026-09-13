@@ -144,7 +144,8 @@ jobs:
             test/apple_preparation/ios_native_runtime_safety_contract_test.dart \
             test/apple_preparation/ios_return_to_app_link_contract_test.dart \
             test/features/auth/apple_credential_lifecycle_test.dart \
-            test/features/auth/facebook_oauth_platform_contract_test.dart \
+            test/features/auth/ios_native_google_sign_in_contract_test.dart \
+            test/features/auth/ios_native_facebook_sign_in_contract_test.dart \
             test/features/ads/admob_and_policy_test.dart \
             test/features/commerce/final_store_market_policy_alignment_test.dart \
             test/features/admin/admin_notification_backend_contract_test.dart \
@@ -453,7 +454,7 @@ jobs:
             'AUTHENTICATED_UI_REQUIRED=true' \
             'SIMULATOR_INTEGRITY_BOUNDARY=If the production server requires App Attest, Simulator cannot mint a production assertion; authenticated mutations must fail and the signed-device gate remains open.' \
             'IPAD_LANDSCAPE_BOUNDARY=Flutter widget tests cover landscape and split widths; fb-idb 1.1.7 has no supported rotation command, so landscape simulator runtime is not claimed.' \
-            'SIGNED_PHYSICAL_OR_TESTFLIGHT_STILL_REQUIRED=Sign in with Apple credential sheet and revocation,App Attest production assertion,Facebook provider callback and universal-link association,StoreKit purchase and restore,HealthKit and Apple Watch,push delivery,camera hardware' \
+            'SIGNED_PHYSICAL_OR_TESTFLIGHT_STILL_REQUIRED=Sign in with Apple credential sheet and revocation,Meta native Facebook authorization and Supabase token exchange,App Attest production assertion,StoreKit purchase and restore,HealthKit and Apple Watch,push delivery,camera hardware' \
             'APPLE_REVIEWER_IMMUTABLE_REWARD_EFFECT=none;reviewer post is rejected and approved post belongs to deleted disposable account' \
             'APPLE_REVIEWER_POST_APPROVAL_EXCLUDED=immutable five-token receipt would pollute the real review account;not claimed' \
             'SIMULATOR_NO_ADS_EVIDENCE=static no-ad policy contract plus sampled coach UI only;exhaustive signed UI absence is not claimed' \

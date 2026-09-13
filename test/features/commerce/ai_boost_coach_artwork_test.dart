@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('production AI Boost artwork matches the approved source exactly', () {
     final approved = File(
-      'artifacts/store_assets/google_play/bil_ai_boost_coach_icon_512.png',
+      'artifacts/brand/bil_ai_boost_coach_icon_512.png',
     );
     final production = File(bilAiBoostCoachArtworkAsset);
 

@@ -489,18 +489,20 @@ class _MoreRow extends StatelessWidget {
           leading: _isDanger
               ? Icon(
                   Icons.delete_outline_rounded,
+                  size: 18,
                   color: Theme.of(context).colorScheme.error,
                 )
               : semanticKind == null
               ? Icon(
                   Icons.arrow_forward_rounded,
+                  size: 18,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 )
               : BilSemanticIconBadge(
                   key: Key('more-semantic-icon-${semanticKind.name}'),
                   kind: semanticKind,
-                  size: 36,
-                  iconSize: 20,
+                  size: 28,
+                  iconSize: 17,
                   shape: BoxShape.rectangle,
                 ),
           title: Text(
@@ -538,13 +540,13 @@ class _CloudSyncRow extends ConsumerWidget {
         horizontalTitleGap: 12,
         leading: status.isSyncing
             ? const SizedBox.square(
-                dimension: 22,
+                dimension: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : BilSemanticIconBadge(
                 kind: BilSemanticIconKind.cloudSync,
-                size: 36,
-                iconSize: 20,
+                size: 28,
+                iconSize: 17,
                 shape: BoxShape.rectangle,
               ),
         title: Text(label),
@@ -608,8 +610,8 @@ class _MoreActionRow extends StatelessWidget {
         horizontalTitleGap: 12,
         leading: BilSemanticIconBadge(
           kind: kind,
-          size: 36,
-          iconSize: 20,
+          size: 28,
+          iconSize: 17,
           shape: BoxShape.rectangle,
         ),
         title: Text(label),

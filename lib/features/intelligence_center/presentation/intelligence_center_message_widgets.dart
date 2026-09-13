@@ -10,6 +10,7 @@ class _MessageBubble extends StatelessWidget {
     this.onSpeak,
     this.onAction,
     this.actionPhases = const <String, _CoachActionExecutionPhase>{},
+    this.animateReveal = false,
   });
   final IntelligenceMessage message;
   final bool? feedbackValue;
@@ -19,6 +20,7 @@ class _MessageBubble extends StatelessWidget {
   final VoidCallback? onSpeak;
   final ValueChanged<IntelligenceAction>? onAction;
   final Map<String, _CoachActionExecutionPhase> actionPhases;
+  final bool animateReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +79,7 @@ class _MessageBubble extends StatelessWidget {
                   style: Theme.of(
                     context,
                   ).textTheme.bodyLarge?.copyWith(height: 1.55),
+                  animateReveal: animateReveal,
                 ),
                 if (trustedLinks.isNotEmpty) ...[
                   const SizedBox(height: 10),

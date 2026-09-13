@@ -92,16 +92,33 @@ class _LoginPageState extends State<LoginPage> {
           provider == OAuthProvider.apple &&
           !kIsWeb &&
           defaultTargetPlatform == TargetPlatform.iOS;
-      final opened = nativeApple
+      final nativeGoogle = SupabaseAuthService.usesNativeGoogleSignIn(
+        provider,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      );
+      final nativeFacebook = SupabaseAuthService.usesNativeFacebookSignIn(
+        provider,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      );
+      final nativeSignIn = nativeApple || nativeGoogle || nativeFacebook;
+      final completed = nativeApple
           ? await authService.signInWithAppleNative().then((_) => true)
+          : nativeGoogle
+          ? (await authService.signInWithGoogleNative()) != null
+          : nativeFacebook
+          ? (await authService.signInWithFacebookNative()) != null
           : await authService.signInWithOAuth(provider);
-      // Native Sign in with Apple completes inside the app, so there is no
-      // deep-link callback page to advance the authenticated journey.
-      if (nativeApple && opened && mounted) {
+      // Native Apple, Google, and Facebook sign-in complete inside BIL, so
+      // there is no browser callback page to advance the authenticated journey.
+      if (nativeSignIn && completed && mounted) {
         context.go('/startup');
         return;
       }
-      if (!opened && mounted) {
+      // Dismissing a native provider sheet is a deliberate cancellation, not a
+      // provider outage. Keep the polished sign-in page quietly ready.
+      if (!completed && mounted && !nativeGoogle && !nativeFacebook) {
         setState(
           () => status = authEntryText(
             context,

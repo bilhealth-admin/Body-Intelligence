@@ -414,6 +414,11 @@ void main() {
         await tester.tap(logFood);
         await tester.pumpAndSettle();
         final searchBar = find.byType(SearchBar).last;
+        // Opening the meal entry reveals its search field; opening the field
+        // itself presents SearchAnchor's result view, just as a user does.
+        await tester.ensureVisible(searchBar);
+        await tester.tap(searchBar);
+        await tester.pumpAndSettle();
         await tester.enterText(searchBar, 'Plain Greek');
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 1500));
@@ -626,7 +631,7 @@ void main() {
         await tester.drag(pages, const Offset(-320, 0));
         await tester.pumpAndSettle();
         expect(
-          find.descendant(of: rail, matching: find.text('Steps')).hitTestable(),
+          find.byKey(const Key('dashboard-step-trend-card')).hitTestable(),
           findsOneWidget,
         );
       },

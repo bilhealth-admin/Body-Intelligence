@@ -235,8 +235,23 @@ void main() {
       expect(productionMarker, greaterThan(verify), reason: entry.key);
       expect(nativeMarker, greaterThan(verify), reason: entry.key);
     }
-    expect(android, contains('Facebook OAuth via Supabase Custom Tabs'));
-    expect(ios, contains('Facebook OAuth via Supabase SFSafariViewController'));
+    expect(
+      android,
+      contains(
+        'Google Credential Manager sign-in and Meta native Facebook authorization with Supabase token exchange',
+      ),
+    );
+    expect(
+      ios,
+      contains(
+        'Meta native Facebook authorization and Supabase token exchange',
+      ),
+    );
+    expect(android, isNot(contains('Facebook OAuth via Supabase Custom Tabs')));
+    expect(
+      ios,
+      isNot(contains('Facebook OAuth via Supabase SFSafariViewController')),
+    );
     expect(android, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));
     expect(ios, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));
     expect(

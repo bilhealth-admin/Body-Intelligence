@@ -472,7 +472,12 @@ void main() {
     expect(workflow, contains('SIGNED_PHYSICAL_OR_TESTFLIGHT_STILL_REQUIRED='));
     expect(workflow, contains('Sign in with Apple credential sheet'));
     expect(workflow, contains('App Attest production assertion'));
-    expect(workflow, contains('Facebook provider callback'));
+    expect(
+      workflow,
+      contains(
+        'Meta native Facebook authorization and Supabase token exchange',
+      ),
+    );
     expect(workflow, contains('StoreKit purchase and restore'));
     expect(workflow, contains('APPLE_REVIEWER_POST_APPROVAL_EXCLUDED='));
     expect(workflow, contains('exhaustive signed UI absence is not claimed'));

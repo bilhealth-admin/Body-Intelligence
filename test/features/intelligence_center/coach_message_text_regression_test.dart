@@ -53,4 +53,37 @@ void main() {
       );
     }
   }
+
+  testWidgets('fresh BIL reply reveals quickly without delaying its timestamp', (
+    tester,
+  ) async {
+    const reply =
+        'Your saved answer appears smoothly while its full content remains accessible.';
+    final created = DateTime(2026, 9, 13, 11, 30);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CoachMessageText(
+            text: reply,
+            createdAt: created,
+            textDirection: TextDirection.ltr,
+            animateReveal: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<SelectableText>(find.byType(SelectableText)).data,
+      isNot(reply),
+    );
+    for (var tick = 0; tick < 25; tick++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    expect(
+      tester.widget<SelectableText>(find.byType(SelectableText)).data,
+      reply,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

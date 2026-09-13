@@ -35,6 +35,7 @@ extension on _IntelligenceCenterPageState {
           ? (reason) => _recordFeedback(message, false, reason: reason)
           : null,
       actionPhases: actionExecutionPhases,
+      animateReveal: animatedResponseIds.contains(message.id),
       onAction: (action) {
         unawaited(_executeAction(action).then<void>((_) {}));
       },

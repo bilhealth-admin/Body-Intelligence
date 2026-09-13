@@ -148,6 +148,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     List<Food> foods, {
     List<Food>? rankedFoods,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     final browseFoods = rankedFoods != null && rankedFoods.isNotEmpty
         ? rankedFoods
         : foods;
@@ -171,7 +172,17 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
           key: const Key('food-log-search'),
           controller: search,
           hintText: _t(context, _searchHintKey()),
-          leading: const Icon(Icons.search_rounded),
+          leading: Icon(Icons.search_rounded, color: scheme.primary),
+          elevation: const WidgetStatePropertyAll(0),
+          backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
+          side: WidgetStatePropertyAll(
+            BorderSide(color: scheme.primary.withValues(alpha: .18)),
+          ),
+          shape: const WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(22)),
+            ),
+          ),
           trailing: [
             if (search.text.isNotEmpty)
               IconButton(
@@ -330,6 +341,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   }
 
   Widget _buildFoodTile(BuildContext context, Food food) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = scheme.primary;
     final locale = Localizations.localeOf(context).toLanguageTag();
     final name = FoodPresentationLocalizer.foodName(
       name: food.name,
@@ -344,20 +357,25 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       elevation: 0,
       child: ListTile(
         contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 6, 8, 6),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-            if (food.verified) ...[
-              const SizedBox(width: 5),
-              const Icon(
-                Icons.verified_rounded,
-                size: 17,
-                color: Color(0xFF18B875),
-              ),
-            ],
-          ],
+        leading: CircleAvatar(
+          radius: 18,
+          backgroundColor: food.verified
+              ? const Color(0xFFE2F8EC)
+              : accent.withValues(alpha: .10),
+          child: Icon(
+            food.verified
+                ? Icons.verified_rounded
+                : food.isCustom
+                ? Icons.person_rounded
+                : Icons.shield_outlined,
+            color: food.verified ? const Color(0xFF087A43) : accent,
+          ),
+        ),
+        title: Text(
+          name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
           '${food.calories.round()} kcal · ${food.servingSize} ${food.servingUnit}',

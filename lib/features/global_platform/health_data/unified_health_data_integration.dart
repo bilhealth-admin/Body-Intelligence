@@ -270,6 +270,13 @@ abstract interface class NativeHealthDailyTotalsBridge {
   Future<List<NativeHealthRecord>> readDailyTotals({required DateTime asOf});
 }
 
+/// A native HealthKit import that exceeds its foreground deadline must be
+/// stopped at the native query owner. Cancelling only Dart's visible Future
+/// leaves the original HealthKit work alive in the app process.
+abstract interface class NativeHealthCancellableReadBridge {
+  Future<void> cancelReadChanges();
+}
+
 abstract interface class NativeHealthBridge {
   String get id;
   Future<Map<String, bool>> permissions();

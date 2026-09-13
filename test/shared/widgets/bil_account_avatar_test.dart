@@ -51,10 +51,11 @@ void main() {
     );
 
     await pump(bytes);
-    expect(
-      tester.widget<CircleAvatar>(find.byType(CircleAvatar)).backgroundImage,
-      isA<MemoryImage>(),
+    final memberAvatar = tester.widget<CircleAvatar>(
+      find.byType(CircleAvatar),
     );
+    expect(memberAvatar.foregroundImage, isA<MemoryImage>());
+    expect(memberAvatar.backgroundImage, isNull);
     coach = tester.widget<Image>(
       find.byKey(const ValueKey('ai-boost-coach-artwork-image')),
     );
@@ -75,10 +76,11 @@ void main() {
     );
 
     final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
-    expect(avatar.backgroundImage, isA<MemoryImage>());
+    expect(avatar.foregroundImage, isA<MemoryImage>());
+    expect(avatar.backgroundImage, isNull);
   });
 
-  testWidgets('cloud photo is authoritative with local bytes as fallback', (
+  testWidgets('local member photo takes precedence over cached cloud fallback', (
     tester,
   ) async {
     final bytes = base64Decode(
@@ -95,7 +97,7 @@ void main() {
     );
 
     final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
-    expect(avatar.foregroundImage, isA<NetworkImage>());
-    expect(avatar.backgroundImage, isA<MemoryImage>());
+    expect(avatar.foregroundImage, isA<MemoryImage>());
+    expect(avatar.backgroundImage, isA<NetworkImage>());
   });
 }

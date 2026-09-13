@@ -218,8 +218,16 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
 ) async {
   final preferences = ref.watch(preferencesRepositoryProvider);
   final stored = (await preferences.get('profilePhotoPublicUrl'))?.trim();
+  final hasStoredUrl = stored != null && stored.isNotEmpty;
+  // The local bytes are the exact image the member just chose. Do not launch a
+  // redundant cloud profile query during normal avatar rebuilds; it can race
+  // the local stream and briefly swap the avatar back to a network image.
+  final localPhoto = await preferences.get('profilePhoto');
+  if ((localPhoto != null && localPhoto.isNotEmpty) || hasStoredUrl) {
+    return hasStoredUrl ? stored : null;
+  }
   if (!AppEnvironment.supabaseRuntimeReady) {
-    return stored == null || stored.isEmpty ? null : stored;
+    return null;
   }
   final client = Supabase.instance.client;
   final user = client.auth.currentUser;
@@ -232,12 +240,12 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
         .maybeSingle();
     final url = (row?['avatar_url'] as String?)?.trim();
     if (url == null || url.isEmpty) {
-      return stored == null || stored.isEmpty ? null : stored;
+      return null;
     }
     await preferences.set('profilePhotoPublicUrl', url);
     return url;
   } on Object {
-    return stored == null || stored.isEmpty ? null : stored;
+    return null;
   }
 });
 

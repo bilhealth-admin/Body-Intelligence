@@ -25,8 +25,9 @@ const _watchMetricKeys = <String>{
 /// make the watch look connected.
 ///
 /// HealthKit and Health Connect select the authoritative source for each
-/// metric. A phone is a valid source too; owning a watch is not required.
-/// Original provenance remains in storage, not in the compact reading labels.
+/// metric. A phone is a valid HealthKit source too; owning an Apple Watch is
+/// not required. Original provenance remains in storage, not in the compact
+/// reading labels.
 bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
   final usableStatus = switch (snapshot.status) {
     ConnectedHealthStatus.ready ||
@@ -37,7 +38,16 @@ bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
   final hasCurrentSource =
       snapshot.platformSource?.trim().isNotEmpty == true ||
       snapshot.availableSources.any((source) => source.trim().isNotEmpty);
-  return usableStatus && snapshot.deviceVerified && hasCurrentSource;
+  final hasActualNativeReading = <ConnectedHealthSignalView>[
+    ...snapshot.signals,
+    ...snapshot.stepHistory,
+  ].any(liveHealthWatchSignalIsActual);
+  // `deviceVerified` is a native-import confidence flag, not a physical
+  // Apple Watch requirement. A valid iPhone HealthKit aggregate carries its
+  // own non-empty source and must remain visible when that flag is delayed.
+  return usableStatus &&
+      hasCurrentSource &&
+      (snapshot.deviceVerified || hasActualNativeReading);
 }
 
 bool liveHealthWatchSignalIsActual(ConnectedHealthSignalView signal) =>

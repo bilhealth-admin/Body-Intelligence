@@ -26,19 +26,24 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                   key: const Key('daily-meal-food-search-bar'),
                   enabled: !mealSaving,
                   controller: controller,
-                  leading: const Icon(Icons.search),
+                  leading: Icon(
+                    Icons.search_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   elevation: const WidgetStatePropertyAll(0),
                   backgroundColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surfaceContainerLow,
                   ),
                   side: WidgetStatePropertyAll(
                     BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: .18),
                     ),
                   ),
                   shape: WidgetStatePropertyAll(
                     RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(22),
                     ),
                   ),
                   hintText: _mealCopy('searchFoods'),

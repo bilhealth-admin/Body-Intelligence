@@ -251,6 +251,11 @@ void main() {
           final refresh = find.byKey(const Key('dashboard-fitness-last-sync'));
           await tester.tap(refresh);
           await tester.pump();
+          // iOS deliberately yields one UI turn after publishing the busy
+          // state, so the spinner paints before a native HealthKit query can
+          // begin. The gateway therefore starts on the following pump.
+          expect(container.read(connectedHealthProvider).value!.isBusy, isTrue);
+          await tester.pump(const Duration(milliseconds: 1));
           expect(gateway.syncs, 1);
           expect(
             container.read(connectedHealthProvider).value!.lastSyncAt,
@@ -287,6 +292,7 @@ void main() {
             find.byKey(const Key('connected-health-watch-refresh')),
           );
           await tester.pump();
+          await tester.pump(const Duration(milliseconds: 1));
           expect(gateway.syncs, 2);
           // Back must work while the native operation is still unresolved.
           await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);

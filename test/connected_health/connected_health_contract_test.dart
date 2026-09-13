@@ -141,6 +141,28 @@ void main() {
     },
   );
 
+  test('an iOS timeout asks its cancellable native gateway to stop', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    try {
+      final gateway = _CancellableHangingSynchronizationGateway();
+      final controller = ConnectedHealthController(
+        gateway,
+        synchronizationTimeout: Duration.zero,
+      );
+
+      await controller.synchronize();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(gateway.syncCalls, 1);
+      expect(gateway.cancelCalls, 1);
+      expect(controller.state.value?.isBusy, isFalse);
+      expect(controller.state.value?.failureCode, 'health_sync_timed_out');
+      controller.dispose();
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   test('permission action is hidden for an unsupported platform', () {
     expect(
       connectedHealthCanRequestPermissions(ConnectedHealthStatus.unavailable),
@@ -686,6 +708,44 @@ final class _HangingSynchronizationGateway implements ConnectedHealthGateway {
   Future<ConnectedHealthSnapshot> synchronize() {
     syncCalls += 1;
     return syncRequest.future;
+  }
+}
+
+final class _CancellableHangingSynchronizationGateway
+    implements ConnectedHealthGateway, ConnectedHealthCancellableSyncGateway {
+  int syncCalls = 0;
+  int cancelCalls = 0;
+
+  final Completer<ConnectedHealthSnapshot> syncRequest =
+      Completer<ConnectedHealthSnapshot>();
+
+  @override
+  Future<ConnectedHealthSnapshot> load() async => _synchronizedSnapshot;
+
+  @override
+  Future<void> openSystemSettings() async {}
+
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() async =>
+      _synchronizedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      _synchronizedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async =>
+      _permissionRequiredSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() {
+    syncCalls += 1;
+    return syncRequest.future;
+  }
+
+  @override
+  Future<void> cancelSynchronization() async {
+    cancelCalls += 1;
   }
 }
 

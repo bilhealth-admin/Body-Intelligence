@@ -10,6 +10,9 @@ import '../../../tool/recipe_catalog/extract_existing_recipe_seeds.dart'
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final historicalCatalog = File(
+    'artifacts/meal_catalog/existing_recipe_canonical_seeds.json',
+  );
   late List<Map<String, dynamic>> released;
   setUpAll(() async => released = await releasedRecipeRecords());
 
@@ -22,28 +25,28 @@ void main() {
     expect(ids.difference(originalIds), hasLength(1482));
   });
 
-  test('content and image fingerprints reject all duplicate seeds', () {
-    // Historical image-generation check remains separate from the host-only
-    // release contract. Never restore these old artifacts into runtime assets.
-    final catalog =
-        jsonDecode(
-              File(
-                'artifacts/meal_catalog/existing_recipe_canonical_seeds.json',
-              ).readAsStringSync(),
-            )
-            as Map;
-    final records = (catalog['records'] as List).cast<Map<String, Object?>>();
-    final content = <String>{};
-    final images = <String>{};
-    for (final record in records) {
-      expect(content.add(record['contentFingerprint']! as String), isTrue);
-      final image = record['image'] as Map<String, Object?>;
-      final path = image['assetPath']! as String;
-      final actual = sha256.convert(File(path).readAsBytesSync()).toString();
-      expect(image['sha256'], actual);
-      expect(images.add(actual), isTrue);
-    }
-  });
+  test(
+    'content and image fingerprints reject all duplicate seeds',
+    () {
+      // Historical image-generation check remains separate from the host-only
+      // release contract. Never restore these old artifacts into runtime assets.
+      final catalog = jsonDecode(historicalCatalog.readAsStringSync()) as Map;
+      final records = (catalog['records'] as List).cast<Map<String, Object?>>();
+      final content = <String>{};
+      final images = <String>{};
+      for (final record in records) {
+        expect(content.add(record['contentFingerprint']! as String), isTrue);
+        final image = record['image'] as Map<String, Object?>;
+        final path = image['assetPath']! as String;
+        final actual = sha256.convert(File(path).readAsBytesSync()).toString();
+        expect(image['sha256'], actual);
+        expect(images.add(actual), isTrue);
+      }
+    },
+    skip: historicalCatalog.existsSync()
+        ? false
+        : 'Requires the host-only historical meal-catalog audit artifacts.',
+  );
 
   test('unknown quantities and nutrition remain explicitly pending', () {
     final unknown = seed.ingredient('red lentils', 0);

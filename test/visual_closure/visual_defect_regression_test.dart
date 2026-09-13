@@ -686,7 +686,10 @@ void main() {
     expect(account, contains('textTheme.labelLarge?.fontFamily'));
     expect(account, isNot(contains("? 'BILArabic'")));
     expect(mealEntry, contains("Key('daily-meal-food-search-bar')"));
-    expect(mealEntry, contains('leading: const Icon(Icons.search)'));
+    expect(mealEntry, contains('leading: Icon('));
+    expect(mealEntry, contains('Icons.search_rounded'));
+    expect(mealEntry, contains('colorScheme.primary'));
+    expect(mealEntry, isNot(contains('leading: const Icon(Icons.search)')));
     expect(mealEntry, contains("hintText: _mealCopy('searchFoods')"));
     expect(onboarding, contains('"ar": "بماذا تحب أن يناديك BIL؟"'));
 

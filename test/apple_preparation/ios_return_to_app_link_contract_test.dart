@@ -37,7 +37,6 @@ void main() {
       ).allMatches(androidManifest),
       hasLength(1),
     );
-
     expect(
       iosPlist,
       matches(RegExp(r'<key>FlutterDeepLinkingEnabled</key>\s*<false/>')),
@@ -48,38 +47,52 @@ void main() {
     );
   });
 
-  test('iOS return links attach the event stream without an await gap', () {
-    final mainSource = File('lib/main.dart').readAsStringSync();
-    final iosPlugin = File(
-      'tool/vendor_app_links/ios/app_links/Sources/app_links/'
-      'AppLinksIosPlugin.swift',
-    ).readAsStringSync();
-    final bindStart = mainSource.indexOf('void _bind()');
-    final bindEnd = mainSource.indexOf(
-      'Future<void> _handleIncomingUri',
-      bindStart,
-    );
+  test(
+    'return links attach the event stream before reading a cold-start URI',
+    () {
+      final mainSource = File('lib/main.dart').readAsStringSync();
+      final iosPlugin = File(
+        'tool/vendor_app_links/ios/app_links/Sources/app_links/'
+        'AppLinksIosPlugin.swift',
+      ).readAsStringSync();
+      final bindStart = mainSource.indexOf('void _bind()');
+      final bindEnd = mainSource.indexOf(
+        'Future<void> _consumeInitialLink',
+        bindStart,
+      );
 
-    expect(bindStart, greaterThan(-1));
-    expect(bindEnd, greaterThan(bindStart));
-    final bindBody = mainSource.substring(bindStart, bindEnd);
+      expect(bindStart, greaterThan(-1));
+      expect(bindEnd, greaterThan(bindStart));
+      final bindBody = mainSource.substring(bindStart, bindEnd);
 
-    expect(bindBody, contains('appLinks.uriLinkStream.listen('));
-    expect(bindBody, isNot(contains('getInitialLink()')));
-    expect(bindBody, isNot(contains('await ')));
-    expect(bindBody, contains("'incoming_link_stream_failed'"));
+      expect(bindBody, contains('appLinks.uriLinkStream.listen('));
+      expect(bindBody, contains('unawaited(_consumeInitialLink(appLinks))'));
+      expect(bindBody, isNot(contains('await ')));
+      expect(bindBody, contains("'incoming_link_stream_failed'"));
+      expect(
+        mainSource,
+        contains('final initial = await appLinks.getInitialLink()'),
+      );
+      expect(mainSource, contains("'incoming_initial_link_failed'"));
+      expect(
+        mainSource.indexOf('appLinks.uriLinkStream.listen('),
+        lessThan(
+          mainSource.indexOf('unawaited(_consumeInitialLink(appLinks))'),
+        ),
+      );
 
-    final onListenStart = iosPlugin.indexOf('public func onListen(');
-    final onListenEnd = iosPlugin.indexOf(
-      'public func onCancel(',
-      onListenStart,
-    );
-    expect(onListenStart, greaterThan(-1));
-    expect(onListenEnd, greaterThan(onListenStart));
-    final onListenBody = iosPlugin.substring(onListenStart, onListenEnd);
-    expect(onListenBody, contains('self.eventSink = events'));
-    expect(onListenBody, contains('events(initialLink!)'));
-  });
+      final onListenStart = iosPlugin.indexOf('public func onListen(');
+      final onListenEnd = iosPlugin.indexOf(
+        'public func onCancel(',
+        onListenStart,
+      );
+      expect(onListenStart, greaterThan(-1));
+      expect(onListenEnd, greaterThan(onListenStart));
+      final onListenBody = iosPlugin.substring(onListenStart, onListenEnd);
+      expect(onListenBody, contains('self.eventSink = events'));
+      expect(onListenBody, contains('events(initialLink!)'));
+    },
+  );
 
   test('OAuth HTTPS callback is registered as a narrow verified app link', () {
     final androidManifest = File(

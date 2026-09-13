@@ -268,9 +268,8 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
 
   void _bind() {
     final appLinks = AppLinks();
-    // app_links replays the cold-start URI when the event listener attaches.
     // Subscribe synchronously so a return from native consent/browser UI
-    // cannot arrive in the gap created by awaiting getInitialLink first.
+    // cannot arrive in the gap created by an awaited initial-link read.
     _linkSubscription = appLinks.uriLinkStream.listen(
       _uriDispatcher.add,
       onError: (Object error, StackTrace _) {
@@ -281,6 +280,26 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
         );
       },
     );
+    // Android can launch a stopped BIL process directly from the Google
+    // browser return. Keep the stream attached first, then consume the
+    // initial URI as a second, deduplicated delivery path.
+    unawaited(_consumeInitialLink(appLinks));
+  }
+
+  Future<void> _consumeInitialLink(AppLinks appLinks) async {
+    try {
+      final initial = await appLinks.getInitialLink();
+      if (initial != null) _uriDispatcher.add(initial);
+    } on Object catch (error, stackTrace) {
+      AppObservability.logger.record(
+        AppLogLevel.warning,
+        'incoming_initial_link_failed',
+        attributes: {
+          'errorType': error.runtimeType.toString(),
+          'stackType': stackTrace.runtimeType.toString(),
+        },
+      );
+    }
   }
 
   Future<void> _handleIncomingUri(Uri uri) async {

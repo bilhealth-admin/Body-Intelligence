@@ -4,7 +4,8 @@ final class NativeConnectedHealthGateway
     implements
         ConnectedHealthGateway,
         ConnectedHealthDailyActivityGateway,
-        ConnectedHealthStartupPermissionGateway {
+        ConnectedHealthStartupPermissionGateway,
+        ConnectedHealthCancellableSyncGateway {
   NativeConnectedHealthGateway(this._flows);
 
   final GlobalProductFlows _flows;
@@ -369,6 +370,17 @@ final class NativeConnectedHealthGateway
   Future<void> openSystemSettings() async {
     if (_bridge is NativeHealthCapabilityBridge) {
       await (_bridge as NativeHealthCapabilityBridge).openSettings();
+    }
+  }
+
+  @override
+  Future<void> cancelSynchronization() async {
+    // Apple Health is the only platform changed by this fix. Bluetooth has its
+    // own scan state machine and Android Health Connect retains its behavior.
+    if (!_isIos) return;
+    final bridge = _bridge;
+    if (bridge is NativeHealthCancellableReadBridge) {
+      await (bridge as NativeHealthCancellableReadBridge).cancelReadChanges();
     }
   }
 

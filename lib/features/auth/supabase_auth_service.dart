@@ -6,7 +6,8 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'apple_credential_lifecycle.dart';
-import 'facebook_oauth_launcher.dart';
+import 'native_facebook_sign_in.dart';
+import 'native_google_sign_in.dart';
 
 enum BilAuthOutcome { signedIn, confirmationRequired }
 
@@ -55,58 +56,147 @@ class SupabaseAuthService {
     this.client, {
     this.appleCredentialIdentifierStore,
     this.appleAuthorizationCodeRegistrar,
-    this.facebookOAuthLauncher = const BilFacebookOAuthLauncher(),
+    this.nativeFacebookSignIn = const BilNativeFacebookSignIn(),
+    this.nativeGoogleSignIn = const BilNativeGoogleSignIn(),
   });
 
   final SupabaseClient client;
   final AppleCredentialIdentifierStore? appleCredentialIdentifierStore;
   final AppleAuthorizationCodeRegistrar? appleAuthorizationCodeRegistrar;
-  final BilFacebookOAuthLauncher facebookOAuthLauncher;
+  final BilNativeFacebookSignIn nativeFacebookSignIn;
+  final BilNativeGoogleSignIn nativeGoogleSignIn;
 
   static const oauthRedirectUri = 'https://www.bilhealth.com/auth/callback';
   static const emailRedirectUri = oauthRedirectUri;
   static const passwordResetRedirectUri =
       'https://www.bilhealth.com/auth/reset-password';
 
-  /// Facebook stays in a provider-owned browser surface. iOS uses Supabase's
-  /// `inAppBrowserView`, which maps to SFSafariViewController. Android obtains
-  /// the same Supabase-generated URL but opens it through BIL's strict native
-  /// Custom Tabs bridge, which fails closed instead of falling back to WebView.
-  /// The verified HTTPS app link returns the completed session to BIL.
-  ///
-  /// Google remains external because the Android Supabase adapter requires
-  /// that mode. Other providers keep the conservative external default until
-  /// their signed-device return path is separately verified.
-  static LaunchMode oauthLaunchModeFor(OAuthProvider provider) =>
-      provider == OAuthProvider.facebook
-      ? LaunchMode.inAppBrowserView
-      : LaunchMode.externalApplication;
+  /// Browser OAuth remains external-only for providers that need a browser
+  /// (for example, Apple on Android). Google and Facebook take their native
+  /// mobile SDK routes before this setting is consulted.
+  static LaunchMode oauthLaunchModeFor(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) {
+    return LaunchMode.externalApplication;
+  }
 
-  static bool usesNativeAndroidFacebookLauncher(
+  static bool usesNativeGoogleSignIn(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) =>
+      provider == OAuthProvider.google &&
+      !isWeb &&
+      (platform == TargetPlatform.android || platform == TargetPlatform.iOS);
+
+  static bool usesNativeFacebookSignIn(
     OAuthProvider provider, {
     required bool isWeb,
     required TargetPlatform platform,
   }) =>
       provider == OAuthProvider.facebook &&
       !isWeb &&
+      (platform == TargetPlatform.android || platform == TargetPlatform.iOS);
+
+  static bool usesNativeIosGoogleSignIn(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) =>
+      usesNativeGoogleSignIn(provider, isWeb: isWeb, platform: platform) &&
+      platform == TargetPlatform.iOS;
+
+  static bool usesNativeIosFacebookSignIn(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) =>
+      usesNativeFacebookSignIn(provider, isWeb: isWeb, platform: platform) &&
+      platform == TargetPlatform.iOS;
+
+  static bool usesNativeAndroidGoogleSignIn(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) =>
+      usesNativeGoogleSignIn(provider, isWeb: isWeb, platform: platform) &&
       platform == TargetPlatform.android;
 
+  static bool usesNativeAndroidFacebookSignIn(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) =>
+      usesNativeFacebookSignIn(provider, isWeb: isWeb, platform: platform) &&
+      platform == TargetPlatform.android;
+
+  /// Native Google and Facebook never use this URL. Other OAuth providers
+  /// retain the verified HTTPS return route.
+  static String oauthRedirectUriFor(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) {
+    return oauthRedirectUri;
+  }
+
   Future<bool> signInWithOAuth(OAuthProvider provider) async {
-    if (usesNativeAndroidFacebookLauncher(
+    if (usesNativeFacebookSignIn(
       provider,
       isWeb: kIsWeb,
       platform: defaultTargetPlatform,
     )) {
-      final response = await client.auth.getOAuthSignInUrl(
-        provider: provider,
-        redirectTo: oauthRedirectUri,
-      );
-      return facebookOAuthLauncher.open(Uri.parse(response.url));
+      return (await signInWithFacebookNative()) != null;
+    }
+    if (usesNativeGoogleSignIn(
+      provider,
+      isWeb: kIsWeb,
+      platform: defaultTargetPlatform,
+    )) {
+      return (await signInWithGoogleNative()) != null;
     }
     return client.auth.signInWithOAuth(
       provider,
-      redirectTo: oauthRedirectUri,
-      authScreenLaunchMode: oauthLaunchModeFor(provider),
+      redirectTo: oauthRedirectUriFor(
+        provider,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      ),
+      authScreenLaunchMode: oauthLaunchModeFor(
+        provider,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      ),
+    );
+  }
+
+  /// Signs in through Google's native mobile SDK, then swaps the short-lived Google
+  /// identity proof for the same Supabase session used by every BIL surface.
+  ///
+  /// A null result means the person dismissed Google's system-owned sheet and
+  /// is not a sign-in failure.
+  Future<AuthResponse?> signInWithGoogleNative() async {
+    final tokens = await nativeGoogleSignIn.authenticate();
+    if (tokens == null) return null;
+    return client.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: tokens.idToken,
+      accessToken: tokens.accessToken,
+    );
+  }
+
+  /// Signs in through Meta's native mobile SDK, then exchanges its short-lived
+  /// identity proof for BIL's normal Supabase session.
+  ///
+  /// A null result means the person dismissed Meta's authorization UI.
+  Future<AuthResponse?> signInWithFacebookNative() async {
+    final token = await nativeFacebookSignIn.authenticate();
+    if (token == null) return null;
+    return client.auth.signInWithIdToken(
+      provider: OAuthProvider.facebook,
+      idToken: token.idToken,
     );
   }
 

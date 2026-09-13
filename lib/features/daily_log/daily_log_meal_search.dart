@@ -168,6 +168,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                       key: food.verified
                           ? const Key('daily-search-verified-food-badge')
                           : null,
+                      radius: 18,
                       backgroundColor: food.verified
                           ? const Color(0xFFE2F8EC)
                           : accent.withValues(alpha: 0.10),
@@ -247,6 +248,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           key: food.verified
               ? const Key('daily-search-verified-food-badge')
               : null,
+          radius: 18,
           backgroundColor: food.verified
               ? const Color(0xFFE2F8EC)
               : accent.withValues(alpha: 0.10),

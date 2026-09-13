@@ -19,7 +19,6 @@ class MainActivity : FlutterFragmentActivity() {
     private var healthBridge: BILGlobalHealthBridge? = null
     private var fitnessBleBridge: BILFitnessBleBridge? = null
     private var playIntegrityBridge: BILPlayIntegrityBridge? = null
-    private var facebookOAuthBridge: BILFacebookOAuthBridge? = null
     private var pushChannel: MethodChannel? = null
     private val pendingRemotePushDeepLinks = ArrayDeque<String>()
     private var remotePushDeliveryInFlight = false
@@ -102,7 +101,6 @@ class MainActivity : FlutterFragmentActivity() {
         micSoundBridge = BILMicSoundBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         healthBridge = BILGlobalHealthBridge(this, flutterEngine.dartExecutor.binaryMessenger, healthPermissionLauncher)
         playIntegrityBridge = BILPlayIntegrityBridge(this, flutterEngine.dartExecutor.binaryMessenger)
-        facebookOAuthBridge = BILFacebookOAuthBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         BILSystemCryptoBridge(flutterEngine.dartExecutor.binaryMessenger)
         captureRemotePushIntent(intent)
         pushChannel = MethodChannel(
@@ -234,8 +232,6 @@ class MainActivity : FlutterFragmentActivity() {
         healthBridge = null
         playIntegrityBridge?.dispose()
         playIntegrityBridge = null
-        facebookOAuthBridge?.dispose()
-        facebookOAuthBridge = null
         pushChannel?.setMethodCallHandler(null)
         pushChannel = null
         pendingRemotePushDeepLinks.clear()
