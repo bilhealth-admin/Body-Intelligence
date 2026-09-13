@@ -124,11 +124,7 @@ final class SqliteGlobalPlatformStore implements GlobalDurableStore {
               : 'SELECT key,value,updated_at FROM global_records '
                     'WHERE bucket=? AND updated_at>? '
                     'ORDER BY updated_at,key LIMIT ?',
-          <Object?>[
-            bucket,
-            if (updatedAfter != null) updatedAfter,
-            _readPageSize,
-          ],
+          <Object?>[bucket, ?updatedAfter, _readPageSize],
         );
       } else {
         rows = _db.select(
