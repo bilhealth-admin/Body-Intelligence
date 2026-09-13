@@ -93,27 +93,49 @@ final class SqliteGlobalPlatformStore implements GlobalDurableStore {
   }
 
   @override
-  Future<List<Map<String, Object?>>> list(
-    String bucket,
-  ) async => <Map<String, Object?>>[
-    for (final row in _db.select(
+  Future<List<Map<String, Object?>>> list(String bucket) async {
+    final rows = _db.select(
       'SELECT value FROM global_records WHERE bucket=? ORDER BY updated_at,key',
       <Object?>[bucket],
-    ))
-      Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
-  ];
+    );
+    final output = <Map<String, Object?>>[];
+    var decodedSinceYield = 0;
+    for (final row in rows) {
+      output.add(
+        Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
+      );
+      decodedSinceYield++;
+      if (decodedSinceYield >= 64) {
+        decodedSinceYield = 0;
+        await Future<void>.delayed(Duration.zero);
+      }
+    }
+    return output;
+  }
 
   Future<List<Map<String, Object?>>> queryUpdatedAfter(
     String bucket,
     DateTime instant,
-  ) async => <Map<String, Object?>>[
-    for (final row in _db.select(
+  ) async {
+    final rows = _db.select(
       'SELECT value FROM global_records '
       'WHERE bucket=? AND updated_at>? ORDER BY updated_at,key',
       <Object?>[bucket, instant.toUtc().toIso8601String()],
-    ))
-      Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
-  ];
+    );
+    final output = <Map<String, Object?>>[];
+    var decodedSinceYield = 0;
+    for (final row in rows) {
+      output.add(
+        Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
+      );
+      decodedSinceYield++;
+      if (decodedSinceYield >= 64) {
+        decodedSinceYield = 0;
+        await Future<void>.delayed(Duration.zero);
+      }
+    }
+    return output;
+  }
 
   Future<void> retain(
     String bucket, {
