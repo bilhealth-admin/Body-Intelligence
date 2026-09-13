@@ -46,6 +46,23 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   }
 });
 
+/// Synchronous owner seed used only until the auth stream publishes its first
+/// value. This prevents an AsyncLoading -> AsyncData transition for the same
+/// signed-in member from looking like an account change to access providers.
+final verifiedEntitlementOwnerSeedProvider = Provider<String?>((_) {
+  if (!AppEnvironment.supabaseRuntimeReady) return null;
+  return Supabase.instance.client.auth.currentUser?.id;
+});
+
+/// Stable scalar owner identity. Once the stream has emitted, including an
+/// authoritative signed-out null, that stream value always wins over the
+/// startup seed.
+final verifiedEntitlementOwnerIdProvider = Provider<String?>((ref) {
+  final owner = ref.watch(verifiedEntitlementOwnerProvider);
+  if (owner.hasValue) return owner.asData?.value;
+  return ref.watch(verifiedEntitlementOwnerSeedProvider);
+});
+
 final verifiedEntitlementLoaderProvider =
     Provider<Future<SubscriptionState> Function()>(
       (_) => const ServerEntitlementRepository().current,
@@ -176,7 +193,7 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// AI subscription allowance and/or verified Boost balance. An active plan at
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
 final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
-  ref.watch(verifiedEntitlementOwnerProvider);
+  ref.watch(verifiedEntitlementOwnerIdProvider);
   ref.watch(aiCoachUsageRefreshProvider);
   final loaded = _observedAuthorityReload(ref, () {
     ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
