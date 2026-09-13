@@ -303,6 +303,15 @@ final class UnifiedHealthDataRuntime {
   final GlobalAuditSink audit;
   final int pageLimit;
 
+  // The production SQLite store is intentionally synchronous at the native
+  // sqlite3 boundary even though the domain API returns Futures. A large
+  // HealthKit backfill can therefore chain many completed Futures without
+  // returning to Flutter's event queue. Yield in small bounded batches so
+  // scrolling/animations remain responsive while persistence continues.
+  static const int _recordsPerUiYield = 4;
+
+  Future<void> _yieldHealthSyncTurn() => Future<void>.delayed(Duration.zero);
+
   Future<List<GlobalHealthSignal>> synchronize({
     required DateTime asOf,
     required GlobalConsentGrant consent,
@@ -375,7 +384,16 @@ final class UnifiedHealthDataRuntime {
           : null;
       var nextAnchor = anchor;
       var pages = 0;
+      var workSinceUiYield = 0;
       var expiredTokenRecoveryAttempted = false;
+
+      Future<void> cooperateWithUi() async {
+        workSinceUiYield++;
+        if (workSinceUiYield < _recordsPerUiYield) return;
+        workSinceUiYield = 0;
+        await _yieldHealthSyncTurn();
+      }
+
       while (pages < pageLimit) {
         final page = await bridge.readChanges(
           anchor: nextAnchor,
@@ -420,6 +438,7 @@ final class UnifiedHealthDataRuntime {
         }
         pages++;
         for (final deleted in page.deletedIds) {
+          await cooperateWithUi();
           await store.put(
             'health_tombstones',
             '${bridge.id}:$deleted',
@@ -444,6 +463,7 @@ final class UnifiedHealthDataRuntime {
         // otherwise turn synchronization into O(parents x stored signals).
         await _removePersistedRecordFamilies(bridge.id, replacedRecordFamilies);
         for (final record in page.records) {
+          await cooperateWithUi();
           if (record.observedAt.isAfter(asOf.toUtc())) continue;
           if (!BilHealthScope.read.contains(record.type)) {
             await audit.record(
@@ -492,6 +512,11 @@ final class UnifiedHealthDataRuntime {
           'anchor': nextAnchor,
           'scope': allowedScopeSignature,
         });
+        // Always hand one event turn back after a native page, even when the
+        // page contained only duplicates. This prevents a multi-page backfill
+        // from monopolizing the UI isolate.
+        workSinceUiYield = 0;
+        await _yieldHealthSyncTurn();
         if (!page.hasMore) break;
       }
     }
