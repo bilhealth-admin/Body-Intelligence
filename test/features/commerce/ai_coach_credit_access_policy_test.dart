@@ -140,6 +140,7 @@ void main() {
         verifiedEntitlementOwnerProvider.overrideWith(
           (_) => Stream<String?>.value('test-owner'),
         ),
+        verifiedEntitlementOwnerSeedProvider.overrideWithValue('test-owner'),
         aiCoachUsageStatusLoaderProvider.overrideWithValue(
           () => Future<Object?>.error(rpcError),
         ),
