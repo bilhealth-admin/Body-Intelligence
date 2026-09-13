@@ -471,14 +471,22 @@ final class NativeConnectedHealthGateway
           (a, b) => b.provenance.observedAt.compareTo(a.provenance.observedAt),
         );
       final dailyBridge = _bridge;
-      final nativeTotals = dailyBridge is NativeHealthDailyTotalsBridge
-          ? nativeDailyActivitySignals(
-              await (dailyBridge as NativeHealthDailyTotalsBridge)
-                  .readDailyTotals(asOf: now)
-                  .timeout(const Duration(seconds: 6)),
-              now,
-            )
-          : null;
+      List<GlobalHealthSignal>? nativeTotals;
+      if (dailyBridge is NativeHealthDailyTotalsBridge) {
+        try {
+          nativeTotals = nativeDailyActivitySignals(
+            await dailyBridge
+                .readDailyTotals(asOf: now)
+                .timeout(const Duration(seconds: 6)),
+            now,
+          );
+        } on TimeoutException {
+          // Daily aggregate reads are an optimization over the already
+          // imported canonical records. A slow OS aggregate must not discard
+          // a completed Health sync or replace fresh evidence with old cache.
+          nativeTotals = null;
+        }
+      }
       final selected = _selectRepresentativeSignals([
         for (final signal in ordered)
           if (nativeTotals == null ||

@@ -231,6 +231,9 @@ void main() {
           dashboardClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
+          premiumProfileClockProvider.overrideWithValue(
+            () => DateTime(2026, 8, 30, 9, 41, 12),
+          ),
           connectedHealthGatewayProvider.overrideWithValue(
             const _UnavailableHealthGateway(),
           ),

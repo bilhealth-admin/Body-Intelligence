@@ -381,6 +381,20 @@ void main() {
     expect(provider, isNot(contains('https://')));
   });
 
+  test('daily totals timeout preserves the completed health import', () {
+    final gateway = File(
+      'lib/features/connected_health/providers/connected_health_native_gateway.dart',
+    ).readAsStringSync();
+
+    expect(gateway, contains('.timeout(const Duration(seconds: 6))'));
+    expect(gateway, contains('on TimeoutException'));
+    expect(gateway, contains('nativeTotals = null;'));
+    expect(
+      gateway,
+      contains('A slow OS aggregate must not discard'),
+    );
+  });
+
   test('device verification requires persisted native evidence', () {
     final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
