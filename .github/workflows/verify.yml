@@ -37,7 +37,8 @@ jobs:
         run: |
           if ("${{ github.event_name }}" -eq "pull_request") {
             git fetch origin "${{ github.base_ref }}" --depth=1
-            $targets = git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- '*.dart' |
+            $baseSha = git rev-parse "origin/${{ github.base_ref }}"
+            $targets = git diff --name-only $baseSha HEAD -- '*.dart' |
               Where-Object {
                 (Test-Path $_) -and (
                   $_ -like 'lib/*' -or
@@ -49,6 +50,7 @@ jobs:
               Write-Host "No changed Dart files to format-check."
               exit 0
             }
+            Write-Host "Format-checking $($targets.Count) changed Dart files."
             dart format --output=none --set-exit-if-changed @targets
           } else {
             $targets = @('lib', 'test')
