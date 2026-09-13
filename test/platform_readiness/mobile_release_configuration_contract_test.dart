@@ -104,15 +104,38 @@ void main() {
     expect(project, contains('com.apple.InAppPurchase'));
     expect(project, contains('com.apple.HealthKit'));
     expect(project, contains('com.apple.SignInWithApple'));
-    expect(info, contains('UISupportedInterfaceOrientations~ipad'));
+    final phoneOrientations = RegExp(
+      r'<key>UISupportedInterfaceOrientations</key>\\s*'
+      r'<array>([\\s\\S]*?)</array>',
+    ).firstMatch(info)?.group(1);
+    final ipadOrientations = RegExp(
+      r'<key>UISupportedInterfaceOrientations~ipad</key>\\s*'
+      r'<array>([\\s\\S]*?)</array>',
+    ).firstMatch(info)?.group(1);
+
+    expect(phoneOrientations, isNotNull);
+    expect(phoneOrientations, contains('UIInterfaceOrientationPortrait'));
     expect(
-      RegExp(
-        r'<string>UIInterfaceOrientationPortrait</string>',
-      ).allMatches(info),
-      hasLength(2),
+      phoneOrientations,
+      isNot(contains('UIInterfaceOrientationPortraitUpsideDown')),
     );
-    expect(info, isNot(contains('UIInterfaceOrientationLandscapeLeft')));
-    expect(info, isNot(contains('UIInterfaceOrientationLandscapeRight')));
+    expect(phoneOrientations, isNot(contains('UIInterfaceOrientationLandscapeLeft')));
+    expect(phoneOrientations, isNot(contains('UIInterfaceOrientationLandscapeRight')));
+
+    expect(ipadOrientations, isNotNull);
+    for (final orientation in <String>[
+      'UIInterfaceOrientationPortrait',
+      'UIInterfaceOrientationPortraitUpsideDown',
+      'UIInterfaceOrientationLandscapeLeft',
+      'UIInterfaceOrientationLandscapeRight',
+    ]) {
+      expect(
+        ipadOrientations,
+        contains(orientation),
+        reason: 'iPad must support $orientation for App Store multitasking validation.',
+      );
+    }
+
     expect(info, isNot(contains('<key>UIRequiredDeviceCapabilities</key>')));
 
     for (final key in <String>[
