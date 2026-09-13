@@ -175,9 +175,7 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// opens only after Supabase reports a positive reserved-aware total from an
 /// AI subscription allowance and/or verified Boost balance. An active plan at
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
-final aiCoachCreditAccessProvider = FutureProvider<bool>((
-  ref,
-) async {
+final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   ref.watch(verifiedEntitlementOwnerProvider);
   ref.watch(aiCoachUsageRefreshProvider);
   final loaded = _observedAuthorityReload(ref, () {
