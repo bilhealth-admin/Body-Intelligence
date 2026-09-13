@@ -17,6 +17,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+Map<String, Object?> _aiUsage(Object? totalRemaining) => {
+  'plan': 'ai_coach',
+  'credits': <String, Object?>{'total_remaining': totalRemaining},
+};
+
 void main() {
   testWidgets('Android More to Coach returns through header and system back', (
     tester,
@@ -176,6 +181,87 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'verified AI Coach stays mounted during silent server revalidation',
+    (tester) async {
+      var loads = 0;
+      Completer<Object?>? pendingReload;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream<String?>.value('qa-owner'),
+            ),
+            aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
+              loads++;
+              if (loads == 1) {
+                return Future<Object?>.value(_aiUsage(1000));
+              }
+              final pending = pendingReload;
+              if (pending == null) {
+                return Future<Object?>.error(
+                  StateError('missing_test_reload_completer'),
+                );
+              }
+              return pending.future;
+            }),
+          ],
+          child: const MaterialApp(
+            home: PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: Scaffold(body: Text('Coach surface')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Coach surface'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('premium-route-access-checking')),
+        findsNothing,
+      );
+      expect(loads, 1);
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      pendingReload = Completer<Object?>();
+      container
+          .read(aiCoachUsageRefreshProvider.notifier)
+          .requestAuthoritativeReload();
+      await tester.pump();
+
+      // A background credit refresh must not cover or rebuild a previously
+      // verified Coach surface with the full-screen access spinner.
+      expect(find.text('Coach surface'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('premium-route-access-checking')),
+        findsNothing,
+      );
+
+      pendingReload!.complete(_aiUsage(1000));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(find.text('Coach surface'), findsOneWidget);
+
+      pendingReload = Completer<Object?>();
+      container
+          .read(aiCoachUsageRefreshProvider.notifier)
+          .requestAuthoritativeReload();
+      await tester.pump();
+      expect(find.text('Coach surface'), findsOneWidget);
+
+      // Once the authoritative server response says the balance is exhausted,
+      // the gate must close instead of trusting the retained presentation.
+      pendingReload!.complete(_aiUsage(0));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(find.text('BIL AI BOOST'), findsWidgets);
+      expect(find.text('Coach surface'), findsNothing);
+    },
+  );
 
   testWidgets('AI Coach remains back-navigable while access is resolving', (
     tester,
