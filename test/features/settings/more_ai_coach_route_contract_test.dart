@@ -193,6 +193,7 @@ void main() {
             verifiedEntitlementOwnerProvider.overrideWith(
               (_) => Stream<String?>.value('qa-owner'),
             ),
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue('qa-owner'),
             aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
               loads++;
               if (loads == 1) {
@@ -208,6 +209,14 @@ void main() {
             }),
           ],
           child: const MaterialApp(
+            locale: Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: PremiumRouteGlassGate(
               feature: PremiumGateFeature.aiCoach,
               child: Scaffold(body: Text('Coach surface')),
