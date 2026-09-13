@@ -43,6 +43,41 @@ void main() {
       expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
     },
   );
+  test(
+    'verified AI access survives listener detach and route re-entry',
+    () async {
+      var loads = 0;
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => Stream.value('qa-owner'),
+          ),
+          aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
+            loads++;
+            return usage('ai_coach', 1000);
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final first = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+      expect(loads, 1);
+      first.close();
+
+      // Auto-disposed providers are released after their last listener leaves.
+      // The verified access cache must instead survive a route pop/push for the
+      // same authenticated owner.
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      final second = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+      addTearDown(second.close);
+      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+      expect(loads, 1);
+    },
+  );
+
   test('zero -> Boost -> consumed zero is reflected exactly', () {
     expect(aiCoachAccessFromUsageStatus(usage('free', 0)), isFalse);
     expect(aiCoachAccessFromUsageStatus(usage('free', 15)), isTrue);
