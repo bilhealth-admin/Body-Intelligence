@@ -114,11 +114,21 @@ final class BilGlobalHealthEvidenceGraphEngine {
 
   final SourceReliabilityMemory memory;
 
+  static const int _signalsPerUiYield = 8;
+
+  Future<void> _yieldUiTurn() => Future<void>.delayed(Duration.zero);
+
   Future<GlobalHealthEvidenceGraph> build(
     Iterable<GlobalHealthSignal> source,
   ) async {
     final groups = <String, List<GlobalHealthSignal>>{};
+    var workSinceUiYield = 0;
     for (final signal in source.where((signal) => !signal.deleted)) {
+      workSinceUiYield++;
+      if (workSinceUiYield >= _signalsPerUiYield) {
+        workSinceUiYield = 0;
+        await _yieldUiTurn();
+      }
       final minute =
           signal.provenance.observedAt.millisecondsSinceEpoch ~/ 60000;
       (groups['${signal.key}:$minute'] ??= <GlobalHealthSignal>[]).add(signal);
@@ -130,6 +140,11 @@ final class BilGlobalHealthEvidenceGraphEngine {
       final candidates =
           <({GlobalHealthSignal signal, double score, double reliability})>[];
       for (final signal in entry.value) {
+        workSinceUiYield++;
+        if (workSinceUiYield >= _signalsPerUiYield) {
+          workSinceUiYield = 0;
+          await _yieldUiTurn();
+        }
         final sourceKey =
             '${signal.provenance.providerId}:${signal.provenance.sourceId}';
         final reliability = (await memory.read(sourceKey)).reliability;
@@ -168,6 +183,11 @@ final class BilGlobalHealthEvidenceGraphEngine {
         );
       }
       for (final candidate in candidates) {
+        workSinceUiYield++;
+        if (workSinceUiYield >= _signalsPerUiYield) {
+          workSinceUiYield = 0;
+          await _yieldUiTurn();
+        }
         final chosen = identical(candidate, selected);
         final sourceKey =
             '${candidate.signal.provenance.providerId}:${candidate.signal.provenance.sourceId}';
