@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../dashboard_five_locale_copy.dart';
 
@@ -101,6 +102,18 @@ class DashboardMobileBodyTwinSnapshot extends StatelessWidget {
             icon: Icons.fact_check_outlined,
             label: tr('Trend evidence', 'أدلة الاتجاه'),
             value: trendEvidence,
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const Key('dashboard-body-twin-health-sources'),
+              onPressed: () => context.push('/health-information-sources'),
+              icon: const Icon(Icons.menu_book_outlined, size: 18),
+              label: Text(
+                tr('Sources & methodology', 'المصادر والمنهجية'),
+              ),
+            ),
           ),
         ],
       ),
