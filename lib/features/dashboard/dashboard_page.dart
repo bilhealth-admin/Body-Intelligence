@@ -185,45 +185,38 @@ class DashboardPage extends ConsumerWidget {
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!context.mounted) return false;
+
     final blocked =
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
-    final proceed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
-        title: Text(
-          context.strings.text(
-            blocked ? 'Camera access is off' : 'Allow camera for this action?',
-          ),
-        ),
-        content: Text(
-          context.strings.text(
-            blocked
-                ? 'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.'
-                : 'BIL opens the camera only after you choose Take photo now. It never requests camera access at startup.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.strings.text('Not now')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(
-              context.strings.text(
-                blocked ? 'Open system settings' : 'Continue',
-              ),
+    if (blocked) {
+      final openSettings = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog.adaptive(
+          title: Text(context.strings.text('Camera access is off')),
+          content: Text(
+            context.strings.text(
+              'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.',
             ),
           ),
-        ],
-      ),
-    );
-    if (proceed != true) return false;
-    if (blocked) {
-      await policy.openSettings();
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                MaterialLocalizations.of(dialogContext).closeButtonLabel,
+              ),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(context.strings.text('Open system settings')),
+            ),
+          ],
+        ),
+      );
+      if (openSettings == true) await policy.openSettings();
       return false;
     }
+
     return await policy.request(BilRuntimeCapability.camera) ==
         BilRuntimePermissionState.granted;
   }

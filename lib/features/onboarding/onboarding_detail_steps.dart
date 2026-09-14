@@ -281,6 +281,19 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
+                const SizedBox(height: 10),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: () => context.push('/health-information-sources'),
+                    icon: const Icon(Icons.menu_book_outlined),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'المصادر والمنهجية'
+                          : 'Sources & methodology',
+                    ),
+                  ),
+                ),
               ],
             ),
     );
