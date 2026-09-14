@@ -42,35 +42,38 @@ void main() {
     expect(results.where((x) => x).length, 1);
     s.close();
   });
-  test('paged SQLite reads preserve ordering and yield between pages', () async {
-    final s = SqliteGlobalPlatformStore.memory();
-    addTearDown(s.close);
-    final updatedAt = DateTime.utc(2026, 9, 13, 20).toIso8601String();
-    for (var index = 0; index < 130; index++) {
-      await s.put(
-        'health_signals',
-        'signal-${index.toString().padLeft(3, '0')}',
-        {'id': index, 'updatedAt': updatedAt},
+  test(
+    'paged SQLite reads preserve ordering and yield between pages',
+    () async {
+      final s = SqliteGlobalPlatformStore.memory();
+      addTearDown(s.close);
+      final updatedAt = DateTime.utc(2026, 9, 13, 20).toIso8601String();
+      for (var index = 0; index < 130; index++) {
+        await s.put(
+          'health_signals',
+          'signal-${index.toString().padLeft(3, '0')}',
+          {'id': index, 'updatedAt': updatedAt},
+        );
+      }
+
+      var completed = false;
+      var uiTurnObservedBeforeCompletion = false;
+      Timer.run(() {
+        uiTurnObservedBeforeCompletion = !completed;
+      });
+
+      final rows = await s
+          .list('health_signals')
+          .whenComplete(() => completed = true);
+
+      expect(rows, hasLength(130));
+      expect(
+        rows.map((row) => row['id']).toList(),
+        List<int>.generate(130, (index) => index),
       );
-    }
-
-    var completed = false;
-    var uiTurnObservedBeforeCompletion = false;
-    Timer.run(() {
-      uiTurnObservedBeforeCompletion = !completed;
-    });
-
-    final rows = await s.list('health_signals').whenComplete(
-      () => completed = true,
-    );
-
-    expect(rows, hasLength(130));
-    expect(
-      rows.map((row) => row['id']).toList(),
-      List<int>.generate(130, (index) => index),
-    );
-    expect(uiTurnObservedBeforeCompletion, isTrue);
-  });
+      expect(uiTurnObservedBeforeCompletion, isTrue);
+    },
+  );
 
   test('paged updated-after query preserves its exclusive boundary', () async {
     final s = SqliteGlobalPlatformStore.memory();
