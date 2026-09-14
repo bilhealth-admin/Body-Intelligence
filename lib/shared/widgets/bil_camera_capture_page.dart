@@ -211,7 +211,6 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
             Center(child: CameraPreview(active))
           else if (_error != null)
             _CameraErrorPanel(
-              error: _error!,
               onRetry: () {
                 unawaited(_initialize());
                 setState(() {});
@@ -255,9 +254,8 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
 }
 
 class _CameraErrorPanel extends StatelessWidget {
-  const _CameraErrorPanel({required this.error, required this.onRetry});
+  const _CameraErrorPanel({required this.onRetry});
 
-  final String error;
   final VoidCallback onRetry;
 
   @override
@@ -274,7 +272,7 @@ class _CameraErrorPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "${context.strings.text('Camera unavailable')}: $error",
+            context.strings.text('Camera unavailable'),
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white),
           ),
