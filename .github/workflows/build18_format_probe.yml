@@ -1,0 +1,34 @@
+name: build18-format-probe
+
+on:
+  push:
+    branches:
+      - codex/build18-format-probe-20260914
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/build18-format-probe-20260914
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Format exact failing files
+        shell: pwsh
+        run: |
+          dart format test/epic15_store_screenshot_golden_test.dart test/features/global_platform/atomic_cas_migration_integrity_test.dart
+          git diff -- test/epic15_store_screenshot_golden_test.dart test/features/global_platform/atomic_cas_migration_integrity_test.dart
+          if (git status --porcelain) {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add test/epic15_store_screenshot_golden_test.dart test/features/global_platform/atomic_cas_migration_integrity_test.dart
+            git commit -m "probe: apply Dart 3.44.6 formatting"
+            git push origin HEAD:codex/build18-format-probe-20260914
+          }
