@@ -285,7 +285,8 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
-                    onPressed: () => context.push('/health-information-sources'),
+                    onPressed: () =>
+                        context.push('/health-information-sources'),
                     icon: const Icon(Icons.menu_book_outlined),
                     label: Text(
                       Localizations.localeOf(context).languageCode == 'ar'

@@ -324,11 +324,7 @@ final class UnifiedHealthDataRuntime {
     required DateTime asOf,
     required Set<String> types,
   }) {
-    final read = bridge.readChanges(
-      anchor: anchor,
-      asOf: asOf,
-      types: types,
-    );
+    final read = bridge.readChanges(anchor: anchor, asOf: asOf, types: types);
     final cancellable = bridge is NativeHealthCancellableReadBridge
         ? bridge as NativeHealthCancellableReadBridge
         : null;

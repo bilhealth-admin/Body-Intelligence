@@ -147,7 +147,8 @@ final class OnboardingCompletionService {
         focuses: Set.unmodifiable(draft.aiFocuses),
       );
       await preferences.setManyInCurrentTransaction({
-        if (preferredName.isNotEmpty) ...DisplayNameSync.localEdit(preferredName),
+        if (preferredName.isNotEmpty)
+          ...DisplayNameSync.localEdit(preferredName),
         'units': draft.system.name,
         'countryRegion': draft.countryRegion.trim(),
         'locale': draft.localeTag,
