@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Base64
 import androidx.activity.result.ActivityResultLauncher
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectFeatures
@@ -31,6 +32,7 @@ import java.time.ZoneOffset
 import java.time.ZoneId
 import java.time.Period
 import kotlin.reflect.KClass
+import org.json.JSONObject
 
 /** Production Health Connect bridge. Device/OEM certification is tracked separately. */
 class BILGlobalHealthBridge(
@@ -41,6 +43,14 @@ class BILGlobalHealthBridge(
     private val channel = MethodChannel(messenger, CHANNEL)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var pendingPermissionResult: MethodChannel.Result? = null
+
+    private data class BootstrapCursor(
+        val changeToken: String,
+        val asOf: Instant,
+        val recordIndex: Int,
+        val pageToken: String?,
+    )
+
     private val client: HealthConnectClient? by lazy {
         if (availability() == HealthConnectClient.SDK_AVAILABLE) HealthConnectClient.getOrCreate(activity) else null
     }
@@ -195,25 +205,79 @@ class BILGlobalHealthBridge(
         result.success(mapOf("granted" to granted.size))
     }
 
+    private fun encodeBootstrapCursor(cursor: BootstrapCursor): String {
+        val json = JSONObject()
+            .put("change_token", cursor.changeToken)
+            .put("as_of", cursor.asOf.toString())
+            .put("record_index", cursor.recordIndex)
+        cursor.pageToken?.let { json.put("page_token", it) }
+        val encoded = Base64.encodeToString(
+            json.toString().toByteArray(Charsets.UTF_8),
+            Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+        )
+        return BOOTSTRAP_ANCHOR_PREFIX + encoded
+    }
+
+    private fun decodeBootstrapCursor(anchor: String?): BootstrapCursor? {
+        if (anchor == null || !anchor.startsWith(BOOTSTRAP_ANCHOR_PREFIX)) {
+            return null
+        }
+        return runCatching {
+            val encoded = anchor.removePrefix(BOOTSTRAP_ANCHOR_PREFIX)
+            val decoded = String(
+                Base64.decode(
+                    encoded,
+                    Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+                ),
+                Charsets.UTF_8,
+            )
+            val json = JSONObject(decoded)
+            val changeToken = json.getString("change_token").trim()
+            val asOf = Instant.parse(json.getString("as_of"))
+            val recordIndex = json.getInt("record_index")
+            val pageToken = json.optString("page_token")
+                .trim()
+                .takeIf(String::isNotEmpty)
+            require(changeToken.isNotEmpty())
+            require(recordIndex >= 0)
+            BootstrapCursor(
+                changeToken = changeToken,
+                asOf = asOf,
+                recordIndex = recordIndex,
+                pageToken = pageToken,
+            )
+        }.getOrNull()
+    }
+
     private suspend fun readChanges(call: MethodCall): Map<String, Any?> {
         val client = requireClient()
         val names = call.argument<List<String>>("types") ?: supportedNames
         val supportedRequestedNames = names.filter(supportedNames::contains).distinct()
         val requestedNameSet = supportedRequestedNames.toSet()
         val classes = supportedRequestedNames.mapNotNull(::recordClass).toSet()
-        val incomingToken = call.argument<String>("anchor")
-        val asOf = call.argument<String>("asOf")
+        val incomingAnchor = call.argument<String>("anchor")
+        val bootstrapCursor = decodeBootstrapCursor(incomingAnchor)
+        if (
+            incomingAnchor?.startsWith(BOOTSTRAP_ANCHOR_PREFIX) == true &&
+            bootstrapCursor == null
+        ) {
+            error("Invalid Health Connect bootstrap anchor.")
+        }
+        val requestedAsOf = call.argument<String>("asOf")
             ?.let { raw -> runCatching { Instant.parse(raw) }.getOrNull() }
             ?: Instant.now()
+        // A paged bootstrap must keep the exact same time window across app
+        // restarts. Health Connect page tokens are tied to the original query.
+        val asOf = bootstrapCursor?.asOf ?: requestedAsOf
         // Establish the incremental boundary before the first historical read.
         // Otherwise a record inserted between history and token creation can
         // fall through both windows and never be imported.
-        val token = incomingToken ?: client.getChangesToken(ChangesTokenRequest(classes))
-        // A changes token only observes mutations after it is created. Read a
-        // bounded history for every requested type on the first synchronization
-        // so existing sleep/activity/watch records are not invisible forever.
+        val token = bootstrapCursor?.changeToken
+            ?: incomingAnchor
+            ?: client.getChangesToken(ChangesTokenRequest(classes))
         val records = mutableListOf<Map<String, Any?>>()
-        if (incomingToken == null) {
+
+        if (incomingAnchor == null || bootstrapCursor != null) {
             val granted = client.permissionController.getGrantedPermissions()
             val historyReadAvailable = client.features.getFeatureStatus(
                 HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY,
@@ -222,50 +286,84 @@ class BILGlobalHealthBridge(
                 historyReadAvailable &&
                 HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY in granted
             ) 365L else 30L
-            // History remains least-privilege. A denied history grant never
-            // blocks current data: it simply selects Health Connect's ordinary
-            // 30-day window instead of the explicitly authorized one-year view.
             val since = TimeRangeFilter.between(
                 asOf.minusSeconds(historyDays * 24L * 60L * 60L),
                 asOf,
             )
-            suspend fun <T : Record> readInitial(recordType: KClass<T>) {
-                var pageToken: String? = null
-                do {
-                    val page = client.readRecords(
-                        ReadRecordsRequest(
-                            recordType = recordType,
-                            timeRangeFilter = since,
-                            pageToken = pageToken,
-                        ),
+            // Nutrition logical fields share one native NutritionRecord read.
+            // Keep the order deterministic so the synthetic cursor can resume
+            // after process death without replaying unrelated record families.
+            val bootstrapRecordNames = supportedRequestedNames
+                .map { name -> if (name in nutritionLogicalNames) "nutrition" else name }
+                .distinct()
+            var recordIndex = bootstrapCursor?.recordIndex ?: 0
+            var pageToken = bootstrapCursor?.pageToken
+
+            suspend fun <T : Record> readInitialPage(recordType: KClass<T>): String? {
+                val page = client.readRecords(
+                    ReadRecordsRequest(
+                        recordType = recordType,
+                        timeRangeFilter = since,
+                        pageToken = pageToken,
+                        pageSize = NATIVE_SYNC_PAGE_SIZE,
+                    ),
+                )
+                page.records.flatMapTo(records) { record ->
+                    serializeAll(record, requestedNameSet)
+                }
+                return page.pageToken?.trim()?.takeIf(String::isNotEmpty)
+            }
+
+            // Return at most one non-empty native history page per platform
+            // message. Empty record families are skipped in the same call so a
+            // sparse account does not pay a round trip for every supported type.
+            while (recordIndex < bootstrapRecordNames.size) {
+                val recordName = bootstrapRecordNames[recordIndex]
+                val nextPageToken = when (recordName) {
+                    "steps" -> readInitialPage(StepsRecord::class)
+                    "distance" -> readInitialPage(DistanceRecord::class)
+                    "activeEnergy" -> readInitialPage(ActiveCaloriesBurnedRecord::class)
+                    "workout" -> readInitialPage(ExerciseSessionRecord::class)
+                    "sleep" -> readInitialPage(SleepSessionRecord::class)
+                    "weight" -> readInitialPage(WeightRecord::class)
+                    "bodyFat" -> readInitialPage(BodyFatRecord::class)
+                    "leanMass" -> readInitialPage(LeanBodyMassRecord::class)
+                    "heartRate" -> readInitialPage(HeartRateRecord::class)
+                    "restingHeartRate" -> readInitialPage(RestingHeartRateRecord::class)
+                    "hrv" -> readInitialPage(HeartRateVariabilityRmssdRecord::class)
+                    "water" -> readInitialPage(HydrationRecord::class)
+                    "nutrition" -> readInitialPage(NutritionRecord::class)
+                    else -> null
+                }
+                val nextIndex = if (nextPageToken == null) {
+                    recordIndex + 1
+                } else {
+                    recordIndex
+                }
+                if (records.isNotEmpty() || nextPageToken != null) {
+                    val cursor = BootstrapCursor(
+                        changeToken = token,
+                        asOf = asOf,
+                        recordIndex = nextIndex,
+                        pageToken = nextPageToken,
                     )
-                    page.records.flatMapTo(records) { record ->
-                        serializeAll(record, requestedNameSet)
-                    }
-                    pageToken = page.pageToken
-                    // Some Health Connect implementations return an empty
-                    // token at the end of pagination instead of null.
-                } while (!pageToken.isNullOrEmpty())
-            }
-            for (name in supportedRequestedNames) when (name) {
-                "steps" -> readInitial(StepsRecord::class)
-                "distance" -> readInitial(DistanceRecord::class)
-                "activeEnergy" -> readInitial(ActiveCaloriesBurnedRecord::class)
-                "workout" -> readInitial(ExerciseSessionRecord::class)
-                "sleep" -> readInitial(SleepSessionRecord::class)
-                "weight" -> readInitial(WeightRecord::class)
-                "bodyFat" -> readInitial(BodyFatRecord::class)
-                "leanMass" -> readInitial(LeanBodyMassRecord::class)
-                "heartRate" -> readInitial(HeartRateRecord::class)
-                "restingHeartRate" -> readInitial(RestingHeartRateRecord::class)
-                "hrv" -> readInitial(HeartRateVariabilityRmssdRecord::class)
-                "water" -> readInitial(HydrationRecord::class)
-            }
-            if (supportedRequestedNames.any(nutritionLogicalNames::contains)) {
-                readInitial(NutritionRecord::class)
+                    return mapOf(
+                        "records" to records,
+                        "deletedIds" to emptyList<String>(),
+                        "nextAnchor" to encodeBootstrapCursor(cursor),
+                        "hasMore" to true,
+                        "changesTokenExpired" to false,
+                    )
+                }
+                recordIndex = nextIndex
+                pageToken = null
             }
         }
-        val response = client.getChanges(token)
+
+        // Once the bounded history is complete, drain only one bounded changes
+        // page. Dart owns the outer pagination loop and persists nextAnchor
+        // after every page, so an interruption never forces a full replay.
+        val response = client.getChanges(token, NATIVE_SYNC_PAGE_SIZE)
         val deleted = mutableListOf<String>()
         response.changes.forEach { change ->
             when (change) {
@@ -482,6 +580,8 @@ class BILGlobalHealthBridge(
     companion object {
         const val CHANNEL = "bil/health_connect"
         const val HISTORY_PERMISSION_SCOPE_MARKER = "__readHealthDataHistory"
+        private const val BOOTSTRAP_ANCHOR_PREFIX = "bil_hc_bootstrap_v1:"
+        private const val NATIVE_SYNC_PAGE_SIZE = 250
         val nutritionLogicalNames = setOf(
             "nutrition", "nutritionProtein", "nutritionCarbohydrates",
             "nutritionFat", "nutritionFiber", "nutritionSugar",
