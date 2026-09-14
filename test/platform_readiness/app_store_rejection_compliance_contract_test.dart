@@ -37,12 +37,22 @@ void main() {
     final dashboard = File(
       'lib/features/dashboard/dashboard_page.dart',
     ).readAsStringSync();
+    final coachPermissions = File(
+      'lib/features/intelligence_center/presentation/'
+      'intelligence_conversation_voice.dart',
+    ).readAsStringSync();
 
     for (final source in <String>[profile, dashboard]) {
       expect(source, isNot(contains('Allow camera for this action?')));
       expect(source, contains('request(BilRuntimeCapability.camera)'));
       expect(source, contains('BilRuntimePermissionState.permanentlyDenied'));
     }
+    expect(coachPermissions, isNot(contains('final continueRequest =')));
+    expect(
+      coachPermissions,
+      isNot(contains('Allow camera for this action?')),
+    );
+    expect(coachPermissions, contains('policy.request(effectiveCapability)'));
   });
 
   test('health recommendation surfaces expose reviewable sources', () {
