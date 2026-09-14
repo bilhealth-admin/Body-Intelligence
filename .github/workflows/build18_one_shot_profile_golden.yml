@@ -54,7 +54,7 @@ jobs:
             throw "Expected profile golden failure image was not generated."
           }
           Copy-Item $source $target -Force
-          $changed = git diff --name-only
+          $changed = @(git diff --name-only)
           if ($changed.Count -ne 1 -or $changed[0] -ne $target) {
             Write-Host "Unexpected changed files:"
             $changed | ForEach-Object { Write-Host $_ }
