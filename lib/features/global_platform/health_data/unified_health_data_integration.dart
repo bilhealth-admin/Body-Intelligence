@@ -340,9 +340,9 @@ final class UnifiedHealthDataRuntime {
       appleReadTimeout,
       onTimeout: () async {
         try {
-          await cancellable
-              .cancelReadChanges()
-              .timeout(_nativeCancellationTimeout);
+          await cancellable.cancelReadChanges().timeout(
+            _nativeCancellationTimeout,
+          );
         } on Object {
           // The foreground deadline remains authoritative even if native
           // cleanup itself cannot acknowledge promptly.
