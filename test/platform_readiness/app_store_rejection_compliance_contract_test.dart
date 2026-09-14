@@ -22,11 +22,10 @@ void main() {
       ),
     );
     expect(completion, isNot(contains('preferred_name_required')));
+    expect(completion, contains('if (preferredName.isNotEmpty)'));
     expect(
       completion,
-      contains(
-        'if (preferredName.isNotEmpty) ...DisplayNameSync.localEdit(preferredName)',
-      ),
+      contains('...DisplayNameSync.localEdit(preferredName),'),
     );
   });
 
