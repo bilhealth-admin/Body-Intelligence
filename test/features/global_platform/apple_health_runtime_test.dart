@@ -52,8 +52,7 @@ final class _BurstAppleBridge implements NativeHealthBridge {
 
 final class _HangingCancellableAppleBridge
     implements NativeHealthBridge, NativeHealthCancellableReadBridge {
-  final Completer<NativeHealthPage> pendingRead =
-      Completer<NativeHealthPage>();
+  final Completer<NativeHealthPage> pendingRead = Completer<NativeHealthPage>();
   int cancellations = 0;
 
   @override
@@ -75,8 +74,7 @@ final class _HangingCancellableAppleBridge
     required String? anchor,
     required DateTime asOf,
     required Set<String> types,
-  }) =>
-      pendingRead.future;
+  }) => pendingRead.future;
 
   @override
   Future<void> request(Set<String> types, {required bool write}) async {}
