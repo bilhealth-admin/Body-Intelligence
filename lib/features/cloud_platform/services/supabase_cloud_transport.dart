@@ -48,7 +48,7 @@ final class SupabaseCloudTransport implements CloudTransport {
           params: <String, Object?>{
             'p_device_id': deviceId,
             'p_cursor': int.tryParse(cursor ?? '') ?? 0,
-            'p_operations': operations.map(_operationJson).toList(growable: false),
+            'p_operations': operations\n                .map(_operationJson)\n                .toList(growable: false),
           },
         )
         .timeout(requestTimeout);
