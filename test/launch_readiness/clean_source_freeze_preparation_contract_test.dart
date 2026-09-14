@@ -111,10 +111,10 @@ void main() {
   );
 
   test(
-    'validator targets the current non-self-referential Android 14 manifest',
+    'validator targets the current non-self-referential Android 15 manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V14_FROZEN_SOURCE_MANIFEST_2026-09-13.md';
+          'docs/release/BIL_ANDROID_V15_FROZEN_SOURCE_MANIFEST_2026-09-14.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();
@@ -128,16 +128,16 @@ void main() {
       );
       expect(metadata.unresolvedReviewCount, 0);
       expect(metadata.releaseVersion, '1.0.0');
-      expect(metadata.releaseBuildNumber, 14);
+      expect(metadata.releaseBuildNumber, 15);
       expect(
         metadata.stagingManifestComplete,
         metadata.candidateFrozenOrAccepted,
         reason: 'The current manifest must transition from NO/NO to YES/YES.',
       );
-      expect(manifestSource, contains('BIL_ANDROID_V14_AUDITED_SOURCE_SHA'));
+      expect(manifestSource, contains('BIL_ANDROID_V15_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
-        contains('BIL_ANDROID_V14_STAGING_MANIFEST_SHA256'),
+        contains('BIL_ANDROID_V15_STAGING_MANIFEST_SHA256'),
       );
       expect(manifestSource, contains('not self-referential'));
     },
