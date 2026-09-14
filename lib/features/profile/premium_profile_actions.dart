@@ -163,18 +163,6 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           ),
         );
       }
-    } on ProfilePhotoTooLargeException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'Choose an image smaller than 5 MB.',
-              'اختر صورة أصغر من 5 ميجابايت.',
-            ),
-          ),
-        ),
-      );
     } on ProfilePhotoIdentityChangedException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
