@@ -275,7 +275,9 @@ class SupabaseAuthService {
     if (appleDisplayName.isNotEmpty) {
       try {
         await client.auth.updateUser(
-          UserAttributes(data: <String, dynamic>{'full_name': appleDisplayName}),
+          UserAttributes(
+            data: <String, dynamic>{'full_name': appleDisplayName},
+          ),
         );
       } on Object {
         // Name enrichment is optional and must never invalidate a successfully
