@@ -360,10 +360,11 @@ class BILGlobalHealthBridge(
             }
         }
 
-        // Once the bounded history is complete, drain only one bounded changes
-        // page. Dart owns the outer pagination loop and persists nextAnchor
-        // after every page, so an interruption never forces a full replay.
-        val response = client.getChanges(token, NATIVE_SYNC_PAGE_SIZE)
+        // Once the bounded history is complete, drain one Health Connect
+        // changes page. This SDK version exposes the one-argument getChanges()
+        // API; response.hasMore and nextChangesToken keep the outer Dart loop
+        // paged and restart-resumable without replaying the historical bootstrap.
+        val response = client.getChanges(token)
         val deleted = mutableListOf<String>()
         response.changes.forEach { change ->
             when (change) {
