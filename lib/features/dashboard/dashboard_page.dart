@@ -167,11 +167,6 @@ class DashboardPage extends ConsumerWidget {
 
     try {
       await ref.read(profilePhotoServiceProvider).chooseAndSave();
-    } on ProfilePhotoTooLargeException {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_dashboardText(locale, 'imageTooLarge'))),
-      );
     } on ProfilePhotoIdentityChangedException {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
