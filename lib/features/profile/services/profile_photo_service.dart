@@ -446,11 +446,6 @@ class ProfilePhotoService {
   }
 }
 
-@Deprecated('Profile photos are compressed automatically instead of rejected.')
-class ProfilePhotoTooLargeException implements Exception {
-  const ProfilePhotoTooLargeException();
-}
-
 class ProfilePhotoCompressionException implements Exception {
   const ProfilePhotoCompressionException();
 }
