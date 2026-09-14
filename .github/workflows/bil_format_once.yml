@@ -1,0 +1,49 @@
+name: BIL one-shot Dart formatter
+
+on:
+  push:
+    branches:
+      - codex/build18-ai-coach-no-loading-flash-20260913
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bil-format-once-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format-once:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+        with:
+          ref: codex/build18-ai-coach-no-loading-flash-20260913
+          fetch-depth: 0
+
+      - name: Install Flutter release toolchain
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Format exact pending files
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format             lib/app/router/app_router.dart             lib/features/global_platform/health_data/unified_health_data_integration.dart             lib/features/onboarding/domain/onboarding_completion_service.dart             lib/features/onboarding/onboarding_detail_steps.dart             lib/features/settings/health_information_sources_page.dart             test/platform_readiness/health_connect_paged_bootstrap_contract_test.dart
+          rm .github/workflows/bil_format_once.yml
+
+      - name: Commit formatter output and remove this one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             lib/app/router/app_router.dart             lib/features/global_platform/health_data/unified_health_data_integration.dart             lib/features/onboarding/domain/onboarding_completion_service.dart             lib/features/onboarding/onboarding_detail_steps.dart             lib/features/settings/health_information_sources_page.dart             test/platform_readiness/health_connect_paged_bootstrap_contract_test.dart             .github/workflows/bil_format_once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "style: apply Dart 3.13 formatter"
+          git push origin HEAD:codex/build18-ai-coach-no-loading-flash-20260913
