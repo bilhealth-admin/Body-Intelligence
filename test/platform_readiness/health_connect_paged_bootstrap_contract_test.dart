@@ -15,7 +15,7 @@ void main() {
     );
     expect(source, contains('NATIVE_SYNC_PAGE_SIZE = 250'));
     expect(source, contains('pageSize = NATIVE_SYNC_PAGE_SIZE'));
-    expect(source, contains('client.getChanges(token, NATIVE_SYNC_PAGE_SIZE)'));
+    expect(source, contains('client.getChanges(token)'));
     expect(source, contains('encodeBootstrapCursor(cursor)'));
     expect(
       source,
