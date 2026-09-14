@@ -22,6 +22,11 @@ Android release workflow overrides the shared Flutter version with
 `--build-number 15`, producing `versionCode 15` while `versionName` remains
 `1.0.0`.
 
+The binding is not self-referential: after the final Android 15 source commit is
+pushed, `BIL_ANDROID_V15_AUDITED_SOURCE_SHA` must equal that exact commit and
+`BIL_ANDROID_V15_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
+SHA-256. Source, manifest and expected build number are independently checked.
+
 The final release may later be rebased/cherry-picked onto the locally tested
 iOS Build 18 commit. That integration must preserve the iOS runtime and use one
 final source SHA for iOS build 18 and Android versionCode 15.
