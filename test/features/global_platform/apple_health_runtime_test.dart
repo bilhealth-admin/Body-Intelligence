@@ -50,6 +50,41 @@ final class _BurstAppleBridge implements NativeHealthBridge {
   Future<void> write(List<GlobalHealthSignal> signals) async {}
 }
 
+final class _HangingCancellableAppleBridge
+    implements NativeHealthBridge, NativeHealthCancellableReadBridge {
+  final Completer<NativeHealthPage> pendingRead =
+      Completer<NativeHealthPage>();
+  int cancellations = 0;
+
+  @override
+  String get id => 'bil/apple_health';
+
+  @override
+  Future<void> cancelReadChanges() async {
+    cancellations++;
+  }
+
+  @override
+  Future<void> delete(List<String> recordIds) async {}
+
+  @override
+  Future<Map<String, bool>> permissions() async => const {};
+
+  @override
+  Future<NativeHealthPage> readChanges({
+    required String? anchor,
+    required DateTime asOf,
+    required Set<String> types,
+  }) =>
+      pendingRead.future;
+
+  @override
+  Future<void> request(Set<String> types, {required bool write}) async {}
+
+  @override
+  Future<void> write(List<GlobalHealthSignal> signals) async {}
+}
+
 final class _RecordingAppleBridge implements NativeHealthBridge {
   int writes = 0;
   @override
@@ -125,6 +160,34 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(uiTurnObservedBeforeCompletion, isTrue);
+    },
+  );
+
+  test(
+    'stalled Apple Health reads hit a foreground deadline and cancel natively',
+    () async {
+      final bridge = _HangingCancellableAppleBridge();
+      final runtime = UnifiedHealthDataRuntime(
+        bridges: [bridge],
+        store: InMemoryGlobalStore(),
+        audit: InMemoryGlobalAuditSink(),
+        appleReadTimeout: const Duration(milliseconds: 25),
+      );
+
+      await expectLater(
+        runtime.synchronize(
+          asOf: DateTime.utc(2026, 9, 14, 8),
+          consent: GlobalConsentGrant(
+            scope: 'apple_health_read',
+            state: GlobalConsentState.granted,
+            updatedAt: DateTime.utc(2026, 9, 14, 8),
+          ),
+          types: const {HealthDataType.weight},
+        ),
+        throwsA(isA<TimeoutException>()),
+      );
+
+      expect(bridge.cancellations, 1);
     },
   );
 
