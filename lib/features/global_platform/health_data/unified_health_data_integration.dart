@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../core/global_platform_core.dart';
 
 abstract interface class NativeHealthCapabilityBridge {
@@ -296,12 +298,16 @@ final class UnifiedHealthDataRuntime {
     required this.store,
     required this.audit,
     this.pageLimit = 100,
+    this.appleReadTimeout = const Duration(seconds: 20),
   });
 
   final List<NativeHealthBridge> bridges;
   final GlobalDurableStore store;
   final GlobalAuditSink audit;
   final int pageLimit;
+  final Duration appleReadTimeout;
+
+  static const Duration _nativeCancellationTimeout = Duration(seconds: 2);
 
   // The production SQLite store is intentionally synchronous at the native
   // sqlite3 boundary even though the domain API returns Futures. A large
@@ -311,6 +317,43 @@ final class UnifiedHealthDataRuntime {
   static const int _recordsPerUiYield = 4;
 
   Future<void> _yieldHealthSyncTurn() => Future<void>.delayed(Duration.zero);
+
+  Future<NativeHealthPage> _readPageWithForegroundDeadline({
+    required NativeHealthBridge bridge,
+    required String? anchor,
+    required DateTime asOf,
+    required Set<String> types,
+  }) {
+    final read = bridge.readChanges(
+      anchor: anchor,
+      asOf: asOf,
+      types: types,
+    );
+    final cancellable = bridge is NativeHealthCancellableReadBridge
+        ? bridge as NativeHealthCancellableReadBridge
+        : null;
+    if (!_isAppleHealthBridge(bridge) || cancellable == null) {
+      return read;
+    }
+
+    return read.timeout(
+      appleReadTimeout,
+      onTimeout: () async {
+        try {
+          await cancellable
+              .cancelReadChanges()
+              .timeout(_nativeCancellationTimeout);
+        } on Object {
+          // The foreground deadline remains authoritative even if native
+          // cleanup itself cannot acknowledge promptly.
+        }
+        throw TimeoutException(
+          'Apple Health read exceeded its foreground deadline.',
+          appleReadTimeout,
+        );
+      },
+    );
+  }
 
   Future<List<GlobalHealthSignal>> synchronize({
     required DateTime asOf,
@@ -395,7 +438,8 @@ final class UnifiedHealthDataRuntime {
       }
 
       while (pages < pageLimit) {
-        final page = await bridge.readChanges(
+        final page = await _readPageWithForegroundDeadline(
+          bridge: bridge,
           anchor: nextAnchor,
           asOf: asOf,
           types: allowed,
