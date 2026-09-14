@@ -221,15 +221,6 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
           ),
         );
       }
-    } on ProfilePhotoTooLargeException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text('Choose an image smaller than 5 MB.'),
-          ),
-        ),
-      );
     } finally {
       if (mounted) setState(() => _photoBusy = false);
     }

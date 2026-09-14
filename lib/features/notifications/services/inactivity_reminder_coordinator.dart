@@ -48,6 +48,11 @@ class _InactivityReminderCoordinatorState
 
   @override
   void dispose() {
+    // Invalidate any in-flight pause scheduling before this coordinator leaves
+    // the tree. Otherwise an async reminder read can finish after disposal and
+    // schedule a stale notification for a foreground/replaced app surface.
+    _generation += 1;
+    _backgroundHandled = false;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

@@ -163,18 +163,6 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           ),
         );
       }
-    } on ProfilePhotoTooLargeException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'Choose an image smaller than 5 MB.',
-              'اختر صورة أصغر من 5 ميجابايت.',
-            ),
-          ),
-        ),
-      );
     } on ProfilePhotoIdentityChangedException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -207,42 +195,33 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!mounted) return false;
+
     final blocked =
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
-    final proceed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
-        title: Text(
-          tr(
-            blocked ? 'Camera access is off' : 'Allow camera for this action?',
-            blocked
-                ? 'الوصول إلى الكاميرا متوقف'
-                : 'السماح بالكاميرا لهذا الإجراء؟',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(tr('Not now', 'ليس الآن')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(
-              tr(
-                blocked ? 'Open system settings' : 'Continue',
-                blocked ? 'فتح إعدادات النظام' : 'متابعة',
+    if (blocked) {
+      final openSettings = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog.adaptive(
+          title: Text(tr('Camera access is off', 'الوصول إلى الكاميرا متوقف')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(
+                MaterialLocalizations.of(dialogContext).closeButtonLabel,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-    if (proceed != true) return false;
-    if (blocked) {
-      await policy.openSettings();
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(tr('Open system settings', 'فتح إعدادات النظام')),
+            ),
+          ],
+        ),
+      );
+      if (openSettings == true) await policy.openSettings();
       return false;
     }
+
     return await policy.request(BilRuntimeCapability.camera) ==
         BilRuntimePermissionState.granted;
   }

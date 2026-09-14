@@ -81,6 +81,23 @@ class _MessageBubble extends StatelessWidget {
                   ).textTheme.bodyLarge?.copyWith(height: 1.55),
                   animateReveal: animateReveal,
                 ),
+                const SizedBox(height: 4),
+                TextButton.icon(
+                  key: Key('ai-coach-health-sources'),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () => context.push('/health-information-sources'),
+                  icon: const Icon(Icons.menu_book_outlined, size: 17),
+                  label: Text(
+                    intelligenceText(
+                      context,
+                      'Health sources & methodology',
+                      'المصادر والمنهجية الصحية',
+                    ),
+                  ),
+                ),
                 if (trustedLinks.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Wrap(

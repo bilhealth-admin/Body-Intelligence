@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../core/global_platform_core.dart';
 
 abstract interface class NativeHealthCapabilityBridge {
@@ -296,12 +298,58 @@ final class UnifiedHealthDataRuntime {
     required this.store,
     required this.audit,
     this.pageLimit = 100,
+    this.appleReadTimeout = const Duration(seconds: 20),
   });
 
   final List<NativeHealthBridge> bridges;
   final GlobalDurableStore store;
   final GlobalAuditSink audit;
   final int pageLimit;
+  final Duration appleReadTimeout;
+
+  static const Duration _nativeCancellationTimeout = Duration(seconds: 2);
+
+  // The production SQLite store is intentionally synchronous at the native
+  // sqlite3 boundary even though the domain API returns Futures. A large
+  // HealthKit backfill can therefore chain many completed Futures without
+  // returning to Flutter's event queue. Yield in small bounded batches so
+  // scrolling/animations remain responsive while persistence continues.
+  static const int _recordsPerUiYield = 4;
+
+  Future<void> _yieldHealthSyncTurn() => Future<void>.delayed(Duration.zero);
+
+  Future<NativeHealthPage> _readPageWithForegroundDeadline({
+    required NativeHealthBridge bridge,
+    required String? anchor,
+    required DateTime asOf,
+    required Set<String> types,
+  }) {
+    final read = bridge.readChanges(anchor: anchor, asOf: asOf, types: types);
+    final cancellable = bridge is NativeHealthCancellableReadBridge
+        ? bridge as NativeHealthCancellableReadBridge
+        : null;
+    if (!_isAppleHealthBridge(bridge) || cancellable == null) {
+      return read;
+    }
+
+    return read.timeout(
+      appleReadTimeout,
+      onTimeout: () async {
+        try {
+          await cancellable.cancelReadChanges().timeout(
+            _nativeCancellationTimeout,
+          );
+        } on Object {
+          // The foreground deadline remains authoritative even if native
+          // cleanup itself cannot acknowledge promptly.
+        }
+        throw TimeoutException(
+          'Apple Health read exceeded its foreground deadline.',
+          appleReadTimeout,
+        );
+      },
+    );
+  }
 
   Future<List<GlobalHealthSignal>> synchronize({
     required DateTime asOf,
@@ -375,9 +423,19 @@ final class UnifiedHealthDataRuntime {
           : null;
       var nextAnchor = anchor;
       var pages = 0;
+      var workSinceUiYield = 0;
       var expiredTokenRecoveryAttempted = false;
+
+      Future<void> cooperateWithUi() async {
+        workSinceUiYield++;
+        if (workSinceUiYield < _recordsPerUiYield) return;
+        workSinceUiYield = 0;
+        await _yieldHealthSyncTurn();
+      }
+
       while (pages < pageLimit) {
-        final page = await bridge.readChanges(
+        final page = await _readPageWithForegroundDeadline(
+          bridge: bridge,
           anchor: nextAnchor,
           asOf: asOf,
           types: allowed,
@@ -420,6 +478,7 @@ final class UnifiedHealthDataRuntime {
         }
         pages++;
         for (final deleted in page.deletedIds) {
+          await cooperateWithUi();
           await store.put(
             'health_tombstones',
             '${bridge.id}:$deleted',
@@ -444,6 +503,7 @@ final class UnifiedHealthDataRuntime {
         // otherwise turn synchronization into O(parents x stored signals).
         await _removePersistedRecordFamilies(bridge.id, replacedRecordFamilies);
         for (final record in page.records) {
+          await cooperateWithUi();
           if (record.observedAt.isAfter(asOf.toUtc())) continue;
           if (!BilHealthScope.read.contains(record.type)) {
             await audit.record(
@@ -492,6 +552,11 @@ final class UnifiedHealthDataRuntime {
           'anchor': nextAnchor,
           'scope': allowedScopeSignature,
         });
+        // Always hand one event turn back after a native page, even when the
+        // page contained only duplicates. This prevents a multi-page backfill
+        // from monopolizing the UI isolate.
+        workSinceUiYield = 0;
+        await _yieldHealthSyncTurn();
         if (!page.hasMore) break;
       }
     }
@@ -596,7 +661,17 @@ final class UnifiedHealthDataRuntime {
     Set<String> parentRecordIds,
   ) async {
     if (parentRecordIds.isEmpty) return;
+    var workSinceUiYield = 0;
+
+    Future<void> cooperateWithUi() async {
+      workSinceUiYield++;
+      if (workSinceUiYield < _recordsPerUiYield) return;
+      workSinceUiYield = 0;
+      await _yieldHealthSyncTurn();
+    }
+
     for (final row in await store.list('health_signals')) {
+      await cooperateWithUi();
       if (row['providerId'] != providerId) continue;
       final recordId = row['recordId'];
       final attributes = row['attributes'] as Map?;
@@ -614,6 +689,7 @@ final class UnifiedHealthDataRuntime {
     // are absent from health_signals but still have a health_seen fingerprint.
     for (final parentRecordId in parentRecordIds) {
       for (final type in BilHealthScope.read) {
+        await cooperateWithUi();
         final identity = '$providerId:$parentRecordId:${type.name}';
         await store.remove('health_signals', identity);
         await store.remove('health_seen', identity);

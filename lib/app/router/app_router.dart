@@ -72,6 +72,7 @@ import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/location_settings_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/settings/trust_support_page.dart';
+import '../../features/settings/health_information_sources_page.dart';
 import '../../features/settings/help_center_page.dart';
 import '../../features/settings/account_deletion_page.dart';
 import '../../features/settings/account_email_page.dart';
@@ -490,6 +491,10 @@ class AppRouter {
         path: '/trust-support',
         builder: (_, _) => const TrustSupportPage(),
       ),
+      GoRoute(
+        path: '/health-information-sources',
+        builder: (_, _) => const HealthInformationSourcesPage(),
+      ),
       GoRoute(path: '/help', builder: (_, _) => const HelpCenterPage()),
       GoRoute(path: '/help/faq', builder: (_, _) => const HelpFaqPage()),
       GoRoute(
@@ -681,7 +686,10 @@ class AppRouter {
           ),
           GoRoute(path: '/foods', builder: (_, _) => const FoodPage()),
           GoRoute(path: '/history', builder: (_, _) => const ProgressPage()),
-          GoRoute(path: '/weight-history', builder: (_, _) => const HistoryPage()),
+          GoRoute(
+            path: '/weight-history',
+            builder: (_, _) => const HistoryPage(),
+          ),
           GoRoute(
             path: '/analytics',
             builder: (_, _) => const AnalyticsPage(showDashboardBack: true),

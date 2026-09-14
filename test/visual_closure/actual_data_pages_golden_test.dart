@@ -140,6 +140,9 @@ void main() {
         activityLevel: 'light',
         exercises: true,
       );
+      await PreferencesRepository(
+        db,
+      ).set('timezoneName', 'Egypt Daylight Time');
     }
     return db;
   }
@@ -230,6 +233,9 @@ void main() {
           databaseProvider.overrideWithValue(db),
           dashboardClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
+          ),
+          premiumProfileClockProvider.overrideWithValue(
+            () => DateTime.utc(2026, 8, 30, 9, 41, 12),
           ),
           connectedHealthGatewayProvider.overrideWithValue(
             const _UnavailableHealthGateway(),

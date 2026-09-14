@@ -9,9 +9,13 @@ import 'cloud_platform_ports.dart';
 /// The matching RPC validates `auth.uid()` server-side.  This class also
 /// rejects a mismatched local session before any request leaves the device.
 final class SupabaseCloudTransport implements CloudTransport {
-  const SupabaseCloudTransport(this.client);
+  const SupabaseCloudTransport(
+    this.client, {
+    this.requestTimeout = const Duration(seconds: 20),
+  });
 
   final SupabaseClient client;
+  final Duration requestTimeout;
 
   @override
   Future<CloudSyncBatchResult> synchronize({
@@ -38,14 +42,18 @@ final class SupabaseCloudTransport implements CloudTransport {
       throw StateError('Cross-account or cross-device sync batch rejected.');
     }
 
-    final response = await client.rpc(
-      'bil_sync_records',
-      params: <String, Object?>{
-        'p_device_id': deviceId,
-        'p_cursor': int.tryParse(cursor ?? '') ?? 0,
-        'p_operations': operations.map(_operationJson).toList(growable: false),
-      },
-    );
+    final response = await client
+        .rpc(
+          'bil_sync_records',
+          params: <String, Object?>{
+            'p_device_id': deviceId,
+            'p_cursor': int.tryParse(cursor ?? '') ?? 0,
+            'p_operations': operations
+                .map(_operationJson)
+                .toList(growable: false),
+          },
+        )
+        .timeout(requestTimeout);
     if (response is! Map) {
       throw const FormatException('Invalid BIL cloud sync response.');
     }

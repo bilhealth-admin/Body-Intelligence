@@ -81,9 +81,6 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
     if (current == BilRuntimePermissionState.granted) return true;
     if (!mounted) return false;
-    final presentation = coachRuntimePermissionPresentation(
-      effectiveCapability,
-    );
     final permissionTitle = switch (effectiveCapability) {
       BilRuntimeCapability.microphone => MealVoiceRuntimeCopy.resolve(
         MealVoiceCopyKey.microphonePermissionTitle,
@@ -94,8 +91,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
       ),
       BilRuntimeCapability.camera => tr(
-        'Allow camera for this action?',
-        'السماح بالكاميرا لهذا الإجراء؟',
+        'Camera access is off',
+        'الوصول إلى الكاميرا متوقف',
       ),
       BilRuntimeCapability.notifications => tr('Notifications', 'الإشعارات'),
     };
@@ -126,26 +123,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       if (open == true) await policy.openSettings();
       return false;
     }
-    final continueRequest = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
-        title: Text(permissionTitle),
-        content: Text(
-          tr(presentation.englishRationale, presentation.arabicRationale),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(tr('Not now', 'ليس الآن')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(tr('Continue', 'متابعة')),
-          ),
-        ],
-      ),
-    );
-    if (continueRequest != true || !mounted || coachInBackground) return false;
+    if (!mounted || coachInBackground) return false;
     final granted =
         await policy.request(effectiveCapability) ==
         BilRuntimePermissionState.granted;

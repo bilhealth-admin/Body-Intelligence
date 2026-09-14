@@ -22,6 +22,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   final purchaseLaunch = Completer<bool>();
   bool failCompletion = false;
   int completionCalls = 0;
+  final completionAttempted = Completer<void>();
   int queries = 0;
   int launches = 0;
   @override
@@ -37,6 +38,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   @override
   Future<void> completePurchase(PurchaseDetails purchase) async {
     completionCalls++;
+    if (!completionAttempted.isCompleted) completionAttempted.complete();
     if (failCompletion) throw StateError('local acknowledgement failed');
   }
 
@@ -208,6 +210,9 @@ void main() {
       expect(native.queries, 1);
       await verificationStarted.future;
       verification.complete(_verifiedResponse());
+      await native.completionAttempted.future.timeout(
+        const Duration(seconds: 2),
+      );
       await drain();
       expect(store.state, VerifiedStoreState.verified);
       expect(store.busy, isFalse);
@@ -234,6 +239,9 @@ void main() {
       native.updates.add([_receipt()]);
       await verificationStarted.future;
       verification.complete(_verifiedResponse());
+      await native.completionAttempted.future.timeout(
+        const Duration(seconds: 2),
+      );
       await drain();
       expect(store.state, VerifiedStoreState.verified);
       native.productResponse.completeError(StateError('catalog unavailable'));
@@ -311,8 +319,11 @@ void main() {
       native.updates.add([_receipt()]);
       await verificationStarted.future;
       verification.complete(_verifiedResponse());
-      await drain();
+      await native.completionAttempted.future.timeout(
+        const Duration(seconds: 2),
+      );
       expect(native.completionCalls, 1);
+      await drain();
       expect(store.messageCode, 'verification_failed');
       expect(store.canStartPurchase, isFalse);
     },

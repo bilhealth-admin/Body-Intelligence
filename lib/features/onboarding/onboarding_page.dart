@@ -65,7 +65,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _draftWrites = Future<void>.value();
 
   List<String> get _steps => <String>[
-    'name',
+    if (defaultTargetPlatform != TargetPlatform.iOS) 'name',
     'goals',
     'activity',
     'facts',
@@ -78,7 +78,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     'neck',
     if (_draft.sex == 'female') 'hips',
     'plan',
-    'integrations',
+    if (defaultTargetPlatform != TargetPlatform.iOS) 'integrations',
     'ai',
     'review',
   ];

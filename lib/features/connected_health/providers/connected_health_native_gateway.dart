@@ -438,7 +438,13 @@ final class NativeConnectedHealthGateway
             );
       final persistedRows = await _flows.store.list('health_signals');
       final persisted = <GlobalHealthSignal>[];
+      var persistedRowsSinceUiYield = 0;
       for (final row in persistedRows) {
+        persistedRowsSinceUiYield++;
+        if (persistedRowsSinceUiYield >= 8) {
+          persistedRowsSinceUiYield = 0;
+          await Future<void>.delayed(Duration.zero);
+        }
         try {
           final signal = GlobalHealthSignal.fromMap(row);
           if (BilHealthScope.excludesKey(signal.key) ||
@@ -453,6 +459,10 @@ final class NativeConnectedHealthGateway
         }
       }
       final normalizedPersisted = aggregateConnectedSleepSignals(persisted);
+      // Parsing, aggregation and evidence reconciliation can still be sizeable
+      // on the first Apple Health backfill. Hand an event turn back before the
+      // graph walk so navigation and scrolling never wait behind it.
+      await Future<void>.delayed(Duration.zero);
       final graph = await BilGlobalHealthEvidenceGraphEngine(
         memory: SourceReliabilityMemory(store: _flows.store),
       ).build(normalizedPersisted);
@@ -461,13 +471,22 @@ final class NativeConnectedHealthGateway
           (a, b) => b.provenance.observedAt.compareTo(a.provenance.observedAt),
         );
       final dailyBridge = _bridge;
-      final nativeTotals = dailyBridge is NativeHealthDailyTotalsBridge
-          ? nativeDailyActivitySignals(
-              await (dailyBridge as NativeHealthDailyTotalsBridge)
-                  .readDailyTotals(asOf: now),
-              now,
-            )
-          : null;
+      List<GlobalHealthSignal>? nativeTotals;
+      if (dailyBridge is NativeHealthDailyTotalsBridge) {
+        try {
+          nativeTotals = nativeDailyActivitySignals(
+            await (dailyBridge as NativeHealthDailyTotalsBridge)
+                .readDailyTotals(asOf: now)
+                .timeout(const Duration(seconds: 6)),
+            now,
+          );
+        } on TimeoutException {
+          // Daily aggregate reads are an optimization over the already
+          // imported canonical records. A slow OS aggregate must not discard
+          // a completed Health sync or replace fresh evidence with old cache.
+          nativeTotals = null;
+        }
+      }
       final selected = _selectRepresentativeSignals([
         for (final signal in ordered)
           if (nativeTotals == null ||

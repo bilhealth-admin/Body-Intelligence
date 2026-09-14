@@ -53,9 +53,7 @@ final class OnboardingCompletionService {
   final Future<void> Function(OnboardingCommitPhase phase)? phaseHook;
 
   Future<void> commit({required OnboardingDraft draft, DateTime? now}) async {
-    if (draft.preferredName.trim().isEmpty) {
-      throw StateError('preferred_name_required');
-    }
+    final preferredName = draft.preferredName.trim();
     if (draft.remoteAiConsent == OnboardingRemoteAiConsent.unknown) {
       throw StateError('remote_ai_choice_required');
     }
@@ -149,7 +147,8 @@ final class OnboardingCompletionService {
         focuses: Set.unmodifiable(draft.aiFocuses),
       );
       await preferences.setManyInCurrentTransaction({
-        ...DisplayNameSync.localEdit(draft.preferredName),
+        if (preferredName.isNotEmpty)
+          ...DisplayNameSync.localEdit(preferredName),
         'units': draft.system.name,
         'countryRegion': draft.countryRegion.trim(),
         'locale': draft.localeTag,

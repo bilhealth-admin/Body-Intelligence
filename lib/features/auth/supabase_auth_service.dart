@@ -211,9 +211,14 @@ class SupabaseAuthService {
     final credential = await SignInWithApple.getAppleIDCredential(
       scopes: const <AppleIDAuthorizationScopes>[
         AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
       ],
       nonce: hashedNonce,
     );
+    final appleDisplayName = <String>[
+      credential.givenName?.trim() ?? '',
+      credential.familyName?.trim() ?? '',
+    ].where((part) => part.isNotEmpty).join(' ').trim();
     final appleUserIdentifier = credential.userIdentifier?.trim();
     if (appleUserIdentifier == null || appleUserIdentifier.isEmpty) {
       throw const AuthException('Apple did not return a user identifier.');
@@ -262,6 +267,22 @@ class SupabaseAuthService {
         // GoTrue clears its local session before its best-effort server call.
       }
       throw const AuthException('Apple credential could not be secured.');
+    }
+
+    // Authentication Services only returns name fields on the first
+    // authorization. Persist the value Apple already supplied when available;
+    // never require the person to type it again if Apple omits it later.
+    if (appleDisplayName.isNotEmpty) {
+      try {
+        await client.auth.updateUser(
+          UserAttributes(
+            data: <String, dynamic>{'full_name': appleDisplayName},
+          ),
+        );
+      } on Object {
+        // Name enrichment is optional and must never invalidate a successfully
+        // secured Apple session.
+      }
     }
     return response;
   }

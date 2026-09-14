@@ -118,20 +118,25 @@ void registerCoachRequestCases() {
         available = false;
         container.invalidate(aiCoachCreditAccessProvider);
         await tester.pumpAndSettle();
-        expect(
-          find.byKey(
-            ValueKey(
-              fail
-                  ? 'premium-route-access-unavailable'
-                  : 'premium-route-glass-blur',
-            ),
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(const Key('ai-coach-send-button')).hitTestable(),
-          findsNothing,
-        );
+        if (fail) {
+          // A transient background revalidation error must not tear down a
+          // previously server-verified Coach surface. The request path remains
+          // server-authoritative and can still reject unavailable credit.
+          expect(
+            find.byKey(const Key('premium-route-access-unavailable')),
+            findsNothing,
+          );
+          expect(find.byType(IntelligenceCenterPage), findsOneWidget);
+        } else {
+          expect(
+            find.byKey(const Key('premium-route-glass-blur')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('ai-coach-send-button')).hitTestable(),
+            findsNothing,
+          );
+        }
         available = true;
         container.invalidate(aiCoachCreditAccessProvider);
         await tester.pumpAndSettle();

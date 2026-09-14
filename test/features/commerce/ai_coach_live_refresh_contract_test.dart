@@ -25,9 +25,19 @@ void main() {
 
     expect(
       providers,
-      contains(
-        'aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>',
+      contains('aiCoachCreditAccessProvider = FutureProvider<bool>'),
+    );
+    expect(
+      providers,
+      isNot(
+        contains(
+          'aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>',
+        ),
       ),
+    );
+    expect(
+      providers,
+      contains('ref.watch(verifiedEntitlementOwnerIdProvider);'),
     );
     expect(providers, contains("credits['total_remaining']"));
     expect(query, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
