@@ -349,7 +349,9 @@ final class VerifiedStoreEntitlement {
   final DateTime? gracePeriodEndsAt;
   final String? provider;
 
-  bool get grantsPaidAccess {
+  bool get grantsPaidAccess => grantsPaidAccessAt(DateTime.now().toUtc());
+
+  bool grantsPaidAccessAt(DateTime now) {
     if (plan == CommercePlan.free) return false;
     final boundary = lifecycle == 'grace_period'
         ? gracePeriodEndsAt
@@ -361,7 +363,7 @@ final class VerifiedStoreEntitlement {
           'cancelled',
         }.contains(lifecycle) &&
         boundary != null &&
-        boundary.toUtc().isAfter(DateTime.now().toUtc());
+        boundary.toUtc().isAfter(now.toUtc());
   }
 }
 

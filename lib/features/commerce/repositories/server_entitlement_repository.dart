@@ -12,9 +12,12 @@ import '../domain/subscription_state.dart';
 
 /// Reads only the server-owned subscription snapshot.
 ///
-/// Network failure deliberately returns Free. It never deletes user data and
-/// never treats local preferences, debug flags, or a paywall selection as an
-/// entitlement.
+/// Network failure fails closed when no previously verified entitlement is
+/// available. A short, owner-scoped continuity window prevents a transient
+/// read/replication failure from flickering a paid member back to Free, while
+/// a valid terminal subscription row still revokes access immediately. It
+/// never deletes user data and never treats local preferences, debug flags, or
+/// a paywall selection as an entitlement.
 final class ServerEntitlementRepository {
   const ServerEntitlementRepository({EntitlementResolver? resolver})
     : _resolver = resolver ?? const EntitlementResolver();
@@ -73,6 +76,13 @@ final class ServerEntitlementRepository {
           closedTestRows.first['active'] == true &&
           closedTestExpiresAt != null &&
           closedTestExpiresAt.isAfter(now);
+      if (closedTestActive) {
+        return _remember(
+          user.id,
+          _closedTestState(now: now, expiresAt: closedTestExpiresAt),
+          now,
+        );
+      }
       final rows = await client
           .from('bil_subscriptions')
           .select()
@@ -80,68 +90,75 @@ final class ServerEntitlementRepository {
           .limit(1)
           .timeout(const Duration(seconds: 10));
       if (rows.isEmpty) {
-        if (!closedTestActive) {
-          return _remember(user.id, _verifiedFree(), now);
-        }
-        return _remember(
-          user.id,
-          _closedTestState(now: now, expiresAt: closedTestExpiresAt),
-          now,
-        );
+        // An empty response can be produced while a just-verified purchase is
+        // still replicating through Supabase. Do not erase the short-lived
+        // verified continuity cache on that transient read.
+        return _transientFallback(user.id, now);
       }
       final row = rows.first;
-      final providerValue = '${row['provider']}'.trim();
+      final providerValue = row['provider']?.toString().trim().toLowerCase();
       final verifiedAt = DateTime.tryParse('${row['verified_at']}')?.toUtc();
-      if (!closedTestActive &&
-          !isAcceptableServerVerificationTimestamp(
-            verifiedAt: verifiedAt,
-            now: now,
-          )) {
-        return _remember(user.id, FreePlan.createState(), now);
+      if (!isAcceptableServerVerificationTimestamp(
+        verifiedAt: verifiedAt,
+        now: now,
+      )) {
+        // A malformed/future timestamp is not an authoritative revocation;
+        // it is an unreadable snapshot. Keep a previously verified member
+        // visible for the bounded continuity window instead.
+        return _transientFallback(user.id, now);
       }
-      final plan = closedTestActive
-          ? CommercePlan.premiumAiCoach
-          : _plan('${row['plan_id']}');
+      final plan = _planOrNull('${row['plan_id']}');
+      if (plan == null) return _transientFallback(user.id, now);
       if (plan == CommercePlan.free) {
         return _remember(user.id, _verifiedFree(), now);
       }
-      final lifecycle = closedTestActive
-          ? SubscriptionLifecycle.active
-          : _lifecycle('${row['lifecycle']}');
-      final expiresAt = closedTestActive
-          ? closedTestExpiresAt
-          : DateTime.tryParse('${row['expires_at']}')?.toUtc();
+      final lifecycle = _lifecycleOrNull('${row['lifecycle']}');
+      if (lifecycle == null) return _transientFallback(user.id, now);
+      final expiresAt = DateTime.tryParse('${row['expires_at']}')?.toUtc();
+      final gracePeriodEndsAt = DateTime.tryParse(
+        '${row['grace_period_ends_at']}',
+      )?.toUtc();
       final provider = providerValue == 'apple'
           ? SubscriptionProvider.apple
           : providerValue == 'google'
           ? SubscriptionProvider.google
           : null;
-      if (provider == null &&
-          !closedTestActive &&
-          providerValue != 'closed_test') {
-        return _remember(user.id, FreePlan.createState(), now);
+      if (provider == null) return _transientFallback(user.id, now);
+      final accessBoundary = lifecycle == SubscriptionLifecycle.gracePeriod
+          ? gracePeriodEndsAt
+          : expiresAt;
+      if (lifecycle.mayGrantPaidAccess && accessBoundary == null) {
+        // A paid lifecycle without its boundary is malformed, not a verified
+        // cancellation. Treat it like a transient read so the last valid
+        // entitlement can carry the UI through replication/schema lag.
+        return _transientFallback(user.id, now);
       }
-      return _remember(
-        user.id,
-        _resolver.resolve(
-          record: SubscriptionRecord(
-            plan: plan,
-            lifecycle: lifecycle,
-            authorityVerified: true,
-            provider: provider,
-            startedAt: DateTime.tryParse('${row['started_at']}')?.toUtc(),
-            currentPeriodEndsAt: expiresAt,
-            trialEndsAt: lifecycle == SubscriptionLifecycle.trial
-                ? expiresAt
-                : null,
-            gracePeriodEndsAt: DateTime.tryParse(
-              '${row['grace_period_ends_at']}',
-            )?.toUtc(),
-          ),
-          now: now,
+      if (lifecycle.mayGrantPaidAccess && !accessBoundary!.isAfter(now)) {
+        // Expiration at the boundary is an authoritative loss of access.
+        return _remember(user.id, _verifiedFree(), now);
+      }
+      final resolved = _resolver.resolve(
+        record: SubscriptionRecord(
+          plan: plan,
+          lifecycle: lifecycle,
+          authorityVerified: true,
+          provider: provider,
+          startedAt: DateTime.tryParse('${row['started_at']}')?.toUtc(),
+          currentPeriodEndsAt: expiresAt,
+          trialEndsAt: lifecycle == SubscriptionLifecycle.trial
+              ? expiresAt
+              : null,
+          gracePeriodEndsAt: gracePeriodEndsAt,
         ),
-        now,
+        now: now,
       );
+      // The resolver can still fail closed for a future-dated/malformed
+      // snapshot. Preserve the last valid paid state instead of converting
+      // that unreadable response into a visible Free flicker.
+      if (lifecycle.mayGrantPaidAccess && resolved.plan == CommercePlan.free) {
+        return _transientFallback(user.id, now);
+      }
+      return _remember(user.id, resolved, now);
     } on Object {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return FreePlan.createState();
@@ -161,6 +178,10 @@ final class ServerEntitlementRepository {
     _sessionCache.remember(ownerId: ownerId, state: state, now: now);
     return state;
   }
+
+  SubscriptionState _transientFallback(String ownerId, DateTime now) =>
+      _sessionCache.fallbackFor(ownerId: ownerId, now: now) ??
+      FreePlan.createState();
 
   SubscriptionState _verifiedFree() => SubscriptionState(
     plan: CommercePlan.free,
@@ -186,17 +207,18 @@ final class ServerEntitlementRepository {
     now: now,
   );
 
-  CommercePlan _plan(String value) => switch (value.trim()) {
+  CommercePlan? _planOrNull(String value) => switch (value.trim()) {
     'premium' => CommercePlan.premium,
     'premium_ai_coach' => CommercePlan.premiumAiCoach,
     // Read-only compatibility for receipts verified before the canonical
     // consumer tier migration. New registry rows cannot use these IDs.
     'pro' => CommercePlan.premium,
     'plus' || 'legacy_plus' => CommercePlan.plus,
-    _ => CommercePlan.free,
+    'free' => CommercePlan.free,
+    _ => null,
   };
 
-  SubscriptionLifecycle _lifecycle(String value) => switch (value) {
+  SubscriptionLifecycle? _lifecycleOrNull(String value) => switch (value) {
     'pending' => SubscriptionLifecycle.pending,
     'trial' => SubscriptionLifecycle.trial,
     'active' => SubscriptionLifecycle.active,
@@ -210,7 +232,7 @@ final class ServerEntitlementRepository {
     'expired' => SubscriptionLifecycle.expired,
     'refunded' => SubscriptionLifecycle.refunded,
     'revoked' => SubscriptionLifecycle.revoked,
-    _ => SubscriptionLifecycle.inactive,
+    _ => null,
   };
 }
 
@@ -231,11 +253,12 @@ bool isAcceptableServerVerificationTimestamp({
 /// A short, owner-scoped continuity window for a previously server-verified
 /// paid entitlement.
 ///
-/// It is consulted only after a transient server read failure. A successful
-/// Free response clears it immediately, it never crosses account boundaries,
-/// and it never outlives either the entitlement period or five minutes. This
-/// prevents route-to-route Premium/Free flicker without treating local state
-/// as purchase authority.
+/// It is consulted only after a transient server read failure or an
+/// unreadable/incomplete snapshot. A valid verified Free/terminal response
+/// clears it immediately, it never crosses account boundaries, and it never
+/// outlives either the entitlement period or five minutes. This prevents
+/// route-to-route Premium/Free flicker without treating local state as
+/// purchase authority.
 final class VerifiedEntitlementSessionCache {
   VerifiedEntitlementSessionCache({
     this.maximumAge = const Duration(minutes: 5),

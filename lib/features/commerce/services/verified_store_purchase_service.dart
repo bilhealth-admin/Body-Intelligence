@@ -40,6 +40,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   bool _disposed = false;
   int _entitlementRefreshGeneration = 0;
   bool _purchaseInitiatedByThisService = false;
+  String? _entitlementOwnerId;
 
   bool get configured => AppEnvironment.commerceConfigured;
   bool get busy =>
@@ -354,7 +355,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         ? Supabase.instance.client.auth.currentUser
         : null;
     if (user == null) {
-      entitlement = null;
+      _clearEntitlement();
       return;
     }
     try {
@@ -366,34 +367,97 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           .timeout(const Duration(seconds: 10));
       if (_disposed || generation != _entitlementRefreshGeneration) return;
       if (Supabase.instance.client.auth.currentUser?.id != user.id) {
-        entitlement = null;
+        // Never carry one member's verified purchase into another member's
+        // session, even if the original request finishes after auth changes.
+        _clearEntitlement();
         return;
       }
       if (rows.isEmpty) {
-        entitlement = null;
+        // A successful empty read is possible for a short period while the
+        // verification function's write is replicating. Keep a still-valid,
+        // server-verified entitlement for this owner instead of flashing the
+        // paid surfaces back to Free.
+        _retainEntitlementIfValid(user.id);
         return;
       }
       final row = rows.first;
       final verifiedAt = DateTime.tryParse('${row['verified_at']}')?.toUtc();
       if (verifiedAt == null) {
-        entitlement = null;
+        _retainEntitlementIfValid(user.id);
+        return;
+      }
+      final plan = _planFromIdOrNull('${row['plan_id']}');
+      final lifecycle = '${row['lifecycle']}'.trim().toLowerCase();
+      final provider = row['provider']?.toString().trim().toLowerCase();
+      final expiresAt = DateTime.tryParse('${row['expires_at']}')?.toUtc();
+      final gracePeriodEndsAt = DateTime.tryParse(
+        '${row['grace_period_ends_at']}',
+      )?.toUtc();
+      if (plan == null ||
+          !_knownStoreLifecycles.contains(lifecycle) ||
+          (provider != 'apple' && provider != 'google') ||
+          (_accessLifecycles.contains(lifecycle) &&
+              (lifecycle == 'grace_period'
+                  ? gracePeriodEndsAt == null
+                  : expiresAt == null))) {
+        // Unknown/malformed rows are unreadable snapshots, not proof of a
+        // revocation. Preserve the last valid entitlement only within its
+        // own billing boundary.
+        _retainEntitlementIfValid(user.id);
         return;
       }
       entitlement = VerifiedStoreEntitlement(
-        plan: _planFromId('${row['plan_id']}'),
-        lifecycle: '${row['lifecycle']}',
+        plan: plan,
+        lifecycle: lifecycle,
         verifiedAt: verifiedAt,
-        renewsOrExpiresAt: DateTime.tryParse('${row['expires_at']}')?.toUtc(),
-        gracePeriodEndsAt: DateTime.tryParse(
-          '${row['grace_period_ends_at']}',
-        )?.toUtc(),
-        provider: row['provider']?.toString(),
+        renewsOrExpiresAt: expiresAt,
+        gracePeriodEndsAt: gracePeriodEndsAt,
+        provider: provider,
       );
+      _entitlementOwnerId = user.id;
     } on Object {
-      // Never turn an unverifiable local label into paid access.
+      // Never turn an unverifiable local label into paid access, but do not
+      // erase a still-valid server-verified result for a transient failure.
       if (!_disposed && generation == _entitlementRefreshGeneration) {
-        entitlement = null;
+        _retainEntitlementIfValid(user.id);
       }
+    }
+  }
+
+  static const _knownStoreLifecycles = {
+    'pending',
+    'trial',
+    'active',
+    'grace_period',
+    'billing_retry',
+    'account_hold',
+    'paused',
+    'suspended',
+    'deferred',
+    'cancelled',
+    'expired',
+    'refunded',
+    'revoked',
+  };
+
+  static const _accessLifecycles = {
+    'trial',
+    'active',
+    'grace_period',
+    'cancelled',
+  };
+
+  void _clearEntitlement() {
+    entitlement = null;
+    _entitlementOwnerId = null;
+  }
+
+  void _retainEntitlementIfValid(String ownerId) {
+    final current = entitlement;
+    if (_entitlementOwnerId != ownerId ||
+        current == null ||
+        !current.grantsPaidAccess) {
+      _clearEntitlement();
     }
   }
 
@@ -558,7 +622,23 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           data is Map &&
           data['verified'] == true &&
           data['entitlement_active'] == true;
-      if (verified) await refreshEntitlement();
+      if (verified) {
+        // The verification function persists first, but the read replica can
+        // briefly lag. Retry the read a few times before reporting a false
+        // verification failure to the native purchase queue.
+        for (var attempt = 0; attempt < 3; attempt++) {
+          await refreshEntitlement();
+          if (entitlement?.grantsPaidAccess == true) break;
+          if (attempt < 2) {
+            await Future<void>.delayed(
+              Duration(milliseconds: attempt == 0 ? 150 : 300),
+            );
+          }
+        }
+      }
+      // Keep the explicit server-row check: the function response proves the
+      // receipt, while the row is the durable entitlement consumed by every
+      // paid surface. The bounded retries above only bridge read-replica lag.
       return verified && entitlement?.grantsPaidAccess == true;
     } on Object {
       return false;
@@ -594,10 +674,20 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     );
   }
 
+  CommercePlan? _planFromIdOrNull(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty || normalized == 'free') {
+      return normalized == 'free' ? CommercePlan.free : null;
+    }
+    final plan = _planFromId(normalized);
+    return plan == CommercePlan.free ? null : plan;
+  }
+
   @override
   void dispose() {
     _disposed = true;
     _entitlementRefreshGeneration++;
+    _clearEntitlement();
     unawaited(_subscription?.cancel());
     super.dispose();
   }

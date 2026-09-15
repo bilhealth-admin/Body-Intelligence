@@ -134,12 +134,14 @@ void main() {
   late _ConfiguredStore store;
   late Completer<http.Response> verification;
   late Completer<void> verificationStarted;
+  late List<Map<String, Object?>> subscriptionRows;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     verification = Completer<http.Response>();
     verificationStarted = Completer<void>();
+    subscriptionRows = <Map<String, Object?>>[];
     await Supabase.initialize(
       url: 'https://billing-fixture.invalid',
       publishableKey: 'fixture-publishable-key',
@@ -151,7 +153,12 @@ void main() {
       ),
       httpClient: MockClient((request) async {
         if (request.url.path == '/rest/v1/bil_subscriptions') {
-          return http.Response('[]', 200);
+          return http.Response(
+            jsonEncode(subscriptionRows),
+            200,
+            headers: {'content-type': 'application/json'},
+            request: request,
+          );
         }
         if (request.url.path == '/functions/v1/verify-store-purchase') {
           if (!verificationStarted.isCompleted) verificationStarted.complete();
@@ -372,6 +379,72 @@ void main() {
       expect(store.state, VerifiedStoreState.verified);
       expect(store.messageCode, 'ai_boost_verified');
       expect(store.busy, isFalse);
+    },
+  );
+
+  test(
+    'a transient empty entitlement read retains the verified member state',
+    () async {
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      await store.refreshEntitlement();
+      expect(store.entitlement?.plan, CommercePlan.premium);
+      expect(store.entitlement?.grantsPaidAccessAt(now), isTrue);
+
+      subscriptionRows = <Map<String, Object?>>[];
+      await store.refreshEntitlement();
+
+      expect(store.entitlement?.plan, CommercePlan.premium);
+      expect(store.entitlement?.grantsPaidAccessAt(now), isTrue);
+    },
+  );
+
+  test(
+    'a malformed active row does not erase a still-valid entitlement',
+    () async {
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      await store.refreshEntitlement();
+      expect(store.entitlement?.grantsPaidAccessAt(now), isTrue);
+
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'expires_at': null,
+          'grace_period_ends_at': null,
+        },
+      ];
+      await store.refreshEntitlement();
+
+      expect(store.entitlement?.plan, CommercePlan.premium);
+      expect(store.entitlement?.grantsPaidAccessAt(now), isTrue);
     },
   );
 }
