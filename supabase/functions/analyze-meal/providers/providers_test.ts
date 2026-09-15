@@ -1,4 +1,5 @@
 import { buildProviderRequest } from "./builders.ts";
+import { loadProviderConfig } from "./config.ts";
 import { normalizeProviderResponse } from "./normalize.ts";
 import { ProviderConfig, VisionProviderError } from "./types.ts";
 
@@ -62,6 +63,57 @@ Deno.test("all provider envelopes normalize to the BIL schema", () => {
     if (
       result.candidates[0].name !== "koshari" || result.usage.cost_usd !== null
     ) throw new Error("normalization failed");
+  }
+});
+
+Deno.test("Gemini vision defaults to the stable multimodal 3.7 model", () => {
+  const values: Record<string, string> = {
+    BIL_GEMINI_API_KEY: "test-only",
+  };
+  const config = loadProviderConfig("gemini", (name) => values[name]);
+  if (
+    config.model !== "gemini-3.7-flash" ||
+    config.endpoint !== "https://generativelanguage.googleapis.com/v1beta"
+  ) {
+    throw new Error("unexpected Gemini vision defaults");
+  }
+});
+
+Deno.test("an explicit Gemini vision model remains the rollback switch", () => {
+  const values: Record<string, string> = {
+    BIL_GEMINI_API_KEY: "test-only",
+    BIL_GEMINI_VISION_MODEL: "gemini-2.5-flash",
+  };
+  const config = loadProviderConfig("gemini", (name) => values[name]);
+  if (config.model !== "gemini-2.5-flash") {
+    throw new Error("explicit Gemini model override was ignored");
+  }
+});
+
+Deno.test("Gemini thought parts are excluded and thinking tokens are billed", () => {
+  const result = normalizeProviderResponse(
+    {
+      candidates: [{
+        content: {
+          parts: [
+            { thought: true, text: "internal reasoning" },
+            { text: modelJson, thoughtSignature: "opaque" },
+          ],
+        },
+      }],
+      usageMetadata: {
+        promptTokenCount: 10,
+        candidatesTokenCount: 5,
+        thoughtsTokenCount: 7,
+      },
+    },
+    configs.gemini,
+  );
+  if (
+    result.candidates[0].name !== "koshari" ||
+    result.usage.output_tokens !== 12
+  ) {
+    throw new Error("Gemini thought handling or usage accounting failed");
   }
 });
 

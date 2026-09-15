@@ -87,14 +87,26 @@ function textAndUsage(envelope: unknown, config: ProviderConfig): {
     const first = candidates[0] as Record<string, unknown> | undefined;
     const content = first?.content as Record<string, unknown> | undefined;
     const parts = Array.isArray(content?.parts) ? content.parts : [];
-    const part = parts.find((row) =>
-      row && typeof row === "object" &&
-      typeof (row as Record<string, unknown>).text === "string"
-    ) as Record<string, unknown> | undefined;
+    // Gemini 3 may return thought parts before the visible structured JSON.
+    // Never parse or expose those parts as the user-facing meal result.
+    const visibleText = parts
+      .filter((row) =>
+        row && typeof row === "object" &&
+        (row as Record<string, unknown>).thought !== true &&
+        typeof (row as Record<string, unknown>).text === "string"
+      )
+      .map((row) => String((row as Record<string, unknown>).text))
+      .join("")
+      .trim();
     const usage = root.usageMetadata && typeof root.usageMetadata === "object"
       ? root.usageMetadata as Record<string, unknown>
       : {};
-    if (typeof part?.text !== "string") {
+    const visibleOutputTokens = finiteMetric(usage.candidatesTokenCount);
+    const thoughtTokens = finiteMetric(usage.thoughtsTokenCount);
+    const output = visibleOutputTokens === null && thoughtTokens === null
+      ? null
+      : (visibleOutputTokens ?? 0) + (thoughtTokens ?? 0);
+    if (!visibleText) {
       throw new VisionProviderError(
         "malformed_response",
         "Gemini text part missing",
@@ -102,9 +114,9 @@ function textAndUsage(envelope: unknown, config: ProviderConfig): {
       );
     }
     return {
-      text: part.text,
+      text: visibleText,
       input: finiteMetric(usage.promptTokenCount),
-      output: finiteMetric(usage.candidatesTokenCount),
+      output,
       cost: finiteMetric(usage.costUsd),
     };
   }

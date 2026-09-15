@@ -15,7 +15,9 @@ const defaults: Record<
     endpoint: "https://api.openai.com/v1/responses",
   },
   gemini: {
-    model: "gemini-2.5-flash",
+    // Keep the default on a stable multimodal Gemini 3 model while retaining
+    // BIL_GEMINI_VISION_MODEL as the staged rollout and rollback switch.
+    model: "gemini-3.7-flash",
     endpoint: "https://generativelanguage.googleapis.com/v1beta",
   },
   mistral: {
