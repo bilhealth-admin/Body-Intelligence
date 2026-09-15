@@ -105,7 +105,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         feedback == null ||
         feedback == 'purchase_awaiting_approval' ||
         feedback == 'purchase_in_progress' ||
-        feedback == 'purchase_verification_unavailable') {
+        feedback == 'purchase_verification_unavailable' ||
+        feedback == 'purchase_reconciliation_pending' ||
+        feedback == 'purchase_reconciliation_failed' ||
+        feedback == 'restore_verification_failed') {
       return;
     }
     setState(() {
@@ -118,12 +121,17 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     final code = store.messageCode;
     final key = switch (code) {
       'purchase_pending' => 'purchase_awaiting_approval',
+      'restore_pending' => 'restore_checking',
+      'reconciliation_pending' => 'purchase_reconciliation_pending',
       // Cancelling the native sheet is an intentional choice, not an error.
       // Keep the catalog actionable so another term can be selected at once.
       'purchase_cancelled' => null,
       'purchase_not_started' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
       'verification_failed' => 'purchase_verification_unavailable',
+      'restore_verification_failed' => 'restore_verification_failed',
+      'reconciliation_verification_failed' =>
+        'purchase_reconciliation_failed',
       'purchase_failed' || 'store_stream_failed' => 'purchase_error',
       'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
       _ => switch (store.state) {
@@ -133,7 +141,11 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         _ => null,
       },
     };
-    final isError = const {'purchase_error'}.contains(key);
+    final isError = const {
+      'purchase_error',
+      'restore_verification_failed',
+      'purchase_reconciliation_failed',
+    }.contains(key);
     return (key, isError);
   }
 
@@ -193,6 +205,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         'no_restorable_purchases' => 'restore_none',
         'authentication_required' => 'restore_sign_in',
         'restore_failed' => 'restore_failed',
+        'restore_verification_failed' ||
+        'verification_failed' ||
+        'reconciliation_verification_failed' => 'restore_verification_failed',
+        _ when store?.state == VerifiedStoreState.failed => 'restore_failed',
         _ => 'restore_checked',
       };
     } on TimeoutException {

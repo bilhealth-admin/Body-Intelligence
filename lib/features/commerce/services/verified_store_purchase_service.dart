@@ -40,6 +40,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   bool _disposed = false;
   int _entitlementRefreshGeneration = 0;
   bool _purchaseInitiatedByThisService = false;
+  String? _purchaseInitiatedProductId;
+  bool _storeStartupFaultBeforeCatalog = false;
+  Completer<void>? _restoreEventObserved;
   String? _entitlementOwnerId;
 
   bool get configured => AppEnvironment.commerceConfigured;
@@ -66,6 +69,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   Future<void> _initialize() async {
     final purchaseGeneration = _purchaseEventGeneration;
+    _storeStartupFaultBeforeCatalog = false;
     state = VerifiedStoreState.loading;
     messageCode = null;
     notifyListeners();
@@ -90,7 +94,15 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           initiatedByCurrentService: _purchaseInitiatedByThisService,
           purchasePending: state == VerifiedStoreState.purchasePending,
         );
-        _purchaseInitiatedByThisService = false;
+        if (products.isEmpty &&
+            !_purchaseInitiatedByThisService &&
+            state != VerifiedStoreState.purchasePending) {
+          // StoreKit can report a transient stream fault before the first
+          // product query has populated [products].  Keep that fault local to
+          // startup: a valid catalog arriving moments later must be actionable.
+          _storeStartupFaultBeforeCatalog = true;
+        }
+        _clearPurchaseInitiation();
         if (outcome.state == VerifiedStoreState.failed) {
           _purchaseEventGeneration++;
         }
@@ -141,7 +153,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         return;
       }
       products = Map.unmodifiable(loaded);
-      if (state == VerifiedStoreState.loading) state = VerifiedStoreState.ready;
+      if (state == VerifiedStoreState.loading ||
+          _storeStartupFaultBeforeCatalog) {
+        state = VerifiedStoreState.ready;
+        messageCode = null;
+        _storeStartupFaultBeforeCatalog = false;
+      }
       notifyListeners();
       await _queryCompletedAndroidPurchases();
     } on Object {
@@ -229,6 +246,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     final purchaseGeneration = _purchaseEventGeneration;
     try {
       _purchaseInitiatedByThisService = true;
+      _purchaseInitiatedProductId = product.id;
       final started = await _purchase.buyNonConsumable(
         purchaseParam: purchaseParam,
       );
@@ -239,13 +257,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
-      _purchaseInitiatedByThisService = false;
+      _clearPurchaseInitiation();
       notifyListeners();
     } on Object {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
-      _purchaseInitiatedByThisService = false;
+      _clearPurchaseInitiation();
       notifyListeners();
     }
   }
@@ -281,6 +299,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     final purchaseGeneration = _purchaseEventGeneration;
     try {
       _purchaseInitiatedByThisService = true;
+      _purchaseInitiatedProductId = product.id;
       final started = await _purchase.buyConsumable(
         purchaseParam: purchaseParam,
         autoConsume: false,
@@ -292,13 +311,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
-      _purchaseInitiatedByThisService = false;
+      _clearPurchaseInitiation();
       notifyListeners();
     } on Object {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
-      _purchaseInitiatedByThisService = false;
+      _clearPurchaseInitiation();
       notifyListeners();
     }
   }
@@ -312,12 +331,22 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       return;
     }
     _restoring = true;
+    final restoreEventObserved = Completer<void>();
+    _restoreEventObserved = restoreEventObserved;
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
     try {
       // On Apple this is the explicit user action that invokes AppStore.sync.
       await _purchase.restorePurchases();
+      // StoreKit may complete AppStore.sync just before it publishes its
+      // restored transaction to the stream.  Wait briefly for that callback
+      // instead of falsely reporting an empty history; a later callback still
+      // remains safely queued and is never treated as a new purchase.
+      await Future.any<void>([
+        restoreEventObserved.future,
+        Future<void>.delayed(const Duration(seconds: 1)),
+      ]);
       // A restored callback may be verifying while the native restore Future
       // completes. Do not announce "nothing to restore" before it settles.
       while (_queuedPurchaseUpdates > 0) {
@@ -343,6 +372,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       messageCode = 'restore_failed';
       notifyListeners();
     } finally {
+      if (identical(_restoreEventObserved, restoreEventObserved)) {
+        _restoreEventObserved = null;
+      }
       _restoring = false;
       notifyListeners();
     }
@@ -514,14 +546,41 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   Future<void> _handlePurchases(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
       if (_disposed) return;
+      final origin = _purchaseEventOriginFor(purchase);
       switch (purchase.status) {
         case PurchaseStatus.pending:
           state = VerifiedStoreState.purchasePending;
-          messageCode = 'purchase_pending';
+          messageCode = switch (origin) {
+            _StorePurchaseEventOrigin.purchase => 'purchase_pending',
+            _StorePurchaseEventOrigin.restore => 'restore_pending',
+            _StorePurchaseEventOrigin.reconciliation =>
+              'reconciliation_pending',
+          };
           notifyListeners();
         case PurchaseStatus.error:
-          state = VerifiedStoreState.failed;
-          messageCode = 'purchase_failed';
+          if (origin == _StorePurchaseEventOrigin.reconciliation) {
+            // A StoreKit error replayed while merely opening the Plans screen
+            // is not a new checkout and does not represent a charge.  It is
+            // safe to keep the loaded catalog actionable.
+            if (products.isEmpty && state == VerifiedStoreState.loading) {
+              // StoreKit can publish a historical error before the product
+              // query settles.  Treat it like a startup transport fault: a
+              // subsequent valid catalog must remain purchasable.
+              _storeStartupFaultBeforeCatalog = true;
+            }
+            state = products.isEmpty
+                ? VerifiedStoreState.unavailable
+                : VerifiedStoreState.ready;
+            messageCode = null;
+          } else {
+            state = VerifiedStoreState.failed;
+            messageCode = origin == _StorePurchaseEventOrigin.restore
+                ? 'restore_failed'
+                : 'purchase_failed';
+          }
+          if (origin == _StorePurchaseEventOrigin.purchase) {
+            _clearPurchaseInitiation();
+          }
           notifyListeners();
         case PurchaseStatus.canceled:
           // A StoreKit/Play cancellation is neither a failed receipt nor an
@@ -532,6 +591,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
               ? VerifiedStoreState.unavailable
               : VerifiedStoreState.ready;
           messageCode = null;
+          if (origin == _StorePurchaseEventOrigin.purchase) {
+            _clearPurchaseInitiation();
+          }
           notifyListeners();
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
@@ -557,9 +619,18 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
               : VerifiedStoreState.failed;
           messageCode = verified
               ? boost
-                    ? 'ai_boost_verified'
-                    : 'subscription_verified'
-              : 'verification_failed';
+                  ? 'ai_boost_verified'
+                  : 'subscription_verified'
+              : switch (origin) {
+                  _StorePurchaseEventOrigin.purchase => 'verification_failed',
+                  _StorePurchaseEventOrigin.restore =>
+                    'restore_verification_failed',
+                  _StorePurchaseEventOrigin.reconciliation =>
+                    'reconciliation_verification_failed',
+                };
+          if (origin == _StorePurchaseEventOrigin.purchase) {
+            _clearPurchaseInitiation();
+          }
           notifyListeners();
       }
     }
@@ -580,6 +651,10 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   Future<void> _enqueuePurchaseUpdates(List<PurchaseDetails> purchases) {
     if (_disposed || purchases.isEmpty) return Future<void>.value();
+    final restoreEventObserved = _restoreEventObserved;
+    if (restoreEventObserved != null && !restoreEventObserved.isCompleted) {
+      restoreEventObserved.complete();
+    }
     // Store callbacks own transaction outcomes. An older price/launch Future
     // must not publish a stale failure after any newer native transaction event.
     _purchaseEventGeneration++;
@@ -667,6 +742,22 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     }
   }
 
+  _StorePurchaseEventOrigin _purchaseEventOriginFor(
+    PurchaseDetails purchase,
+  ) {
+    if (_restoring) return _StorePurchaseEventOrigin.restore;
+    if (_purchaseInitiatedByThisService &&
+        _purchaseInitiatedProductId == purchase.productID) {
+      return _StorePurchaseEventOrigin.purchase;
+    }
+    return _StorePurchaseEventOrigin.reconciliation;
+  }
+
+  void _clearPurchaseInitiation() {
+    _purchaseInitiatedByThisService = false;
+    _purchaseInitiatedProductId = null;
+  }
+
   CommercePlan _planFromId(String value) {
     return CommercePlan.values.firstWhere(
       (plan) => plan.id == value,
@@ -697,3 +788,5 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     if (!_disposed) super.notifyListeners();
   }
 }
+
+enum _StorePurchaseEventOrigin { purchase, restore, reconciliation }

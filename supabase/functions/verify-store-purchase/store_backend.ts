@@ -489,6 +489,54 @@ async function appleServerToken() {
     .setIssuedAt().setExpirationTime("5m").sign(key);
 }
 
+type AppleLastTransaction = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+
+/// The Status API returns every subscription group for the customer.  Bind the
+/// server result to the original transaction identifier that was already
+/// verified in the device JWS; never accept whichever item Apple happens to
+/// list first.
+export function selectAppleSubscriptionTransaction(
+  groups: unknown,
+  expectedOriginalTransactionId: string,
+): AppleLastTransaction {
+  if (!expectedOriginalTransactionId) {
+    throw new Error("apple_transaction_missing");
+  }
+  const transactions = Array.isArray(groups)
+    ? groups.flatMap((group) => {
+      if (!isRecord(group) || !Array.isArray(group.lastTransactions)) {
+        return [];
+      }
+      return group.lastTransactions.filter(isRecord);
+    })
+    : [];
+  const matches = transactions.filter((transaction) =>
+    String(transaction.originalTransactionId ?? "") ===
+      expectedOriginalTransactionId
+  );
+  if (matches.length === 0) throw new Error("apple_transaction_missing");
+  if (matches.length !== 1) throw new Error("apple_transaction_ambiguous");
+  const selected = matches[0];
+  if (
+    typeof selected.signedTransactionInfo !== "string" ||
+    !selected.signedTransactionInfo.trim()
+  ) {
+    throw new Error("apple_transaction_missing");
+  }
+  return selected;
+}
+
+/// Preserve only a stable HTTP status in diagnostic logs.  Apple response
+/// bodies can contain store-specific details and must never reach telemetry.
+export function appleServerApiFailureCode(status: number) {
+  return Number.isInteger(status) && status >= 100 && status <= 599
+    ? `apple_server_api_${status}`
+    : "apple_server_api_failed";
+}
+
 async function reconcileApple(
   originalTransactionId: string,
   environment: StoreEnvironment,
@@ -500,16 +548,14 @@ async function reconcileApple(
     }`,
     { headers: { authorization: `Bearer ${await appleServerToken()}` } },
   );
-  if (!response.ok) throw new Error("apple_server_api_failed");
-  const data = await response.json();
-  const groups = data.data ?? [];
-  const transactions = groups.flatMap((group: Record<string, unknown>) =>
-    (group.lastTransactions as Array<Record<string, unknown>> | undefined) ?? []
-  );
-  const latest = transactions[0];
-  if (!latest?.signedTransactionInfo) {
-    throw new Error("apple_transaction_missing");
+  if (!response.ok) {
+    throw new Error(appleServerApiFailureCode(response.status));
   }
+  const data = await response.json();
+  const latest = selectAppleSubscriptionTransaction(
+    isRecord(data) ? data.data : undefined,
+    originalTransactionId,
+  );
   const purchase = await verifyApple(String(latest.signedTransactionInfo));
   purchase.lifecycle = appleServerStatusLifecycle(
     Number(latest.status ?? 0),

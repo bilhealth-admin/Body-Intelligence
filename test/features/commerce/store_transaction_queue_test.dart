@@ -20,6 +20,8 @@ class _NativeStore extends Fake implements InAppPurchase {
   final updates = StreamController<List<PurchaseDetails>>.broadcast(sync: true);
   final productResponse = Completer<ProductDetailsResponse>();
   final purchaseLaunch = Completer<bool>();
+  PurchaseDetails? restoreReceipt;
+  Duration? restoreCallbackDelay;
   bool failCompletion = false;
   int completionCalls = 0;
   final completionAttempted = Completer<void>();
@@ -44,7 +46,17 @@ class _NativeStore extends Fake implements InAppPurchase {
 
   @override
   Future<void> restorePurchases({String? applicationUserName}) async {
-    updates.add([_receipt()]);
+    final receipt = restoreReceipt ?? _receipt();
+    final delay = restoreCallbackDelay;
+    if (delay == null) {
+      updates.add([receipt]);
+      return;
+    }
+    unawaited(
+      Future<void>.delayed(delay, () {
+        if (!updates.isClosed) updates.add([receipt]);
+      }),
+    );
   }
 
   @override
@@ -124,6 +136,12 @@ PurchaseDetails _receipt({
 
 http.Response _verifiedResponse() => http.Response(
   '{"verified":true}',
+  200,
+  headers: {'content-type': 'application/json'},
+);
+
+http.Response _verifiedSubscriptionResponse() => http.Response(
+  '{"verified":true,"entitlement_active":true}',
   200,
   headers: {'content-type': 'application/json'},
 );
@@ -236,7 +254,10 @@ void main() {
     );
     await initialization;
     expect(store.state, VerifiedStoreState.purchasePending);
-    expect(store.messageCode, 'purchase_pending');
+    // No purchase was launched by this service in this test. A pending native
+    // callback during startup is therefore a StoreKit reconciliation event,
+    // not evidence that opening Plans launched a new checkout.
+    expect(store.messageCode, 'reconciliation_pending');
   });
   test(
     'failed prices cannot overwrite a transaction that already verified',
@@ -351,6 +372,42 @@ void main() {
     },
   );
   test(
+    'a startup StoreKit stream fault recovers after the catalog loads',
+    () async {
+      final initialization = store.initialize();
+      await drain();
+
+      native.updates.addError(StateError('startup stream unavailable'));
+      await drain();
+      expect(store.state, VerifiedStoreState.unavailable);
+
+      native.finishPrices();
+      await initialization;
+
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.messageCode, isNull);
+      expect(store.canStartPurchase, isTrue);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'a startup historical StoreKit error does not lock the loaded catalog',
+    () async {
+      final initialization = store.initialize();
+      await drain();
+
+      native.updates.add([_receipt(status: PurchaseStatus.error)]);
+      await drain();
+      native.finishPrices();
+      await initialization;
+
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.messageCode, isNull);
+      expect(store.canStartPurchase, isTrue);
+      expect(native.launches, 0);
+    },
+  );
+  test(
     'a stream error cannot replace the outcome of an in-flight receipt',
     () async {
       await ready();
@@ -381,6 +438,60 @@ void main() {
       expect(store.busy, isFalse);
     },
   );
+  test('restore waits for a delayed restored Premium callback', () async {
+    final now = DateTime.now().toUtc();
+    subscriptionRows = [
+      {
+        'provider': 'apple',
+        'plan_id': 'premium',
+        'lifecycle': 'active',
+        'verified_at': now.toIso8601String(),
+        'started_at': now
+            .subtract(const Duration(minutes: 1))
+            .toIso8601String(),
+        'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+        'grace_period_ends_at': null,
+      },
+    ];
+    native.restoreReceipt = _receipt(
+      status: PurchaseStatus.restored,
+      productId: StoreCatalogConfiguration.premiumMonthly,
+    );
+    native.restoreCallbackDelay = const Duration(milliseconds: 10);
+    await ready();
+
+    final restoring = store.restore();
+    await verificationStarted.future;
+    verification.complete(_verifiedSubscriptionResponse());
+    await restoring;
+
+    expect(store.state, VerifiedStoreState.verified);
+    expect(store.messageCode, 'subscription_verified');
+    expect(native.completionCalls, 1);
+    expect(native.launches, 0);
+  });
+  test('restore verification failure stays restore-specific and fail-closed', () async {
+    native.restoreReceipt = _receipt(
+      status: PurchaseStatus.restored,
+      productId: StoreCatalogConfiguration.premiumMonthly,
+    );
+    await ready();
+
+    final restoring = store.restore();
+    await verificationStarted.future;
+    verification.complete(http.Response(
+      '{"verified":false}',
+      200,
+      headers: {'content-type': 'application/json'},
+    ));
+    await restoring;
+
+    expect(store.state, VerifiedStoreState.failed);
+    expect(store.messageCode, 'restore_verification_failed');
+    expect(store.canStartPurchase, isFalse);
+    expect(native.completionCalls, 0);
+    expect(native.launches, 0);
+  });
 
   test(
     'a transient empty entitlement read retains the verified member state',

@@ -78,6 +78,40 @@ void main() {
       );
     },
   );
+  testWidgets(
+    'restore verification failure never claims that purchase history was checked',
+    (tester) async {
+      final store = _CancellationReadyStore();
+      final catalog = _RestoreVerificationFailureCatalog(store);
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: catalog,
+            productIds: const {'premium.monthly'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final restore = find.text(BilStoreCopy.text('en', 'restore'));
+      await tester.ensureVisible(restore);
+      await tester.pumpAndSettle();
+      await tester.tap(restore);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(BilStoreCopy.text('en', 'restore_verification_failed')),
+        findsWidgets,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'restore_checked')),
+        findsNothing,
+      );
+      expect(catalog.requested, isEmpty);
+    },
+  );
   testWidgets('plan route is fail-closed when owner store IDs are absent', (
     tester,
   ) async {
@@ -262,6 +296,7 @@ void main() {
 
     final cta = find.byKey(const ValueKey('store-purchase-cta'));
     expect(cta, findsOneWidget);
+    expect(catalog.requested, isEmpty);
     await tester.tap(cta);
     await tester.pump();
 
@@ -490,5 +525,19 @@ final class _ThrowingCatalog extends _RecordingCatalog {
   @override
   Future<void> requestPurchase(BilStoreOfferMetadata offer) async {
     throw StateError('native sheet unavailable');
+  }
+}
+
+final class _RestoreVerificationFailureCatalog extends _RecordingCatalog {
+  _RestoreVerificationFailureCatalog(this.store) : super(const [_monthlyOffer]);
+
+  final _CancellationReadyStore store;
+
+  @override
+  Future<void> restorePurchases() async {
+    store.reportFeedback(
+      VerifiedStoreState.failed,
+      'restore_verification_failed',
+    );
   }
 }

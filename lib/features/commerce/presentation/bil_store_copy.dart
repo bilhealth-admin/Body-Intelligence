@@ -157,6 +157,8 @@ abstract final class BilStoreCopy {
       'restore_none': 'No restorable purchases were found for this account.',
       'restore_sign_in': 'Sign in before restoring purchases.',
       'restore_failed': 'Purchases could not be restored. Try again.',
+      'restore_verification_failed':
+          'We found a previous store purchase, but it could not be verified yet. No new purchase was made. Try restoring again later.',
       'restore_timeout': 'The store did not respond. Try again.',
       'manage': 'Manage subscription',
       'view_all_features': 'View all features',
@@ -166,6 +168,10 @@ abstract final class BilStoreCopy {
       'purchase_error':
           'The store could not complete this request. Try again later.',
       'purchase_in_progress': 'Opening secure purchase…',
+      'purchase_reconciliation_pending':
+          'Checking a previous store transaction. No new purchase was started.',
+      'purchase_reconciliation_failed':
+          'A previous store transaction needs verification. No new purchase was made. Try Restore purchases again later.',
       'purchase_verified': 'Purchase verified. Your access is updating.',
       'ads_consent': 'Choose whether BIL may show contextual ads.',
     },
@@ -243,6 +249,8 @@ abstract final class BilStoreCopy {
       'restore_none': 'لم يتم العثور على مشتريات قابلة للاستعادة لهذا الحساب.',
       'restore_sign_in': 'سجّل الدخول قبل استعادة المشتريات.',
       'restore_failed': 'تعذرت استعادة المشتريات. حاول مرة أخرى.',
+      'restore_verification_failed':
+          'عثرنا على عملية شراء سابقة من المتجر، لكن تعذّر التحقق منها الآن. لم تُجرَ عملية شراء جديدة. حاول الاستعادة لاحقًا.',
       'restore_timeout': 'لم يستجب المتجر. حاول مرة أخرى.',
       'manage': 'إدارة الاشتراك',
       'view_all_features': 'عرض كل المزايا',
@@ -251,6 +259,10 @@ abstract final class BilStoreCopy {
       'store_unavailable': 'السعر غير متاح على هذا الجهاز',
       'purchase_error': 'تعذر إكمال الطلب من المتجر. يمكنك المحاولة لاحقًا.',
       'purchase_in_progress': 'جارٍ فتح عملية الشراء الآمنة…',
+      'purchase_reconciliation_pending':
+          'جارٍ التحقق من عملية سابقة من المتجر. لم تبدأ عملية شراء جديدة.',
+      'purchase_reconciliation_failed':
+          'هناك عملية سابقة من المتجر تحتاج إلى تحقق. لم تُجرَ عملية شراء جديدة. حاول استعادة المشتريات لاحقًا.',
       'purchase_verified': 'تم التحقق من الشراء. يجري تحديث صلاحياتك.',
       'ads_consent': 'اختر ما إذا كان بإمكان BIL عرض إعلانات سياقية.',
     },
@@ -337,6 +349,8 @@ abstract final class BilStoreCopy {
       'restore_none': 'Aucun achat restaurable trouvé pour ce compte.',
       'restore_sign_in': 'Connectez-vous avant de restaurer les achats.',
       'restore_failed': 'Impossible de restaurer les achats. Réessayez.',
+      'restore_verification_failed':
+          'Un achat antérieur a été trouvé dans la boutique, mais sa vérification est impossible pour le moment. Aucun nouvel achat n’a été effectué. Réessayez la restauration plus tard.',
       'restore_timeout': 'La boutique ne répond pas. Réessayez.',
       'manage': 'Gérer l’abonnement',
       'view_all_features': 'Voir toutes les fonctionnalités',
@@ -346,6 +360,10 @@ abstract final class BilStoreCopy {
       'purchase_error':
           'La boutique n’a pas pu traiter cette demande. Réessayez plus tard.',
       'purchase_in_progress': 'Ouverture de l’achat sécurisé…',
+      'purchase_reconciliation_pending':
+          'Vérification d’une transaction antérieure de la boutique. Aucun nouvel achat n’a été lancé.',
+      'purchase_reconciliation_failed':
+          'Une transaction antérieure de la boutique doit être vérifiée. Aucun nouvel achat n’a été effectué. Réessayez de restaurer vos achats plus tard.',
       'purchase_verified':
           'Achat vérifié. Votre accès est en cours de mise à jour.',
       'ads_consent':
@@ -434,6 +452,8 @@ abstract final class BilStoreCopy {
       'restore_sign_in': 'Inicia sesión antes de restaurar compras.',
       'restore_failed':
           'No se pudieron restaurar las compras. Inténtalo de nuevo.',
+      'restore_verification_failed':
+          'Encontramos una compra anterior de la tienda, pero no se pudo verificar aún. No se realizó ninguna compra nueva. Intenta restaurar de nuevo más tarde.',
       'restore_timeout': 'La tienda no respondió. Inténtalo de nuevo.',
       'manage': 'Gestionar suscripción',
       'view_all_features': 'Ver todas las funciones',
@@ -443,6 +463,10 @@ abstract final class BilStoreCopy {
       'purchase_error':
           'La tienda no pudo completar la solicitud. Inténtalo más tarde.',
       'purchase_in_progress': 'Abriendo la compra segura…',
+      'purchase_reconciliation_pending':
+          'Comprobando una transacción anterior de la tienda. No se inició ninguna compra nueva.',
+      'purchase_reconciliation_failed':
+          'Una transacción anterior de la tienda necesita verificación. No se realizó ninguna compra nueva. Intenta restaurar las compras más tarde.',
       'purchase_verified': 'Compra verificada. Se está actualizando tu acceso.',
       'ads_consent': 'Elige si BIL puede mostrar anuncios contextuales.',
     },
@@ -523,6 +547,8 @@ abstract final class BilStoreCopy {
       'restore_none': 'Bu hesap için geri yüklenebilir satın alım bulunamadı.',
       'restore_sign_in': 'Satın alımları geri yüklemeden önce oturum açın.',
       'restore_failed': 'Satın alımlar geri yüklenemedi. Tekrar deneyin.',
+      'restore_verification_failed':
+          'Önceki bir mağaza satın alımı bulundu, ancak henüz doğrulanamadı. Yeni bir satın alım yapılmadı. Daha sonra yeniden geri yüklemeyi deneyin.',
       'restore_timeout': 'Mağaza yanıt vermedi. Tekrar deneyin.',
       'manage': 'Aboneliği yönet',
       'view_all_features': 'Tüm özellikleri göster',
@@ -532,6 +558,10 @@ abstract final class BilStoreCopy {
       'purchase_error':
           'Mağaza bu isteği tamamlayamadı. Daha sonra tekrar deneyin.',
       'purchase_in_progress': 'Güvenli satın alma açılıyor…',
+      'purchase_reconciliation_pending':
+          'Önceki bir mağaza işlemi kontrol ediliyor. Yeni bir satın alma başlatılmadı.',
+      'purchase_reconciliation_failed':
+          'Önceki bir mağaza işlemi doğrulama gerektiriyor. Yeni bir satın alım yapılmadı. Daha sonra satın alımları geri yüklemeyi deneyin.',
       'purchase_verified': 'Satın alma doğrulandı. Erişiminiz güncelleniyor.',
       'ads_consent':
           'BIL’in bağlamsal reklam gösterip gösteremeyeceğini seçin.',
