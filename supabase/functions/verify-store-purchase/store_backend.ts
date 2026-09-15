@@ -77,6 +77,23 @@ const json = (body: unknown, status = 200) =>
     },
   });
 
+// Production diagnostics must never include the purchase body, receipt, JWT,
+// or exception text.  The static route and error code are sufficient to
+// distinguish an Apple/Google verification failure from a persistence fault.
+const logStoreVerificationFailure = (
+  route: "verify_purchase" | "verify_ai_boost" | "unknown",
+  code: string,
+) => {
+  const safeCode = /^[a-z0-9_]+$/.test(code)
+    ? code
+    : "verification_failed";
+  console.error(JSON.stringify({
+    event: "store_verification_failure",
+    route,
+    code: safeCode,
+  }));
+};
+
 const env = (name: string) => Deno.env.get(name)?.trim() ?? "";
 type EnvironmentReader = (name: string) => string;
 
@@ -890,20 +907,24 @@ export async function handler(
   if (request.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
   }
+  let route: "verify_purchase" | "verify_ai_boost" | "unknown" = "unknown";
   try {
     const body = await request.json() as Record<string, unknown>;
     if (body.action === "reconcile") return await reconcile(request);
     if (body.signedPayload) return await verifyAppleNotification(body);
     if (body.message) return await verifyGooglePush(request, body);
     if (body.action === "verify_purchase") {
+      route = "verify_purchase";
       return await verifyPurchase(request, body, dependencies);
     }
     if (body.action === "verify_ai_boost") {
+      route = "verify_ai_boost";
       return await verifyAiBoost(request, body, dependencies);
     }
     return json({ error: "invalid_action" }, 400);
   } catch (error) {
     const code = error instanceof Error ? error.message : "verification_failed";
+    logStoreVerificationFailure(route, code);
     const clientCodes = new Set([
       "authentication_required",
       "invalid_session",

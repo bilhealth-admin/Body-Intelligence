@@ -29,6 +29,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onPurchaseRequested,
     required this.onRestore,
     required this.onManage,
+    this.onOfferSelected,
     this.onRetry,
     this.loading = false,
     this.purchaseInProgress = false,
@@ -46,6 +47,11 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final ValueChanged<BilStoreOfferMetadata> onPurchaseRequested;
   final VoidCallback? onRestore;
   final VoidCallback? onManage;
+
+  /// Called after a member chooses a different store offer. The owning page
+  /// can clear transient feedback from the previous attempt without changing
+  /// the verified store outcome or re-enabling an unverified transaction.
+  final ValueChanged<BilStoreOfferMetadata>? onOfferSelected;
   final VoidCallback? onRetry;
   final bool loading;
   final bool purchaseInProgress;
@@ -239,8 +245,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           loading: widget.loading,
                           interactionLocked: controlsLocked,
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
-                          onOfferSelected: (offer) =>
-                              setState(() => _selectedOffer = offer),
+                          onOfferSelected: (offer) {
+                            setState(() => _selectedOffer = offer);
+                            widget.onOfferSelected?.call(offer);
+                          },
                           onRetry: widget.onRetry,
                         ),
                         const SizedBox(height: 14),

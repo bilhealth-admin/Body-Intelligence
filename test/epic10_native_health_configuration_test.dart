@@ -116,10 +116,10 @@ void main() {
       'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
     ).readAsStringSync();
     final initialStart = android.indexOf(
-      'suspend fun <T : Record> readInitial',
+      'suspend fun <T : Record> readInitialPage',
     );
     final initialEnd = android.indexOf(
-      'for (name in supportedRequestedNames)',
+      '// Once the bounded history is complete',
       initialStart,
     );
     final initialRead = android.substring(initialStart, initialEnd);
@@ -138,14 +138,22 @@ void main() {
     expect(android, contains('val asOf = call.argument<String>("asOf")'));
     expect(
       android.indexOf('getChangesToken(ChangesTokenRequest(classes))'),
-      lessThan(android.indexOf('suspend fun <T : Record> readInitial')),
+      lessThan(android.indexOf('suspend fun <T : Record> readInitialPage')),
       reason:
           'The incremental boundary must be created before history is read.',
     );
     expect(android, isNot(contains('366L')));
     expect(initialRead, contains('pageToken = pageToken'));
-    expect(initialRead, contains('pageToken = page.pageToken'));
-    expect(initialRead, contains('while (!pageToken.isNullOrEmpty())'));
+    expect(
+      initialRead,
+      contains('return page.pageToken?.trim()?.takeIf(String::isNotEmpty)'),
+    );
+    expect(
+      initialRead,
+      contains('pageToken = null'),
+      reason:
+          'The page cursor must reset when advancing to the next record family.',
+    );
     expect(
       android,
       contains('"changesTokenExpired" to response.changesTokenExpired'),

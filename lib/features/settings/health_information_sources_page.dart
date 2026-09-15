@@ -17,7 +17,8 @@ class HealthInformationSourcesPage extends StatelessWidget {
           title: 'Dietary Reference Intakes',
           organization:
               'U.S. Office of Disease Prevention and Health Promotion',
-          purpose: 'Reference values used for nutrient and energy guidance.',
+          purpose:
+              'Reference values used for nutrient, energy, and water-intake guidance.',
           url:
               'https://odphp.health.gov/our-work/nutrition-physical-activity/dietary-guidelines/dietary-reference-intakes',
         ),
@@ -41,6 +42,13 @@ class HealthInformationSourcesPage extends StatelessWidget {
           organization: 'American Journal of Clinical Nutrition / PubMed',
           purpose: 'Published basis for BIL resting-energy estimates.',
           url: 'https://pubmed.ncbi.nlm.nih.gov/2305711/',
+        ),
+        (
+          title: 'Recommended sleep duration for adults',
+          organization: 'National Sleep Foundation expert panel / PubMed',
+          purpose:
+              'Consensus reference for the general 7–9 hour adult sleep range; individual needs and age may differ.',
+          url: 'https://pubmed.ncbi.nlm.nih.gov/29073398/',
         ),
       ];
 

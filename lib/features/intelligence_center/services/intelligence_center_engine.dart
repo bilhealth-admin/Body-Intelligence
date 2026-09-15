@@ -217,11 +217,13 @@ class IntelligenceCenterEngine {
       );
     }
     if (_has(normalized, const ['hydration', 'hydrate', 'dehydration'])) {
-      return _plain(
+      return _reply(
         tr(
           'Sip water regularly across the day and use thirst plus pale-yellow urine as practical hydration cues. Needs vary with heat, exercise, pregnancy, medicines, and health conditions.',
           'اشرب الماء بانتظام خلال اليوم، واستخدم العطش ولون البول الأصفر الفاتح كإشارتين عمليتين للترطيب. تختلف الاحتياجات مع الحرارة والتمرين والحمل والأدوية والحالات الصحية.',
         ),
+        evidence: const ['Dietary Reference Intakes (water)'],
+        confidence: .85,
       );
     }
     if (_isPlanRequest(normalized)) {
@@ -491,7 +493,7 @@ class IntelligenceCenterEngine {
     );
     return _reply(
       text,
-      evidence: const ['general adult sleep-duration guidance'],
+      evidence: const ['Recommended sleep duration for adults (PubMed)'],
       confidence: .85,
       spokenText: text,
     );

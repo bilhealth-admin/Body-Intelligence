@@ -56,6 +56,58 @@ abstract final class ProfilePhotoRuntimeCopy {
       'nl': 'Profielfoto',
       'uk': 'Фото профілю',
     },
+    'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.': {
+      'ar':
+          'فعّل الوصول إلى الكاميرا من إعدادات النظام لالتقاط صورة للملف الشخصي. يمكنك أيضًا اختيار صورة باستخدام منتقي النظام.',
+      'en':
+          'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.',
+      'fr':
+          'Activez l’accès à la caméra dans les réglages système pour prendre une photo de profil. Vous pouvez toujours choisir une photo avec le sélecteur système.',
+      'es':
+          'Activa el acceso a la cámara en los ajustes del sistema para hacer una foto de perfil. También puedes elegir una foto con el selector del sistema.',
+      'tr':
+          'Profil fotoğrafı çekmek için sistem ayarlarından kamera erişimini etkinleştirin. Sistem seçicisiyle fotoğraf seçmeye devam edebilirsiniz.',
+      'de':
+          'Aktivieren Sie den Kamerazugriff in den Systemeinstellungen, um ein Profilfoto aufzunehmen. Sie können weiterhin ein Foto über die Systemauswahl wählen.',
+      'it':
+          'Abilita l’accesso alla fotocamera nelle impostazioni di sistema per scattare una foto del profilo. Puoi comunque scegliere una foto dal selettore di sistema.',
+      'pt-BR':
+          'Ative o acesso à câmera nos ajustes do sistema para tirar uma foto de perfil. Você ainda pode escolher uma foto pelo seletor do sistema.',
+      'pt-PT':
+          'Ative o acesso à câmara nas definições do sistema para tirar uma fotografia de perfil. Pode escolher uma fotografia através do seletor do sistema.',
+      'ur':
+          'پروفائل تصویر لینے کے لیے سسٹم کی ترتیبات میں کیمرے کی رسائی فعال کریں۔ آپ سسٹم پکَر سے تصویر منتخب کر سکتے ہیں۔',
+      'fa':
+          'برای گرفتن عکس نمایه، دسترسی دوربین را در تنظیمات سیستم فعال کنید. همچنان می‌توانید عکس را از انتخابگر سیستم برگزینید.',
+      'hi':
+          'प्रोफ़ाइल फ़ोटो लेने के लिए सिस्टम सेटिंग्स में कैमरा एक्सेस चालू करें। आप सिस्टम पिकर से फ़ोटो भी चुन सकते हैं।',
+      'id':
+          'Aktifkan akses kamera di pengaturan sistem untuk mengambil foto profil. Anda tetap dapat memilih foto dengan pemilih sistem.',
+      'ms':
+          'Dayakan akses kamera dalam tetapan sistem untuk mengambil foto profil. Anda masih boleh memilih foto dengan pemilih sistem.',
+      'ja':
+          'プロフィール写真を撮影するには、システム設定でカメラへのアクセスを有効にしてください。システムピッカーで写真を選ぶこともできます。',
+      'ko':
+          '프로필 사진을 찍으려면 시스템 설정에서 카메라 접근을 허용하세요. 시스템 선택기로 사진을 선택할 수도 있습니다.',
+      'zh-Hans':
+          '要拍摄个人资料照片，请在系统设置中启用相机访问权限。你也可以使用系统选择器选择照片。',
+      'zh-Hant':
+          '若要拍攝個人資料相片，請在系統設定中啟用相機存取權限。你也可以使用系統選擇器選取相片。',
+      'ru':
+          'Включите доступ к камере в системных настройках, чтобы сделать фото профиля. Вы также можете выбрать фото через системный выбор.',
+      'bn':
+          'প্রোফাইল ছবি তুলতে সিস্টেম সেটিংসে ক্যামেরা অ্যাক্সেস চালু করুন। আপনি সিস্টেম পিকার ব্যবহার করে ছবিও বেছে নিতে পারেন।',
+      'vi':
+          'Hãy bật quyền truy cập camera trong cài đặt hệ thống để chụp ảnh hồ sơ. Bạn vẫn có thể chọn ảnh bằng trình chọn của hệ thống.',
+      'th':
+          'เปิดใช้การเข้าถึงกล้องในการตั้งค่าระบบเพื่อถ่ายรูปโปรไฟล์ คุณยังเลือกภาพผ่านตัวเลือกของระบบได้',
+      'pl':
+          'Włącz dostęp do aparatu w ustawieniach systemu, aby zrobić zdjęcie profilowe. Możesz też wybrać zdjęcie za pomocą selektora systemowego.',
+      'nl':
+          'Schakel cameratoegang in via de systeeminstellingen om een profielfoto te maken. Je kunt ook een foto kiezen met de systeemkiezer.',
+      'uk':
+          'Увімкніть доступ до камери в системних налаштуваннях, щоб зробити фото профілю. Ви також можете вибрати фото за допомогою системного вибору.',
+    },
     'Your photo is saved on this device. Community sync will retry when the cloud is available.': {
       'ar':
           'حُفظت صورتك على هذا الجهاز. ستُعاد مزامنة المجتمع عند توفر السحابة.',

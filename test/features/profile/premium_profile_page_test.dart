@@ -411,7 +411,7 @@ void main() {
     await database.close();
   });
 
-  testWidgets('profile camera asks just-in-time before opening capture', (
+  testWidgets('profile camera requests permission directly before capture', (
     tester,
   ) async {
     final database = await _seedDatabase();
@@ -432,11 +432,10 @@ void main() {
     await tester.tap(find.byKey(const Key('profile-photo-camera-action')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Allow camera for this action?'), findsOneWidget);
-    expect(cameraPolicy.requestAttempts, 0);
-    expect(cameraLaunchAttempts, 0);
-
-    await tester.tap(find.text('Continue'));
+    // Apple review requires the system permission request to be the first
+    // prompt at the point of use; the app must not insert a dismissible
+    // pre-permission dialog.
+    expect(find.text('Allow camera for this action?'), findsNothing);
     await tester.pumpAndSettle();
     expect(cameraPolicy.requestAttempts, 1);
     expect(cameraLaunchAttempts, 1);

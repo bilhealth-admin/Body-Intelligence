@@ -358,9 +358,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   String? _validateStep(String step) {
     switch (step) {
       case 'name':
-        if (_draft.preferredName.trim().isEmpty) {
-          return t('Enter the name you would like BIL to use.');
-        }
       case 'goals':
         if (_draft.goals.isEmpty) return t('Choose at least one goal.');
       case 'activity':

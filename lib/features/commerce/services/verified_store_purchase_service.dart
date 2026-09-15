@@ -39,6 +39,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   bool _restoring = false;
   bool _disposed = false;
   int _entitlementRefreshGeneration = 0;
+  bool _purchaseInitiatedByThisService = false;
 
   bool get configured => AppEnvironment.commerceConfigured;
   bool get busy =>
@@ -83,9 +84,17 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         // while merely waiting for a native transaction must still leave a
         // recoverable, non-retryable failure instead of a permanent spinner.
         if (_disposed || _queuedPurchaseUpdates > 0) return;
-        _purchaseEventGeneration++;
-        state = VerifiedStoreState.failed;
-        messageCode = 'store_stream_failed';
+        final outcome = storePurchaseStreamFailureOutcome(
+          productsAvailable: products.isNotEmpty,
+          initiatedByCurrentService: _purchaseInitiatedByThisService,
+          purchasePending: state == VerifiedStoreState.purchasePending,
+        );
+        _purchaseInitiatedByThisService = false;
+        if (outcome.state == VerifiedStoreState.failed) {
+          _purchaseEventGeneration++;
+        }
+        state = outcome.state;
+        messageCode = outcome.messageCode;
         notifyListeners();
       },
     );
@@ -218,6 +227,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     }
     final purchaseGeneration = _purchaseEventGeneration;
     try {
+      _purchaseInitiatedByThisService = true;
       final started = await _purchase.buyNonConsumable(
         purchaseParam: purchaseParam,
       );
@@ -228,11 +238,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
+      _purchaseInitiatedByThisService = false;
       notifyListeners();
     } on Object {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
+      _purchaseInitiatedByThisService = false;
       notifyListeners();
     }
   }
@@ -267,6 +279,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     );
     final purchaseGeneration = _purchaseEventGeneration;
     try {
+      _purchaseInitiatedByThisService = true;
       final started = await _purchase.buyConsumable(
         purchaseParam: purchaseParam,
         autoConsume: false,
@@ -278,11 +291,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
+      _purchaseInitiatedByThisService = false;
       notifyListeners();
     } on Object {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
+      _purchaseInitiatedByThisService = false;
       notifyListeners();
     }
   }

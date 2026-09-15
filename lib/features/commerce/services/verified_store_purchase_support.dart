@@ -11,6 +11,31 @@ enum VerifiedStoreState {
   failed,
 }
 
+/// A stale StoreKit stream error must not disable a fully loaded storefront
+/// before the person has initiated a purchase. A stream error during this
+/// service's own purchase attempt remains fail-closed.
+@visibleForTesting
+({VerifiedStoreState state, String? messageCode})
+storePurchaseStreamFailureOutcome({
+  required bool productsAvailable,
+  required bool initiatedByCurrentService,
+  bool purchasePending = false,
+}) {
+  // A pending native transaction is an active billing operation even when it
+  // was restored from StoreKit rather than started by this service instance.
+  // Keep the failure fail-closed so a stream fault cannot re-enable the CTA
+  // while that transaction is still unresolved.
+  if (!initiatedByCurrentService && !purchasePending) {
+    return (
+      state: productsAvailable
+          ? VerifiedStoreState.ready
+          : VerifiedStoreState.unavailable,
+      messageCode: null,
+    );
+  }
+  return (state: VerifiedStoreState.failed, messageCode: 'store_stream_failed');
+}
+
 /// Whether another explicit user tap may open the native billing flow.
 ///
 /// Store catalog availability and the last transaction outcome are separate

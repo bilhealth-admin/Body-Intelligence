@@ -100,6 +100,14 @@ void main() {
       // entitlement, cache, manifests, and content management are separate.
       'lib/features/wellness/presentation/bil_workout_routines_list.dart': 725,
       'lib/features/wellness/presentation/recipe_library_page.dart': 850,
+      // The production router keeps the complete bounded route table in one
+      // place so route ownership and its guarded builders remain reviewable.
+      'lib/app/router/app_router.dart': 725,
+      // This provider is the single native-health synchronization boundary;
+      // HealthKit/Health Connect pagination, anchors, cancellation, and
+      // provenance filtering are intentionally kept together.
+      'lib/features/global_platform/health_data/unified_health_data_integration.dart':
+          725,
     };
 
     final oversized = <String>[];

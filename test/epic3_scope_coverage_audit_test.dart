@@ -68,6 +68,7 @@ void main() {
     '/wellness/content-packs': 'wellness',
     '/location-settings': 'settings',
     '/trust-support': 'support',
+    '/health-information-sources': 'settings',
     '/help/faq': 'settings',
     '/help/delete-account': 'settings',
     '/settings/analytics': 'settings',

@@ -94,6 +94,26 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     });
   }
 
+  void _onOfferSelected(BilStoreOfferMetadata _) {
+    // Choosing another term is not a new purchase attempt. Clear only
+    // retryable launch/cancellation feedback so an old bottom-banner error
+    // cannot follow the member between monthly and annual offers. A pending
+    // operation and a receipt verification failure deliberately remain visible
+    // and fail-closed until the native transaction is resolved or restored.
+    final feedback = _purchaseFeedbackKey;
+    if (!mounted ||
+        feedback == null ||
+        feedback == 'purchase_awaiting_approval' ||
+        feedback == 'purchase_in_progress' ||
+        feedback == 'purchase_verification_unavailable') {
+      return;
+    }
+    setState(() {
+      _purchaseFeedbackKey = null;
+      _purchaseFeedbackIsError = false;
+    });
+  }
+
   (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
     final code = store.messageCode;
     final key = switch (code) {
@@ -290,6 +310,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
         onPurchaseRequested: _requestPurchase,
+        onOfferSelected: _onOfferSelected,
         onRestore: _catalog == null ? null : _restorePurchases,
         onManage: _catalog == null
             ? null

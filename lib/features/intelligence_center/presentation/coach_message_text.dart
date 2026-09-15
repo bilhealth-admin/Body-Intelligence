@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 /// Render-only transcript text: selection/copy is user initiated, and time
@@ -29,8 +27,9 @@ class CoachMessageText extends StatefulWidget {
   State<CoachMessageText> createState() => _CoachMessageTextState();
 }
 
-class _CoachMessageTextState extends State<CoachMessageText> {
-  Timer? _revealTimer;
+class _CoachMessageTextState extends State<CoachMessageText>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _revealController;
   late List<int> _runes;
   late String _visibleText;
 
@@ -50,7 +49,8 @@ class _CoachMessageTextState extends State<CoachMessageText> {
   }
 
   void _resetReveal() {
-    _revealTimer?.cancel();
+    _revealController?.dispose();
+    _revealController = null;
     _runes = widget.text.runes.toList(growable: false);
     if (!widget.animateReveal || _runes.length <= 8) {
       _visibleText = widget.text;
@@ -58,21 +58,34 @@ class _CoachMessageTextState extends State<CoachMessageText> {
     }
     // Runes keep Arabic and emoji intact. The answer already exists locally;
     // this is a short visual reveal, not a streamed or delayed response.
-    var visible = 8;
+    // A 40ms single-rune cadence is deliberately conversational rather than
+    // the previous near-instant burst, while still keeping a normal reply
+    // readable without a long wait.
+    const initialVisible = 8;
+    final remaining = _runes.length - initialVisible;
+    var visible = initialVisible;
     _visibleText = String.fromCharCodes(_runes.take(visible));
-    _revealTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
-      if (!mounted) return timer.cancel();
-      visible = visible + 5 > _runes.length ? _runes.length : visible + 5;
+    final controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: remaining * 40),
+    );
+    _revealController = controller;
+    controller.addListener(() {
+      if (!mounted) return;
+      final nextVisible = initialVisible +
+          (controller.value * remaining).floor().clamp(0, remaining);
+      if (nextVisible == visible) return;
+      visible = nextVisible;
       setState(() {
         _visibleText = String.fromCharCodes(_runes.take(visible));
       });
-      if (visible >= _runes.length) timer.cancel();
     });
+    controller.forward();
   }
 
   @override
   void dispose() {
-    _revealTimer?.cancel();
+    _revealController?.dispose();
     super.dispose();
   }
 

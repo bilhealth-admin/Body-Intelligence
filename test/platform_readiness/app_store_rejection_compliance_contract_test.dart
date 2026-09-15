@@ -70,5 +70,7 @@ void main() {
     expect(sources, contains('cdc.gov/healthy-weight-growth/losing-weight'));
     expect(sources, contains('ods.od.nih.gov/factsheets/Potassium'));
     expect(sources, contains('pubmed.ncbi.nlm.nih.gov/2305711'));
+    expect(sources, contains('pubmed.ncbi.nlm.nih.gov/29073398'));
+    expect(sources, contains('water-intake guidance'));
   });
 }

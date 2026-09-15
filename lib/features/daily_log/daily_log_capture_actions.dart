@@ -32,28 +32,6 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       if (open == true) await policy.openSettings();
       return false;
     }
-    final continueRequest = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog.adaptive(
-        title: Text(context.strings.text('Allow camera for this action?')),
-        content: Text(
-          context.strings.text(
-            'The camera opens only for the barcode or meal photo you selected. BIL does not request access at startup.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.strings.text('Not now')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(context.strings.text('Continue')),
-          ),
-        ],
-      ),
-    );
-    if (continueRequest != true) return false;
     return await policy.request(BilRuntimeCapability.camera) ==
         BilRuntimePermissionState.granted;
   }

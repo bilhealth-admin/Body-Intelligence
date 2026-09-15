@@ -9,6 +9,10 @@ void main() {
       arabic: false,
     );
     expect(reply.message.text, contains('Sip water regularly'));
+    expect(
+      reply.message.evidence,
+      contains('Dietary Reference Intakes (water)'),
+    );
     expect(reply.actions, isEmpty);
   });
 

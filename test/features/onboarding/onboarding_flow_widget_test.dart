@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -162,62 +160,17 @@ void main() {
     expect((await drafts.load())!.stepId, 'waist');
   });
 
-  testWidgets(
-    'Health review keeps the button mounted and opens real guidance',
-    (tester) async {
-      final health = _ReviewHealthGateway();
-      await pump(
-        tester,
-        valid(
-          step: 'integrations',
-        ).copyWith(healthPermission: OnboardingPermissionStatus.granted),
-        health: health,
-      );
-      final card = find.byKey(const Key('onboarding-health-permission'));
-      final button = find.descendant(
-        of: card,
-        matching: find.byType(OutlinedButton),
-      );
-      expect(
-        find.descendant(of: card, matching: find.text('Allowed')),
-        findsNothing,
-      );
-      await tester.ensureVisible(button);
-      await tester.pumpAndSettle();
-      final height = tester.getSize(card).height;
-      await tester.tap(button);
-      await tester.pump();
-      expect(button, findsOneWidget);
-      expect(tester.widget<OutlinedButton>(button).onPressed, isNull);
-      expect(tester.getSize(card).height, height);
-      health.pending.complete(
-        const ConnectedHealthSnapshot.unavailable().copyWith(
-          status: ConnectedHealthStatus.authorizationRequested,
-          platformSource: 'Apple Health',
-          failureCode: 'health_permissions_review_required',
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(const Key('apple-health-permission-review')),
-        findsOneWidget,
-      );
-      expect(health.requests, 1);
-      expect(
-        (await drafts.load())!.healthPermission,
-        OnboardingPermissionStatus.requested,
-      );
-      await tester.tap(find.byKey(const Key('apple-health-open-settings')));
-      await tester.pumpAndSettle();
-      expect(health.settingsOpened, 1);
-      expect(
-        find.byKey(const Key('apple-health-permission-review')),
-        findsNothing,
-      );
-      expect(tester.takeException(), isNull);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+  testWidgets('iOS onboarding omits the optional health permission stage', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await pump(tester, valid(step: 'integrations'));
+    expect(find.byKey(const Key('onboarding-health-permission')), findsNothing);
+    expect(find.text('Apple Health'), findsNothing);
+    expect(find.byKey(const Key('onboarding-step-title')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets(
     'one kilogram never advances with an unsupported calorie target',
@@ -588,7 +541,8 @@ void main() {
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await pump(tester, valid(step: 'integrations'));
-    expect(find.text('Apple Health'), findsOneWidget);
+    expect(find.byKey(const Key('onboarding-health-permission')), findsNothing);
+    expect(find.text('Apple Health'), findsNothing);
     expect(find.textContaining('Health Connect'), findsNothing);
     expect(find.textContaining('blood pressure'), findsNothing);
     expect(find.textContaining('SpO2'), findsNothing);
@@ -708,30 +662,4 @@ final class _HealthGateway implements ConnectedHealthGateway {
 
   @override
   Future<ConnectedHealthSnapshot> synchronize() => load();
-}
-
-final class _ReviewHealthGateway implements ConnectedHealthGateway {
-  final pending = Completer<ConnectedHealthSnapshot>();
-  int requests = 0;
-  int settingsOpened = 0;
-  @override
-  Future<ConnectedHealthSnapshot> requestPermissions() {
-    requests++;
-    return pending.future;
-  }
-
-  @override
-  Future<void> openSystemSettings() async {
-    settingsOpened++;
-  }
-
-  @override
-  Future<ConnectedHealthSnapshot> load() async =>
-      const ConnectedHealthSnapshot.unavailable();
-  @override
-  Future<ConnectedHealthSnapshot> synchronize() => load();
-  @override
-  Future<ConnectedHealthSnapshot> requestWeightWritePermission() => load();
-  @override
-  Future<ConnectedHealthSnapshot> revokePermissions() => load();
 }

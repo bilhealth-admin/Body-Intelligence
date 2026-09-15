@@ -161,6 +161,10 @@ void main() {
     );
 
     expect(reply.message.text, contains('7–9'));
+    expect(
+      reply.message.evidence,
+      contains('Recommended sleep duration for adults (PubMed)'),
+    );
     expect(reply.spokenText, reply.message.text);
     expect(reply.runtime.name, 'onDevice');
     expect(

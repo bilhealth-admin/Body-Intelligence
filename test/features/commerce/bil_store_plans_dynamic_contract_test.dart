@@ -308,6 +308,46 @@ void main() {
       expect(catalog.requested, <BilStoreOfferMetadata>[_monthlyOffer]);
     },
   );
+
+  testWidgets(
+    'changing term clears retryable purchase feedback without reopening the route',
+    (tester) async {
+      final store = _CancellationReadyStore();
+      final catalog = _RecordingCatalog(const [_monthlyOffer, _annualOffer]);
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: catalog,
+            productIds: const {'premium.monthly', 'premium.annual'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      store.reportFeedback(VerifiedStoreState.failed, 'purchase_failed');
+      await tester.pump();
+      expect(
+        find.byKey(const ValueKey('store-purchase-status')),
+        findsOneWidget,
+      );
+
+      final annual = find.byKey(const ValueKey('store-offer-premium.annual'));
+      await tester.ensureVisible(annual);
+      await tester.tap(annual);
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('store-purchase-status')), findsNothing);
+      expect(find.text('EGP 999.99'), findsWidgets);
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const ValueKey('store-purchase-cta')))
+            .onTap,
+        isNotNull,
+      );
+    },
+  );
 }
 
 const _monthlyOffer = BilStoreOfferMetadata(

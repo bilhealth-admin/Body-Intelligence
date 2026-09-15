@@ -54,7 +54,7 @@ void main() {
     }
   }
 
-  testWidgets('fresh BIL reply reveals quickly without delaying its timestamp', (
+  testWidgets('fresh BIL reply reveals at a conversational pace without delaying its timestamp', (
     tester,
   ) async {
     const reply =
@@ -77,9 +77,12 @@ void main() {
       tester.widget<SelectableText>(find.byType(SelectableText)).data,
       isNot(reply),
     );
-    for (var tick = 0; tick < 25; tick++) {
-      await tester.pump(const Duration(milliseconds: 20));
-    }
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(
+      tester.widget<SelectableText>(find.byType(SelectableText)).data,
+      isNot(reply),
+    );
+    await tester.pump(const Duration(seconds: 3));
     expect(
       tester.widget<SelectableText>(find.byType(SelectableText)).data,
       reply,

@@ -64,6 +64,17 @@ void main() {
         estimatesAcknowledged: true,
       );
 
+  // iOS intentionally omits the name and integrations permission stages so
+  // Sign in with Apple remains the identity source and health permissions are
+  // reviewed from Settings. Render those two real stages on Android when the
+  // matrix needs to exercise their widgets.
+  TargetPlatform platformForStep(
+    String step, {
+    TargetPlatform fallback = TargetPlatform.iOS,
+  }) => step == 'name' || step == 'integrations'
+      ? TargetPlatform.android
+      : fallback;
+
   Future<void> render(
     WidgetTester tester, {
     required OnboardingDraft draft,
@@ -125,7 +136,10 @@ void main() {
             ),
             child: child!,
           ),
-          home: const OnboardingPage(),
+          // Each matrix case must start a fresh page state. Without a new key,
+          // pumpWidget reuses the previous draft/page and the next case would
+          // assert against a stale step rather than the requested one.
+          home: OnboardingPage(key: UniqueKey()),
         ),
       ),
     );
@@ -347,7 +361,7 @@ void main() {
                 locale: locale,
                 themeMode: theme,
                 textScale: 2,
-                platform: TargetPlatform.iOS,
+                platform: platformForStep(step),
               );
 
               final photo = find.byKey(Key('onboarding-photo-$step'));
@@ -402,6 +416,11 @@ void main() {
           for (var scaleIndex = 0; scaleIndex < 2; scaleIndex++) {
             final scale = scaleIndex == 0 ? 1.0 : 2.0;
             final dark = (localeIndex + stepIndex + scaleIndex).isOdd;
+            final platform = step == 'name' || step == 'integrations'
+                ? TargetPlatform.android
+                : ((localeIndex + stepIndex).isEven
+                      ? TargetPlatform.iOS
+                      : TargetPlatform.android);
             await render(
               tester,
               draft: valid(
@@ -412,9 +431,7 @@ void main() {
               locale: locale,
               themeMode: dark ? ThemeMode.dark : ThemeMode.light,
               textScale: scale,
-              platform: (localeIndex + stepIndex).isEven
-                  ? TargetPlatform.iOS
-                  : TargetPlatform.android,
+              platform: platform,
             );
             rendered++;
 
@@ -492,7 +509,7 @@ void main() {
       locale: const Locale('en'),
       themeMode: ThemeMode.light,
       textScale: 2,
-      platform: TargetPlatform.iOS,
+      platform: TargetPlatform.android,
       padding: const EdgeInsets.only(top: 24, bottom: 34),
       viewInsets: const EdgeInsets.only(bottom: 250),
     );
@@ -528,7 +545,7 @@ void main() {
     }
     final progress = find.byKey(const Key('onboarding-progress-semantics'));
     expect(tester.getSemantics(progress).label, isNotEmpty);
-    expect(tester.getSemantics(progress).value, '10 / 16');
+    expect(tester.getSemantics(progress).value, '9 / 14');
     expect(tester.takeException(), isNull);
     semantics.dispose();
   });
@@ -543,7 +560,7 @@ void main() {
       locale: const Locale('en'),
       themeMode: ThemeMode.light,
       textScale: 1,
-      platform: TargetPlatform.iOS,
+      platform: TargetPlatform.android,
     );
 
     await tester.tap(find.byKey(const Key('onboarding-name-field')));
@@ -608,7 +625,7 @@ void main() {
     },
   );
 
-  testWidgets('progress truthfully reports 15 male and 16 female pages', (
+  testWidgets('progress truthfully reports platform-specific page counts', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
@@ -636,7 +653,7 @@ void main() {
       platform: TargetPlatform.iOS,
     );
     progress = find.byKey(const Key('onboarding-progress-semantics'));
-    expect(tester.getSemantics(progress).value, '16 / 16');
+    expect(tester.getSemantics(progress).value, '14 / 14');
     semantics.dispose();
   });
 }
