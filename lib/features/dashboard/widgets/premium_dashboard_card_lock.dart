@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../../commerce/presentation/premium_label_badge.dart';
@@ -44,23 +46,26 @@ class PremiumDashboardCardLock extends StatelessWidget {
         Positioned.fill(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
-            child: Material(
-              color: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0x1F0B0D10)
-                  : const Color(0x42000000),
-              child: InkWell(
-                key: const Key('dashboard-premium-lock'),
-                onTap: onTap,
-                child: Center(
-                  child: Semantics(
-                    button: true,
-                    label: title,
-                    child: ExcludeSemantics(
-                      child: showLabel
-                          ? const PremiumLabelBadge(
-                              key: Key('dashboard-premium-label'),
-                            )
-                          : const SizedBox.expand(),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
+              child: Material(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? const Color(0x2AFFFFFF)
+                    : const Color(0x42000000),
+                child: InkWell(
+                  key: const Key('dashboard-premium-lock'),
+                  onTap: onTap,
+                  child: Center(
+                    child: Semantics(
+                      button: true,
+                      label: title,
+                      child: ExcludeSemantics(
+                        child: showLabel
+                            ? const PremiumLabelBadge(
+                                key: Key('dashboard-premium-label'),
+                              )
+                            : const SizedBox.expand(),
+                      ),
                     ),
                   ),
                 ),

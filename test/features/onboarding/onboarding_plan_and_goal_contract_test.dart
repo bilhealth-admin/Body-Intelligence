@@ -83,18 +83,19 @@ void main() {
     expect(plan.targets.calories, (plan.model.tdeeKcal - 1100).round());
   });
 
-  test('selectable loss pace cannot bypass the existing calorie floor', () {
+  test('loss paces that breach the calorie floor are not selectable', () {
     final draft = valid(
       pace: 1,
     ).copyWith(currentWeightKg: 55, targetWeightKg: 50, activity: 'sedentary');
-    expect(OnboardingPlanCalculator.paceOptions(draft), contains(1));
+    expect(OnboardingPlanCalculator.paceOptions(draft), isNot(contains(1)));
+    expect(OnboardingPlanCalculator.validate(draft).code, 'pace_out_of_range');
     expect(
       () => OnboardingPlanCalculator.calculate(draft),
       throwsA(
         isA<StateError>().having(
           (error) => error.message,
           'code',
-          'pace_energy_out_of_supported_range',
+          'pace_out_of_range',
         ),
       ),
     );

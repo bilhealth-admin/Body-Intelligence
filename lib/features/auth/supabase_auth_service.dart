@@ -184,6 +184,7 @@ class SupabaseAuthService {
       provider: OAuthProvider.google,
       idToken: tokens.idToken,
       accessToken: tokens.accessToken,
+      nonce: tokens.rawNonce,
     );
   }
 

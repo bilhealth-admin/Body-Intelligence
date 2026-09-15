@@ -145,6 +145,13 @@ void main() {
         findsNothing,
       );
       expect(
+        find.descendant(
+          of: find.byKey(const Key('dashboard-heart-premium-lock')),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsOneWidget,
+      );
+      expect(
         find.byKey(const Key('dashboard-premium-page-label')),
         findsOneWidget,
       );
@@ -165,7 +172,7 @@ void main() {
           of: find.byKey(const Key('dashboard-macros-premium-lock')),
           matching: find.byType(BackdropFilter),
         ),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.descendant(

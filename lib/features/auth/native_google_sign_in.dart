@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,10 +12,12 @@ final class BilGoogleIdentityTokens {
   const BilGoogleIdentityTokens({
     required this.idToken,
     required this.accessToken,
+    required this.rawNonce,
   });
 
   final String idToken;
   final String accessToken;
+  final String rawNonce;
 }
 
 /// Uses Google's native sign-in surface on Android and iOS instead of opening
@@ -31,13 +37,20 @@ final class BilNativeGoogleSignIn {
       '1041595138122-hpe2ke9c5rpphijvmk2ssvsbggvbp14j.apps.googleusercontent.com';
   static const _identityScopes = <String>['openid', 'email', 'profile'];
   static Future<void>? _initialization;
+  static String? _rawNonce;
 
   /// Returns null only when the person dismisses or interrupts the Google UI.
   /// Configuration and token failures remain errors so the sign-in page can
   /// show an actionable, localized failure instead of a false success.
   Future<BilGoogleIdentityTokens?> authenticate() async {
     try {
-      await _ensureInitialized();
+      // GoogleSignIn.instance must be initialized exactly once per process.
+      // Keep this raw value paired with that initialization, pass only its
+      // SHA-256 digest to Google, then prove the original to Supabase when
+      // exchanging the returned ID token. This keeps Supabase nonce validation
+      // enabled for iOS instead of accepting an unbound Google ID token.
+      final rawNonce = _rawNonce ??= _newRawNonce();
+      await _ensureInitialized(rawNonce: rawNonce);
       final signIn = GoogleSignIn.instance;
       if (!signIn.supportsAuthenticate()) {
         throw const AuthException(
@@ -67,6 +80,7 @@ final class BilNativeGoogleSignIn {
       return BilGoogleIdentityTokens(
         idToken: idToken,
         accessToken: accessToken,
+        rawNonce: rawNonce,
       );
     } on GoogleSignInException catch (error) {
       if (error.code == GoogleSignInExceptionCode.canceled ||
@@ -77,12 +91,18 @@ final class BilNativeGoogleSignIn {
     }
   }
 
-  static Future<void> _ensureInitialized() async {
+  static String _newRawNonce() {
+    final bytes = List<int>.generate(32, (_) => Random.secure().nextInt(256));
+    return base64UrlEncode(bytes).replaceAll('=', '');
+  }
+
+  static Future<void> _ensureInitialized({required String rawNonce}) async {
     final initialized = _initialization;
     if (initialized != null) return initialized;
 
     final initialization = GoogleSignIn.instance.initialize(
       serverClientId: _serverClientId,
+      nonce: sha256.convert(utf8.encode(rawNonce)).toString(),
     );
     _initialization = initialization;
     try {

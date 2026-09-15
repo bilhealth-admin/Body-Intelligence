@@ -37,6 +37,10 @@ void main() {
     // redirect or a generated google-services.json file.
     expect(nativeGoogle, contains('GoogleSignIn.instance.initialize('));
     expect(nativeGoogle, contains('serverClientId: _serverClientId'));
+    expect(
+      nativeGoogle,
+      contains('nonce: sha256.convert(utf8.encode(rawNonce)).toString()'),
+    );
     expect(nativeGoogle, contains('signIn.authenticate()'));
     expect(nativeGoogle, contains('authorizationForScopes'));
     expect(nativeGoogle, contains('authorizeScopes'));

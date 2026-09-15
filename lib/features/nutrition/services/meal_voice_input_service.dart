@@ -133,6 +133,23 @@ class MealVoiceInputService {
       if (open == true) await policy.openSettings();
       return false;
     }
+
+    // On iOS, request the native permission sheet immediately after the user
+    // taps voice input. Apple review rejects dismissible pre-permission
+    // prompts that sit in front of the system permission request. The voice
+    // button is already the contextual user action, and the native sheet
+    // provides the platform's authoritative explanation and controls.
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final granted =
+          await policy.request(capability) == BilRuntimePermissionState.granted;
+      if (!granted || capability != BilRuntimeCapability.microphone) {
+        return granted;
+      }
+      // iOS asks for speech recognition separately after microphone access.
+      if (!context.mounted) return false;
+      return await _ensureMicrophonePermission(context);
+    }
+
     final continueRequest = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog.adaptive(

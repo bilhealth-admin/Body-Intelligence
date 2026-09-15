@@ -37,11 +37,17 @@ void main() {
 
     expect(nativeGoogle, contains('GoogleSignIn.instance.initialize('));
     expect(nativeGoogle, contains('serverClientId: _serverClientId'));
+    expect(
+      nativeGoogle,
+      contains('nonce: sha256.convert(utf8.encode(rawNonce)).toString()'),
+    );
+    expect(nativeGoogle, contains('required this.rawNonce'));
     expect(nativeGoogle, contains('signIn.authenticate()'));
     expect(nativeGoogle, contains('authorizationForScopes'));
     expect(nativeGoogle, contains('authorizeScopes'));
     expect(nativeGoogle, contains('GoogleSignInExceptionCode.canceled'));
     expect(service, contains('client.auth.signInWithIdToken'));
     expect(service, contains('accessToken: tokens.accessToken'));
+    expect(service, contains('nonce: tokens.rawNonce'));
   });
 }

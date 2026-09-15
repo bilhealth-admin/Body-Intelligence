@@ -172,26 +172,21 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets(
-    'one kilogram never advances with an unsupported calorie target',
-    (tester) async {
-      await pump(
-        tester,
-        valid(step: 'pace').copyWith(
-          currentWeightKg: 55,
-          targetWeightKg: 50,
-          activity: 'sedentary',
-        ),
+  testWidgets('one kilogram is hidden when it would breach the calorie floor', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      valid(step: 'pace').copyWith(
+        currentWeightKg: 55,
+        targetWeightKg: 50,
+        activity: 'sedentary',
+      ),
       );
-      final choice = find.text('1 kg / 7d');
-      await tester.ensureVisible(choice);
-      await tester.tap(choice);
-      await tester.tap(find.byKey(const Key('onboarding-next')));
-      await tester.pumpAndSettle();
-      expect(find.text('BIL could not calculate a safe plan.'), findsOneWidget);
+      expect(find.text('1 kg / 7d'), findsNothing);
+      expect(find.text('BIL could not calculate a safe plan.'), findsNothing);
       expect((await drafts.load())!.stepId, 'pace');
-    },
-  );
+  });
 
   testWidgets(
     'waist and neck are separate optional pages and female receives hip page',

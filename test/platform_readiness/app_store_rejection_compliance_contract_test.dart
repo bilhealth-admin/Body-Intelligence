@@ -51,6 +51,30 @@ void main() {
     expect(coachPermissions, contains('policy.request(effectiveCapability)'));
   });
 
+  test(
+    'iOS voice requests native permission without a pre-permission prompt',
+    () {
+      final voice = File(
+        'lib/features/nutrition/services/meal_voice_input_service.dart',
+      ).readAsStringSync();
+      final nativeRequestStart = voice.indexOf(
+        'if (defaultTargetPlatform == TargetPlatform.iOS) {',
+      );
+      final prePermissionStart = voice.indexOf(
+        'final continueRequest = await showDialog<bool>(',
+      );
+
+      expect(nativeRequestStart, greaterThanOrEqualTo(0));
+      expect(prePermissionStart, greaterThan(nativeRequestStart));
+      final nativeRequest = voice.substring(
+        nativeRequestStart,
+        prePermissionStart,
+      );
+      expect(nativeRequest, contains('await policy.request(capability)'));
+      expect(nativeRequest, isNot(contains('showDialog')));
+    },
+  );
+
   test('health recommendation surfaces expose reviewable sources', () {
     final route = File('lib/app/router/app_router.dart').readAsStringSync();
     final plan = File(
