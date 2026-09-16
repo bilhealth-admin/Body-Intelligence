@@ -15,6 +15,7 @@ import {
   assertApplePurchaseLookup,
   assertApplePurchaseReconciliation,
 } from "./apple_purchase_reconciliation.ts";
+import { assertApplePurchaseOwnership } from "./apple_purchase_ownership.ts";
 import {
   MobileIntegrityFailure,
   requireMobileIntegrityGrant,
@@ -65,6 +66,8 @@ type VerifiedPurchase = {
   expiresAt?: string;
   gracePeriodEndsAt?: string;
   autoRenews?: boolean;
+  // Only copied from Apple's verified JWS, never from the request body.
+  appAccountToken?: unknown;
 };
 
 type VerifiedConsumable = {
@@ -629,6 +632,7 @@ async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
   const environment = verifiedStoreEnvironment(payload.environment);
   return {
     provider: "apple",
+    appAccountToken: payload.appAccountToken,
     productId: String(payload.productId ?? ""),
     originalTransactionId: String(payload.originalTransactionId ?? ""),
     transactionId: String(payload.transactionId ?? ""),
@@ -772,16 +776,47 @@ export function buildVerifiedPurchaseRpcArgs(
   };
 }
 
-async function persistVerified(
+export async function persistVerified(
   admin: ReturnType<typeof clients>["admin"],
   ownerId: string,
   purchase: VerifiedPurchase,
+  additionalSignedAppleAccountTokens: readonly unknown[] = [],
 ) {
   if (
     !purchase.productId || !purchase.originalTransactionId ||
     !purchase.transactionId
   ) {
     throw new Error("incomplete_store_result");
+  }
+  if (purchase.provider === "apple") {
+    // A valid Apple receipt proves a store purchase, not that the currently
+    // signed-in BIL member owns it. Check Apple's signed account binding before
+    // any entitlement write, including notification and scheduled refreshes.
+    const { data: existing, error: ownershipError } = await admin.from(
+      "bil_subscriptions",
+    ).select("owner_id,environment").eq("provider", "apple").eq(
+      "original_transaction_id",
+      purchase.originalTransactionId,
+    ).maybeSingle();
+    if (ownershipError) throw new Error("apple_ownership_check_unavailable");
+    // Still honor Apple's authoritative terminal state for this exact stored
+    // owner. A historical bad binding must not prevent a refund/revocation
+    // from removing access. This cannot create a binding or grant paid access.
+    const deactivatesExistingOwner = existing?.owner_id === ownerId &&
+      existing?.environment === purchase.environment &&
+      (purchase.environment === "sandbox" ||
+        purchase.environment === "production") &&
+      ["expired", "refunded", "revoked"].includes(purchase.lifecycle);
+    if (!deactivatesExistingOwner) {
+      await assertApplePurchaseOwnership(
+        ownerId,
+        [purchase.appAccountToken, ...additionalSignedAppleAccountTokens],
+        existing
+          ? { ownerId: existing.owner_id, environment: existing.environment }
+          : null,
+        purchase.environment,
+      );
+    }
   }
   const verifiedAt = new Date().toISOString();
   const { data: active, error } = await admin.rpc(
@@ -849,10 +884,12 @@ async function verifyPurchase(
   const verification = String(body.verification_data ?? "");
   if (!verification) throw new Error("invalid_receipt_payload");
   let purchase: VerifiedPurchase;
+  const signedAppleAccountTokens: unknown[] = [];
   if (source === "app_store") {
     // The device JWS is only the lookup proof. Entitlement truth comes from a
     // fresh App Store Server API response over authenticated TLS.
     const deviceTransaction = await verifyApple(verification);
+    signedAppleAccountTokens.push(deviceTransaction.appAccountToken);
     assertApplePurchaseLookup(body.product_id, deviceTransaction);
     purchase = await reconcileApple(
       deviceTransaction.originalTransactionId,
@@ -874,6 +911,7 @@ async function verifyPurchase(
     admin,
     user.id,
     purchase,
+    signedAppleAccountTokens,
   );
   return json({
     verified: true,
@@ -924,6 +962,14 @@ async function verifyAiBoost(
     if (apple.productId !== productId || apple.lifecycle !== "active") {
       throw new Error("purchase_not_completed");
     }
+    // Consumable credits have no subscription-owner row to establish a legacy
+    // binding. Never make a new credit without Apple's signed BIL account token.
+    await assertApplePurchaseOwnership(
+      user.id,
+      [apple.appAccountToken],
+      null,
+      apple.environment,
+    );
     purchase = {
       provider: "apple",
       productId,
@@ -945,7 +991,10 @@ async function verifyAiBoost(
     p_raw_receipt_hash: await digest(verification),
   });
   if (error) {
-    if (error.code === "23505") {
+    if (
+      error.code === "23505" ||
+      error.message === "purchase_owned_by_another_account"
+    ) {
       throw new Error("purchase_owned_by_another_account");
     }
     throw new Error("persistence_failed");
@@ -1089,12 +1138,7 @@ async function verifyAppleNotification(body: Record<string, unknown>) {
       notificationTransaction.originalTransactionId,
       notificationTransaction.environment,
     );
-    if (
-      purchase.originalTransactionId !==
-        notificationTransaction.originalTransactionId
-    ) {
-      throw new Error("apple_transaction_mismatch");
-    }
+    assertApplePurchaseReconciliation(notificationTransaction, purchase);
     const notificationType = String(notification.notificationType ?? "");
     const subtype = String(notification.subtype ?? "");
     purchase.lifecycle = appleNotificationLifecycle(
@@ -1108,7 +1152,9 @@ async function verifyAppleNotification(body: Record<string, unknown>) {
         purchase.originalTransactionId,
       ).maybeSingle();
     if (existing.data?.owner_id) {
-      await persistVerified(admin, existing.data.owner_id, purchase);
+      await persistVerified(admin, existing.data.owner_id, purchase, [
+        notificationTransaction.appAccountToken,
+      ]);
     }
     await markStoreNotification(admin, "apple", notificationId, "processed");
     return json({ accepted: true });
@@ -1257,6 +1303,8 @@ export async function handler(
       "wrong_bundle",
       "wrong_environment",
       "purchase_owned_by_another_account",
+      "apple_account_binding_required",
+      "invalid_apple_account_token",
       "market_plan_mismatch",
       "store_country_required",
     ]);

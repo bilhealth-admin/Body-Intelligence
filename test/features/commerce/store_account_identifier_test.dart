@@ -41,4 +41,24 @@ void main() {
       ),
     );
   });
+
+  test(
+    'Apple UUID stays identical to the server ownership-binding vectors',
+    () {
+      const vectors = {
+        'owner-1': '651a3935-1b54-5eac-b3c1-2e5307274f6c',
+        '123e4567-e89b-12d3-a456-426614174000':
+            'dbbea98e-af59-506f-911f-219825a11ce3',
+      };
+      for (final entry in vectors.entries) {
+        expect(
+          storeAccountIdentifier(
+            ownerId: entry.key,
+            platform: TargetPlatform.iOS,
+          ),
+          entry.value,
+        );
+      }
+    },
+  );
 }
