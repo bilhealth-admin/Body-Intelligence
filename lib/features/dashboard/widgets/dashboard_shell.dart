@@ -14,10 +14,14 @@ class DashboardShell extends StatefulWidget {
     super.key,
     required this.child,
     required this.onRefresh,
+    this.leading,
+    this.edgeHeader,
   });
 
   final Widget child;
   final RefreshCallback onRefresh;
+  final Widget? leading;
+  final Widget? edgeHeader;
 
   @override
   State<DashboardShell> createState() => _DashboardShellState();
@@ -133,13 +137,30 @@ class _DashboardShellState extends State<DashboardShell> {
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
-                      metrics.horizontalPadding,
+                      0,
                       16,
-                      metrics.horizontalPadding,
-                      constraints.maxWidth < 600 ? 176 : 132,
+                      0,
+                      // The app shell already reserves the navigation dock.
+                      // Only leave the same small gap as between cards.
+                      16,
                     ),
                     child: Center(
-                      child: SizedBox(width: contentWidth, child: widget.child),
+                      child: Column(
+                        children: [
+                          if (widget.leading != null)
+                            SizedBox(
+                              width: contentWidth,
+                              child: widget.leading,
+                            ),
+                          if (widget.edgeHeader != null)
+                            SizedBox(
+                              width:
+                                  contentWidth + metrics.horizontalPadding * 2,
+                              child: widget.edgeHeader,
+                            ),
+                          SizedBox(width: contentWidth, child: widget.child),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -176,6 +197,33 @@ class _ElasticDashboardRefresh extends StatefulWidget {
 class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
   double _pullExtent = 0;
   bool _refreshing = false;
+  bool _pointerDown = false;
+  bool _reboundScheduled = false;
+
+  void _settleIdleOverscroll() {
+    if (_reboundScheduled) return;
+    _reboundScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _reboundScheduled = false;
+      if (!mounted || _pointerDown || !widget.controller.hasClients) return;
+      final position = widget.controller.position;
+      // Let native drag/ballistic physics finish first, just like More. A
+      // refresh can change the content extent after that activity has ended;
+      // recover only an idle position still outside the new bounds.
+      if (position.isScrollingNotifier.value || !position.outOfRange) return;
+      unawaited(
+        position.animateTo(
+          position.pixels.clamp(
+            position.minScrollExtent,
+            position.maxScrollExtent,
+          ),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+        ),
+      );
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
+  }
 
   bool _trackScroll(ScrollNotification notification) {
     if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
@@ -197,6 +245,7 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
         notification.overscroll < 0) {
       _pullExtent += -notification.overscroll;
     }
+    if (notification is ScrollEndNotification) _settleIdleOverscroll();
     return false;
   }
 
@@ -204,8 +253,7 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
     final shouldRefresh =
         _pullExtent >= _ElasticDashboardRefresh.triggerExtent && !_refreshing;
     _pullExtent = 0;
-    // Native scroll physics own rebound, as on More. Starting another animation
-    // here races the scrollable's pointer-up ballistic activity.
+    _settleIdleOverscroll();
     if (!shouldRefresh) return;
     _refreshing = true;
     unawaited(_runRefresh());
@@ -219,6 +267,7 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
       // guarantees that an implementation error cannot leave refresh armed.
     } finally {
       _refreshing = false;
+      if (mounted) _settleIdleOverscroll();
     }
   }
 
@@ -226,11 +275,28 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
   Widget build(BuildContext context) {
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerUp: (_) => _finishPull(),
-      onPointerCancel: (_) => _pullExtent = 0,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _trackScroll,
-        child: widget.child,
+      onPointerDown: (_) => _pointerDown = true,
+      onPointerUp: (_) {
+        _pointerDown = false;
+        _finishPull();
+      },
+      onPointerCancel: (_) {
+        _pointerDown = false;
+        _pullExtent = 0;
+        _settleIdleOverscroll();
+      },
+      child: NotificationListener<ScrollMetricsNotification>(
+        onNotification: (notification) {
+          if (notification.depth == 0 &&
+              notification.metrics.axis == Axis.vertical) {
+            _settleIdleOverscroll();
+          }
+          return false;
+        },
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _trackScroll,
+          child: widget.child,
+        ),
       ),
     );
   }

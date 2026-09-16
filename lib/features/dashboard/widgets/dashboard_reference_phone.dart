@@ -86,6 +86,10 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String tr(String en, String ar) => _referenceText(context, en, ar);
+    final groupedFitness =
+        visibleSections.contains(DashboardSectionIds.connectedHealth) &&
+        connectedHealth is ConnectedHealthCard &&
+        dailyIntelligence is DailyReturnCard;
     final meals = loggingItems
         .where(
           (item) =>
@@ -241,13 +245,28 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         // Reuse the full Health Hub instead of a second phone-only imitation.
         if (visibleSections.contains(DashboardSectionIds.connectedHealth) &&
             connectedHealth != null) ...[
-          connectedHealth!,
+          if (groupedFitness)
+            DashboardHealthSidePanel(
+              panel: DashboardDailyReturnLayout(
+                weightValue: weightTrendValues.isEmpty
+                    ? null
+                    : '${weightTrendValues.last.toStringAsFixed(1)} $weightUnit',
+                child: KeyedSubtree(
+                  key: const Key('dashboard-daily-intelligence-slot'),
+                  child: dailyIntelligence,
+                ),
+              ),
+              child: connectedHealth!,
+            )
+          else
+            connectedHealth!,
           const SizedBox(height: 12),
         ],
-        KeyedSubtree(
-          key: const Key('dashboard-daily-intelligence-slot'),
-          child: dailyIntelligence,
-        ),
+        if (!groupedFitness)
+          KeyedSubtree(
+            key: const Key('dashboard-daily-intelligence-slot'),
+            child: dailyIntelligence,
+          ),
         if (visibleSections.contains(DashboardSectionIds.aiCoach) &&
             aiCoach != null) ...[
           const SizedBox(height: 12),
@@ -256,11 +275,17 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             child: aiCoach!,
           ),
         ],
-        const SizedBox(height: 12),
+        if (!groupedFitness) const SizedBox(height: 12),
         if (overviewCards.isNotEmpty)
           _OverviewCardsCarousel(
             cards: overviewCards,
-            initialPage: nutrientDashboardPreset == 'Heart healthy' ? 2 : 0,
+            hasBurnPolicyNote:
+                visibleSections.contains(DashboardSectionIds.calories) &&
+                caloriesBurned > 0 &&
+                !burnedCaloriesApplied,
+            // Calories remain the first visible dashboard card. Saved dietary
+            // preferences must not jump this carousel to Heart Healthy.
+            initialPage: 0,
           ),
         if (visibleSections.contains(DashboardSectionIds.macros)) ...[
           const SafeFreeAdAnchor(
@@ -314,8 +339,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 12),
-        if (visibleSections.contains(DashboardSectionIds.bestAction))
+        if (visibleSections.contains(DashboardSectionIds.bestAction)) ...[
+          const SizedBox(height: 12),
           _CompactIntelligenceCard(
             arabic: arabic,
             title: actionTitle,
@@ -324,14 +349,16 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             onAction: onAction,
             onExplain: onExplain,
           ),
-        const SizedBox(height: 12),
-        if (visibleSections.contains(DashboardSectionIds.bodyTwin))
+        ],
+        if (visibleSections.contains(DashboardSectionIds.bodyTwin)) ...[
+          const SizedBox(height: 12),
           _BodyTwinImageCard(
             key: const Key('dashboard-mobile-body-twin-snapshot'),
             title: tr('Body Twin', 'التوأم الجسدي'),
             summary: bodyTwinSummary,
             onTap: () => context.go('/analytics'),
           ),
+        ],
         if (visibleSections.contains(DashboardSectionIds.discover)) ...[
           const SizedBox(height: 12),
           _ReferenceDiscoverGrid(

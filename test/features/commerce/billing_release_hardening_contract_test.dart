@@ -127,9 +127,39 @@ void main() {
     final source = File(
       'lib/features/commerce/providers/commerce_providers.dart',
     ).readAsStringSync();
+    // Verify each boundary, not the number of mentions of the async owner
+    // stream. Stable owner IDs deliberately avoid same-account startup reloads.
+    for (final provider in [
+      'verifiedSubscriptionStateProvider',
+      'aiCoachCreditAccessProvider',
+      'aiBoostVisionAccessProvider',
+    ]) {
+      expect(source, contains('final $provider ='));
+      final body = source
+          .split('final $provider =')
+          .last
+          .split('\nfinal ')
+          .first;
+      expect(
+        RegExp(
+          r'ref.watch\(verifiedEntitlementOwner(?:Id)?Provider\)',
+        ).hasMatch(body),
+        isTrue,
+        reason: '$provider must invalidate on an authenticated owner change.',
+      );
+    }
+    final stableOwner = source
+        .split('final verifiedEntitlementOwnerIdProvider =')
+        .last
+        .split('\nfinal ')
+        .first;
     expect(
-      'ref.watch(verifiedEntitlementOwnerProvider)'.allMatches(source).length,
-      greaterThanOrEqualTo(3),
+      stableOwner,
+      contains('ref.watch(verifiedEntitlementOwnerProvider)'),
+    );
+    expect(
+      stableOwner,
+      contains('if (owner.hasValue) return owner.asData?.value;'),
     );
   });
 

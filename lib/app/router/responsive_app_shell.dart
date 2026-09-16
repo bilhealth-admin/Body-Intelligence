@@ -230,7 +230,7 @@ class ResponsiveAppShell extends StatelessWidget {
     final quickButton = _GlassQuickAdd(
       key: const Key('shell-quick-add'),
       onTap: quickAdd,
-      size: wide ? 62 : 56,
+      size: wide ? 62 : 48,
     );
 
     void handleSystemBack(bool didPop) {
@@ -372,7 +372,7 @@ class _GlassBottomNavigation extends StatelessWidget {
     final colors = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final dockHeight = 90.0 + (textScale - 1).clamp(0.0, 1.0) * 20;
+    final dockHeight = 76.0 + (textScale - 1).clamp(0.0, 1.0) * 34;
     final radius = BorderRadius.circular(28);
     return SafeArea(
       top: false,
@@ -395,7 +395,7 @@ class _GlassBottomNavigation extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
             child: Container(
               height: dockHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -498,7 +498,7 @@ class _GlassBottomDestination extends StatelessWidget {
                     destination: item.destination,
                     selected: selected,
                     color: foreground,
-                    size: 25,
+                    size: 22,
                   ),
                   const SizedBox(height: 4),
                   Flexible(

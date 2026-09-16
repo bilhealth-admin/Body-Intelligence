@@ -42,17 +42,23 @@ class DashboardTopBar extends StatelessWidget {
       key: const Key('dashboard-notifications'),
       tooltip: copy['notifications']!,
       onPressed: () => context.push('/notification-settings'),
+      iconSize: 19,
+      constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        minimumSize: const Size.square(44),
+        maximumSize: const Size.square(44),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: EdgeInsets.zero,
+      ),
       icon: const Icon(Icons.notifications_none_rounded),
     );
-    final edit = _DashboardEditButton(
-      label: copy['action']!,
-      tooltip: copy['edit']!,
-    );
+    final edit = _DashboardEditButton(tooltip: copy['edit']!);
     const brand = Directionality(
       textDirection: TextDirection.ltr,
       child: BilFullWordmark(
         key: Key('dashboard-wordmark'),
-        height: 48,
+        height: 36,
         alignment: Alignment.center,
       ),
     );
@@ -61,15 +67,15 @@ class DashboardTopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 600;
+          final compact =
+              constraints.maxWidth < 330 ||
+              MediaQuery.textScalerOf(context).scale(1) > 1.35;
           if (compact) {
-            // A full-width identity row gives the long BIL lockup enough room
-            // on phones. Keeping the controls on their own row avoids making
-            // the centered mark tiny or letting either physical rail overlap
-            // it in RTL and at large text scales.
+            // Only narrow screens and accessibility text need a second row;
+            // ordinary phones use the compact, centred reference layout.
             return SizedBox(
               key: const Key('dashboard-identity-header'),
-              height: 102,
+              height: 78,
               child: Column(
                 children: [
                   Expanded(
@@ -92,36 +98,29 @@ class DashboardTopBar extends StatelessWidget {
             );
           }
 
-          // Keep equal physical rails around the wordmark. Centering the mark
-          // in the space left by a Row would shift it toward Profile because
-          // the notifications/edit cluster is wider. The symmetric rails
-          // make the identity's centre equal the viewport/content centre on
-          // phones, tablets and both text directions.
-          // The right controls occupy the notification button plus the Today
-          // action. Equal rails keep the wordmark centred despite that wider
-          // text action; narrower windows use the two-row branch above.
-          const sideRailWidth = 152.0;
-          final brandWidth = (constraints.maxWidth - sideRailWidth * 2)
-              .clamp(0.0, double.infinity)
-              .toDouble();
+          // Keep the mark at the physical centre, independently of the three
+          // controls. Equal rails reserve only the two 44-wide right actions
+          // plus a 2-point gap; the shell gives this header the full safe width.
+          const sideRailWidth = 90.0;
           return SizedBox(
             key: const Key('dashboard-identity-header'),
-            height: 56,
+            height: 48,
             child: Stack(
               fit: StackFit.expand,
               children: [
                 Align(alignment: Alignment.centerLeft, child: profile),
                 Center(
-                  child: SizedBox(width: brandWidth, child: brand),
+                  child: SizedBox(
+                    width: constraints.maxWidth - sideRailWidth * 2,
+                    child: brand,
+                  ),
                 ),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Directionality(
+                  child: Row(
                     textDirection: TextDirection.ltr,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [notifications, edit],
-                    ),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [notifications, edit],
                   ),
                 ),
               ],
@@ -134,58 +133,56 @@ class DashboardTopBar extends StatelessWidget {
 }
 
 class _DashboardEditButton extends StatelessWidget {
-  const _DashboardEditButton({required this.label, required this.tooltip});
+  const _DashboardEditButton({required this.tooltip});
 
-  final String label;
   final String tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF12394E), Color(0xFF2563EB)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF12394E).withValues(alpha: .18),
-              blurRadius: 16,
-              offset: const Offset(0, 7),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          width: 84,
-          height: 48,
-          child: TextButton(
-            key: const Key('dashboard-edit-today'),
-            onPressed: () => context.push('/dashboard/preferences'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              minimumSize: const Size(84, 48),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: const StadiumBorder(),
-            ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                maxLines: 1,
-                softWrap: false,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            top: 8,
+            bottom: 8,
+            left: 8,
+            right: 8,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF12394E), Color(0xFF2563EB)],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF12394E).withValues(alpha: .18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 7),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
+          IconButton(
+            key: const Key('dashboard-edit-today'),
+            tooltip: tooltip,
+            onPressed: () => context.push('/dashboard/preferences'),
+            style: IconButton.styleFrom(
+              foregroundColor: Colors.white,
+              minimumSize: const Size(44, 44),
+              maximumSize: const Size(44, 44),
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: const CircleBorder(),
+            ),
+            icon: const Icon(Icons.settings_outlined, size: 18),
+          ),
+        ],
       ),
     );
   }
@@ -284,8 +281,8 @@ class _RoundProfileButtonState extends State<_RoundProfileButton> {
               child: Center(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  width: 42,
-                  height: 42,
+                  width: 32,
+                  height: 32,
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -312,7 +309,7 @@ class _RoundProfileButtonState extends State<_RoundProfileButton> {
                             (widget.imageUrl?.trim().isEmpty ?? true)
                         ? const Key('dashboard-default-profile-avatar')
                         : const Key('dashboard-user-profile-avatar'),
-                    radius: 19,
+                    radius: 14,
                     photoBytes: widget.imageBytes,
                     networkUrl: widget.imageUrl,
                     backgroundColor: const Color(0xFF12394E),

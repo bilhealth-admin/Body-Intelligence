@@ -9,6 +9,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/presentation/premium_collection_item_gate.dart';
 import '../../commerce/presentation/premium_label_badge.dart';
+import '../../commerce/presentation/premium_route_glass_gate.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
@@ -223,7 +224,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final subscription = ref.watch(verifiedSubscriptionStateProvider).value;
+    final subscription = ref.watch(verifiedSubscriptionAccessProvider).value;
     final premiumUnlocked =
         subscription != null && subscription.plan != CommercePlan.free;
     final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
@@ -575,34 +576,38 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (context) => FutureBuilder<RecipeCatalogDetail>(
-        future: _repository.loadDetail(summary),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const SizedBox(
-              height: 320,
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (snapshot.hasError || !snapshot.hasData) {
-            return SizedBox(
-              height: 320,
-              child: Center(
-                child: Text(
-                  wellnessCopy(
-                    context,
-                    'Recipe details are unavailable.',
-                    'تفاصيل الوصفة غير متاحة.',
+      builder: (context) => PremiumRouteGlassGate(
+        key: const ValueKey('recipe-detail-access-gate'),
+        feature: PremiumGateFeature.recipeLibrary,
+        child: FutureBuilder<RecipeCatalogDetail>(
+          future: _repository.loadDetail(summary),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const SizedBox(
+                height: 320,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return SizedBox(
+                height: 320,
+                child: Center(
+                  child: Text(
+                    wellnessCopy(
+                      context,
+                      'Recipe details are unavailable.',
+                      'تفاصيل الوصفة غير متاحة.',
+                    ),
                   ),
                 ),
-              ),
+              );
+            }
+            return _RecipeDetails(
+              detail: snapshot.requireData,
+              imageResult: _detailImageResultFor(summary),
             );
-          }
-          return _RecipeDetails(
-            detail: snapshot.requireData,
-            imageResult: _detailImageResultFor(summary),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -623,7 +628,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
     final recipe = matches.first;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final subscription = ref.read(verifiedSubscriptionStateProvider).value;
+      final subscription = ref.read(verifiedSubscriptionAccessProvider).value;
       if (subscription == null || subscription.plan == CommercePlan.free) {
         final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
         context.push(

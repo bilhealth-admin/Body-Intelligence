@@ -155,7 +155,7 @@ class _PremiumRouteGateContents extends ConsumerWidget {
     // lookup (including its loading/error state) must not block verified credit.
     final subscription = isAiCoach
         ? const AsyncValue<SubscriptionState?>.data(null)
-        : ref.watch(verifiedSubscriptionStateProvider);
+        : ref.watch(verifiedSubscriptionAccessProvider);
     final storefrontPlan = isAiCoach
         ? null
         : ref.watch(storefrontTargetPlanProvider).value;

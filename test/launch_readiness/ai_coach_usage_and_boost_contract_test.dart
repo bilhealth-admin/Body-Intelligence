@@ -96,19 +96,68 @@ void main() {
       store,
       matches(RegExp(r'''body\.action\s*===\s*["']verify_ai_boost["']''')),
     );
+
+    final boostStart = store.indexOf('async function verifyAiBoost(');
+    final boostEnd = store.indexOf(
+      '\nasync function verifyGooglePushIdentity(',
+      boostStart,
+    );
+    expect(boostStart, greaterThanOrEqualTo(0));
+    expect(boostEnd, greaterThan(boostStart));
+    final boostFunction = store.substring(boostStart, boostEnd);
+
     expect(
-      store,
+      boostFunction,
       matches(RegExp(r'''productId\s*!==\s*["']bil_ai_boost["']''')),
     );
-    expect(store, contains('verifyGoogleConsumable'));
-    expect(store, contains('verifyApple(verification)'));
+    expect(boostFunction, contains('verifyGoogleConsumable'));
+
+    // A device-signed Apple transaction is only lookup proof. Before crediting
+    // Boost, the backend must reconcile it with Apple's server transaction,
+    // require an exact active product match, and bind it to this BIL owner.
+    final appleProof = boostFunction.indexOf(
+      'dependencies.verifyAppleTransaction ?? verifyApple',
+    );
+    final appleLookup = boostFunction.indexOf(
+      'assertApplePurchaseLookup(productId, proof)',
+    );
+    final appleServerRead = boostFunction.indexOf(
+      'dependencies.readAppleTransaction ?? readAppleTransaction',
+    );
+    final appleExactMatch = boostFunction.indexOf(
+      'assertExactAppleTransaction(proof, apple)',
+    );
+    final appleActive = boostFunction.indexOf(
+      'apple.productId !== productId || apple.lifecycle !== "active"',
+    );
+    final appleOwnership = boostFunction.indexOf(
+      'assertApplePurchaseOwnership(',
+    );
+    final credit = boostFunction.indexOf(
+      'admin.rpc("bil_credit_ai_boost_verified"',
+    );
+    expect(appleProof, greaterThanOrEqualTo(0));
+    expect(appleLookup, greaterThan(appleProof));
+    expect(appleServerRead, greaterThan(appleLookup));
+    expect(appleExactMatch, greaterThan(appleServerRead));
+    expect(appleActive, greaterThan(appleExactMatch));
+    expect(appleOwnership, greaterThan(appleActive));
+    expect(credit, greaterThan(appleOwnership));
     expect(
-      store,
+      boostFunction,
+      contains('[proof.appAccountToken, apple.appAccountToken]'),
+    );
+    expect(
+      boostFunction,
       matches(
         RegExp(r'''admin\.rpc\(\s*["']bil_credit_ai_boost_verified["']'''),
       ),
     );
-    expect(store, contains('consumeGoogleConsumable'));
+    expect(boostFunction, contains('consumeGoogleConsumable'));
+    expect(
+      boostFunction.indexOf('consumeGoogleConsumable'),
+      greaterThan(credit),
+    );
     expect(store, isNot(contains('BIL_GEMINI_API_KEY')));
 
     // Reservations debit the shared weekly tokens first and only then Boost.

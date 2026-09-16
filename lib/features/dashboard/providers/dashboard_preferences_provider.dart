@@ -51,6 +51,12 @@ final dashboardSectionVisibleProvider = StreamProvider.family<bool, String>((
       );
 });
 
+// Keep the subscription stable while the editor saves or rebuilds. Creating
+// repository.watch() in build briefly unmounts the horizontal preset list.
+final dashboardSelectedPresetProvider = StreamProvider<String?>((ref) {
+  return ref.watch(preferencesRepositoryProvider).watch('dashboard.preset');
+});
+
 abstract final class DashboardNutrientGoalIds {
   static const protein = 'protein';
   static const carbohydrates = 'carbohydrates';

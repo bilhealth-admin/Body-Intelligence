@@ -85,7 +85,7 @@ class _BilWorkoutRoutineDetailsPageState
   Widget build(BuildContext context) {
     final item = widget.item;
     final subscription = _usableVerifiedSubscription(
-      ref.watch(verifiedSubscriptionStateProvider),
+      ref.watch(verifiedSubscriptionAccessProvider),
     );
     final locked = !workoutItemAccessGranted(item, subscription);
     return Scaffold(
@@ -156,6 +156,7 @@ class _BilWorkoutRoutineDetailsPageState
                     title: _copy(context, 'Workout steps', 'خطوات التمرين'),
                     child: item.segments.isNotEmpty
                         ? _WorkoutSegmentsList(
+                            item: item,
                             segments: item.segments,
                             mediaCache: widget.mediaCache,
                             online: !widget.offline,

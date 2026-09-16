@@ -429,6 +429,7 @@ class _VideoLessonPageState extends State<_VideoLessonPage> {
       children: [
         if (widget.item.videoMedia case final media?)
           BilVerifiedWorkoutVideo(
+            accessItem: widget.item,
             asset: media,
             poster: widget.item.imageMedia,
             mediaCache: _cache,

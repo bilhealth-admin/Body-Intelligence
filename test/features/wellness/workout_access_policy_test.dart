@@ -2,10 +2,35 @@ import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dar
 import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
+import 'package:body_intelligence_log/features/wellness/domain/wellness_content_access_policy.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/workout_access_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('paid workout locks exactly at the verified period boundary', () {
+    final boundary = DateTime.utc(2026, 9, 16);
+    final state = _state(
+      CommercePlan.premium,
+      EntitlementAuthority.verifiedServer,
+      currentPeriodEndsAt: boundary,
+    );
+    expect(
+      wellnessContentAccessGranted(
+        WellnessContentAccess.pro,
+        state,
+        now: boundary.subtract(const Duration(microseconds: 1)),
+      ),
+      isTrue,
+    );
+    expect(
+      wellnessContentAccessGranted(
+        WellnessContentAccess.pro,
+        state,
+        now: boundary,
+      ),
+      isFalse,
+    );
+  });
   test('free workout stays available without commerce configuration', () {
     expect(workoutAccessGranted(WellnessContentAccess.free, null), isTrue);
   });

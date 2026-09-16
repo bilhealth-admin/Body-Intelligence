@@ -9,6 +9,7 @@ import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
@@ -68,10 +69,14 @@ void main() {
         (candidate) => candidate.id == foodId,
       );
       final selectedDate = DateTime(2026, 8, 14);
+      final entitlementNow = DateTime.utc(2026, 8, 14, 12);
       final premium = SubscriptionState(
         plan: CommercePlan.premium,
         entitlements: const {CommerceEntitlement.advancedIntelligence},
         authority: EntitlementAuthority.verifiedServer,
+        lifecycle: SubscriptionLifecycle.active,
+        startedAt: entitlementNow.subtract(const Duration(days: 1)),
+        currentPeriodEndsAt: entitlementNow.add(const Duration(days: 1)),
         isPurchasable: true,
         canRestorePurchases: true,
       );
@@ -82,6 +87,9 @@ void main() {
             databaseProvider.overrideWithValue(database),
             verifiedSubscriptionStateProvider.overrideWithValue(
               AsyncData(premium),
+            ),
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => entitlementNow,
             ),
             seedCatalogProvider.overrideWith((ref) async {}),
             foodsProvider.overrideWithValue(AsyncData([food])),
@@ -192,6 +200,11 @@ void main() {
         find.byKey(const Key('daily-log-nutrition-facts-expanded')),
         findsNothing,
         reason: 'Detailed nutrients stay collapsed until requested.',
+      );
+      expect(
+        find.byKey(const Key('premium-nutrition-glass')),
+        findsNothing,
+        reason: 'A currently verified Premium fixture must stay unlocked.',
       );
       await tester.ensureVisible(
         find.byKey(const Key('daily-log-nutrition-facts')),

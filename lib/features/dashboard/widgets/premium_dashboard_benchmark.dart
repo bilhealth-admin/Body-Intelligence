@@ -14,6 +14,8 @@ import '../dashboard_five_locale_copy.dart';
 import '../domain/dashboard_heart_health_policy.dart';
 import '../domain/dashboard_step_trend.dart';
 import 'premium_dashboard_card_lock.dart';
+import '../../connected_health/widgets/connected_health_card.dart';
+import 'daily_return_card.dart';
 
 part 'premium_dashboard_command_center.dart';
 part 'premium_dashboard_evidence.dart';

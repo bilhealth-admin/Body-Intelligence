@@ -30,9 +30,24 @@ class DashboardPreferencesPage extends ConsumerStatefulWidget {
 class _DashboardPreferencesPageState
     extends ConsumerState<DashboardPreferencesPage> {
   bool _saving = false;
-  int _streamRevision = 0;
+  String? _savingSection;
+  // A single switch save must not dim every control or flash a page-wide
+  // progress bar. Batch changes still use the existing blocking presentation.
+  bool get _savingLayout => _saving && _savingSection == null;
+  final _presetScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _presetScrollController.dispose();
+    super.dispose();
+  }
 
   void _updateState(VoidCallback update) => setState(update);
+
+  void _finishEditing() {
+    if (_saving) return;
+    context.canPop() ? context.pop() : context.go('/dashboard');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +64,7 @@ class _DashboardPreferencesPageState
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            onPressed: _saving
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go('/dashboard'),
+            onPressed: _savingLayout ? null : _finishEditing,
             icon: const Icon(Icons.arrow_back_rounded),
           ),
           title: Text(
@@ -65,7 +76,7 @@ class _DashboardPreferencesPageState
           children: [
             SizedBox(
               height: 12,
-              child: _saving
+              child: _savingLayout
                   ? const LinearProgressIndicator()
                   : const SizedBox.shrink(),
             ),
@@ -92,12 +103,9 @@ class _DashboardPreferencesPageState
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
-            StreamBuilder<String?>(
-              key: ValueKey(_streamRevision),
-              stream: ref
-                  .watch(preferencesRepositoryProvider)
-                  .watch('dashboard.preset'),
-              builder: (context, snapshot) {
+            Consumer(
+              builder: (context, ref, _) {
+                final snapshot = ref.watch(dashboardSelectedPresetProvider);
                 if (snapshot.hasError) {
                   return ListTile(
                     leading: const Icon(Icons.error_outline_rounded),
@@ -109,14 +117,15 @@ class _DashboardPreferencesPageState
                       ),
                     ),
                     trailing: TextButton(
-                      onPressed: () => setState(() => _streamRevision++),
+                      onPressed: () =>
+                          ref.invalidate(dashboardSelectedPresetProvider),
                       child: Text(
                         _sectionCopy(context, 'Retry', 'إعادة المحاولة'),
                       ),
                     ),
                   );
                 }
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.isLoading && !snapshot.hasValue) {
                   return Semantics(
                     liveRegion: true,
                     label: _sectionCopy(
@@ -127,11 +136,12 @@ class _DashboardPreferencesPageState
                     child: const LinearProgressIndicator(),
                   );
                 }
-                final selected = snapshot.data;
+                final selected = snapshot.value;
                 return SizedBox(
-                  height: 190,
+                  height: 190 * MediaQuery.textScalerOf(context).scale(1),
                   child: ListView(
                     key: const Key('dashboard-preset-carousel'),
+                    controller: _presetScrollController,
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsetsDirectional.only(end: 12),
                     children: [
@@ -141,8 +151,11 @@ class _DashboardPreferencesPageState
                           child: Card(
                             child: ListTile(
                               key: Key('dashboard-preset-${preset.id}'),
+                              horizontalTitleGap: 12,
                               leading: BilSemanticIconBadge(
                                 kind: _dashboardPresetIconKind(preset.id),
+                                size: 32,
+                                iconSize: 18,
                               ),
                               title: Text(
                                 _copy(
@@ -202,11 +215,13 @@ class _DashboardPreferencesPageState
                                     )
                                   : null,
                               onTap:
-                                  _saving ||
+                                  _savingLayout ||
                                       (preset.premium && !entitlementResolved)
                                   ? null
                                   : preset.premium && !paid
-                                  ? () => context.push('/plans')
+                                  ? () {
+                                      if (!_saving) context.push('/plans');
+                                    }
                                   : () => _applyPreset(
                                       context,
                                       ref,
@@ -221,8 +236,11 @@ class _DashboardPreferencesPageState
                         child: Card(
                           child: ListTile(
                             key: const Key('dashboard-preset-custom'),
+                            horizontalTitleGap: 12,
                             leading: const BilSemanticIconBadge(
                               kind: BilSemanticIconKind.preferences,
+                              size: 32,
+                              iconSize: 18,
                             ),
                             title: Text(
                               _copy(
@@ -255,7 +273,7 @@ class _DashboardPreferencesPageState
                                     ).colorScheme.primary,
                                   )
                                 : null,
-                            onTap: _saving
+                            onTap: _savingLayout
                                 ? null
                                 : () => _guardedSave(
                                     () => ref
@@ -285,104 +303,143 @@ class _DashboardPreferencesPageState
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                mainAxisExtent: 84,
-              ),
-              itemCount: _dashboardPreferenceItems.length,
-              itemBuilder: (context, index) {
-                final item = _dashboardPreferenceItems[index];
-                return Card(
-                  margin: EdgeInsets.zero,
-                  clipBehavior: Clip.antiAlias,
-                  child: Consumer(
-                    builder: (context, ref, _) {
-                      final state = ref.watch(
-                        dashboardSectionVisibleProvider(item.$1),
-                      );
-                      if (state.hasError) {
-                        return ListTile(
-                          key: Key('dashboard-section-${item.$1}-error'),
-                          contentPadding: const EdgeInsets.all(10),
-                          title: Row(
-                            children: [
-                              const Icon(Icons.error_outline_rounded, size: 20),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  _sectionCopy(context, item.$3, item.$4),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Keep native switch targets and readable labels. Two narrow
+                // columns cannot fit both plus a separated decorative badge.
+                final textScale =
+                    MediaQuery.textScalerOf(context).scale(14) / 14;
+                final columns = constraints.maxWidth >= 488 * textScale ? 2 : 1;
+                final cardWidth =
+                    (constraints.maxWidth - (columns - 1) * 8) / columns;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final item in _dashboardPreferenceItems)
+                      SizedBox(
+                        width: cardWidth,
+                        child: Card(
+                          margin: EdgeInsets.zero,
+                          clipBehavior: Clip.antiAlias,
+                          child: Consumer(
+                            builder: (context, ref, _) {
+                              final state = ref.watch(
+                                dashboardSectionVisibleProvider(item.$1),
+                              );
+                              if (state.hasError) {
+                                return ListTile(
+                                  key: Key(
+                                    'dashboard-section-${item.$1}-error',
+                                  ),
+                                  contentPadding: const EdgeInsets.all(10),
+                                  title: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline_rounded,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          _sectionCopy(
+                                            context,
+                                            item.$3,
+                                            item.$4,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: TextButton(
+                                    onPressed: () => ref.invalidate(
+                                      dashboardSectionVisibleProvider(item.$1),
+                                    ),
+                                    child: Text(
+                                      _sectionCopy(
+                                        context,
+                                        'Retry',
+                                        'إعادة المحاولة',
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (state.isLoading) {
+                                return Semantics(
+                                  liveRegion: true,
+                                  label: _sectionCopy(
+                                    context,
+                                    'Loading saved setting',
+                                    'جارٍ تحميل الإعداد المحفوظ',
+                                  ),
+                                  child: const Center(
+                                    child: SizedBox.square(
+                                      dimension: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              final visible = state.value!;
+                              return SwitchListTile.adaptive(
+                                key: Key('dashboard-section-${item.$1}'),
+                                contentPadding:
+                                    const EdgeInsetsDirectional.fromSTEB(
+                                      12,
+                                      6,
+                                      12,
+                                      6,
+                                    ),
+                                horizontalTitleGap: 12,
+                                minLeadingWidth: 0,
+                                minTileHeight: 64,
+                                secondary: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    BilSemanticIconBadge(
+                                      kind: _dashboardSectionIconKind(item.$1),
+                                      size: 30,
+                                      iconSize: 18,
+                                    ),
+                                    if (_savingSection == item.$1)
+                                      SizedBox.square(
+                                        key: Key(
+                                          'dashboard-section-${item.$1}-saving',
+                                        ),
+                                        dimension: 30,
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                          subtitle: TextButton(
-                            onPressed: () => ref.invalidate(
-                              dashboardSectionVisibleProvider(item.$1),
-                            ),
-                            child: Text(
-                              _sectionCopy(context, 'Retry', 'إعادة المحاولة'),
-                            ),
-                          ),
-                        );
-                      }
-                      if (state.isLoading) {
-                        return Semantics(
-                          liveRegion: true,
-                          label: _sectionCopy(
-                            context,
-                            'Loading saved setting',
-                            'جارٍ تحميل الإعداد المحفوظ',
-                          ),
-                          child: const Center(
-                            child: SizedBox.square(
-                              dimension: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-                        );
-                      }
-                      final visible = state.value!;
-                      return SwitchListTile.adaptive(
-                        key: Key('dashboard-section-${item.$1}'),
-                        contentPadding: const EdgeInsetsDirectional.fromSTEB(
-                          10,
-                          6,
-                          6,
-                          6,
-                        ),
-                        secondary: BilSemanticIconBadge(
-                          kind: _dashboardSectionIconKind(item.$1),
-                          size: 36,
-                          iconSize: 20,
-                        ),
-                        title: Text(
-                          _sectionCopy(context, item.$3, item.$4),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                                title: Text(
+                                  _sectionCopy(context, item.$3, item.$4),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                value: visible,
+                                onChanged: _savingLayout || state.isLoading
+                                    ? null
+                                    : (value) => _setSectionVisibility(
+                                        context,
+                                        ref,
+                                        item.$1,
+                                        value,
+                                      ),
+                              );
+                            },
                           ),
                         ),
-                        value: visible,
-                        onChanged: _saving || state.isLoading
-                            ? null
-                            : (value) => _setSectionVisibility(
-                                context,
-                                ref,
-                                item.$1,
-                                value,
-                              ),
-                      );
-                    },
-                  ),
+                      ),
+                  ],
                 );
               },
             ),
@@ -394,6 +451,8 @@ class _DashboardPreferencesPageState
                     key: const Key('dashboard-edit-nutrition-goals'),
                     leading: const BilSemanticIconBadge(
                       kind: BilSemanticIconKind.goals,
+                      size: 32,
+                      iconSize: 18,
                     ),
                     title: Text(
                       _copy(
@@ -416,9 +475,13 @@ class _DashboardPreferencesPageState
                       ),
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: _saving
+                    onTap: _savingLayout
                         ? null
-                        : () => context.push('/settings/nutrition-goals'),
+                        : () {
+                            if (!_saving) {
+                              context.push('/settings/nutrition-goals');
+                            }
+                          },
                   ),
                 ],
               ),
@@ -456,6 +519,8 @@ class _DashboardPreferencesPageState
                       }
                       return const BilSemanticIconBadge(
                         kind: BilSemanticIconKind.nutrition,
+                        size: 32,
+                        iconSize: 18,
                       );
                     },
                   ),
@@ -567,7 +632,9 @@ class _DashboardPreferencesPageState
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
-              onPressed: _saving ? null : () => _restoreDefaults(context, ref),
+              onPressed: _savingLayout
+                  ? null
+                  : () => _restoreDefaults(context, ref),
               icon: const Icon(Icons.restart_alt_rounded),
               label: Text(
                 _sectionCopy(
@@ -583,11 +650,7 @@ class _DashboardPreferencesPageState
           minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
           child: FilledButton(
             key: const Key('dashboard-preferences-done'),
-            onPressed: _saving
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go('/dashboard'),
+            onPressed: _savingLayout ? null : _finishEditing,
             child: Text(_sectionCopy(context, 'Done editing', 'إنهاء التعديل')),
           ),
         ),

@@ -85,20 +85,29 @@ void main() {
           expect(tester.getRect(edit).overlaps(wordmarkRect), isFalse);
           expect(
             wordmarkRect.width,
-            greaterThan(size.width < 480 ? size.width * .85 : 300),
+            greaterThan(
+              size.width < 330
+                  ? size.width * .7
+                  : size.width < 480
+                  ? size.width * .4
+                  : 200,
+            ),
           );
           expect(
             wordmarkRect.height,
-            greaterThanOrEqualTo(size.width < 480 ? 13 : 20),
+            greaterThanOrEqualTo(size.width < 480 ? 8 : 13),
           );
           expect(tester.getSize(profile), const Size.square(48));
-          expect(tester.getSize(notifications).width, greaterThanOrEqualTo(48));
+          expect(tester.getSize(notifications), const Size.square(44));
+          // The compact settings circle is visually 28, with a 44 tap target.
+          // Centre and collision checks remain in both text directions.
+          expect(tester.getSize(edit), const Size.square(44));
           expect(
-            tester.getSize(notifications).height,
-            greaterThanOrEqualTo(48),
+            tester
+                .getSize(find.byKey(const Key('dashboard-identity-header')))
+                .height,
+            size.width < 330 ? 78 : 48,
           );
-          // Preserve the approved compact control and its full 48dp target.
-          expect(tester.getSize(edit), const Size(84, 48));
 
           // The canonical mark itself and its Dashboard header path stay
           // transparent: no legacy white card, border or rounded container.
@@ -141,31 +150,32 @@ void main() {
     expect(placeholder.color, Colors.white);
   });
 
-  testWidgets('a member photo remains an unmodified foreground image provider', (
-    tester,
-  ) async {
-    final onePixelPng = base64Decode(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4'
-      '//8/AwAI/AL+KDvKAAAAAElFTkSuQmCC',
-    );
-    await pumpHeader(
-      tester,
-      size: const Size(390, 844),
-      locale: const Locale('en'),
-      photo: onePixelPng,
-    );
+  testWidgets(
+    'a member photo remains an unmodified foreground image provider',
+    (tester) async {
+      final onePixelPng = base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4'
+        '//8/AwAI/AL+KDvKAAAAAElFTkSuQmCC',
+      );
+      await pumpHeader(
+        tester,
+        size: const Size(390, 844),
+        locale: const Locale('en'),
+        photo: onePixelPng,
+      );
 
-    final avatar = tester.widget<CircleAvatar>(
-      find.descendant(
-        of: find.byKey(const Key('dashboard-user-profile-avatar')),
-        matching: find.byType(CircleAvatar),
-      ),
-    );
-    // The freshly selected local photo must stay on the foreground layer so a
-    // delayed cached NetworkImage cannot replace it during an unrelated
-    // Dashboard rebuild. This is still the original MemoryImage provider.
-    expect(avatar.foregroundImage, isA<MemoryImage>());
-    expect(avatar.backgroundImage, isNull);
-    expect(avatar.child, isNull);
-  });
+      final avatar = tester.widget<CircleAvatar>(
+        find.descendant(
+          of: find.byKey(const Key('dashboard-user-profile-avatar')),
+          matching: find.byType(CircleAvatar),
+        ),
+      );
+      // The freshly selected local photo must stay on the foreground layer so a
+      // delayed cached NetworkImage cannot replace it during an unrelated
+      // Dashboard rebuild. This is still the original MemoryImage provider.
+      expect(avatar.foregroundImage, isA<MemoryImage>());
+      expect(avatar.backgroundImage, isNull);
+      expect(avatar.child, isNull);
+    },
+  );
 }

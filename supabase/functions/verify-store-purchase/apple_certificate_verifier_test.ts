@@ -48,7 +48,7 @@ const pemPrivateKey = (encoded: string) =>
   }\n-----END PRIVATE KEY-----`;
 
 const sha256 = async (value: Uint8Array) =>
-  Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", value)))
+  Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array(value))))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
 

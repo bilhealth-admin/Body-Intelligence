@@ -275,7 +275,7 @@ async function verifyRsaCertificateSignature(
   return await crypto.subtle.verify(
     { name: "RSASSA-PKCS1-v1_5" },
     key,
-    signature,
+    new Uint8Array(signature),
     tbs as BufferSource,
   );
 }

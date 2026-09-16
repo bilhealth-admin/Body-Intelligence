@@ -16,6 +16,7 @@ import {
   assertApplePurchaseReconciliation,
 } from "./apple_purchase_reconciliation.ts";
 import { assertApplePurchaseOwnership } from "./apple_purchase_ownership.ts";
+import { assertAppleNotificationFreshness } from "./apple_notification_policy.ts";
 import {
   MobileIntegrityFailure,
   requireMobileIntegrityGrant,
@@ -68,6 +69,10 @@ type VerifiedPurchase = {
   autoRenews?: boolean;
   // Only copied from Apple's verified JWS, never from the request body.
   appAccountToken?: unknown;
+  signedAt?: string;
+  // Google renewal orders share a purchaseToken; only this exact verified
+  // latest successful order may be matched to a voided-purchase record.
+  storeOrderId?: string;
 };
 
 type VerifiedConsumable = {
@@ -77,6 +82,17 @@ type VerifiedConsumable = {
   packageOrBundleId: string;
   environment: "sandbox" | "production";
   verifiedAt: string;
+};
+
+type VerifiedGoogleConsumable = VerifiedConsumable & {
+  purchaseState: number;
+  orderId?: string;
+};
+
+type GoogleVoidedPurchase = {
+  purchaseToken: string;
+  orderId: string;
+  voidedAt: string;
 };
 
 type AppleCertificateVerificationStage =
@@ -414,6 +430,17 @@ function clients(authorization?: string) {
 export type StoreBackendHandlerDependencies = {
   clients?: typeof clients;
   requireIntegrity?: typeof requireMobileIntegrityGrant;
+  // In-process test seams only. The HTTP body can never replace these trust
+  // boundaries; production always uses signature verification and store APIs.
+  verifyAppleJws?: typeof verifyAppleJws;
+  verifyAppleTransaction?: typeof verifyApple;
+  reconcileApple?: typeof reconcileApple;
+  readAppleTransaction?: typeof readAppleTransaction;
+  verifyGoogle?: typeof verifyGoogle;
+  readGoogleConsumable?: typeof readGoogleConsumable;
+  verifyGooglePushIdentity?: typeof verifyGooglePushIdentity;
+  googleVoidedPurchases?: typeof googleVoidedPurchases;
+  readEnvironment?: EnvironmentReader;
 };
 
 async function googleAccessToken() {
@@ -478,6 +505,9 @@ async function verifyGoogle(
     expiresAt: line.expiryTime,
     gracePeriodEndsAt: googleGracePeriodEnd(lifecycle, line.expiryTime),
     autoRenews: Boolean(line.autoRenewingPlan?.autoRenewEnabled),
+    storeOrderId: typeof line.latestSuccessfulOrderId === "string"
+      ? line.latestSuccessfulOrderId.trim() || undefined
+      : undefined,
   };
 }
 
@@ -486,6 +516,16 @@ async function verifyGoogleConsumable(
   productId: string,
   purchaseToken: string,
 ): Promise<VerifiedConsumable> {
+  const purchase = await readGoogleConsumable(packageName, productId, purchaseToken);
+  if (purchase.purchaseState !== 0) throw new Error("purchase_not_completed");
+  return purchase;
+}
+
+async function readGoogleConsumable(
+  packageName: string,
+  productId: string,
+  purchaseToken: string,
+): Promise<VerifiedGoogleConsumable> {
   if (packageName !== env("GOOGLE_PLAY_PACKAGE_NAME")) {
     throw new Error("wrong_package");
   }
@@ -502,9 +542,8 @@ async function verifyGoogleConsumable(
   });
   if (!response.ok) throw new Error("google_verification_failed");
   const data = await response.json() as Record<string, unknown>;
-  if (Number(data.purchaseState ?? -1) !== 0) {
-    throw new Error("purchase_not_completed");
-  }
+  const purchaseState = Number(data.purchaseState ?? -1);
+  if (![0, 1, 2].includes(purchaseState)) throw new Error("invalid_google_purchase_state");
   const environment = googleProductEnvironment(data.purchaseType);
   return {
     provider: "google",
@@ -513,6 +552,8 @@ async function verifyGoogleConsumable(
     packageOrBundleId: packageName,
     environment,
     verifiedAt: new Date().toISOString(),
+    purchaseState,
+    orderId: typeof data.orderId === "string" ? data.orderId.trim() || undefined : undefined,
   };
 }
 
@@ -540,10 +581,10 @@ async function consumeGoogleConsumable(
   }
 }
 
-async function googleVoidedPurchaseTokens(): Promise<Set<string>> {
+async function googleVoidedPurchases(): Promise<GoogleVoidedPurchase[]> {
   const packageName = env("GOOGLE_PLAY_PACKAGE_NAME");
   const token = await googleAccessToken();
-  const tokens = new Set<string>();
+  const purchases: GoogleVoidedPurchase[] = [];
   let pageToken = "";
   do {
     const endpoint = new URL(
@@ -551,6 +592,9 @@ async function googleVoidedPurchaseTokens(): Promise<Set<string>> {
         encodeURIComponent(packageName)
       }/purchases/voidedpurchases`,
     );
+    // Default type=0 omits subscriptions. Include them, then match order IDs:
+    // multiple renewals legitimately have the same purchase token.
+    endpoint.searchParams.set("type", "1");
     if (pageToken) endpoint.searchParams.set("token", pageToken);
     const response = await fetch(endpoint, {
       headers: { authorization: `Bearer ${token}` },
@@ -559,11 +603,22 @@ async function googleVoidedPurchaseTokens(): Promise<Set<string>> {
     const data = await response.json();
     for (const purchase of data.voidedPurchases ?? []) {
       const purchaseToken = String(purchase.purchaseToken ?? "");
-      if (purchaseToken) tokens.add(purchaseToken);
+      const orderId = String(purchase.orderId ?? "").trim();
+      if (purchaseToken && orderId) {
+        purchases.push({ purchaseToken, orderId, voidedAt: googleStoreEventTime(purchase.voidedTimeMillis) });
+      }
     }
     pageToken = String(data.tokenPagination?.nextPageToken ?? "");
   } while (pageToken);
-  return tokens;
+  return purchases;
+}
+
+function googleStoreEventTime(value: unknown): string {
+  const milliseconds = Number(value);
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0 || milliseconds > Date.now() + 300000) {
+    throw new Error("invalid_google_event_time");
+  }
+  return new Date(milliseconds).toISOString();
 }
 
 export async function verifyAppleJwsWithTrustedRoots(
@@ -633,6 +688,10 @@ async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
   return {
     provider: "apple",
     appAccountToken: payload.appAccountToken,
+    signedAt: typeof payload.signedDate === "number" &&
+        Number.isFinite(payload.signedDate) && payload.signedDate > 0
+      ? new Date(payload.signedDate).toISOString()
+      : undefined,
     productId: String(payload.productId ?? ""),
     originalTransactionId: String(payload.originalTransactionId ?? ""),
     transactionId: String(payload.transactionId ?? ""),
@@ -748,6 +807,37 @@ async function reconcileApple(
   return purchase;
 }
 
+async function readAppleTransaction(
+  transactionId: string,
+  environment: StoreEnvironment,
+): Promise<VerifiedPurchase> {
+  const response = await fetch(
+    `https://${appleServerHost(environment)}/inApps/v1/transactions/${
+      encodeURIComponent(transactionId)
+    }`,
+    { headers: { authorization: `Bearer ${await appleServerToken()}` } },
+  );
+  if (!response.ok) throw new Error(appleServerApiFailureCode(response.status));
+  const result = await response.json();
+  const purchase = await verifyApple(String(result.signedTransactionInfo ?? ""));
+  if (purchase.transactionId !== transactionId) {
+    throw new Error("apple_transaction_mismatch");
+  }
+  if (purchase.environment !== environment) throw new Error("wrong_environment");
+  return purchase;
+}
+
+function assertExactAppleTransaction(
+  proof: VerifiedPurchase,
+  canonical: VerifiedPurchase,
+) {
+  assertApplePurchaseReconciliation(proof, canonical);
+  if (proof.transactionId !== canonical.transactionId) {
+    throw new Error("apple_transaction_mismatch");
+  }
+  if (proof.productId !== canonical.productId) throw new Error("wrong_product");
+}
+
 // PostgREST resolves this RPC by its complete named argument signature. These
 // nullable SQL arguments have no defaults: undefined would disappear from JSON
 // and cause a function-resolution 404, even for a valid active subscription.
@@ -819,14 +909,17 @@ export async function persistVerified(
     }
   }
   const verifiedAt = new Date().toISOString();
-  const { data: active, error } = await admin.rpc(
+  const { data: persisted, error } = await admin.rpc(
     "bil_persist_verified_store_purchase",
-    buildVerifiedPurchaseRpcArgs(
-      ownerId,
-      purchase,
-      verifiedAt,
-      await fingerprint(purchase.transactionId),
-    ),
+    {
+      ...buildVerifiedPurchaseRpcArgs(
+        ownerId,
+        purchase,
+        verifiedAt,
+        await fingerprint(purchase.transactionId),
+      ),
+      p_store_signed_at: purchase.provider === "apple" ? purchase.signedAt ?? null : null,
+    },
   );
   if (error) {
     if (error.code === "23505") {
@@ -843,8 +936,10 @@ export async function persistVerified(
     }
     throw new Error("persistence_failed");
   }
-  if (typeof active !== "boolean") throw new Error("persistence_failed");
-  return { active, verifiedAt };
+  if (!isRecord(persisted) || typeof persisted.active !== "boolean" ||
+    typeof persisted.lifecycle !== "string" || typeof persisted.verified_at !== "string" ||
+    !Number.isFinite(Date.parse(persisted.verified_at))) throw new Error("persistence_failed");
+  return { active: persisted.active, lifecycle: persisted.lifecycle, verifiedAt: persisted.verified_at };
 }
 
 async function authenticatedUser(
@@ -888,10 +983,11 @@ async function verifyPurchase(
   if (source === "app_store") {
     // The device JWS is only the lookup proof. Entitlement truth comes from a
     // fresh App Store Server API response over authenticated TLS.
-    const deviceTransaction = await verifyApple(verification);
+    const deviceTransaction = await (dependencies.verifyAppleTransaction ??
+      verifyApple)(verification);
     signedAppleAccountTokens.push(deviceTransaction.appAccountToken);
     assertApplePurchaseLookup(body.product_id, deviceTransaction);
-    purchase = await reconcileApple(
+    purchase = await (dependencies.reconcileApple ?? reconcileApple)(
       deviceTransaction.originalTransactionId,
       deviceTransaction.environment,
     );
@@ -907,7 +1003,7 @@ async function verifyPurchase(
   } else {
     throw new Error("invalid_store_source");
   }
-  const { active, verifiedAt } = await persistVerified(
+  const { active, lifecycle, verifiedAt } = await persistVerified(
     admin,
     user.id,
     purchase,
@@ -919,7 +1015,7 @@ async function verifyPurchase(
     // The client uses this server-generated watermark to ignore only older
     // entitlement snapshots while a fresh subscription verification settles.
     verified_at: verifiedAt,
-    lifecycle: purchase.lifecycle,
+    lifecycle,
     store_country_code: purchase.storeCountryCode,
   });
 }
@@ -958,7 +1054,15 @@ async function verifyAiBoost(
       verification,
     );
   } else if (source === "app_store") {
-    const apple = await verifyApple(verification);
+    const proof = await (dependencies.verifyAppleTransaction ?? verifyApple)(
+      verification,
+    );
+    assertApplePurchaseLookup(productId, proof);
+    const apple = await (dependencies.readAppleTransaction ?? readAppleTransaction)(
+      proof.transactionId,
+      proof.environment,
+    );
+    assertExactAppleTransaction(proof, apple);
     if (apple.productId !== productId || apple.lifecycle !== "active") {
       throw new Error("purchase_not_completed");
     }
@@ -966,7 +1070,7 @@ async function verifyAiBoost(
     // binding. Never make a new credit without Apple's signed BIL account token.
     await assertApplePurchaseOwnership(
       user.id,
-      [apple.appAccountToken],
+      [proof.appAccountToken, apple.appAccountToken],
       null,
       apple.environment,
     );
@@ -989,6 +1093,7 @@ async function verifyAiBoost(
     p_product_id: productId,
     p_verified_at: purchase.verifiedAt,
     p_raw_receipt_hash: await digest(verification),
+    p_environment: purchase.environment,
   });
   if (error) {
     if (
@@ -1013,10 +1118,7 @@ async function verifyAiBoost(
   });
 }
 
-async function verifyGooglePush(
-  request: Request,
-  body: Record<string, unknown>,
-) {
+async function verifyGooglePushIdentity(request: Request): Promise<void> {
   const bearer =
     request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   const tokenInfo = await fetch(
@@ -1032,32 +1134,92 @@ async function verifyGooglePush(
   ) {
     throw new Error("invalid_pubsub_identity");
   }
+}
+
+async function applyGoogleBoostRefund(
+  admin: ReturnType<typeof clients>["admin"],
+  purchaseToken: string,
+  orderId: string | undefined,
+  eventId: string,
+  eventAt: string,
+  receiptDigest: string,
+  dependencies: StoreBackendHandlerDependencies,
+) {
+  if (!purchaseToken.trim()) throw new Error("invalid_google_notification");
+  const purchase = await (dependencies.readGoogleConsumable ?? readGoogleConsumable)(
+    (dependencies.readEnvironment ?? env)("GOOGLE_PLAY_PACKAGE_NAME"),
+    "bil_ai_boost",
+    purchaseToken,
+  );
+  if (purchase.provider !== "google" || purchase.productId !== "bil_ai_boost" ||
+    purchase.transactionId !== purchaseToken || (orderId && purchase.orderId !== orderId)) {
+    throw new Error("google_transaction_mismatch");
+  }
+  if (purchase.purchaseState !== 1) {
+    // A notification can beat the Publisher API. A purchased/pending response
+    // cannot authorize a refund, nor may we acknowledge the refund away.
+    throw new Error("google_canonical_state_pending");
+  }
+  const { data, error } = await admin.rpc("bil_apply_ai_boost_store_event", {
+    p_store: "google_play",
+    p_transaction_id: purchaseToken,
+    p_product_id: "bil_ai_boost",
+    p_environment: purchase.environment,
+    p_event_id: eventId,
+    p_event_type: "refunded",
+    p_event_at: eventAt,
+    p_raw_receipt_hash: receiptDigest,
+  });
+  if (error || !isRecord(data) || typeof data.applied !== "boolean") {
+    throw new Error("boost_refund_persistence_failed");
+  }
+}
+
+async function verifyGooglePush(
+  request: Request,
+  body: Record<string, unknown>,
+  dependencies: StoreBackendHandlerDependencies,
+) {
+  await (dependencies.verifyGooglePushIdentity ?? verifyGooglePushIdentity)(request);
   const encoded = String((body.message as Record<string, unknown>)?.data ?? "");
   const notice = JSON.parse(atob(encoded)) as Record<string, unknown>;
   const parsed = parseGoogleNotification(notice);
+  const voided = isRecord(notice.voidedPurchaseNotification) ? notice.voidedPurchaseNotification : null;
   const notificationId = String(
     (body.message as Record<string, unknown>)?.messageId ?? "",
   );
   if (!notificationId) throw new Error("invalid_google_notification");
-  const { admin } = clients();
-  const { data: claimed } = await admin.rpc("bil_claim_store_notification", {
-    p_provider: "google",
-    p_notification_id: notificationId,
+  const { admin } = (dependencies.clients ?? clients)();
+  const claimToken = await claimStoreNotification(
+    admin, "google", notificationId, await digest(encoded),
     // Google RTDN delivery itself has no environment field. Purchase truth is
     // persisted from the authenticated Publisher API response below.
-    p_payload_digest: await digest(encoded),
-    p_environment: "production",
-  });
-  if (!claimed) return json({ accepted: true, duplicate: true });
+    "production",
+  );
+  if (!claimToken) return json({ accepted: true, duplicate: true });
+  const mark = (status: "processed" | "error") =>
+    markStoreNotification(admin, "google", notificationId, claimToken, status);
   try {
     if (parsed.kind === "test") {
-      await markStoreNotification(admin, "google", notificationId, "processed");
+      await mark("processed");
       return json({ accepted: true, test: true });
+    }
+    if (voided && Number(voided.productType) === 2) {
+      await applyGoogleBoostRefund(
+        admin, String(voided.purchaseToken ?? ""), String(voided.orderId ?? "") || undefined,
+        notificationId, googleStoreEventTime(notice.eventTimeMillis), await digest(encoded), dependencies,
+      );
+      await mark("processed");
+      return json({ accepted: true, one_time_product: true, refunded: true });
     }
     if (parsed.kind === "one_time_canceled") {
       if (parsed.productId !== "bil_ai_boost") throw new Error("wrong_product");
-      await markStoreNotification(admin, "google", notificationId, "processed");
-      return json({ accepted: true, one_time_product: true, cancelled: true });
+      await applyGoogleBoostRefund(
+        admin, parsed.purchaseToken!, undefined, notificationId,
+        googleStoreEventTime(notice.eventTimeMillis), await digest(encoded), dependencies,
+      );
+      await mark("processed");
+      return json({ accepted: true, one_time_product: true, refunded: true });
     }
     if (parsed.kind === "one_time_purchased") {
       await verifyGoogleConsumable(
@@ -1068,126 +1230,194 @@ async function verifyGooglePush(
       // RTDN has no authenticated BIL owner. The signed-in client performs the
       // idempotent credit and consume flow; this notification only validates
       // the purchase and records delivery without guessing account ownership.
-      await markStoreNotification(admin, "google", notificationId, "processed");
+      await mark("processed");
       return json({
         accepted: true,
         one_time_product: true,
         owner_pending: true,
       });
     }
-    if (parsed.kind !== "subscription") {
+    const subscriptionToken = parsed.kind === "subscription" ? parsed.purchaseToken
+      : voided && Number(voided.productType) === 1 ? String(voided.purchaseToken ?? "") : null;
+    if (!subscriptionToken) {
       throw new Error("invalid_google_notification");
     }
-    const purchase = await verifyGoogle(
-      env("GOOGLE_PLAY_PACKAGE_NAME"),
-      parsed.purchaseToken!,
+    const purchase = await (dependencies.verifyGoogle ?? verifyGoogle)(
+      (dependencies.readEnvironment ?? env)("GOOGLE_PLAY_PACKAGE_NAME"),
+      subscriptionToken,
     );
+    if (voided && !purchase.storeOrderId && ["active", "trial", "grace_period"].includes(purchase.lifecycle)) {
+      throw new Error("google_canonical_state_pending");
+    }
+    if (voided && purchase.storeOrderId === voided.orderId) {
+      const voidedPurchases = await (dependencies.googleVoidedPurchases ?? googleVoidedPurchases)();
+      if (!voidedPurchases.some((item) => item.purchaseToken === purchase.transactionId && item.orderId === purchase.storeOrderId)) {
+        throw new Error("google_canonical_state_pending");
+      }
+      purchase.lifecycle = "revoked";
+    }
     const existing = await admin.from("bil_subscriptions").select("owner_id")
       .eq("provider", "google").eq(
         "original_transaction_id",
         purchase.originalTransactionId,
       ).maybeSingle();
+    if (existing.error) throw new Error("notification_owner_lookup_failed");
     if (existing.data?.owner_id) {
       await persistVerified(admin, existing.data.owner_id, purchase);
     }
-    await markStoreNotification(admin, "google", notificationId, "processed");
+    await mark("processed");
     return json({ accepted: true });
   } catch (error) {
-    await markStoreNotification(admin, "google", notificationId, "error").catch(
-      () => {},
-    );
+    await mark("error").catch(() => {});
     throw error;
   }
+}
+
+async function claimStoreNotification(
+  admin: ReturnType<typeof clients>["admin"],
+  provider: Provider,
+  notificationId: string,
+  payloadDigest: string,
+  environment: StoreEnvironment,
+): Promise<string | null> {
+  if (!notificationId.trim()) throw new Error("invalid_store_notification");
+  const claimToken = crypto.randomUUID();
+  const { data, error } = await admin.rpc("bil_claim_store_notification", {
+    p_provider: provider,
+    p_notification_id: notificationId,
+    p_payload_digest: payloadDigest,
+    p_environment: environment,
+    p_claim_token: claimToken,
+  });
+  if (error) {
+    if (error.message === "notification_claim_in_progress") {
+      throw new Error("notification_claim_in_progress");
+    }
+    throw new Error("notification_claim_failed");
+  }
+  if (typeof data !== "boolean") throw new Error("notification_claim_failed");
+  return data ? claimToken : null;
 }
 
 async function markStoreNotification(
   admin: ReturnType<typeof clients>["admin"],
   provider: Provider,
   notificationId: string,
+  claimToken: string,
   status: "processed" | "error",
 ) {
-  const { error } = await admin.from("bil_store_notification_inbox").update({
-    status,
-    processed_at: new Date().toISOString(),
-  }).eq("provider", provider).eq("notification_id", notificationId);
-  if (error) throw new Error("notification_status_update_failed");
+  const { data, error } = await admin.rpc("bil_finish_store_notification", {
+    p_provider: provider,
+    p_notification_id: notificationId,
+    p_claim_token: claimToken,
+    p_status: status,
+  });
+  if (error || data !== true) {
+    throw new Error("notification_status_update_failed");
+  }
 }
 
-async function verifyAppleNotification(body: Record<string, unknown>) {
+async function verifyAppleNotification(
+  body: Record<string, unknown>,
+  dependencies: StoreBackendHandlerDependencies,
+) {
   const signedPayload = String(body.signedPayload ?? "");
-  const notification = await verifyAppleJws(signedPayload);
+  const notification = await (dependencies.verifyAppleJws ?? verifyAppleJws)(signedPayload);
   const notificationId = String(notification.notificationUUID ?? "");
-  const data = notification.data as Record<string, unknown>;
+  const data = isRecord(notification.data) ? notification.data : {};
   const notificationEnvironment = verifiedStoreEnvironment(data?.environment);
-  const { admin } = clients();
-  const { data: claimed } = await admin.rpc("bil_claim_store_notification", {
-    p_provider: "apple",
-    p_notification_id: notificationId,
-    p_payload_digest: await digest(signedPayload),
-    p_environment: notificationEnvironment,
-  });
-  if (!claimed) return json({ accepted: true, duplicate: true });
+  const { admin } = (dependencies.clients ?? clients)();
+  const claimToken = await claimStoreNotification(
+    admin, "apple", notificationId, await digest(signedPayload), notificationEnvironment,
+  );
+  if (!claimToken) return json({ accepted: true, duplicate: true });
+  const mark = (status: "processed" | "error") =>
+    markStoreNotification(admin, "apple", notificationId, claimToken, status);
   try {
-    if (String(notification.notificationType ?? "") === "TEST") {
-      await markStoreNotification(admin, "apple", notificationId, "processed");
+    const notificationType = String(notification.notificationType ?? "");
+    if (notificationType === "TEST") {
+      await mark("processed");
       return json({ accepted: true, test: true });
     }
     const transactionJws = String(data?.signedTransactionInfo ?? "");
-    const notificationTransaction = await verifyApple(transactionJws);
-    const purchase = await reconcileApple(
+    const notificationTransaction = await (dependencies.verifyAppleTransaction ?? verifyApple)(transactionJws);
+    if (notificationTransaction.environment !== notificationEnvironment) {
+      throw new Error("wrong_environment");
+    }
+    if (notificationType === "CONSUMPTION_REQUEST") {
+      // There is no consent-backed usage disclosure contract in this service.
+      // A refund REQUEST is not a refund decision. Send no usage/personal data,
+      // never change entitlement/credits, and explicitly record handling.
+      await mark("processed");
+      return json({ accepted: true, consumption_data_sent: false, reason: "consent_not_recorded" });
+    }
+    if (notificationTransaction.productId === "bil_ai_boost") {
+      const canonical = await (dependencies.readAppleTransaction ?? readAppleTransaction)(
+        notificationTransaction.transactionId, notificationTransaction.environment,
+      );
+      assertExactAppleTransaction(notificationTransaction, canonical);
+      assertAppleNotificationFreshness(notificationType, notificationTransaction, canonical);
+      let eventApplied = false;
+      if (["REFUND", "REVOKE", "REFUND_REVERSED"].includes(notificationType)) {
+        const eventType = canonical.lifecycle === "revoked" || canonical.lifecycle === "refunded"
+          ? "refunded"
+          : canonical.lifecycle === "active" ? "refund_reversed" : null;
+        if (!eventType || !canonical.signedAt || !Number.isFinite(Date.parse(canonical.signedAt))) {
+          throw new Error("invalid_apple_store_event");
+        }
+        const { data: eventResult, error } = await admin.rpc("bil_apply_ai_boost_store_event", {
+          p_store: "app_store",
+          p_transaction_id: canonical.transactionId,
+          p_product_id: canonical.productId,
+          p_environment: canonical.environment,
+          p_event_id: notificationId,
+          p_event_type: eventType,
+          p_event_at: canonical.signedAt,
+          p_raw_receipt_hash: await digest(signedPayload),
+        });
+        if (error || !isRecord(eventResult) || typeof eventResult.applied !== "boolean") {
+          throw new Error("boost_refund_persistence_failed");
+        }
+        eventApplied = eventResult.applied;
+      }
+      await mark("processed");
+      return json({ accepted: true, one_time_product: true, event_applied: eventApplied });
+    }
+    const purchase = await (dependencies.reconcileApple ?? reconcileApple)(
       notificationTransaction.originalTransactionId,
       notificationTransaction.environment,
     );
     assertApplePurchaseReconciliation(notificationTransaction, purchase);
-    const notificationType = String(notification.notificationType ?? "");
-    const subtype = String(notification.subtype ?? "");
-    purchase.lifecycle = appleNotificationLifecycle(
-      notificationType,
-      subtype,
-      purchase.lifecycle,
-    );
+    assertAppleNotificationFreshness(notificationType, notificationTransaction, purchase);
+    // Never project an older event's state onto a newer renewal/upgrade. The
+    // freshly verified canonical transaction/status is the entitlement truth.
     const existing = await admin.from("bil_subscriptions").select("owner_id")
       .eq("provider", "apple").eq(
         "original_transaction_id",
         purchase.originalTransactionId,
       ).maybeSingle();
+    if (existing.error) throw new Error("notification_owner_lookup_failed");
     if (existing.data?.owner_id) {
       await persistVerified(admin, existing.data.owner_id, purchase, [
         notificationTransaction.appAccountToken,
       ]);
     }
-    await markStoreNotification(admin, "apple", notificationId, "processed");
+    await mark("processed");
     return json({ accepted: true });
   } catch (error) {
-    await markStoreNotification(admin, "apple", notificationId, "error").catch(
-      () => {},
-    );
+    await mark("error").catch(() => {});
     throw error;
   }
 }
 
-function appleNotificationLifecycle(
-  notificationType: string,
-  subtype: string,
-  verifiedLifecycle: Lifecycle,
-): Lifecycle {
-  if (notificationType === "REFUND") return "refunded";
-  if (notificationType === "REVOKE") return "revoked";
-  if (
-    notificationType === "EXPIRED" ||
-    notificationType === "GRACE_PERIOD_EXPIRED"
-  ) {
-    return "expired";
-  }
-  if (notificationType === "DID_FAIL_TO_RENEW") {
-    return subtype === "GRACE_PERIOD" ? "grace_period" : "billing_retry";
-  }
-  return verifiedLifecycle;
-}
-
-async function reconcile(request: Request) {
+async function reconcile(
+  request: Request,
+  body: Record<string, unknown>,
+  dependencies: StoreBackendHandlerDependencies,
+) {
   const supplied = request.headers.get("x-bil-reconciliation-secret") ?? "";
-  const expected = env("BIL_RECONCILIATION_SECRET");
+  const readEnvironment = dependencies.readEnvironment ?? env;
+  const expected = readEnvironment("BIL_RECONCILIATION_SECRET");
   if (!expected || supplied.length !== expected.length) {
     throw new Error("reconciliation_forbidden");
   }
@@ -1198,57 +1428,58 @@ async function reconcile(request: Request) {
     mismatch |= left[index] ^ right[index];
   }
   if (mismatch !== 0) throw new Error("reconciliation_forbidden");
-  const { admin } = clients();
-  const { data: subscriptions, error } = await admin.from("bil_subscriptions")
+  const cursor = body.after_owner_id;
+  if (cursor != null && (typeof cursor !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cursor))) {
+    throw new Error("invalid_reconciliation_cursor");
+  }
+  const { admin } = (dependencies.clients ?? clients)();
+  let query = admin.from("bil_subscriptions")
     .select(
       "owner_id,provider,original_transaction_id,latest_transaction_id,environment",
     )
-    .limit(500);
+    .in("provider", ["apple", "google"])
+    .order("owner_id", { ascending: true })
+    .limit(101);
+  if (typeof cursor === "string") query = query.gt("owner_id", cursor);
+  const { data: page, error } = await query;
   if (error) throw new Error("reconciliation_read_failed");
-  let voidedGoogleTokens = new Set<string>();
-  try {
-    voidedGoogleTokens = await googleVoidedPurchaseTokens();
-  } catch {
-    // Normal per-subscription verification still runs. The failure is visible
-    // in reconciliation audit rather than silently granting new access.
+  const hasMore = (page?.length ?? 0) > 100;
+  const subscriptions = (page ?? []).slice(0, 100);
+  let voidedGooglePurchases: GoogleVoidedPurchase[] = [];
+  let voidedGoogleLookupUnavailable = false;
+  if (subscriptions.some((row) => row.provider === "google") || readEnvironment("GOOGLE_PLAY_PACKAGE_NAME")) {
+    try {
+      voidedGooglePurchases = await (dependencies.googleVoidedPurchases ?? googleVoidedPurchases)();
+    } catch {
+      // The Google function follows every store page; an outage is explicitly
+      // reported rather than pretending this bounded owner page is a full audit.
+      voidedGoogleLookupUnavailable = true;
+    }
   }
   let reconciled = 0;
-  for (const row of subscriptions ?? []) {
+  let failed = 0;
+  for (const row of subscriptions) {
     try {
-      if (
-        row.provider === "google" &&
-        voidedGoogleTokens.has(row.latest_transaction_id)
-      ) {
-        await admin.from("bil_subscriptions").update({
-          lifecycle: "revoked",
-          verified_at: new Date().toISOString(),
-        }).eq("owner_id", row.owner_id);
-        await admin.from("bil_entitlements").update({
-          active: false,
-          server_updated_at: new Date().toISOString(),
-        }).eq("owner_id", row.owner_id).like("entitlement_id", "plan:%");
-        await admin.from("bil_store_entitlement_audit").insert({
-          owner_id: row.owner_id,
-          provider: "google",
-          lifecycle: "revoked",
-          reason: "google_voided_purchase",
-          transaction_fingerprint: await fingerprint(row.latest_transaction_id),
-        });
-        reconciled += 1;
-        continue;
-      }
       const purchase = row.provider === "google"
-        ? await verifyGoogle(
-          env("GOOGLE_PLAY_PACKAGE_NAME"),
+        ? await (dependencies.verifyGoogle ?? verifyGoogle)(
+          readEnvironment("GOOGLE_PLAY_PACKAGE_NAME"),
           row.latest_transaction_id,
         )
-        : await reconcileApple(
+        : await (dependencies.reconcileApple ?? reconcileApple)(
           row.original_transaction_id,
           verifiedStoreEnvironment(row.environment),
         );
+      if (purchase.provider === "google" && purchase.storeOrderId &&
+        voidedGooglePurchases.some((item) => item.purchaseToken === purchase.transactionId && item.orderId === purchase.storeOrderId)) {
+        // Apply revocation through the same atomic subscription + entitlement
+        // persistence RPC, never three independently acknowledged writes.
+        purchase.lifecycle = "revoked";
+      }
       await persistVerified(admin, row.owner_id, purchase);
       reconciled += 1;
     } catch {
+      failed += 1;
       await admin.from("bil_store_entitlement_audit").insert({
         owner_id: row.owner_id,
         provider: row.provider,
@@ -1258,7 +1489,38 @@ async function reconcile(request: Request) {
       });
     }
   }
-  return json({ reconciled, examined: subscriptions?.length ?? 0 });
+  let boostRefundsReconciled = 0;
+  let boostRefundsFailed = 0;
+  // The authoritative, fully paginated Google voided list already bounds this
+  // work to recent refunds. Exact ledger lookups avoid a second unbounded scan.
+  // Do it once per full owner pass rather than repeating on every cursor page.
+  if (cursor == null && !voidedGoogleLookupUnavailable) {
+    for (const voided of voidedGooglePurchases) {
+      try {
+        const { data: credit, error: creditError } = await admin.from("bil_ai_boost_purchases")
+          .select("product_id").eq("store", "google_play").eq("transaction_id", voided.purchaseToken).maybeSingle();
+        if (creditError) throw new Error("boost_refund_lookup_failed");
+        if (!credit) continue;
+        if (credit.product_id !== "bil_ai_boost") throw new Error("wrong_product");
+        await applyGoogleBoostRefund(
+          admin, voided.purchaseToken, voided.orderId,
+          `voided:${voided.orderId}:${voided.voidedAt}`, voided.voidedAt,
+          await digest(JSON.stringify(voided)), dependencies,
+        );
+        boostRefundsReconciled++;
+      } catch {
+        boostRefundsFailed++;
+      }
+    }
+  }
+  return json({
+    reconciled, failed, examined: subscriptions.length,
+    has_more: hasMore,
+    next_cursor: hasMore ? subscriptions[subscriptions.length - 1].owner_id : null,
+    voided_google_lookup_unavailable: voidedGoogleLookupUnavailable,
+    boost_refunds_reconciled: boostRefundsReconciled,
+    boost_refunds_failed: boostRefundsFailed,
+  });
 }
 
 export async function handler(
@@ -1271,9 +1533,9 @@ export async function handler(
   let route: "verify_purchase" | "verify_ai_boost" | "unknown" = "unknown";
   try {
     const body = await request.json() as Record<string, unknown>;
-    if (body.action === "reconcile") return await reconcile(request);
-    if (body.signedPayload) return await verifyAppleNotification(body);
-    if (body.message) return await verifyGooglePush(request, body);
+    if (body.action === "reconcile") return await reconcile(request, body, dependencies);
+    if (body.signedPayload) return await verifyAppleNotification(body, dependencies);
+    if (body.message) return await verifyGooglePush(request, body, dependencies);
     if (body.action === "verify_purchase") {
       route = "verify_purchase";
       return await verifyPurchase(request, body, dependencies);
@@ -1307,6 +1569,7 @@ export async function handler(
       "invalid_apple_account_token",
       "market_plan_mismatch",
       "store_country_required",
+      "invalid_reconciliation_cursor",
     ]);
     return json(
       { error: code, verified: false, entitlement_active: false },

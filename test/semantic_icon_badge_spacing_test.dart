@@ -16,6 +16,46 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   for (final direction in TextDirection.values) {
+    for (final brightness in Brightness.values) {
+      testWidgets('Shared theme separates unconfigured icon rows in '
+          '${direction.name} ${brightness.name}', (tester) async {
+        _setPhoneSurface(tester);
+        await tester.pumpWidget(
+          _localizedApp(
+            direction: direction,
+            theme: brightness == Brightness.dark
+                ? BilFlagshipTheme.dark()
+                : BilFlagshipTheme.light(),
+            home: const Scaffold(
+              body: ListTile(
+                leading: BilSemanticIconBadge(kind: BilSemanticIconKind.health),
+                title: Text('Body context'),
+                subtitle: Text('An entry point with no local spacing override'),
+                trailing: Icon(Icons.chevron_right_rounded),
+                onTap: _noop,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final tile = find.byType(ListTile);
+        expect(tester.widget<ListTile>(tile).horizontalTitleGap, isNull);
+        for (final text
+            in find
+                .descendant(of: tile, matching: find.byType(Text))
+                .evaluate()) {
+          expect(
+            _directionalGap(
+              direction: direction,
+              leading: tester.getRect(find.byType(BilSemanticIconBadge)),
+              title: tester.getRect(find.byWidget(text.widget)),
+            ),
+            greaterThanOrEqualTo(12),
+          );
+        }
+        expect(tester.takeException(), isNull);
+      });
+    }
     testWidgets(
       'Daily Water semantic badge keeps a 12 px title gap in ${direction.name}',
       (tester) async {
@@ -174,8 +214,9 @@ void _setPhoneSurface(WidgetTester tester) {
 Widget _localizedApp({
   required TextDirection direction,
   required Widget home,
+  ThemeData? theme,
 }) => MaterialApp(
-  theme: BilFlagshipTheme.light(),
+  theme: theme ?? BilFlagshipTheme.light(),
   locale: const Locale('en'),
   supportedLocales: AppLocalizations.supportedLocales,
   localizationsDelegates: const [

@@ -71,10 +71,29 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> revealHeartHealthy(WidgetTester tester) async {
+    // A saved dietary preset must not displace Calories from the first page.
+    expect(
+      find.byKey(const Key('dashboard-reference-calories-card')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('dashboard-heart-circle-card')), findsNothing);
+    expect(tester.takeException(), isNull);
+    for (var page = 0; page < 2; page++) {
+      await tester.drag(
+        find.byKey(const Key('dashboard-calories-macros-horizontal')),
+        const Offset(-320, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+  }
+
   testWidgets('heart health reuses the three macro ring colors', (
     tester,
   ) async {
     await pumpDashboard(tester, premiumUnlocked: true);
+    await revealHeartHealthy(tester);
 
     final heart = find.byKey(const Key('dashboard-heart-circle-card'));
     expect(heart, findsOneWidget);
@@ -131,6 +150,7 @@ void main() {
     'free users see minimal Premium locks on macros and heart health',
     (tester) async {
       await pumpDashboard(tester, premiumUnlocked: false);
+      await revealHeartHealthy(tester);
 
       final heartLock = find.descendant(
         of: find.byKey(const Key('dashboard-heart-premium-lock')),

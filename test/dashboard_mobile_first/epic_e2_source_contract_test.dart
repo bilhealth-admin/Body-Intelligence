@@ -31,9 +31,24 @@ void main() {
         "key: const Key('dashboard-mobile-body-twin-snapshot')",
       );
       final connectedIndex = current.indexOf('connectedHealth!,');
-      expect(dayIndex, greaterThanOrEqualTo(0));
-      expect(twinIndex, greaterThan(dayIndex));
-      expect(connectedIndex, lessThan(dayIndex));
+      final fitnessIndex = current.indexOf('DashboardHealthSidePanel(');
+      final ungroupedIndex = current.indexOf('if (!groupedFitness)');
+      // Named-argument order is not visual order: daily summaries are now
+      // supplied as the panel beside the watch, not a separate lower row.
+      expect(fitnessIndex, greaterThanOrEqualTo(0));
+      expect(dayIndex, greaterThan(fitnessIndex));
+      expect(connectedIndex, greaterThan(dayIndex));
+      expect(ungroupedIndex, greaterThan(connectedIndex));
+      final fitnessGroup = current.substring(fitnessIndex, ungroupedIndex);
+      expect(fitnessGroup, contains('panel: DashboardDailyReturnLayout('));
+      expect(fitnessGroup, contains('child: dailyIntelligence,'));
+      expect(fitnessGroup, contains('child: connectedHealth!,'));
+      final standaloneDayIndex = current.indexOf(
+        "Key('dashboard-daily-intelligence-slot')",
+        ungroupedIndex,
+      );
+      expect(standaloneDayIndex, greaterThan(ungroupedIndex));
+      expect(twinIndex, greaterThan(standaloneDayIndex));
 
       final grid = File(
         'lib/features/dashboard/widgets/dashboard_grid.dart',

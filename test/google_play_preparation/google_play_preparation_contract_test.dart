@@ -62,9 +62,10 @@ void main() {
   test('store purchases require real billing and server verification', () {
     final pubspec = read('pubspec.yaml');
     final environment = read('lib/app/environment/app_environment.dart');
-    final purchaseService = read(
+    final purchaseService = [
       'lib/features/commerce/services/verified_store_purchase_service.dart',
-    );
+      'lib/features/commerce/services/verified_store_purchase_processing.dart',
+    ].map(read).join('\n');
 
     expect(pubspec, contains('in_app_purchase:'));
     expect(pubspec, isNot(contains('google_play_integrity:')));

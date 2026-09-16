@@ -46,6 +46,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   String? _purchaseFeedbackKey;
   bool _purchaseFeedbackIsError = false;
   VerifiedStoreState? _lastStoreState;
+  String? _lastStoreMessage;
 
   @override
   void initState() {
@@ -78,8 +79,17 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   void _onStoreChanged() {
     final store = widget.store ?? _ownedStore;
     if (store == null || !mounted) return;
-    if (store.state == VerifiedStoreState.verified &&
-        _lastStoreState != VerifiedStoreState.verified) {
+    final verifiedTransition =
+        store.state == VerifiedStoreState.verified &&
+        _lastStoreState != VerifiedStoreState.verified;
+    final settledRestore =
+        store.messageCode == 'no_restorable_purchases' &&
+        _lastStoreMessage != 'no_restorable_purchases';
+    // An authentic inactive receipt is settled without a paid grant. Refresh
+    // mounted surfaces immediately, not only after an active purchase. Empty
+    // store history also uses this message: it triggers a read, never a local
+    // revocation of an independently verified account entitlement.
+    if (verifiedTransition || settledRestore) {
       ref.invalidate(verifiedSubscriptionStateProvider);
       ref.invalidate(aiCoachCreditAccessProvider);
       ref
@@ -87,6 +97,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
           .requestAuthoritativeReload();
     }
     _lastStoreState = store.state;
+    _lastStoreMessage = store.messageCode;
     final feedback = _purchaseFeedbackFor(store);
     setState(() {
       _purchaseFeedbackKey = feedback.$1;
@@ -287,7 +298,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     var currentPlan = CommercePlan.free;
     try {
       currentPlan =
-          ref.watch(verifiedSubscriptionStateProvider).value?.plan ??
+          ref.watch(verifiedSubscriptionAccessProvider).value?.plan ??
           CommercePlan.free;
     } on StateError {
       currentPlan = CommercePlan.free;

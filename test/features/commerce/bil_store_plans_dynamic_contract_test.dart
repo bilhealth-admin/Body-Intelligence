@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -41,6 +46,74 @@ void main() {
       );
       await tester.pumpWidget(const SizedBox.shrink());
       store.dispose();
+    },
+  );
+
+  testWidgets(
+    'settled inactive restore immediately refreshes mounted access without purchasing',
+    (tester) async {
+      final store = _CancellationReadyStore();
+      final catalog = _InactiveRestoreCatalog(store);
+      var entitlementLoads = 0;
+      var creditLoads = 0;
+      var state = SubscriptionState(
+        plan: CommercePlan.premium,
+        entitlements: const {},
+        authority: EntitlementAuthority.verifiedServer,
+        currentPeriodEndsAt: DateTime.now().toUtc().add(
+          const Duration(hours: 1),
+        ),
+        isPurchasable: false,
+        canRestorePurchases: true,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWith((_) async {
+            entitlementLoads++;
+            return state;
+          }),
+          aiCoachCreditAccessProvider.overrideWith((_) async {
+            creditLoads++;
+            return false;
+          }),
+        ],
+      );
+      final credits = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+      addTearDown(() {
+        credits.close();
+        container.dispose();
+        store.dispose();
+      });
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: BilStorePlansPage(
+              store: store,
+              catalog: catalog,
+              productIds: const {'premium.monthly'},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(catalog.requested, isEmpty);
+      final beforeEntitlements = entitlementLoads;
+      final beforeCredits = creditLoads;
+      state = FreePlan.createState();
+      final restore = find.text(BilStoreCopy.text('en', 'restore'));
+      await tester.ensureVisible(restore);
+      await tester.pumpAndSettle();
+      await tester.tap(restore);
+      await tester.pumpAndSettle();
+      expect(entitlementLoads, greaterThan(beforeEntitlements));
+      expect(creditLoads, greaterThan(beforeCredits));
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).value?.plan,
+        CommercePlan.free,
+      );
+      expect(catalog.requested, isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
     },
   );
 
@@ -603,5 +676,16 @@ final class _RestoreVerificationFailureCatalog extends _RecordingCatalog {
       VerifiedStoreState.failed,
       'restore_verification_failed',
     );
+  }
+}
+
+final class _InactiveRestoreCatalog extends _RecordingCatalog {
+  _InactiveRestoreCatalog(this.store) : super(const [_monthlyOffer]);
+
+  final _CancellationReadyStore store;
+
+  @override
+  Future<void> restorePurchases() async {
+    store.reportFeedback(VerifiedStoreState.ready, 'no_restorable_purchases');
   }
 }

@@ -148,6 +148,7 @@ SubscriptionState _state(CommercePlan plan) {
         ? const {CommerceEntitlement.advancedIntelligence}
         : const <CommerceEntitlement>{},
     authority: EntitlementAuthority.verifiedServer,
+    currentPeriodEndsAt: DateTime.utc(2099),
     isPurchasable: true,
     canRestorePurchases: true,
   );

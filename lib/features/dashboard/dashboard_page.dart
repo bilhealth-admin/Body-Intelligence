@@ -286,19 +286,6 @@ class DashboardPage extends ConsumerWidget {
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const CloudSyncConsentNotice(),
-        DashboardTopBar(
-          profilePhoto: profilePhoto,
-          profilePhotoUrl: profilePhotoUrl,
-          onProfile: () => manageProfilePhoto(
-            context,
-            ref,
-            profilePhoto,
-            profilePhotoUrl,
-            locale,
-          ),
-        ),
-        const SizedBox(height: 18),
         if (showFirstValue) ...[
           FirstValueHandoffCard(
             onContinue: () async {
@@ -319,7 +306,7 @@ class DashboardPage extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
         ],
       ],
     );
@@ -338,6 +325,18 @@ class DashboardPage extends ConsumerWidget {
       data: dashboardTheme,
       child: DashboardShell(
         onRefresh: () => refresh(context, ref),
+        leading: const CloudSyncConsentNotice(),
+        edgeHeader: DashboardTopBar(
+          profilePhoto: profilePhoto,
+          profilePhotoUrl: profilePhotoUrl,
+          onProfile: () => manageProfilePhoto(
+            context,
+            ref,
+            profilePhoto,
+            profilePhotoUrl,
+            locale,
+          ),
+        ),
         child: DashboardHealthActivityRefresh(
           child: DashboardComposition(
             hero: hero,

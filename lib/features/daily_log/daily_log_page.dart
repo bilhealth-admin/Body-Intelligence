@@ -570,10 +570,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         padding: EdgeInsets.zero,
                         child: ListTile(
                           contentPadding: PremiumDesignTokens.cardPaddingLarge,
+                          horizontalTitleGap: 12,
                           leading: BilSemanticIconBadge(
                             kind: BilSemanticIconKind.health,
-                            size: 40,
-                            iconSize: 22,
+                            size: 32,
+                            iconSize: 18,
                             shape: BoxShape.rectangle,
                           ),
                           title: Text(_tr('Body context', 'سياق الجسم')),

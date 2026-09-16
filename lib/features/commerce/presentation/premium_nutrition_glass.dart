@@ -29,7 +29,7 @@ class PremiumNutritionGlass extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscription = ref.watch(verifiedSubscriptionStateProvider);
+    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
     if (subscription.isLoading || subscription.hasError) {
       return _PremiumNutritionStatusGlass(
         borderRadius: borderRadius,

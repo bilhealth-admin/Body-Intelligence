@@ -36,6 +36,7 @@ part 'bil_workout_routine_details.dart';
 part 'bil_workout_routine_media.dart';
 part 'bil_workout_fullscreen_copy.dart';
 part 'bil_workout_fullscreen_video.dart';
+part 'bil_workout_video_access_gate.dart';
 part 'bil_workout_fullscreen_view.dart';
 part 'bil_workout_routine_presenters.dart';
 part 'bil_workout_routine_visuals.dart';
@@ -293,7 +294,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
 
   Future<void> _logTrustedRoutine(WellnessContentItem item) async {
     final subscription = _usableVerifiedSubscription(
-      ref.read(verifiedSubscriptionStateProvider),
+      ref.read(verifiedSubscriptionAccessProvider),
     );
     if (!workoutItemAccessGranted(item, subscription)) {
       throw StateError(
@@ -362,7 +363,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   Widget build(BuildContext context) {
     // Keep paid rows fail-closed while entitlement is loading and rebuild the
     // library immediately if the verified server snapshot changes.
-    ref.watch(verifiedSubscriptionStateProvider);
+    ref.watch(verifiedSubscriptionAccessProvider);
     final future = _items;
     final compactHeader = MediaQuery.sizeOf(context).width < 520;
     return Scaffold(
@@ -526,7 +527,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
 
   bool _isLocked(WellnessContentItem item) {
     final subscription = _usableVerifiedSubscription(
-      ref.read(verifiedSubscriptionStateProvider),
+      ref.read(verifiedSubscriptionAccessProvider),
     );
     return !workoutItemAccessGranted(item, subscription);
   }

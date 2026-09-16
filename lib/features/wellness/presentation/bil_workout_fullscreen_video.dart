@@ -35,6 +35,7 @@ class _FullscreenWorkoutVideoPage extends StatefulWidget {
 
 @visibleForTesting
 Widget buildWorkoutFullscreenVideoForTest({
+  WellnessContentItem? accessItem,
   File? file,
   Future<VideoPlayerController> Function()? controllerFactory,
   Duration initialPosition = Duration.zero,
@@ -43,16 +44,21 @@ Widget buildWorkoutFullscreenVideoForTest({
   Duration commandTimeout = const Duration(seconds: 8),
   Duration bufferingTimeout = const Duration(seconds: 30),
   Duration controlsAutoHideDuration = const Duration(seconds: 3),
-}) => _FullscreenWorkoutVideoPage(
-  file: file,
-  controllerFactory: controllerFactory,
-  initialPosition: initialPosition,
-  onPositionChanged: onPositionChanged,
-  initializationTimeout: initializationTimeout,
-  commandTimeout: commandTimeout,
-  bufferingTimeout: bufferingTimeout,
-  controlsAutoHideDuration: controlsAutoHideDuration,
-);
+}) {
+  final player = _FullscreenWorkoutVideoPage(
+    file: file,
+    controllerFactory: controllerFactory,
+    initialPosition: initialPosition,
+    onPositionChanged: onPositionChanged,
+    initializationTimeout: initializationTimeout,
+    commandTimeout: commandTimeout,
+    bufferingTimeout: bufferingTimeout,
+    controlsAutoHideDuration: controlsAutoHideDuration,
+  );
+  return accessItem == null
+      ? player
+      : _WorkoutVideoAccessGate(item: accessItem, child: player);
+}
 
 class _FullscreenWorkoutVideoPageState
     extends State<_FullscreenWorkoutVideoPage>

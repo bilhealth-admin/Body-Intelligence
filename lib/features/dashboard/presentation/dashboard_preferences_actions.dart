@@ -1,9 +1,15 @@
 part of 'dashboard_preferences_page.dart';
 
 extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
-  Future<bool> _guardedSave(Future<void> Function() operation) async {
+  Future<bool> _guardedSave(
+    Future<void> Function() operation, {
+    String? section,
+  }) async {
     if (_saving) return false;
-    _updateState(() => _saving = true);
+    _updateState(() {
+      _saving = true;
+      _savingSection = section;
+    });
     try {
       await operation();
       return true;
@@ -11,7 +17,12 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
       if (mounted) _showSaveFailure(context);
       return false;
     } finally {
-      if (mounted) _updateState(() => _saving = false);
+      if (mounted) {
+        _updateState(() {
+          _saving = false;
+          _savingSection = null;
+        });
+      }
     }
   }
 
@@ -157,7 +168,7 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
         'dashboard.section.$section': '$visible',
         'dashboard.preset': 'custom',
       });
-    });
+    }, section: section);
   }
 
   Future<void> _restoreDefaults(BuildContext context, WidgetRef ref) async {

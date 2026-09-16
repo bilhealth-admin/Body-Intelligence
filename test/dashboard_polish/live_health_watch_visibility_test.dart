@@ -345,9 +345,10 @@ void main() {
   });
 
   test('dashboard snapshot and status follow aggregate connection truth', () {
-    final card = File(
+    final card = [
       'lib/features/connected_health/widgets/connected_health_card.dart',
-    ).readAsStringSync();
+      'lib/features/connected_health/widgets/connected_health_dashboard_snapshot.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(card, contains('final hasMeasuredData ='));
     expect(card, contains('liveHealthWatchCanShowMetrics(watchSnapshot)'));

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
 import subprocess
 from types import SimpleNamespace
 import unittest
@@ -14,6 +15,9 @@ from tool.release import run_portable_release_tests as runner
 
 class PortableReleaseSchedulingTest(unittest.TestCase):
     def setUp(self) -> None:
+        environment = mock.patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
         self.portable = [
             "test/a_test.dart",
             runner.PERFORMANCE_BUDGET_TEST,
@@ -158,6 +162,33 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
         self.assertEqual(calls[0].args[0][-1], runner.PERFORMANCE_BUDGET_TEST)
         self.assertEqual(calls[1].args[0][-2:], ["test/a_test.dart", "test/z_test.dart"])
         self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=3\n"))
+
+    def test_dashboard_capture_guards_keep_all_regression_tests_scheduled(self):
+        policy = runner.load_code_only_policy()
+        all_tests, ordinary = policy.discover()
+        _, portable = runner.discover_tests()
+        expected = {
+            "test/dashboard_polish/dashboard_current_preview_test.dart",
+            "test/dashboard_polish/dashboard_polish_layout_review_test.dart",
+            "test/dashboard_polish/icon_label_layout_review_test.dart",
+        }
+        self.assertEqual(set(policy.ENV_CAPTURE_GUARDED), expected)
+        for name in expected:
+            self.assertIn(name, all_tests)
+            self.assertIn(name, ordinary)
+            self.assertIn(name, portable)
+            self.assertNotIn(name, policy.NOT_RUN)
+            self.assertNotIn(name, policy.MIXED_NAMES)
+
+    def test_code_only_overrides_inherited_dashboard_capture_flags(self):
+        policy = runner.load_code_only_policy()
+        for flag in policy.ENV_CAPTURE_GUARDED.values():
+            os.environ[flag] = "1"
+        code, calls, _ = self.run_main([0, 0], ["--code-only"])
+        self.assertEqual(code, 0)
+        self.assertEqual(len(calls), 2)
+        for flag in policy.ENV_CAPTURE_GUARDED.values():
+            self.assertEqual(os.environ[flag], "0")
 
     def test_code_only_real_policy_preserves_performance_failure(self):
         code, calls, output = self.run_main([7], ["--code-only"])

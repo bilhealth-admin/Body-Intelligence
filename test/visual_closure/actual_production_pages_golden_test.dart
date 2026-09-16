@@ -1678,50 +1678,50 @@ void main() {
         interact: (tester) async {
           // Quick log and Personal intelligence are both hidden by default.
           // Turn the peer on so each golden proves one distinct disabled state.
-          final peerLabel = switch (section.$1) {
-            'quick_log' => 'Personal intelligence',
-            'best_action' => 'Quick log',
+          final peerId = switch (section.$1) {
+            'quick_log' => 'best_action',
+            'best_action' => 'quick_log',
             _ => null,
           };
-          if (peerLabel != null) {
-            final peer = find.text(peerLabel);
+          if (peerId != null) {
+            final peerTile = find.byKey(Key('dashboard-section-$peerId'));
             await tester.scrollUntilVisible(
-              peer,
+              peerTile,
               180,
               scrollable: find.byType(Scrollable).first,
             );
-            final peerTile = find.ancestor(
-              of: peer,
-              matching: find.byType(SwitchListTile),
-            );
-            if (!tester.widget<SwitchListTile>(peerTile).value) {
-              await tester.tap(peerTile);
+            await tester.ensureVisible(peerTile);
+            final peerWidget = tester.widget<SwitchListTile>(peerTile);
+            if (!peerWidget.value) {
+              peerWidget.onChanged!(true);
               await tester.pumpAndSettle();
             }
           }
-          final target = find.text(section.$2);
+          final tile = find.byKey(Key('dashboard-section-${section.$1}'));
           await tester.scrollUntilVisible(
-            target,
+            tile,
             180,
             scrollable: find.byType(Scrollable).first,
           );
           await Scrollable.ensureVisible(
-            tester.element(target),
+            tester.element(tile),
             alignment: .35,
             duration: Duration.zero,
           );
           await tester.pumpAndSettle();
-          final tile = find.ancestor(
-            of: target,
-            matching: find.byType(SwitchListTile),
-          );
-          if (tester.widget<SwitchListTile>(tile).value) {
-            await tester.tap(tile);
+          final tileWidget = tester.widget<SwitchListTile>(tile);
+          if (tileWidget.value) {
+            tileWidget.onChanged!(false);
             await tester.pumpAndSettle();
           }
           expect(tester.widget<SwitchListTile>(tile).value, isFalse);
           if (section.$1 == 'quick_log') {
             final restore = find.text('Restore default view');
+            await tester.scrollUntilVisible(
+              restore,
+              180,
+              scrollable: find.byType(Scrollable).first,
+            );
             await Scrollable.ensureVisible(
               tester.element(restore),
               alignment: .72,

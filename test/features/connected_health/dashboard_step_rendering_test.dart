@@ -90,7 +90,12 @@ void main() {
     await tester.pumpWidget(
       _harness(const Locale('en'), scenarios.first.trend),
     );
-    await _showSteps(tester);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('dashboard-step-trend-card')),
+      findsOneWidget,
+      reason: 'Updating the data keeps the selected Steps page in place',
+    );
     expect(find.text('1234 steps'), findsNothing);
     expect(find.textContaining('Apple Health'), findsNothing);
     expect(find.text('Connect or log steps to see your trend'), findsOneWidget);

@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../domain/commerce_plan.dart';
+import '../domain/free_plan.dart';
 import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
@@ -101,7 +102,7 @@ void Function() _observedAuthorityReload(Ref ref, void Function() reload) {
 final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   ref,
 ) async {
-  ref.watch(verifiedEntitlementOwnerProvider);
+  ref.watch(verifiedEntitlementOwnerIdProvider);
   final loaded = _observedAuthorityReload(ref, ref.invalidateSelf);
   try {
     return await ref.watch(verifiedEntitlementLoaderProvider)();
@@ -109,6 +110,60 @@ final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
     loaded();
   }
 });
+
+/// Injectable only for deterministic expiry tests; the device clock never
+/// creates an entitlement, it can only shorten an already verified grant.
+final verifiedEntitlementClockProvider = Provider<DateTime Function()>(
+  (_) =>
+      () => DateTime.now().toUtc(),
+);
+
+/// Presentation view of the server snapshot with an exact local access cutoff.
+/// The upstream repository still owns verification and its bounded continuity
+/// cache. A slow refresh must not keep a cached paid plan alive past its period.
+final verifiedSubscriptionAccessProvider =
+    Provider.autoDispose<AsyncValue<SubscriptionState>>((ref) {
+      final snapshot = ref.watch(verifiedSubscriptionStateProvider);
+      // A dependency reload includes an account change. Never reuse another
+      // owner's previous AsyncValue; only an explicit same-owner refresh may
+      // retain its previously verified value while the server is answering.
+      if (snapshot.isLoading && !snapshot.isRefreshing) {
+        return const AsyncValue.loading();
+      }
+      if (snapshot.hasError) return snapshot;
+      final state = snapshot.value;
+      if (state == null || state.plan == CommercePlan.free) return snapshot;
+      final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
+      final boundary = switch (state.lifecycle) {
+        SubscriptionLifecycle.trial => state.trialEndsAt,
+        SubscriptionLifecycle.active ||
+        SubscriptionLifecycle.cancelled => state.currentPeriodEndsAt,
+        SubscriptionLifecycle.gracePeriod => state.gracePeriodEndsAt,
+        _ => null,
+      };
+      if (state.authority != EntitlementAuthority.verifiedServer ||
+          boundary == null ||
+          !boundary.toUtc().isAfter(now) ||
+          (state.startedAt?.toUtc().isAfter(now) ?? false)) {
+        return AsyncValue.data(
+          SubscriptionState(
+            plan: CommercePlan.free,
+            entitlements: FreePlan.entitlements,
+            authority: state.authority,
+            lifecycle: SubscriptionLifecycle.expired,
+            provider: state.provider,
+            isPurchasable: false,
+            canRestorePurchases: state.canRestorePurchases,
+          ),
+        );
+      }
+      final expiry = Timer(
+        boundary.toUtc().difference(now),
+        ref.invalidateSelf,
+      );
+      ref.onDispose(expiry.cancel);
+      return AsyncValue.data(state);
+    });
 
 double _positiveFiniteNumber(Object? value) {
   if (value is! num) return 0;

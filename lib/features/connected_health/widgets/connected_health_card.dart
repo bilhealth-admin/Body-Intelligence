@@ -17,82 +17,22 @@ import 'connected_health_primitives.dart';
 import 'health_hub_empty_state.dart';
 import 'live_health_watch.dart';
 
-@visibleForTesting
-ConnectedHealthSnapshot dashboardWatchSnapshot(
-  ConnectedHealthSnapshot snapshot,
-  FitnessDeviceSnapshot fitnessDevices,
-) {
-  final connected =
-      fitnessDevices.status == FitnessDeviceConnectionStatus.connected &&
-      fitnessDevices.connectedDeviceId?.trim().isNotEmpty == true;
-  if (!connected) return snapshot;
+part 'connected_health_dashboard_snapshot.dart';
 
-  ConnectedHealthSignalView? latestHeartRate;
-  for (final packet in fitnessDevices.measurements) {
-    if (packet['kind'] != 'heart_rate' || packet['unit'] != 'bpm') continue;
-    final value = packet['value'];
-    final observedAt = DateTime.tryParse('${packet['observedAt'] ?? ''}');
-    if (value is! num ||
-        !value.toDouble().isFinite ||
-        observedAt == null ||
-        value < BleMeasurementPolicy.supported['heart_rate']!.minimum ||
-        value > BleMeasurementPolicy.supported['heart_rate']!.maximum) {
-      continue;
-    }
-    final candidate = ConnectedHealthSignalView(
-      key: 'heartRate',
-      value: value.toDouble(),
-      unit: 'bpm',
-      source: 'ble:${fitnessDevices.connectedDeviceId}',
-      observedAt: observedAt.toUtc(),
-      confidence: 1,
-      attributes: const <String, Object?>{
-        'transport': 'ble',
-        'wearableKind': 'ble_fitness_sensor',
-      },
-    );
-    if (latestHeartRate == null ||
-        candidate.observedAt.isAfter(latestHeartRate.observedAt)) {
-      latestHeartRate = candidate;
-    }
-  }
-  const bleSource = 'Bluetooth fitness device';
-  final baseUsable = liveHealthWatchCanShowMetrics(snapshot);
-  final availableSources = <String>{
-    if (baseUsable)
-      ...snapshot.availableSources.where((source) => source.trim().isNotEmpty),
-    bleSource,
-  }.toList(growable: false);
-  final baseLastSync = baseUsable ? snapshot.lastSyncAt : null;
-  final latestSync = latestHeartRate == null
-      ? baseLastSync
-      : baseLastSync == null || latestHeartRate.observedAt.isAfter(baseLastSync)
-      ? latestHeartRate.observedAt
-      : baseLastSync;
-  return ConnectedHealthSnapshot(
-    status: latestHeartRate == null
-        ? baseUsable
-              ? snapshot.status
-              : ConnectedHealthStatus.ready
-        : ConnectedHealthStatus.synchronized,
-    platformSource:
-        baseUsable && snapshot.platformSource?.trim().isNotEmpty == true
-        ? snapshot.platformSource
-        : bleSource,
-    availableSources: availableSources,
-    signals: <ConnectedHealthSignalView>[
-      if (baseUsable) ...snapshot.signals,
-      ?latestHeartRate,
-    ],
-    importedCount: baseUsable ? snapshot.importedCount : 0,
-    lastSyncAt: latestSync,
-    failureCode: null,
-    availabilityStatus: null,
-    deviceVerified: true,
-    stepHistory: baseUsable
-        ? snapshot.stepHistory
-        : const <ConnectedHealthSignalView>[],
-  );
+/// Groups existing dashboard summaries beside the unchanged health source.
+class DashboardHealthSidePanel extends InheritedWidget {
+  const DashboardHealthSidePanel({
+    super.key,
+    required super.child,
+    required this.panel,
+  });
+  final Widget panel;
+  static Widget? of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<DashboardHealthSidePanel>()
+      ?.panel;
+  @override
+  bool updateShouldNotify(DashboardHealthSidePanel oldWidget) =>
+      panel != oldWidget.panel;
 }
 
 class ConnectedHealthCard extends ConsumerStatefulWidget {
@@ -190,7 +130,7 @@ class _DashboardDevicePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final inherited = MediaQuery.of(context);
     final scale = inherited.textScaler.scale(1).clamp(1.0, 2.0).toDouble();
-    final previewSide = 248 + ((scale - 1) * 68);
+    final previewSide = 208 + ((scale - 1) * 108);
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -530,6 +470,100 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
         liveHealthWatchCanShowMetrics(watchSnapshot) &&
         watchSnapshot.lastSyncAt != null;
     final hasData = hasMeasuredData || showLastSync;
+    final sidePanel = DashboardHealthSidePanel.of(context);
+    if (sidePanel != null) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final sideBySide =
+              constraints.maxWidth >= 300 &&
+              MediaQuery.textScalerOf(context).scale(1) <= 1.35;
+          final watch = _DashboardDevicePreview(
+            key: const Key('dashboard-live-fitness-watch-slot'),
+            child: LiveHealthWatch(
+              snapshot: watchSnapshot,
+              languageCode: languageCode,
+              compact: true,
+              showConnectControl: false,
+              showMetrics: true,
+              onStepsTap: () => context.push('/connected-health/steps'),
+              onHeartTap: () => context.push('/connected-health/heart'),
+              onActiveEnergyTap: () =>
+                  context.push('/settings/exercise-calories'),
+              onSleepTap: () => context.push('/wellness/sleep'),
+            ),
+          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      tr('Fitness snapshot', 'ملخص اللياقة'),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  if (showLastSync && sideBySide)
+                    _DashboardSyncReading(
+                      syncedAt: watchSnapshot.lastSyncAt!,
+                      languageCode: languageCode,
+                      onSync: onSync,
+                      syncing: snapshot.isBusy,
+                      compact: true,
+                    )
+                  else
+                    ConnectedHealthStatusDot(status: watchSnapshot.status),
+                ],
+              ),
+              if (sideBySide) ...[
+                const SizedBox(height: 8),
+                Row(
+                  key: const Key('dashboard-fitness-side-by-side'),
+                  // Keep the summary physically to the right of the watch,
+                  // including Arabic. Text inside each child keeps its locale.
+                  textDirection: TextDirection.ltr,
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ConnectedHealthStatusDot(
+                            status: watchSnapshot.status,
+                          ),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 176),
+                            child: watch,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(flex: 5, child: sidePanel),
+                  ],
+                ),
+              ] else ...[
+                const SizedBox(height: 10),
+                watch,
+                if (showLastSync)
+                  _DashboardSyncReading(
+                    syncedAt: watchSnapshot.lastSyncAt!,
+                    languageCode: languageCode,
+                    onSync: onSync,
+                    syncing: snapshot.isBusy,
+                    compact: true,
+                  ),
+                const SizedBox(height: 12),
+                sidePanel,
+              ],
+            ],
+          );
+        },
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -591,12 +625,14 @@ class _DashboardSyncReading extends StatelessWidget {
     required this.languageCode,
     required this.onSync,
     required this.syncing,
+    this.compact = false,
   });
 
   final DateTime syncedAt;
   final String languageCode;
   final VoidCallback? onSync;
   final bool syncing;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => OutlinedButton.icon(
@@ -604,12 +640,22 @@ class _DashboardSyncReading extends StatelessWidget {
     // Consume taps while busy too: they must not reach the parent card's
     // navigation gesture. The controller also coalesces repeated requests.
     onPressed: onSync ?? () {},
+    style: compact
+        ? OutlinedButton.styleFrom(
+            side: BorderSide.none,
+            minimumSize: const Size(0, 40),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            textStyle: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(fontSize: 10),
+          )
+        : null,
     icon: syncing
         ? const SizedBox.square(
             dimension: 17,
             child: CircularProgressIndicator(strokeWidth: 2),
           )
-        : const Icon(Icons.sync_rounded, size: 17),
+        : Icon(Icons.sync_rounded, size: compact ? 14 : 17),
     label: Text(
       syncing
           ? connectedHealthTextForLanguage(

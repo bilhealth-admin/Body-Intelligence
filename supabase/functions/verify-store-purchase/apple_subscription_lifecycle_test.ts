@@ -169,3 +169,69 @@ test("maps server lifecycle failures without silently granting access", () => {
   assert.equal(appleServerStatusLifecycle(4, "suspended"), "revoked");
   assert.equal(appleServerStatusLifecycle(0, "unexpected"), "revoked");
 });
+
+test("accelerated signed Sandbox free trials retain trial-sized allowance", () => {
+  for (
+    const productId of ["bil_premium_ai_coach", "bil_premium_ai_coach_annual"]
+  ) {
+    const payload = trialPayload({
+      productId,
+      environment: "Sandbox",
+      expiresDate: nowMs + 3 * 60 * 1000,
+    });
+    assert.equal(appleTransactionLifecycle(payload, nowMs), "trial");
+    assert.equal(
+      appleTransactionLifecycle(payload, nowMs + 3 * 60 * 1000),
+      "expired",
+    );
+    assert.equal(
+      appleTransactionLifecycle({ ...payload, revocationDate: nowMs }, nowMs),
+      "revoked",
+    );
+  }
+});
+
+test("Sandbox acceleration does not invent production trials or extend signed boundaries", () => {
+  const shortTrial = trialPayload({ expiresDate: nowMs + 60 * 1000 });
+  for (const environment of [undefined, "Production", "unknown"]) {
+    assert.equal(
+      appleTransactionLifecycle({ ...shortTrial, environment }, nowMs),
+      "active",
+    );
+  }
+  assert.equal(
+    appleTransactionLifecycle({
+      ...shortTrial,
+      environment: "Sandbox",
+      productId: "bil_premium",
+    }, nowMs),
+    "active",
+  );
+  assert.equal(
+    appleTransactionLifecycle({
+      ...shortTrial,
+      environment: "Sandbox",
+      offerType: 2,
+    }, nowMs),
+    "active",
+  );
+  assert.equal(
+    appleTransactionLifecycle({
+      ...shortTrial,
+      environment: "Sandbox",
+      offerDiscountType: "PAY_UP_FRONT",
+      price: 500,
+    }, nowMs),
+    "active",
+  );
+  assert.equal(
+    appleTransactionLifecycle(
+      trialPayload({
+        environment: "Sandbox",
+        expiresDate: nowMs + 8 * 24 * 60 * 60 * 1000,
+      }),
+      nowMs,
+    ),
+    "active",
+  );
+});

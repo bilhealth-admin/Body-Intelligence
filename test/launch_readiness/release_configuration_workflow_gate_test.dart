@@ -81,10 +81,10 @@ void main() {
 
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V15_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V15_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V18_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V18_STAGING_MANIFEST_SHA256'));
+    expect(android, contains('BIL_ANDROID_V16_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_ANDROID_V16_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V19_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V19_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -95,7 +95,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V15_FROZEN_SOURCE_MANIFEST_2026-09-14.md',
+        'docs/release/BIL_ANDROID_V16_FROZEN_SOURCE_MANIFEST_2026-09-17.md',
       ),
     );
     expect(
@@ -109,13 +109,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 18 release manifest', () {
+  test('iOS validator consumes only the build 19 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V18_FROZEN_SOURCE_MANIFEST_2026-09-14.md',
+        'docs/release/BIL_IOS_V19_FROZEN_SOURCE_MANIFEST_2026-09-17.md',
       ),
     );
     expect(
@@ -127,8 +127,8 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 18 ))'));
-    expect(source, isNot(contains('(( BUILD_NUMBER == 17 ))')));
+    expect(source, contains('(( BUILD_NUMBER == 19 ))'));
+    expect(source, isNot(contains('(( BUILD_NUMBER == 18 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {

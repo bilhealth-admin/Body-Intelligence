@@ -47,11 +47,19 @@ function isAppleIntroductoryFreeTrial(payload: Record<string, unknown>) {
   const purchaseDate = Number(payload.purchaseDate ?? 0);
   const expiresDate = Number(payload.expiresDate ?? 0);
   const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const durationMs = expiresDate - purchaseDate;
+  // Apple accelerates Sandbox introductory periods. This environment is read
+  // from the verified transaction JWS, never from a caller-supplied flag.
+  // Preserve the signed expiry rather than inventing seven days of access or
+  // misclassifying a free introductory period as a paid AI allowance.
+  const sandbox = String(payload.environment ?? "").toLowerCase() === "sandbox";
+  const validDuration = durationMs === sevenDaysMs ||
+    (sandbox && durationMs > 0 && durationMs < sevenDaysMs);
   if (
     !Number.isFinite(purchaseDate) ||
     !Number.isFinite(expiresDate) ||
     purchaseDate <= 0 ||
-    expiresDate - purchaseDate !== sevenDaysMs
+    !validDuration
   ) return false;
   if (String(payload.offerDiscountType ?? "").toUpperCase() === "FREE_TRIAL") {
     return true;

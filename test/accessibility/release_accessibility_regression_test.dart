@@ -26,7 +26,9 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_top_bar.dart',
     );
     expect(
-      RegExp(r'return Tooltip\(\s*message: tooltip,').hasMatch(dashboardTopBar),
+      RegExp(
+        r"IconButton\(\s*key: const Key\('dashboard-edit-today'\),\s*tooltip: tooltip,",
+      ).hasMatch(dashboardTopBar),
       isTrue,
       reason: 'The Edit action must retain its localized accessible name.',
     );

@@ -41,7 +41,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('header keeps the Edit action while omitting duplicate date', (
+  testWidgets('header keeps an icon-only Edit action without duplicate date', (
     tester,
   ) async {
     await pumpDashboard(tester);
@@ -50,7 +50,8 @@ void main() {
     expect(find.text('Today'), findsNothing);
     expect(find.text('Aug 6, 2026'), findsNothing);
     expect(find.text('Welcome'), findsNothing);
-    expect(find.text('Edit'), findsOneWidget);
+    expect(find.text('Edit'), findsNothing);
+    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
   });
 
   testWidgets('profile uses a neutral account avatar by default', (
@@ -65,13 +66,11 @@ void main() {
     );
   });
 
-  testWidgets('Edit opens dashboard customization without a settings icon', (
-    tester,
-  ) async {
+  testWidgets('settings icon opens dashboard customization', (tester) async {
     await pumpDashboard(tester);
 
-    expect(find.text('Edit'), findsOneWidget);
-    expect(find.byIcon(Icons.dashboard_customize_rounded), findsNothing);
+    expect(find.text('Edit'), findsNothing);
+    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('dashboard-edit-today')));
     await tester.pumpAndSettle();
@@ -189,12 +188,26 @@ void main() {
           expect(wordmark, findsOneWidget);
           expect(tester.getSemantics(wordmark).label, 'Body Intelligence Log');
           expect(find.byKey(const Key('dashboard-edit-today')), findsOneWidget);
-          final context = tester.element(
+          final edit = tester.widget<IconButton>(
             find.byKey(const Key('dashboard-edit-today')),
           );
+          expect(edit.tooltip, isNotEmpty);
           expect(
-            find.text(AppLocalizations.of(context).text('Edit')),
-            findsOneWidget,
+            tester.getSemantics(find.byKey(const Key('dashboard-edit-today'))),
+            matchesSemantics(
+              tooltip: edit.tooltip,
+              isButton: true,
+              isEnabled: true,
+              hasEnabledState: true,
+              isFocusable: true,
+              hasTapAction: true,
+              hasFocusAction: true,
+            ),
+          );
+          expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+          expect(
+            tester.getSize(find.byKey(const Key('dashboard-edit-today'))),
+            const Size.square(44),
           );
           expect(tester.takeException(), isNull);
           semantics.dispose();

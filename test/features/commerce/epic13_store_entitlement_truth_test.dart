@@ -167,9 +167,10 @@ void main() {
     final backend = File(
       'supabase/functions/verify-store-purchase/store_backend.ts',
     ).readAsStringSync();
-    final client = File(
+    final client = [
       'lib/features/commerce/services/verified_store_purchase_service.dart',
-    ).readAsStringSync();
+      'lib/features/commerce/services/verified_store_purchase_processing.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final canonicalMigration = File(
       'supabase/migrations/20260815225624_bil_canonical_consumer_tiers.sql',
     ).readAsStringSync();
