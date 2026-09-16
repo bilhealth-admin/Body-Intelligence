@@ -11,22 +11,17 @@ void main() {
       'READ_STEPS',
       'READ_DISTANCE',
       'READ_ACTIVE_CALORIES_BURNED',
-      'READ_EXERCISE',
-      'READ_SLEEP',
-      'READ_HEART_RATE',
-      'READ_RESTING_HEART_RATE',
-      'READ_HEART_RATE_VARIABILITY',
-      'READ_WEIGHT',
-      'WRITE_WEIGHT',
-      'READ_BODY_FAT',
-      'READ_LEAN_BODY_MASS',
-      'READ_HYDRATION',
-      'READ_NUTRITION',
-      'WRITE_NUTRITION',
-      'READ_HEALTH_DATA_HISTORY',
     ]) {
       expect(manifest, contains('android.permission.health.$permission'));
     }
+    final healthPermissions = RegExp(
+      r'android:name="android\.permission\.health\.([^"]+)"',
+    ).allMatches(manifest).map((match) => match.group(1)).toSet();
+    expect(healthPermissions, {
+      'READ_STEPS',
+      'READ_DISTANCE',
+      'READ_ACTIVE_CALORIES_BURNED',
+    });
     for (final excludedPermission in <String>[
       'READ_BLOOD_GLUCOSE',
       'READ_BLOOD_PRESSURE',
@@ -124,16 +119,9 @@ void main() {
     );
     final initialRead = android.substring(initialStart, initialEnd);
 
-    expect(android, contains(') 365L else 30L'));
-    expect(
-      android,
-      contains('HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY'),
-    );
-    expect(
-      android,
-      contains('HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY'),
-    );
-    expect(android, contains('HISTORY_PERMISSION_SCOPE_MARKER'));
+    expect(android, contains('asOf.minusSeconds(30L * 24L * 60L * 60L)'));
+    expect(android, isNot(contains('PERMISSION_READ_HEALTH_DATA_HISTORY')));
+    expect(android, isNot(contains('HISTORY_PERMISSION_SCOPE_MARKER')));
     expect(android, contains('TimeRangeFilter.between('));
     expect(android, contains('val asOf = call.argument<String>("asOf")'));
     expect(
@@ -161,16 +149,23 @@ void main() {
           'Expired Health Connect tokens must be surfaced instead of saving '
           'their unusable next token.',
     );
+    expect(android, isNot(contains('HeartRateRecord')));
+    expect(android, contains('"health_connect_write_not_available"'));
+    expect(android, contains('.filter(supportedNames::contains)'));
+    expect(android, contains('if (recordPermissions.isEmpty())'));
+    expect(android, contains('if (supportedRequestedNames.isEmpty())'));
+    // Status inspection needs a default scope; mutation/read requests do not.
     expect(
       android,
-      contains('record.samples.mapIndexed'),
-      reason: 'Every sample in a HeartRateRecord series must be imported.',
+      contains(
+        'permissionSnapshot(call.argument<List<String>>("types") ?: supportedNames)',
+      ),
     );
-    expect(android, contains('"parentRecordId" to metadata.id'));
     expect(
       android,
-      contains(r'#heartRate#${sample.time.toEpochMilli()}#$index'),
-      reason: 'Heart-rate child identities must be stable across retries.',
+      contains(
+        'val names = call.argument<List<String>>("types") ?: emptyList()',
+      ),
     );
   });
 }

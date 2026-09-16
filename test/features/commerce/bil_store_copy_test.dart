@@ -3,6 +3,20 @@ import 'package:body_intelligence_log/features/commerce/presentation/bil_store_c
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('catalog changes explain no checkout in all 25 supported locales', () {
+    for (final locale in RuntimeCopy.supported) {
+      final copy = BilStoreCopy.text(locale, 'purchase_catalog_changed');
+      expect(copy, isNotEmpty);
+      expect(copy, isNot('purchase_catalog_changed'));
+      if (locale != 'en') {
+        expect(
+          copy,
+          isNot(BilStoreCopy.text('en', 'purchase_catalog_changed')),
+          reason: locale,
+        );
+      }
+    }
+  });
   test('store/paywall copy is balanced across five production locales', () {
     expect(BilStoreCopy.catalogs.keys.toSet(), {'ar', 'en', 'fr', 'es', 'tr'});
     final keys = BilStoreCopy.catalogs['en']!.keys.toSet();

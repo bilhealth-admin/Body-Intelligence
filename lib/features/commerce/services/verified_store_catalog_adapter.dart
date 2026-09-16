@@ -371,6 +371,9 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
               },
           offerId: playOffer?.offerId,
           basePlanId: playOffer?.basePlanId,
+          purchaseOfferToken: product is GooglePlayProductDetails
+              ? product.offerToken
+              : null,
           trialPeriodIso8601: allowsTrial
               ? playOffer?.trialPeriodIso8601 ?? appleOffer?.trialPeriodIso8601
               : null,
@@ -393,7 +396,11 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       offer.productId,
     );
     if (binding == null) return;
-    await store.purchasePlan(binding.plan, term: binding.term);
+    await store.purchasePlan(
+      binding.plan,
+      term: binding.term,
+      expectedGoogleOfferToken: offer.purchaseOfferToken,
+    );
   }
 
   @override

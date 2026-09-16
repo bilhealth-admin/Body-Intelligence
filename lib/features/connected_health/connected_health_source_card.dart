@@ -135,26 +135,31 @@ class _HealthSourceCard extends ConsumerWidget {
                 ),
               ),
               if (snapshot.deviceVerified) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    key: const Key('connected-health-weight-export'),
-                    onPressed: snapshot.isBusy
-                        ? null
-                        : controller.requestWeightWritePermission,
-                    icon: const Icon(Icons.monitor_weight_outlined),
-                    label: Text(
-                      defaultTargetPlatform == TargetPlatform.iOS
-                          ? tr('Allow weight export', 'السماح بتصدير الوزن')
-                          : tr(
-                              'Allow weight and nutrition export',
-                              'السماح بتصدير الوزن والتغذية',
-                            ),
-                      textAlign: TextAlign.center,
+                if (!kIsWeb &&
+                    connectedHealthWriteTypeNamesForPlatform(
+                      defaultTargetPlatform,
+                    ).isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      key: const Key('connected-health-weight-export'),
+                      onPressed: snapshot.isBusy
+                          ? null
+                          : controller.requestWeightWritePermission,
+                      icon: const Icon(Icons.monitor_weight_outlined),
+                      label: Text(
+                        defaultTargetPlatform == TargetPlatform.iOS
+                            ? tr('Allow weight export', 'السماح بتصدير الوزن')
+                            : tr(
+                                'Allow weight and nutrition export',
+                                'السماح بتصدير الوزن والتغذية',
+                              ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 8),
                 TextButton.icon(
                   onPressed: snapshot.isBusy

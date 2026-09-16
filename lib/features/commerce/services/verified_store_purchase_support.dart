@@ -56,6 +56,7 @@ bool canStartStorePurchase({
     VerifiedStoreState.failed => const {
       'purchase_failed',
       'purchase_not_started',
+      'store_catalog_refresh_failed',
     }.contains(messageCode),
     VerifiedStoreState.loading ||
     VerifiedStoreState.unavailable ||
@@ -83,6 +84,50 @@ String storeAccountIdentifier({
   return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
       '${hex.substring(12, 16)}-${hex.substring(16, 20)}-'
       '${hex.substring(20, 32)}';
+}
+
+/// Match the terms actually displayed, not a stale opaque offer token. A new
+/// token for the same terms is safe; any price/period/trial change needs a new
+/// explicit selection after the screen has refreshed.
+bool sameGooglePlayCheckoutTerms(
+  ProductDetails displayed,
+  GooglePlayProductDetails fresh,
+) {
+  if (displayed is! GooglePlayProductDetails || displayed.id != fresh.id) {
+    return false;
+  }
+  if (displayed.subscriptionIndex == null || fresh.subscriptionIndex == null) {
+    return displayed.subscriptionIndex == null &&
+        fresh.subscriptionIndex == null &&
+        displayed.productDetails.productType == ProductType.inapp &&
+        fresh.productDetails.productType == ProductType.inapp &&
+        displayed.rawPrice == fresh.rawPrice &&
+        displayed.currencyCode == fresh.currencyCode;
+  }
+  String? terms(GooglePlayProductDetails product) {
+    final offers = product.productDetails.subscriptionOfferDetails;
+    final index = product.subscriptionIndex!;
+    if (offers == null || index < 0 || index >= offers.length) return null;
+    final offer = offers[index];
+    if (offer.offerIdToken.trim().isEmpty) return null;
+    return jsonEncode({
+      'basePlanId': offer.basePlanId,
+      'offerId': offer.offerId,
+      'phases': [
+        for (final phase in offer.pricingPhases)
+          [
+            phase.priceAmountMicros,
+            phase.priceCurrencyCode,
+            phase.billingPeriod,
+            phase.billingCycleCount,
+            phase.recurrenceMode.name,
+          ],
+      ],
+    });
+  }
+
+  final expected = terms(displayed);
+  return expected != null && expected == terms(fresh);
 }
 
 bool _selectedGoogleOfferHasFreePhase(ProductDetails value) {
@@ -260,6 +305,7 @@ bool releaseEligibleStoreProduct(ProductDetails value) {
   final aiTrialProduct = StoreCatalogConfiguration.isAiTrialProduct(value.id);
 
   if (value is GooglePlayProductDetails) {
+    if (value.offerToken?.trim().isNotEmpty != true) return false;
     final hasFreePhase = _selectedGoogleOfferHasFreePhase(value);
     if (!hasFreePhase) return true;
     return aiTrialProduct && _isApprovedGoogleAiTrial(value);

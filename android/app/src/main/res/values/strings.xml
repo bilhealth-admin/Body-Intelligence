@@ -4,7 +4,7 @@
     <string name="facebook_app_id" translatable="false">1384055070498598</string>
     <string name="facebook_client_token" translatable="false">511dd100843bb0cee6b0bbc6af140ebf</string>
     <string name="health_permissions_rationale_title">Health data privacy</string>
-    <string name="health_permissions_rationale_body">BIL requests only the Health Connect data types needed for features you choose to use. Your health data is processed locally by default. You can grant, deny, or revoke individual permissions at any time from Health Connect settings. BIL does not sell health data or use it for advertising.</string>
+    <string name="health_permissions_rationale_body">BIL reads steps, distance, and active calories from Health Connect to show your activity summary. Access is read-only and only while BIL is in use. You can grant, deny, or revoke each permission in Health Connect settings. BIL does not sell health data or use it for advertising.</string>
     <string name="health_permissions_privacy_policy_action">Read the full BIL privacy policy</string>
     <string name="health_privacy_policy_url" translatable="false">https://www.bilhealth.com/privacy</string>
 </resources>

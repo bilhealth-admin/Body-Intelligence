@@ -315,11 +315,16 @@ void main() {
           final export = find.byKey(
             const Key('connected-health-weight-export'),
           );
-          await tester.ensureVisible(export);
-          await tester.pumpAndSettle();
-          await tester.tap(export);
-          await tester.pumpAndSettle();
-          expect(gateway.exports, 1);
+          if (platform == TargetPlatform.iOS) {
+            await tester.ensureVisible(export);
+            await tester.pumpAndSettle();
+            await tester.tap(export);
+            await tester.pumpAndSettle();
+            expect(gateway.exports, 1);
+          } else {
+            expect(export, findsNothing);
+            expect(gateway.exports, 0);
+          }
           expect(gateway.syncs, 2);
           final signals = find.byKey(
             const Key('connected-health-signals-card'),

@@ -11,14 +11,19 @@ require Product Owner and legal approval in Play Console.**
   (a product capability, not an asserted Play category name).
 - Wellness coaching and user-visible insights based on user-authorized evidence.
 
-The Android v1 production permission surface reads steps, active energy,
-exercise sessions, sleep sessions, heart rate, resting heart rate, heart-rate
-variability, weight, and nutrition from Health Connect.
-These readings power the user-visible watch, sleep, recovery, and activity
-views. Write permission
-is limited to weight and nutrition records explicitly selected by the user for
-synchronization. Other measurements shown by BIL can come from explicit manual
-entry. Paired BLE imports in this release are limited to weight, body
+The Android remediation source dated 2026-09-16 restricts Health Connect to
+**read-only steps, distance and active calories burned**, for the activity
+dashboard. Initial history is limited to the ordinary 30-day window. No extended
+history, background-read or write permissions are requested. BodyFat,
+RestingHeartRate and SleepSession (named in the version-code-13 rejection), and
+all other Health Connect types outside these three, are removed from both the
+manifest and native runtime. The Android export action is unavailable.
+
+This intentionally removes Health Connect imports for sleep, body composition,
+vitals, nutrition and weight for this release. Local/manual records are not
+deleted, and the Apple Health scope is unchanged. Existing out-of-scope imports
+are hidden from the Android connection-status projection, not deleted from
+the user's underlying local history. Paired BLE imports remain limited to weight, body
 composition, and heart rate from compatible external fitness devices; BLE data
 is not a Health Connect permission.
 
@@ -52,6 +57,10 @@ Before submission:
    fitness-only/non-medical boundary used to mark Medical Device Apps not
    applicable.
 5. Remove permissions unused by the final signed release.
+   In Play Console, remove declarations for all Health Connect types except
+   Steps (read), Distance (read) and ActiveCaloriesBurned (read). Do not enable
+   writes or history/background access. Verify this exact set again in the
+   final merged AAB manifest; the source change alone does not update Console.
 6. Complete physical-device tests for permission grant, denial, revocation,
    partial authorization, and deletion behavior.
 7. Test weight-scale, body-composition, and heart-rate BLE peripherals and verify

@@ -71,7 +71,6 @@ Set<HealthDataType> connectedHealthReadTypesForPlatform(
   return const <HealthDataType>{};
 }
 
-@visibleForTesting
 Set<String> connectedHealthWriteTypeNamesForPlatform(TargetPlatform platform) =>
     switch (platform) {
       TargetPlatform.iOS => BilHealthScope.appleHealthWriteTypeNames,

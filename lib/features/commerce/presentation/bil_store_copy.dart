@@ -165,6 +165,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Show fewer features',
       'store_loading': 'Loading price from the store…',
       'store_unavailable': 'Price unavailable on this device',
+      'purchase_catalog_changed':
+          'The store offer changed or is unavailable. Review the refreshed plans before trying again. No purchase was started.',
       'purchase_error':
           'The store could not complete this request. Try again later.',
       'purchase_in_progress': 'Opening secure purchase…',
@@ -257,6 +259,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'عرض مزايا أقل',
       'store_loading': 'جارٍ تحميل السعر من المتجر…',
       'store_unavailable': 'السعر غير متاح على هذا الجهاز',
+      'purchase_catalog_changed':
+          'تغيّر عرض المتجر أو أصبح غير متاح. راجع الخطط المحدّثة قبل المحاولة مجددًا. لم تبدأ أي عملية شراء.',
       'purchase_error': 'تعذر إكمال الطلب من المتجر. يمكنك المحاولة لاحقًا.',
       'purchase_in_progress': 'جارٍ فتح عملية الشراء الآمنة…',
       'purchase_reconciliation_pending':
@@ -357,6 +361,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Afficher moins de fonctionnalités',
       'store_loading': 'Chargement du prix depuis la boutique…',
       'store_unavailable': 'Prix indisponible sur cet appareil',
+      'purchase_catalog_changed':
+          'L’offre a changé ou n’est plus disponible. Vérifiez les offres actualisées avant de réessayer. Aucun achat n’a été lancé.',
       'purchase_error':
           'La boutique n’a pas pu traiter cette demande. Réessayez plus tard.',
       'purchase_in_progress': 'Ouverture de l’achat sécurisé…',
@@ -460,6 +466,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Mostrar menos funciones',
       'store_loading': 'Cargando el precio desde la tienda…',
       'store_unavailable': 'Precio no disponible en este dispositivo',
+      'purchase_catalog_changed':
+          'La oferta cambió o ya no está disponible. Revisa los planes actualizados antes de reintentar. No se inició ninguna compra.',
       'purchase_error':
           'La tienda no pudo completar la solicitud. Inténtalo más tarde.',
       'purchase_in_progress': 'Abriendo la compra segura…',
@@ -555,6 +563,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Daha az özellik göster',
       'store_loading': 'Fiyat mağazadan yükleniyor…',
       'store_unavailable': 'Fiyat bu cihazda kullanılamıyor',
+      'purchase_catalog_changed':
+          'Teklif değişti veya artık kullanılamıyor. Tekrar denemeden önce güncel planları inceleyin. Satın alma başlatılmadı.',
       'purchase_error':
           'Mağaza bu isteği tamamlayamadı. Daha sonra tekrar deneyin.',
       'purchase_in_progress': 'Güvenli satın alma açılıyor…',
@@ -568,10 +578,56 @@ abstract final class BilStoreCopy {
     },
   };
 
+  static const _catalogChangedCopy = <String, String>{
+    'de':
+        'Das Angebot hat sich geändert oder ist nicht verfügbar. Prüfe die aktualisierten Tarife vor einem neuen Versuch. Es wurde kein Kauf gestartet.',
+    'it':
+        'L’offerta è cambiata o non è disponibile. Controlla i piani aggiornati prima di riprovare. Nessun acquisto è stato avviato.',
+    'pt-br':
+        'A oferta mudou ou está indisponível. Confira os planos atualizados antes de tentar novamente. Nenhuma compra foi iniciada.',
+    'pt-pt':
+        'A oferta mudou ou está indisponível. Verifique os planos atualizados antes de tentar novamente. Nenhuma compra foi iniciada.',
+    'ur':
+        'اسٹور کی پیشکش بدل گئی ہے یا دستیاب نہیں۔ دوبارہ کوشش سے پہلے تازہ منصوبے دیکھیں۔ کوئی خریداری شروع نہیں ہوئی۔',
+    'fa':
+        'پیشنهاد فروشگاه تغییر کرده یا در دسترس نیست. پیش از تلاش دوباره طرح‌های به‌روز را بررسی کنید. هیچ خریدی آغاز نشد.',
+    'hi':
+        'स्टोर का ऑफ़र बदल गया है या उपलब्ध नहीं है। फिर कोशिश करने से पहले अपडेट किए गए प्लान देखें। कोई खरीद शुरू नहीं हुई।',
+    'id':
+        'Penawaran berubah atau tidak tersedia. Periksa paket terbaru sebelum mencoba lagi. Tidak ada pembelian yang dimulai.',
+    'ms':
+        'Tawaran berubah atau tidak tersedia. Semak pelan terkini sebelum mencuba lagi. Tiada pembelian dimulakan.',
+    'ja': 'ストアのオファーが変更されたか、利用できなくなりました。再試行する前に更新されたプランをご確認ください。購入は開始されていません。',
+    'ko':
+        '스토어 혜택이 변경되었거나 이용할 수 없습니다. 다시 시도하기 전에 업데이트된 요금제를 확인하세요. 구매는 시작되지 않았습니다.',
+    'zh-hans': '商店优惠已更改或不可用。请先查看更新后的方案再重试。尚未发起购买。',
+    'zh-hant': '商店優惠已變更或無法使用。請先查看更新後的方案再重試。尚未開始購買。',
+    'ru':
+        'Предложение изменилось или недоступно. Проверьте обновлённые планы перед повторной попыткой. Покупка не начата.',
+    'bn':
+        'স্টোরের অফার বদলেছে বা উপলব্ধ নেই। আবার চেষ্টা করার আগে আপডেট করা প্ল্যান দেখুন। কোনো কেনাকাটা শুরু হয়নি।',
+    'vi':
+        'Ưu đãi đã thay đổi hoặc không còn khả dụng. Hãy xem các gói đã cập nhật trước khi thử lại. Chưa bắt đầu giao dịch mua nào.',
+    'th':
+        'ข้อเสนอเปลี่ยนแปลงหรือไม่พร้อมใช้งาน โปรดตรวจสอบแผนที่อัปเดตก่อนลองอีกครั้ง ยังไม่ได้เริ่มการซื้อ',
+    'pl':
+        'Oferta uległa zmianie lub jest niedostępna. Sprawdź zaktualizowane plany przed ponowną próbą. Zakup nie został rozpoczęty.',
+    'nl':
+        'De aanbieding is gewijzigd of niet beschikbaar. Bekijk de bijgewerkte abonnementen voordat je opnieuw probeert. Er is geen aankoop gestart.',
+    'uk':
+        'Пропозиція змінилася або недоступна. Перегляньте оновлені плани перед повторною спробою. Купівлю не розпочато.',
+  };
+
   static String text(String locale, String key) {
     final normalized = locale.replaceAll('_', '-').toLowerCase();
     final language = normalized.split('-').first;
     final english = catalogs['en']![key] ?? key;
+    if (key == 'purchase_catalog_changed') {
+      return catalogs[language]?[key] ??
+          _catalogChangedCopy[normalized] ??
+          _catalogChangedCopy[language] ??
+          english;
+    }
     return BilStoreRecoveryCopy.text(normalized, key) ??
         catalogs[language]?[key] ??
         _extendedTrialRenewalCopy[key]?[normalized] ??

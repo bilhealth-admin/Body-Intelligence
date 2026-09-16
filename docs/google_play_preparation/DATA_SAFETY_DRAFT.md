@@ -53,10 +53,12 @@ For the current build composition:
   Mobile Ads/banner code, even if eligibility and consent gates fail closed.
 - Accounts, cloud synchronization, remote AI, commerce, and Community: present
   and conditional on user action, consent, configuration, or entitlement.
-- Health Connect access: permission-gated and used for user-visible health
-  timeline and wellness insights.
-- Health Connect writes: limited to weight and nutrition records explicitly
-  selected by the user for synchronization.
+- Health Connect access: permission-gated, foreground-only reads of steps,
+  distance and active calories burned for the activity dashboard; ordinary
+  30-day initial history only. Other locally recorded wellness categories above
+  do not imply Health Connect access to those categories.
+- Health Connect writes: unavailable in the 2026-09-16 remediation source.
+  Update the Console declaration and verify the final AAB before submission.
 - User export: initiated by the user through the operating-system share sheet;
   the user selects the destination.
 - Data in transit: applicable to enabled remote services and required to be

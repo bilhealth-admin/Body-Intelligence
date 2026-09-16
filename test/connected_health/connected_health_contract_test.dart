@@ -185,9 +185,8 @@ void main() {
   test('native read and write scopes stay platform-specific', () {
     expect(
       BilHealthScope.healthConnectReadTypeNames,
-      BilHealthScope.appleHealthReadTypeNames,
-      reason:
-          'The two native bridges now implement the same canonical read scope.',
+      const {'steps', 'distance', 'activeEnergy'},
+      reason: 'Android is activity-only; iOS retains its reviewed read scope.',
     );
     expect(
       connectedHealthReadTypesForPlatform(
@@ -207,7 +206,7 @@ void main() {
     );
     expect(
       connectedHealthWriteTypeNamesForPlatform(TargetPlatform.android),
-      const <String>{'weight', 'nutrition'},
+      isEmpty,
     );
     expect(
       connectedHealthReadTypesForPlatform(TargetPlatform.windows),

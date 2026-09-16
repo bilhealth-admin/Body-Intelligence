@@ -127,11 +127,12 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       // Keep the catalog actionable so another term can be selected at once.
       'purchase_cancelled' => null,
       'purchase_not_started' => 'purchase_error',
+      'store_catalog_changed' => 'purchase_catalog_changed',
+      'store_catalog_refresh_failed' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
       'verification_failed' => 'purchase_verification_unavailable',
       'restore_verification_failed' => 'restore_verification_failed',
-      'reconciliation_verification_failed' =>
-        'purchase_reconciliation_failed',
+      'reconciliation_verification_failed' => 'purchase_reconciliation_failed',
       'purchase_failed' || 'store_stream_failed' => 'purchase_error',
       'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
       _ => switch (store.state) {
@@ -247,6 +248,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         });
       }
     } finally {
+      if (mounted && store?.messageCode == 'store_catalog_changed') {
+        await _load();
+      }
       if (mounted) {
         setState(() {
           _purchaseRequestInFlight = false;

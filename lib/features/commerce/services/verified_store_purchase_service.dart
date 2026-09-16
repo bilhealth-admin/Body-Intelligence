@@ -21,10 +21,8 @@ import '../domain/subscription_term.dart';
 part 'verified_store_purchase_support.dart';
 
 class VerifiedStorePurchaseService extends ChangeNotifier {
-  VerifiedStorePurchaseService({
-    InAppPurchase? purchase,
-    this._appleStoreSync,
-  }) : _purchaseInstance = purchase;
+  VerifiedStorePurchaseService({InAppPurchase? purchase, this._appleStoreSync})
+    : _purchaseInstance = purchase;
 
   InAppPurchase? _purchaseInstance;
   final Future<void> Function()? _appleStoreSync;
@@ -40,6 +38,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   int _queuedPurchaseUpdates = 0;
   int _purchaseEventGeneration = 0;
   bool _restoring = false;
+  bool _checkoutPreflightInFlight = false;
   bool _disposed = false;
   int _entitlementRefreshGeneration = 0;
   bool _purchaseInitiatedByThisService = false;
@@ -73,6 +72,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   bool get configured => AppEnvironment.commerceConfigured;
   bool get busy =>
       _restoring ||
+      _checkoutPreflightInFlight ||
       _queuedPurchaseUpdates > 0 ||
       state == VerifiedStoreState.purchasePending;
   bool get canStartPurchase =>
@@ -209,18 +209,80 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     return binding == null ? null : products[binding.productId];
   }
 
+  /// Play ProductDetails/offer tokens may expire while the page stays open.
+  /// Refresh on the explicit purchase tap and never silently substitute a
+  /// different price, base plan or trial. This does not start a transaction.
+  Future<ProductDetails?> _freshCheckoutProduct(
+    ProductDetails displayed, {
+    required String ownerId,
+    required int generation,
+  }) async {
+    if (defaultTargetPlatform != TargetPlatform.android) return displayed;
+    _checkoutPreflightInFlight = true;
+    try {
+      final response = await _purchase
+          .queryProductDetails({displayed.id})
+          .timeout(const Duration(seconds: 10));
+      if (_disposed || generation != _purchaseEventGeneration) return null;
+      if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
+        state = VerifiedStoreState.unavailable;
+        messageCode = 'authentication_required';
+        return null;
+      }
+      if (response.error != null) {
+        throw StateError('catalog_refresh_failed');
+      }
+      ProductDetails? preferred;
+      ProductDetails? matching;
+      for (final candidate in response.productDetails) {
+        if (candidate.id != displayed.id ||
+            response.notFoundIDs.contains(candidate.id) ||
+            candidate is! GooglePlayProductDetails ||
+            !releaseEligibleStoreProduct(candidate)) {
+          continue;
+        }
+        preferred = preferredStoreProduct(preferred, candidate);
+        if (sameGooglePlayCheckoutTerms(displayed, candidate)) {
+          matching ??= candidate;
+        }
+      }
+      final refreshed = matching ?? preferred;
+      products = Map.unmodifiable({
+        for (final entry in products.entries)
+          if (entry.key != displayed.id) entry.key: entry.value,
+        displayed.id: ?refreshed,
+      });
+      if (matching != null) return matching;
+      state = products.isEmpty
+          ? VerifiedStoreState.unavailable
+          : VerifiedStoreState.ready;
+      messageCode = 'store_catalog_changed';
+      return null;
+    } on Object {
+      if (!_disposed && generation == _purchaseEventGeneration) {
+        state = VerifiedStoreState.failed;
+        messageCode = 'store_catalog_refresh_failed';
+      }
+      return null;
+    } finally {
+      _checkoutPreflightInFlight = false;
+      if (!_disposed) notifyListeners();
+    }
+  }
+
   Future<void> purchasePlan(
     CommercePlan plan, {
     required SubscriptionTerm term,
     GooglePlayPurchaseDetails? replacesGooglePurchase,
     bool downgradeAtRenewal = false,
+    String? expectedGoogleOfferToken,
   }) async {
     // The button and service both guard this boundary. Keeping the service
     // idempotent prevents a second UI event from overwriting the truthful
     // pending state while the native sheet is opening.
     if (_disposed || busy) return;
     final user = Supabase.instance.client.auth.currentUser;
-    final product = productFor(plan, term: term);
+    var product = productFor(plan, term: term);
     if (user == null ||
         product == null ||
         !canStartStorePurchase(
@@ -232,9 +294,30 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    if (defaultTargetPlatform == TargetPlatform.android &&
+        expectedGoogleOfferToken != null &&
+        (product is! GooglePlayProductDetails ||
+            product.offerToken != expectedGoogleOfferToken)) {
+      messageCode = 'store_catalog_changed';
+      notifyListeners();
+      return;
+    }
+    final purchaseGeneration = _purchaseEventGeneration;
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      product = await _freshCheckoutProduct(
+        product,
+        ownerId: user.id,
+        generation: purchaseGeneration,
+      );
+      if (product == null ||
+          _disposed ||
+          purchaseGeneration != _purchaseEventGeneration) {
+        return;
+      }
+    }
     final accountHash = storeAccountIdentifier(
       ownerId: user.id,
       platform: defaultTargetPlatform,
@@ -242,7 +325,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     final PurchaseParam purchaseParam;
     if (defaultTargetPlatform == TargetPlatform.android &&
         product is GooglePlayProductDetails) {
-      final previousPurchase = replacesGooglePurchase ?? _activeGooglePurchase;
+      final previous = replacesGooglePurchase ?? _activeGooglePurchase;
+      // Same-product checkout is not a cross-subscription replacement. Play
+      // handles existing ownership; a replacement of itself is invalid.
+      final previousPurchase = previous?.productID == product.id
+          ? null
+          : previous;
       final isDowngrade = downgradeAtRenewal;
       // The platform wrapper already selects the exact base plan/offer used
       // to construct this ProductDetails instance. Reusing its token avoids
@@ -268,7 +356,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         applicationUserName: accountHash,
       );
     }
-    final purchaseGeneration = _purchaseEventGeneration;
     try {
       _purchaseInitiatedByThisService = true;
       _purchaseInitiatedProductId = product.id;

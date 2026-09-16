@@ -140,7 +140,10 @@ final class NativeConnectedHealthGateway
       final retainedSignalMaps = <Map<String, Object?>>[];
       final retainedStepHistoryMaps = <Map<String, Object?>>[];
       var hasVerifiedNativeEvidence = false;
-      var removedLegacyClinicalSignal = false;
+      var removedOutOfScopeSignal = false;
+      final readTypes = connectedHealthReadTypesForPlatform(
+        defaultTargetPlatform,
+      ).map((type) => type.name).toSet();
       for (final raw in stored?['signals'] as List<Object?>? ?? const []) {
         final signal = GlobalHealthSignal.fromMap(
           Map<String, Object?>.from(raw! as Map),
@@ -148,9 +151,8 @@ final class NativeConnectedHealthGateway
         // Old preview/foreign-provider cache rows are not HealthKit evidence.
         // Ignore them for this source without deleting the underlying history.
         if (!_isEvidenceFromNativeBridge(signal)) continue;
-        if (BilHealthScope.excludesKey(signal.key) ||
-            await _isTombstoned(signal)) {
-          removedLegacyClinicalSignal = true;
+        if (!readTypes.contains(signal.key) || await _isTombstoned(signal)) {
+          removedOutOfScopeSignal = true;
           continue;
         }
         retainedSignalMaps.add(signal.toMap());
@@ -180,7 +182,7 @@ final class NativeConnectedHealthGateway
       if (stepHistory.isEmpty) {
         stepHistory.addAll(signals.where((signal) => signal.key == 'steps'));
       }
-      if (removedLegacyClinicalSignal && stored != null) {
+      if (removedOutOfScopeSignal && stored != null) {
         await _flows.store
             .put('connected_health_ui', 'snapshot', <String, Object?>{
               ...stored,
@@ -212,7 +214,9 @@ final class NativeConnectedHealthGateway
         platformSource: source,
         availableSources: <String>[source],
         signals: signals,
-        importedCount: stored?['importedCount'] as int? ?? signals.length,
+        importedCount: removedOutOfScopeSignal
+            ? signals.length
+            : stored?['importedCount'] as int? ?? signals.length,
         lastSyncAt: lastSyncRaw == null
             ? null
             : DateTime.parse(lastSyncRaw).toLocal(),
@@ -303,11 +307,12 @@ final class NativeConnectedHealthGateway
     if (source == null || _capability?.available != true) {
       return const ConnectedHealthSnapshot.unavailable();
     }
+    final writeTypes = connectedHealthWriteTypeNamesForPlatform(
+      defaultTargetPlatform,
+    );
+    if (writeTypes.isEmpty) return load();
     try {
-      await _bridge.request(
-        connectedHealthWriteTypeNamesForPlatform(defaultTargetPlatform),
-        write: true,
-      );
+      await _bridge.request(writeTypes, write: true);
       final current =
           await _flows.store.get('connected_health_consent', source) ??
           <String, Object?>{};

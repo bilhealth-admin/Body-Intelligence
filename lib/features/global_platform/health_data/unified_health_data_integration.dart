@@ -53,33 +53,14 @@ abstract final class BilHealthScope {
     read.map((type) => type.name),
   );
 
-  /// Logical types implemented by the Android Health Connect bridge.
-  ///
-  /// Several nutrition values share Health Connect's single NutritionRecord
-  /// permission and native record, but are emitted as separate canonical BIL
-  /// signals. Every other entry has a matching native record serializer and
-  /// manifest permission; clinical types remain deliberately excluded.
+  /// Android's release scope is limited to the activity dashboard. Other BIL
+  /// wellness features retain manual input and compatible BLE support; they do
+  /// not ask Health Connect for sleep, body-composition, vitals, nutrition or
+  /// write access in this release.
   static const Set<String> healthConnectReadTypeNames = <String>{
     'steps',
     'distance',
     'activeEnergy',
-    'workout',
-    'sleep',
-    'weight',
-    'bodyFat',
-    'leanMass',
-    'heartRate',
-    'restingHeartRate',
-    'hrv',
-    'water',
-    'nutrition',
-    'nutritionProtein',
-    'nutritionCarbohydrates',
-    'nutritionFat',
-    'nutritionFiber',
-    'nutritionSugar',
-    'nutritionSodium',
-    'nutritionPotassium',
   };
 
   static Set<String> get appleHealthReadTypeNames => readTypeNames;
@@ -90,13 +71,11 @@ abstract final class BilHealthScope {
   };
 
   /// Native write types implemented and disclosed by each mobile bridge.
-  /// HealthKit currently exports reviewed weight records only; Android Health
-  /// Connect additionally supports the reviewed nutrition export pipeline.
+  /// Android Health Connect exports are intentionally unavailable in this
+  /// release so the binary never requests a broader data scope than its
+  /// activity dashboard requires.
   static const Set<String> appleHealthWriteTypeNames = <String>{'weight'};
-  static const Set<String> healthConnectWriteTypeNames = <String>{
-    'weight',
-    'nutrition',
-  };
+  static const Set<String> healthConnectWriteTypeNames = <String>{};
 
   /// Reject every provider key that is not part of the explicit fitness-only
   /// contract. This positive allow-list also safely drops unknown historical

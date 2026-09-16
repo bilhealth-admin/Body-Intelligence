@@ -10,6 +10,41 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
+    'changed Play offer reloads the screen without a second purchase',
+    (tester) async {
+      final store = _CancellationReadyStore();
+      final catalog = _ChangedOfferCatalog(store);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: catalog,
+            productIds: const {'premium.monthly'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('store-purchase-cta')));
+      await tester.pumpAndSettle();
+      expect(catalog.loads, 2);
+      expect(catalog.requested, hasLength(1));
+      expect(find.textContaining('EGP 149.99'), findsWidgets);
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_catalog_changed')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const ValueKey('store-purchase-cta')))
+            .onTap,
+        isNotNull,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      store.dispose();
+    },
+  );
+
+  testWidgets(
     'unconfirmed receipt shows calm recovery guidance, not loss of access',
     (tester) async {
       final store = _CancellationReadyStore();
@@ -525,6 +560,35 @@ final class _ThrowingCatalog extends _RecordingCatalog {
   @override
   Future<void> requestPurchase(BilStoreOfferMetadata offer) async {
     throw StateError('native sheet unavailable');
+  }
+}
+
+final class _ChangedOfferCatalog extends _RecordingCatalog {
+  _ChangedOfferCatalog(this.store) : super(const [_monthlyOffer]);
+  final _CancellationReadyStore store;
+  int loads = 0;
+  @override
+  Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
+    loads++;
+    return requested.isEmpty
+        ? offers
+        : const [
+            BilStoreOfferMetadata(
+              productId: 'premium.monthly',
+              kind: BilStoreProductKind.premiumSubscription,
+              localizedTitle: 'Monthly',
+              localizedPrice: 'EGP 149.99',
+              currencyCode: 'EGP',
+              priceMicros: 149990000,
+              billingPeriodIso8601: 'P1M',
+            ),
+          ];
+  }
+
+  @override
+  Future<void> requestPurchase(BilStoreOfferMetadata offer) async {
+    requested.add(offer);
+    store.reportFeedback(VerifiedStoreState.ready, 'store_catalog_changed');
   }
 }
 

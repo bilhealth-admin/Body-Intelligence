@@ -18,10 +18,7 @@ void main() {
       expect(gradle, contains('targetSdk = 36'));
       expect(gradle, contains('isMinifyEnabled = true'));
       expect(gradle, contains('isShrinkResources = true'));
-      expect(
-        gradle,
-        contains('abiFilters += listOf("arm64-v8a", "x86_64")'),
-      );
+      expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
       expect(workflow, contains('(( BUILD_NUMBER == 15 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 14 ))')));
@@ -58,19 +55,6 @@ void main() {
         'android.permission.health.READ_STEPS',
         'android.permission.health.READ_DISTANCE',
         'android.permission.health.READ_ACTIVE_CALORIES_BURNED',
-        'android.permission.health.READ_EXERCISE',
-        'android.permission.health.READ_SLEEP',
-        'android.permission.health.READ_HEART_RATE',
-        'android.permission.health.READ_RESTING_HEART_RATE',
-        'android.permission.health.READ_HEART_RATE_VARIABILITY',
-        'android.permission.health.READ_WEIGHT',
-        'android.permission.health.WRITE_WEIGHT',
-        'android.permission.health.READ_BODY_FAT',
-        'android.permission.health.READ_LEAN_BODY_MASS',
-        'android.permission.health.READ_HYDRATION',
-        'android.permission.health.READ_NUTRITION',
-        'android.permission.health.WRITE_NUTRITION',
-        'android.permission.health.READ_HEALTH_DATA_HISTORY',
       ]) {
         expect(manifest, contains('android:name="$permission"'));
       }
@@ -144,16 +128,19 @@ void main() {
     },
   );
 
-  test('AI Boost remains aligned to the canonical Play/StoreKit product id', () {
-    final catalog = _read(
-      'lib/features/commerce/domain/store_catalog_configuration.dart',
-    );
-    final migration = _read(
-      'supabase/migrations/'
-      '20260914101500_align_ai_boost_product_id_with_storekit.sql',
-    );
+  test(
+    'AI Boost remains aligned to the canonical Play/StoreKit product id',
+    () {
+      final catalog = _read(
+        'lib/features/commerce/domain/store_catalog_configuration.dart',
+      );
+      final migration = _read(
+        'supabase/migrations/'
+        '20260914101500_align_ai_boost_product_id_with_storekit.sql',
+      );
 
-    expect(catalog, contains("'bil_ai_boost'"));
-    expect(migration, contains("check (product_id = 'bil_ai_boost')"));
-  });
+      expect(catalog, contains("'bil_ai_boost'"));
+      expect(migration, contains("check (product_id = 'bil_ai_boost')"));
+    },
+  );
 }

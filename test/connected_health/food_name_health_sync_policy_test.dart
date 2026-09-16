@@ -8,19 +8,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('reviewed nutrition scope can activate explicit food-name sync', () {
+  test('Android activity-only scope cannot activate food-name export', () {
     expect(BilHealthScope.write, contains(HealthDataType.nutrition));
     final status = FoodNameHealthSyncPolicy.evaluate(
       requested: true,
       platform: TargetPlatform.android,
     );
     expect(status.requested, isTrue);
-    expect(status.capability, FoodNameHealthSyncCapability.supported);
-    expect(status.active, isTrue);
-    expect(status.reasonCode, 'supported');
+    expect(status.capability, FoodNameHealthSyncCapability.unavailable);
+    expect(status.active, isFalse);
+    expect(status.reasonCode, 'nutrition_write_pipeline_not_available');
   });
 
-  test('remembered opt-in activates the reviewed nutrition contract', () async {
+  test('old opt-in is preserved but cannot enable Android export', () async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     final repository = FoodNameHealthSyncPreferenceRepository(
@@ -32,7 +32,7 @@ void main() {
     final status = await repository.watch().first;
 
     expect(status.requested, isTrue);
-    expect(status.active, isTrue);
+    expect(status.active, isFalse);
   });
 
   test(

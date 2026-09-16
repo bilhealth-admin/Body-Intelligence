@@ -34,9 +34,12 @@ abstract final class FoodNameHealthSyncPolicy {
     TargetPlatform? platform,
   }) {
     final effectivePlatform = platform ?? defaultTargetPlatform;
-    final canWriteNutrition =
-        BilHealthScope.write.contains(HealthDataType.nutrition) &&
-        effectivePlatform == TargetPlatform.android;
+    final writeTypes = switch (effectivePlatform) {
+      TargetPlatform.android => BilHealthScope.healthConnectWriteTypeNames,
+      TargetPlatform.iOS => BilHealthScope.appleHealthWriteTypeNames,
+      _ => const <String>{},
+    };
+    final canWriteNutrition = !kIsWeb && writeTypes.contains('nutrition');
     return FoodNameHealthSyncStatus(
       requested: requested,
       capability: canWriteNutrition
