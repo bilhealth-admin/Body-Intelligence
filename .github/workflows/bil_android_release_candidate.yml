@@ -29,7 +29,18 @@ jobs:
         with:
           flutter-version: 3.44.6
           cache: true
-
+      - name: Precache Material fonts for visual evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter precache --universal
+          FLUTTER_BIN="$(readlink -f "$(command -v flutter)")"
+          FLUTTER_ROOT="$(cd "$(dirname "$FLUTTER_BIN")/.." && pwd)"
+          FONT_DIR="$FLUTTER_ROOT/bin/cache/artifacts/material_fonts"
+          test -s "$FONT_DIR/roboto-regular.ttf"
+          test -s "$FONT_DIR/roboto-medium.ttf"
+          test -s "$FONT_DIR/roboto-bold.ttf"
+          test -s "$FONT_DIR/materialicons-regular.otf"
       - name: Validate release build number
         shell: bash
         env:
