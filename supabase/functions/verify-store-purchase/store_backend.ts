@@ -12,6 +12,10 @@ import {
   verifyCertificateSignature,
 } from "./apple_certificate_verifier.ts";
 import {
+  assertApplePurchaseLookup,
+  assertApplePurchaseReconciliation,
+} from "./apple_purchase_reconciliation.ts";
+import {
   MobileIntegrityFailure,
   requireMobileIntegrityGrant,
 } from "../_shared/mobile_integrity.ts";
@@ -740,6 +744,34 @@ async function reconcileApple(
   return purchase;
 }
 
+// PostgREST resolves this RPC by its complete named argument signature. These
+// nullable SQL arguments have no defaults: undefined would disappear from JSON
+// and cause a function-resolution 404, even for a valid active subscription.
+export function buildVerifiedPurchaseRpcArgs(
+  ownerId: string,
+  purchase: VerifiedPurchase,
+  verifiedAt: string,
+  transactionFingerprint: string,
+) {
+  return {
+    p_owner_id: ownerId,
+    p_provider: purchase.provider,
+    p_product_id: purchase.productId,
+    p_package_or_bundle_id: purchase.packageOrBundleId,
+    p_lifecycle: purchase.lifecycle,
+    p_original_transaction_id: purchase.originalTransactionId,
+    p_latest_transaction_id: purchase.transactionId,
+    p_environment: purchase.environment,
+    p_store_country_code: purchase.storeCountryCode ?? null,
+    p_started_at: purchase.startedAt ?? null,
+    p_expires_at: purchase.expiresAt ?? null,
+    p_grace_period_ends_at: purchase.gracePeriodEndsAt ?? null,
+    p_auto_renews: purchase.autoRenews ?? null,
+    p_verified_at: verifiedAt,
+    p_transaction_fingerprint: transactionFingerprint,
+  };
+}
+
 async function persistVerified(
   admin: ReturnType<typeof clients>["admin"],
   ownerId: string,
@@ -754,23 +786,12 @@ async function persistVerified(
   const verifiedAt = new Date().toISOString();
   const { data: active, error } = await admin.rpc(
     "bil_persist_verified_store_purchase",
-    {
-      p_owner_id: ownerId,
-      p_provider: purchase.provider,
-      p_product_id: purchase.productId,
-      p_package_or_bundle_id: purchase.packageOrBundleId,
-      p_lifecycle: purchase.lifecycle,
-      p_original_transaction_id: purchase.originalTransactionId,
-      p_latest_transaction_id: purchase.transactionId,
-      p_environment: purchase.environment,
-      p_store_country_code: purchase.storeCountryCode,
-      p_started_at: purchase.startedAt,
-      p_expires_at: purchase.expiresAt,
-      p_grace_period_ends_at: purchase.gracePeriodEndsAt,
-      p_auto_renews: purchase.autoRenews,
-      p_verified_at: verifiedAt,
-      p_transaction_fingerprint: await fingerprint(purchase.transactionId),
-    },
+    buildVerifiedPurchaseRpcArgs(
+      ownerId,
+      purchase,
+      verifiedAt,
+      await fingerprint(purchase.transactionId),
+    ),
   );
   if (error) {
     if (error.code === "23505") {
@@ -832,25 +853,22 @@ async function verifyPurchase(
     // The device JWS is only the lookup proof. Entitlement truth comes from a
     // fresh App Store Server API response over authenticated TLS.
     const deviceTransaction = await verifyApple(verification);
+    assertApplePurchaseLookup(body.product_id, deviceTransaction);
     purchase = await reconcileApple(
       deviceTransaction.originalTransactionId,
       deviceTransaction.environment,
     );
-    if (
-      purchase.originalTransactionId !== deviceTransaction.originalTransactionId
-    ) {
-      throw new Error("apple_transaction_mismatch");
-    }
+    assertApplePurchaseReconciliation(deviceTransaction, purchase);
   } else if (source === "google_play") {
     purchase = await verifyGoogle(
       env("GOOGLE_PLAY_PACKAGE_NAME"),
       verification,
     );
+    if (purchase.productId !== String(body.product_id ?? "")) {
+      throw new Error("wrong_product");
+    }
   } else {
     throw new Error("invalid_store_source");
-  }
-  if (purchase.productId !== String(body.product_id ?? "")) {
-    throw new Error("wrong_product");
   }
   const { active, verifiedAt } = await persistVerified(
     admin,

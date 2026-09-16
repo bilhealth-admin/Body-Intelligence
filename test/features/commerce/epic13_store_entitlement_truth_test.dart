@@ -179,14 +179,21 @@ void main() {
     expect(backend, contains('purchases/subscriptionsv2/tokens'));
     expect(backend, contains('signedPayload'));
     expect(backend, contains('apple_chain_untrusted'));
-    expect(backend, contains('digestBytes(decodeBase64Bytes'));
+    expect(backend, contains('await verifiedAppleCertificateChain('));
+    expect(backend, contains('digestBytes(certificateChain[2].der)'));
+    expect(backend, contains('if (!pinnedRoots.has(rootDigest))'));
+    expect(backend, contains('await compactVerify(jws, key'));
     expect(backend, contains('purchases/voidedpurchases'));
     expect(backend, contains('appleServerStatusLifecycle'));
     expect(backend, contains('scheduled_reconciliation_failed'));
     expect(client, contains('purchase.status'));
     expect(
       client,
-      contains('if (verified && purchase.pendingCompletePurchase)'),
+      contains('if (verifiedReceipt && purchase.pendingCompletePurchase)'),
+    );
+    expect(
+      client,
+      contains('verification != _StoreReceiptVerificationResult.failed'),
     );
     expect(client, isNot(contains('SharedPreferences')));
     expect(canonicalMigration, contains("when 'pro' then 'premium'"));
