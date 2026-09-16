@@ -22,8 +22,11 @@ class _NativeStore extends Fake implements InAppPurchase {
   final purchaseLaunch = Completer<bool>();
   PurchaseDetails? restoreReceipt;
   Duration? restoreCallbackDelay;
+  Future<void> Function()? appleSync;
   bool failCompletion = false;
   int completionCalls = 0;
+  int restoreCalls = 0;
+  int appleSyncCalls = 0;
   final completionAttempted = Completer<void>();
   int queries = 0;
   int launches = 0;
@@ -46,6 +49,7 @@ class _NativeStore extends Fake implements InAppPurchase {
 
   @override
   Future<void> restorePurchases({String? applicationUserName}) async {
+    restoreCalls++;
     final receipt = restoreReceipt ?? _receipt();
     final delay = restoreCallbackDelay;
     if (delay == null) {
@@ -57,6 +61,11 @@ class _NativeStore extends Fake implements InAppPurchase {
         if (!updates.isClosed) updates.add([receipt]);
       }),
     );
+  }
+
+  Future<void> syncAppleStore() async {
+    appleSyncCalls++;
+    await appleSync?.call();
   }
 
   @override
@@ -114,7 +123,8 @@ class _NativeStore extends Fake implements InAppPurchase {
 }
 
 class _ConfiguredStore extends VerifiedStorePurchaseService {
-  _ConfiguredStore(_NativeStore native) : super(purchase: native);
+  _ConfiguredStore(_NativeStore native)
+    : super(purchase: native, appleStoreSync: native.syncAppleStore);
   @override
   bool get configured => true;
 }
@@ -122,8 +132,9 @@ class _ConfiguredStore extends VerifiedStorePurchaseService {
 PurchaseDetails _receipt({
   PurchaseStatus status = PurchaseStatus.purchased,
   String productId = StoreCatalogConfiguration.aiBoost,
+  String purchaseId = 'local-receipt',
 }) => PurchaseDetails(
-  purchaseID: 'local-receipt',
+  purchaseID: purchaseId,
   productID: productId,
   verificationData: PurchaseVerificationData(
     localVerificationData: 'fixture',
@@ -152,13 +163,16 @@ void main() {
   late _ConfiguredStore store;
   late Completer<http.Response> verification;
   late Completer<void> verificationStarted;
+  late int verificationCalls;
   late List<Map<String, Object?>> subscriptionRows;
 
   setUp(() async {
+    VerifiedStorePurchaseService.resetTransactionReplayProtectionForTesting();
     SharedPreferences.setMockInitialValues({});
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     verification = Completer<http.Response>();
     verificationStarted = Completer<void>();
+    verificationCalls = 0;
     subscriptionRows = <Map<String, Object?>>[];
     await Supabase.initialize(
       url: 'https://billing-fixture.invalid',
@@ -179,6 +193,7 @@ void main() {
           );
         }
         if (request.url.path == '/functions/v1/verify-store-purchase') {
+          verificationCalls++;
           if (!verificationStarted.isCompleted) verificationStarted.complete();
           return verification.future;
         }
@@ -211,6 +226,7 @@ void main() {
     await native.updates.close();
     await Supabase.instance.dispose();
     debugDefaultTargetPlatformOverride = null;
+    VerifiedStorePurchaseService.resetTransactionReplayProtectionForTesting();
   });
   Future<void> ready() async {
     native.finishPrices();
@@ -408,6 +424,32 @@ void main() {
     },
   );
   test(
+    'a receipt verification failure cannot be overwritten by a startup fault',
+    () async {
+      final initialization = store.initialize();
+      await drain();
+
+      native.updates.addError(StateError('startup stream unavailable'));
+      await drain();
+      native.updates.add([_receipt(purchaseId: 'startup-failure-receipt')]);
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await drain();
+      native.finishPrices();
+      await initialization;
+
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'reconciliation_verification_failed');
+      expect(store.canStartPurchase, isFalse);
+    },
+  );
+  test(
     'a stream error cannot replace the outcome of an in-flight receipt',
     () async {
       await ready();
@@ -419,6 +461,208 @@ void main() {
       await drain();
       expect(store.state, VerifiedStoreState.verified);
       expect(store.busy, isFalse);
+    },
+  );
+  test('explicit iOS restore syncs before StoreKit restoration', () async {
+    final sync = Completer<void>();
+    native.appleSync = () => sync.future;
+    await ready();
+
+    final restoring = store.restore();
+    await drain();
+    expect(native.appleSyncCalls, 1);
+    expect(native.restoreCalls, 0);
+
+    sync.complete();
+    await verificationStarted.future;
+    expect(native.restoreCalls, 1);
+    verification.complete(_verifiedResponse());
+    await restoring;
+
+    expect(native.appleSyncCalls, 1);
+    expect(native.completionCalls, 1);
+    expect(native.launches, 0);
+  });
+  test(
+    'a failed explicit Apple sync never starts native restoration',
+    () async {
+      native.appleSync = () async {
+        throw StateError('Apple sync unavailable');
+      };
+      await ready();
+
+      await store.restore();
+
+      expect(native.appleSyncCalls, 1);
+      expect(native.restoreCalls, 0);
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'restore_failed');
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'deduplicates a queued failed transaction but permits a new purchase id',
+    () async {
+      await ready();
+      final replayed = _receipt(purchaseId: 'replayed-transaction');
+
+      native.updates.add([replayed, replayed]);
+      await verificationStarted.future;
+      expect(verificationCalls, 1);
+
+      // This is a second StoreKit stream delivery while the first verification
+      // remains in flight. It must not become a second server request.
+      native.updates.add([replayed]);
+      await drain();
+      expect(verificationCalls, 1);
+
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await drain();
+      expect(native.completionCalls, 0);
+
+      // A distinct platform transaction is never covered by the replay key.
+      native.updates.add([_receipt(purchaseId: 'new-transaction')]);
+      await drain();
+      expect(verificationCalls, 2);
+    },
+  );
+  test(
+    'a cooled-down replay cannot replace a newly pending checkout',
+    () async {
+      await ready();
+      final oldReceipt = _receipt(purchaseId: 'old-replayed-transaction');
+      native.updates.add([oldReceipt]);
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await drain();
+
+      // A completed receipt verification failure correctly blocks a retry in
+      // this Plans instance. Opening the route again is the real member path:
+      // it starts ready, while the process-local replay cooldown remains.
+      store.dispose();
+      await native.updates.close();
+      native = _NativeStore();
+      store = _ConfiguredStore(native);
+      native.finishPrices();
+      await store.initialize();
+
+      final launch = store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      await drain();
+      expect(store.state, VerifiedStoreState.purchasePending);
+      expect(store.messageCode, isNull);
+
+      native.updates.add([oldReceipt]);
+      await drain();
+
+      expect(store.state, VerifiedStoreState.purchasePending);
+      expect(store.messageCode, isNull);
+      expect(native.launches, 1);
+      native.purchaseLaunch.complete(false);
+      await launch;
+    },
+  );
+  test(
+    'explicit Restore retries a failed transaction once despite cooldown',
+    () async {
+      native.restoreReceipt = _receipt(
+        status: PurchaseStatus.restored,
+        purchaseId: 'restore-retry-transaction',
+      );
+      await ready();
+
+      final firstRestore = store.restore();
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await firstRestore;
+      expect(verificationCalls, 1);
+      expect(native.completionCalls, 0);
+
+      await store.restore();
+
+      expect(verificationCalls, 2);
+      expect(native.appleSyncCalls, 2);
+      expect(native.completionCalls, 0);
+      expect(store.messageCode, 'restore_verification_failed');
+    },
+  );
+  test(
+    'failed replay cooldown is account scoped across Plans service instances',
+    () async {
+      await ready();
+      final replayed = _receipt(purchaseId: 'account-scoped-transaction');
+      native.updates.add([replayed]);
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await drain();
+      expect(verificationCalls, 1);
+
+      // Opening Plans creates a new service. The same member's unfinished
+      // transaction stays fail-closed without consuming another rate-limit
+      // slot.
+      store.dispose();
+      await native.updates.close();
+      native = _NativeStore();
+      store = _ConfiguredStore(native);
+      native.finishPrices();
+      await store.initialize();
+      native.updates.add([replayed]);
+      await drain();
+      expect(verificationCalls, 1);
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'reconciliation_verification_failed');
+
+      // The cooldown is not shared with another signed-in member, even when
+      // StoreKit reports a transaction with the same id.
+      store.dispose();
+      await native.updates.close();
+      await Supabase.instance.client.auth.setInitialSession(
+        jsonEncode({
+          'access_token': 'local-test-token-owner-b',
+          'token_type': 'bearer',
+          'user': {
+            'id': '00000000-0000-4000-8000-000000000002',
+            'app_metadata': {},
+            'user_metadata': {},
+            'aud': 'authenticated',
+            'created_at': '2026-01-01T00:00:00Z',
+          },
+        }),
+      );
+      native = _NativeStore();
+      store = _ConfiguredStore(native);
+      native.finishPrices();
+      await store.initialize();
+      native.updates.add([replayed]);
+      await drain();
+
+      expect(verificationCalls, 2);
     },
   );
   test(
@@ -470,28 +714,195 @@ void main() {
     expect(native.completionCalls, 1);
     expect(native.launches, 0);
   });
-  test('restore verification failure stays restore-specific and fail-closed', () async {
-    native.restoreReceipt = _receipt(
-      status: PurchaseStatus.restored,
-      productId: StoreCatalogConfiguration.premiumMonthly,
-    );
-    await ready();
+  test(
+    'a verified inactive subscription completes without restoring stale paid access',
+    () async {
+      final now = DateTime.now().toUtc();
+      final inactiveVerifiedAt = now.add(const Duration(minutes: 1));
+      // Simulate an App Store response that has already recorded an inactive
+      // lifecycle while the subscription read still returns its old active row.
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      native.restoreReceipt = _receipt(
+        status: PurchaseStatus.restored,
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: 'verified-inactive-subscription',
+      );
+      await ready();
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
 
-    final restoring = store.restore();
-    await verificationStarted.future;
-    verification.complete(http.Response(
-      '{"verified":false}',
-      200,
-      headers: {'content-type': 'application/json'},
-    ));
-    await restoring;
+      final restoring = store.restore();
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          jsonEncode({
+            'verified': true,
+            'entitlement_active': false,
+            'verified_at': inactiveVerifiedAt.toIso8601String(),
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await restoring;
 
-    expect(store.state, VerifiedStoreState.failed);
-    expect(store.messageCode, 'restore_verification_failed');
-    expect(store.canStartPurchase, isFalse);
-    expect(native.completionCalls, 0);
-    expect(native.launches, 0);
-  });
+      expect(native.completionCalls, 1);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.messageCode, 'no_restorable_purchases');
+      expect(store.canStartPurchase, isTrue);
+      expect(native.launches, 0);
+
+      // The inactivity watermark blocks only the old replica row. A later
+      // canonical active verification represents a real new subscription.
+      final recoveredAt = inactiveVerifiedAt.add(const Duration(minutes: 1));
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': recoveredAt.toIso8601String(),
+          'started_at': recoveredAt
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': recoveredAt
+              .add(const Duration(hours: 1))
+              .toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      await store.refreshEntitlement();
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+    },
+  );
+  test(
+    'a verified subscription missing entitlement state stays fail-closed',
+    () async {
+      native.restoreReceipt = _receipt(
+        status: PurchaseStatus.restored,
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: 'missing-entitlement-state',
+      );
+      await ready();
+
+      final restoring = store.restore();
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":true}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await restoring;
+
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'restore_verification_failed');
+      expect(store.canStartPurchase, isFalse);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'a newer canonical active row wins an inactive receipt response race',
+    () async {
+      final now = DateTime.now().toUtc();
+      final inactiveVerifiedAt = now.add(const Duration(minutes: 1));
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      native.restoreReceipt = _receipt(
+        status: PurchaseStatus.restored,
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: 'inactive-to-newer-active-race',
+      );
+      await ready();
+
+      final restoring = store.restore();
+      await verificationStarted.future;
+      final newerActiveAt = inactiveVerifiedAt.add(const Duration(minutes: 1));
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': newerActiveAt.toIso8601String(),
+          'started_at': newerActiveAt
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': newerActiveAt
+              .add(const Duration(hours: 1))
+              .toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      verification.complete(
+        http.Response(
+          jsonEncode({
+            'verified': true,
+            'entitlement_active': false,
+            'verified_at': inactiveVerifiedAt.toIso8601String(),
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await restoring;
+
+      expect(native.completionCalls, 1);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.messageCode, 'subscription_verified');
+    },
+  );
+  test(
+    'restore verification failure stays restore-specific and fail-closed',
+    () async {
+      native.restoreReceipt = _receipt(
+        status: PurchaseStatus.restored,
+        productId: StoreCatalogConfiguration.premiumMonthly,
+      );
+      await ready();
+
+      final restoring = store.restore();
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await restoring;
+
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'restore_verification_failed');
+      expect(store.canStartPurchase, isFalse);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
 
   test(
     'a transient empty entitlement read retains the verified member state',

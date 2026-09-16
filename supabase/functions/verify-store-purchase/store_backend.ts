@@ -8,6 +8,10 @@ import {
 } from "npm:jose@6.1.0";
 import { X509Certificate } from "node:crypto";
 import {
+  certificateDerToPem,
+  verifyCertificateSignature,
+} from "./apple_certificate_verifier.ts";
+import {
   MobileIntegrityFailure,
   requireMobileIntegrityGrant,
 } from "../_shared/mobile_integrity.ts";
@@ -68,6 +72,27 @@ type VerifiedConsumable = {
   verifiedAt: string;
 };
 
+type AppleCertificateVerificationStage =
+  | "configured_root_certificate"
+  | "parse_leaf_certificate"
+  | "parse_intermediate_certificate"
+  | "verify_leaf_certificate_signature"
+  | "verify_intermediate_certificate_signature"
+  | "import_leaf_jws_key";
+
+// Preserve the public failure code while giving production diagnostics a
+// bounded, non-sensitive stage. Certificate bodies, public keys and runtime
+// exception text must never enter logs.
+class AppleCertificateVerificationFailure extends Error {
+  constructor(
+    readonly stage: AppleCertificateVerificationStage,
+    code = "invalid_apple_certificate_chain",
+  ) {
+    super(code);
+    this.name = "AppleCertificateVerificationFailure";
+  }
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -86,19 +111,15 @@ const logStoreVerificationFailure = (
   errorType = "",
   errorCategory = "",
   errorCode = "",
+  errorStage = "",
 ) => {
-  const safeCode = /^[a-z0-9_]+$/.test(code)
-    ? code
-    : "verification_failed";
-  const safeErrorType = /^[A-Za-z0-9_]+$/.test(errorType)
-    ? errorType
-    : "";
+  const safeCode = /^[a-z0-9_]+$/.test(code) ? code : "verification_failed";
+  const safeErrorType = /^[A-Za-z0-9_]+$/.test(errorType) ? errorType : "";
   const safeErrorCategory = /^[A-Za-z0-9_]+$/.test(errorCategory)
     ? errorCategory
     : "";
-  const safeErrorCode = /^[A-Za-z0-9_]+$/.test(errorCode)
-    ? errorCode
-    : "";
+  const safeErrorCode = /^[A-Za-z0-9_]+$/.test(errorCode) ? errorCode : "";
+  const safeErrorStage = /^[A-Za-z0-9_]+$/.test(errorStage) ? errorStage : "";
   console.error(JSON.stringify({
     event: "store_verification_failure",
     route,
@@ -106,6 +127,7 @@ const logStoreVerificationFailure = (
     ...(safeErrorType ? { error_type: safeErrorType } : {}),
     ...(safeErrorCategory ? { error_category: safeErrorCategory } : {}),
     ...(safeErrorCode ? { error_code: safeErrorCode } : {}),
+    ...(safeErrorStage ? { error_stage: safeErrorStage } : {}),
   }));
 };
 
@@ -134,6 +156,9 @@ const safeVerificationErrorCode = (error: unknown) => {
   ]);
   return allowed.has(code) ? code : "unknown";
 };
+
+const safeVerificationErrorStage = (error: unknown) =>
+  error instanceof AppleCertificateVerificationFailure ? error.stage : "";
 
 const env = (name: string) => Deno.env.get(name)?.trim() ?? "";
 type EnvironmentReader = (name: string) => string;
@@ -177,7 +202,7 @@ const decodeBase64Bytes = (value: string) =>
 // (for example when a cross-signed chain is selected).  Trust is therefore
 // rooted in these public Apple Root CA certificates, selected only when their
 // exact DER SHA-256 pin is configured in APPLE_ROOT_CA_SHA256.
-const APPLE_ROOT_CA_DER_BASE64: Readonly<Record<string, string>> = {
+export const APPLE_ROOT_CA_DER_BASE64: Readonly<Record<string, string>> = {
   "b0b1730ecbc7ff4505142c49f1295e6eda6bcaed7e2c68c5be91b5a11001f024":
     "MIIEuzCCA6OgAwIBAgIBAjANBgkqhkiG9w0BAQUFADBiMQswCQYDVQQGEwJVUzETMBEGA1UEChMKQXBwbGUgSW5jLjEmMCQGA1UECxMdQXBwbGUgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkxFjAUBgNVBAMTDUFwcGxlIFJvb3QgQ0EwHhcNMDYwNDI1MjE0MDM2WhcNMzUwMjA5MjE0MDM2WjBiMQswCQYDVQQGEwJVUzETMBEGA1UEChMKQXBwbGUgSW5jLjEmMCQGA1UECxMdQXBwbGUgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkxFjAUBgNVBAMTDUFwcGxlIFJvb3QgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDkkakJH5HbHkdQ6wXtXnmELes2oldMVeyLGYne+Uts9QerIjAC6Bg++FAJ039BqJj50cpmnCRrEdCju+QbKsMflZ56DKRHi1vUFjczy8QPTc4UadHJGXL1XQ7Vf1+b8iUDulWPTV0N8WQ1IxVLFVkds5T39pyez1C6wVhQZ48ItCD3y6wsIG9wtj8BMIy3Q88PnT3zK0koGsj+zrW5DtleHNbLPbU6rfQPDgCSC7EhFi501TwN22IWq6NxkkdTVcGvL0Gz+PvjcM3mo0xFfh9Ma1CWQYnEdGILEINBhzOKgbEwWOxaBDKMaLOPHd5lc/9nXmW8Sdh2nzMUZaF3lMktAgMBAAGjggF6MIIBdjAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUK9BpR5R2Cf70a40uQKb3R01/CF4wHwYDVR0jBBgwFoAUK9BpR5R2Cf70a40uQKb3R01/CF4wggERBgNVHSAEggEIMIIBBDCCAQAGCSqGSIb3Y2QFATCB8jAqBggrBgEFBQcCARYeaHR0cHM6Ly93d3cuYXBwbGUuY29tL2FwcGxlY2EvMIHDBggrBgEFBQcCAjCBthqBs1JlbGlhbmNlIG9uIHRoaXMgY2VydGlmaWNhdGUgYnkgYW55IHBhcnR5IGFzc3VtZXMgYWNjZXB0YW5jZSBvZiB0aGUgdGhlbiBhcHBsaWNhYmxlIHN0YW5kYXJkIHRlcm1zIGFuZCBjb25kaXRpb25zIG9mIHVzZSwgY2VydGlmaWNhdGUgcG9saWN5IGFuZCBjZXJ0aWZpY2F0aW9uIHByYWN0aWNlIHN0YXRlbWVudHMuMA0GCSqGSIb3DQEBBQUAA4IBAQBcNplMLXi37Yyb3PN3m/J20ncwT8EfhYOFG5k9RzfyqZtAjizUsZAS2L70c5vu0mQPy3lPNNiiPvl4/2vIB+x9OYOLUyDTOMSxv5pPCmv/K/xZpwUJfBdAVhEedNO3iyM7R6PVbyTi69G3cN8PReEnyvFteO3ntRcXqNx+IjXKJdXZD9Zr1KIkIxH3oayPc4FgxhtbCS+SsvhESPBgOJ4V9T0mZyCKM2r3DYLP3uujL/lTaltkwGMzd/c6ByxW69oPIQ7aunMZT7XZNn/Bh1XZp5m5MkL72NVxnn6hUrcbvZNCJBIqxw8dtk2cXmPIS4AXUKqK1drk/NAJBzewdXUh",
   "c2b9b042dd57830e7d117dac55ac8ae19407d38e41d88f3215bc3a890444a050":
@@ -186,54 +211,180 @@ const APPLE_ROOT_CA_DER_BASE64: Readonly<Record<string, string>> = {
     "MIICQzCCAcmgAwIBAgIILcX8iNLFS5UwCgYIKoZIzj0EAwMwZzEbMBkGA1UEAwwSQXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNDMwMTgxOTA2WhcNMzkwNDMwMTgxOTA2WjBnMRswGQYDVQQDDBJBcHBsZSBSb290IENBIC0gRzMxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzB2MBAGByqGSM49AgEGBSuBBAAiA2IABJjpLz1AcqTtkyJygRMc3RCV8cWjTnHcFBbZDuWmBSp3ZHtfTjjTuxxEtX/1H7YyYl3J6YRbTzBPEVoA/VhYDKX1DyxNB0cTddqXl5dvMVztK517IDvYuVTZXpmkOlEKMaNCMEAwHQYDVR0OBBYEFLuw3qFYM4iapIqZ3r6966/ayySrMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMDA2gAMGUCMQCD6cHEFl4aXTQY2e3v9GwOAEZLuN+yRhHFD/3meoyhpmvOwgPUnPWTxnS4at+qIxUCMG1mihDK1A3UT82NQz60imOlM27jbdoXt2QfyFMm+YhidDkLF1vLUagM6BgD56KyKA==",
 };
 
+const MAX_APPLE_CERTIFICATE_DER_BYTES = 16 * 1024;
+
+export type AppleCertificate = {
+  // Preserve exact DER from x5c/configuration. Deno 2.1.x cannot read
+  // X509Certificate.raw, so the original trusted bytes are authoritative.
+  der: Uint8Array;
+  pem: string;
+  certificate: X509Certificate;
+};
+
+function appleCertificateFromDer(
+  value: Uint8Array,
+  stage: AppleCertificateVerificationStage,
+): AppleCertificate {
+  if (value.length === 0 || value.length > MAX_APPLE_CERTIFICATE_DER_BYTES) {
+    throw new AppleCertificateVerificationFailure(stage);
+  }
+  // Do not keep a view into a decoder-owned buffer at a trust boundary.
+  const der = new Uint8Array(value.length);
+  der.set(value);
+  try {
+    return {
+      der,
+      pem: certificateDerToPem(der),
+      certificate: new X509Certificate(der),
+    };
+  } catch {
+    throw new AppleCertificateVerificationFailure(stage);
+  }
+}
+
+// This is intentionally an in-process helper, exported only so certificate
+// compatibility tests can construct a synthetic trusted root. Production
+// roots remain exclusively the pinned APPLE_ROOT_CA_DER_BASE64 entries below.
+export function appleCertificateFromTrustedDer(value: Uint8Array) {
+  return appleCertificateFromDer(value, "configured_root_certificate");
+}
+
+function appleCertificateFromX5c(
+  encoded: string,
+  stage: AppleCertificateVerificationStage,
+): AppleCertificate {
+  if (
+    encoded.length === 0 ||
+    encoded.length > Math.ceil(MAX_APPLE_CERTIFICATE_DER_BYTES * 4 / 3) + 8 ||
+    !/^[A-Za-z0-9+/]*={0,2}$/.test(encoded)
+  ) {
+    throw new AppleCertificateVerificationFailure(stage);
+  }
+  try {
+    return appleCertificateFromDer(decodeBase64Bytes(encoded), stage);
+  } catch (error) {
+    if (error instanceof AppleCertificateVerificationFailure) throw error;
+    throw new AppleCertificateVerificationFailure(stage);
+  }
+}
+
 function configuredAppleRootCertificates(pinnedRoots: ReadonlySet<string>) {
   return Object.entries(APPLE_ROOT_CA_DER_BASE64)
     .filter(([pin]) => pinnedRoots.has(pin))
-    .map(([, encoded]) => new X509Certificate(decodeBase64Bytes(encoded)));
+    .map(([, encoded]) =>
+      appleCertificateFromX5c(encoded, "configured_root_certificate")
+    );
 }
 
-function verifiedAppleCertificateChain(
-  x5c: string[],
-  trustedRoots: X509Certificate[],
+function certificatePublicKey(
+  certificate: AppleCertificate,
+  stage: AppleCertificateVerificationStage,
 ) {
+  try {
+    const key = certificate.certificate.publicKey.export({ format: "jwk" });
+    if (!key || typeof key !== "object") throw new Error();
+    return key as Record<string, unknown>;
+  } catch {
+    throw new AppleCertificateVerificationFailure(stage);
+  }
+}
+
+function certificateIsCurrent(certificate: AppleCertificate, now: number) {
+  const validFrom = Date.parse(certificate.certificate.validFrom);
+  const validTo = Date.parse(certificate.certificate.validTo);
+  return Number.isFinite(validFrom) && Number.isFinite(validTo) &&
+    now >= validFrom && now <= validTo;
+}
+
+export async function verifiedAppleCertificateChain(
+  x5c: string[],
+  trustedRoots: AppleCertificate[],
+): Promise<[AppleCertificate, AppleCertificate, AppleCertificate]> {
   if (x5c.length < 2) throw new Error("invalid_apple_certificate_chain");
-  const certificates = x5c.slice(0, 2).map((encoded) =>
-    new X509Certificate(decodeBase64Bytes(encoded))
+  const leaf = appleCertificateFromX5c(x5c[0], "parse_leaf_certificate");
+  const intermediate = appleCertificateFromX5c(
+    x5c[1],
+    "parse_intermediate_certificate",
   );
   const now = Date.now();
-  for (const certificate of certificates) {
-    const validFrom = Date.parse(certificate.validFrom);
-    const validTo = Date.parse(certificate.validTo);
-    if (
-      !Number.isFinite(validFrom) || !Number.isFinite(validTo) ||
-      now < validFrom || now > validTo
-    ) {
-      throw new Error("apple_certificate_expired");
+  if (
+    !certificateIsCurrent(leaf, now) || !certificateIsCurrent(intermediate, now)
+  ) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_leaf_certificate_signature",
+      "apple_certificate_expired",
+    );
+  }
+  if (leaf.certificate.ca) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_leaf_certificate_signature",
+      "invalid_apple_leaf_certificate",
+    );
+  }
+  if (!intermediate.certificate.ca) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_intermediate_certificate_signature",
+      "invalid_apple_ca_certificate",
+    );
+  }
+  if (leaf.certificate.issuer !== intermediate.certificate.subject) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_leaf_certificate_signature",
+    );
+  }
+  let leafSignatureValid = false;
+  try {
+    leafSignatureValid = await verifyCertificateSignature(
+      leaf.der,
+      certificatePublicKey(intermediate, "verify_leaf_certificate_signature"),
+    );
+  } catch {
+    throw new AppleCertificateVerificationFailure(
+      "verify_leaf_certificate_signature",
+    );
+  }
+  if (!leafSignatureValid) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_leaf_certificate_signature",
+    );
+  }
+
+  let root: AppleCertificate | undefined;
+  for (const candidate of trustedRoots) {
+    if (intermediate.certificate.issuer !== candidate.certificate.subject) {
+      continue;
+    }
+    let intermediateSignatureValid = false;
+    try {
+      intermediateSignatureValid = await verifyCertificateSignature(
+        intermediate.der,
+        certificatePublicKey(
+          candidate,
+          "verify_intermediate_certificate_signature",
+        ),
+      );
+    } catch {
+      throw new AppleCertificateVerificationFailure(
+        "verify_intermediate_certificate_signature",
+      );
+    }
+    if (intermediateSignatureValid) {
+      root = candidate;
+      break;
     }
   }
-  if (certificates[0].ca) throw new Error("invalid_apple_leaf_certificate");
-  const intermediate = certificates[1];
-  if (!intermediate.ca) throw new Error("invalid_apple_ca_certificate");
-  if (
-    certificates[0].issuer !== intermediate.subject ||
-    !certificates[0].verify(intermediate.publicKey)
-  ) {
-    throw new Error("invalid_apple_certificate_chain");
+  if (!root) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_intermediate_certificate_signature",
+    );
   }
-  const root = trustedRoots.find((candidate) =>
-    intermediate.issuer === candidate.subject &&
-    intermediate.verify(candidate.publicKey)
-  );
-  if (!root) throw new Error("invalid_apple_certificate_chain");
-  const rootValidFrom = Date.parse(root.validFrom);
-  const rootValidTo = Date.parse(root.validTo);
-  if (
-    !Number.isFinite(rootValidFrom) || !Number.isFinite(rootValidTo) ||
-    now < rootValidFrom || now > rootValidTo
-  ) {
-    throw new Error("apple_certificate_expired");
+  if (!certificateIsCurrent(root, now)) {
+    throw new AppleCertificateVerificationFailure(
+      "verify_intermediate_certificate_signature",
+      "apple_certificate_expired",
+    );
   }
-  return [certificates[0], intermediate, root];
+  return [leaf, intermediate, root];
 }
 
 function clients(authorization?: string) {
@@ -408,7 +559,11 @@ async function googleVoidedPurchaseTokens(): Promise<Set<string>> {
   return tokens;
 }
 
-async function verifyAppleJws(jws: string): Promise<Record<string, unknown>> {
+export async function verifyAppleJwsWithTrustedRoots(
+  jws: string,
+  pinnedRoots: ReadonlySet<string>,
+  trustedRoots: AppleCertificate[],
+): Promise<Record<string, unknown>> {
   const header = decodeProtectedHeader(jws);
   if (
     header.alg !== "ES256" || !Array.isArray(header.x5c) ||
@@ -423,29 +578,42 @@ async function verifyAppleJws(jws: string): Promise<Record<string, unknown>> {
   ) {
     throw new Error("invalid_apple_jws_header");
   }
-  const pinnedRoots = new Set(
-    env("APPLE_ROOT_CA_SHA256")
-      .split(",")
-      .map((pin) => pin.trim().toLowerCase().replaceAll(":", ""))
-      .filter((pin) => /^[0-9a-f]{64}$/.test(pin)),
-  );
   if (pinnedRoots.size === 0) throw new Error("apple_root_pin_missing");
-  const trustedRoots = configuredAppleRootCertificates(pinnedRoots);
   if (trustedRoots.length === 0) throw new Error("apple_root_pin_unsupported");
-  const certificateChain = verifiedAppleCertificateChain(
+  const certificateChain = await verifiedAppleCertificateChain(
     header.x5c,
     trustedRoots,
   );
   // Certificate pins are SHA-256 fingerprints of the raw DER certificate,
   // never of a UTF-8 reinterpretation of its binary bytes.  Hash the exact
   // DER bytes of the separately trusted Apple root, not an optional x5c root.
-  const rootDigest = await digestBytes(
-    new Uint8Array(certificateChain.at(-1)!.raw),
-  );
+  const rootDigest = await digestBytes(certificateChain[2].der);
   if (!pinnedRoots.has(rootDigest)) throw new Error("apple_chain_untrusted");
-  const key = await importX509(certificateChain[0].toString(), "ES256");
+  let key;
+  try {
+    key = await importX509(certificateChain[0].pem, "ES256");
+  } catch {
+    throw new AppleCertificateVerificationFailure("import_leaf_jws_key");
+  }
   const verified = await compactVerify(jws, key, { algorithms: ["ES256"] });
   return JSON.parse(new TextDecoder().decode(verified.payload));
+}
+
+export async function verifyAppleJws(
+  jws: string,
+): Promise<Record<string, unknown>> {
+  const pinnedRoots = new Set(
+    env("APPLE_ROOT_CA_SHA256")
+      .split(",")
+      .map((pin) => pin.trim().toLowerCase().replaceAll(":", ""))
+      .filter((pin) => /^[0-9a-f]{64}$/.test(pin)),
+  );
+  const trustedRoots = configuredAppleRootCertificates(pinnedRoots);
+  return await verifyAppleJwsWithTrustedRoots(
+    jws,
+    pinnedRoots,
+    trustedRoots,
+  );
 }
 
 async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
@@ -620,7 +788,7 @@ async function persistVerified(
     throw new Error("persistence_failed");
   }
   if (typeof active !== "boolean") throw new Error("persistence_failed");
-  return active;
+  return { active, verifiedAt };
 }
 
 async function authenticatedUser(
@@ -684,10 +852,17 @@ async function verifyPurchase(
   if (purchase.productId !== String(body.product_id ?? "")) {
     throw new Error("wrong_product");
   }
-  const active = await persistVerified(admin, user.id, purchase);
+  const { active, verifiedAt } = await persistVerified(
+    admin,
+    user.id,
+    purchase,
+  );
   return json({
     verified: true,
     entitlement_active: active,
+    // The client uses this server-generated watermark to ignore only older
+    // entitlement snapshots while a fresh subscription verification settles.
+    verified_at: verifiedAt,
     lifecycle: purchase.lifecycle,
     store_country_code: purchase.storeCountryCode,
   });
@@ -1053,6 +1228,7 @@ export async function handler(
       errorType,
       safeVerificationErrorCategory(error),
       safeVerificationErrorCode(error),
+      safeVerificationErrorStage(error),
     );
     const clientCodes = new Set([
       "authentication_required",
