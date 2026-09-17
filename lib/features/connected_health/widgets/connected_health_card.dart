@@ -130,7 +130,10 @@ class _DashboardDevicePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final inherited = MediaQuery.of(context);
     final scale = inherited.textScaler.scale(1).clamp(1.0, 2.0).toDouble();
-    final previewSide = 208 + ((scale - 1) * 108);
+    // Give the watch a little more breathing room in the dashboard card.
+    // The extra width is intentional: it keeps four readings legible without
+    // pushing the device outside its bounded square.
+    final previewSide = 224 + ((scale - 1) * 112);
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -535,7 +538,7 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
                             status: watchSnapshot.status,
                           ),
                           ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 176),
+                            constraints: const BoxConstraints(maxWidth: 194),
                             child: watch,
                           ),
                         ],

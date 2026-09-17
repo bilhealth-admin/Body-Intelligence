@@ -147,26 +147,21 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
       final date = signal.observedAt.toLocal();
       return DateTime(date.year, date.month, date.day) == today;
     });
-    final signals = key == 'steps' && todayHistory.isNotEmpty
-        ? todayHistory
+    // Prefer today's aggregate when it exists, but do not hide a valid
+    // reading merely because the native source reported it shortly before
+    // the local day boundary. The card already exposes the last-sync time;
+    // showing the latest confirmed value is more useful than replacing it
+    // with an empty watch face.
+    final signals = key == 'steps'
+        ? <ConnectedHealthSignalView>[
+            ...todayHistory,
+            ...widget.snapshot.signals.where((signal) => signal.key == key),
+          ]
         : widget.snapshot.signals;
     ConnectedHealthSignalView? latest;
     for (final signal in signals) {
       if (signal.key != key || !liveHealthWatchSignalIsActual(signal)) {
         continue;
-      }
-      // Step history is a per-day total, not a live sample. Showing an older
-      // day as today's watch reading would be misleading, so use today's
-      // aggregate only.
-      if (key == 'steps' ||
-          signal.attributes['aggregation'] == 'native_daily') {
-        final observed = signal.observedAt.toLocal();
-        final observedDay = DateTime(
-          observed.year,
-          observed.month,
-          observed.day,
-        );
-        if (observedDay != today) continue;
       }
       if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {
         latest = signal;
@@ -216,214 +211,239 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
         'ساعة لياقة حية تعرض الوقت الحالي والبيانات المقاسة المتاحة',
       ),
       child: SizedBox.expand(
-        child: CustomPaint(
-          key: const Key('bil-live-health-watch'),
-          painter: _WatchPainter(hour: hour, minute: minute, second: second),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned(
-                left: widget.compact ? 28 : 54,
-                right: widget.compact ? 28 : 54,
-                top: widget.compact ? 25 : 42,
-                child: Text(
-                  _dateLine(context),
-                  key: const Key('watch-date-line'),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF91AEC0),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final side = constraints.biggest.shortestSide;
+            final referenceSide = widget.compact ? 176.0 : 304.0;
+            final layoutScale = (side / referenceSide).clamp(.75, 2.25);
+            double d(double value) => value * layoutScale;
+            return CustomPaint(
+              key: const Key('bil-live-health-watch'),
+              painter: _WatchPainter(
+                hour: hour,
+                minute: minute,
+                second: second,
               ),
-              Positioned(
-                left: widget.compact ? 38 : 50,
-                right: widget.compact ? 38 : 50,
-                top: widget.compact ? 58 : 82,
-                child: Text.rich(
-                  key: const Key('watch-digital-time'),
-                  TextSpan(
-                    children: [
-                      TextSpan(text: '$digitalHour:$digitalMinute'),
-                      TextSpan(
-                        text: '  $digitalSecond',
-                        style: TextStyle(
-                          color: const Color(0xFF55DFF2),
-                          fontSize: widget.compact ? 11 : 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    left: d(widget.compact ? 28 : 54),
+                    right: d(widget.compact ? 28 : 54),
+                    top: d(widget.compact ? 25 : 42),
+                    child: Text(
+                      _dateLine(context),
+                      key: const Key('watch-date-line'),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF91AEC0),
+                        fontSize: d(10),
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                  textDirection: TextDirection.ltr,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: widget.compact ? 32 : 42,
-                    height: 1,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: -1.8,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: widget.compact ? 26 : 40,
-                right: widget.compact ? 26 : 40,
-                bottom: widget.compact ? 25 : 44,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: compactConnectOnly
-                        ? 0
-                        : widget.compact
-                        ? 6
-                        : 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: compactConnectOnly
-                        ? Colors.transparent
-                        : const Color(0xFF06131F).withValues(alpha: .68),
-                    borderRadius: BorderRadius.circular(24),
-                    border: compactConnectOnly
-                        ? null
-                        : Border.all(
-                            color: Colors.white.withValues(alpha: .12),
-                          ),
-                  ),
-                  child: showMeasuredMetrics
-                      ? _WatchMetricsLayout(
-                          children: [
-                            if (steps != null)
-                              Expanded(
-                                child: _WatchMetricButton(
-                                  key: const Key('watch-metric-steps'),
-                                  onTap: widget.onStepsTap,
-                                  child: _WatchMetric(
-                                    icon: Icons.directions_walk_rounded,
-                                    color: const Color(0xFF55D66B),
-                                    value: _value(steps),
-                                    compact: widget.compact,
-                                    label: connectedHealthText(
-                                      context,
-                                      'steps',
-                                      'خطوات',
-                                    ),
-                                    semanticLabel: connectedHealthText(
-                                      context,
-                                      'Steps',
-                                      'الخطوات',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (heart != null)
-                              Expanded(
-                                child: _WatchMetricButton(
-                                  key: const Key('watch-metric-heart-rate'),
-                                  onTap: widget.onHeartTap,
-                                  child: _WatchMetric(
-                                    icon: Icons.favorite_outline_rounded,
-                                    color: const Color(0xFFFF6472),
-                                    value: _value(heart),
-                                    compact: widget.compact,
-                                    label: connectedHealthText(
-                                      context,
-                                      'bpm',
-                                      'نبض',
-                                    ),
-                                    semanticLabel: connectedHealthText(
-                                      context,
-                                      'Heart rate',
-                                      'معدل نبض القلب',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (activeEnergy != null)
-                              Expanded(
-                                child: _WatchMetricButton(
-                                  key: const Key('watch-metric-active-energy'),
-                                  onTap: widget.onActiveEnergyTap,
-                                  child: _WatchMetric(
-                                    icon: Icons.local_fire_department_outlined,
-                                    color: const Color(0xFFFFA24A),
-                                    value: _value(activeEnergy),
-                                    compact: widget.compact,
-                                    label: connectedHealthText(
-                                      context,
-                                      'kcal',
-                                      'سعرة',
-                                    ),
-                                    semanticLabel: connectedHealthText(
-                                      context,
-                                      'Active energy',
-                                      'الطاقة النشطة',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (sleep != null)
-                              Expanded(
-                                child: _WatchMetricButton(
-                                  key: const Key('watch-metric-sleep'),
-                                  onTap: widget.onSleepTap,
-                                  child: _WatchMetric(
-                                    icon: Icons.bedtime_outlined,
-                                    color: const Color(0xFFA982FF),
-                                    value: _value(sleep, decimals: 1),
-                                    compact: widget.compact,
-                                    label: connectedHealthText(
-                                      context,
-                                      'sleep',
-                                      'نوم',
-                                    ),
-                                    semanticLabel: connectedHealthText(
-                                      context,
-                                      'Sleep',
-                                      'النوم',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        )
-                      : !widget.showConnectControl
-                      ? const SizedBox.shrink()
-                      : widget.compact
-                      ? Center(
-                          child: _CompactWatchConnectButton(
-                            onPressed: widget.onConnectTap,
-                            semanticLabel: connectedHealthText(
-                              context,
-                              'Link fitness',
-                              'ربط اللياقة',
+                  Positioned(
+                    left: d(widget.compact ? 38 : 50),
+                    right: d(widget.compact ? 38 : 50),
+                    // The compact dashboard preview is only about 176 logical
+                    // pixels tall. Keep the clock in its own upper zone so the
+                    // four-metric grid below can never paint over it.
+                    top: d(widget.compact ? 51 : 82),
+                    child: Text.rich(
+                      key: const Key('watch-digital-time'),
+                      TextSpan(
+                        children: [
+                          TextSpan(text: '$digitalHour:$digitalMinute'),
+                          TextSpan(
+                            text: '  $digitalSecond',
+                            style: TextStyle(
+                              color: const Color(0xFF55DFF2),
+                              fontSize: d(widget.compact ? 10 : 14),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        )
-                      : SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.tonalIcon(
-                            key: const Key('watch-connect-health-cta'),
-                            onPressed: widget.onConnectTap,
-                            icon: const Icon(Icons.link_rounded, size: 15),
-                            label: Text(
-                              connectedHealthText(
-                                context,
-                                'Connect fitness',
-                                'ربط اللياقة',
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                      textDirection: TextDirection.ltr,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: d(widget.compact ? 28 : 42),
+                        height: 1,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: d(-1.8),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: d(widget.compact ? 26 : 40),
+                    right: d(widget.compact ? 26 : 40),
+                    bottom: d(widget.compact ? 17 : 44),
+                    child: Container(
+                      constraints: widget.compact
+                          ? BoxConstraints(minHeight: d(78), maxHeight: d(78))
+                          : null,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: d(widget.compact ? 6 : 8),
+                        vertical: compactConnectOnly
+                            ? 0
+                            : widget.compact
+                            ? d(4)
+                            : d(10),
+                      ),
+                      decoration: BoxDecoration(
+                        color: compactConnectOnly
+                            ? Colors.transparent
+                            : const Color(0xFF06131F).withValues(alpha: .68),
+                        borderRadius: BorderRadius.circular(d(24)),
+                        border: compactConnectOnly
+                            ? null
+                            : Border.all(
+                                color: Colors.white.withValues(alpha: .12),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 12),
+                      ),
+                      child: showMeasuredMetrics
+                          ? _WatchMetricsLayout(
+                              children: [
+                                if (steps != null)
+                                  Expanded(
+                                    child: _WatchMetricButton(
+                                      key: const Key('watch-metric-steps'),
+                                      onTap: widget.onStepsTap,
+                                      child: _WatchMetric(
+                                        icon: Icons.directions_walk_rounded,
+                                        color: const Color(0xFF55D66B),
+                                        value: _value(steps),
+                                        compact: widget.compact,
+                                        scale: layoutScale,
+                                        label: connectedHealthText(
+                                          context,
+                                          'steps',
+                                          'خطوات',
+                                        ),
+                                        semanticLabel: connectedHealthText(
+                                          context,
+                                          'Steps',
+                                          'الخطوات',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                if (heart != null)
+                                  Expanded(
+                                    child: _WatchMetricButton(
+                                      key: const Key('watch-metric-heart-rate'),
+                                      onTap: widget.onHeartTap,
+                                      child: _WatchMetric(
+                                        icon: Icons.favorite_outline_rounded,
+                                        color: const Color(0xFFFF6472),
+                                        value: _value(heart),
+                                        compact: widget.compact,
+                                        scale: layoutScale,
+                                        label: connectedHealthText(
+                                          context,
+                                          'bpm',
+                                          'نبض',
+                                        ),
+                                        semanticLabel: connectedHealthText(
+                                          context,
+                                          'Heart rate',
+                                          'معدل نبض القلب',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                if (activeEnergy != null)
+                                  Expanded(
+                                    child: _WatchMetricButton(
+                                      key: const Key(
+                                        'watch-metric-active-energy',
+                                      ),
+                                      onTap: widget.onActiveEnergyTap,
+                                      child: _WatchMetric(
+                                        icon: Icons
+                                            .local_fire_department_outlined,
+                                        color: const Color(0xFFFFA24A),
+                                        value: _value(activeEnergy),
+                                        compact: widget.compact,
+                                        scale: layoutScale,
+                                        label: connectedHealthText(
+                                          context,
+                                          'kcal',
+                                          'سعرة',
+                                        ),
+                                        semanticLabel: connectedHealthText(
+                                          context,
+                                          'Active energy',
+                                          'الطاقة النشطة',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                if (sleep != null)
+                                  Expanded(
+                                    child: _WatchMetricButton(
+                                      key: const Key('watch-metric-sleep'),
+                                      onTap: widget.onSleepTap,
+                                      child: _WatchMetric(
+                                        icon: Icons.bedtime_outlined,
+                                        color: const Color(0xFFA982FF),
+                                        value: _value(sleep, decimals: 1),
+                                        compact: widget.compact,
+                                        scale: layoutScale,
+                                        label: connectedHealthText(
+                                          context,
+                                          'sleep',
+                                          'نوم',
+                                        ),
+                                        semanticLabel: connectedHealthText(
+                                          context,
+                                          'Sleep',
+                                          'النوم',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            )
+                          : !widget.showConnectControl
+                          ? const SizedBox.shrink()
+                          : widget.compact
+                          ? Center(
+                              child: _CompactWatchConnectButton(
+                                onPressed: widget.onConnectTap,
+                                semanticLabel: connectedHealthText(
+                                  context,
+                                  'Link fitness',
+                                  'ربط اللياقة',
+                                ),
+                              ),
+                            )
+                          : SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.tonalIcon(
+                                key: const Key('watch-connect-health-cta'),
+                                onPressed: widget.onConnectTap,
+                                icon: const Icon(Icons.link_rounded, size: 15),
+                                label: Text(
+                                  connectedHealthText(
+                                    context,
+                                    'Connect fitness',
+                                    'ربط اللياقة',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -530,6 +550,7 @@ class _WatchMetric extends StatelessWidget {
     required this.label,
     required this.semanticLabel,
     this.compact = false,
+    this.scale = 1,
   });
 
   final IconData icon;
@@ -538,6 +559,7 @@ class _WatchMetric extends StatelessWidget {
   final String label;
   final String semanticLabel;
   final bool compact;
+  final double scale;
 
   @override
   Widget build(BuildContext context) {
@@ -547,13 +569,14 @@ class _WatchMetric extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: compact ? 13 : 16),
+            Icon(icon, color: color, size: (compact ? 10 : 16) * scale),
             Text(
               value,
               maxLines: 1,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Colors.white,
-                fontSize: compact ? 11 : 13,
+                fontSize: (compact ? 10 : 13) * scale,
+                height: 1,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -563,7 +586,8 @@ class _WatchMetric extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: const Color(0xFFD9EAF4),
-                fontSize: compact ? 9 : null,
+                fontSize: compact ? 8 * scale : null,
+                height: 1,
               ),
             ),
           ],
