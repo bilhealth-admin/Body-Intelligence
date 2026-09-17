@@ -735,7 +735,8 @@ void main() {
     expect(dashboard, isNot(contains("tr('Premium nutrient goals'")));
     expect(dashboard, isNot(contains("tr('Premium heart health'")));
     expect(dashboard, contains("Key('dashboard-premium-page-label')"));
-    expect(RegExp('showLabel: false').allMatches(dashboard).length, 2);
+    expect(RegExp('showLabel: false').allMatches(dashboard).length, 0);
+    expect(RegExp('showLabel: true').allMatches(dashboard).length, 2);
     expect(dashboardLock, contains('this.showLabel = true'));
     expect(dashboardLock, isNot(contains('Icons.lock_rounded')));
     expect(

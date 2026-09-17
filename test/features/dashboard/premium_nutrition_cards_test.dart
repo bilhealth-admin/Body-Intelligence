@@ -147,7 +147,7 @@ void main() {
   });
 
   testWidgets(
-    'free users see minimal Premium locks on macros and heart health',
+    'free users see Premium labels on macros and heart health locks',
     (tester) async {
       await pumpDashboard(tester, premiumUnlocked: false);
       await revealHeartHealthy(tester);
@@ -162,7 +162,7 @@ void main() {
           of: find.byKey(const Key('dashboard-heart-premium-lock')),
           matching: find.byType(PremiumLabelBadge),
         ),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.descendant(
@@ -175,7 +175,7 @@ void main() {
         find.byKey(const Key('dashboard-premium-page-label')),
         findsOneWidget,
       );
-      expect(find.byType(PremiumLabelBadge), findsOneWidget);
+      expect(find.byType(PremiumLabelBadge), findsNWidgets(2));
 
       await tester.drag(
         find.byKey(const Key('dashboard-calories-macros-horizontal')),
@@ -205,10 +205,10 @@ void main() {
         of: find.byKey(const Key('dashboard-macros-premium-lock')),
         matching: find.byType(PremiumLabelBadge),
       );
-      expect(macroBadge, findsNothing);
+      expect(macroBadge, findsOneWidget);
       expect(
         find.descendant(of: macrosLock, matching: find.byType(Text)),
-        findsNothing,
+        findsOneWidget,
       );
 
       await tester.tap(macrosLock);

@@ -138,7 +138,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             'تابع تقدم البروتين والكربوهيدرات والدهون بلمحة.',
           ),
           borderRadius: 12,
-          showLabel: false,
+          showLabel: true,
           onTap: () => context.push('/plans'),
           child: _ReferenceMacrosCard(
             onEdit: () => context.push('/settings/nutrition-goals'),
@@ -175,7 +175,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             'أهداف القلب والصوديوم والألياف والأهداف المخصصة',
           ),
           borderRadius: 12,
-          showLabel: false,
+          showLabel: true,
           onTap: () => context.push('/plans'),
           child: _CircularNutrientCard(
             key: const Key('dashboard-heart-circle-card'),
