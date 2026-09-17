@@ -57,7 +57,7 @@ void main() {
       final voice = File(
         'lib/features/nutrition/services/meal_voice_input_service.dart',
       ).readAsStringSync();
-      final nativeRequestStart = voice.indexOf(
+      final nativeRequestStart = voice.lastIndexOf(
         'if (defaultTargetPlatform == TargetPlatform.iOS) {',
       );
       final prePermissionStart = voice.indexOf(

@@ -29,10 +29,21 @@ const _watchMetricKeys = <String>{
 /// not required. Original provenance remains in storage, not in the compact
 /// reading labels.
 bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
+  final cachePreservedAfterNativeFailure =
+      snapshot.status == ConnectedHealthStatus.degraded &&
+      snapshot.lastSyncAt != null &&
+      (snapshot.failureCode == 'health_sync_failed_offline_cache_preserved' ||
+          snapshot.failureCode ==
+              'health_refresh_failed_offline_cache_preserved');
   final usableStatus = switch (snapshot.status) {
     ConnectedHealthStatus.ready ||
     ConnectedHealthStatus.syncing ||
     ConnectedHealthStatus.synchronized => true,
+    // Keep the last confirmed watch readings on screen when a foreground
+    // retry fails. The status dot still reports the degraded source, while
+    // disconnect/revocation snapshots (which have no cache-preserved code)
+    // continue to hide stale readings.
+    ConnectedHealthStatus.degraded => cachePreservedAfterNativeFailure,
     _ => false,
   };
   final hasCurrentSource =

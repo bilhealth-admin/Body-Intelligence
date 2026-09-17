@@ -135,7 +135,17 @@ class _DashboardShellState extends State<DashboardShell> {
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
                     controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
+                    // Match the platform ListView used by More: iOS keeps
+                    // its native rubber-band drag while Android remains
+                    // clamped. AlwaysScrollable preserves pull-to-refresh
+                    // even when the content is shorter than the viewport.
+                    physics: switch (Theme.of(context).platform) {
+                      TargetPlatform.iOS ||
+                      TargetPlatform.macOS => const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      _ => const AlwaysScrollableScrollPhysics(),
+                    },
                     padding: EdgeInsets.fromLTRB(
                       0,
                       16,
@@ -197,33 +207,6 @@ class _ElasticDashboardRefresh extends StatefulWidget {
 class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
   double _pullExtent = 0;
   bool _refreshing = false;
-  bool _pointerDown = false;
-  bool _reboundScheduled = false;
-
-  void _settleIdleOverscroll() {
-    if (_reboundScheduled) return;
-    _reboundScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _reboundScheduled = false;
-      if (!mounted || _pointerDown || !widget.controller.hasClients) return;
-      final position = widget.controller.position;
-      // Let native drag/ballistic physics finish first, just like More. A
-      // refresh can change the content extent after that activity has ended;
-      // recover only an idle position still outside the new bounds.
-      if (position.isScrollingNotifier.value || !position.outOfRange) return;
-      unawaited(
-        position.animateTo(
-          position.pixels.clamp(
-            position.minScrollExtent,
-            position.maxScrollExtent,
-          ),
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-        ),
-      );
-    });
-    WidgetsBinding.instance.ensureVisualUpdate();
-  }
 
   bool _trackScroll(ScrollNotification notification) {
     if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
@@ -245,7 +228,6 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
         notification.overscroll < 0) {
       _pullExtent += -notification.overscroll;
     }
-    if (notification is ScrollEndNotification) _settleIdleOverscroll();
     return false;
   }
 
@@ -253,7 +235,6 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
     final shouldRefresh =
         _pullExtent >= _ElasticDashboardRefresh.triggerExtent && !_refreshing;
     _pullExtent = 0;
-    _settleIdleOverscroll();
     if (!shouldRefresh) return;
     _refreshing = true;
     unawaited(_runRefresh());
@@ -267,7 +248,6 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
       // guarantees that an implementation error cannot leave refresh armed.
     } finally {
       _refreshing = false;
-      if (mounted) _settleIdleOverscroll();
     }
   }
 
@@ -275,28 +255,11 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
   Widget build(BuildContext context) {
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => _pointerDown = true,
-      onPointerUp: (_) {
-        _pointerDown = false;
-        _finishPull();
-      },
-      onPointerCancel: (_) {
-        _pointerDown = false;
-        _pullExtent = 0;
-        _settleIdleOverscroll();
-      },
-      child: NotificationListener<ScrollMetricsNotification>(
-        onNotification: (notification) {
-          if (notification.depth == 0 &&
-              notification.metrics.axis == Axis.vertical) {
-            _settleIdleOverscroll();
-          }
-          return false;
-        },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: _trackScroll,
-          child: widget.child,
-        ),
+      onPointerUp: (_) => _finishPull(),
+      onPointerCancel: (_) => _pullExtent = 0,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _trackScroll,
+        child: widget.child,
       ),
     );
   }

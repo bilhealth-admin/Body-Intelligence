@@ -62,6 +62,10 @@ extension _FoodPageActions on _FoodPageState {
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await policy.openSettings();
+        return false;
+      }
       final open = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(

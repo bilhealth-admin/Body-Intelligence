@@ -59,7 +59,7 @@ void main() {
   });
 
   testWidgets(
-    'subscription error stays protected and offers retry, not upsell',
+    'subscription error stays protected and labels Premium beside retry',
     (tester) async {
       await tester.pumpWidget(
         _appWithSubscription(
@@ -76,7 +76,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
-      expect(find.text('Premium'), findsNothing);
+      expect(find.text('Premium'), findsOneWidget);
     },
   );
 
@@ -98,7 +98,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
-    expect(find.text('Premium'), findsNothing);
+    expect(find.text('Premium'), findsOneWidget);
   });
 }
 

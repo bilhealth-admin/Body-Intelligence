@@ -33,6 +33,7 @@ class PremiumNutritionGlass extends ConsumerWidget {
     if (subscription.isLoading || subscription.hasError) {
       return _PremiumNutritionStatusGlass(
         borderRadius: borderRadius,
+        compact: compact,
         loading: subscription.isLoading,
         onRetry: subscription.hasError
             ? () => ref.invalidate(verifiedSubscriptionStateProvider)
@@ -44,6 +45,7 @@ class PremiumNutritionGlass extends ConsumerWidget {
     if (state?.authority != EntitlementAuthority.verifiedServer) {
       return _PremiumNutritionStatusGlass(
         borderRadius: borderRadius,
+        compact: compact,
         loading: false,
         onRetry: () => ref.invalidate(verifiedSubscriptionStateProvider),
         child: child,
@@ -145,12 +147,14 @@ class _PremiumNutritionStatusGlass extends StatelessWidget {
     required this.child,
     required this.borderRadius,
     required this.loading,
+    required this.compact,
     this.onRetry,
   });
 
   final Widget child;
   final double borderRadius;
   final bool loading;
+  final bool compact;
   final VoidCallback? onRetry;
 
   @override
@@ -188,13 +192,23 @@ class _PremiumNutritionStatusGlass extends StatelessWidget {
                             dimension: 22,
                             child: CircularProgressIndicator(strokeWidth: 2.5),
                           )
-                        : FilledButton.tonalIcon(
-                            key: const Key(
-                              'premium-nutrition-entitlement-retry',
+                        : FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _PremiumNutritionLabel(compact: compact),
+                                const SizedBox(width: 10),
+                                FilledButton.tonalIcon(
+                                  key: const Key(
+                                    'premium-nutrition-entitlement-retry',
+                                  ),
+                                  onPressed: onRetry,
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text(context.strings.text('Retry')),
+                                ),
+                              ],
                             ),
-                            onPressed: onRetry,
-                            icon: const Icon(Icons.refresh_rounded),
-                            label: Text(context.strings.text('Retry')),
                           ),
                   ),
                 ),
@@ -203,6 +217,50 @@ class _PremiumNutritionStatusGlass extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PremiumNutritionLabel extends StatelessWidget {
+  const _PremiumNutritionLabel({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final light = Theme.of(context).brightness == Brightness.light;
+    return DecoratedBox(
+      key: const Key('premium-nutrition-status-label'),
+      decoration: BoxDecoration(
+        color: light ? const Color(0xD9FFFFFF) : const Color(0xB8141820),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: const Color(0x99D79A1E)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 9 : 14,
+          vertical: compact ? 4 : 8,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.workspace_premium_rounded,
+              color: const Color(0xFFD79A1E),
+              size: compact ? 16 : 20,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Premium',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: light ? const Color(0xFF231B0B) : Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: compact ? 12 : null,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -200,6 +200,10 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await policy.openSettings();
+        return false;
+      }
       final openSettings = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog.adaptive(

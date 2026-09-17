@@ -113,6 +113,10 @@ class MealVoiceInputService {
     );
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await policy.openSettings();
+        return false;
+      }
       final open = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog.adaptive(

@@ -31,6 +31,7 @@ ConnectedHealthSnapshot _snapshot({
   required List<ConnectedHealthSignalView> signals,
   List<ConnectedHealthSignalView> stepHistory = const [],
   String? source = 'Health Connect',
+  String? failureCode,
 }) => ConnectedHealthSnapshot(
   status: status,
   platformSource: source,
@@ -39,7 +40,7 @@ ConnectedHealthSnapshot _snapshot({
   stepHistory: stepHistory,
   importedCount: signals.length,
   lastSyncAt: DateTime.utc(2026, 8, 31, 12),
-  failureCode: null,
+  failureCode: failureCode,
   deviceVerified: verified,
 );
 
@@ -196,6 +197,25 @@ void main() {
 
     expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
     expect(find.text('100'), findsOneWidget);
+  });
+
+  testWidgets('sync failure keeps the last confirmed watch readings visible', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _subject(
+        _snapshot(
+          status: ConnectedHealthStatus.degraded,
+          verified: true,
+          signals: [_signal('steps', 83, 'count')],
+          failureCode: 'health_sync_failed_offline_cache_preserved',
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+    expect(find.text('83'), findsOneWidget);
   });
 
   testWidgets('source-less and invalid signals stay hidden', (tester) async {
