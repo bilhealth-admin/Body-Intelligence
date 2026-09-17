@@ -44,6 +44,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   int _entitlementRefreshGeneration = 0;
   bool _purchaseInitiatedByThisService = false;
   String? _purchaseInitiatedProductId;
+  Timer? _purchaseWatchdog;
   bool _storeStartupFaultBeforeCatalog = false;
   Completer<void>? _restoreEventObserved;
   String? _entitlementOwnerId;
@@ -61,6 +62,10 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   // one unfinished StoreKit transaction into a verification storm. Keys are
   // owner-scoped hashes; no entitlement or raw receipt is cached here.
   static const _failedTransactionReplayCooldown = Duration(minutes: 5);
+  // StoreKit may publish a purchase update after the native purchase call
+  // returns. Never leave the Plans button permanently disabled if that
+  // callback is lost or the platform sheet stops responding.
+  static const _purchaseWatchdogDuration = Duration(seconds: 90);
   static const _maximumFailedTransactionCooldowns = 256;
   static final Map<String, DateTime> _failedTransactionCooldowns =
       <String, DateTime>{};
@@ -357,6 +362,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         applicationUserName: accountHash,
       );
     }
+    _armPurchaseWatchdog(purchaseGeneration);
     try {
       _purchaseInitiatedByThisService = true;
       _purchaseInitiatedProductId = product.id;
@@ -379,6 +385,27 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       _clearPurchaseInitiation();
       notifyListeners();
     }
+  }
+
+  void _armPurchaseWatchdog(int generation) {
+    _purchaseWatchdog?.cancel();
+    _purchaseWatchdog = Timer(_purchaseWatchdogDuration, () {
+      if (_disposed ||
+          generation != _purchaseEventGeneration ||
+          !_purchaseInitiatedByThisService ||
+          state != VerifiedStoreState.purchasePending) {
+        return;
+      }
+      // Keep the native transaction unfinished so a later StoreKit update can
+      // still be verified. Only release the UI state and allow a controlled
+      // retry; never claim that access was granted.
+      state = products.isEmpty
+          ? VerifiedStoreState.unavailable
+          : VerifiedStoreState.ready;
+      messageCode = 'purchase_failed';
+      _clearPurchaseInitiation();
+      notifyListeners();
+    });
   }
 
   Future<void> purchaseBoost({String? offerToken}) async {
@@ -674,6 +701,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _purchaseWatchdog?.cancel();
+    _purchaseWatchdog = null;
     _entitlementRefreshGeneration++;
     _clearEntitlement();
     unawaited(_subscription?.cancel());

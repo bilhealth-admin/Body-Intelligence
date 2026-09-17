@@ -127,7 +127,23 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       // unfinished and therefore fail-closed.
       if (verifiedReceipt && purchase.pendingCompletePurchase) {
         if (!boost || defaultTargetPlatform != TargetPlatform.android) {
-          await _purchase.completePurchase(purchase);
+          try {
+            await _purchase
+                .completePurchase(purchase)
+                .timeout(const Duration(seconds: 12));
+          } on Object {
+            // Do not leave the Plans screen in an endless pending state when
+            // StoreKit accepts the receipt but never acknowledges completion.
+            // The unfinished transaction remains eligible for a later native
+            // replay, while the server entitlement stays authoritative.
+            state = VerifiedStoreState.failed;
+            messageCode = 'verification_failed';
+            if (origin == _StorePurchaseEventOrigin.purchase) {
+              _clearPurchaseInitiation();
+            }
+            notifyListeners();
+            return;
+          }
         }
       }
       transactionSettled = verifiedReceipt;
@@ -570,6 +586,8 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
   }
 
   void _clearPurchaseInitiation() {
+    _purchaseWatchdog?.cancel();
+    _purchaseWatchdog = null;
     _purchaseInitiatedByThisService = false;
     _purchaseInitiatedProductId = null;
   }

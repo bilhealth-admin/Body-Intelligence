@@ -1197,8 +1197,8 @@ async function verifyGooglePush(
     "production",
   );
   if (!claimToken) return json({ accepted: true, duplicate: true });
-  const mark = (status: "processed" | "error") =>
-    markStoreNotification(admin, "google", notificationId, claimToken, status);
+  const mark = (status: "processed" | "error", errorCode?: string) =>
+    markStoreNotification(admin, "google", notificationId, claimToken, status, errorCode);
   try {
     if (parsed.kind === "test") {
       await mark("processed");
@@ -1268,7 +1268,7 @@ async function verifyGooglePush(
     await mark("processed");
     return json({ accepted: true });
   } catch (error) {
-    await mark("error").catch(() => {});
+    await mark("error", notificationFailureCode(error)).catch(() => {});
     throw error;
   }
 }
@@ -1305,16 +1305,23 @@ async function markStoreNotification(
   notificationId: string,
   claimToken: string,
   status: "processed" | "error",
+  errorCode?: string,
 ) {
   const { data, error } = await admin.rpc("bil_finish_store_notification", {
     p_provider: provider,
     p_notification_id: notificationId,
     p_claim_token: claimToken,
     p_status: status,
+    p_error_code: status === "error" ? errorCode ?? "verification_failed" : null,
   });
   if (error || data !== true) {
     throw new Error("notification_status_update_failed");
   }
+}
+
+function notificationFailureCode(error: unknown): string {
+  const code = error instanceof Error ? error.message : "";
+  return /^[a-z0-9_]{1,80}$/.test(code) ? code : "verification_failed";
 }
 
 async function verifyAppleNotification(
@@ -1331,8 +1338,8 @@ async function verifyAppleNotification(
     admin, "apple", notificationId, await digest(signedPayload), notificationEnvironment,
   );
   if (!claimToken) return json({ accepted: true, duplicate: true });
-  const mark = (status: "processed" | "error") =>
-    markStoreNotification(admin, "apple", notificationId, claimToken, status);
+  const mark = (status: "processed" | "error", errorCode?: string) =>
+    markStoreNotification(admin, "apple", notificationId, claimToken, status, errorCode);
   try {
     const notificationType = String(notification.notificationType ?? "");
     if (notificationType === "TEST") {
@@ -1405,7 +1412,7 @@ async function verifyAppleNotification(
     await mark("processed");
     return json({ accepted: true });
   } catch (error) {
-    await mark("error").catch(() => {});
+    await mark("error", notificationFailureCode(error)).catch(() => {});
     throw error;
   }
 }
