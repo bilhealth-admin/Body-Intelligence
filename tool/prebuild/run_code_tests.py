@@ -32,6 +32,7 @@ NOT_RUN = {
     "test/features/wellness/wellness_video_stream_live_test.dart": "opt-in live media request, not a pure integration test",
     "test/features/meal_planner/generated_recipe_assets_test.dart": "image asset content and hash comparison",
     "test/features/commerce/apple_review_asset_package_contract_test.dart": "store image file validation",
+    "test/dashboard_polish/live_health_watch_layout_golden_test.dart": "pixel comparison",
     "test/release_metadata_test.dart": "combined metadata and image content comparison; reviewed statically instead",
     "test/splash_video_contract_test.dart": "binary video and fallback image validation",
 }
