@@ -204,7 +204,11 @@ class ResponsiveAppShell extends StatelessWidget {
           // Quick Add's Log food action owns a separate entry surface. The
           // legacy Daily Log and its breakfast/lunch/dinner pages stay on
           // their original route and are not rebuilt or altered here.
-          context.go('/daily-log?foodLog=1&from=$origin');
+          // Push the standalone surface after the sheet has fully dismissed.
+          // A push gives the shell a distinct child route and avoids the
+          // transient blank child that can occur when replacing the sheet's
+          // route with `go` on iOS.
+          context.push('/daily-log?foodLog=1&from=$origin');
           break;
         case 'barcode':
           context.go('/daily-log?action=barcode&from=$origin');

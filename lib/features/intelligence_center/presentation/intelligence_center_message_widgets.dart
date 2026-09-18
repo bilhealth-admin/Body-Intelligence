@@ -80,8 +80,69 @@ class _MessageBubble extends StatelessWidget {
                     context,
                   ).textTheme.bodyLarge?.copyWith(height: 1.55),
                   animateReveal: animateReveal,
+                  showTime: false,
                 ),
                 const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CoachMessageTime(createdAt: message.createdAt),
+                    const Spacer(),
+                    if (onSpeak != null)
+                      IconButton(
+                        key: Key('ai-coach-speak-${message.id}'),
+                        tooltip: intelligenceText(
+                          context,
+                          'Read answer aloud',
+                          'اقرأ الإجابة بصوت عالٍ',
+                        ),
+                        onPressed: onSpeak,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
+                        icon: const Icon(Icons.volume_up_rounded, size: 19),
+                      ),
+                    if (onFeedback != null)
+                      _QuickFeedbackBar(
+                        value: feedbackValue,
+                        onChanged: onFeedback!,
+                        compact: true,
+                      ),
+                    if (onReport != null)
+                      IconButton(
+                        key: Key('ai-coach-report-${message.id}'),
+                        tooltip: intelligenceText(
+                          context,
+                          'Report answer',
+                          'الإبلاغ عن الإجابة',
+                        ),
+                        onPressed: () =>
+                            _showAiAnswerReportSheet(context, onReport!),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
+                        style: IconButton.styleFrom(
+                          foregroundColor: reported
+                              ? scheme.error
+                              : scheme.onSurfaceVariant,
+                          backgroundColor: reported
+                              ? scheme.error.withValues(alpha: .14)
+                              : Colors.transparent,
+                        ),
+                        icon: Icon(
+                          reported ? Icons.flag_rounded : Icons.flag_outlined,
+                          size: 18,
+                        ),
+                      ),
+                  ],
+                ),
                 TextButton.icon(
                   key: Key('ai-coach-health-sources'),
                   style: TextButton.styleFrom(
@@ -141,63 +202,6 @@ class _MessageBubble extends StatelessWidget {
                           onPressed: onAction == null
                               ? null
                               : () => onAction!(action.toAction()),
-                        ),
-                    ],
-                  ),
-                ],
-                if (onFeedback != null ||
-                    onReport != null ||
-                    onSpeak != null) ...[
-                  const SizedBox(height: 7),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 3,
-                    runSpacing: 2,
-                    children: [
-                      if (onSpeak != null)
-                        IconButton(
-                          key: Key('ai-coach-speak-${message.id}'),
-                          tooltip: intelligenceText(
-                            context,
-                            'Read answer aloud',
-                            'اقرأ الإجابة بصوت عالٍ',
-                          ),
-                          onPressed: onSpeak,
-                          style: IconButton.styleFrom(
-                            minimumSize: const Size.square(48),
-                          ),
-                          icon: const Icon(Icons.volume_up_rounded, size: 19),
-                        ),
-                      if (onFeedback != null)
-                        _QuickFeedbackBar(
-                          value: feedbackValue,
-                          onChanged: onFeedback!,
-                          compact: true,
-                        ),
-                      if (onReport != null)
-                        IconButton(
-                          key: Key('ai-coach-report-${message.id}'),
-                          tooltip: intelligenceText(
-                            context,
-                            'Report answer',
-                            'الإبلاغ عن الإجابة',
-                          ),
-                          onPressed: () =>
-                              _showAiAnswerReportSheet(context, onReport!),
-                          style: IconButton.styleFrom(
-                            minimumSize: const Size.square(48),
-                            visualDensity: VisualDensity.standard,
-                            foregroundColor: reported
-                                ? scheme.error
-                                : scheme.onSurfaceVariant,
-                            backgroundColor: reported
-                                ? scheme.error.withValues(alpha: .14)
-                                : Colors.transparent,
-                          ),
-                          icon: Icon(
-                            reported ? Icons.flag_rounded : Icons.flag_outlined,
-                            size: 18,
-                          ),
                         ),
                     ],
                   ),

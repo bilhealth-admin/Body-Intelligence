@@ -13,7 +13,7 @@
 ## Release identity and source boundary
 
 Android build 17 is the next candidate after build 16 and uses the same final
-unified source as iOS build 20. It includes the reviewed Health Connect scope,
+unified source as iOS build 21. It includes the reviewed Health Connect scope,
 Apple/Google purchase entitlement safeguards shared by the app, and the
 dashboard, accessibility, premium-content, and native-permission corrections.
 

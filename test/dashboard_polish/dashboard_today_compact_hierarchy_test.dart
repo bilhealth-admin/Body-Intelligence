@@ -37,8 +37,9 @@ void main() {
     expect(cards, contains('padEnds: false'));
     expect(health, contains("Key('dashboard-live-fitness-watch-slot')"));
     expect(health, isNot(contains("Key('dashboard-health-device-pager')")));
-    // The polish reduces normal-size artwork, not scaled-text readability.
-    expect(health, contains('final previewSide = 208 + ((scale - 1) * 108)'));
+    // The compact watch has a slightly larger bounded square so all available
+    // readings remain legible without covering the adjacent health summary.
+    expect(health, contains('final previewSide = 224 + ((scale - 1) * 112)'));
     expect(health, contains('maxWidth: previewSide'));
     expect(health, contains('maxHeight: previewSide'));
     expect(health, contains('compact: true'));

@@ -564,6 +564,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   }
 
   void _close(BuildContext context) {
-    context.go('/dashboard');
+    context.go(widget.returnPath ?? '/dashboard');
   }
 }

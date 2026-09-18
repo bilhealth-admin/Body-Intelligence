@@ -48,6 +48,12 @@ void main() {
       // protected glass veil, and its CTA must remain reviewed together so a
       // transient provider error can never accidentally expose a paywall.
       'lib/features/commerce/presentation/premium_route_glass_gate.dart': 800,
+      // Store purchase verification is one fail-closed transaction boundary:
+      // catalog loading, transaction ownership, replay protection, and
+      // entitlement hand-off stay together so no partial purchase can unlock
+      // access. Keep the narrow reviewed margin until the next service split.
+      'lib/features/commerce/services/verified_store_purchase_service.dart':
+          725,
       // Daily Log already delegates capture, mutation, search, navigation,
       // copy, entry, and component responsibilities to part files. The root
       // retains the single state lifecycle and Today-goal resolution only.

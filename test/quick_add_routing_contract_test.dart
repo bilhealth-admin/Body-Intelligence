@@ -37,7 +37,9 @@ void main() {
       expect(shell, contains('vision=capture&from=\$origin'));
       expect(diary, contains("case 'photo':"));
 
-      expect(shell, contains("context.go('/daily-log?foodLog=1&from="));
+      // Log food is pushed after dismissing Quick Add so the shell does not
+      // briefly rebuild with a blank child while the standalone page mounts.
+      expect(shell, contains("context.push('/daily-log?foodLog=1&from="));
       // Quick Add's Log food action is a standalone surface. It exposes the
       // meal selector there while leaving the legacy Daily Log pages intact.
       expect(shell, isNot(contains("focus=meal&meal=dinner")));

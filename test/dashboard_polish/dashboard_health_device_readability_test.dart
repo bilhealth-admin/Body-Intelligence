@@ -239,7 +239,7 @@ void main() {
         expect(artwork, findsOneWidget);
         final size = tester.getSize(artwork);
         final expectedSide =
-            208 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 108);
+            224 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 112);
         expect(size.width, closeTo(expectedSide, .1));
         expect(size.height, closeTo(expectedSide, .1));
         expect(

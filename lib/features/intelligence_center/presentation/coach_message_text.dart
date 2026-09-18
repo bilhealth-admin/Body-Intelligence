@@ -10,6 +10,7 @@ class CoachMessageText extends StatefulWidget {
     this.style,
     this.alignEnd = false,
     this.animateReveal = false,
+    this.showTime = true,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class CoachMessageText extends StatefulWidget {
   /// Only fresh BIL replies animate. Restored transcript rows stay complete,
   /// selectable, and immediately readable.
   final bool animateReveal;
+  final bool showTime;
 
   @override
   State<CoachMessageText> createState() => _CoachMessageTextState();
@@ -72,7 +74,8 @@ class _CoachMessageTextState extends State<CoachMessageText>
     _revealController = controller;
     controller.addListener(() {
       if (!mounted) return;
-      final nextVisible = initialVisible +
+      final nextVisible =
+          initialVisible +
           (controller.value * remaining).floor().clamp(0, remaining);
       if (nextVisible == visible) return;
       visible = nextVisible;
@@ -91,9 +94,6 @@ class _CoachMessageTextState extends State<CoachMessageText>
 
   @override
   Widget build(BuildContext context) {
-    final localTime = widget.createdAt.toLocal();
-    final time = TimeOfDay.fromDateTime(localTime).format(context);
-    final date = MaterialLocalizations.of(context).formatFullDate(localTime);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: widget.alignEnd
@@ -108,15 +108,31 @@ class _CoachMessageTextState extends State<CoachMessageText>
           // reveals it quickly.
           semanticsLabel: widget.animateReveal ? widget.text : null,
         ),
-        const SizedBox(height: 4),
-        Text(
-          time,
-          semanticsLabel: '$date, $time',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
+        if (widget.showTime) ...[
+          const SizedBox(height: 4),
+          CoachMessageTime(createdAt: widget.createdAt),
+        ],
       ],
+    );
+  }
+}
+
+class CoachMessageTime extends StatelessWidget {
+  const CoachMessageTime({required this.createdAt, super.key});
+
+  final DateTime createdAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final localTime = createdAt.toLocal();
+    final time = TimeOfDay.fromDateTime(localTime).format(context);
+    final date = MaterialLocalizations.of(context).formatFullDate(localTime);
+    return Text(
+      time,
+      semanticsLabel: '$date, $time',
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }
