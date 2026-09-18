@@ -25,17 +25,14 @@ void main() {
     },
   );
 
-  test(
-    'a fault while a native transaction is pending stays fail-closed',
-    () {
-      final outcome = storePurchaseStreamFailureOutcome(
-        productsAvailable: true,
-        initiatedByCurrentService: false,
-        purchasePending: true,
-      );
+  test('a fault while a native transaction is pending stays fail-closed', () {
+    final outcome = storePurchaseStreamFailureOutcome(
+      productsAvailable: true,
+      initiatedByCurrentService: false,
+      purchasePending: true,
+    );
 
-      expect(outcome.state, VerifiedStoreState.failed);
-      expect(outcome.messageCode, 'store_stream_failed');
-    },
-  );
+    expect(outcome.state, VerifiedStoreState.failed);
+    expect(outcome.messageCode, 'store_stream_failed');
+  });
 }

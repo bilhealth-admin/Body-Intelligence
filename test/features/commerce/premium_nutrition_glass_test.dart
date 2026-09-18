@@ -80,9 +80,7 @@ void main() {
     },
   );
 
-  testWidgets('local Free default shows only the Premium gate', (
-    tester,
-  ) async {
+  testWidgets('local Free default shows only the Premium gate', (tester) async {
     final localDefault = SubscriptionState(
       plan: CommercePlan.free,
       entitlements: const <CommerceEntitlement>{},
@@ -93,7 +91,10 @@ void main() {
     await tester.pumpWidget(_app(localDefault));
     await tester.pump();
 
-    expect(find.byKey(const Key('premium-nutrition-entitlement-retry')), findsNothing);
+    expect(
+      find.byKey(const Key('premium-nutrition-entitlement-retry')),
+      findsNothing,
+    );
     expect(find.byKey(const Key('premium-nutrition-glass')), findsOneWidget);
     expect(find.text('Premium'), findsOneWidget);
   });

@@ -119,8 +119,14 @@ void main() {
       phoneOrientations,
       isNot(contains('UIInterfaceOrientationPortraitUpsideDown')),
     );
-    expect(phoneOrientations, isNot(contains('UIInterfaceOrientationLandscapeLeft')));
-    expect(phoneOrientations, isNot(contains('UIInterfaceOrientationLandscapeRight')));
+    expect(
+      phoneOrientations,
+      isNot(contains('UIInterfaceOrientationLandscapeLeft')),
+    );
+    expect(
+      phoneOrientations,
+      isNot(contains('UIInterfaceOrientationLandscapeRight')),
+    );
 
     expect(ipadOrientations, isNotNull);
     for (final orientation in <String>[
@@ -132,7 +138,8 @@ void main() {
       expect(
         ipadOrientations,
         contains(orientation),
-        reason: 'iPad must support $orientation for App Store multitasking validation.',
+        reason:
+            'iPad must support $orientation for App Store multitasking validation.',
       );
     }
 

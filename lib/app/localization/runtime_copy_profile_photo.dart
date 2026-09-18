@@ -85,14 +85,10 @@ abstract final class ProfilePhotoRuntimeCopy {
           'Aktifkan akses kamera di pengaturan sistem untuk mengambil foto profil. Anda tetap dapat memilih foto dengan pemilih sistem.',
       'ms':
           'Dayakan akses kamera dalam tetapan sistem untuk mengambil foto profil. Anda masih boleh memilih foto dengan pemilih sistem.',
-      'ja':
-          'プロフィール写真を撮影するには、システム設定でカメラへのアクセスを有効にしてください。システムピッカーで写真を選ぶこともできます。',
-      'ko':
-          '프로필 사진을 찍으려면 시스템 설정에서 카메라 접근을 허용하세요. 시스템 선택기로 사진을 선택할 수도 있습니다.',
-      'zh-Hans':
-          '要拍摄个人资料照片，请在系统设置中启用相机访问权限。你也可以使用系统选择器选择照片。',
-      'zh-Hant':
-          '若要拍攝個人資料相片，請在系統設定中啟用相機存取權限。你也可以使用系統選擇器選取相片。',
+      'ja': 'プロフィール写真を撮影するには、システム設定でカメラへのアクセスを有効にしてください。システムピッカーで写真を選ぶこともできます。',
+      'ko': '프로필 사진을 찍으려면 시스템 설정에서 카메라 접근을 허용하세요. 시스템 선택기로 사진을 선택할 수도 있습니다.',
+      'zh-Hans': '要拍摄个人资料照片，请在系统设置中启用相机访问权限。你也可以使用系统选择器选择照片。',
+      'zh-Hant': '若要拍攝個人資料相片，請在系統設定中啟用相機存取權限。你也可以使用系統選擇器選取相片。',
       'ru':
           'Включите доступ к камере в системных настройках, чтобы сделать фото профиля. Вы также можете выбрать фото через системный выбор.',
       'bn':

@@ -4,53 +4,48 @@ import 'package:url_launcher/url_launcher.dart';
 class HealthInformationSourcesPage extends StatelessWidget {
   const HealthInformationSourcesPage({super.key});
 
-  static const _sources =
-      <({String title, String organization, String purpose, String url})>[
-        (
-          title: 'Steps for Losing Weight',
-          organization: 'U.S. Centers for Disease Control and Prevention (CDC)',
-          purpose: 'General healthy-weight and gradual weight-loss guidance.',
-          url:
-              'https://www.cdc.gov/healthy-weight-growth/losing-weight/index.html',
-        ),
-        (
-          title: 'Dietary Reference Intakes',
-          organization:
-              'U.S. Office of Disease Prevention and Health Promotion',
-          purpose:
-              'Reference values used for nutrient, energy, and water-intake guidance.',
-          url:
-              'https://odphp.health.gov/our-work/nutrition-physical-activity/dietary-guidelines/dietary-reference-intakes',
-        ),
-        (
-          title: 'Potassium Fact Sheet',
-          organization: 'NIH Office of Dietary Supplements',
-          purpose:
-              'Potassium intake, food sources, safety, and clinical cautions.',
-          url:
-              'https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/',
-        ),
-        (
-          title: 'Nutrition and Healthy Eating — Evidence-Based Resources',
-          organization: 'Healthy People 2030 / U.S. HHS',
-          purpose: 'Evidence-based nutrition and healthy-eating resources.',
-          url:
-              'https://odphp.health.gov/healthypeople/objectives-and-data/browse-objectives/nutrition-and-healthy-eating/evidence-based-resources',
-        ),
-        (
-          title: 'Mifflin–St Jeor resting energy equation',
-          organization: 'American Journal of Clinical Nutrition / PubMed',
-          purpose: 'Published basis for BIL resting-energy estimates.',
-          url: 'https://pubmed.ncbi.nlm.nih.gov/2305711/',
-        ),
-        (
-          title: 'Recommended sleep duration for adults',
-          organization: 'National Sleep Foundation expert panel / PubMed',
-          purpose:
-              'Consensus reference for the general 7–9 hour adult sleep range; individual needs and age may differ.',
-          url: 'https://pubmed.ncbi.nlm.nih.gov/29073398/',
-        ),
-      ];
+  static const _sources = <({String title, String organization, String purpose, String url})>[
+    (
+      title: 'Steps for Losing Weight',
+      organization: 'U.S. Centers for Disease Control and Prevention (CDC)',
+      purpose: 'General healthy-weight and gradual weight-loss guidance.',
+      url: 'https://www.cdc.gov/healthy-weight-growth/losing-weight/index.html',
+    ),
+    (
+      title: 'Dietary Reference Intakes',
+      organization: 'U.S. Office of Disease Prevention and Health Promotion',
+      purpose:
+          'Reference values used for nutrient, energy, and water-intake guidance.',
+      url:
+          'https://odphp.health.gov/our-work/nutrition-physical-activity/dietary-guidelines/dietary-reference-intakes',
+    ),
+    (
+      title: 'Potassium Fact Sheet',
+      organization: 'NIH Office of Dietary Supplements',
+      purpose: 'Potassium intake, food sources, safety, and clinical cautions.',
+      url: 'https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/',
+    ),
+    (
+      title: 'Nutrition and Healthy Eating — Evidence-Based Resources',
+      organization: 'Healthy People 2030 / U.S. HHS',
+      purpose: 'Evidence-based nutrition and healthy-eating resources.',
+      url:
+          'https://odphp.health.gov/healthypeople/objectives-and-data/browse-objectives/nutrition-and-healthy-eating/evidence-based-resources',
+    ),
+    (
+      title: 'Mifflin–St Jeor resting energy equation',
+      organization: 'American Journal of Clinical Nutrition / PubMed',
+      purpose: 'Published basis for BIL resting-energy estimates.',
+      url: 'https://pubmed.ncbi.nlm.nih.gov/2305711/',
+    ),
+    (
+      title: 'Recommended sleep duration for adults',
+      organization: 'National Sleep Foundation expert panel / PubMed',
+      purpose:
+          'Consensus reference for the general 7–9 hour adult sleep range; individual needs and age may differ.',
+      url: 'https://pubmed.ncbi.nlm.nih.gov/29073398/',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
