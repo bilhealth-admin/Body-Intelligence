@@ -83,8 +83,8 @@ void main() {
     final ios = _read(workflows.last);
     expect(android, contains('BIL_ANDROID_V18_AUDITED_SOURCE_SHA'));
     expect(android, contains('BIL_ANDROID_V18_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V22_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V22_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V23_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V23_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -109,13 +109,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 22 release manifest', () {
+  test('iOS validator consumes only the build 23 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V22_FROZEN_SOURCE_MANIFEST_2026-09-18.md',
+        'docs/release/BIL_IOS_V23_FROZEN_SOURCE_MANIFEST_2026-09-18.md',
       ),
     );
     expect(
@@ -127,7 +127,7 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 22 ))'));
+    expect(source, contains('(( BUILD_NUMBER == 23 ))'));
     expect(source, isNot(contains('(( BUILD_NUMBER == 21 ))')));
   });
 

@@ -1,0 +1,50 @@
+# BIL iOS 1.0.0 build 23 — unified release source manifest
+
+`STAGING_MANIFEST_COMPLETE: YES`
+
+`CANDIDATE_FROZEN_OR_ACCEPTED: YES`
+
+`UNRESOLVED_REVIEW_COUNT: 0`
+
+`RELEASE_VERSION: 1.0.0`
+
+`RELEASE_BUILD_NUMBER: 23`
+
+## Release identity and scope
+
+iOS build 23 is the next candidate after build 22, which is already present in
+App Store Connect and therefore cannot be uploaded again. It includes the
+unified Apple purchase ownership, refund, trial, restore and entitlement
+safeguards; the dashboard, accessibility, premium-content, connected-health,
+and native permission corrections, plus the Food Log and AI Coach layout
+corrections.
+
+The signed iOS workflow supplies `--build-number 23`, which becomes
+`CFBundleVersion 23` while the public version remains `1.0.0`. Its manual
+dispatch defaults to uploading only the validated, signed IPA to TestFlight;
+the upload step remains downstream of all source, signing and App Store
+Connect validation gates.
+
+The binding is not self-referential: after this final unified source commit is
+pushed, `BIL_IOS_V23_AUDITED_SOURCE_SHA` must equal that exact commit and
+`BIL_IOS_V23_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
+SHA-256. The workflow independently checks source, manifest and build number.
+
+## Review boundaries outside source
+
+This manifest does not claim that a StoreKit sandbox purchase, refund, trial
+expiry or restore has succeeded on a physical device, that a production
+Supabase migration has been deployed, or that the IPA has been accepted by
+TestFlight or App Review. Those remain external release checks.
+
+The final unified source SHA is intended to build:
+
+- iOS 1.0.0, CFBundleVersion 23.
+- Android 1.0.0, versionCode 18.
+
+## Verification boundary
+
+Source and contract checks prove checked-in behavior only. Signed CI still
+validates the release configuration, analyzer, portable source suite, signing,
+IPA/entitlements and App Store Connect package requirements. Physical-device,
+TestFlight and live-store behavior remain separate runtime evidence.
