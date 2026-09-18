@@ -194,7 +194,9 @@ Widget _subject(Locale locale, double scale) {
 }
 
 void main() {
-  setUpAll(loadVisualEvidenceFont);
+  setUpAll(
+    () => loadVisualEvidenceFontWhenCapturing('BIL_CAPTURE_DASHBOARD_POLISH'),
+  );
   for (final locale in const [Locale('en'), Locale('ar')]) {
     for (final width in const [320.0, 390.0, 430.0]) {
       for (final scale in const [1.0, 1.6]) {

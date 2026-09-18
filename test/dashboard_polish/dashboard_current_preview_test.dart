@@ -126,7 +126,9 @@ Future<void> _capture(WidgetTester tester, String name) async {
 }
 
 void main() {
-  setUpAll(loadVisualEvidenceFont);
+  setUpAll(
+    () => loadVisualEvidenceFontWhenCapturing('BIL_CAPTURE_DASHBOARD_POLISH'),
+  );
   for (final language in const ['en', 'ar']) {
     testWidgets('$language current production dashboard and dock preview', (
       tester,

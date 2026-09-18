@@ -26,7 +26,9 @@ import 'package:go_router/go_router.dart';
 import '../visual_closure/visual_evidence_font.dart';
 
 void main() {
-  setUpAll(loadVisualEvidenceFont);
+  setUpAll(
+    () => loadVisualEvidenceFontWhenCapturing('BIL_CAPTURE_ICON_POLISH'),
+  );
 
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     for (final locale in const [Locale('en'), Locale('ar')]) {
