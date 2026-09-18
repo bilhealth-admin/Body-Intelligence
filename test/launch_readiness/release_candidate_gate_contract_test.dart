@@ -30,13 +30,13 @@ void main() {
     );
     expect(gate, contains('CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE'));
     expect(gate, isNot(contains('## Accepted parent')));
-    expect(androidWorkflow, contains('(( BUILD_NUMBER == 17 ))'));
-    expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 16 ))')));
+    expect(androidWorkflow, contains('(( BUILD_NUMBER == 18 ))'));
+    expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 17 ))')));
     expect(iosWorkflow, contains('(( BUILD_NUMBER == 22 ))'));
     expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 21 ))')));
     expect(
       androidWorkflow,
-      contains('build 16 and earlier must never be promoted'),
+      contains('build 17 and earlier must never be promoted'),
     );
     expect(
       iosWorkflow,
