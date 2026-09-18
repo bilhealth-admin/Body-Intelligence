@@ -473,10 +473,13 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             ),
             const SizedBox(height: 10),
           ],
-          KeyedSubtree(
-            key: _aiStatusKey,
+          // Reserve the status slot so consent never makes the page jump or
+          // briefly hide the controls. One card is the only cloud-AI control:
+          // selected means enabled; tapping it again safely opts out.
+          SizedBox(
+            height: 68,
             child: _aiStatusMessage == null
-                ? const SizedBox.shrink()
+                ? null
                 : _InfoBanner(
                     icon:
                         _draft.remoteAiConsent ==
@@ -487,53 +490,25 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                   ),
           ),
           const SizedBox(height: 10),
-          FilledButton.icon(
-            key: const Key('onboarding-enable-ai'),
-            style: _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
-                ? FilledButton.styleFrom(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onPrimaryContainer,
-                  )
-                : null,
-            onPressed: _permissionBusy || _draft.aiFocuses.isEmpty
-                ? null
-                : () => unawaited(_setAiConsent(true)),
-            icon: Icon(
-              _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.cloud_done_outlined,
-            ),
-            label: Text(t('I agree — enable cloud AI')),
-          ),
-          const SizedBox(height: 8),
-          if (_draft.remoteAiConsent == OnboardingRemoteAiConsent.declined &&
-              _aiStatusMessage != null)
-            OutlinedButton.icon(
-              key: const Key('onboarding-decline-ai'),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+          OnboardingChoiceCard(
+            key: const Key('onboarding-cloud-ai-toggle'),
+            title: t('Cloud AI'),
+            subtitle:
+                _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
+                ? t('Enabled with your explicit consent.')
+                : t('Off by default. Tap to enable when you are ready.'),
+            icon: _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
+                ? Icons.cloud_done_outlined
+                : Icons.cloud_off_outlined,
+            selected:
+                _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted,
+            enabled: !_permissionBusy && _draft.aiFocuses.isNotEmpty,
+            onTap: () => unawaited(
+              _setAiConsent(
+                _draft.remoteAiConsent != OnboardingRemoteAiConsent.granted,
               ),
-              onPressed: _permissionBusy
-                  ? null
-                  : () => unawaited(_setAiConsent(false)),
-              icon: const Icon(Icons.check_circle_outline_rounded),
-              label: Text(t('Keep cloud AI off')),
-            )
-          else
-            TextButton(
-              key: const Key('onboarding-decline-ai'),
-              onPressed: _permissionBusy
-                  ? null
-                  : () => unawaited(_setAiConsent(false)),
-              child: Text(t('Keep cloud AI off')),
             ),
+          ),
         ],
       ),
     );
@@ -551,7 +526,6 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
           remoteAiConsent: OnboardingRemoteAiConsent.declined,
         );
       });
-      _revealAiStatus();
     } else {
       _updateState(() {
         _permissionBusy = true;
@@ -562,15 +536,15 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
         .read(onboardingRemoteAiGatewayProvider)
         .setGranted(granted);
     if (!mounted) return;
-    final consent = switch (result) {
-      OnboardingRemoteAiResult.granted => OnboardingRemoteAiConsent.granted,
-      OnboardingRemoteAiResult.declined => OnboardingRemoteAiConsent.declined,
-      OnboardingRemoteAiResult.authenticationRequired when !granted =>
-        OnboardingRemoteAiConsent.declined,
-      OnboardingRemoteAiResult.failed when !granted =>
-        OnboardingRemoteAiConsent.declined,
-      _ => OnboardingRemoteAiConsent.unknown,
-    };
+    // Opting out is always a safe local decision. Even if the RPC cannot be
+    // reached, never turn an explicit off choice back into an unknown state.
+    final consent = !granted
+        ? OnboardingRemoteAiConsent.declined
+        : switch (result) {
+            OnboardingRemoteAiResult.granted =>
+              OnboardingRemoteAiConsent.granted,
+            _ => OnboardingRemoteAiConsent.unknown,
+          };
     final message = switch (result) {
       OnboardingRemoteAiResult.authenticationRequired =>
         granted
@@ -587,27 +561,10 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
       _aiStatusMessage = message;
       _draft = _draft.copyWith(remoteAiConsent: consent);
     });
-    _revealAiStatus();
     await _queueDraftSave();
     if (thenContinue && consent == OnboardingRemoteAiConsent.declined) {
       await _goNext();
     }
-  }
-
-  void _revealAiStatus() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _aiStatusMessage == null) return;
-      final statusContext = _aiStatusKey.currentContext;
-      if (statusContext == null) return;
-      Scrollable.ensureVisible(
-        statusContext,
-        alignment: .35,
-        duration: MediaQuery.disableAnimationsOf(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-      );
-    });
   }
 
   _StepView _reviewStep() {

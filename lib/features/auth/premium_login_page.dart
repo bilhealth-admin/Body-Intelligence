@@ -12,6 +12,7 @@ import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
 import 'auth_input_validation.dart';
+import 'premium_login_status_panel.dart';
 import 'supabase_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -113,7 +114,18 @@ class _LoginPageState extends State<LoginPage> {
       // Native Apple, Google, and Facebook sign-in complete inside BIL, so
       // there is no browser callback page to advance the authenticated journey.
       if (nativeSignIn && completed && mounted) {
-        context.go('/startup');
+        final sessionReady = await authService.waitForAuthenticatedSession();
+        if (!mounted) return;
+        if (sessionReady) {
+          context.go('/startup');
+        } else {
+          setState(
+            () => status = authEntryText(
+              context,
+              AuthEntryCopyKey.openSecureFailure,
+            ),
+          );
+        }
         return;
       }
       // Dismissing a native provider sheet is a deliberate cancellation, not a
@@ -226,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 if (status != null) ...[
                                   const SizedBox(height: 12),
-                                  _StatusPanel(message: status!),
+                                  AuthStatusPanel(message: status!),
                                 ],
                                 const SizedBox(height: 18),
                                 FilledButton(
@@ -665,29 +677,6 @@ class _OrDivider extends StatelessWidget {
         ),
         Expanded(child: Divider(color: scheme.outlineVariant)),
       ],
-    );
-  }
-}
-
-class _StatusPanel extends StatelessWidget {
-  const _StatusPanel({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(13),
-      decoration: BoxDecoration(
-        color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        message,
-        textAlign: TextAlign.center,
-        style: TextStyle(color: scheme.onErrorContainer, height: 1.35),
-      ),
     );
   }
 }

@@ -33,6 +33,9 @@ void main() {
     expect(page, isNot(contains('TargetPlatform.macOS')));
     expect(page, contains('authService.signInWithAppleNative()'));
     expect(page, contains('authService.signInWithGoogleNative()'));
+    expect(page, contains('authService.waitForAuthenticatedSession()'));
+    expect(service, contains('client.auth.currentSession'));
+    expect(service, contains('onAuthStateChange'));
     expect(page, contains("context.go('/startup')"));
     expect(page, contains('SignInWithAppleButton('));
     expect(page, contains('SignInWithAppleButtonStyle.black'));

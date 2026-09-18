@@ -4,17 +4,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../localization/app_localizations.dart';
 import '../theme/premium_motion_tokens.dart';
 import '../theme/bil_navigation_icons.dart';
+import '../../features/cloud_platform/providers/cloud_sync_providers.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import '../../shared/widgets/bil_modal_bottom_sheet.dart';
 import 'bil_quick_add_sheet.dart';
 
 part 'responsive_app_shell_top_navigation.dart';
 
-class ResponsiveAppShell extends StatelessWidget {
+class ResponsiveAppShell extends ConsumerWidget {
   const ResponsiveAppShell({super.key, required this.child});
 
   final Widget child;
@@ -54,10 +56,16 @@ class ResponsiveAppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: GoRouter.of(context).routerDelegate,
-    builder: (context, _) => _buildShell(context),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Keep the account-scoped durable outbox moving across dashboard routes.
+    // This is a no-op when the user is signed out, consent is absent, or the
+    // cloud runtime is unavailable; local writes remain fully functional.
+    ref.watch(cloudAutoSyncProvider);
+    return ListenableBuilder(
+      listenable: GoRouter.of(context).routerDelegate,
+      builder: (context, _) => _buildShell(context),
+    );
+  }
 
   Widget _buildShell(BuildContext context) {
     // A ShellRoute widget can inherit the shell page's GoRouterState instead
@@ -73,7 +81,11 @@ class ResponsiveAppShell extends StatelessWidget {
         currentPath == '/dashboard' || currentPath.startsWith('/dashboard/');
     final isDashboardRoot = currentPath == '/dashboard';
     final hasRouteHistory = context.canPop();
-    final immersiveCoach = currentPath == '/intelligence-center';
+    // Keep the coach immersive for the route and any future coach sub-route;
+    // the dashboard dock must never consume space inside the conversation.
+    final immersiveCoach =
+        currentPath == '/intelligence-center' ||
+        currentPath.startsWith('/intelligence-center/');
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final platform = Theme.of(context).platform;
     final systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(
@@ -217,7 +229,10 @@ class ResponsiveAppShell extends StatelessWidget {
           context.go('/daily-log?action=voice&from=$origin');
           break;
         case 'photo':
-          context.push('/intelligence-center?vision=capture&from=$origin');
+          // Photo analysis is a meal-vision action, not a chat deep-link.
+          // Open the existing Daily Log camera flow directly so the user is
+          // never dropped into AI Coach just to take a meal photo.
+          context.push('/daily-log?action=photo&source=camera&from=$origin');
           break;
         case 'exercise':
           context.push('/wellness/workouts');

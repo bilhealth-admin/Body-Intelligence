@@ -564,7 +564,7 @@ void main() {
         result: OnboardingRemoteAiResult.authenticationRequired,
       ),
     );
-    final enable = find.byKey(const Key('onboarding-enable-ai'));
+    final enable = find.byKey(const Key('onboarding-cloud-ai-toggle'));
     await tester.ensureVisible(enable);
     await tester.pumpAndSettle();
     await tester.tap(enable);
@@ -585,9 +585,21 @@ void main() {
   testWidgets('explicit cloud AI opt-out is visible and selected', (
     tester,
   ) async {
-    await pump(tester, valid(step: 'ai'));
-    final decline = find.byKey(const Key('onboarding-decline-ai'));
+    await pump(
+      tester,
+      valid(
+        step: 'ai',
+      ).copyWith(remoteAiConsent: OnboardingRemoteAiConsent.granted),
+      remote: const _RemoteAiGateway(
+        readResult: OnboardingRemoteAiResult.granted,
+        setResult: OnboardingRemoteAiResult.declined,
+      ),
+    );
+    final decline = find.byKey(const Key('onboarding-cloud-ai-toggle'));
     await tester.ensureVisible(decline);
+    final topBefore = tester.getRect(decline).top;
+    expect(find.byKey(const Key('onboarding-enable-ai')), findsNothing);
+    expect(find.byKey(const Key('onboarding-decline-ai')), findsNothing);
     await tester.tap(decline);
     await tester.pumpAndSettle();
 
@@ -596,7 +608,8 @@ void main() {
       (await drafts.load())!.remoteAiConsent,
       OnboardingRemoteAiConsent.declined,
     );
-    expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
+    expect(find.text('Cloud AI is off.'), findsOneWidget);
+    expect(tester.getRect(decline).top, closeTo(topBefore, 0.1));
   });
 
   testWidgets('cloud AI opt-out stays local when consent RPC fails', (
@@ -604,10 +617,15 @@ void main() {
   ) async {
     await pump(
       tester,
-      valid(step: 'ai'),
-      remote: const _RemoteAiGateway(result: OnboardingRemoteAiResult.failed),
+      valid(
+        step: 'ai',
+      ).copyWith(remoteAiConsent: OnboardingRemoteAiConsent.granted),
+      remote: const _RemoteAiGateway(
+        readResult: OnboardingRemoteAiResult.granted,
+        setResult: OnboardingRemoteAiResult.failed,
+      ),
     );
-    final decline = find.byKey(const Key('onboarding-decline-ai'));
+    final decline = find.byKey(const Key('onboarding-cloud-ai-toggle'));
     await tester.ensureVisible(decline);
     await tester.tap(decline);
     await tester.pumpAndSettle();
@@ -655,14 +673,21 @@ void main() {
 }
 
 final class _RemoteAiGateway implements OnboardingRemoteAiGateway {
-  const _RemoteAiGateway({this.result = OnboardingRemoteAiResult.declined});
+  const _RemoteAiGateway({
+    this.result = OnboardingRemoteAiResult.declined,
+    this.readResult,
+    this.setResult,
+  });
   final OnboardingRemoteAiResult result;
+  final OnboardingRemoteAiResult? readResult;
+  final OnboardingRemoteAiResult? setResult;
 
   @override
-  Future<OnboardingRemoteAiResult> read() async => result;
+  Future<OnboardingRemoteAiResult> read() async => readResult ?? result;
 
   @override
-  Future<OnboardingRemoteAiResult> setGranted(bool granted) async => result;
+  Future<OnboardingRemoteAiResult> setGranted(bool granted) async =>
+      setResult ?? result;
 }
 
 final class _NotificationGateway implements OnboardingNotificationGateway {

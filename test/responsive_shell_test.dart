@@ -243,6 +243,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ai-coach'), findsOneWidget);
     expect(find.byKey(const Key('shell-quick-add')), findsNothing);
+    expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
   });
 
   testWidgets('wide AI route does not cover its composer with quick add', (
@@ -256,6 +257,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ai-coach'), findsOneWidget);
     expect(find.byKey(const Key('shell-quick-add')), findsNothing);
+    expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
   });
 
   testWidgets('visible desktop profile control opens the profile form', (

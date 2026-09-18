@@ -124,6 +124,25 @@ void main() {
     expect(chat, contains('_conversationChanges?.cancel()'));
   });
 
+  test(
+    'conversation queries use a deterministic tie-breaker for equal times',
+    () {
+      final source = File(
+        'lib/features/community/data/community_repository.dart',
+      ).readAsStringSync();
+      final conversationStart = source.indexOf(
+        'Future<List<CommunityMessage>> loadMessages',
+      );
+      final conversationEnd = source.indexOf(
+        'Stream<void> watchConversationChanges',
+        conversationStart,
+      );
+      final conversation = source.substring(conversationStart, conversationEnd);
+      expect(conversation, contains(".order('created_at')"));
+      expect(conversation, contains(".order('id')"));
+    },
+  );
+
   test('messages surface has direct copy in all extended locales', () {
     const keys = {
       'Messages',

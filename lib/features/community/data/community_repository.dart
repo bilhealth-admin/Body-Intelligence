@@ -257,10 +257,19 @@ class CommunityRepository
         .or(
           'and(sender_id.eq.$userId,recipient_id.eq.$otherUserId),and(sender_id.eq.$otherUserId,recipient_id.eq.$userId)',
         )
-        .order('created_at');
-    return rows
+        .order('created_at')
+        .order('id');
+    final messages = rows
         .map((row) => CommunityMessage.fromJson(row))
-        .toList(growable: false);
+        .toList(growable: true);
+    // Keep the conversation transcript chronological even if an edge/cache
+    // returns rows outside the requested order. The chat viewport is reversed
+    // so this places the newest message at the latest (bottom) end.
+    messages.sort((left, right) {
+      final byTime = left.createdAt.compareTo(right.createdAt);
+      return byTime == 0 ? left.id.compareTo(right.id) : byTime;
+    });
+    return List<CommunityMessage>.unmodifiable(messages);
   }
 
   Stream<void> watchConversationChanges(String otherUserId) {
@@ -274,6 +283,7 @@ class CommunityRepository
         .stream(primaryKey: const ['id'])
         .eq(column, otherUserId)
         .order('created_at')
+        .order('id')
         .limit(1)
         .map<void>((_) {});
 
@@ -311,6 +321,7 @@ class CommunityRepository
         .select('id,sender_id,recipient_id,body,created_at,read_at')
         .eq('recipient_id', _user.id)
         .order('created_at', ascending: false)
+        .order('id', ascending: false)
         .limit(100);
     return _enrichMessageRows(rows, profileKey: 'sender_id');
   }
@@ -329,6 +340,7 @@ class CommunityRepository
         .select('id,sender_id,recipient_id,body,created_at,read_at')
         .eq('sender_id', _user.id)
         .order('created_at', ascending: false)
+        .order('id', ascending: false)
         .limit(100);
     return _enrichMessageRows(rows, profileKey: 'recipient_id');
   }

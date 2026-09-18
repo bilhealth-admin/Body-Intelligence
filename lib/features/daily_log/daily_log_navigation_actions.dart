@@ -61,7 +61,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
         case 'voice':
           await _captureMealVoice();
         case 'photo':
-          await _analyzeMealImage();
+          await _analyzeMealImage(directCamera: widget.directPhotoCapture);
         case 'recovered-photo':
           await _analyzeMealImage(recoveredOnly: true);
         case 'water':

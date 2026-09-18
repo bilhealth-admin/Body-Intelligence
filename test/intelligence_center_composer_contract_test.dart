@@ -189,10 +189,8 @@ void main() {
       shell,
       contains('floatingActionButton: isDashboard ? quickButton : null'),
     );
-    expect(
-      shell,
-      contains("final immersiveCoach = currentPath == '/intelligence-center'"),
-    );
+    expect(shell, contains("currentPath == '/intelligence-center'"));
+    expect(shell, contains("currentPath.startsWith('/intelligence-center/')"));
     expect(shell, contains('bottomNavigationBar: immersiveCoach'));
   });
 

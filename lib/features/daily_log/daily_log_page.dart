@@ -69,12 +69,14 @@ class DailyLogPage extends ConsumerStatefulWidget {
     this.initialMealType,
     this.focusMealEntry = false,
     this.initialAction,
+    this.directPhotoCapture = false,
     this.returnPath,
   });
 
   final String? initialMealType;
   final bool focusMealEntry;
   final String? initialAction;
+  final bool directPhotoCapture;
   final String? returnPath;
 
   @override

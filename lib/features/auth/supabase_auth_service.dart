@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -186,6 +187,32 @@ class SupabaseAuthService {
       accessToken: tokens.accessToken,
       nonce: tokens.rawNonce,
     );
+  }
+
+  /// Native provider SDKs can return before Supabase has published the
+  /// session through its auth stream. Wait for that publication before the
+  /// router evaluates the startup redirect, otherwise Android may briefly
+  /// return to Sign in after the account picker succeeds.
+  Future<bool> waitForAuthenticatedSession({
+    Duration timeout = const Duration(seconds: 4),
+  }) async {
+    if (client.auth.currentSession != null) return true;
+    final ready = Completer<void>();
+    late final StreamSubscription<AuthState> subscription;
+    subscription = client.auth.onAuthStateChange.listen((state) {
+      if (state.session != null && !ready.isCompleted) ready.complete();
+    });
+    try {
+      if (client.auth.currentSession == null) {
+        await ready.future.timeout(timeout);
+      }
+    } on TimeoutException {
+      // The caller can keep the sign-in page visible and show its normal
+      // provider error instead of navigating into an unauthenticated shell.
+    } finally {
+      await subscription.cancel();
+    }
+    return client.auth.currentSession != null;
   }
 
   /// Signs in through Meta's native mobile SDK, then exchanges its short-lived

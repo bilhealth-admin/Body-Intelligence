@@ -174,8 +174,9 @@ class _DashboardShellState extends State<DashboardShell> {
 }
 
 /// Keeps the dashboard directly finger-controlled without a post-release
-/// fling. Clamping avoids elastic overscroll while the always-accepting offset
-/// preserves the dashboard pull-to-refresh gesture.
+/// fling. Normal releases stop where the finger leaves the content; only an
+/// actual overscroll is returned smoothly to its nearest edge. This keeps the
+/// dashboard distinct from Quick Add, whose modal drag behavior is unchanged.
 class DashboardScrollPhysics extends ClampingScrollPhysics {
   const DashboardScrollPhysics({super.parent});
 
@@ -192,8 +193,22 @@ class DashboardScrollPhysics extends ClampingScrollPhysics {
     ScrollMetrics position,
     double velocity,
   ) {
-    if (velocity.abs() > toleranceFor(position).velocity) return null;
-    return super.createBallisticSimulation(position, velocity);
+    final edge = position.pixels < position.minScrollExtent
+        ? position.minScrollExtent
+        : position.pixels > position.maxScrollExtent
+        ? position.maxScrollExtent
+        : null;
+    if (edge != null) {
+      return ScrollSpringSimulation(
+        const SpringDescription(mass: .8, stiffness: 320, damping: 28),
+        position.pixels,
+        edge,
+        velocity,
+        tolerance: toleranceFor(position),
+      );
+    }
+    // Do not fling the long dashboard after the finger is released.
+    return null;
   }
 }
 

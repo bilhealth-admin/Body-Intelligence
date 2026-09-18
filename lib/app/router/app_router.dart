@@ -645,6 +645,8 @@ class AppRouter {
                 initialMealType: state.uri.queryParameters['meal'],
                 focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
                 initialAction: state.uri.queryParameters['action'],
+                directPhotoCapture:
+                    state.uri.queryParameters['source'] == 'camera',
                 returnPath: returnPath,
               );
             },

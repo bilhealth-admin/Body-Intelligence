@@ -80,7 +80,12 @@ void main() {
         'lib/features/daily_log/daily_log_capture_actions.dart',
       ).readAsStringSync();
       expect(page, contains("case 'photo':"));
-      expect(page, contains('await _analyzeMealImage();'));
+      expect(
+        page,
+        contains(
+          'await _analyzeMealImage(directCamera: widget.directPhotoCapture);',
+        ),
+      );
       expect(captureActions, contains('aiBoostVisionAccessProvider.future'));
       expect(captureActions, contains('hasVisionTokens'));
       expect(captureActions, contains("context.push('/plans?focus=boost')"));

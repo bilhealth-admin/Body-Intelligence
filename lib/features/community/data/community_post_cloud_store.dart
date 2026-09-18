@@ -331,7 +331,11 @@ final class CommunityPostCloudStore
       }
       await _client.storage.from(_bucket).remove([mediaPath]);
     }
-    final changed = await _client
+    // Do not request a returned row here. The update sets deleted_at, and the
+    // read policy intentionally hides deleted posts immediately; a
+    // post-update `.select('id')` therefore returns zero rows even when the
+    // soft-delete succeeded and makes the UI report a false failure.
+    await _client
         .from('bil_community_posts')
         .update({
           'deleted_at': DateTime.now().toUtc().toIso8601String(),
@@ -343,11 +347,7 @@ final class CommunityPostCloudStore
           'media_height': null,
         })
         .eq('id', postId)
-        .eq('author_id', _user.id)
-        .select('id');
-    if (changed.length != 1) {
-      throw StateError('Post was not available to delete');
-    }
+        .eq('author_id', _user.id);
   }
 
   static String? _validatedBody(String body) {

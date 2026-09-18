@@ -194,7 +194,10 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     _updateState(() => selectedFood = foods.first);
   }
 
-  Future<void> _analyzeMealImage({bool recoveredOnly = false}) async {
+  Future<void> _analyzeMealImage({
+    bool recoveredOnly = false,
+    bool directCamera = false,
+  }) async {
     if (mealImageBusy) return;
     _updateState(() => mealImageBusy = true);
     try {
@@ -243,6 +246,16 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
           // new picker after the file has been consumed or rejected.
           image = await BilRecoverableImagePicker.instance.takeRecoveredImage(
             BilImagePickerPurpose.mealPhoto,
+          );
+        } else if (directCamera) {
+          if (!await _ensureCameraPermission() || !mounted) return;
+          image = await Navigator.of(context).push<XFile>(
+            MaterialPageRoute<XFile>(
+              builder: (_) => BilCameraCapturePage(
+                title: visionCopy.text('take'),
+                captureLabel: visionCopy.text('take'),
+              ),
+            ),
           );
         } else {
           final imageSource = await showModalBottomSheet<ImageSource>(

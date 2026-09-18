@@ -17,4 +17,21 @@ void main() {
     expect(physics.shouldAcceptUserOffset(position), isTrue);
     expect(physics.createBallisticSimulation(position, 1200), isNull);
   });
+
+  test('dashboard returns an overscroll smoothly to the nearest edge', () {
+    const physics = DashboardScrollPhysics();
+    final position = FixedScrollMetrics(
+      minScrollExtent: 0,
+      maxScrollExtent: 1000,
+      pixels: -42,
+      viewportDimension: 600,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: 1,
+    );
+
+    final simulation = physics.createBallisticSimulation(position, -260);
+    expect(simulation, isNotNull);
+    expect(simulation!.x(0), -42);
+    expect(simulation.x(10), closeTo(0, 0.1));
+  });
 }

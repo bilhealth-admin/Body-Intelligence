@@ -62,7 +62,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   bool _permissionBusy = false;
   String? _inlineError;
   String? _aiStatusMessage;
-  final _aiStatusKey = GlobalKey();
   Future<void> _draftWrites = Future<void>.value();
 
   List<String> get _steps => <String>[

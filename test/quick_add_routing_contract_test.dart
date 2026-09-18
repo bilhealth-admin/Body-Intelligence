@@ -31,10 +31,13 @@ void main() {
         expect(shell, contains('action=$action'));
         expect(diary, contains("case '$action':"));
       }
-      // Photo Quick Add enters the AI Coach vision capture flow. The diary
-      // photo action remains supported for existing deep links, but it is not
-      // the global Quick Add destination.
-      expect(shell, contains('vision=capture&from=\$origin'));
+      // Photo Quick Add opens the meal-vision camera directly. It must never
+      // route through the AI Coach conversation.
+      expect(
+        shell,
+        contains("'/daily-log?action=photo&source=camera&from=\$origin'"),
+      );
+      expect(shell, isNot(contains('vision=capture&from=\$origin')));
       expect(diary, contains("case 'photo':"));
 
       // Log food is pushed after dismissing Quick Add so the shell does not

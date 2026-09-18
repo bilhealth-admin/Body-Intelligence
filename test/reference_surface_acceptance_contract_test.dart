@@ -115,14 +115,20 @@ void main() {
         expect(shell, contains("'/daily-log?action=voice&from=\$origin'"));
         expect(
           shell,
-          contains("'/intelligence-center?vision=capture&from=\$origin'"),
+          contains("'/daily-log?action=photo&source=camera&from=\$origin'"),
         );
+        expect(shell, isNot(contains('vision=capture&from=\$origin')));
         expect(diary, contains("case 'barcode':"));
         expect(diary, contains('await _scanBarcode();'));
         expect(diary, contains("case 'voice':"));
         expect(diary, contains('await _captureMealVoice();'));
         expect(diary, contains("case 'photo':"));
-        expect(diary, contains('await _analyzeMealImage();'));
+        expect(
+          diary,
+          contains(
+            'await _analyzeMealImage(directCamera: widget.directPhotoCapture);',
+          ),
+        );
         expect(tile, contains('food.calories.round()'));
         expect(tile, contains('servingSize'));
         expect(tile, isNot(contains('food.protein')));
