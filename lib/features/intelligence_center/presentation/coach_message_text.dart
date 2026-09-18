@@ -31,6 +31,9 @@ class CoachMessageText extends StatefulWidget {
 
 class _CoachMessageTextState extends State<CoachMessageText>
     with SingleTickerProviderStateMixin {
+  // Sliver lists recycle off-screen rows. A fresh widget for the same message
+  // must not restart the reveal animation when the user browses history.
+  static final _startedRevealKeys = <Object>{};
   AnimationController? _revealController;
   late List<int> _runes;
   late String _visibleText;
@@ -54,7 +57,11 @@ class _CoachMessageTextState extends State<CoachMessageText>
     _revealController?.dispose();
     _revealController = null;
     _runes = widget.text.runes.toList(growable: false);
-    if (!widget.animateReveal || _runes.length <= 8) {
+    final revealKey = widget.key;
+    final animateReveal =
+        widget.animateReveal &&
+        (revealKey == null || _startedRevealKeys.add(revealKey));
+    if (!animateReveal || _runes.length <= 8) {
       _visibleText = widget.text;
       return;
     }

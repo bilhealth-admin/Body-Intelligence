@@ -473,23 +473,18 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             ),
             const SizedBox(height: 10),
           ],
-          // Keep a stable status slot beside the choices so the result stays
-          // visible on phone-sized viewports after either selection.
           KeyedSubtree(
             key: _aiStatusKey,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 58),
-              child: _aiStatusMessage == null
-                  ? const SizedBox.shrink()
-                  : _InfoBanner(
-                      icon:
-                          _draft.remoteAiConsent ==
-                              OnboardingRemoteAiConsent.granted
-                          ? Icons.cloud_done_outlined
-                          : Icons.cloud_off_outlined,
-                      text: _aiStatusMessage!,
-                    ),
-            ),
+            child: _aiStatusMessage == null
+                ? const SizedBox.shrink()
+                : _InfoBanner(
+                    icon:
+                        _draft.remoteAiConsent ==
+                            OnboardingRemoteAiConsent.granted
+                        ? Icons.cloud_done_outlined
+                        : Icons.cloud_off_outlined,
+                    text: _aiStatusMessage!,
+                  ),
           ),
           const SizedBox(height: 10),
           FilledButton.icon(
@@ -515,28 +510,30 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             label: Text(t('I agree — enable cloud AI')),
           ),
           const SizedBox(height: 8),
-          OutlinedButton.icon(
-            key: const Key('onboarding-decline-ai'),
-            style: _draft.remoteAiConsent == OnboardingRemoteAiConsent.declined
-                ? OutlinedButton.styleFrom(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  )
-                : null,
-            onPressed: _permissionBusy
-                ? null
-                : () => unawaited(_setAiConsent(false)),
-            icon: Icon(
-              _draft.remoteAiConsent == OnboardingRemoteAiConsent.declined
-                  ? Icons.check_circle_outline_rounded
-                  : Icons.cloud_off_outlined,
+          if (_draft.remoteAiConsent == OnboardingRemoteAiConsent.declined &&
+              _aiStatusMessage != null)
+            OutlinedButton.icon(
+              key: const Key('onboarding-decline-ai'),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+              ),
+              onPressed: _permissionBusy
+                  ? null
+                  : () => unawaited(_setAiConsent(false)),
+              icon: const Icon(Icons.check_circle_outline_rounded),
+              label: Text(t('Keep cloud AI off')),
+            )
+          else
+            TextButton(
+              key: const Key('onboarding-decline-ai'),
+              onPressed: _permissionBusy
+                  ? null
+                  : () => unawaited(_setAiConsent(false)),
+              child: Text(t('Keep cloud AI off')),
             ),
-            label: Text(t('Keep cloud AI off')),
-          ),
         ],
       ),
     );

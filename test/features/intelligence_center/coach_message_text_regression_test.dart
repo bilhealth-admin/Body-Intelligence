@@ -54,16 +54,54 @@ void main() {
     }
   }
 
-  testWidgets('fresh BIL reply reveals at a conversational pace without delaying its timestamp', (
+  testWidgets(
+    'fresh BIL reply reveals at a conversational pace without delaying its timestamp',
+    (tester) async {
+      const reply =
+          'Your saved answer appears smoothly while its full content remains accessible.';
+      final created = DateTime(2026, 9, 13, 11, 30);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CoachMessageText(
+              text: reply,
+              createdAt: created,
+              textDirection: TextDirection.ltr,
+              animateReveal: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        isNot(reply),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        isNot(reply),
+      );
+      await tester.pump(const Duration(seconds: 3));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        reply,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('recycled fresh reply does not restart its reveal', (
     tester,
   ) async {
-    const reply =
-        'Your saved answer appears smoothly while its full content remains accessible.';
+    const reply = 'A reply that must remain complete after history scrolling.';
     final created = DateTime(2026, 9, 13, 11, 30);
-    await tester.pumpWidget(
+    const key = ValueKey('coach-message-text-recycled');
+    Future<void> pumpMessage() => tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CoachMessageText(
+            key: key,
             text: reply,
             createdAt: created,
             textDirection: TextDirection.ltr,
@@ -73,20 +111,17 @@ void main() {
       ),
     );
 
+    await pumpMessage();
     expect(
       tester.widget<SelectableText>(find.byType(SelectableText)).data,
       isNot(reply),
     );
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(
-      tester.widget<SelectableText>(find.byType(SelectableText)).data,
-      isNot(reply),
-    );
-    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await pumpMessage();
     expect(
       tester.widget<SelectableText>(find.byType(SelectableText)).data,
       reply,
     );
-    expect(tester.takeException(), isNull);
   });
 }

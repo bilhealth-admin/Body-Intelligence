@@ -160,7 +160,9 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       late final IntelligenceCenterReply reply;
       if (immediateEngine.canAnswerWithoutPersonalContext(text)) {
         final fastEngine =
-            immediateEngine.isGreetingQuestion(text) && !voiceGreeting
+            immediateEngine.isGreetingQuestion(text) &&
+                !voiceGreeting &&
+                !isTransliteratedArabicGreeting(text.trim().toLowerCase())
             ? IntelligenceCenterEngine(
                 localApi: ModelBackedLocalCoachApi(
                   gateway: ref.read(intelligenceCenterModelGatewayProvider),

@@ -403,6 +403,26 @@ void main() {
     expect(gateway.locale, 'ar-SA');
   });
 
+  test('common transliterated Arabic greeting stays local', () async {
+    final gateway = _RecordingGateway();
+    final engine = IntelligenceCenterEngine(
+      localApi: ModelBackedLocalCoachApi(
+        gateway: gateway,
+        context: CoachContextSnapshot.empty(),
+      ),
+    );
+
+    final reply = await engine.answer(
+      question: 'kefak',
+      arabic: false,
+      localeCode: 'en',
+    );
+
+    expect(reply.message.text, contains('ready'));
+    expect(reply.runtime, CoachAnswerRuntime.onDevice);
+    expect(gateway.locale, isNull);
+  });
+
   test(
     'context v2 includes canonical intelligence and explicit memory slots',
     () {

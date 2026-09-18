@@ -139,7 +139,8 @@ class IntelligenceCenterEngine {
     // outage from turning a simple spoken "كيفك"/"good evening" into a 30s
     // service error while leaving typed greetings on the consented model path.
     final local =
-        inputChannel == CoachInputChannel.voice && _isGreeting(normalized)
+        (inputChannel == CoachInputChannel.voice && _isGreeting(normalized)) ||
+            isTransliteratedArabicGreeting(normalized)
         ? const LocalCoachResult(actions: [], processedOnDevice: true)
         : await localApi.understand(
             LocalCoachRequest(
