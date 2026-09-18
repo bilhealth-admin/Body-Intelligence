@@ -201,9 +201,11 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       final visionCopy = MealVisionUiCopy.ofLocale(
         Localizations.localeOf(context),
       );
-      final hasPaidBoost = await ref.read(aiBoostVisionAccessProvider.future);
+      final hasVisionTokens = await ref.read(
+        aiBoostVisionAccessProvider.future,
+      );
       if (!mounted) return;
-      if (!hasPaidBoost) {
+      if (!hasVisionTokens) {
         await context.push('/plans?focus=boost');
         return;
       }

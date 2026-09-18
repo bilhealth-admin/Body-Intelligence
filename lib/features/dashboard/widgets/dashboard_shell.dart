@@ -135,17 +135,7 @@ class _DashboardShellState extends State<DashboardShell> {
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
                     controller: _scrollController,
-                    // Match the platform ListView used by More: iOS keeps
-                    // its native rubber-band drag while Android remains
-                    // clamped. AlwaysScrollable preserves pull-to-refresh
-                    // even when the content is shorter than the viewport.
-                    physics: switch (Theme.of(context).platform) {
-                      TargetPlatform.iOS ||
-                      TargetPlatform.macOS => const BouncingScrollPhysics(
-                        parent: AlwaysScrollableScrollPhysics(),
-                      ),
-                      _ => const AlwaysScrollableScrollPhysics(),
-                    },
+                    physics: const DashboardScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
                       0,
                       16,
@@ -180,6 +170,30 @@ class _DashboardShellState extends State<DashboardShell> {
         ],
       ),
     );
+  }
+}
+
+/// Keeps the dashboard directly finger-controlled without a post-release
+/// fling. Clamping avoids elastic overscroll while the always-accepting offset
+/// preserves the dashboard pull-to-refresh gesture.
+class DashboardScrollPhysics extends ClampingScrollPhysics {
+  const DashboardScrollPhysics({super.parent});
+
+  @override
+  DashboardScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return DashboardScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) => true;
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    if (velocity.abs() > toleranceFor(position).velocity) return null;
+    return super.createBallisticSimulation(position, velocity);
   }
 }
 

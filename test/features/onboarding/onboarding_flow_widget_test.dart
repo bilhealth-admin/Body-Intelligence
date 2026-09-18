@@ -182,10 +182,10 @@ void main() {
         targetWeightKg: 50,
         activity: 'sedentary',
       ),
-      );
-      expect(find.text('1 kg / 7d'), findsNothing);
-      expect(find.text('BIL could not calculate a safe plan.'), findsNothing);
-      expect((await drafts.load())!.stepId, 'pace');
+    );
+    expect(find.text('1 kg / 7d'), findsNothing);
+    expect(find.text('BIL could not calculate a safe plan.'), findsNothing);
+    expect((await drafts.load())!.stepId, 'pace');
   });
 
   testWidgets(
@@ -580,6 +580,42 @@ void main() {
       find.text('Choose whether to enable cloud AI, or keep it off.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('explicit cloud AI opt-out is visible and selected', (
+    tester,
+  ) async {
+    await pump(tester, valid(step: 'ai'));
+    final decline = find.byKey(const Key('onboarding-decline-ai'));
+    await tester.ensureVisible(decline);
+    await tester.tap(decline);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cloud AI is off.'), findsOneWidget);
+    expect(
+      (await drafts.load())!.remoteAiConsent,
+      OnboardingRemoteAiConsent.declined,
+    );
+    expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
+  });
+
+  testWidgets('cloud AI opt-out stays local when consent RPC fails', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      valid(step: 'ai'),
+      remote: const _RemoteAiGateway(result: OnboardingRemoteAiResult.failed),
+    );
+    final decline = find.byKey(const Key('onboarding-decline-ai'));
+    await tester.ensureVisible(decline);
+    await tester.tap(decline);
+    await tester.pumpAndSettle();
+    expect(
+      (await drafts.load())!.remoteAiConsent,
+      OnboardingRemoteAiConsent.declined,
+    );
+    expect(find.textContaining('AI remains off'), findsOneWidget);
   });
 
   testWidgets('signed-out restart preserves an explicit cloud AI opt-out', (

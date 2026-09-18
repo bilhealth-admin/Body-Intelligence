@@ -105,6 +105,7 @@ class _BILBootstrapState extends State<_BILBootstrap> {
   bool ready = !AppEnvironment.cloudConfigured;
   Object? failure;
   bool nativeLaunchDismissed = false;
+  Future<void>? _cloudInitializationFuture;
 
   @override
   void initState() {
@@ -138,6 +139,10 @@ class _BILBootstrapState extends State<_BILBootstrap> {
       // and could consume the initial auth link before the allow-list router.
       authOptions: const FlutterAuthClientOptions(detectSessionInUri: false),
     );
+    // Keep the initialization future available to the link bootstrap. The
+    // client object exists synchronously, but its PKCE verifier/session
+    // storage is not ready until this future completes.
+    _cloudInitializationFuture = cloudInitialization;
     if (mounted) setState(() => ready = true);
     try {
       await cloudInitialization;
@@ -163,8 +168,11 @@ class _BILBootstrapState extends State<_BILBootstrap> {
   @override
   Widget build(BuildContext context) {
     if (ready) {
-      return const BilMobileUmpBootstrap(
-        child: _BILLinkBootstrap(child: BILApp()),
+      return BilMobileUmpBootstrap(
+        child: _BILLinkBootstrap(
+          cloudInitialization: _cloudInitializationFuture,
+          child: const BILApp(),
+        ),
       );
     }
     return MaterialApp(
@@ -216,9 +224,10 @@ class _BILBootstrapState extends State<_BILBootstrap> {
 }
 
 class _BILLinkBootstrap extends StatefulWidget {
-  const _BILLinkBootstrap({required this.child});
+  const _BILLinkBootstrap({required this.child, this.cloudInitialization});
 
   final Widget child;
+  final Future<void>? cloudInitialization;
 
   @override
   State<_BILLinkBootstrap> createState() => _BILLinkBootstrapState();
@@ -240,6 +249,9 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
     );
     _authController = BilAuthCallbackController(
       resolve: (uri) async {
+        // A cold Android return can arrive before Supabase has finished
+        // preparing SharedPreferences and the PKCE verifier store.
+        await widget.cloudInitialization;
         await dismissIosOAuthBrowserAfterCallback();
         await Supabase.instance.client.auth.getSessionFromUrl(uri);
       },

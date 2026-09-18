@@ -473,27 +473,70 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             ),
             const SizedBox(height: 10),
           ],
+          // Keep a stable status slot beside the choices so the result stays
+          // visible on phone-sized viewports after either selection.
+          KeyedSubtree(
+            key: _aiStatusKey,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 58),
+              child: _aiStatusMessage == null
+                  ? const SizedBox.shrink()
+                  : _InfoBanner(
+                      icon:
+                          _draft.remoteAiConsent ==
+                              OnboardingRemoteAiConsent.granted
+                          ? Icons.cloud_done_outlined
+                          : Icons.cloud_off_outlined,
+                      text: _aiStatusMessage!,
+                    ),
+            ),
+          ),
           const SizedBox(height: 10),
           FilledButton.icon(
             key: const Key('onboarding-enable-ai'),
+            style: _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
+                ? FilledButton.styleFrom(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onPrimaryContainer,
+                  )
+                : null,
             onPressed: _permissionBusy || _draft.aiFocuses.isEmpty
                 ? null
                 : () => unawaited(_setAiConsent(true)),
-            icon: const Icon(Icons.cloud_done_outlined),
+            icon: Icon(
+              _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cloud_done_outlined,
+            ),
             label: Text(t('I agree — enable cloud AI')),
           ),
           const SizedBox(height: 8),
-          TextButton(
+          OutlinedButton.icon(
             key: const Key('onboarding-decline-ai'),
+            style: _draft.remoteAiConsent == OnboardingRemoteAiConsent.declined
+                ? OutlinedButton.styleFrom(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : null,
             onPressed: _permissionBusy
                 ? null
                 : () => unawaited(_setAiConsent(false)),
-            child: Text(t('Keep cloud AI off')),
+            icon: Icon(
+              _draft.remoteAiConsent == OnboardingRemoteAiConsent.declined
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cloud_off_outlined,
+            ),
+            label: Text(t('Keep cloud AI off')),
           ),
-          if (_aiStatusMessage case final message?) ...[
-            const SizedBox(height: 12),
-            _InfoBanner(icon: Icons.info_outline_rounded, text: message),
-          ],
         ],
       ),
     );
@@ -501,10 +544,23 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
 
   Future<void> _setAiConsent(bool granted, {bool thenContinue = false}) async {
     if (_permissionBusy) return;
-    _updateState(() {
-      _permissionBusy = true;
-      _aiStatusMessage = null;
-    });
+    if (!granted) {
+      // Opting out is local and safe. Show the resulting state immediately
+      // even if the remote gateway is slow or unavailable.
+      _updateState(() {
+        _permissionBusy = true;
+        _aiStatusMessage = t('Cloud AI is off.');
+        _draft = _draft.copyWith(
+          remoteAiConsent: OnboardingRemoteAiConsent.declined,
+        );
+      });
+      _revealAiStatus();
+    } else {
+      _updateState(() {
+        _permissionBusy = true;
+        _aiStatusMessage = null;
+      });
+    }
     final result = await ref
         .read(onboardingRemoteAiGatewayProvider)
         .setGranted(granted);
@@ -513,6 +569,8 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
       OnboardingRemoteAiResult.granted => OnboardingRemoteAiConsent.granted,
       OnboardingRemoteAiResult.declined => OnboardingRemoteAiConsent.declined,
       OnboardingRemoteAiResult.authenticationRequired when !granted =>
+        OnboardingRemoteAiConsent.declined,
+      OnboardingRemoteAiResult.failed when !granted =>
         OnboardingRemoteAiConsent.declined,
       _ => OnboardingRemoteAiConsent.unknown,
     };
@@ -532,10 +590,27 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
       _aiStatusMessage = message;
       _draft = _draft.copyWith(remoteAiConsent: consent);
     });
+    _revealAiStatus();
     await _queueDraftSave();
     if (thenContinue && consent == OnboardingRemoteAiConsent.declined) {
       await _goNext();
     }
+  }
+
+  void _revealAiStatus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _aiStatusMessage == null) return;
+      final statusContext = _aiStatusKey.currentContext;
+      if (statusContext == null) return;
+      Scrollable.ensureVisible(
+        statusContext,
+        alignment: .35,
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   _StepView _reviewStep() {

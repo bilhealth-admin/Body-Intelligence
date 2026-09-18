@@ -266,9 +266,9 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   }
 }, retry: (_, _) => null);
 
-/// Meal-photo analysis is purchased through AI Boost in every storefront.
-/// It deliberately ignores subscription/included allowance and opens only
-/// when Supabase confirms enough paid credit for one Vision reservation.
+/// Meal-photo analysis uses the same shared BIL AI Token balance as AI Coach.
+/// The server reports a reserved-aware total, so the client never unlocks a
+/// request from a stale local purchase callback or a plan label alone.
 final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
   ref.watch(verifiedEntitlementOwnerProvider);
   ref.watch(aiCoachUsageRefreshProvider);
@@ -280,10 +280,10 @@ final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
     final rawCredits = status['credits'];
     if (rawCredits is! Map) return false;
     final credits = Map<String, Object?>.from(rawCredits);
-    final paidRemaining = credits['paid_remaining'];
-    return paidRemaining is num &&
-        paidRemaining.isFinite &&
-        paidRemaining >= 100;
+    final totalRemaining = credits['total_remaining'];
+    return totalRemaining is num &&
+        totalRemaining.isFinite &&
+        totalRemaining >= 100;
   } on Object {
     // Cloud-paid access fails closed when current credit cannot be verified.
     return false;
