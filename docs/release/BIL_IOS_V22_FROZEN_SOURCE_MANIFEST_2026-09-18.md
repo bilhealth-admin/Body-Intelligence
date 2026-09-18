@@ -38,7 +38,7 @@ TestFlight or App Review. Those remain external release checks.
 The final unified source SHA is intended to build:
 
 - iOS 1.0.0, CFBundleVersion 22.
-- Android 1.0.0, versionCode 17.
+- Android 1.0.0, versionCode 18.
 
 ## Verification boundary
 

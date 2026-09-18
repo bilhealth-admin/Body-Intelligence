@@ -1,4 +1,4 @@
-# BIL Android 1.0.0 build 17 — unified release source manifest
+# BIL Android 1.0.0 build 18 — unified release source manifest
 
 `STAGING_MANIFEST_COMPLETE: YES`
 
@@ -8,22 +8,23 @@
 
 `RELEASE_VERSION: 1.0.0`
 
-`RELEASE_BUILD_NUMBER: 17`
+`RELEASE_BUILD_NUMBER: 18`
 
 ## Release identity and source boundary
 
-Android build 17 is the next candidate after build 16 and uses the same final
-unified source as iOS build 21. It includes the reviewed Health Connect scope,
-Apple/Google purchase entitlement safeguards shared by the app, and the
-dashboard, accessibility, premium-content, and native-permission corrections.
+Android build 18 is the next candidate after the previously used build 17 and
+uses the same final unified source as iOS build 22. It includes the reviewed
+Health Connect scope, Apple/Google purchase entitlement safeguards shared by
+the app, the dashboard, accessibility, premium-content, native-permission,
+Food Log, and AI Coach corrections.
 
 The Android release workflow overrides the shared Flutter version with
-`--build-number 17`, producing `versionCode 17` while `versionName` remains
+`--build-number 18`, producing `versionCode 18` while `versionName` remains
 `1.0.0`.
 
 The binding is not self-referential: after this final unified source commit is
-pushed, `BIL_ANDROID_V17_AUDITED_SOURCE_SHA` must equal that exact commit and
-`BIL_ANDROID_V17_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
+pushed, `BIL_ANDROID_V18_AUDITED_SOURCE_SHA` must equal that exact commit and
+`BIL_ANDROID_V18_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
 SHA-256. Source, manifest and expected build number are independently checked.
 
 ## Android runtime and review scope
@@ -41,8 +42,8 @@ SHA-256. Source, manifest and expected build number are independently checked.
 
 ## Console and runtime boundaries
 
-This manifest does not claim that the AAB has been uploaded, reviewed or run on
-a physical device. Before Play review, the Play Console Health Apps
+This manifest does not claim that the AAB has been uploaded, reviewed or run
+on a physical device. Before Play review, the Play Console Health Apps
 declaration, Data Safety, reviewer access, subscription/trial metadata and
 public listing must match this binary. Signed CI and device/store testing
 remain distinct evidence.

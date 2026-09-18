@@ -6,7 +6,7 @@ String _read(String path) => File(path).readAsStringSync();
 
 void main() {
   test(
-    'Android 17 release identity and modern Android package gates are exact',
+    'Android 18 release identity and modern Android package gates are exact',
     () {
       final gradle = _read('android/app/build.gradle.kts');
       final workflow = _read(
@@ -20,13 +20,13 @@ void main() {
       expect(gradle, contains('isShrinkResources = true'));
       expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
-      expect(workflow, contains('(( BUILD_NUMBER == 17 ))'));
-      expect(workflow, isNot(contains('(( BUILD_NUMBER == 16 ))')));
-      expect(workflow, contains('BIL_ANDROID_V17_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V17_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('(( BUILD_NUMBER == 18 ))'));
+      expect(workflow, isNot(contains('(( BUILD_NUMBER == 17 ))')));
+      expect(workflow, contains('BIL_ANDROID_V18_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_ANDROID_V18_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V17_FROZEN_SOURCE_MANIFEST_2026-09-17.md'),
+        contains('BIL_ANDROID_V18_FROZEN_SOURCE_MANIFEST_2026-09-18.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));
