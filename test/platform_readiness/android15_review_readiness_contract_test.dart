@@ -20,13 +20,13 @@ void main() {
       expect(gradle, contains('isShrinkResources = true'));
       expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
-      expect(workflow, contains('(( BUILD_NUMBER == 18 ))'));
-      expect(workflow, isNot(contains('(( BUILD_NUMBER == 17 ))')));
-      expect(workflow, contains('BIL_ANDROID_V18_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V18_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('(( BUILD_NUMBER == 19 ))'));
+      expect(workflow, isNot(contains('(( BUILD_NUMBER == 18 ))')));
+      expect(workflow, contains('BIL_ANDROID_V19_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_ANDROID_V19_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V18_FROZEN_SOURCE_MANIFEST_2026-09-18.md'),
+        contains('BIL_ANDROID_V19_FROZEN_SOURCE_MANIFEST_2026-09-19.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));
