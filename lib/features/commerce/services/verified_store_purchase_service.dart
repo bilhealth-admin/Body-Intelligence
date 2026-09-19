@@ -119,7 +119,15 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         // A receipt already being verified owns its outcome. A stream error
         // while merely waiting for a native transaction must still leave a
         // recoverable, non-retryable failure instead of a permanent spinner.
-        if (_disposed || _queuedPurchaseUpdates > 0) return;
+        // StoreKit can deliver the stream error after the receipt callback has
+        // completed. In that ordering the queue count is already zero, but
+        // the verified entitlement is still the authoritative result and a
+        // stale stream fault must not downgrade it to a catalog-ready state.
+        if (_disposed ||
+            _queuedPurchaseUpdates > 0 ||
+            state == VerifiedStoreState.verified) {
+          return;
+        }
         final outcome = storePurchaseStreamFailureOutcome(
           productsAvailable: products.isNotEmpty,
           initiatedByCurrentService: _purchaseInitiatedByThisService,
