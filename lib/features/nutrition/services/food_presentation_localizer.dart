@@ -47,10 +47,11 @@ abstract final class FoodPresentationLocalizer {
     bool isCustom = false,
     String source = '',
   }) {
+    final locale = _canonicalLocaleTag(localeTag);
     final original = name.trim();
     if (original.isEmpty) return original;
-    if (localeTag == 'en') return original;
-    if (!isCustom && !_isBranded(source) && localeTag == 'ar') {
+    if (locale == 'en') return original;
+    if (!isCustom && !_isBranded(source) && locale == 'ar') {
       // Translate only when the reviewed lexicon preserves most of the
       // authoritative food identity. Partial labels are deliberately rejected.
       final reviewedArabic = const FoodSearchAssistance().arabicNameFor(
@@ -68,7 +69,7 @@ abstract final class FoodPresentationLocalizer {
     if (isCustom || _isBranded(source)) return original;
     final normalized = _normalize(original);
     final concept = _reviewedFoodConcept(normalized);
-    return _localizedFoodName(concept, localeTag) ?? original;
+    return _localizedFoodName(concept, locale) ?? original;
   }
 
   /// Food rows follow the language the user actually typed when it can be
@@ -113,19 +114,21 @@ abstract final class FoodPresentationLocalizer {
     bool isCustom = false,
     String source = '',
   }) {
-    if (localeTag == 'en') return true;
+    final locale = _canonicalLocaleTag(localeTag);
+    if (locale == 'en') return true;
     final original = name.trim();
     if (original.isEmpty) return false;
     if (isCustom || _isBranded(source)) return true;
-    if (localeTag == 'ar' && arabicName?.trim().isNotEmpty == true) return true;
+    if (locale == 'ar' && arabicName?.trim().isNotEmpty == true) return true;
     return _reviewedFoodConcept(_normalize(original)) != null;
   }
 
   static String servingUnit(String raw, String localeTag) {
+    final locale = _canonicalLocaleTag(localeTag);
     final original = raw.trim();
     final normalized = _normalize(original);
     if (const {'', 'undetermined', 'unknown', 'unit'}.contains(normalized)) {
-      return _units['unavailable']?[localeTag] ??
+      return _units['unavailable']?[locale] ??
           _units['unavailable']?['en'] ??
           'Serving unavailable';
     }
@@ -142,7 +145,7 @@ abstract final class FoodPresentationLocalizer {
       _ => null,
     };
     if (concept == null) return original;
-    return _units[concept]?[localeTag] ?? _units[concept]?['en'] ?? original;
+    return _units[concept]?[locale] ?? _units[concept]?['en'] ?? original;
   }
 
   static bool hasKnownServingUnit(String raw) =>
@@ -168,8 +171,10 @@ abstract final class FoodPresentationLocalizer {
       ? servingText(amount: amount, unit: unit, localeTag: localeTag)
       : null;
 
-  static String label(String key, String localeTag) =>
-      _labels[key]?[localeTag] ?? _labels[key]?['en'] ?? key;
+  static String label(String key, String localeTag) {
+    final locale = _canonicalLocaleTag(localeTag);
+    return _labels[key]?[locale] ?? _labels[key]?['en'] ?? key;
+  }
 
   static bool _isBranded(String source) {
     final normalized = source.toLowerCase();

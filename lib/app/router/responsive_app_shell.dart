@@ -225,10 +225,12 @@ class ResponsiveAppShell extends StatelessWidget {
           context.go('/daily-log?action=voice&from=$origin');
           break;
         case 'photo':
-          // Photo analysis is a meal-vision action, not a chat deep-link.
-          // Open the existing Daily Log camera flow directly so the user is
-          // never dropped into AI Coach just to take a meal photo.
-          context.push('/daily-log?action=photo&source=camera&from=$origin');
+          // Photo analysis belongs to the standalone Food Log surface. Keep
+          // the dashboard as the validated return destination and do not
+          // route a meal image through AI Coach or the legacy Daily Log.
+          context.push(
+            '/daily-log?foodLog=1&action=photo&source=camera&from=$origin',
+          );
           break;
         case 'exercise':
           context.push('/wellness/workouts');

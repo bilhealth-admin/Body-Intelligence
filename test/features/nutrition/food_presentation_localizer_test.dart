@@ -85,6 +85,28 @@ void main() {
     }
   });
 
+  test(
+    'canonicalizes regional locale tags instead of leaking English names',
+    () {
+      expect(
+        FoodPresentationLocalizer.foodName(
+          name: 'Egg',
+          localeTag: 'ar-EG',
+          source: 'USDA FoodData Central',
+        ),
+        'بيض',
+      );
+      expect(
+        FoodPresentationLocalizer.foodName(
+          name: 'Egg',
+          localeTag: 'fr-FR',
+          source: 'USDA FoodData Central',
+        ),
+        'Œufs',
+      );
+    },
+  );
+
   test('rare trusted USDA identities have bounded 25-locale names', () {
     for (final tag in tags) {
       for (final food in const ['Teff, cooked', 'Cloud ear mushroom, dried']) {

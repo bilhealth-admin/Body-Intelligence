@@ -646,6 +646,9 @@ class AppRouter {
               if (foodLogMode) {
                 return FoodLogPage(
                   initialMealType: state.uri.queryParameters['meal'],
+                  initialAction: state.uri.queryParameters['action'],
+                  directPhotoCapture:
+                      state.uri.queryParameters['source'] == 'camera',
                   returnPath: returnPath,
                 );
               }

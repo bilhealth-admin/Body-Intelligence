@@ -35,7 +35,9 @@ void main() {
       // route through the AI Coach conversation.
       expect(
         shell,
-        contains("'/daily-log?action=photo&source=camera&from=\$origin'"),
+        contains(
+          "'/daily-log?foodLog=1&action=photo&source=camera&from=\$origin'",
+        ),
       );
       expect(shell, isNot(contains('vision=capture&from=\$origin')));
       expect(diary, contains("case 'photo':"));
@@ -54,6 +56,14 @@ void main() {
         ),
       );
       expect(router, contains('return FoodLogPage('));
+      expect(
+        router,
+        contains('initialAction: state.uri.queryParameters[\'action\']'),
+      );
+      expect(
+        router,
+        contains("state.uri.queryParameters['source'] == 'camera'"),
+      );
       expect(
         File('lib/features/daily_log/daily_log_page.dart').readAsStringSync(),
         contains("String mealType = 'breakfast';"),

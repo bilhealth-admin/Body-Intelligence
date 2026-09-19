@@ -115,7 +115,9 @@ void main() {
         expect(shell, contains("'/daily-log?action=voice&from=\$origin'"));
         expect(
           shell,
-          contains("'/daily-log?action=photo&source=camera&from=\$origin'"),
+          contains(
+            "'/daily-log?foodLog=1&action=photo&source=camera&from=\$origin'",
+          ),
         );
         expect(shell, isNot(contains('vision=capture&from=\$origin')));
         expect(diary, contains("case 'barcode':"));
