@@ -253,9 +253,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
 
     Object? consent;
     try {
-      consent = await access.readRemoteAiConsent().timeout(
-        const Duration(seconds: 8),
-      );
+      consent = await _readRemoteAiConsentWithSafeRetry(access);
     } on Object {
       return const LocalModelResult(
         status: CoachServiceStatus.temporarilyUnavailable,
@@ -359,6 +357,33 @@ class LlamaCppLocalGateway implements LocalModelGateway {
         diagnosticCode: 'cloud_request_failed',
       );
     }
+  }
+
+  /// The consent RPC is a read-only preflight. A single transient failure on
+  /// the first Coach turn is safe to retry because no context is projected,
+  /// Edge Function is invoked, or AI unit is reserved until this completes.
+  /// Keep this retry strictly before [invokeCoach]; retrying an in-flight
+  /// model request could duplicate a successful reservation when a response
+  /// is lost after the server has processed it.
+  Future<Object?> _readRemoteAiConsentWithSafeRetry(
+    CoachCloudAccess access,
+  ) async {
+    Object? firstError;
+    StackTrace? firstStack;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        return await access.readRemoteAiConsent().timeout(
+          const Duration(seconds: 8),
+        );
+      } catch (error, stack) {
+        firstError = error;
+        firstStack = stack;
+        if (attempt == 1) {
+          Error.throwWithStackTrace(firstError, firstStack);
+        }
+      }
+    }
+    throw StateError('remote_ai_consent_preflight_failed');
   }
 
   List<Map<String, String>> _conversationMessages({
