@@ -111,10 +111,10 @@ void main() {
   );
 
   test(
-    'validator targets the current non-self-referential Android 19 manifest',
+    'validator targets the current non-self-referential Android 20 manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V19_FROZEN_SOURCE_MANIFEST_2026-09-19.md';
+          'docs/release/BIL_ANDROID_V20_FROZEN_SOURCE_MANIFEST_2026-09-19.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();
@@ -128,16 +128,16 @@ void main() {
       );
       expect(metadata.unresolvedReviewCount, 0);
       expect(metadata.releaseVersion, '1.0.0');
-      expect(metadata.releaseBuildNumber, 19);
+      expect(metadata.releaseBuildNumber, 20);
       expect(
         metadata.stagingManifestComplete,
         metadata.candidateFrozenOrAccepted,
         reason: 'The current manifest must transition from NO/NO to YES/YES.',
       );
-      expect(manifestSource, contains('BIL_ANDROID_V19_AUDITED_SOURCE_SHA'));
+      expect(manifestSource, contains('BIL_ANDROID_V20_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
-        contains('BIL_ANDROID_V19_STAGING_MANIFEST_SHA256'),
+        contains('BIL_ANDROID_V20_STAGING_MANIFEST_SHA256'),
       );
       expect(manifestSource, contains('not self-referential'));
     },
