@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../analytics/bil_launch_deep_link.dart';
 import '../environment/app_environment.dart';
@@ -121,7 +122,13 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/startup',
-        pageBuilder: (_, _) => const NoTransitionPage(child: StartupPage()),
+        pageBuilder: (_, state) => NoTransitionPage(
+          child: StartupPage(
+            initialAuthSession: state.extra is Session
+                ? state.extra! as Session
+                : null,
+          ),
+        ),
       ),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(
@@ -613,7 +620,7 @@ class AppRouter {
         // atomically; a platform page transition would expose the blue splash
         // beside the dashboard for a frame, especially in RTL on iOS.
         pageBuilder: (_, state, child) => NoTransitionPage(
-          child: ResponsiveAppShell(child: child, currentUri: state.uri),
+          child: ResponsiveAppShell(currentUri: state.uri, child: child),
         ),
         routes: [
           GoRoute(

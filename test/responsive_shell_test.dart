@@ -30,7 +30,7 @@ Widget shellApp({
       ),
       ShellRoute(
         pageBuilder: (_, state, child) => NoTransitionPage(
-          child: ResponsiveAppShell(child: child, currentUri: state.uri),
+          child: ResponsiveAppShell(currentUri: state.uri, child: child),
         ),
         routes: [
           GoRoute(

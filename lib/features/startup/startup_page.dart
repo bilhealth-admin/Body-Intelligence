@@ -48,12 +48,19 @@ class StartupPage extends ConsumerStatefulWidget {
   const StartupPage({
     super.key,
     this.authClient,
+    this.initialAuthSession,
     this.imagePickerResumeResolver,
   });
 
   /// Optional authentication seam for deterministic widget tests.
   /// Production callers leave this null and use the initialized Supabase auth.
   final GoTrueClient? authClient;
+
+  /// A native sign-in response can be authoritative before Android finishes
+  /// persisting `currentSession`. The login route passes this short-lived
+  /// handoff so startup cannot undo a successful provider sign-in during that
+  /// storage window.
+  final Session? initialAuthSession;
 
   /// Deterministic seam for startup widget tests. Production resolves the
   /// owner-bound Android lost-image intent and its entitlement in this page.
@@ -104,7 +111,7 @@ class _StartupPageState extends ConsumerState<StartupPage>
     }
 
     final auth = widget.authClient ?? Supabase.instance.client.auth;
-    authSession = auth.currentSession;
+    authSession = widget.initialAuthSession ?? auth.currentSession;
     if (authSession != null) {
       authStateResolved = true;
     }
@@ -118,7 +125,13 @@ class _StartupPageState extends ConsumerState<StartupPage>
             state.event == AuthChangeEvent.signedOut ||
             state.session != null;
         setState(() {
-          authSession = state.session;
+          // Do not let a transient null initialSession event erase the
+          // verified native handoff. An explicit signedOut event is the only
+          // authoritative clear operation.
+          if (state.session != null ||
+              state.event == AuthChangeEvent.signedOut) {
+            authSession = state.session;
+          }
           if (resolved) authStateResolved = true;
           readyLocation = null;
           redirectScheduled = false;

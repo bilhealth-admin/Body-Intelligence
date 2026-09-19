@@ -129,7 +129,11 @@ class _LoginPageState extends State<LoginPage> {
         );
         if (!mounted) return;
         if (sessionReady) {
-          context.go('/startup');
+          // Carry the verified native response into Startup. Android can
+          // publish the signed-in event before its auth storage finishes
+          // writing currentSession; dropping this response used to send a
+          // successful Google account selection back to Sign in.
+          context.go('/startup', extra: nativeResponse?.session);
         } else {
           setState(
             () => status = authEntryText(

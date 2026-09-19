@@ -9,14 +9,20 @@ void main() {
     expect(
       source,
       contains(
-        "pageBuilder: (_, _) => const NoTransitionPage(child: StartupPage())",
+        "pageBuilder: (_, state) => NoTransitionPage(\n"
+        '          child: StartupPage(\n'
+        '            initialAuthSession: state.extra is Session\n'
+        '                ? state.extra! as Session\n'
+        '                : null,\n'
+        '          ),\n'
+        '        ),',
       ),
     );
     expect(
       source,
       contains(
         'pageBuilder: (_, state, child) => NoTransitionPage(\n'
-        '          child: ResponsiveAppShell(child: child, currentUri: state.uri),\n'
+        '          child: ResponsiveAppShell(currentUri: state.uri, child: child),\n'
         '        ),',
       ),
     );

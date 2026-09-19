@@ -39,7 +39,10 @@ void main() {
     expect(service, contains('onAuthStateChange'));
     expect(service, contains('Session? knownSession'));
     expect(service, contains('observedSession = session'));
-    expect(page, contains("context.go('/startup')"));
+    expect(
+      page,
+      contains("context.go('/startup', extra: nativeResponse?.session)"),
+    );
     expect(page, contains('SignInWithAppleButton('));
     expect(page, contains('SignInWithAppleButtonStyle.black'));
     expect(page, contains('SignInWithAppleButtonStyle.white'));
