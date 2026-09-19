@@ -46,33 +46,49 @@ final class NativeConnectedHealthGateway
         now,
       );
       const keys = {'steps', 'distance', 'activeEnergy'};
+      // A daily aggregate read is an optimization, not an authoritative
+      // deletion signal. HealthKit/Health Connect can briefly return an empty
+      // or partial result while its store is refreshing. Keep the last
+      // confirmed value for every metric that was not returned this time;
+      // otherwise both dashboard watch faces disappear after a normal sync.
+      final freshSignals = _selectRepresentativeSignals(activity);
+      final freshKeys = freshSignals.map((signal) => signal.key).toSet();
       final signals = <ConnectedHealthSignalView>[
-        ...cached.signals.where((signal) => !keys.contains(signal.key)),
-        ..._selectRepresentativeSignals(
-          activity,
-        ).map(ConnectedHealthSignalView.fromSignal),
+        ...cached.signals.where(
+          (signal) =>
+              !keys.contains(signal.key) || !freshKeys.contains(signal.key),
+        ),
+        ...freshSignals.map(ConnectedHealthSignalView.fromSignal),
       ];
       final steps = activity.where((signal) => signal.key == 'steps').toList();
+      final stepHistory = steps.isEmpty
+          ? cached.stepHistory
+          : steps.map(ConnectedHealthSignalView.fromSignal).toList();
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
+      final storedSignals = [
+        for (final raw in stored?['signals'] as List<Object?>? ?? const [])
+          if (raw is Map) raw,
+      ];
       await _flows.store.put('connected_health_ui', 'snapshot', {
         ...?stored,
         'lastSyncAt': now.toUtc().toIso8601String(),
         'importedCount': cached.importedCount,
         'signals': [
-          for (final raw in stored?['signals'] as List<Object?>? ?? const [])
-            if (raw is Map && !keys.contains(raw['key'])) raw,
-          ..._selectRepresentativeSignals(
-            activity,
-          ).map((signal) => signal.toMap()),
+          for (final raw in storedSignals)
+            if (!keys.contains(raw['key']) || !freshKeys.contains(raw['key']))
+              raw,
+          ...freshSignals.map((signal) => signal.toMap()),
         ],
-        'stepHistory': steps.map((signal) => signal.toMap()).toList(),
+        'stepHistory': steps.isEmpty
+            ? (stored?['stepHistory'] as List<Object?>? ?? const <Object?>[])
+            : steps.map((signal) => signal.toMap()).toList(),
       });
       return cached.copyWith(
         status: signals.isEmpty && _isIos
             ? ConnectedHealthStatus.authorizationRequested
             : ConnectedHealthStatus.synchronized,
         signals: signals,
-        stepHistory: steps.map(ConnectedHealthSignalView.fromSignal).toList(),
+        stepHistory: stepHistory,
         deviceVerified:
             cached.deviceVerified || activity.any(_isEvidenceFromNativeBridge),
         lastSyncAt: now,
@@ -412,6 +428,11 @@ final class NativeConnectedHealthGateway
       );
     }
 
+    // Keep a usable projection available while the full native import runs.
+    // A successful HealthKit query can still legitimately return no records
+    // (for example while the store is refreshing or access is indeterminate).
+    // That result must never erase the last confirmed dashboard/watch values.
+    final cached = await load();
     try {
       final now = DateTime.now();
       if (_isIos && consentState?['historicalReadResetAt'] == null) {
@@ -505,6 +526,13 @@ final class NativeConnectedHealthGateway
       final hasVerifiedNativeEvidence = selected.any(
         _isEvidenceFromNativeBridge,
       );
+      if (selected.isEmpty &&
+          (cached.signals.isNotEmpty || cached.stepHistory.isNotEmpty)) {
+        return cached.copyWith(
+          status: ConnectedHealthStatus.degraded,
+          failureCode: 'health_sync_empty_result_cache_preserved',
+        );
+      }
       await _flows.store
           .put('connected_health_evidence', 'latest', <String, Object?>{
             'selectedIds': graph.nodes

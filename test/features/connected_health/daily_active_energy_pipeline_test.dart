@@ -21,6 +21,7 @@ void main() {
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       var failRead = false;
+      var emptyRead = false;
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
       Map<String, Object?> daily(String key, double value, DateTime at) => {
@@ -40,6 +41,7 @@ void main() {
         }
         if (call.method == 'readDailyTotals') {
           if (failRead) throw PlatformException(code: 'daily_totals_failed');
+          if (emptyRead) return const <Object?>[];
           return [
             daily('activeEnergy', 900, yesterday),
             daily('activeEnergy', 321, now),
@@ -131,6 +133,20 @@ void main() {
           );
         }
       }
+      emptyRead = true;
+      final afterEmpty = await gateway.loadDailyActivity();
+      expect(afterEmpty.failureCode, isNull);
+      expect(
+        afterEmpty.signals.where((row) => row.key == 'activeEnergy'),
+        hasLength(1),
+      );
+      expect(
+        afterEmpty.signals
+            .singleWhere((row) => row.key == 'activeEnergy')
+            .value,
+        321,
+      );
+      expect(afterEmpty.stepHistory.single.value, 4321);
       failRead = true;
       final afterFailure = await gateway.loadDailyActivity();
       expect(

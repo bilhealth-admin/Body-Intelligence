@@ -33,6 +33,7 @@ bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
       snapshot.status == ConnectedHealthStatus.degraded &&
       snapshot.lastSyncAt != null &&
       (snapshot.failureCode == 'health_sync_failed_offline_cache_preserved' ||
+          snapshot.failureCode == 'health_sync_empty_result_cache_preserved' ||
           snapshot.failureCode ==
               'health_refresh_failed_offline_cache_preserved');
   final usableStatus = switch (snapshot.status) {
