@@ -13,7 +13,6 @@ import '../services/app_database_cloud_outbox_producer.dart';
 import '../services/cloud_account_key_repository.dart';
 import '../services/cloud_device_identity_repository.dart';
 import '../services/cloud_manual_sync_service.dart';
-import '../services/cloud_auto_sync_controller.dart';
 import '../services/cloud_platform_composition_root.dart';
 import '../services/cloud_platform_ports.dart';
 import '../services/cloud_runtime_access_gate.dart';
@@ -171,29 +170,6 @@ final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
     database: ref.watch(databaseProvider),
     accountBoundary: ref.watch(localDataAccountBoundaryProvider),
   );
-});
-
-/// Foreground automatic sync for authenticated shell routes. The service is
-/// intentionally gated by the same consent, entitlement, owner and session
-/// checks as the manual "Sync now" action.
-final cloudAutoSyncProvider = Provider.autoDispose<CloudAutoSyncController>((
-  ref,
-) {
-  final authOwner = ref.watch(cloudAuthOwnerIdProvider);
-  final ownerId = authOwner.value;
-  final controller = CloudAutoSyncController(
-    runSync: () async {
-      if (ownerId == null || !AppEnvironment.supabaseRuntimeReady) {
-        return const CloudManualSyncResult(
-          disposition: CloudManualSyncDisposition.unavailable,
-        );
-      }
-      return ref.read(cloudManualSyncServiceProvider).runOnce();
-    },
-  );
-  controller.start();
-  ref.onDispose(controller.dispose);
-  return controller;
 });
 
 /// Bounded selective recovery for an already-bound local account namespace.

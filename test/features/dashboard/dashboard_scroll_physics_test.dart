@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('dashboard accepts finger offsets but does not start a fling', () {
+  test('dashboard accepts finger offsets and keeps native fling momentum', () {
     const physics = DashboardScrollPhysics();
     final position = FixedScrollMetrics(
       minScrollExtent: 0,
@@ -15,7 +15,7 @@ void main() {
     );
 
     expect(physics.shouldAcceptUserOffset(position), isTrue);
-    expect(physics.createBallisticSimulation(position, 1200), isNull);
+    expect(physics.createBallisticSimulation(position, 1200), isNotNull);
   });
 
   test('dashboard returns an overscroll smoothly to the nearest edge', () {

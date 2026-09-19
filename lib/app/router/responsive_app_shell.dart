@@ -4,22 +4,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../localization/app_localizations.dart';
 import '../theme/premium_motion_tokens.dart';
 import '../theme/bil_navigation_icons.dart';
-import '../../features/cloud_platform/providers/cloud_sync_providers.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import '../../shared/widgets/bil_modal_bottom_sheet.dart';
 import 'bil_quick_add_sheet.dart';
 
 part 'responsive_app_shell_top_navigation.dart';
 
-class ResponsiveAppShell extends ConsumerWidget {
-  const ResponsiveAppShell({super.key, required this.child});
+class ResponsiveAppShell extends StatelessWidget {
+  const ResponsiveAppShell({super.key, required this.child, this.currentUri});
 
   final Widget child;
+
+  /// The URI of the active child supplied by [ShellRoute]. Keeping this on
+  /// the shell page avoids relying on the delegate's configuration, which can
+  /// briefly describe the parent shell while an imperative push is settling.
+  final Uri? currentUri;
 
   static const paths = <String>[
     '/dashboard',
@@ -56,27 +59,20 @@ class ResponsiveAppShell extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Keep the account-scoped durable outbox moving across dashboard routes.
-    // This is a no-op when the user is signed out, consent is absent, or the
-    // cloud runtime is unavailable; local writes remain fully functional.
-    ref.watch(cloudAutoSyncProvider);
-    return ListenableBuilder(
-      listenable: GoRouter.of(context).routerDelegate,
-      builder: (context, _) => _buildShell(context),
-    );
-  }
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: GoRouter.of(context).routerDelegate,
+    builder: (context, _) => _buildShell(context),
+  );
 
   Widget _buildShell(BuildContext context) {
-    // A ShellRoute widget can inherit the shell page's GoRouterState instead
-    // of the active child route. Read the delegate's complete configuration so
-    // root-back and selected-navigation behavior follow the route the user is
-    // actually viewing on phones and wide layouts alike.
-    final currentUri = GoRouter.of(
-      context,
-    ).routerDelegate.currentConfiguration.uri;
-    final currentPath = currentUri.path;
-    final index = selectedIndexForUri(currentUri);
+    // Prefer the URI captured by ShellRoute. The router delegate can briefly
+    // describe the parent shell while an imperative push is settling, which
+    // used to remount the bottom dock over the immersive AI Coach route.
+    final activeUri =
+        currentUri ??
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri;
+    final currentPath = activeUri.path;
+    final index = selectedIndexForUri(activeUri);
     final isDashboard =
         currentPath == '/dashboard' || currentPath.startsWith('/dashboard/');
     final isDashboardRoot = currentPath == '/dashboard';

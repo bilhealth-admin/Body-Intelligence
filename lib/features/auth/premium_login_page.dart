@@ -104,17 +104,29 @@ class _LoginPageState extends State<LoginPage> {
         platform: defaultTargetPlatform,
       );
       final nativeSignIn = nativeApple || nativeGoogle || nativeFacebook;
-      final completed = nativeApple
-          ? await authService.signInWithAppleNative().then((_) => true)
+      AuthResponse? nativeResponse;
+      final completed = await (nativeApple
+          ? (() async {
+              nativeResponse = await authService.signInWithAppleNative();
+              return true;
+            })()
           : nativeGoogle
-          ? (await authService.signInWithGoogleNative()) != null
+          ? (() async {
+              nativeResponse = await authService.signInWithGoogleNative();
+              return nativeResponse != null;
+            })()
           : nativeFacebook
-          ? (await authService.signInWithFacebookNative()) != null
-          : await authService.signInWithOAuth(provider);
+          ? (() async {
+              nativeResponse = await authService.signInWithFacebookNative();
+              return nativeResponse != null;
+            })()
+          : authService.signInWithOAuth(provider));
       // Native Apple, Google, and Facebook sign-in complete inside BIL, so
       // there is no browser callback page to advance the authenticated journey.
       if (nativeSignIn && completed && mounted) {
-        final sessionReady = await authService.waitForAuthenticatedSession();
+        final sessionReady = await authService.waitForAuthenticatedSession(
+          knownSession: nativeResponse?.session,
+        );
         if (!mounted) return;
         if (sessionReady) {
           context.go('/startup');

@@ -329,25 +329,23 @@ final class CommunityPostCloudStore
           !_validMediaPath(mediaPath, _user.id, postId)) {
         throw StateError('Post image path did not pass the ownership boundary');
       }
-      await _client.storage.from(_bucket).remove([mediaPath]);
     }
-    // Do not request a returned row here. The update sets deleted_at, and the
-    // read policy intentionally hides deleted posts immediately; a
-    // post-update `.select('id')` therefore returns zero rows even when the
-    // soft-delete succeeded and makes the UI report a false failure.
-    await _client
-        .from('bil_community_posts')
-        .update({
-          'deleted_at': DateTime.now().toUtc().toIso8601String(),
-          'media_url': null,
-          'media_object_path': null,
-          'media_mime_type': null,
-          'media_bytes': null,
-          'media_width': null,
-          'media_height': null,
-        })
-        .eq('id', postId)
-        .eq('author_id', _user.id);
+    final deleted = await _client.rpc(
+      'bil_delete_community_post',
+      params: {'p_post_id': postId},
+    );
+    if (deleted != true) {
+      throw StateError('Post was not available to delete');
+    }
+    // The database mutation is authoritative. Storage cleanup is best effort:
+    // a stale image must never make a successfully deleted post look undeleted.
+    if (mediaPath is String) {
+      try {
+        await _client.storage.from(_bucket).remove([mediaPath]);
+      } on Object {
+        // The row is already safely hidden; retrying storage cleanup is safe.
+      }
+    }
   }
 
   static String? _validatedBody(String body) {

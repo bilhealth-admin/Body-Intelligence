@@ -15,8 +15,9 @@ void main() {
     expect(
       source,
       contains(
-        'pageBuilder: (_, _, child) =>\n'
-        '            NoTransitionPage(child: ResponsiveAppShell(child: child)),',
+        'pageBuilder: (_, state, child) => NoTransitionPage(\n'
+        '          child: ResponsiveAppShell(child: child, currentUri: state.uri),\n'
+        '        ),',
       ),
     );
     expect(

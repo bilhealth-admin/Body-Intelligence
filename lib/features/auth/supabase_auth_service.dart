@@ -195,12 +195,18 @@ class SupabaseAuthService {
   /// return to Sign in after the account picker succeeds.
   Future<bool> waitForAuthenticatedSession({
     Duration timeout = const Duration(seconds: 4),
+    Session? knownSession,
   }) async {
-    if (client.auth.currentSession != null) return true;
+    Session? observedSession = knownSession ?? client.auth.currentSession;
+    if (observedSession != null) return true;
     final ready = Completer<void>();
     late final StreamSubscription<AuthState> subscription;
     subscription = client.auth.onAuthStateChange.listen((state) {
-      if (state.session != null && !ready.isCompleted) ready.complete();
+      final session = state.session;
+      if (session != null) {
+        observedSession = session;
+        if (!ready.isCompleted) ready.complete();
+      }
     });
     try {
       if (client.auth.currentSession == null) {
@@ -212,7 +218,11 @@ class SupabaseAuthService {
     } finally {
       await subscription.cancel();
     }
-    return client.auth.currentSession != null;
+    // Supabase may publish signedIn before its persistence layer updates
+    // currentSession. The observed event/response is authoritative for this
+    // transition; requiring currentSession here reopens the login page on
+    // Android even though Google authentication already succeeded.
+    return observedSession != null || client.auth.currentSession != null;
   }
 
   /// Signs in through Meta's native mobile SDK, then exchanges its short-lived

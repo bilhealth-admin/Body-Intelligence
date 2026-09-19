@@ -29,7 +29,9 @@ Widget shellApp({
             const Scaffold(body: Center(child: Text('workout-library'))),
       ),
       ShellRoute(
-        builder: (_, _, child) => ResponsiveAppShell(child: child),
+        pageBuilder: (_, state, child) => NoTransitionPage(
+          child: ResponsiveAppShell(child: child, currentUri: state.uri),
+        ),
         routes: [
           GoRoute(
             path: '/dashboard',
@@ -245,6 +247,36 @@ void main() {
     expect(find.byKey(const Key('shell-quick-add')), findsNothing);
     expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
   });
+
+  testWidgets(
+    'compact AI route removes the dock after navigating from Dashboard',
+    (tester) async {
+      tester.view.physicalSize = const Size(600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        shellApp(
+          dashboardChild: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => context.push('/intelligence-center'),
+              child: const Text('open-coach'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('glass-bottom-navigation')), findsOneWidget);
+
+      await tester.tap(find.text('open-coach'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ai-coach'), findsOneWidget);
+      expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
+      expect(find.byKey(const Key('shell-quick-add')), findsNothing);
+    },
+  );
 
   testWidgets('wide AI route does not cover its composer with quick add', (
     tester,

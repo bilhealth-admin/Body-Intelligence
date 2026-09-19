@@ -173,10 +173,10 @@ class _DashboardShellState extends State<DashboardShell> {
   }
 }
 
-/// Keeps the dashboard directly finger-controlled without a post-release
-/// fling. Normal releases stop where the finger leaves the content; only an
-/// actual overscroll is returned smoothly to its nearest edge. This keeps the
-/// dashboard distinct from Quick Add, whose modal drag behavior is unchanged.
+/// Keeps the dashboard directly finger-controlled while retaining the native
+/// post-release momentum used by the More surface. An actual overscroll is
+/// still returned smoothly to its nearest edge. Quick Add has its own modal
+/// drag physics and is intentionally unaffected by this class.
 class DashboardScrollPhysics extends ClampingScrollPhysics {
   const DashboardScrollPhysics({super.parent});
 
@@ -207,8 +207,9 @@ class DashboardScrollPhysics extends ClampingScrollPhysics {
         tolerance: toleranceFor(position),
       );
     }
-    // Do not fling the long dashboard after the finger is released.
-    return null;
+    // Preserve the native platform simulation so a short upward/downward
+    // swipe continues smoothly after the finger leaves the screen.
+    return super.createBallisticSimulation(position, velocity);
   }
 }
 

@@ -612,8 +612,9 @@ class AppRouter {
         // Startup is a full-screen gate. Entering the product must replace it
         // atomically; a platform page transition would expose the blue splash
         // beside the dashboard for a frame, especially in RTL on iOS.
-        pageBuilder: (_, _, child) =>
-            NoTransitionPage(child: ResponsiveAppShell(child: child)),
+        pageBuilder: (_, state, child) => NoTransitionPage(
+          child: ResponsiveAppShell(child: child, currentUri: state.uri),
+        ),
         routes: [
           GoRoute(
             path: '/dashboard',
