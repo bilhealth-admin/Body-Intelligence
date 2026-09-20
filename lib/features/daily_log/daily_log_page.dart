@@ -190,7 +190,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
 
   @override
   Widget build(BuildContext context) {
-    final foods = ref.watch(foodsProvider);
     final date = ref.watch(selectedLogDateProvider);
     final meals = ref.watch(dailyMealsProvider);
     final waterEntries = ref.watch(dailyWaterProvider);
@@ -246,7 +245,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       today.month,
       today.day,
     );
+    final dailyGoal = goalSchedule.targetFor(date);
     final mealRows = meals.value ?? const <MealWithItems>[];
+    final visibleWaterEntries = waterEntries.isLoading
+        ? const AsyncLoading<List<WaterEntry>>()
+        : waterEntries;
     MealWithItems? focusedMeal;
     for (final row in mealRows) {
       if (row.meal.type == mealType) {
@@ -283,29 +286,14 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
             bottom: false,
             child: Semantics(
               container: true,
-              child: foods.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => ActionableErrorState(
-                  title: context.strings.text(
-                    'Could not load the food catalog.',
-                  ),
-                  onRetry: () => ref.invalidate(foodsProvider),
-                ),
-                data: (items) {
-                  if (mealCalorieState.isLoading || mealMacroState.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (mealCalorieState.hasError || mealMacroState.hasError) {
-                    return ActionableErrorState(
-                      title: context.strings.text(
-                        'Meal display settings could not be loaded.',
-                      ),
-                      onRetry: () {
-                        ref.invalidate(mealCalorieGoalsProvider);
-                        ref.invalidate(mealMacroDisplayProvider);
-                      },
-                    );
-                  }
+              child: Builder(
+                builder: (context) {
+                  // The food catalog and premium display preferences are
+                  // entry-point dependencies, not dependencies of the Today
+                  // shell. Keeping them out of the page-level loading branch
+                  // prevents a date change from replacing the whole surface
+                  // with a spinner. Search handles catalog loading when the
+                  // user opens a meal; the diary remains usable meanwhile.
                   if (widget.focusMealEntry && !mealFocusApplied) {
                     WidgetsBinding.instance.addPostFrameCallback(
                       (_) => _focusMealEntry(),
@@ -443,24 +431,35 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 },
                           onPrevious: mutationBusy
                               ? null
-                              : () =>
-                                    ref
-                                        .read(selectedLogDateProvider.notifier)
-                                        .state = date.subtract(
-                                      const Duration(days: 1),
-                                    ),
+                              : () {
+                                  // Read the latest state at tap time. A fast
+                                  // double-tap must advance from the first
+                                  // tap, not from the date captured by the
+                                  // previous build.
+                                  final date = ref.read(
+                                    selectedLogDateProvider,
+                                  );
+                                  ref
+                                      .read(selectedLogDateProvider.notifier)
+                                      .state = date.subtract(
+                                    const Duration(days: 1),
+                                  );
+                                },
                           onNext: date.isBefore(latestPlannableDate)
                               ? mutationBusy
                                     ? null
-                                    : () =>
-                                          ref
-                                              .read(
-                                                selectedLogDateProvider
-                                                    .notifier,
-                                              )
-                                              .state = date.add(
-                                            const Duration(days: 1),
-                                          )
+                                    : () {
+                                        final date = ref.read(
+                                          selectedLogDateProvider,
+                                        );
+                                        ref
+                                            .read(
+                                              selectedLogDateProvider.notifier,
+                                            )
+                                            .state = date.add(
+                                          const Duration(days: 1),
+                                        );
+                                      }
                               : null,
                           onPick: mutationBusy
                               ? null
@@ -485,9 +484,17 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         DailyLogSnapshot(
                           key: const Key('daily-log-today-summary'),
                           arabic: _arabic,
-                          meals: meals.value ?? const [],
-                          water: waterEntries.value ?? const [],
-                          calorieGoal: goalSchedule.targetFor(date)?.calories,
+                          meals: meals.isLoading
+                              ? const []
+                              : meals.value ?? const [],
+                          water: waterEntries.isLoading
+                              ? const []
+                              : waterEntries.value ?? const [],
+                          calorieGoal: dailyGoal?.calories,
+                          carbsGoal: dailyGoal?.carbsGrams,
+                          proteinGoal: dailyGoal?.proteinGrams,
+                          fatGoal: dailyGoal?.fatGrams,
+                          loading: meals.isLoading,
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -554,7 +561,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         showFoodInsights: showFoodInsights,
                         showFoodTimestamps: showFoodTimestamps,
                         useNetCarbs: useNetCarbs,
-                        dailyGoal: goalSchedule.targetFor(date),
+                        dailyGoal: dailyGoal,
                         mealGoals: goalSchedule.mealTargets,
                         mealCalorieGoals: mealCalorieGoals,
                         mealMacroDisplay: mealMacroDisplay,
@@ -571,9 +578,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
                       if (alwaysShowWater ||
-                          (waterEntries.value?.isNotEmpty ?? false)) ...[
+                          (!waterEntries.isLoading &&
+                              (waterEntries.value?.isNotEmpty ?? false))) ...[
                         DailyWaterShortcut(
-                          entries: waterEntries,
+                          entries: visibleWaterEntries,
                           onTap: () => context.push(
                             '/daily-log/water?from=${Uri.encodeComponent('/daily-log')}',
                           ),
@@ -609,8 +617,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       PremiumSurface(
                         key: const Key('daily-log-lifecycle-card'),
                         child: ledger.when(
-                          loading: () =>
-                              const Center(child: CircularProgressIndicator()),
+                          skipLoadingOnRefresh: false,
+                          loading: () => const _DailyLedgerSkeleton(),
                           error: (_, _) => ActionableErrorState(
                             title: _tr(
                               'Diary status could not be loaded.',
@@ -687,6 +695,45 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DailyLedgerSkeleton extends StatelessWidget {
+  const _DailyLedgerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.surfaceContainerHighest;
+    return Column(
+      key: const Key('daily-log-ledger-loading-skeleton'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          width: 150,
+          height: 18,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          height: 14,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          height: 42,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ],
     );
   }
 }

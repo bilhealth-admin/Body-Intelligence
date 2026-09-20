@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
@@ -51,62 +53,69 @@ class DailyMealsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mealNames = ref.watch(diaryMealNamesProvider);
-    if (mealNames.isLoading) return const LinearProgressIndicator();
-    if (mealNames.hasError) {
-      return ActionableErrorState(
-        title: context.strings.text('Meal names could not be loaded.'),
-        onRetry: () => ref.invalidate(diaryMealNamesProvider),
-      );
+    // A date switch invalidates this stream. Keep the meal slots in place
+    // while the new day arrives instead of replacing the Today surface with
+    // a page-level progress indicator. The skeleton deliberately contains no
+    // previous-day values, so the new date cannot display stale meals.
+    if (meals.isLoading || mealNames.isLoading) {
+      return const _DiaryMealsSkeleton();
     }
-    return meals.when(
-      loading: () => const LinearProgressIndicator(),
-      error: (_, _) => ActionableErrorState(
+    if (meals.hasError) {
+      return ActionableErrorState(
         title: context.strings.text('Meals unavailable'),
         onRetry: () => ref.invalidate(dailyMealsProvider),
-      ),
-      data: (rows) {
-        final configuredNames = mealNames.value;
-        const indexes = {'breakfast': 0, 'lunch': 1, 'dinner': 2, 'snack': 3};
-        final byType = <String, MealWithItems>{
-          for (final meal in rows) meal.meal.type: meal,
-        };
-        final slots = <({String type, MealWithItems? meal})>[
-          for (final entry in indexes.entries)
-            if (() {
-              final meal = byType[entry.key];
-              final configuredName = configuredNames?[entry.value];
-              final enabled =
-                  configuredNames == null ||
-                  configuredName == null ||
-                  configuredName.isNotEmpty;
-              return (meal?.items.isNotEmpty ?? false) ||
-                  (showEmptyMealSlots && enabled);
-            }())
-              (type: entry.key, meal: byType[entry.key]),
-          for (final meal in rows)
-            if (!indexes.containsKey(meal.meal.type))
-              (type: meal.meal.type, meal: meal),
-        ];
-        if (slots.isEmpty) {
-          return _DiaryEmptyMeals(onAdd: () => onAdd('breakfast'));
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final slot in slots) ...[
-              _CompactDiaryMealCard(
-                key: Key('daily-meal-card-${slot.type}'),
-                type: slot.type,
-                title: _resolvedMealName(context, mealNames, slot.type),
-                meal: slot.meal,
-                calorieGoal: mealCalorieGoals[slot.type],
-                onAdd: () => onAdd(slot.type),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ],
-        );
-      },
+      );
+    }
+    final rows = meals.value ?? const <MealWithItems>[];
+    final configuredNames = mealNames.value;
+    const indexes = {'breakfast': 0, 'lunch': 1, 'dinner': 2, 'snack': 3};
+    final byType = <String, MealWithItems>{
+      for (final meal in rows) meal.meal.type: meal,
+    };
+    final slots = <({String type, MealWithItems? meal})>[
+      for (final entry in indexes.entries)
+        if (() {
+          final meal = byType[entry.key];
+          final configuredName = configuredNames?[entry.value];
+          final enabled =
+              configuredNames == null ||
+              configuredName == null ||
+              configuredName.isNotEmpty;
+          return (meal?.items.isNotEmpty ?? false) ||
+              (showEmptyMealSlots && enabled);
+        }())
+          (type: entry.key, meal: byType[entry.key]),
+      for (final meal in rows)
+        if (!indexes.containsKey(meal.meal.type))
+          (type: meal.meal.type, meal: meal),
+    ];
+    if (slots.isEmpty) {
+      return _DiaryEmptyMeals(onAdd: () => onAdd('breakfast'));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final slot in slots) ...[
+          _DiaryMealCard(
+            key: Key('daily-meal-card-${slot.type}'),
+            type: slot.type,
+            title: _resolvedMealName(context, mealNames, slot.type),
+            meal: slot.meal,
+            showFoodInsights: showFoodInsights,
+            showFoodTimestamps: showFoodTimestamps,
+            useNetCarbs: useNetCarbs,
+            dailyGoal: dailyGoal,
+            mealGoal: mealGoals[slot.type],
+            calorieGoal:
+                mealGoals[slot.type]?.calories ?? mealCalorieGoals[slot.type],
+            macroDisplay: mealMacroDisplay,
+            onAdd: () => onAdd(slot.type),
+            onEdit: onEdit,
+            onActions: onActions,
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 
@@ -127,146 +136,71 @@ class DailyMealsList extends ConsumerWidget {
   }
 }
 
-class _CompactDiaryMealCard extends StatelessWidget {
-  const _CompactDiaryMealCard({
-    super.key,
-    required this.type,
-    required this.title,
-    required this.meal,
-    required this.calorieGoal,
-    required this.onAdd,
-  });
-
-  final String type;
-  final String title;
-  final MealWithItems? meal;
-  final double? calorieGoal;
-  final VoidCallback onAdd;
+class _DiaryMealsSkeleton extends StatelessWidget {
+  const _DiaryMealsSkeleton();
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final items = meal?.items ?? const <MealItem>[];
-    final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
-    final icon = switch (type) {
-      'breakfast' => Icons.wb_sunny_outlined,
-      'lunch' => Icons.restaurant_outlined,
-      'dinner' => Icons.nights_stay_outlined,
-      _ => Icons.cookie_outlined,
-    };
-    final calorieText = items.isEmpty
-        ? null
-        : calorieGoal == null
-        ? '${calories.round()} ${_mealListText(context, 'kcal')}'
-        : '${calories.round()} / ${calorieGoal!.round()} ${_mealListText(context, 'kcal')}';
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      color: scheme.surface,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onAdd,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 94),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 10, 12),
+    return Column(
+      key: const Key('daily-meal-loading-skeleton'),
+      children: [
+        for (var index = 0; index < 4; index++) ...[
+          Container(
+            height: 76,
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
             child: Row(
-              key: Key('daily-meal-header-$type'),
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
-                    color: scheme.primaryContainer.withValues(alpha: .58),
-                    borderRadius: BorderRadius.circular(16),
+                    color: scheme.surfaceContainerHighest,
+                    shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: scheme.primary),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        key: Key('daily-meal-title-$type'),
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.25,
-                        ),
-                      ),
-                      if (calorieText != null) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          key: Key('daily-meal-totals-$type'),
-                          calorieText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textDirection: TextDirection.ltr,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                      ],
-                    ],
+                Container(
+                  width: 108,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                const SizedBox(width: 8),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 128),
-                  child: FilledButton.tonalIcon(
-                    key: Key('daily-meal-log-$type'),
-                    onPressed: onAdd,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, 42),
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        10,
-                        0,
-                        6,
-                        0,
-                      ),
-                      shape: const StadiumBorder(),
-                    ),
-                    iconAlignment: IconAlignment.end,
-                    icon: const Icon(Icons.chevron_right_rounded, size: 19),
-                    label: Text(
-                      _mealListText(
-                        context,
-                        items.isEmpty ? 'logFood' : 'logMore',
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                const Spacer(),
+                Container(
+                  width: 72,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
+          if (index != 3) const SizedBox(height: 8),
+        ],
+      ],
     );
   }
 }
 
-// Retained for compatibility with historical golden helpers while the live
-// Today surface uses [_CompactDiaryMealCard].
-// ignore: unused_element
 class _DiaryMealCard extends StatelessWidget {
   const _DiaryMealCard({
+    super.key,
     required this.type,
     required this.title,
     required this.meal,
     required this.showFoodInsights,
     required this.showFoodTimestamps,
     required this.useNetCarbs,
+    required this.dailyGoal,
     required this.mealGoal,
     required this.calorieGoal,
     required this.macroDisplay,
@@ -281,6 +215,7 @@ class _DiaryMealCard extends StatelessWidget {
   final bool showFoodInsights;
   final bool showFoodTimestamps;
   final bool useNetCarbs;
+  final NutritionGoalTarget? dailyGoal;
   final NutritionGoalTarget? mealGoal;
   final double? calorieGoal;
   final MealMacroDisplay? macroDisplay;
@@ -296,10 +231,22 @@ class _DiaryMealCard extends StatelessWidget {
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
     final netCarbs = useNetCarbs ? knownNetCarbohydrateTotal(items) : null;
     final carbValue = useNetCarbs ? netCarbs : totals.carbs;
-    final macroLine =
-        'C ${carbValue == null ? '—' : formatDiaryMacroGrams(carbValue)}g   '
-        'F ${formatDiaryMacroGrams(totals.fat)}g   '
-        'P ${formatDiaryMacroGrams(totals.protein)}g';
+    final showMacroSummary = items.isNotEmpty && macroDisplay?.enabled == true;
+    final effectiveGoal = mealGoal ?? dailyGoal;
+    final macroLine = _mealMacroLine(
+      display: macroDisplay,
+      carbs: carbValue,
+      protein: totals.protein,
+      fat: totals.fat,
+      goal: effectiveGoal,
+    );
+    final macroGoalText = mealGoal == null
+        ? null
+        : '${_mealListText(context, 'mealGoal')}: '
+              '${mealGoal!.calories.round()} ${_mealListText(context, 'kcal')}  '
+              'C ${mealGoal!.carbsGrams.round()} g  '
+              'P ${mealGoal!.proteinGrams.round()} g  '
+              'F ${mealGoal!.fatGrams.round()} g';
     Widget logButton() => SizedBox(
       width: 124,
       child: FilledButton.tonal(
@@ -322,6 +269,12 @@ class _DiaryMealCard extends StatelessWidget {
         ),
       ),
     );
+    Widget plannerAction() => IconButton(
+      key: Key('daily-meal-planner-$type'),
+      tooltip: _mealListText(context, 'logFood'),
+      icon: const Icon(Icons.event_note_outlined),
+      onPressed: () => context.push('/meal-planner'),
+    );
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
@@ -334,24 +287,51 @@ class _DiaryMealCard extends StatelessWidget {
               constraints: const BoxConstraints(minHeight: 100),
               child: Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 12, 12),
-                child: Row(
-                  key: Key('daily-meal-header-$type'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Text(
-                        key: Key('daily-meal-title-$type'),
-                        title,
-                        maxLines: 1,
+                    Row(
+                      key: Key('daily-meal-header-$type'),
+                      children: [
+                        BilSemanticIconBadge(
+                          kind: _mealSemanticIcon(type),
+                          size: 34,
+                          iconSize: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            key: Key('daily-meal-title-$type'),
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.25,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        plannerAction(),
+                        const SizedBox(width: 2),
+                        logButton(),
+                      ],
+                    ),
+                    if (macroGoalText != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        key: Key('daily-meal-macro-goal-$type'),
+                        macroGoalText,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.25,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    logButton(),
+                    ],
                   ],
                 ),
               ),
@@ -365,6 +345,12 @@ class _DiaryMealCard extends StatelessWidget {
                     key: Key('daily-meal-header-$type'),
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      BilSemanticIconBadge(
+                        kind: _mealSemanticIcon(type),
+                        size: 34,
+                        iconSize: 18,
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,33 +368,38 @@ class _DiaryMealCard extends StatelessWidget {
                                   ),
                             ),
                             const SizedBox(height: 2),
-                            PremiumNutritionGlass(
-                              key: Key('daily-meal-macros-$type'),
-                              compact: true,
-                              showLabel: false,
-                              borderRadius: 8,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 3,
-                                ),
-                                child: Text(
-                                  macroLine,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textDirection: TextDirection.ltr,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        fontSize: 13,
-                                        color: scheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                            if (showMacroSummary)
+                              PremiumNutritionGlass(
+                                key: Key('daily-meal-macros-$type'),
+                                compact: true,
+                                showLabel: false,
+                                borderRadius: 8,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 3,
+                                  ),
+                                  child: Text(
+                                    macroLine,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textDirection: TextDirection.ltr,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          fontSize: 13,
+                                          color: scheme.onSurfaceVariant,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 12),
+                      plannerAction(),
+                      const SizedBox(width: 2),
                       Text(
                         key: Key('daily-meal-totals-$type'),
                         '${calories.round()} ${_mealListText(context, 'kcal')}',
@@ -435,6 +426,9 @@ class _DiaryMealCard extends StatelessWidget {
                       food: meal?.foodsById[item.foodId],
                       onEdit: onEdit,
                       onActions: onActions,
+                      showLoggedTime: showFoodTimestamps,
+                      showFoodInsights: showFoodInsights,
+                      useNetCarbs: useNetCarbs,
                     ),
                   const SizedBox(height: 2),
                   Align(
@@ -446,4 +440,44 @@ class _DiaryMealCard extends StatelessWidget {
             ),
     );
   }
+}
+
+BilSemanticIconKind _mealSemanticIcon(String type) => switch (type) {
+  'breakfast' => BilSemanticIconKind.breakfast,
+  'lunch' => BilSemanticIconKind.lunch,
+  'dinner' => BilSemanticIconKind.dinner,
+  _ => BilSemanticIconKind.snack,
+};
+
+String _mealMacroLine({
+  required MealMacroDisplay? display,
+  required double? carbs,
+  required double protein,
+  required double fat,
+  required NutritionGoalTarget? goal,
+}) {
+  String grams(String label, double? consumed, double? target) {
+    if (consumed == null) return '$label —';
+    final consumedText = formatDiaryMacroGrams(consumed);
+    if (target == null || !target.isFinite || target <= 0) {
+      return '$label $consumedText g';
+    }
+    return '$label $consumedText / ${formatDiaryMacroGrams(target)} g';
+  }
+
+  String percent(String label, double? consumed, double? target) {
+    if (consumed == null || target == null || !target.isFinite || target <= 0) {
+      return '$label —';
+    }
+    return '$label ${(consumed / target * 100).round()}%';
+  }
+
+  if (display?.mode == MealMacroDisplayMode.percent) {
+    return '${percent('C', carbs, goal?.carbsGrams)}   '
+        '${percent('P', protein, goal?.proteinGrams)}   '
+        '${percent('F', fat, goal?.fatGrams)}';
+  }
+  return '${grams('C', carbs, goal?.carbsGrams)}   '
+      '${grams('P', protein, goal?.proteinGrams)}   '
+      '${grams('F', fat, goal?.fatGrams)}';
 }

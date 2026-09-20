@@ -41,6 +41,7 @@ class DiaryDateNavigator extends StatelessWidget {
         ? semanticLabel
         : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${(date.year % 100).toString().padLeft(2, '0')}';
     final scheme = Theme.of(context).colorScheme;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
     return SizedBox(
       key: const Key('daily-log-date-bar'),
       height: 64,
@@ -59,12 +60,11 @@ class DiaryDateNavigator extends StatelessWidget {
               const SizedBox(width: 48),
             const Spacer(),
             IconButton(
+              key: const Key('daily-log-previous'),
               tooltip: _summaryText(context, 'previous'),
               onPressed: onPrevious,
               icon: Icon(
-                arabic
-                    ? Icons.chevron_right_rounded
-                    : Icons.chevron_left_rounded,
+                rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
               ),
             ),
             Flexible(
@@ -109,12 +109,11 @@ class DiaryDateNavigator extends StatelessWidget {
               ),
             ),
             IconButton(
+              key: const Key('daily-log-next'),
               tooltip: _summaryText(context, 'next'),
               onPressed: onNext,
               icon: Icon(
-                arabic
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
+                rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
               ),
             ),
             const Spacer(),
@@ -133,12 +132,20 @@ class DailyLogSnapshot extends StatelessWidget {
     required this.meals,
     required this.water,
     this.calorieGoal,
+    this.carbsGoal,
+    this.proteinGoal,
+    this.fatGoal,
+    this.loading = false,
   });
 
   final bool arabic;
   final List<MealWithItems> meals;
   final List<WaterEntry> water;
   final double? calorieGoal;
+  final double? carbsGoal;
+  final double? proteinGoal;
+  final double? fatGoal;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -158,72 +165,215 @@ class DailyLogSnapshot extends StatelessWidget {
     final fatPercent = macroEnergy == 0 ? 0.0 : fat * 900 / macroEnergy;
     final proteinPercent = macroEnergy == 0 ? 0.0 : protein * 400 / macroEnergy;
     final scheme = Theme.of(context).colorScheme;
+    final hasGoal =
+        calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
+    final remaining = hasGoal ? calorieGoal! - calories : null;
+    double macroProgress(double consumed, double? goal) {
+      if (goal == null || !goal.isFinite || goal <= 0) return 0.0;
+      return (consumed / goal).clamp(0.0, 1.0).toDouble();
+    }
+
     return Container(
       key: const Key('daily-log-compact-summary'),
-      constraints: const BoxConstraints(minHeight: 146),
-      padding: const EdgeInsets.fromLTRB(14, 9, 14, 14),
+      constraints: const BoxConstraints(minHeight: 154),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final ring = DailyLogCalorieMacroRing(
-            calories: calories,
-            calorieGoal: calorieGoal,
-            carbs: carbs,
-            fat: fat,
-            protein: protein,
-            dimension: 108,
-          );
-          final macros = Row(
-            children: [
-              Expanded(
-                child: _MacroMetric(
-                  color: const Color(0xFF0A8F88),
-                  percent: carbsPercent,
-                  grams: carbs,
-                  label: _summaryText(context, 'carbs'),
-                ),
-              ),
-              Expanded(
-                child: _MacroMetric(
-                  color: const Color(0xFF6F1096),
-                  percent: fatPercent,
-                  grams: fat,
-                  label: _summaryText(context, 'fat'),
-                ),
-              ),
-              Expanded(
-                child: _MacroMetric(
-                  color: const Color(0xFFC56A00),
-                  percent: proteinPercent,
-                  grams: protein,
-                  label: _summaryText(context, 'proteinShort'),
-                ),
-              ),
-            ],
-          );
-          return Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Expanded(
+                child: _CalorieSummary(
+                  calories: calories,
+                  calorieGoal: calorieGoal,
+                  remaining: remaining,
+                  loading: loading,
+                ),
+              ),
+              const SizedBox(width: 10),
               Transform.translate(
                 key: const Key('daily-log-summary-ring-raised'),
                 offset: const Offset(0, -3),
-                child: ring,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: PremiumNutritionGlass(
-                  key: const Key('daily-log-summary-macros-glass'),
-                  compact: true,
-                  borderRadius: 14,
-                  child: macros,
-                ),
+                child: loading
+                    ? _SummaryRingSkeleton(
+                        color: scheme.surfaceContainerHighest,
+                      )
+                    : DailyLogCalorieMacroRing(
+                        calories: calories,
+                        calorieGoal: calorieGoal,
+                        carbs: carbs,
+                        fat: fat,
+                        protein: protein,
+                        dimension: 84,
+                      ),
               ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 12),
+          PremiumNutritionGlass(
+            key: const Key('daily-log-summary-macros-glass'),
+            compact: true,
+            borderRadius: 14,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFF0A8F88),
+                    percent: carbsGoal == null || carbsGoal! <= 0
+                        ? carbsPercent
+                        : (carbs / carbsGoal! * 100).clamp(0, 100),
+                    progress: macroProgress(carbs, carbsGoal),
+                    grams: carbs,
+                    goal: carbsGoal,
+                    label: _summaryText(context, 'carbs'),
+                    percentKey: const Key('daily-summary-carbs-percent'),
+                    gramsKey: const Key('daily-summary-carbs-grams'),
+                    loading: loading,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFF6F1096),
+                    percent: fatGoal == null || fatGoal! <= 0
+                        ? fatPercent
+                        : (fat / fatGoal! * 100).clamp(0, 100),
+                    progress: macroProgress(fat, fatGoal),
+                    grams: fat,
+                    goal: fatGoal,
+                    label: _summaryText(context, 'fat'),
+                    percentKey: const Key('daily-summary-fat-percent'),
+                    gramsKey: const Key('daily-summary-fat-grams'),
+                    loading: loading,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFFC56A00),
+                    percent: proteinGoal == null || proteinGoal! <= 0
+                        ? proteinPercent
+                        : (protein / proteinGoal! * 100).clamp(0, 100),
+                    progress: macroProgress(protein, proteinGoal),
+                    grams: protein,
+                    goal: proteinGoal,
+                    label: _summaryText(context, 'proteinShort'),
+                    percentKey: const Key('daily-summary-protein-percent'),
+                    gramsKey: const Key('daily-summary-protein-grams'),
+                    loading: loading,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CalorieSummary extends StatelessWidget {
+  const _CalorieSummary({
+    required this.calories,
+    required this.calorieGoal,
+    required this.remaining,
+    required this.loading,
+  });
+
+  final double calories;
+  final double? calorieGoal;
+  final double? remaining;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final goal =
+        calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
+    final status = !goal
+        ? _summaryText(context, 'noGoal')
+        : remaining! >= 0
+        ? '${remaining!.round()} ${_summaryText(context, 'kcal')} ${_summaryText(context, 'remaining')}'
+        : '${(-remaining!).round()} ${_summaryText(context, 'kcal')} ${_summaryText(context, 'over')}';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _summaryText(context, 'calories'),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: scheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 3),
+        if (loading)
+          Container(
+            key: const Key('daily-summary-calories-loading'),
+            width: 150,
+            height: 27,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          )
+        else
+          Text(
+            '${calories.round()} ${_summaryText(context, 'kcal')}${goal ? ' / ${calorieGoal!.round()}' : ''}',
+            key: const Key('daily-summary-calories-value'),
+            textDirection: TextDirection.ltr,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
+          ),
+        const SizedBox(height: 4),
+        Text(
+          loading ? '…' : status,
+          key: const Key('daily-summary-calories-status'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: goal && remaining! < 0
+                ? scheme.error
+                : scheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 7),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: LinearProgressIndicator(
+            key: const Key('daily-summary-calories-progress'),
+            minHeight: 7,
+            value: loading || !goal
+                ? 0
+                : (calories / calorieGoal!).clamp(0.0, 1.0).toDouble(),
+            backgroundColor: scheme.surfaceContainerHighest,
+            color: goal && remaining! < 0 ? scheme.error : scheme.primary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryRingSkeleton extends StatelessWidget {
+  const _SummaryRingSkeleton({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: 84,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: color, width: 10),
+        ),
       ),
     );
   }
@@ -559,14 +709,24 @@ class _MacroMetric extends StatelessWidget {
   const _MacroMetric({
     required this.color,
     required this.percent,
+    required this.progress,
     required this.grams,
+    required this.goal,
     required this.label,
+    this.percentKey,
+    this.gramsKey,
+    this.loading = false,
   });
 
   final Color color;
   final double percent;
+  final double progress;
   final double grams;
+  final double? goal;
   final String label;
+  final Key? percentKey;
+  final Key? gramsKey;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -575,6 +735,7 @@ class _MacroMetric extends StatelessWidget {
       children: [
         Text(
           '${percent.round()}%',
+          key: percentKey,
           textDirection: TextDirection.ltr,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontSize: 13,
@@ -587,6 +748,7 @@ class _MacroMetric extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             '${formatDiaryMacroGrams(grams)} g',
+            key: gramsKey,
             maxLines: 1,
             textDirection: TextDirection.ltr,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -595,9 +757,23 @@ class _MacroMetric extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: LinearProgressIndicator(
+            minHeight: 4,
+            value: loading ? 0 : progress,
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 3),
         Text(
-          label,
+          goal == null || goal! <= 0
+              ? label
+              : '$label / ${formatDiaryMacroGrams(goal!)} g',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
@@ -645,8 +821,8 @@ class NutrientMetric extends StatelessWidget {
             Flexible(
               child: Text(
                 value == null
-                    ? '${context.strings.text(label)}: ${context.strings.text('Unavailable')}'
-                    : '${context.strings.text(label)} ${value!.toStringAsFixed(1)} $localizedUnit',
+                    ? '$label: ${context.strings.text('Unavailable')}'
+                    : '$label ${value!.toStringAsFixed(1)} $localizedUnit',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
