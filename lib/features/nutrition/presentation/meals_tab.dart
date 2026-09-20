@@ -22,7 +22,7 @@ class _MealsTab extends ConsumerWidget {
           children: [
             Expanded(
               child: _ActionCard(
-                icon: Icons.add_rounded,
+                kind: BilSemanticIconKind.meal,
                 label: _c(context, 'Create meal'),
                 onTap: () => context.push('/daily-log'),
               ),
@@ -30,7 +30,8 @@ class _MealsTab extends ConsumerWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _ActionCard(
-                icon: Icons.content_copy_rounded,
+                kind: BilSemanticIconKind.meal,
+                iconOverride: Icons.content_copy_rounded,
                 label: _c(context, 'Copy previous meal'),
                 onTap: candidates.isEmpty
                     ? null

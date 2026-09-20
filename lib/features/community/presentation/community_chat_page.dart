@@ -16,6 +16,7 @@ class CommunityChatPage extends StatefulWidget {
 class _CommunityChatPageState extends State<CommunityChatPage> {
   CommunityRepository? _repository;
   final _composer = TextEditingController();
+  final _historyScroll = ScrollController(keepScrollOffset: false);
   Future<List<CommunityMessage>> _messages = Future.value(const []);
   StreamSubscription<void>? _conversationChanges;
   bool _sending = false;
@@ -72,10 +73,45 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     final body = _composer.text.trim();
     if (body.isEmpty || _sending) return;
     setState(() => _sending = true);
+    // Sending is an explicit request to follow the conversation end. Do this
+    // now, not after the async reply when the user might be reading history.
+    if (_historyScroll.hasClients) {
+      _historyScroll.jumpTo(_historyScroll.position.minScrollExtent);
+    }
     try {
       await _repository!.sendMessage(widget.userId, body);
-      _composer.clear();
-      if (mounted) setState(_reload);
+      if (!mounted) return;
+      if (_composer.text.trim() == body) _composer.clear();
+      setState(_reload);
+    } on CommunityPolicyAccessException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _copy(
+              context,
+              error.arabicMessage(CommunityPolicyProtectedAction.messaging),
+              error.englishMessage(CommunityPolicyProtectedAction.messaging),
+              error.englishMessage(CommunityPolicyProtectedAction.messaging),
+              error.englishMessage(CommunityPolicyProtectedAction.messaging),
+              error.englishMessage(CommunityPolicyProtectedAction.messaging),
+            ),
+          ),
+          action: SnackBarAction(
+            label: _copy(
+              context,
+              'مراجعة السياسة',
+              'Review policy',
+              'Review policy',
+              'Review policy',
+              'Review policy',
+            ),
+            onPressed: () {
+              context.push('/community/safety');
+            },
+          ),
+        ),
+      );
     } on CommunityTextPolicyException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -111,6 +147,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   @override
   void dispose() {
     unawaited(_conversationChanges?.cancel());
+    _historyScroll.dispose();
     _composer.dispose();
     super.dispose();
   }
@@ -166,7 +203,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                 child: FutureBuilder<List<CommunityMessage>>(
                   future: _messages,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
+                    if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError) {
@@ -188,12 +225,23 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                       );
                     }
                     final rows = snapshot.data ?? const [];
-                    return RefreshIndicator(
+                    return ChatHistoryViewport(
+                      controller: _historyScroll,
+                      latestMessageId: rows.isEmpty ? null : rows.last.id,
+                      child: RefreshIndicator(
                       onRefresh: () async {
                         setState(_reload);
                         await _messages;
                       },
                       child: ListView.builder(
+                        key: const Key('community-message-history'),
+                        controller: _historyScroll,
+                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        findChildIndexCallback: (key) {
+                          if (key is! ValueKey<String>) return null;
+                          final position = rows.indexWhere((message) => message.id == key.value);
+                          return position < 0 ? null : rows.length - 1 - position;
+                        },
                         physics: const AlwaysScrollableScrollPhysics(),
                         reverse: true,
                         padding: const EdgeInsets.all(16),
@@ -203,6 +251,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                           final mine =
                               message.senderId == _repository!.currentUserId;
                           return Align(
+                            key: ValueKey(message.id),
                             alignment: mine
                                 ? AlignmentDirectional.centerEnd
                                 : AlignmentDirectional.centerStart,
@@ -217,7 +266,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(message.body),
+                                    SelectableText(message.body, key: ValueKey('community-message-text-${message.id}')),
                                     const SizedBox(height: 4),
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -265,6 +314,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                           );
                         },
                       ),
+                      ),
                     );
                   },
                 ),
@@ -277,7 +327,11 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                     children: [
                       Expanded(
                         child: TextField(
+                          key: const Key('community-message-composer'),
                           controller: _composer,
+                          minLines: 1,
+                          maxLines: 4,
+                          textCapitalization: TextCapitalization.sentences,
                           maxLength: 2000,
                           decoration: InputDecoration(
                             hintText: _copy(

@@ -8,14 +8,60 @@ import '../../../app/environment/app_environment.dart';
 import '../domain/community_push_preferences.dart';
 
 abstract interface class PushTokenProvider {
+  Future<PushProviderCapability> capability();
   Future<String?> requestToken();
   Future<void> deleteToken();
+}
+
+class PushProviderCapability {
+  const PushProviderCapability({
+    required this.configured,
+    required this.tokenRegistration,
+    required this.remoteTapRouting,
+    required this.provider,
+  });
+
+  const PushProviderCapability.unavailable()
+    : configured = false,
+      tokenRegistration = false,
+      remoteTapRouting = false,
+      provider = 'unavailable';
+
+  factory PushProviderCapability.fromMap(Map<Object?, Object?> map) =>
+      PushProviderCapability(
+        configured: map['configured'] == true,
+        tokenRegistration: map['tokenRegistration'] == true,
+        remoteTapRouting: map['remoteTapRouting'] == true,
+        provider: map['provider']?.toString().trim() ?? 'unknown',
+      );
+
+  final bool configured;
+  final bool tokenRegistration;
+  final bool remoteTapRouting;
+  final String provider;
+
+  bool get ready => configured && tokenRegistration && remoteTapRouting;
 }
 
 class NativePushTokenProvider implements PushTokenProvider {
   const NativePushTokenProvider();
 
   static const _channel = MethodChannel('bil/push');
+
+  @override
+  Future<PushProviderCapability> capability() async {
+    try {
+      final status = await _channel.invokeMethod<Map<Object?, Object?>>(
+        'providerStatus',
+      );
+      if (status == null) return const PushProviderCapability.unavailable();
+      return PushProviderCapability.fromMap(status);
+    } on MissingPluginException {
+      return const PushProviderCapability.unavailable();
+    } on PlatformException {
+      return const PushProviderCapability.unavailable();
+    }
+  }
 
   @override
   Future<String?> requestToken() =>
@@ -44,6 +90,9 @@ class CommunityPushService {
       await _tokenProvider.deleteToken();
       return;
     }
+    if (Platform.isAndroid && !await _androidProviderReady()) {
+      throw StateError('Android push provider is not ready');
+    }
     final token = await _tokenProvider.requestToken();
     if (token == null || token.isEmpty) {
       throw StateError('Push permission or native configuration unavailable');
@@ -70,6 +119,13 @@ class CommunityPushService {
     if (user == null || !isAvailable) {
       return const CommunityPushPreferences(enabled: false, timeZone: 'UTC');
     }
+    if (Platform.isAndroid && !await _androidProviderReady()) {
+      return const CommunityPushPreferences(
+        enabled: false,
+        timeZone: 'UTC',
+        providerReady: false,
+      );
+    }
     final response = await _client.rpc('bil_get_push_preferences');
     final rows = (response as List).cast<Map<String, dynamic>>();
     final row = rows.isEmpty ? null : rows.first;
@@ -79,5 +135,10 @@ class CommunityPushService {
       sensitivePreviewAllowed:
           row?['sensitive_preview_allowed'] as bool? ?? false,
     );
+  }
+
+  Future<bool> _androidProviderReady() async {
+    final capability = await _tokenProvider.capability();
+    return capability.ready;
   }
 }

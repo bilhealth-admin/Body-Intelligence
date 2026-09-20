@@ -477,6 +477,7 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('store-offer-bil_premium')));
     await tester.pump();
+    expect(requested, isNull);
     await tester.tap(find.byKey(const ValueKey('store-purchase-cta')));
 
     expect(requested, same(monthly));
@@ -576,6 +577,17 @@ void main() {
         find.byKey(const ValueKey('store-offer-price-premium.annual')),
       );
       expect(annualPrice.maxLines, 1);
+      final annualPriceCenter = tester.getCenter(
+        find.byKey(const ValueKey('store-offer-price-premium.annual')),
+      );
+      final savingsCenter = tester.getCenter(
+        find.byKey(const ValueKey('annual-savings-premium.annual')),
+      );
+      final referenceCenter = tester.getCenter(
+        find.byKey(const ValueKey('annual-reference-price-premium.annual')),
+      );
+      expect((annualPriceCenter.dy - savingsCenter.dy).abs(), lessThan(2));
+      expect((referenceCenter.dy - savingsCenter.dy).abs(), greaterThan(4));
     },
   );
 

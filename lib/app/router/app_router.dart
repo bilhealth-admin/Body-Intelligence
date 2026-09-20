@@ -15,6 +15,7 @@ import '../../features/auth/verify_email_page.dart';
 import '../../features/auth/account_gateway_page.dart';
 import '../../features/auth/account_data_conflict_page.dart';
 import '../../features/auth/auth_callback_page.dart';
+import '../../features/auth/bil_auth_callback_controller.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_log/daily_body_context_page.dart';
@@ -46,12 +47,14 @@ import '../../features/community/presentation/community_profile_page.dart';
 import '../../features/community/presentation/community_safety_page.dart';
 import '../../features/community/presentation/community_messages_page.dart';
 import '../../features/community/presentation/community_notifications_page.dart';
+import '../../features/community/presentation/community_post_moderation_page.dart';
 import '../../features/life_context/life_context_page.dart';
 import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
 import '../../features/nutrition/presentation/catalog_packs_page.dart';
 import '../../features/nutrition/presentation/meal_image_guide_page.dart';
 import '../../features/nutrition/presentation/meals_recipes_foods_page.dart';
+import '../../features/daily_log/food_log_page.dart';
 import '../../features/recipe_import/presentation/trusted_recipe_import_page.dart';
 import '../../features/nutrition_plans/presentation/nutrition_pathways_page.dart';
 import '../../features/nutrition_plans/presentation/diet_plan_editor_page.dart';
@@ -69,6 +72,7 @@ import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/location_settings_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/settings/trust_support_page.dart';
+import '../../features/settings/health_information_sources_page.dart';
 import '../../features/settings/help_center_page.dart';
 import '../../features/settings/account_deletion_page.dart';
 import '../../features/settings/account_email_page.dart';
@@ -92,19 +96,17 @@ import '../../features/startup/startup_page.dart';
 import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
 
-String? _safeDailyReturnPath(String? value) =>
-    const {'/dashboard', '/daily-log'}.contains(value) ? value : null;
-
 class AppRouter {
+  static Future<bool> Function()? nativeAuthCallbackRetry;
+
   static final router = GoRouter(
     initialLocation: '/startup',
     errorBuilder: (_, _) => const InvalidRoutePage(),
     redirect: (_, state) {
-      if (state.uri.scheme == 'bil' && state.uri.host == 'auth-callback') {
+      if (BilAuthCallbackController.isSupportedCallbackLocation(state.uri)) {
         if (!AppEnvironment.cloudConfigured) return '/login';
         final isPasswordRecovery =
-            state.uri.pathSegments.length == 1 &&
-            state.uri.pathSegments.single == 'reset-password';
+            BilAuthCallbackController.isPasswordRecoveryLocation(state.uri);
         return isPasswordRecovery ? '/reset-password' : '/auth-callback';
       }
       final launchLink = BilLaunchDeepLink.parse(state.uri);
@@ -135,11 +137,16 @@ class AppRouter {
         path: '/auth-callback',
         builder: (_, state) => AuthCallbackPage(
           initiallyFailed: state.uri.queryParameters['failed'] == '1',
+          onRetry: nativeAuthCallbackRetry,
         ),
       ),
       GoRoute(
         path: '/reset-password',
-        builder: (_, _) => const ResetPasswordPage(),
+        builder: (_, state) => ResetPasswordPage(
+          initiallyFailed: state.uri.queryParameters['failed'] == '1',
+          initiallyVerified: state.uri.queryParameters['verified'] == '1',
+          onRetry: nativeAuthCallbackRetry,
+        ),
       ),
       GoRoute(path: '/register', builder: (_, _) => const RegisterPage()),
       GoRoute(
@@ -204,7 +211,10 @@ class AppRouter {
       ),
       GoRoute(
         path: '/profile-settings',
-        builder: (_, _) => const PremiumProfilePage(),
+        builder: (_, state) => PremiumProfilePage(
+          resumeRecoveredPhoto:
+              state.uri.queryParameters['resume'] == 'android-image-picker',
+        ),
       ),
       GoRoute(
         path: '/advanced-body-measurements',
@@ -296,6 +306,13 @@ class AppRouter {
           feature: PremiumGateFeature.community,
           child: CommunityNotificationsPage(),
         ),
+      ),
+      GoRoute(
+        path: '/community/moderation',
+        // Moderation is a server-verified role, not a customer purchase.
+        // Its RPCs fail closed for non-moderators, so a legitimate moderator
+        // must not be blocked merely because they do not own Premium.
+        builder: (_, _) => const CommunityPostModerationPage(),
       ),
       GoRoute(
         path: '/community/connections',
@@ -463,6 +480,10 @@ class AppRouter {
         path: '/trust-support',
         builder: (_, _) => const TrustSupportPage(),
       ),
+      GoRoute(
+        path: '/health-information-sources',
+        builder: (_, _) => const HealthInformationSourcesPage(),
+      ),
       GoRoute(path: '/help', builder: (_, _) => const HelpCenterPage()),
       GoRoute(path: '/help/faq', builder: (_, _) => const HelpFaqPage()),
       GoRoute(
@@ -590,19 +611,30 @@ class AppRouter {
           ),
           GoRoute(
             path: '/daily-log',
-            builder: (_, state) => DailyLogPage(
-              initialMealType: state.uri.queryParameters['meal'],
-              focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
-              initialAction: state.uri.queryParameters['action'],
-              returnPath: _safeDailyReturnPath(
-                state.uri.queryParameters['from'],
-              ),
-            ),
+            builder: (_, state) {
+              final foodLogMode = state.uri.queryParameters['foodLog'] == '1';
+              if (foodLogMode) {
+                return FoodLogPage(
+                  initialMealType: state.uri.queryParameters['meal'],
+                  returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
+                    state.uri.queryParameters['from'],
+                  ),
+                );
+              }
+              return DailyLogPage(
+                initialMealType: state.uri.queryParameters['meal'],
+                focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
+                initialAction: state.uri.queryParameters['action'],
+                returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
+                  state.uri.queryParameters['from'],
+                ),
+              );
+            },
           ),
           GoRoute(
             path: '/daily-log/body-context',
             builder: (_, state) => DailyBodyContextPage(
-              returnPath: _safeDailyReturnPath(
+              returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
                 state.uri.queryParameters['from'],
               ),
             ),
@@ -610,7 +642,7 @@ class AppRouter {
           GoRoute(
             path: '/daily-log/water',
             builder: (_, state) => DailyWaterPage(
-              returnPath: _safeDailyReturnPath(
+              returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
                 state.uri.queryParameters['from'],
               ),
             ),

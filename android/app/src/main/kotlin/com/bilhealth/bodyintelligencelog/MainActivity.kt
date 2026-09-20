@@ -9,12 +9,20 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+import java.util.ArrayDeque
 
 class MainActivity : FlutterFragmentActivity() {
     private var speechBridge: BILSpeechBridge? = null
     private var textToSpeechBridge: BILTextToSpeechBridge? = null
+    private var micSoundBridge: BILMicSoundBridge? = null
     private var healthBridge: BILGlobalHealthBridge? = null
+    private var fitnessBleBridge: BILFitnessBleBridge? = null
     private var playIntegrityBridge: BILPlayIntegrityBridge? = null
+    private var facebookOAuthBridge: BILFacebookOAuthBridge? = null
+    private var pushChannel: MethodChannel? = null
+    private val pendingRemotePushDeepLinks = ArrayDeque<String>()
+    private var remotePushDeliveryInFlight = false
     private val speechPermissionLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             speechBridge?.onMicrophonePermissionResult(granted)
@@ -90,14 +98,28 @@ class MainActivity : FlutterFragmentActivity() {
             speechPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
         textToSpeechBridge = BILTextToSpeechBridge(this, flutterEngine.dartExecutor.binaryMessenger)
+        micSoundBridge = BILMicSoundBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         healthBridge = BILGlobalHealthBridge(this, flutterEngine.dartExecutor.binaryMessenger, healthPermissionLauncher)
         playIntegrityBridge = BILPlayIntegrityBridge(this, flutterEngine.dartExecutor.binaryMessenger)
+        facebookOAuthBridge = BILFacebookOAuthBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         BILSystemCryptoBridge(flutterEngine.dartExecutor.binaryMessenger)
-        io.flutter.plugin.common.MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "bil/push").setMethodCallHandler { call, result ->
-            when (call.method) {
-                "requestToken" -> pushProvider.requestToken(result)
-                "deleteToken" -> pushProvider.deleteToken(result)
-                else -> result.notImplemented()
+        captureRemotePushIntent(intent)
+        pushChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            PUSH_CHANNEL,
+        ).also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "providerStatus" -> result.success(pushProvider.status())
+                    "requestToken" -> pushProvider.requestToken(result)
+                    "deleteToken" -> pushProvider.deleteToken(result)
+                    "takeInitialPayload" -> {
+                        val payloads = pendingRemotePushDeepLinks.toList()
+                        pendingRemotePushDeepLinks.clear()
+                        result.success(payloads)
+                    }
+                    else -> result.notImplemented()
+                }
             }
         }
         io.flutter.plugin.common.MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "bil/contact_picker").setMethodCallHandler { call, result ->
@@ -118,7 +140,7 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
-        BILFitnessBleBridge(this, flutterEngine.dartExecutor.binaryMessenger) { result ->
+        fitnessBleBridge = BILFitnessBleBridge(this, flutterEngine.dartExecutor.binaryMessenger) { result ->
             if (pendingBlePermissionResult != null) {
                 result.error("permission_request_in_progress", null, null)
             } else {
@@ -129,14 +151,101 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val payload = remotePushDeepLink(intent) ?: return
+        intent.removeExtra(REMOTE_PUSH_DEEP_LINK_EXTRA)
+        enqueueRemotePushDeepLink(payload)
+        deliverNextRemotePushTap()
+    }
+
+    private fun deliverNextRemotePushTap() {
+        if (remotePushDeliveryInFlight) return
+        val payload = pendingRemotePushDeepLinks.peekFirst() ?: return
+        val channel = pushChannel ?: return
+        remotePushDeliveryInFlight = true
+        channel.invokeMethod(
+            "notificationTap",
+            payload,
+            object : MethodChannel.Result {
+                override fun success(result: Any?) {
+                    remotePushDeliveryInFlight = false
+                    if (result == true && pendingRemotePushDeepLinks.peekFirst() == payload) {
+                        pendingRemotePushDeepLinks.removeFirst()
+                        deliverNextRemotePushTap()
+                    }
+                }
+
+                override fun error(
+                    errorCode: String,
+                    errorMessage: String?,
+                    errorDetails: Any?,
+                ) {
+                    remotePushDeliveryInFlight = false
+                }
+
+                override fun notImplemented() {
+                    remotePushDeliveryInFlight = false
+                }
+            },
+        )
+    }
+
+    private fun captureRemotePushIntent(intent: Intent?) {
+        remotePushDeepLink(intent)?.let { payload ->
+            enqueueRemotePushDeepLink(payload)
+            intent?.removeExtra(REMOTE_PUSH_DEEP_LINK_EXTRA)
+        }
+    }
+
+    private fun enqueueRemotePushDeepLink(payload: String) {
+        if (pendingRemotePushDeepLinks.contains(payload)) return
+        if (pendingRemotePushDeepLinks.size >= MAX_PENDING_PUSH_TAPS) return
+        pendingRemotePushDeepLinks.addLast(payload)
+    }
+
+    private fun remotePushDeepLink(intent: Intent?): String? {
+        val value = intent?.getStringExtra(REMOTE_PUSH_DEEP_LINK_EXTRA)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() && it.length <= MAX_PUSH_PAYLOAD_LENGTH }
+            ?: return null
+        return value.takeIf {
+            runCatching { android.net.Uri.parse(it).scheme.equals("bil", ignoreCase = true) }
+                .getOrDefault(false)
+        }
+    }
+
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         speechBridge?.dispose()
         speechBridge = null
         textToSpeechBridge?.dispose()
         textToSpeechBridge = null
+        micSoundBridge?.dispose()
+        micSoundBridge = null
+        pendingBlePermissionResult?.error("activity_disposed", null, null)
+        pendingBlePermissionResult = null
+        pendingContactResult?.error("activity_disposed", null, null)
+        pendingContactResult = null
+        fitnessBleBridge?.dispose()
+        fitnessBleBridge = null
+        healthBridge?.dispose()
         healthBridge = null
         playIntegrityBridge?.dispose()
         playIntegrityBridge = null
+        facebookOAuthBridge?.dispose()
+        facebookOAuthBridge = null
+        pushChannel?.setMethodCallHandler(null)
+        pushChannel = null
+        pendingRemotePushDeepLinks.clear()
+        remotePushDeliveryInFlight = false
         super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    companion object {
+        private const val PUSH_CHANNEL = "bil/push"
+        private const val REMOTE_PUSH_DEEP_LINK_EXTRA = "deep_link"
+        private const val MAX_PUSH_PAYLOAD_LENGTH = 512
+        private const val MAX_PENDING_PUSH_TAPS = 32
     }
 }

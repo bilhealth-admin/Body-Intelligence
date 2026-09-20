@@ -10,6 +10,9 @@ void main() {
     final benchmark = File(
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
     ).readAsStringSync();
+    final current = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
     final summary = File(
       'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
     ).readAsStringSync();
@@ -23,10 +26,11 @@ void main() {
     ).readAsStringSync();
 
     expect(
-      benchmark,
-      contains("title: tr('Today Summary', 'ملخص اليوم')"),
+      '$benchmark\n$current\n$summary',
+      contains("tr('Daily Summary', 'ملخص اليوم')"),
       reason: 'Today Summary must use the approved Arabic title.',
     );
+    expect(current, contains("Key('dashboard-mobile-summary-card')"));
 
     expect(profile, contains("tr('Daily energy plan', 'خطة الطاقة اليومية')"));
     expect(profile, contains("tr('Daily metabolism', 'معدل الأيض اليومي')"));

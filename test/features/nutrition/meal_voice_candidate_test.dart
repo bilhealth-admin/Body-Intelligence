@@ -66,6 +66,39 @@ void main() {
       );
     });
 
+    test(
+      'preserves exact Portuguese region over a different device region',
+      () {
+        expect(
+          MealVoiceLocaleResolver.resolve(
+            appLanguage: 'pt-BR',
+            deviceLocale: 'pt-PT',
+            availableLocales: const ['pt-PT', 'pt-BR'],
+          ),
+          'pt-BR',
+        );
+      },
+    );
+
+    test('maps exact Chinese script before a conflicting device script', () {
+      expect(
+        MealVoiceLocaleResolver.resolve(
+          appLanguage: 'zh-Hans',
+          deviceLocale: 'zh-TW',
+          availableLocales: const ['zh-TW', 'zh-CN'],
+        ),
+        'zh-CN',
+      );
+      expect(
+        MealVoiceLocaleResolver.resolve(
+          appLanguage: 'zh-Hant',
+          deviceLocale: 'zh-CN',
+          availableLocales: const ['zh-CN', 'zh-TW'],
+        ),
+        'zh-TW',
+      );
+    });
+
     test('never falls back to another app language', () {
       expect(
         MealVoiceLocaleResolver.resolve(

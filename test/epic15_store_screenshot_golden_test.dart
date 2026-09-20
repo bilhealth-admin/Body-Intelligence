@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -7,6 +5,7 @@ import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
+import 'package:body_intelligence_log/features/analytics/weekly_report_engine.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
@@ -26,6 +25,7 @@ import 'package:body_intelligence_log/features/settings/settings_page.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_library_page.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,15 +38,20 @@ final class _StoreHealthGateway implements ConnectedHealthGateway {
   const _StoreHealthGateway();
 
   @override
-  Future<ConnectedHealthSnapshot> load() async => const ConnectedHealthSnapshot(
-    status: ConnectedHealthStatus.permissionDenied,
-    platformSource: 'Health Connect',
-    availableSources: ['Health Connect'],
-    signals: [],
-    importedCount: 0,
-    lastSyncAt: null,
-    failureCode: 'permission_denied',
-  );
+  Future<ConnectedHealthSnapshot> load() async {
+    final platformSource = defaultTargetPlatform == TargetPlatform.iOS
+        ? 'Apple Health'
+        : 'Health Connect';
+    return ConnectedHealthSnapshot(
+      status: ConnectedHealthStatus.permissionDenied,
+      platformSource: platformSource,
+      availableSources: [platformSource],
+      signals: const [],
+      importedCount: 0,
+      lastSyncAt: null,
+      failureCode: 'permission_denied',
+    );
+  }
 
   @override
   Future<void> openSystemSettings() async {}
@@ -63,6 +68,83 @@ final class _StoreHealthGateway implements ConnectedHealthGateway {
   @override
   Future<ConnectedHealthSnapshot> synchronize() => load();
 }
+
+final _storeWeeklyReport = const WeeklyReportEngine().build(
+  asOf: DateTime.utc(2026, 8, 4),
+  mealCount: 4,
+  nutrition: const [
+    WeeklyNutritionObservation(
+      dayKey: '2026-08-01',
+      calories: 1850,
+      proteinG: 118,
+      carbsG: 205,
+      fatG: 62,
+      sodiumMg: 2100,
+      foodCategory: 'vegetable',
+      foodName: 'Roasted vegetables',
+    ),
+    WeeklyNutritionObservation(
+      dayKey: '2026-08-03',
+      calories: 1720,
+      proteinG: 126,
+      carbsG: 188,
+      fatG: 58,
+      sodiumMg: 1900,
+      foodCategory: 'protein',
+      foodName: 'Grilled chicken',
+    ),
+    WeeklyNutritionObservation(
+      dayKey: '2026-08-03',
+      calories: 120,
+      proteinG: 1,
+      carbsG: 28,
+      fatG: 0,
+      sodiumMg: 4,
+      foodCategory: 'fruit',
+      foodName: 'Fresh berries',
+    ),
+    WeeklyNutritionObservation(
+      dayKey: '2026-08-04',
+      calories: 210,
+      proteinG: 4,
+      carbsG: 31,
+      fatG: 8,
+      sodiumMg: 160,
+      foodCategory: 'snack',
+      foodName: 'Yogurt snack',
+    ),
+  ],
+  water: const [
+    WeeklyWaterObservation(dayKey: '2026-08-01', amountMl: 2200),
+    WeeklyWaterObservation(dayKey: '2026-08-03', amountMl: 2500),
+  ],
+  weights: [
+    WeeklyWeightObservation(
+      dayKey: '2026-08-01',
+      observedAt: DateTime.utc(2026, 8, 1),
+      weightKg: 93.4,
+    ),
+    WeeklyWeightObservation(
+      dayKey: '2026-08-04',
+      observedAt: DateTime.utc(2026, 8, 4),
+      weightKg: 92.8,
+    ),
+  ],
+  activity: const [
+    WeeklyActivityObservation(
+      dayKey: '2026-08-01',
+      steps: 8420,
+      exerciseNotes: 'Strength workout',
+    ),
+    WeeklyActivityObservation(dayKey: '2026-08-03', steps: 10120),
+  ],
+  allTimeMealCount: 4,
+  allTimeWeightCount: 2,
+  allTimeExerciseDays: 1,
+  allTimeSteps: 18540,
+  dailyCalorieGoal: 2100,
+  loggingStreakDays: 4,
+);
 
 /// Limits renderer edge tolerance to the single onboarding store capture.
 ///
@@ -160,6 +242,7 @@ void main() {
           weeklyReportClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
+          weeklyReportProvider.overrideWith((ref) async => _storeWeeklyReport),
           analyticsClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 30, 9, 41, 12),
           ),
@@ -225,169 +308,185 @@ void main() {
     testWidgets('${device.$1} English flagship store screenshots', (
       tester,
     ) async {
-      const locale = Locale('en');
-      final strictComparator = goldenFileComparator;
-      goldenFileComparator = _OnboardingEdgeGoldenComparator(
-        Uri.file('test/epic15_store_screenshot_golden_test.dart'),
-      );
+      final previousTargetPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = device.$1 == 'iphone_69'
+          ? TargetPlatform.iOS
+          : TargetPlatform.android;
       try {
+        const locale = Locale('en');
+        final strictComparator = goldenFileComparator;
+        goldenFileComparator = _OnboardingEdgeGoldenComparator(
+          Uri.file('test/epic15_store_screenshot_golden_test.dart'),
+        );
+        try {
+          await capture(
+            tester,
+            page: const OnboardingPage(),
+            name: '${device.$1}_en_00_onboarding',
+            physicalSize: device.$2,
+            locale: locale,
+          );
+        } finally {
+          goldenFileComparator = strictComparator;
+        }
         await capture(
           tester,
-          page: const OnboardingPage(),
-          name: '${device.$1}_en_00_onboarding',
+          page: const DashboardPage(),
+          name: '${device.$1}_en_01_dashboard',
           physicalSize: device.$2,
           locale: locale,
         );
-      } finally {
-        goldenFileComparator = strictComparator;
-      }
-      await capture(
-        tester,
-        page: const DashboardPage(),
-        name: '${device.$1}_en_01_dashboard',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const DailyLogPage(focusMealEntry: true),
-        name: '${device.$1}_en_02_daily_log',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const FoodPage(),
-        name: '${device.$1}_en_025_food_search',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const AnalyticsPage(),
-        name: '${device.$1}_en_03_progress',
-        physicalSize: device.$2,
-        locale: locale,
-        trends: true,
-      );
-      await capture(
-        tester,
-        page: const BilStorePlansPage(connectToDeviceStore: false),
-        name: '${device.$1}_en_04_plans',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const ConnectedHealthPage(),
-        name: '${device.$1}_en_05_connected_health',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const SettingsPage(),
-        name: '${device.$1}_en_06_privacy_settings',
-        physicalSize: device.$2,
-        locale: locale,
-        brightness: Brightness.dark,
-      );
-      if (device.$1 == 'iphone_69') {
         await capture(
           tester,
-          page: const WeeklyReportPage(),
-          name: '${device.$1}_en_07_weekly_report',
+          page: const DailyLogPage(focusMealEntry: true),
+          name: '${device.$1}_en_02_daily_log',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const FoodPage(),
+          name: '${device.$1}_en_025_food_search',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const AnalyticsPage(),
+          name: '${device.$1}_en_03_progress',
           physicalSize: device.$2,
           locale: locale,
           trends: true,
         );
         await capture(
           tester,
-          page: const NutritionPathwaysPage(),
-          name: '${device.$1}_en_08_nutrition_pathways',
+          page: const BilStorePlansPage(connectToDeviceStore: false),
+          name: '${device.$1}_en_04_plans',
           physicalSize: device.$2,
           locale: locale,
         );
-      }
-    });
-
-    testWidgets('${device.$1} Arabic RTL store screenshots', (tester) async {
-      const locale = Locale('ar');
-      await capture(
-        tester,
-        page: const OnboardingPage(),
-        name: '${device.$1}_ar_00_onboarding',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const DashboardPage(),
-        name: '${device.$1}_ar_01_dashboard',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const DailyLogPage(focusMealEntry: true),
-        name: '${device.$1}_ar_02_daily_log',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const FoodPage(),
-        name: '${device.$1}_ar_025_food_search',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const AnalyticsPage(),
-        name: '${device.$1}_ar_03_progress_dark',
-        physicalSize: device.$2,
-        locale: locale,
-        brightness: Brightness.dark,
-        trends: true,
-      );
-      await capture(
-        tester,
-        page: const BilStorePlansPage(connectToDeviceStore: false),
-        name: '${device.$1}_ar_04_plans',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      await capture(
-        tester,
-        page: const WeeklyReportPage(),
-        name: '${device.$1}_ar_05_weekly_report',
-        physicalSize: device.$2,
-        locale: locale,
-        trends: true,
-      );
-      await capture(
-        tester,
-        page: const ConnectedHealthPage(),
-        name: '${device.$1}_ar_06_connected_health',
-        physicalSize: device.$2,
-        locale: locale,
-      );
-      if (device.$1 == 'iphone_69') {
         await capture(
           tester,
-          page: const PremiumProfilePage(),
-          name: '${device.$1}_ar_07_profile',
+          page: const ConnectedHealthPage(),
+          name: '${device.$1}_en_05_connected_health',
           physicalSize: device.$2,
           locale: locale,
         );
         await capture(
           tester,
           page: const SettingsPage(),
-          name: '${device.$1}_ar_08_privacy_settings_dark',
+          name: '${device.$1}_en_06_privacy_settings',
           physicalSize: device.$2,
           locale: locale,
           brightness: Brightness.dark,
         );
+        if (device.$1 == 'iphone_69') {
+          await capture(
+            tester,
+            page: const WeeklyReportPage(),
+            name: '${device.$1}_en_07_weekly_report',
+            physicalSize: device.$2,
+            locale: locale,
+            trends: true,
+          );
+          await capture(
+            tester,
+            page: const NutritionPathwaysPage(),
+            name: '${device.$1}_en_08_nutrition_pathways',
+            physicalSize: device.$2,
+            locale: locale,
+          );
+        }
+      } finally {
+        debugDefaultTargetPlatformOverride = previousTargetPlatform;
+      }
+    });
+
+    testWidgets('${device.$1} Arabic RTL store screenshots', (tester) async {
+      final previousTargetPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = device.$1 == 'iphone_69'
+          ? TargetPlatform.iOS
+          : TargetPlatform.android;
+      try {
+        const locale = Locale('ar');
+        await capture(
+          tester,
+          page: const OnboardingPage(),
+          name: '${device.$1}_ar_00_onboarding',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const DashboardPage(),
+          name: '${device.$1}_ar_01_dashboard',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const DailyLogPage(focusMealEntry: true),
+          name: '${device.$1}_ar_02_daily_log',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const FoodPage(),
+          name: '${device.$1}_ar_025_food_search',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const AnalyticsPage(),
+          name: '${device.$1}_ar_03_progress_dark',
+          physicalSize: device.$2,
+          locale: locale,
+          brightness: Brightness.dark,
+          trends: true,
+        );
+        await capture(
+          tester,
+          page: const BilStorePlansPage(connectToDeviceStore: false),
+          name: '${device.$1}_ar_04_plans',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        await capture(
+          tester,
+          page: const WeeklyReportPage(),
+          name: '${device.$1}_ar_05_weekly_report',
+          physicalSize: device.$2,
+          locale: locale,
+          trends: true,
+        );
+        await capture(
+          tester,
+          page: const ConnectedHealthPage(),
+          name: '${device.$1}_ar_06_connected_health',
+          physicalSize: device.$2,
+          locale: locale,
+        );
+        if (device.$1 == 'iphone_69') {
+          await capture(
+            tester,
+            page: const PremiumProfilePage(),
+            name: '${device.$1}_ar_07_profile',
+            physicalSize: device.$2,
+            locale: locale,
+          );
+          await capture(
+            tester,
+            page: const SettingsPage(),
+            name: '${device.$1}_ar_08_privacy_settings_dark',
+            physicalSize: device.$2,
+            locale: locale,
+            brightness: Brightness.dark,
+          );
+        }
+      } finally {
+        debugDefaultTargetPlatformOverride = previousTargetPlatform;
       }
     });
   }

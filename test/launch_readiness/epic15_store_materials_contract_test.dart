@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -34,27 +35,87 @@ void main() {
     },
   );
 
-  test('rights manifest records original art and real production captures', () {
-    final rights =
-        jsonDecode(
-              File(
-                'docs/release/BIL_EPIC15_CONTENT_RIGHTS.json',
-              ).readAsStringSync(),
-            )
-            as Map<String, dynamic>;
-    final generated = rights['generated_for_bil_2026_08_05'] as List<dynamic>;
+  test(
+    'rights manifest preserves current art and real production captures',
+    () {
+      final rights =
+          jsonDecode(
+                File(
+                  'docs/release/BIL_EPIC15_CONTENT_RIGHTS.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final generated = rights['generated_for_bil_2026_08_05'] as List<dynamic>;
+      final identity =
+          rights['canonical_brand_identity'] as Map<String, dynamic>;
+      final appIcon = identity['app_icon'] as Map<String, dynamic>;
+      final wordmark = identity['full_wordmark'] as Map<String, dynamic>;
+      final existing = (rights['existing_bil_assets'] as List<dynamic>)
+          .cast<Map<String, dynamic>>();
+      final retired = rights['retired_brand_archive'] as Map<String, dynamic>;
 
-    expect(generated, hasLength(4));
-    expect(
-      generated.every((item) => item['rights'] == 'original_generated_for_BIL'),
-      isTrue,
-    );
-    expect(rights['screenshots']['mockup'], isFalse);
-    expect(
-      rights['screenshots']['source'],
-      contains('epic15_store_screenshot_golden_test.dart'),
-    );
-  });
+      expect(
+        generated,
+        isEmpty,
+        reason: 'Owner-rejected 2026-08-05 derivatives are not approved art.',
+      );
+      expect(appIcon['status'], 'OWNER_APPROVED_CURRENT');
+      expect(appIcon['path'], 'assets/branding/bil_app_icon.png');
+      final appIconFile = File(appIcon['path'] as String);
+      expect(appIconFile.existsSync(), isTrue);
+      expect(
+        sha256.convert(appIconFile.readAsBytesSync()).toString(),
+        appIcon['sha256'],
+      );
+      expect(wordmark['status'], 'OWNER_APPROVED_CURRENT');
+      expect(wordmark['symbol'], 'BilFullWordmark');
+      expect(wordmark['text'], 'BODY INTELLIGENCE LOG');
+      expect(wordmark['trademark'], '™');
+      final wordmarkSource = File(
+        wordmark['path'] as String,
+      ).readAsStringSync();
+      expect(wordmarkSource, contains('class BilFullWordmark'));
+      expect(wordmarkSource, contains("'BODY INTELLIGENCE LOG'"));
+      expect(wordmarkSource, contains("'™'"));
+
+      expect(existing, isNotEmpty);
+      for (final item in existing) {
+        expect(item['owner'], 'BIL');
+        expect('${item['rights']}', isNotEmpty);
+        expect(
+          FileSystemEntity.typeSync(item['path'] as String),
+          isNot(FileSystemEntityType.notFound),
+          reason: item['path'] as String,
+        );
+      }
+
+      expect(retired['status'], 'OWNER_REJECTED_DO_NOT_SHIP_2026_09_06');
+      expect(
+        File(retired['source_readme'] as String).existsSync(),
+        isTrue,
+        reason: 'The retirement tombstone must remain as recovery provenance.',
+      );
+      for (final path in const <String>[
+        'assets/branding/bil_icon_master.png',
+        'store_assets/graphics/google_play/feature_graphic.png',
+        'store_assets/graphics/plans/free.png',
+        'store_assets/graphics/plans/plus.png',
+        'store_assets/graphics/plans/pro.png',
+      ]) {
+        expect(
+          FileSystemEntity.typeSync(path),
+          FileSystemEntityType.notFound,
+          reason: 'Retired artwork must not be restored: $path',
+        );
+      }
+
+      expect(rights['screenshots']['mockup'], isFalse);
+      expect(
+        rights['screenshots']['source'],
+        contains('epic15_store_screenshot_golden_test.dart'),
+      );
+    },
+  );
 
   test('Apple and Google have independent launch checklists', () {
     final checklists = File(

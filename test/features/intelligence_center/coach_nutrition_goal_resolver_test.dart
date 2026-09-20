@@ -61,9 +61,9 @@ void main() {
     expect(resolution.targets['proteinG'], 135);
     expect(resolution.targets['carbsG'], 180);
     expect(resolution.targets['fatG'], 60);
-    expect(resolution.sources['proteinG'], 'scheduled_percentage_goal');
-    expect(resolution.sources['carbsG'], 'scheduled_percentage_goal');
-    expect(resolution.sources['fatG'], 'scheduled_percentage_goal');
+    expect(resolution.sources['proteinG'], 'scheduled_gram_goal');
+    expect(resolution.sources['carbsG'], 'scheduled_gram_goal');
+    expect(resolution.sources['fatG'], 'scheduled_gram_goal');
   });
 
   test('meal goal contract is exposed without dropping meal identity', () {
@@ -79,7 +79,12 @@ void main() {
 
     expect(targets.keys, ['breakfast']);
     expect(targets['breakfast']?['caloriesKcal'], 500);
-    expect(targets['breakfast']?['proteinPercent'], 30);
+    expect(targets['breakfast']?['carbsG'], 56.25);
+    expect(targets['breakfast']?['proteinG'], 37.5);
+    expect(targets['breakfast']?['fatG'], closeTo(13.888888, 0.000001));
+    expect(targets['breakfast'], isNot(contains('carbsPercent')));
+    expect(targets['breakfast'], isNot(contains('proteinPercent')));
+    expect(targets['breakfast'], isNot(contains('fatPercent')));
   });
 
   test('protein target retains the exact winning source', () {

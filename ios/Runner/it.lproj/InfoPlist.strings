@@ -1,7 +1,7 @@
-"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
+"NSHealthShareUsageDescription" = "BIL legge solo le categorie di Salute che scegli — attività, sonno, misure corporee, parametri cardiaci, idratazione e alimentazione — per mostrarti sul dispositivo una cronologia privata del fitness e informazioni utili. Solo quando attivi l’intelligenza personalizzata (Personalized Intelligence) e fai una domanda a BIL Coach, i dati pertinenti strettamente necessari possono essere elaborati in modo sicuro dall’IA nel cloud per rispondere.";
 "NSHealthUpdateUsageDescription" = "BIL scrive i dati del peso solo dopo che hai autorizzato separatamente l’accesso in scrittura a Salute.";
-"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
-"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothAlwaysUsageDescription" = "BIL si connette solo ai dispositivi per il fitness che abbini esplicitamente, così da importare le misurazioni in locale.";
+"NSBluetoothPeripheralUsageDescription" = "BIL si connette solo ai dispositivi per il fitness che abbini esplicitamente, così da importare le misurazioni in locale.";
 "NSCameraUsageDescription" = "Utilizza la fotocamera solo quando scegli di scansionare un codice a barre, rivedere la foto di un pasto o aggiungere un profilo privato o una foto dei progressi.";
 "NSPhotoLibraryUsageDescription" = "BIL accede solo a una foto scelta per un pasto, il profilo, i progressi, un post della community o un contributo alimentare, così puoi verificarla prima del salvataggio o caricamento.";
 "NSMicrophoneUsageDescription" = "BIL utilizza il microfono solo quando scegli di registrare il peso o un pasto con la voce, o parlare direttamente con BIL AI Coach.";

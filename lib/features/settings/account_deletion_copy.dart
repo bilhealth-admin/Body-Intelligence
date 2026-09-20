@@ -328,9 +328,9 @@ class _AccountDeletionCopy {
           'Your request was recorded. Your account and cloud data have not been confirmed deleted yet. Keep the status and reference below for enquiries.',
       'deletionCompletedBody':
           'Your BIL account and developer-controlled cloud data were deleted. Store billing and records managed by Apple or Google remain separate.',
-      'appleAccessTitle': 'Finish removing Sign in with Apple access',
+      'appleAccessTitle': 'Confirm Sign in with Apple access is removed',
       'appleAccessBody':
-          'Your BIL account was deleted. BIL cannot automatically revoke Apple authorization because it does not retain an Apple token. To remove access manually: Settings > [your name] > Sign in with Apple > BIL > Delete or Stop Using. This optional Apple step does not affect the completed BIL deletion.',
+          'When a protected Apple token is available, BIL revokes Apple authorization before deleting the account. Older accounts may not have that token. Confirm access is removed in Settings > [your name] > Sign in with Apple > BIL > Delete or Stop Using. This fallback does not block or undo completed BIL deletion.',
       'appleAccessLearnMore': 'Open Apple instructions',
       'failed':
           'The deletion request could not be sent. Nothing was deleted. Try again later.',
@@ -360,9 +360,10 @@ class _AccountDeletionCopy {
           'تم تسجيل طلبك. لم يتم تأكيد حذف الحساب والبيانات السحابية بعد. احتفظ بالحالة والمرجع أدناه للاستفسار.',
       'deletionCompletedBody':
           'تم حذف حساب BIL والبيانات السحابية التي يديرها BIL. تبقى فوترة المتجر والسجلات التي تديرها Apple أو Google منفصلة.',
-      'appleAccessTitle': 'إكمال إزالة الوصول عبر تسجيل الدخول باستخدام Apple',
+      'appleAccessTitle':
+          'التأكد من إزالة الوصول عبر تسجيل الدخول باستخدام Apple',
       'appleAccessBody':
-          'تم حذف حساب BIL. لا يستطيع BIL إلغاء تفويض Apple تلقائيًا لأنه لا يحتفظ برمز Apple. لإزالة الوصول يدويًا: الإعدادات > [اسمك] > تسجيل الدخول باستخدام Apple > BIL > حذف أو إيقاف الاستخدام. هذه الخطوة الاختيارية لدى Apple لا تؤثر في اكتمال حذف حساب BIL.',
+          'عند توفر رمز Apple محمي، يلغي BIL تفويض Apple قبل حذف الحساب. قد لا تملك الحسابات الأقدم هذا الرمز. تأكد من إزالة الوصول من الإعدادات > [اسمك] > تسجيل الدخول باستخدام Apple > BIL > حذف أو إيقاف الاستخدام. هذا المسار الاحتياطي لا يمنع حذف حساب BIL المكتمل ولا يتراجع عنه.',
       'appleAccessLearnMore': 'فتح إرشادات Apple',
       'failed': 'تعذر إرسال طلب الحذف. لم يُحذف شيء. حاول لاحقًا.',
       'close': 'إغلاق',
@@ -391,9 +392,9 @@ class _AccountDeletionCopy {
           'Votre demande a été enregistrée. La suppression du compte et des données cloud n’est pas encore confirmée. Conservez le statut et la référence ci-dessous pour le suivi.',
       'deletionCompletedBody':
           'Votre compte BIL et les données cloud contrôlées par le développeur ont été supprimés. La facturation et les enregistrements gérés par Apple ou Google restent distincts.',
-      'appleAccessTitle': 'Terminer la suppression de l’accès Apple',
+      'appleAccessTitle': 'Confirmer la suppression de l’accès Apple',
       'appleAccessBody':
-          'Votre compte BIL a été supprimé. BIL ne peut pas révoquer automatiquement l’autorisation Apple, car aucun jeton Apple n’est conservé. Pour supprimer l’accès manuellement : Réglages > [votre nom] > Se connecter avec Apple > BIL > Supprimer ou Ne plus utiliser. Cette étape Apple facultative ne modifie pas la suppression BIL déjà terminée.',
+          'Lorsqu’un jeton Apple protégé est disponible, BIL révoque l’autorisation Apple avant de supprimer le compte. Les anciens comptes peuvent ne pas posséder ce jeton. Confirmez la suppression dans Réglages > [votre nom] > Se connecter avec Apple > BIL > Supprimer ou Ne plus utiliser. Cette solution de secours ne bloque ni n’annule la suppression BIL terminée.',
       'appleAccessLearnMore': 'Ouvrir les instructions Apple',
       'failed':
           'La demande n’a pas pu être envoyée. Rien n’a été supprimé. Réessayez plus tard.',
@@ -424,9 +425,9 @@ class _AccountDeletionCopy {
           'Tu solicitud se registró. La eliminación de la cuenta y los datos en la nube aún no está confirmada. Conserva el estado y la referencia siguientes para consultas.',
       'deletionCompletedBody':
           'Tu cuenta de BIL y los datos en la nube controlados por el desarrollador se eliminaron. La facturación y los registros gestionados por Apple o Google son independientes.',
-      'appleAccessTitle': 'Terminar de quitar el acceso con Apple',
+      'appleAccessTitle': 'Confirmar que se quitó el acceso con Apple',
       'appleAccessBody':
-          'Tu cuenta de BIL se eliminó. BIL no puede revocar automáticamente la autorización de Apple porque no conserva un token de Apple. Para quitar el acceso manualmente: Ajustes > [tu nombre] > Iniciar sesión con Apple > BIL > Eliminar o Dejar de usar. Este paso opcional de Apple no afecta a la eliminación de BIL ya completada.',
+          'Cuando hay un token protegido de Apple, BIL revoca la autorización antes de eliminar la cuenta. Es posible que las cuentas antiguas no tengan ese token. Confirma que se quitó el acceso en Ajustes > [tu nombre] > Iniciar sesión con Apple > BIL > Eliminar o Dejar de usar. Esta alternativa no bloquea ni revierte la eliminación de BIL completada.',
       'appleAccessLearnMore': 'Abrir las instrucciones de Apple',
       'failed':
           'No se pudo enviar la solicitud. No se eliminó nada. Inténtalo más tarde.',
@@ -457,9 +458,9 @@ class _AccountDeletionCopy {
           'İsteğiniz kaydedildi. Hesabın ve bulut verilerinin silindiği henüz doğrulanmadı. Sorgular için aşağıdaki durum ve referansı saklayın.',
       'deletionCompletedBody':
           'BIL hesabınız ve geliştiricinin denetimindeki bulut verileri silindi. Apple veya Google tarafından yönetilen mağaza faturalandırması ve kayıtlar ayrıdır.',
-      'appleAccessTitle': 'Apple ile giriş erişimini kaldırmayı tamamla',
+      'appleAccessTitle': 'Apple ile giriş erişiminin kaldırıldığını doğrula',
       'appleAccessBody':
-          'BIL hesabınız silindi. BIL bir Apple belirteci saklamadığı için Apple yetkilendirmesini otomatik olarak iptal edemez. Erişimi elle kaldırmak için: Ayarlar > [adınız] > Apple ile Giriş > BIL > Sil veya Kullanmayı Durdur. Bu isteğe bağlı Apple adımı, tamamlanan BIL silme işlemini etkilemez.',
+          'Korunan bir Apple belirteci varsa BIL, hesabı silmeden önce Apple yetkilendirmesini iptal eder. Eski hesaplarda bu belirteç bulunmayabilir. Ayarlar > [adınız] > Apple ile Giriş > BIL > Sil veya Kullanmayı Durdur yolunda erişimin kaldırıldığını doğrulayın. Bu yedek adım, tamamlanan BIL silme işlemini engellemez veya geri almaz.',
       'appleAccessLearnMore': 'Apple yönergelerini aç',
       'failed':
           'Silme isteği gönderilemedi. Hiçbir şey silinmedi. Daha sonra yeniden deneyin.',

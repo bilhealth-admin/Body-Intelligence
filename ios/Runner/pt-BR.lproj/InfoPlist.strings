@@ -1,7 +1,7 @@
-"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
+"NSHealthShareUsageDescription" = "O BIL lê somente as categorias do app Saúde que você escolher — atividade, sono, medidas corporais, métricas cardíacas, hidratação e nutrição — para exibir no seu dispositivo uma linha do tempo privada de atividades físicas e insights. Somente quando você ativa a inteligência personalizada (Personalized Intelligence) e faz uma pergunta ao BIL Coach, o mínimo de dados relevantes pode ser processado com segurança por IA na nuvem para respondê-la.";
 "NSHealthUpdateUsageDescription" = "O BIL grava registros de peso somente após sua autorização separada de acesso de gravação ao app Saúde.";
-"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
-"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothAlwaysUsageDescription" = "O BIL se conecta somente aos dispositivos de atividade física que você emparelha explicitamente, para que as medições possam ser importadas localmente.";
+"NSBluetoothPeripheralUsageDescription" = "O BIL se conecta somente aos dispositivos de atividade física que você emparelha explicitamente, para que as medições possam ser importadas localmente.";
 "NSCameraUsageDescription" = "Use a câmera somente quando você optar por ler um código de barras, revisar uma foto de refeição ou adicionar um perfil privado ou uma foto de progresso.";
 "NSPhotoLibraryUsageDescription" = "O BIL acessa apenas uma foto escolhida para refeição, perfil, progresso, publicação da comunidade ou contribuição de alimento, para você revisá-la antes de salvar ou enviar.";
 "NSMicrophoneUsageDescription" = "BIL usa o microfone apenas quando você escolhe registrar o peso ou uma refeição por voz, ou falar diretamente com o BIL AI Coach.";

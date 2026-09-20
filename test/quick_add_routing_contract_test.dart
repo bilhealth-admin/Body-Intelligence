@@ -17,28 +17,61 @@ void main() {
         'lib/features/daily_log/daily_log_navigation_actions.dart',
       ].map((path) => File(path).readAsStringSync()).join('\n');
 
+      expect(
+        shell,
+        contains('final action = await showModalBottomSheet<String>('),
+      );
+      expect(
+        shell,
+        contains('if (!context.mounted || action == null) return;'),
+      );
+      expect(shell, contains('switch (action)'));
+
       for (final action in const ['barcode', 'voice', 'photo']) {
         expect(shell, contains('action=$action'));
         expect(diary, contains("case '$action':"));
       }
 
       expect(shell, contains("context.go('/daily-log?focus=meal&from="));
+      expect(shell, contains('&foodLog=1'));
+      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      expect(
+        router,
+        contains(
+          "final foodLogMode = state.uri.queryParameters['foodLog'] == '1';",
+        ),
+      );
+      expect(router, contains('return FoodLogPage('));
+      // Quick Add's general food flow must not smuggle a Dinner context into
+      // the route. The focused page exposes the meal selector after a food is
+      // chosen, so the user can deliberately keep or change the context.
+      expect(shell, isNot(contains("focus=meal&meal=dinner")));
+      expect(
+        File('lib/features/daily_log/daily_log_page.dart').readAsStringSync(),
+        contains("String mealType = 'breakfast';"),
+      );
       expect(shell, contains('/daily-log/body-context?from='));
       expect(diary, contains("case 'notes':"));
       expect(shell, contains("context.push('/wellness/workouts')"));
-      expect(shell, contains("context.go('/nutrition')"));
+      expect(
+        shell,
+        contains("if (currentPath != '/nutrition') context.push('/nutrition')"),
+      );
 
-      for (final callback in const [
-        'onFood',
-        'onBarcode',
-        'onVoice',
-        'onPhoto',
-        'onExercise',
-        'onNotes',
-        'onSearch',
+      for (final entry in const [
+        ('onFood', 'food'),
+        ('onBarcode', 'barcode'),
+        ('onVoice', 'voice'),
+        ('onPhoto', 'photo'),
+        ('onExercise', 'exercise'),
+        ('onNotes', 'notes'),
+        ('onSearch', 'search'),
       ]) {
+        final (callback, action) = entry;
         expect(sheet, contains('required this.$callback'));
         expect(shell, contains('$callback: ()'));
+        expect(shell, contains("Navigator.of(sheetContext).pop('$action')"));
+        expect(shell, contains("case '$action':"));
       }
 
       // Water, weight and check-in stay on their diary surfaces. Repeating them

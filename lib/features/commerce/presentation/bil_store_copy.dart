@@ -164,6 +164,8 @@ abstract final class BilStoreCopy {
       'store_unavailable': 'Price unavailable on this device',
       'purchase_error':
           'The purchase was not completed. No access was granted.',
+      'purchase_in_progress': 'Opening secure purchase…',
+      'purchase_verified': 'Purchase verified. Your access is updating.',
       'ads_consent': 'Choose whether BIL may show contextual ads.',
     },
     'ar': {
@@ -247,6 +249,8 @@ abstract final class BilStoreCopy {
       'store_loading': 'جارٍ تحميل السعر من المتجر…',
       'store_unavailable': 'السعر غير متاح على هذا الجهاز',
       'purchase_error': 'لم تكتمل عملية الشراء ولم يتم منح أي صلاحية.',
+      'purchase_in_progress': 'جارٍ فتح عملية الشراء الآمنة…',
+      'purchase_verified': 'تم التحقق من الشراء. يجري تحديث صلاحياتك.',
       'ads_consent': 'اختر ما إذا كان بإمكان BIL عرض إعلانات سياقية.',
     },
     'fr': {
@@ -339,6 +343,9 @@ abstract final class BilStoreCopy {
       'store_loading': 'Chargement du prix depuis la boutique…',
       'store_unavailable': 'Prix indisponible sur cet appareil',
       'purchase_error': 'L’achat n’a pas abouti. Aucun accès n’a été accordé.',
+      'purchase_in_progress': 'Ouverture de l’achat sécurisé…',
+      'purchase_verified':
+          'Achat vérifié. Votre accès est en cours de mise à jour.',
       'ads_consent':
           'Choisissez si BIL peut afficher des publicités contextuelles.',
     },
@@ -432,6 +439,8 @@ abstract final class BilStoreCopy {
       'store_loading': 'Cargando el precio desde la tienda…',
       'store_unavailable': 'Precio no disponible en este dispositivo',
       'purchase_error': 'La compra no se completó. No se concedió acceso.',
+      'purchase_in_progress': 'Abriendo la compra segura…',
+      'purchase_verified': 'Compra verificada. Se está actualizando tu acceso.',
       'ads_consent': 'Elige si BIL puede mostrar anuncios contextuales.',
     },
     'tr': {
@@ -518,6 +527,8 @@ abstract final class BilStoreCopy {
       'store_loading': 'Fiyat mağazadan yükleniyor…',
       'store_unavailable': 'Fiyat bu cihazda kullanılamıyor',
       'purchase_error': 'Satın alma tamamlanmadı. Erişim verilmedi.',
+      'purchase_in_progress': 'Güvenli satın alma açılıyor…',
+      'purchase_verified': 'Satın alma doğrulandı. Erişiminiz güncelleniyor.',
       'ads_consent':
           'BIL’in bağlamsal reklam gösterip gösteremeyeceğini seçin.',
     },

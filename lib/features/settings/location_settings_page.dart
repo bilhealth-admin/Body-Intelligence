@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'location_catalog.dart';
@@ -201,7 +202,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
             ),
             for (final city in cities)
               ListTile(
-                leading: const Icon(Icons.location_city_rounded),
+                leading: const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.location,
+                ),
                 title: Text(cityLabel(city)),
                 subtitle: Text(city.timezone),
                 onTap: () {
@@ -269,7 +272,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                       itemBuilder: (context, index) {
                         final identifier = matches[index];
                         return ListTile(
-                          leading: const Icon(Icons.schedule_rounded),
+                          leading: const BilSemanticIconBadge(
+                            kind: BilSemanticIconKind.time,
+                          ),
                           title: Text(
                             identifier.split('/').last.replaceAll('_', ' '),
                           ),
@@ -329,7 +334,14 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l('saved'))));
-      context.go('/settings');
+      // Preserve the route that opened this editor (profile, onboarding, or
+      // More).  Navigating to /settings unconditionally made a successful
+      // profile save unexpectedly jump back to the More tab.
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/settings');
+      }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -386,7 +398,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                       SwitchListTile(
                         key: const Key('automatic-location-switch'),
                         contentPadding: EdgeInsets.zero,
-                        secondary: const Icon(Icons.my_location_rounded),
+                        secondary: const BilSemanticIconBadge(
+                          kind: BilSemanticIconKind.location,
+                        ),
                         value: automaticLocation,
                         onChanged: _setAutomatic,
                         title: Text(l('automatic')),
@@ -409,7 +423,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                       children: [
                         ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.public_rounded),
+                          leading: const BilSemanticIconBadge(
+                            kind: BilSemanticIconKind.location,
+                          ),
                           title: Text(l('country')),
                           subtitle: Text(countryName ?? l('chooseCountry')),
                           trailing: const Icon(Icons.expand_more_rounded),

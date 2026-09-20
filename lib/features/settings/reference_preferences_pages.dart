@@ -1,15 +1,20 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
+import '../../data/repositories/preferences_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
+import 'data/diary_sharing_support_repository.dart';
 
 part 'reference_preferences_controls.dart';
 part 'reference_preferences_numeric.dart';
@@ -348,6 +353,7 @@ class ReferenceDiarySharingPage extends ConsumerStatefulWidget {
 
 class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
   String selected = 'private';
+  String? _accessKeyHash;
   bool loading = true;
   bool saving = false;
   Object? error;
@@ -363,14 +369,18 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
       error = null;
     });
     try {
-      final value = await ref
-          .read(preferencesRepositoryProvider)
-          .get('diary.sharing');
+      final repository = ref.read(preferencesRepositoryProvider);
+      final values = await Future.wait([
+        repository.get('diary.sharing'),
+        repository.get('diary.sharingKeySha256'),
+      ]);
       if (!mounted) return;
       setState(() {
+        final value = values.first;
         if (const {'private', 'public', 'friends', 'locked'}.contains(value)) {
           selected = value!;
         }
+        _accessKeyHash = values.last;
         loading = false;
       });
     } catch (caught) {
@@ -384,7 +394,12 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
   }
 
   Future<void> _select(String value) async {
-    if (saving || loading || error != null || value == selected) return;
+    if (saving ||
+        loading ||
+        error != null ||
+        (value == selected && value != 'locked')) {
+      return;
+    }
     String? accessKeyHash;
     if (value == 'locked') {
       final controller = TextEditingController();
@@ -427,8 +442,35 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
       }
       accessKeyHash = sha256.convert(utf8.encode(key)).toString();
     }
+
+    DiarySharingSupportRepository? cloudRepository;
+    if (AppEnvironment.supabaseRuntimeReady) {
+      final client = Supabase.instance.client;
+      if (client.auth.currentUser != null) {
+        cloudRepository = DiarySharingSupportRepository(client);
+      }
+    }
+    if (value != 'private' && cloudRepository == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text('Sign in to manage cloud sync.'),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    final previous = selected;
+    final previousAccessKeyHash = _accessKeyHash;
     setState(() => saving = true);
     try {
+      await cloudRepository?.setDiarySharing(
+        visibility: value,
+        accessKeySha256: accessKeyHash,
+      );
       await ref
           .read(preferencesRepositoryProvider)
           .mutate(
@@ -440,8 +482,28 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
                 ? const ['diary.sharingKeySha256']
                 : const [],
           );
-      if (mounted) setState(() => selected = value);
+      if (mounted) {
+        setState(() {
+          selected = value;
+          _accessKeyHash = accessKeyHash;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(_diaryText(context, 'Saved'))));
+      }
     } catch (_) {
+      // If the local commit fails after the server accepted the new policy,
+      // restore the previous server policy so the UI never reports a stale
+      // privacy choice. A failed rollback is intentionally swallowed; the
+      // original failure remains the actionable result for the user.
+      try {
+        await cloudRepository?.setDiarySharing(
+          visibility: previous,
+          accessKeySha256: previous == 'locked' ? previousAccessKeyHash : null,
+        );
+      } on Object {
+        // Best-effort consistency rollback.
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -474,43 +536,31 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
                 Padding(
                   padding: const EdgeInsets.all(18),
                   child: Text(
-                    _diaryText(
-                      context,
-                      'Diary sharing is not available yet. Your diary remains private.',
+                    context.strings.text(
+                      'If you share your diary, your weight and eating habits may be visible to the people you choose.',
                     ),
                   ),
                 ),
-                for (final option in const ['private'])
+                for (final option in const [
+                  'private',
+                  'friends',
+                  'public',
+                  'locked',
+                ])
                   ListTile(
+                    key: Key('diary-sharing-$option'),
                     title: Text(_diaryText(context, option)),
                     trailing: selected == option
-                        ? const Icon(Icons.check_rounded)
+                        ? option == 'locked'
+                              ? const Icon(Icons.key_rounded)
+                              : const Icon(Icons.check_rounded)
                         : null,
                     onTap: saving ? null : () => _select(option),
                   ),
-                for (final option in const ['public', 'friends', 'locked'])
-                  Semantics(
-                    enabled: false,
-                    label:
-                        '${_diaryText(context, option)}, ${context.strings.text('Unavailable')}',
-                    child: ListTile(
-                      title: Text(
-                        _diaryText(context, option),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      subtitle: Text(
-                        context.strings.text('Unavailable'),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.lock_outline_rounded,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
+                if (saving)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                    child: LinearProgressIndicator(),
                   ),
               ],
             ),

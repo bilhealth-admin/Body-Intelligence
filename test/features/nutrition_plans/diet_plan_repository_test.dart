@@ -181,7 +181,7 @@ void main() {
       closeTo(scheduled.calories * scheduled.proteinPercent / 400, 0.001),
     );
     expect(coach.sources['caloriesKcal'], 'scheduled_daily_goal');
-    expect(coach.sources['proteinG'], 'scheduled_percentage_goal');
+    expect(coach.sources['proteinG'], 'scheduled_gram_goal');
   });
 
   test(

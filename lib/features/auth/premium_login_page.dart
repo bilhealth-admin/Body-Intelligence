@@ -1,12 +1,13 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
-import '../../shared/widgets/bil_wordmark.dart';
 import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
@@ -154,12 +155,6 @@ class _LoginPageState extends State<LoginPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                const BilFullWordmark(
-                                  key: Key('login-wordmark'),
-                                  height: 38,
-                                  alignment: Alignment.center,
-                                ),
-                                SizedBox(height: compact ? 18 : 24),
                                 Text(
                                   authEntryText(
                                     context,
@@ -267,19 +262,40 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 11),
-                                _oauthButton(
-                                  key: const Key('oauth-apple'),
-                                  provider: OAuthProvider.apple,
-                                  label: authEntryText(
-                                    context,
-                                    AuthEntryCopyKey.continueApple,
+                                if (!kIsWeb &&
+                                    defaultTargetPlatform == TargetPlatform.iOS)
+                                  SignInWithAppleButton(
+                                    key: const Key('oauth-apple'),
+                                    onPressed:
+                                        configured &&
+                                            !loading &&
+                                            oauthLoading == null
+                                        ? () => submitOAuth(OAuthProvider.apple)
+                                        : null,
+                                    text: authEntryText(
+                                      context,
+                                      AuthEntryCopyKey.continueApple,
+                                    ),
+                                    height: 56,
+                                    borderRadius: BorderRadius.circular(12),
+                                    style: dark
+                                        ? SignInWithAppleButtonStyle.white
+                                        : SignInWithAppleButtonStyle.black,
+                                  )
+                                else
+                                  _oauthButton(
+                                    key: const Key('oauth-apple'),
+                                    provider: OAuthProvider.apple,
+                                    label: authEntryText(
+                                      context,
+                                      AuthEntryCopyKey.continueApple,
+                                    ),
+                                    brand: Icon(
+                                      Icons.apple,
+                                      size: 27,
+                                      color: scheme.onSurface,
+                                    ),
                                   ),
-                                  brand: Icon(
-                                    Icons.apple,
-                                    size: 27,
-                                    color: scheme.onSurface,
-                                  ),
-                                ),
                                 if (AppEnvironment.facebookLoginEnabled) ...[
                                   const SizedBox(height: 11),
                                   _oauthButton(

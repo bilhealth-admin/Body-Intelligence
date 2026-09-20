@@ -4,24 +4,43 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'dashboard nutrient presets use the MyFitnessPal reference nutrients',
+    'dashboard nutrient presets use the evidence-backed reference nutrients',
     () {
-      final source = File(
+      final phoneSource = File(
         'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
       ).readAsStringSync();
+      final cardsStart = phoneSource.indexOf(
+        'final overviewCards = <Widget>[];',
+      );
+      final cardsEnd = phoneSource.indexOf('return Column(', cardsStart);
+      expect(cardsStart, greaterThanOrEqualTo(0));
+      expect(cardsEnd, greaterThan(cardsStart));
+      final cardAssembly = phoneSource.substring(cardsStart, cardsEnd);
+      final componentSource = [
+        'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
+        'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
 
-      expect(source, contains("tr('Heart Healthy'"));
-      expect(source, contains("tr('Saturated fat'"));
-      expect(source, contains("tr('Sodium'"));
-      expect(source, contains("tr('Fiber'"));
-      expect(source, isNot(contains("tr('Carb Conscious'")));
-      expect(source, contains('/analytics/nutrition?tab=nutrients'));
-      expect(source, contains('_CircularNutrientCard('));
-      expect(source, contains('_OverviewCardsCarousel('));
-      expect(source, contains('cards: overviewCards'));
-      expect(source, contains('PremiumDashboardCardLock('));
-      expect(source, contains('locked: !premiumUnlocked'));
-      expect(source, isNot(contains('_ReferenceStatusCard(')));
+      expect(cardAssembly, contains("tr('Heart Healthy'"));
+      expect(cardAssembly, contains("tr('Potassium'"));
+      expect(cardAssembly, contains("tr('Sodium'"));
+      expect(cardAssembly, contains("tr('Fiber'"));
+      expect(cardAssembly, isNot(contains("tr('Carb Conscious'")));
+      expect(cardAssembly, contains('/analytics/nutrition?tab=nutrients'));
+      expect(cardAssembly, contains('_CircularNutrientCard('));
+      expect(phoneSource, contains('_OverviewCardsCarousel('));
+      expect(phoneSource, contains('cards: overviewCards'));
+      expect(cardAssembly, contains('PremiumDashboardCardLock('));
+      expect(cardAssembly, contains('locked: !premiumUnlocked'));
+      expect(phoneSource, isNot(contains('_ReferenceStatusCard(')));
+      expect(
+        componentSource,
+        contains('class _CircularNutrientCard extends StatelessWidget'),
+      );
+      expect(
+        componentSource,
+        contains('class _OverviewCardsCarousel extends StatefulWidget'),
+      );
     },
   );
 

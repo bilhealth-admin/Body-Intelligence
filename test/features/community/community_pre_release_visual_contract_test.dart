@@ -51,11 +51,14 @@ final class _PreReleaseCommunityRepository extends CommunityRepository {
     required String localeCode,
   }) async => {
     'version': 'qa-community-policy-v1',
-    'document_url': 'https://bilhealth.com/community-policy',
+    'document_url': 'https://www.bilhealth.com/community-guidelines',
   };
 
   @override
-  Future<bool> hasAcceptedContentPolicy(String version) async => false;
+  Future<bool> hasAcceptedContentPolicy(
+    String version, {
+    DateTime? acceptedNotBefore,
+  }) async => false;
 }
 
 final _verifiedPremium = SubscriptionState(

@@ -41,6 +41,12 @@ void main() {
       final bootstrap = File('lib/main.dart').readAsStringSync();
       expect(bootstrap, contains('auth.getSessionFromUrl(uri)'));
       expect(bootstrap, contains('BilAuthCallbackController'));
+      expect(
+        bootstrap,
+        contains('await widget.cloudInitialization'),
+        reason:
+            'A cold Android OAuth return must wait for Supabase PKCE storage.',
+      );
     },
   );
 }

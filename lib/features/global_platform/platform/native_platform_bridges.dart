@@ -4,7 +4,10 @@ import '../core/global_platform_core.dart';
 import '../health_data/unified_health_data_integration.dart';
 
 final class MethodChannelHealthBridge
-    implements NativeHealthBridge, NativeHealthCapabilityBridge {
+    implements
+        NativeHealthBridge,
+        NativeHealthCapabilityBridge,
+        NativeHealthCancellableReadBridge {
   MethodChannelHealthBridge({required String channelName})
     : _channel = MethodChannel(channelName);
 
@@ -82,8 +85,13 @@ final class MethodChannelHealthBridge
       ),
       nextAnchor: raw?['nextAnchor'] as String?,
       hasMore: raw?['hasMore'] == true,
+      changesTokenExpired: raw?['changesTokenExpired'] == true,
     );
   }
+
+  @override
+  Future<void> cancelReadChanges() =>
+      _channel.invokeMethod<void>('cancelReadChanges');
 
   @override
   Future<void> write(List<GlobalHealthSignal> signals) async {

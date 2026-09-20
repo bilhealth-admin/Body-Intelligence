@@ -403,14 +403,118 @@ void main() {
     final protein = value('diet-protein-1');
     final fat = value('diet-fat-1');
     expect(protein, 100);
-    expect(4 * carbs + 4 * protein + 9 * fat, closeTo(1000, .01));
+    expect(carbs, carbs.roundToDouble());
+    expect(fat, fat.roundToDouble());
+    expect(4 * carbs + 4 * protein + 9 * fat, closeTo(1000, 8));
     expect(
       tester
           .widget<FilledButton>(find.byKey(const Key('diet-plan-activate')))
           .onPressed,
       isNotNull,
     );
+
+    await tester.tap(find.byKey(const Key('diet-plan-activate')));
+    await tester.pumpAndSettle();
+    expect(
+      repository._drafts['carb-cycling']!
+          .resolveWeek()![DateTime.monday]!
+          .calculatedCalories,
+      closeTo(1000, .000001),
+    );
   });
+
+  testWidgets(
+    'diet editor rounds gram fields while preserving exact plan doubles',
+    (tester) async {
+      const exactCarbs = 78.666;
+      const exactProtein = 100.0;
+      const exactFat = 31.704;
+      final repository = _InMemoryDietPlanRepository()
+        .._drafts['carb-cycling'] = const DietDraft(
+          pathwayId: 'carb-cycling',
+          calories: 1000,
+          fatLevel: DietFatLevel.medium,
+          carbsByWeekday: {
+            1: exactCarbs,
+            2: exactCarbs,
+            3: exactCarbs,
+            4: exactCarbs,
+            5: exactCarbs,
+            6: exactCarbs,
+            7: exactCarbs,
+          },
+          proteinByWeekday: {
+            1: exactProtein,
+            2: exactProtein,
+            3: exactProtein,
+            4: exactProtein,
+            5: exactProtein,
+            6: exactProtein,
+            7: exactProtein,
+          },
+          fatByWeekday: {
+            1: exactFat,
+            2: exactFat,
+            3: exactFat,
+            4: exactFat,
+            5: exactFat,
+            6: exactFat,
+            7: exactFat,
+          },
+        );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            dietPlanRepositoryProvider.overrideWithValue(repository),
+            activeNutritionPathwayProvider.overrideWithValue(
+              const AsyncData(null),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: DietPlanEditorPage(pathwayId: 'carb-cycling'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('diet-carbs-1')),
+        360,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('diet-carbs-1')))
+            .controller!
+            .text,
+        '79',
+      );
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('diet-fat-1')))
+            .controller!
+            .text,
+        '32',
+      );
+
+      await tester.tap(find.byKey(const Key('diet-plan-activate')));
+      await tester.pumpAndSettle();
+
+      final saved = repository._drafts['carb-cycling']!;
+      expect(saved.carbsByWeekday[1], exactCarbs);
+      expect(saved.proteinByWeekday[1], exactProtein);
+      expect(saved.fatByWeekday[1], exactFat);
+      expect(saved.resolveWeek()![1]!.calculatedCalories, 1000);
+    },
+  );
 }
 
 class _InMemoryDietPlanRepository implements DietPlanRepository {

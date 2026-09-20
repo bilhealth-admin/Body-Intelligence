@@ -98,7 +98,11 @@ void main() {
       expect(brief.title.trim(), isNotEmpty, reason: tag);
       expect(brief.message.trim(), isNotEmpty, reason: tag);
       if (tag != 'en') {
-        expect(brief.title, isNot('Let’s make the first decision'), reason: tag);
+        expect(
+          brief.title,
+          isNot('Let’s make the first decision'),
+          reason: tag,
+        );
         expect(
           brief.message,
           isNot(

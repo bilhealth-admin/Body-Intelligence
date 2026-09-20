@@ -36,35 +36,34 @@ void main() {
     expect(sql, contains('to service_role;'));
   });
 
-  test(
-    'remote AI is server consent gated and feedback stores no conversation text',
-    () {
-      final sql = File(
-        'supabase/migrations/20260820115847_ai_coach_closed_test_feedback_and_consent.sql',
-      ).readAsStringSync();
-      final server = File(
-        'supabase/functions/ai-coach/server.ts',
-      ).readAsStringSync();
-      final gateway = File(
-        'lib/features/intelligence_center/services/local_model_gateway_io.dart',
-      ).readAsStringSync();
+  test('remote AI has client preflight plus server defense in depth', () {
+    final sql = File(
+      'supabase/migrations/20260820115847_ai_coach_closed_test_feedback_and_consent.sql',
+    ).readAsStringSync();
+    final server = File(
+      'supabase/functions/ai-coach/server.ts',
+    ).readAsStringSync();
+    final gateway = File(
+      'lib/features/intelligence_center/services/local_model_gateway_io.dart',
+    ).readAsStringSync();
 
-      expect(sql, contains('bil_get_remote_ai_consent'));
-      expect(sql, contains('bil_has_remote_ai_consent'));
-      expect(server, contains('bil_has_remote_ai_consent'));
-      expect(server, contains('code === "ai_consent_required"'));
-      expect(
-        gateway,
-        isNot(contains("client.rpc('bil_get_remote_ai_consent')")),
-      );
-      expect(gateway, contains('authoritative consent gate'));
-      expect(gateway, contains("'ai-coach'"));
-      expect(sql, contains('public.bil_ai_coach_feedback'));
-      expect(sql, contains('public.bil_ai_usage_events'));
-      expect(sql, contains("e.state = 'succeeded'"));
-      expect(sql, isNot(contains('question_text')));
-      expect(sql, isNot(contains('answer_text')));
-      expect(sql, isNot(contains('conversation')));
-    },
-  );
+    expect(sql, contains('bil_get_remote_ai_consent'));
+    expect(sql, contains('bil_has_remote_ai_consent'));
+    expect(server, contains('bil_has_remote_ai_consent'));
+    expect(server, contains('code === "ai_consent_required"'));
+    expect(gateway, contains("client.rpc('bil_get_remote_ai_consent')"));
+    expect(
+      gateway,
+      contains('Client preflight above prevents context projection'),
+    );
+    expect(gateway, contains('defense in depth'));
+    expect(gateway, contains('context_disclosure'));
+    expect(gateway, contains("'ai-coach'"));
+    expect(sql, contains('public.bil_ai_coach_feedback'));
+    expect(sql, contains('public.bil_ai_usage_events'));
+    expect(sql, contains("e.state = 'succeeded'"));
+    expect(sql, isNot(contains('question_text')));
+    expect(sql, isNot(contains('answer_text')));
+    expect(sql, isNot(contains('conversation')));
+  });
 }

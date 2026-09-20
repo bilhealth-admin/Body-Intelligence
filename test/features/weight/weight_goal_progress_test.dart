@@ -3,6 +3,34 @@ import 'package:body_intelligence_log/features/weight/domain/weight_goal_progres
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('resolved weight goal progress', () {
+    test('preserves a crossed loss goal and reports it reached', () {
+      final progress = resolveWeightGoalProgress(
+        currentWeightKg: 84,
+        targetWeightKg: 85,
+        profileBaselineWeightKg: 93,
+        storedGoalType: 'lose',
+        storedTargetWeightKg: 85,
+      );
+
+      expect(progress.direction, WeightGoalDirection.lose);
+      expect(progress.reached, isTrue);
+      expect(progress.remainingKg, 0);
+    });
+
+    test('uses a positive remaining amount for gain goals', () {
+      final progress = resolveWeightGoalProgress(
+        currentWeightKg: 87.4,
+        targetWeightKg: 90,
+        profileBaselineWeightKg: 87.4,
+      );
+
+      expect(progress.direction, WeightGoalDirection.gain);
+      expect(progress.reached, isFalse);
+      expect(progress.remainingKg, closeTo(2.6, 0.0001));
+    });
+  });
+
   group('signed weight remaining', () {
     test('is current minus goal without clamping', () {
       expect(

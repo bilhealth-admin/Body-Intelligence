@@ -9,6 +9,7 @@ import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
+import '../domain/community_content_policy.dart';
 import '../domain/community_text_policy.dart';
 
 part 'community_messages_copy.dart';
@@ -409,6 +410,20 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
         MessageBodyContract.compose(subject: _subject.text, body: _body.text),
       );
       if (mounted) context.pop();
+    } on CommunityPolicyAccessException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error.englishMessage(CommunityPolicyProtectedAction.messaging),
+            ),
+            action: SnackBarAction(
+              label: 'Review policy',
+              onPressed: () => context.push('/community/safety'),
+            ),
+          ),
+        );
+      }
     } on CommunityTextPolicyException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

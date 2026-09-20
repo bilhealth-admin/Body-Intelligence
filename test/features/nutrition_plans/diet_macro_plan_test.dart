@@ -3,6 +3,19 @@ import 'package:body_intelligence_log/features/nutrition_plans/domain/nutrition_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('whole-gram display keeps the exact allocation value', () {
+    const target = DietMacroTarget(
+      calories: 1000,
+      carbsGrams: 78.666,
+      proteinGrams: 100,
+      fatGrams: 31.704,
+    );
+
+    expect(roundedDietMacroGrams(target.carbsGrams), 79);
+    expect(target.carbsGrams, 78.666);
+    expect(target.calculatedCalories, closeTo(1000, .000001));
+  });
+
   group('fixed-energy macro allocation', () {
     test('Monday 20 g and Sunday 200 g both preserve 2000 kcal', () {
       final week = dietPresets['carb-cycling']!.toDraft().resolveWeek()!;

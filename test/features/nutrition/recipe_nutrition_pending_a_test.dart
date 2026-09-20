@@ -7,11 +7,13 @@ void main() {
   test(
     'pending A calculations are exact and blocked values are never zero-filled',
     () {
-      final artifact = jsonDecode(
-        File(
-          'artifacts/meal_catalog/recipe_nutrition_pending_a.json',
-        ).readAsStringSync(),
-      ) as Map<String, dynamic>;
+      final artifact =
+          jsonDecode(
+                File(
+                  'artifacts/meal_catalog/recipe_nutrition_pending_a.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
       final records = (artifact['records'] as List<dynamic>)
           .cast<Map<String, dynamic>>();
       expect(records, hasLength(17));
@@ -19,12 +21,8 @@ void main() {
       for (final record in records) {
         final blocked =
             (record['blockedIngredientIds'] as List<dynamic>).isNotEmpty;
-        expect(
-          record['status'],
-          blocked ? 'blocked' : 'verified-calculation',
-        );
-        final nutrition =
-            record['nutritionPerServing'] as Map<String, dynamic>;
+        expect(record['status'], blocked ? 'blocked' : 'verified-calculation');
+        final nutrition = record['nutritionPerServing'] as Map<String, dynamic>;
         if (blocked) {
           expect(nutrition.values, everyElement(isNull));
           continue;

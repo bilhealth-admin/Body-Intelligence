@@ -3,209 +3,87 @@ part of 'community_hub_page.dart';
 class _CommunityFoodTab extends StatefulWidget {
   const _CommunityFoodTab({required this.repository});
   final CommunityRepository repository;
-
   @override
   State<_CommunityFoodTab> createState() => _CommunityFoodTabState();
 }
 
 class _CommunityFoodTabState extends State<_CommunityFoodTab> {
-  final _name = TextEditingController();
-  final _serving = TextEditingController();
-  final _calories = TextEditingController();
-  final _protein = TextEditingController();
-  final _carbs = TextEditingController();
-  final _fat = TextEditingController();
+  late Future<List<Map<String, dynamic>>> _submissions;
+  bool _formOpen = false;
+  bool _submitted = false;
 
   @override
-  void dispose() {
-    for (final controller in [
-      _name,
-      _serving,
-      _calories,
-      _protein,
-      _carbs,
-      _fat,
-    ]) {
-      controller.dispose();
-    }
-    super.dispose();
+  void initState() {
+    super.initState();
+    _reload();
   }
 
-  Future<void> _submit() async {
-    final values = [_serving, _calories, _protein, _carbs, _fat]
-        .map((controller) => double.tryParse(controller.text.trim()))
-        .toList(growable: false);
-    if (_name.text.trim().length < 2 || values.any((value) => value == null)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Complete all required values.',
-              'أكمل القيم المطلوبة.',
-            ),
-          ),
-        ),
-      );
-      return;
-    }
+  @override
+  void didUpdateWidget(covariant _CommunityFoodTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) _reload();
+  }
+
+  void _reload() {
+    _submissions = widget.repository.loadMyFoodSubmissions();
+  }
+
+  Future<void> _openForm() async {
+    if (_formOpen) return;
+    setState(() => _formOpen = true);
     try {
-      await widget.repository.submitFood(
-        CommunityFoodDraft(
-          name: _name.text,
-          servingGrams: values[0]!,
-          calories: values[1]!,
-          protein: values[2]!,
-          carbohydrate: values[3]!,
-          fat: values[4]!,
-        ),
+      final submitted = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        isDismissible: false,
+        enableDrag: false,
+        builder: (_) => CommunityFoodSubmissionSheet(onSubmit: widget.repository.submitFood),
       );
-    } on CommunityTextPolicyException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            error.localizedMessage(
-              Localizations.localeOf(context).toLanguageTag(),
-            ),
-          ),
-        ),
-      );
-      return;
+      setState(() {
+        if (submitted == true) _submitted = true;
+        // Also refresh after cancellation: a timed-out request may have saved.
+        _reload();
+      });
+    } finally {
+      if (mounted) setState(() => _formOpen = false);
     }
-    if (!mounted) return;
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          communityText(
-            context,
-            'Food submitted for review. It will not appear as verified before validation.',
-            'أُرسل الغذاء للمراجعة. لن يظهر كموثّق قبل التحقق.',
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openForm() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.viewInsetsOf(context).bottom + 20,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                communityText(
-                  context,
-                  'Submit community food',
-                  'إضافة غذاء مجتمعي',
-                ),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _name,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Name', 'الاسم'),
-                ),
-              ),
-              TextField(
-                controller: _serving,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(
-                    context,
-                    'Serving grams',
-                    'الحصة بالغرام',
-                  ),
-                ),
-              ),
-              TextField(
-                controller: _calories,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Calories', 'السعرات'),
-                ),
-              ),
-              TextField(
-                controller: _protein,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Protein', 'البروتين'),
-                ),
-              ),
-              TextField(
-                controller: _carbs,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(
-                    context,
-                    'Carbohydrate',
-                    'الكربوهيدرات',
-                  ),
-                ),
-              ),
-              TextField(
-                controller: _fat,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Fat', 'الدهون'),
-                ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: _submit,
-                icon: const Icon(Icons.fact_check_outlined),
-                label: Text(
-                  communityText(context, 'Send for review', 'إرسال للمراجعة'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => FutureBuilder<List<Map<String, dynamic>>>(
-    future: widget.repository.loadMyFoodSubmissions(),
+  Widget build(BuildContext context) => FutureBuilder<List<Map<String, dynamic>>>(
+    future: _submissions,
     builder: (context, snapshot) => ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          communityText(
-            context,
-            'Arabic and Gulf foods are reviewed before approval, and your contribution remains attributed to you.',
-            'الأغذية العربية والخليجية تمر بمراجعة قبل اعتمادها، وتظل مساهمتك منسوبة لك.',
-          ),
-        ),
+        Text(communityText(context,
+          'Arabic and Gulf foods are reviewed before approval, and your contribution remains attributed to you.',
+          'الأغذية العربية والخليجية تمر بمراجعة قبل اعتمادها، وتظل مساهمتك منسوبة لك.')),
         const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: _openForm,
+          onPressed: _formOpen ? null : _openForm,
           icon: const Icon(Icons.add_rounded),
           label: Text(communityText(context, 'Submit food', 'إضافة غذاء')),
         ),
+        if (_submitted) ...[
+          const SizedBox(height: 12),
+          Semantics(liveRegion: true, child: Text(communityText(context,
+            'Food submitted for review. It will not appear as verified before validation.',
+            'أُرسل الغذاء للمراجعة. لن يظهر كموثّق قبل التحقق.'))),
+        ],
         const SizedBox(height: 16),
+        if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData)
+          const Center(child: CircularProgressIndicator()),
+        if (snapshot.hasError)
+          _InlineError(onRetry: () => setState(_reload)),
         for (final row in snapshot.data ?? const <Map<String, dynamic>>[])
-          Card(
-            child: ListTile(
-              title: Text(row['canonical_name'] as String),
-              subtitle: Text(row['status'] as String),
-              trailing: const Icon(Icons.verified_outlined),
-            ),
-          ),
+          Card(child: ListTile(
+            title: Text(row['canonical_name'] as String),
+            subtitle: Text(row['status'] as String),
+            trailing: Icon(row['status'] == 'approved'
+                ? Icons.verified_outlined : Icons.hourglass_top_rounded),
+          )),
       ],
     ),
   );

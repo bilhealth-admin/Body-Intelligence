@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../../commerce/domain/store_catalog_configuration.dart';
 import '../../commerce/services/verified_store_catalog_adapter.dart';
 import '../../commerce/services/verified_store_purchase_service.dart';
@@ -110,15 +111,19 @@ final class AiBoostPurchaseService extends ChangeNotifier {
         continue;
       }
       try {
+        final body = <String, Object?>{
+          'action': 'verify_ai_boost',
+          'product_id': productId,
+          'source': purchase.verificationData.source,
+          'verification_data': purchase.verificationData.serverVerificationData,
+        };
+        final protectedBody = await BilMobileIntegrityService.instance.protect(
+          action: 'store.verify_ai_boost',
+          payload: body,
+        );
         final response = await Supabase.instance.client.functions.invoke(
           'verify-store-purchase',
-          body: <String, Object?>{
-            'action': 'verify_ai_boost',
-            'product_id': productId,
-            'source': purchase.verificationData.source,
-            'verification_data':
-                purchase.verificationData.serverVerificationData,
-          },
+          body: protectedBody,
         );
         final data = response.data;
         final verified =

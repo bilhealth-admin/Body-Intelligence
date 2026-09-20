@@ -12,6 +12,7 @@ void main() {
               'daily_log_page_actions.dart',
               'daily_log_mutation_actions.dart',
               'daily_log_capture_actions.dart',
+              'daily_log_capture_providers.dart',
             ]
             .map(
               (name) => File('lib/features/daily_log/$name').readAsStringSync(),
@@ -50,6 +51,7 @@ void main() {
               'daily_log_page_actions.dart',
               'daily_log_mutation_actions.dart',
               'daily_log_capture_actions.dart',
+              'daily_log_capture_providers.dart',
             ]
             .map(
               (name) => File('lib/features/daily_log/$name').readAsStringSync(),

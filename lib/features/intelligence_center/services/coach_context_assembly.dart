@@ -1,16 +1,66 @@
 part of 'coach_context_provider.dart';
 
-Map<String, Object?> _scopeCoachHealth({
+// Keep analytics fail-closed: only these computed, category-neutral body-model
+// fields may be exposed when analytics is selected. In particular, never copy
+// the complete health map because it also contains nutrition, training, and
+// habit payloads.
+const Set<String> _coachHealthAnalyticsKeys = <String>{
+  'bodyModelVersion',
+  'goalDirection',
+  'kilogramsToGoal',
+  'bmrKcal',
+  'tdeeKcal',
+  'bmiScreeningValue',
+  'waistToHeightRatio',
+  'expectedBodyFatPercent',
+  'expectedFatFreeMassKg',
+  'bodyFatEstimateMethod',
+  'bodyFatEstimateUncertainty',
+  'bodyFatEstimateIssue',
+  'healthyWaistScreeningUpperCm',
+  'obesityRiskScreening',
+  'notice',
+};
+
+/// Applies the user's independent Coach-context category choices to health.
+///
+/// This public pure function exists so the privacy boundary can be verified
+/// without constructing repositories or a provider container. Unknown and
+/// future fields are excluded until they are deliberately classified here.
+Map<String, Object?> scopeCoachHealthForFocus({
   required Map<String, Object?> health,
   required bool includeNutrition,
   required bool includeTraining,
   required bool includeHabits,
   required bool includeAnalytics,
 }) {
-  if (includeAnalytics) return health;
+  final scoped = <String, Object?>{
+    if (health['status'] != null) 'status': health['status'],
+  };
+
+  if (includeAnalytics) {
+    for (final key in _coachHealthAnalyticsKeys) {
+      if (health.containsKey(key) && health[key] != null) {
+        scoped[key] = health[key];
+      }
+    }
+  }
+
+  if (includeNutrition) {
+    if (health['dailyTargets'] != null) {
+      scoped['dailyTargets'] = health['dailyTargets'];
+    }
+    if (health['dailyTargetSources'] != null) {
+      scoped['dailyTargetSources'] = health['dailyTargetSources'];
+    }
+    if (health['mealTargets'] != null) {
+      scoped['mealTargets'] = health['mealTargets'];
+    }
+  }
+
   final source = health['today'];
   final today = source is! Map
-      ? const <String, Object?>{}
+      ? <String, Object?>{}
       : <String, Object?>{
           if (source['day'] != null) 'day': source['day'],
           if (includeNutrition && source['nutrition'] != null)
@@ -24,16 +74,24 @@ Map<String, Object?> _scopeCoachHealth({
           if (includeHabits && source['bodyContext'] != null)
             'bodyContext': source['bodyContext'],
         };
-  return <String, Object?>{
-    if (health['status'] != null) 'status': health['status'],
-    if (includeNutrition && health['dailyTargets'] != null)
-      'dailyTargets': health['dailyTargets'],
-    if (includeNutrition && health['dailyTargetSources'] != null)
-      'dailyTargetSources': health['dailyTargetSources'],
-    if (includeNutrition && health['mealTargets'] != null)
-      'mealTargets': health['mealTargets'],
-    'today': today,
-  };
+  scoped['today'] = today;
+  return scoped;
+}
+
+Map<String, Object?> _scopeCoachHealth({
+  required Map<String, Object?> health,
+  required bool includeNutrition,
+  required bool includeTraining,
+  required bool includeHabits,
+  required bool includeAnalytics,
+}) {
+  return scopeCoachHealthForFocus(
+    health: health,
+    includeNutrition: includeNutrition,
+    includeTraining: includeTraining,
+    includeHabits: includeHabits,
+    includeAnalytics: includeAnalytics,
+  );
 }
 
 List<CoachNutritionDay> _coachNutritionDays(List<MealWithItems> meals) {

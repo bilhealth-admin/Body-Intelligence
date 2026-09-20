@@ -13,13 +13,18 @@ void main() {
     final benchmark = File(
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
     ).readAsStringSync();
+    final current = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
     final carousel = File(
       'lib/features/dashboard/widgets/dashboard_carousel.dart',
     ).readAsStringSync();
 
     expect(personal, contains('DashboardTwinDeckShell('));
-    expect(benchmark, contains('DashboardTwinDeckShell('));
+    expect(benchmark, isNot(contains('DashboardTwinDeckShell(')));
     expect(benchmark, isNot(contains('class _KeyInsightsDeck')));
+    expect(current, contains('_OverviewCardsCarousel('));
+    expect(current, contains("Key('dashboard-personal-health-ai-slot')"));
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));
     expect(
@@ -38,7 +43,7 @@ void main() {
     expect(carousel, contains("Key('dashboard-carousel-card-frame')"));
     expect(carousel, contains('widthFactor: widget.viewportFraction'));
 
-    expect(benchmark, contains('dashboardGlass: true'));
+    expect(shell, contains('dashboardGlass: true'));
     expect(personal, contains('DashboardTwinDeckShell('));
     expect(personal, isNot(contains('Colors.black.withValues(alpha: .14)')));
   });

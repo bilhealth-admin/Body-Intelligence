@@ -125,6 +125,18 @@ final class RecipeCatalogImageAsset {
   );
 }
 
+/// Minimal trusted image-catalog surface used by delivery clients.
+///
+/// Keeping this contract separate from the concrete repository makes variant
+/// selection testable without weakening the bundled v1 release validation.
+abstract interface class RecipeImageCatalog {
+  Future<RecipeCatalogImageAsset> loadImageAsset(String canonicalId);
+
+  Future<List<RecipeCatalogImageAsset>> loadImageAssets();
+
+  Future<String> loadImageManifestSha256();
+}
+
 /// Small, card-safe projection of the verified recipe detail record.
 ///
 /// Nutrition and serving values intentionally stay out of the 1,500-item
@@ -172,7 +184,7 @@ final class RecipeCatalogCardFacts {
   }
 }
 
-final class RecipeReleaseRepository {
+final class RecipeReleaseRepository implements RecipeImageCatalog {
   RecipeReleaseRepository({AssetBundle? bundle})
     : _bundle = bundle ?? rootBundle;
 
@@ -311,6 +323,7 @@ final class RecipeReleaseRepository {
   }
 
   /// Returns the SHA/size/MIME-pinned public preview for one catalog-owned id.
+  @override
   Future<RecipeCatalogImageAsset> loadImageAsset(String canonicalId) async {
     await loadIndex();
     final asset = _imageAssets[canonicalId];
@@ -323,6 +336,7 @@ final class RecipeReleaseRepository {
   }
 
   /// Exposes the immutable delivery contract in canonical catalog order.
+  @override
   Future<List<RecipeCatalogImageAsset>> loadImageAssets() async {
     final index = await loadIndex();
     final assets = <RecipeCatalogImageAsset>[];
@@ -336,6 +350,16 @@ final class RecipeReleaseRepository {
       assets.add(asset);
     }
     return List.unmodifiable(assets);
+  }
+
+  /// Digest of the bundled v1 image manifest that owns the original pixels.
+  ///
+  /// Additive delivery variants must bind to this digest before any variant is
+  /// trusted, so a stale thumbnail manifest can never cross catalog releases.
+  @override
+  Future<String> loadImageManifestSha256() async {
+    await loadIndex();
+    return _manifest!.imageManifestSha256;
   }
 
   Future<RecipeCatalogDetail> loadDetail(RecipeCatalogSummary summary) async {

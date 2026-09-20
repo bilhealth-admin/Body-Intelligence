@@ -84,9 +84,7 @@ class _CoachConversationEntry extends StatelessWidget {
                   border: Border.all(color: Colors.white70),
                 ),
                 child: ClipOval(
-                  child: const BilCoachPortrait(
-                    fit: BoxFit.cover,
-                  ),
+                  child: const BilCoachPortrait(fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(width: 14),

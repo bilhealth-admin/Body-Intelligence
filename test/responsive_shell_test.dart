@@ -14,6 +14,7 @@ Widget shellApp({
   String initialLocation = '/dashboard',
   Widget? dashboardChild,
   TextScaler textScaler = TextScaler.noScaling,
+  ThemeData? theme,
 }) {
   final router = GoRouter(
     initialLocation: initialLocation,
@@ -38,8 +39,14 @@ Widget shellApp({
           ),
           GoRoute(
             path: '/daily-log',
-            builder: (_, _) =>
-                const Scaffold(body: Center(child: Text('daily-log'))),
+            builder: (_, state) => Scaffold(
+              body: Center(
+                key: ValueKey(
+                  'daily-log-action-${state.uri.queryParameters['action'] ?? 'none'}',
+                ),
+                child: const Text('daily-log'),
+              ),
+            ),
           ),
           GoRoute(
             path: '/nutrition',
@@ -76,6 +83,7 @@ Widget shellApp({
     ],
     child: MaterialApp.router(
       locale: locale,
+      theme: theme,
       routerConfig: router,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaler: textScaler),
@@ -93,6 +101,23 @@ Widget shellApp({
 }
 
 void main() {
+  test(
+    'Quick Add return paths preserve every shell root and reject redirects',
+    () {
+      for (final path in ResponsiveAppShell.paths) {
+        expect(ResponsiveAppShell.safeQuickAddReturnPath(path), path);
+      }
+      expect(
+        ResponsiveAppShell.safeQuickAddReturnPath('https://evil.test'),
+        isNull,
+      );
+      expect(
+        ResponsiveAppShell.safeQuickAddReturnPath('/settings/account-password'),
+        isNull,
+      );
+    },
+  );
+
   testWidgets('compact shell uses bottom navigation', (tester) async {
     tester.view.physicalSize = const Size(600, 900);
     tester.view.devicePixelRatio = 1;
@@ -113,6 +138,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('glass-top-navigation')), findsOneWidget);
     expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
+    expect(
+      tester
+          .widget<PopScope<dynamic>>(
+            find.byKey(const Key('responsive-app-shell-pop-scope')),
+          )
+          .canPop,
+      isFalse,
+    );
     for (final label in [
       'Today',
       'Diary',
@@ -124,6 +157,79 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+  });
+
+  for (final width in const <double>[900, 1024, 1200]) {
+    for (final locale in const <Locale>[Locale('en'), Locale('ar')]) {
+      testWidgets(
+        'wide shell identity is physically centred with profile on the left '
+        '${width.toInt()} ${locale.languageCode}',
+        (tester) async {
+          tester.view.physicalSize = Size(width, 900);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.reset);
+          await tester.pumpWidget(shellApp(locale: locale));
+          await tester.pumpAndSettle();
+
+          final lockup = _visualWordmark(const Key('shell-wordmark'));
+          final profile = find.byKey(const Key('shell-profile-control'));
+          expect(
+            (tester.getRect(lockup).center.dx - width / 2).abs(),
+            lessThanOrEqualTo(1),
+          );
+          expect(
+            tester.getRect(profile).right,
+            lessThan(tester.getRect(lockup).left),
+          );
+          expect(tester.getSize(profile).height, greaterThanOrEqualTo(48));
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
+  testWidgets('iPad landscape shell remains usable with enlarged text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1024, 768);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      shellApp(textScaler: const TextScaler.linear(1.35)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('glass-top-navigation')), findsOneWidget);
+    expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
+    expect(find.byKey(const Key('shell-profile-control')), findsOneWidget);
+    expect(find.text('dashboard'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('iPad portrait and split-width shell expose the compact dock', (
+    tester,
+  ) async {
+    for (final size in const <Size>[Size(820, 1180), Size(507, 1112)]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpWidget(
+        shellApp(textScaler: const TextScaler.linear(1.3)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('glass-bottom-navigation')), findsOneWidget);
+      expect(find.byKey(const Key('glass-top-navigation')), findsNothing);
+      expect(
+        find.byKey(const Key('shell-dashboard-destination')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('shell-quick-add')), findsOneWidget);
+      expect(find.byKey(const Key('shell-more-destination')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
   });
 
   testWidgets('compact AI route does not mount the dashboard quick add', (
@@ -192,6 +298,25 @@ void main() {
     await tester.tap(find.byKey(const Key('shell-more-destination')));
     await tester.pumpAndSettle();
     expect(find.text('settings'), findsOneWidget);
+  });
+
+  testWidgets('system back from a root tab returns to Today first', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp(initialLocation: '/settings'));
+    await tester.pumpAndSettle();
+    expect(find.text('settings'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('dashboard'), findsOneWidget);
+    expect(find.text('settings'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('hidden routes do not falsely select a compact destination', (
@@ -368,6 +493,173 @@ void main() {
     expect(find.byKey(const Key('quick-add-half-sheet')), findsNothing);
   });
 
+  testWidgets('quick add handle supports tap dismissal', (tester) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    final handleSize = tester.getSize(
+      find.byKey(const Key('quick-add-drag-handle')),
+    );
+    expect(handleSize.width, greaterThanOrEqualTo(48));
+    expect(handleSize.height, greaterThanOrEqualTo(48));
+    await tester.tap(find.byKey(const Key('quick-add-drag-handle')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('quick-add-half-sheet')), findsNothing);
+    expect(find.text('dashboard'), findsOneWidget);
+  });
+
+  testWidgets('quick add sheet supports drag dismissal', (tester) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const Key('quick-add-drag-handle')),
+      const Offset(0, 500),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('quick-add-half-sheet')), findsNothing);
+    expect(find.text('dashboard'), findsOneWidget);
+  });
+
+  testWidgets('quick add handle moves with the sheet during a drag', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    final sheet = find.byKey(const Key('quick-add-half-sheet'));
+    final initialTop = tester.getTopLeft(sheet).dy;
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('quick-add-drag-handle'))),
+    );
+    // First cross the drag recognizer's touch slop, then send a second update
+    // that must translate the complete modal surface while the pointer stays
+    // down.
+    await gesture.moveBy(const Offset(0, 24));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 96));
+    await tester.pump();
+
+    expect(tester.getTopLeft(sheet).dy, greaterThan(initialTop));
+
+    await gesture.moveBy(const Offset(0, 500));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(sheet, findsNothing);
+  });
+
+  testWidgets('quick add dismisses when the dimmed area is tapped', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('quick-add-half-sheet')), findsOneWidget);
+
+    await tester.tapAt(const Offset(40, 80));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('quick-add-half-sheet')), findsNothing);
+    expect(find.text('dashboard'), findsOneWidget);
+  });
+
+  testWidgets('quick add barcode navigates after sheet teardown', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Scan barcode'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('quick-add-half-sheet')), findsNothing);
+    expect(find.byKey(const Key('daily-log-action-barcode')), findsOneWidget);
+  });
+
+  for (final origin in const <String>[
+    '/nutrition',
+    '/history',
+    '/analytics',
+    '/settings',
+  ]) {
+    testWidgets('Quick Add barcode preserves $origin as its return path', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(shellApp(initialLocation: origin));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('shell-quick-add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Scan barcode'));
+      await tester.pumpAndSettle();
+
+      final router = GoRouter.of(
+        tester.element(find.byKey(const Key('daily-log-action-barcode'))),
+      );
+      expect(
+        router.routeInformationProvider.value.uri.queryParameters['from'],
+        origin,
+      );
+    });
+  }
+
+  testWidgets('Quick Add food search returns to its originating section', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp(initialLocation: '/history'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Search or create food'));
+    await tester.pumpAndSettle();
+    expect(find.text('nutrition'), findsOneWidget);
+
+    GoRouter.of(tester.element(find.text('nutrition'))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('history'), findsOneWidget);
+  });
+
   testWidgets('Arabic quick add exposes only implemented capabilities', (
     tester,
   ) async {
@@ -430,3 +722,13 @@ void main() {
     expect(find.text('workout-library'), findsOneWidget);
   });
 }
+
+Finder _visualWordmark(Key ownerKey) => find
+    .ancestor(
+      of: find.descendant(
+        of: find.byKey(ownerKey),
+        matching: find.text('BODY INTELLIGENCE LOG'),
+      ),
+      matching: find.byType(Row),
+    )
+    .first;

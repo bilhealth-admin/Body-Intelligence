@@ -1,129 +1,51 @@
 part of 'community_hub_page.dart';
 
 class _FeedTab extends StatefulWidget {
-  const _FeedTab({required this.repository, required this.imagePicker});
+  const _FeedTab({required this.repository, required this.imagePicker, super.key});
   final CommunityRepository repository;
   final CommunityPostImagePickerContract imagePicker;
-
   @override
   State<_FeedTab> createState() => _FeedTabState();
 }
 
-class _FeedTabState extends State<_FeedTab> {
-  final _composer = TextEditingController();
-  late Future<List<CommunityPost>> _feed = widget.repository.loadFeed();
-  bool _publishing = false;
+class _FeedTabState extends State<_FeedTab> with AutomaticKeepAliveClientMixin<_FeedTab> {
+  late Future<List<CommunityPost>> _feed = Future<List<CommunityPost>>.sync(() => widget.repository.loadFeed());
+  final _draft = _CommunityComposerDraft();
   bool _managingPost = false;
-  bool _selectingImage = false;
-  CommunityPostImageDraft? _selectedImage;
+  bool _openingComposer = false;
 
   @override
-  void dispose() {
-    _composer.dispose();
-    super.dispose();
-  }
+  bool get wantKeepAlive => true;
 
-  Future<void> _publish() async {
-    if (_publishing || _managingPost || _selectingImage) return;
-    final text = _composer.text.trim();
-    if (text.isEmpty) return;
-    setState(() => _publishing = true);
+  Future<void> _openComposer({String? tag}) async {
+    if (_openingComposer || _managingPost) return;
+    if (tag != null && _draft.body.isEmpty) _draft.body = '#$tag ';
+    setState(() => _openingComposer = true);
     try {
-      final image = _selectedImage;
-      if (image == null) {
-        await widget.repository.publishPost(text);
-      } else {
-        await widget.repository.publishPostWithImage(text, image);
-      }
-      final refreshedFeed = widget.repository.loadFeed();
-      _composer.clear();
-      if (mounted) {
-        setState(() {
-          _selectedImage = null;
-          _feed = refreshedFeed;
-        });
-      }
-    } on CommunityTextPolicyException catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            error.localizedMessage(
-              Localizations.localeOf(context).toLanguageTag(),
-            ),
-          ),
+      final submitted = await Navigator.of(context).push<bool>(MaterialPageRoute<bool>(
+        builder: (_) => _CommunityPostComposerPage(
+          repository: widget.repository, imagePicker: widget.imagePicker,
+          draft: _draft,
         ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              _selectedImage == null
-                  ? 'Could not publish now. Your text is kept so you can retry.'
-                  : 'Could not publish now. Your text and photo are kept so you can retry.',
-              _selectedImage == null
-                  ? 'تعذر نشر المشاركة الآن. احتفظنا بالنص لتعيد المحاولة.'
-                  : 'تعذر النشر الآن. احتفظنا بالنص والصورة لتعيد المحاولة.',
-            ),
-          ),
-        ),
-      );
+      ));
+      if (!mounted || submitted != true) return;
+      setState(() {
+        _feed = Future<List<CommunityPost>>.sync(
+          () => widget.repository.loadFeed(),
+        );
+      });
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(SnackBar(content: Text(communityText(context,
+        'Post submitted for human review. Only you can see it until it is approved.',
+        'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.'))));
     } finally {
-      if (mounted) setState(() => _publishing = false);
-    }
-  }
-
-  Future<void> _pickImage() async {
-    if (_publishing || _managingPost || _selectingImage) return;
-    setState(() => _selectingImage = true);
-    try {
-      final image = await widget.imagePicker.pick();
-      if (image != null && mounted) {
-        setState(() => _selectedImage = image);
-      }
-    } on CommunityPostImageException catch (error) {
-      if (!mounted) return;
-      final (english, arabic) = switch (error.failure) {
-        CommunityPostImageFailure.tooLarge => (
-          'Photo too large. Choose an image up to 5 MB.',
-          'الصورة كبيرة جدًا. اختر صورة بحجم لا يتجاوز 5 ميجابايت.',
-        ),
-        CommunityPostImageFailure.unsupportedType => (
-          'Choose a JPEG, PNG, or WebP image.',
-          'اختر صورة بصيغة JPEG أو PNG أو WebP.',
-        ),
-        CommunityPostImageFailure.invalidImage ||
-        CommunityPostImageFailure.invalidDimensions => (
-          'This photo could not be opened safely. Choose another photo.',
-          'تعذر فتح هذه الصورة بأمان. اختر صورة أخرى.',
-        ),
-      };
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(communityText(context, english, arabic))),
-      );
-    } on Object {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Photo picker could not open. Try again.',
-              'تعذر فتح اختيار الصور. حاول مجددًا.',
-            ),
-          ),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _selectingImage = false);
+      if (mounted) setState(() => _openingComposer = false);
     }
   }
 
   Future<void> _managePost(CommunityPost post, String action) async {
-    if (_publishing || _managingPost) return;
+    if (_openingComposer || _managingPost) return;
     if (action == 'delete') {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -160,7 +82,7 @@ class _FeedTabState extends State<_FeedTab> {
         );
       } else if (action == 'delete') {
         await widget.repository.deletePost(post.id);
-        final refreshedFeed = widget.repository.loadFeed();
+        final refreshedFeed = Future<List<CommunityPost>>.sync(() => widget.repository.loadFeed());
         if (mounted) {
           setState(() {
             _feed = refreshedFeed;
@@ -200,212 +122,106 @@ class _FeedTabState extends State<_FeedTab> {
   }
 
   Future<void> _refresh() async {
-    if (_publishing || _managingPost) return;
-    final refreshedFeed = widget.repository.loadFeed();
+    if (_openingComposer || _managingPost) return;
+    final refreshedFeed = Future<List<CommunityPost>>.sync(() => widget.repository.loadFeed());
     setState(() {
       _feed = refreshedFeed;
     });
-    await refreshedFeed;
+    try {
+      await refreshedFeed;
+    } on Object {
+      // FutureBuilder presents the load error; the refresh gesture must not
+      // additionally report an unhandled asynchronous exception.
+    }
   }
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-        child: OutlinedButton.icon(
-          key: const Key('community-browse-topics'),
-          onPressed: _publishing || _managingPost
-              ? null
-              : () => CommunityTaxonomySheet.show(
-                  context,
-                  onSelectTag: (tag) {
-                    _composer.text = '#$tag ';
-                    _composer.selection = TextSelection.collapsed(
-                      offset: _composer.text.length,
-                    );
-                  },
-                ),
-          icon: const Icon(Icons.grid_view_rounded),
-          label: Text(CommunityTaxonomySheet.browseLabel(context)),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              key: const Key('community-post-composer'),
-              controller: _composer,
-              enabled: !_publishing && !_managingPost,
-              maxLength: 1200,
-              minLines: 2,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: communityText(
-                  context,
-                  'Share an experience or win',
-                  'شارك تجربة أو إنجازًا',
-                ),
-                helperText: communityText(
-                  context,
-                  'Do not share private health data you want to keep private.',
-                  'لا تشارك بيانات صحية خاصة لا تريد ظهورها.',
-                ),
-                helperMaxLines: 2,
-              ),
-            ),
-            if (_selectedImage case final image?) ...[
-              const SizedBox(height: 10),
-              _CommunityPostImagePreview(
-                image: image,
-                onRemove: _publishing
-                    ? null
-                    : () => setState(() => _selectedImage = null),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              runAlignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  key: const Key('community-post-add-photo'),
-                  onPressed: _publishing || _managingPost || _selectingImage
-                      ? null
-                      : _pickImage,
-                  icon: _selectingImage
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.add_photo_alternate_outlined),
-                  label: Text(
-                    communityText(context, 'Add photo', 'إضافة صورة'),
-                  ),
-                ),
-                FilledButton.icon(
-                  key: const Key('community-post-publish'),
-                  onPressed: _publishing || _managingPost || _selectingImage
-                      ? null
-                      : _publish,
-                  icon: _publishing
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.send_rounded),
-                  label: Text(
-                    _publishing && _selectedImage != null
-                        ? communityText(
-                            context,
-                            'Uploading photo…',
-                            'جارٍ رفع الصورة…',
-                          )
-                        : communityText(context, 'Publish', 'نشر'),
-                  ),
-                ),
-              ],
-            ),
-            if (_publishing && _selectedImage != null) ...[
-              const SizedBox(height: 6),
-              const LinearProgressIndicator(
-                key: Key('community-post-upload-progress'),
-              ),
-            ],
-          ],
-        ),
-      ),
-      Expanded(
-        child: FutureBuilder<List<CommunityPost>>(
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Stack(
+      children: [
+        FutureBuilder<List<CommunityPost>>(
           future: _feed,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return _InlineError(onRetry: _refresh);
-            }
-            final posts = snapshot.data ?? const [];
-            if (posts.isEmpty) {
-              return Center(
-                child: Text(
-                  communityText(
-                    context,
-                    'No posts yet. Start the first conversation.',
-                    'لا توجد مشاركات بعد. ابدأ بأول مشاركة.',
-                  ),
-                ),
-              );
-            }
+            final posts = snapshot.data ?? const <CommunityPost>[];
+            final loading = snapshot.connectionState != ConnectionState.done;
             return RefreshIndicator(
               onRefresh: _refresh,
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: posts.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return _CommunityPostCard(
-                    post: post,
-                    currentUserId: widget.repository.currentUserId,
-                    actionsEnabled: !_publishing && !_managingPost,
-                    onAction: (value) => _managePost(post, value),
-                  );
-                },
+              child: CustomScrollView(
+                key: const PageStorageKey('community-feed-scroll'),
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: OutlinedButton.icon(
+                        key: const Key('community-browse-topics'),
+                        onPressed: _openingComposer || _managingPost ? null
+                          : () => CommunityTaxonomySheet.show(context,
+                            onSelectTag: (tag) => _openComposer(tag: tag)),
+                        icon: const Icon(Icons.grid_view_rounded),
+                        label: Text(CommunityTaxonomySheet.browseLabel(context)),
+                      ),
+                    ),
+                  ),
+                  if (loading && snapshot.hasData)
+                    const SliverToBoxAdapter(child: LinearProgressIndicator()),
+                  if (snapshot.hasError)
+                    SliverFillRemaining(hasScrollBody: false,
+                      child: _InlineError(onRetry: _refresh))
+                  else if (loading && !snapshot.hasData)
+                    const SliverFillRemaining(hasScrollBody: false,
+                      child: Center(child: CircularProgressIndicator()))
+                  else if (posts.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 24, 24, 96),
+                        child: Center(child: Text(communityText(context,
+                          'No posts yet. Start the first conversation.',
+                          'لا توجد مشاركات بعد. ابدأ بأول مشاركة.'),
+                          textAlign: TextAlign.center)),
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                      sliver: SliverList(delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final post = posts[index];
+                          return Padding(
+                            key: ValueKey(post.id),
+                            padding: const EdgeInsets.only(bottom: 18),
+                            child: _CommunityPostCard(
+                              post: post, currentUserId: widget.repository.currentUserId,
+                              actionsEnabled: !_openingComposer && !_managingPost,
+                              onAction: (value) => _managePost(post, value),
+                            ),
+                          );
+                        }, childCount: posts.length,
+                      )),
+                    ),
+                ],
               ),
             );
           },
         ),
-      ),
-    ],
-  );
-}
-
-class _CommunityPostImagePreview extends StatelessWidget {
-  const _CommunityPostImagePreview({required this.image, this.onRemove});
-
-  final CommunityPostImageDraft image;
-  final VoidCallback? onRemove;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    image: true,
-    label: communityText(context, 'Selected photo', 'الصورة المحددة'),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        height: 160,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.memory(
-              image.bytes,
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.medium,
-              errorBuilder: (_, _, _) => const ColoredBox(
-                color: Color(0xFFE8EBF0),
-                child: Icon(Icons.broken_image_outlined),
-              ),
+        PositionedDirectional(
+          end: 20, bottom: 20,
+          child: SafeArea(top: false, left: false,
+            child: FloatingActionButton(
+              key: const Key('community-create-post'),
+              heroTag: 'bil-community-create-post',
+              tooltip: communityText(context,
+                'Share an experience or win', 'شارك تجربة أو إنجازًا'),
+              onPressed: _openingComposer || _managingPost ? null : _openComposer,
+              child: const Icon(Icons.add_rounded),
             ),
-            PositionedDirectional(
-              top: 8,
-              end: 8,
-              child: IconButton.filledTonal(
-                key: const Key('community-post-remove-photo'),
-                onPressed: onRemove,
-                tooltip: communityText(context, 'Remove photo', 'إزالة الصورة'),
-                icon: const Icon(Icons.close_rounded),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
-  );
+      ],
+    );
+  }
 }
 
 class _CommunityPostCard extends StatelessWidget {
@@ -423,9 +239,15 @@ class _CommunityPostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(22),
+      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+    ),
     clipBehavior: Clip.antiAlias,
     child: Padding(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -449,6 +271,10 @@ class _CommunityPostCard extends StatelessWidget {
                       ).formatShortDate(post.createdAt.toLocal()),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    if (post.authorId == currentUserId) ...[
+                      const SizedBox(height: 6),
+                      _CommunityPostStatusChip(post: post),
+                    ],
                   ],
                 ),
               ),
@@ -474,16 +300,60 @@ class _CommunityPostCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          _NaturalCommunityText(post.body),
           if (post.hasImage) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _CommunityFeedImage(post: post),
           ],
+          const SizedBox(height: 14),
+          SelectableText(post.body,
+            key: ValueKey('community-post-body-${post.id}'),
+            style: Theme.of(context).textTheme.bodyLarge),
         ],
       ),
     ),
   );
+}
+
+class _CommunityPostStatusChip extends StatelessWidget {
+  const _CommunityPostStatusChip({required this.post});
+
+  final CommunityPost post;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, english, arabic) = switch (post.moderationStatus) {
+      CommunityPostModerationStatus.pending => (
+        Icons.schedule_rounded,
+        'Pending review',
+        'بانتظار المراجعة',
+      ),
+      CommunityPostModerationStatus.approved => (
+        Icons.verified_outlined,
+        'Approved',
+        'معتمد',
+      ),
+      CommunityPostModerationStatus.rejected => (
+        Icons.cancel_outlined,
+        'Rejected',
+        'مرفوض',
+      ),
+    };
+    final localizedStatus = communityText(context, english, arabic);
+    final statusLabel = communityText(
+      context,
+      'Post status: {status}',
+      'حالة المنشور: {status}',
+    ).replaceAll('{status}', localizedStatus);
+    return Semantics(
+      label: statusLabel,
+      child: Chip(
+        key: Key('community-post-status-${post.id}'),
+        avatar: Icon(icon, size: 16),
+        visualDensity: VisualDensity.compact,
+        label: Text(localizedStatus),
+      ),
+    );
+  }
 }
 
 class _CommunityFeedImage extends StatelessWidget {

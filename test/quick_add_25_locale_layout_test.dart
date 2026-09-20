@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/router/bil_quick_add_locale_copy.dart';
 import 'package:body_intelligence_log/app/router/bil_quick_add_sheet.dart';
+import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -174,7 +175,12 @@ void main() {
                   matching: find.text('BODY INTELLIGENCE LOG'),
                 ),
               );
-              expect(brandText.style?.color, const Color(0xFF050505));
+              expect(
+                brandText.style?.color,
+                themeMode == ThemeMode.dark
+                    ? const Color(0xFFF7FAFC)
+                    : const Color(0xFF050505),
+              );
               final wordmarkRect = tester.getRect(wordmark);
               expect(wordmarkRect.left, greaterThanOrEqualTo(0));
               expect(wordmarkRect.right, lessThanOrEqualTo(size.width));
@@ -198,9 +204,11 @@ void main() {
               );
               expect(
                 firstIcon.color,
-                themeMode == ThemeMode.dark
-                    ? const Color(0xFFAFC6FF)
-                    : const Color(0xFF1D4ED8),
+                BilSemanticIcons.spec(BilSemanticIconKind.foodLog).onAccent(
+                  themeMode == ThemeMode.dark
+                      ? Brightness.dark
+                      : Brightness.light,
+                ),
               );
               expect(tester.takeException(), isNull);
               semantics.dispose();

@@ -61,16 +61,47 @@ abstract final class FoodPresentationLocalizer {
     return _localizedFoodName(concept, localeTag) ?? original;
   }
 
-  /// Food rows always follow the selected interface locale. Search matching
-  /// may accept any script, but it must never change the language of the
-  /// results list behind the user's back.
+  /// Food rows follow the language the user actually typed when it can be
+  /// determined safely. The interface locale remains the fallback for short,
+  /// numeric, branded, or otherwise ambiguous queries.
   static String resultLocaleForQuery({
     required String query,
     required String interfaceLocaleTag,
   }) {
-    final fallback = supportedLocaleTags.contains(interfaceLocaleTag)
-        ? interfaceLocaleTag
-        : 'en';
+    final fallback = _canonicalLocaleTag(interfaceLocaleTag);
+    final probe = _normalizeLanguageProbe(query);
+    if (probe.isEmpty) return fallback;
+
+    // Exact/whole-name matches are stronger than script heuristics. This also
+    // distinguishes names such as simplified/traditional Chinese reviewed by
+    // BIL, and handles Latin-script queries such as "poulet" and "mela".
+    final reviewedLocales = _reviewedLocalesForQuery(probe);
+    if (reviewedLocales.length == 1) return reviewedLocales.single;
+    if (reviewedLocales.contains(fallback)) return fallback;
+    if (reviewedLocales.contains('en') && _isAsciiLettersAndSpaces(probe)) {
+      return 'en';
+    }
+    if (reviewedLocales.isNotEmpty) return reviewedLocales.first;
+
+    if (_containsAny(query, const ['ٹ', 'ڈ', 'ڑ', 'ں', 'ھ', 'ے'])) {
+      return 'ur';
+    }
+    if (_containsAny(query, const ['پ', 'چ', 'ژ', 'گ'])) return 'fa';
+    if (RegExp(r'[\u0600-\u06ff]').hasMatch(query)) return 'ar';
+    if (RegExp(r'[\u0900-\u097f]').hasMatch(query)) return 'hi';
+    if (RegExp(r'[\u0980-\u09ff]').hasMatch(query)) return 'bn';
+    if (RegExp(r'[\u0e00-\u0e7f]').hasMatch(query)) return 'th';
+    if (RegExp(r'[\u3040-\u30ff]').hasMatch(query)) return 'ja';
+    if (RegExp(r'[\uac00-\ud7af]').hasMatch(query)) return 'ko';
+    if (RegExp(r'[\u0400-\u04ff]').hasMatch(query)) {
+      return _containsAny(query.toLowerCase(), const ['і', 'ї', 'є', 'ґ'])
+          ? 'uk'
+          : 'ru';
+    }
+    if (RegExp(r'[\u3400-\u9fff]').hasMatch(query)) {
+      if (fallback == 'zh-Hant' || fallback == 'zh-Hans') return fallback;
+      return 'zh-Hans';
+    }
     return fallback;
   }
 
@@ -151,6 +182,71 @@ abstract final class FoodPresentationLocalizer {
 
   static String _normalize(String value) =>
       value.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+
+  static String _canonicalLocaleTag(String raw) {
+    final normalized = raw.trim().replaceAll('_', '-');
+    if (supportedLocaleTags.contains(normalized)) return normalized;
+    final lower = normalized.toLowerCase();
+    if (lower.startsWith('zh-hant') || lower == 'zh-tw' || lower == 'zh-hk') {
+      return 'zh-Hant';
+    }
+    if (lower.startsWith('zh')) return 'zh-Hans';
+    if (lower == 'pt-br') return 'pt-BR';
+    if (lower.startsWith('pt')) return 'pt-PT';
+    final language = lower.split('-').first;
+    for (final locale in supportedLocaleTags) {
+      if (locale.toLowerCase() == language) return locale;
+    }
+    return 'en';
+  }
+
+  static String _normalizeLanguageProbe(String value) => value
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[\s\-_,.;:!?/\\()\[\]{}]+'), ' ')
+      .trim();
+
+  static bool _isAsciiLettersAndSpaces(String value) =>
+      RegExp(r'^[a-z ]+$').hasMatch(value);
+
+  static bool _containsAny(String value, List<String> characters) =>
+      characters.any(value.contains);
+
+  static List<String> _reviewedLocalesForQuery(String query) {
+    final exact = <String>{};
+    final wholePhrase = <String>{};
+
+    void consider(String locale, String rawName) {
+      final name = _normalizeLanguageProbe(rawName);
+      if (name.isEmpty) return;
+      if (query == name) {
+        exact.add(locale);
+        return;
+      }
+      if (query.startsWith('$name ') ||
+          query.endsWith(' $name') ||
+          query.contains(' $name ')) {
+        wholePhrase.add(locale);
+      }
+    }
+
+    for (final translations in _foods.values) {
+      for (final entry in translations.entries) {
+        consider(entry.key, entry.value);
+      }
+    }
+    for (final translations in _coreFoodNames.values) {
+      for (var index = 0; index < translations.length; index++) {
+        if (index >= _foodLocaleOrder.length) break;
+        consider(_foodLocaleOrder[index], translations[index]);
+      }
+    }
+    final matches = exact.isNotEmpty ? exact : wholePhrase;
+    return <String>[
+      for (final locale in _foodLocaleOrder)
+        if (matches.contains(locale)) locale,
+    ];
+  }
 
   static bool _isReviewedWholeEggName(String normalized) {
     if (normalized == 'egg' || normalized == 'eggs') return true;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../app/theme/premium_design_tokens.dart';
@@ -247,8 +248,9 @@ class DailyWaterShortcut extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: ListTile(
         minTileHeight: 82,
+        horizontalTitleGap: 12,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: const Icon(Icons.water_drop_outlined),
+        leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.water),
         title: Text(
           _inputText('Water', 'الماء'),
           style: Theme.of(

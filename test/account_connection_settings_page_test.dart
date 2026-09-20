@@ -4,14 +4,19 @@ import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('provider settings expose truthful disabled controls and routes', () {
+  test('unfinished provider linking is not exposed from settings', () {
     final page = File(
       'lib/features/settings/account_connection_settings_page.dart',
     ).readAsStringSync();
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final privacy = File(
+      'lib/features/settings/sharing_privacy_settings_page.dart',
+    ).readAsStringSync();
     expect(page, contains('Account linking is unavailable on this build.'));
     expect(page, contains('onPressed: null'));
     expect(page, contains("Key('connect-\${provider.name}')"));
+    expect(privacy, isNot(contains("account-connections/facebook")));
+    expect(privacy, isNot(contains("account-connections/google")));
     expect(router, contains("'/settings/account-connections/facebook'"));
     expect(router, contains("'/settings/account-connections/google'"));
   });

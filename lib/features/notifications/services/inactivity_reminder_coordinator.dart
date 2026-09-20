@@ -38,8 +38,10 @@ class _InactivityReminderCoordinatorState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (!kIsWeb &&
+        BilNotificationNavigation.supportsPlatform(defaultTargetPlatform)) {
       BilNotificationNavigation.configure(navigate: AppRouter.router.go);
+      unawaited(BilNotificationNavigation.initializeNativeRemoteTapBridge());
     }
     unawaited(_cancelSafely());
   }

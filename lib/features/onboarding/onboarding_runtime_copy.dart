@@ -1651,32 +1651,32 @@ abstract final class OnboardingRuntimeCopy {
       "nl": "Voer uw land of regio in.",
       "uk": "Введіть свою країну або регіон.",
     },
-    "Estimated target window": {
-      'en': "Estimated target window",
-      "ar": "النافذة المستهدفة المقدرة",
-      "fr": "Fenêtre cible estimée",
-      "es": "Ventana objetivo estimada",
-      "tr": "Tahmini hedef pencere",
-      "de": "Geschätztes Zielfenster",
-      "it": "Finestra obiettivo stimata",
-      "pt-BR": "Janela de meta estimada",
-      "pt-PT": "Janela de meta estimada",
-      "ur": "تخمینی ہدف ونڈو",
-      "fa": "پنجره هدف تخمینی",
-      "hi": "अनुमानित लक्ष्य विंडो",
-      "id": "Perkiraan jendela target",
-      "ms": "Anggaran tetingkap sasaran",
-      "ja": "推定ターゲットウィンドウ",
-      "ko": "예상 타겟 창",
-      "zh-Hans": "预计目标窗口",
-      "zh-Hant": "預計目標視窗",
-      "ru": "Предполагаемое целевое окно",
-      "bn": "আনুমানিক লক্ষ্য উইন্ডো",
-      "vi": "Cửa sổ mục tiêu ước tính",
-      "th": "หน้าต่างเป้าหมายโดยประมาณ",
-      "pl": "Szacowane okno docelowe",
-      "nl": "Geschat doelvenster",
-      "uk": "Приблизне цільове вікно",
+    "Expected time to goal": {
+      'en': "Expected time to goal",
+      "ar": "الوقت المتوقع للوصول إلى الهدف",
+      "fr": "Temps estimé pour atteindre l’objectif",
+      "es": "Tiempo estimado para alcanzar el objetivo",
+      "tr": "Hedefe ulaşmak için tahmini süre",
+      "de": "Voraussichtliche Zeit bis zum Ziel",
+      "it": "Tempo previsto per raggiungere l'obiettivo",
+      "pt-BR": "Tempo estimado para alcançar a meta",
+      "pt-PT": "Tempo estimado para atingir o objetivo",
+      "ur": "ہدف تک پہنچنے کا متوقع وقت",
+      "fa": "زمان مورد انتظار برای رسیدن به هدف",
+      "hi": "लक्ष्य तक पहुँचने का अनुमानित समय",
+      "id": "Perkiraan waktu untuk mencapai target",
+      "ms": "Anggaran masa untuk mencapai sasaran",
+      "ja": "目標達成までの予想時間",
+      "ko": "목표 달성까지 예상 시간",
+      "zh-Hans": "达成目标的预计时间",
+      "zh-Hant": "達成目標的預計時間",
+      "ru": "Ожидаемое время достижения цели",
+      "bn": "লক্ষ্য অর্জনের আনুমানিক সময়",
+      "vi": "Thời gian dự kiến để đạt mục tiêu",
+      "th": "ระยะเวลาที่คาดว่าจะถึงเป้าหมาย",
+      "pl": "Przewidywany czas do osiągnięcia celu",
+      "nl": "Verwachte tijd om je doel te bereiken",
+      "uk": "Очікуваний час досягнення цілі",
     },
     "Exceptionally active": {
       'en': "Exceptionally active",
@@ -4362,7 +4362,7 @@ abstract final class OnboardingRuntimeCopy {
 
   static String resolve(String english, Locale locale) {
     final tag = BilLocalePolicy.canonicalTag(locale);
-    if (tag == 'en') return english;
+    if (tag == 'en') return values[english]?['en'] ?? english;
     final shared = RuntimeCopy.resolve(english, tag);
     if (shared != null && shared.trim().isNotEmpty) return shared;
     return values[english]?[tag] ?? english;

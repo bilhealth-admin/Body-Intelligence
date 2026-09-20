@@ -14,7 +14,11 @@ enum NutrientDashboardPreset {
   };
 
   List<TrackedNutrient> get evidenceMetrics => switch (this) {
-    heartHealthy => const [TrackedNutrient.sodium, TrackedNutrient.fiber],
+    heartHealthy => const [
+      TrackedNutrient.sodium,
+      TrackedNutrient.fiber,
+      TrackedNutrient.potassium,
+    ],
     carbConscious || custom => const [
       TrackedNutrient.carbohydrates,
       TrackedNutrient.sugar,
@@ -24,13 +28,7 @@ enum NutrientDashboardPreset {
   };
 }
 
-enum NutrientDashboardMetric {
-  saturatedFat,
-  sodium,
-  fiber,
-  carbohydrates,
-  sugar,
-}
+enum NutrientDashboardMetric { sodium, fiber, potassium, carbohydrates, sugar }
 
 class NutrientDashboardSample {
   const NutrientDashboardSample({
@@ -66,17 +64,51 @@ abstract final class NutrientDashboardEvidence {
       complete: true,
     );
   }
+
+  /// Returns the sum of evidenced rows while retaining whether coverage is
+  /// complete. This is used by surfaces that can show a useful partial total
+  /// (for example, 25 g of fiber from the foods that reported fiber) instead
+  /// of hiding an available value because another food has no evidence.
+  static EvidencedNutrientValue partialTotal(
+    Iterable<NutrientDashboardSample> samples,
+    TrackedNutrient nutrient,
+  ) {
+    final rows = samples.toList(growable: false);
+    if (rows.isEmpty) {
+      return const EvidencedNutrientValue(value: null, complete: false);
+    }
+    var knownCount = 0;
+    var total = 0.0;
+    for (final row in rows) {
+      final value = row.values[nutrient];
+      if (!NutrientEvidenceMask.contains(row.evidenceMask, nutrient) ||
+          value == null ||
+          !value.isFinite ||
+          value < 0) {
+        continue;
+      }
+      knownCount++;
+      total += value;
+    }
+    if (knownCount == 0) {
+      return const EvidencedNutrientValue(value: null, complete: false);
+    }
+    return EvidencedNutrientValue(
+      value: total,
+      complete: knownCount == rows.length,
+    );
+  }
 }
 
 class NutrientDashboardGoalSet {
   const NutrientDashboardGoalSet({
-    required this.saturatedFatG,
     required this.sodiumMg,
     required this.fiberG,
+    required this.potassiumMg,
     required this.carbohydratesG,
     required this.sugarG,
   });
-  final double? saturatedFatG, sodiumMg, fiberG, carbohydratesG, sugarG;
+  final double? sodiumMg, fiberG, potassiumMg, carbohydratesG, sugarG;
 }
 
 enum NutrientProgressState { unknown, below, near, reached, exceeded }

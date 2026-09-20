@@ -114,7 +114,7 @@ class DashboardShell extends StatelessWidget {
 
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
-                    physics: const AlwaysScrollableScrollPhysics(),
+                    physics: const DashboardScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
                       metrics.horizontalPadding,
                       16,
@@ -132,6 +132,31 @@ class DashboardShell extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Keeps the dashboard directly finger-controlled without a post-release
+/// fling.  Clamping avoids the elastic overscroll that made the page appear
+/// to keep moving after the user's finger left the screen, while the
+/// always-accepting offset preserves pull-to-refresh and short-content use.
+class DashboardScrollPhysics extends ClampingScrollPhysics {
+  const DashboardScrollPhysics({super.parent});
+
+  @override
+  DashboardScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return DashboardScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) => true;
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    if (velocity.abs() > toleranceFor(position).velocity) return null;
+    return super.createBallisticSimulation(position, velocity);
   }
 }
 

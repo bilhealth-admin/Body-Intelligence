@@ -187,27 +187,58 @@ void main() {
     }
   });
 
-  test('food result language always follows the selected app locale', () {
+  test('food result language follows the typed query when identifiable', () {
     expect(
       FoodPresentationLocalizer.resultLocaleForQuery(
         query: 'chicken',
         interfaceLocaleTag: 'ar',
       ),
-      'ar',
+      'en',
     );
     expect(
       FoodPresentationLocalizer.resultLocaleForQuery(
         query: 'دجاج',
         interfaceLocaleTag: 'en',
       ),
-      'en',
+      'ar',
     );
     expect(
       FoodPresentationLocalizer.resultLocaleForQuery(
         query: '鸡肉',
         interfaceLocaleTag: 'ar',
       ),
+      'zh-Hans',
+    );
+    expect(
+      FoodPresentationLocalizer.resultLocaleForQuery(
+        query: 'poulet grillé',
+        interfaceLocaleTag: 'en',
+      ),
+      'fr',
+    );
+    expect(
+      FoodPresentationLocalizer.resultLocaleForQuery(
+        query: 'mela',
+        interfaceLocaleTag: 'en',
+      ),
+      'it',
+    );
+  });
+
+  test('ambiguous or numeric food queries retain the interface locale', () {
+    expect(
+      FoodPresentationLocalizer.resultLocaleForQuery(
+        query: '12345',
+        interfaceLocaleTag: 'ar-EG',
+      ),
       'ar',
+    );
+    expect(
+      FoodPresentationLocalizer.resultLocaleForQuery(
+        query: '',
+        interfaceLocaleTag: 'zh-TW',
+      ),
+      'zh-Hant',
     );
   });
 

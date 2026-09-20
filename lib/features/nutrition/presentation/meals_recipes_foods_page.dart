@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../../data/database/database_provider.dart';

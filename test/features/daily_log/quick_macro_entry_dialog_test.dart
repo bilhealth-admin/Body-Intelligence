@@ -64,6 +64,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Quick Macro visual identity is centred in LTR', (tester) async {
+    await open(tester, (_) async {});
+    final dialog = find.byKey(const Key('quick-macro-dialog'));
+    final lockup = _visualWordmark(const Key('quick-macro-wordmark'));
+    expect(
+      (tester.getRect(lockup).center.dx - tester.getRect(dialog).center.dx)
+          .abs(),
+      lessThanOrEqualTo(1),
+    );
+  });
+
   testWidgets('compact RTL dark layout keeps identity, fields, and actions', (
     tester,
   ) async {
@@ -111,6 +122,18 @@ void main() {
     final wordmark = find.byKey(const Key('quick-macro-wordmark'));
     expect(wordmark, findsOneWidget);
     expect(tester.getSemantics(wordmark).label, 'Body Intelligence Log');
+    expect(
+      (tester
+                  .getRect(_visualWordmark(const Key('quick-macro-wordmark')))
+                  .center
+                  .dx -
+              tester
+                  .getRect(find.byKey(const Key('quick-macro-dialog')))
+                  .center
+                  .dx)
+          .abs(),
+      lessThanOrEqualTo(1),
+    );
     expect(find.byKey(const Key('quick-macro-field-0')), findsOneWidget);
     expect(find.byKey(const Key('quick-macro-field-3')), findsOneWidget);
     expect(find.text('إضافة'), findsOneWidget);
@@ -118,3 +141,13 @@ void main() {
     semantics.dispose();
   });
 }
+
+Finder _visualWordmark(Key ownerKey) => find
+    .ancestor(
+      of: find.descendant(
+        of: find.byKey(ownerKey),
+        matching: find.text('BODY INTELLIGENCE LOG'),
+      ),
+      matching: find.byType(Row),
+    )
+    .first;

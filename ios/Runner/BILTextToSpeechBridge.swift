@@ -10,6 +10,10 @@ final class BILTextToSpeechBridge: NSObject, AVSpeechSynthesizerDelegate {
   init(messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(name: "bil/tts", binaryMessenger: messenger)
     super.init()
+    // Speech recognition owns the shared application audio session while it
+    // is listening. Let the synthesizer use its separately managed playback
+    // session so a preceding record route cannot mute the spoken reply.
+    synthesizer.usesApplicationAudioSession = false
     synthesizer.delegate = self
     channel.setMethodCallHandler { [weak self] call, result in
       self?.handle(call, result: result)

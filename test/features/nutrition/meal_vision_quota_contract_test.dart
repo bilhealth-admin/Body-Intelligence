@@ -61,25 +61,28 @@ void main() {
     expect(usage.periodStart, DateTime(2026, 8, 10));
   });
 
-  test('production meal Vision reservation uses paid Boost only', () {
-    final sql = File(
+  test('production meal Vision reservation uses the shared AI Coach meter', () {
+    final legacySql = File(
       'supabase/migrations/'
       '20260821174122_require_paid_boost_for_meal_vision.sql',
+    ).readAsStringSync();
+    final sql = File(
+      'supabase/migrations/'
+      '20260918120000_meal_vision_uses_shared_ai_coach_tokens.sql',
     ).readAsStringSync();
     final client = File(
       'lib/features/commerce/providers/commerce_providers.dart',
     ).readAsStringSync();
-    expect(sql, contains('bil_reserve_paid_ai_vision_usage'));
-    expect(sql, contains("raise exception 'ai_boost_required'"));
-    expect(sql, contains("'billing_source','paid_boost'"));
-    expect(sql, contains('credit_weekly_debit, credit_paid_debit'));
-    expect(sql, contains("0, v_credit_reserve, 'usd-1e-4-v1'"));
-    expect(
-      sql,
-      isNot(contains("bil_reserve_ai_usage(p_owner_id,p_request_id,'vision'")),
-    );
+    expect(legacySql, contains('bil_reserve_paid_ai_vision_usage'));
+    expect(sql, contains('bil_reserve_ai_usage'));
+    expect(sql, contains("'billing_source'"));
+    expect(sql, contains("'ai_coach_then_paid_boost'"));
+    expect(sql, contains('weekly_tokens_reserved'));
+    expect(sql, contains('paid_tokens_reserved'));
+    expect(sql, contains("'vision'"));
     expect(client, contains('final aiBoostVisionAccessProvider'));
-    expect(client, contains('paidRemaining >= 100'));
+    expect(client, contains('totalRemaining'));
+    expect(client, contains('totalRemaining >= 100'));
   });
 
   test(

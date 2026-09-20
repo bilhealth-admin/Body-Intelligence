@@ -44,7 +44,12 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   // changes. Repository reads below remain best-effort and failure tolerant.
   ref.watch(latestDailyLogProvider);
   ref.watch(insightLifeContextProvider);
-  final connectedHealth = ref.watch(connectedHealthProvider).value;
+  // Coach context is a point-in-time input for a turn. Subscribing to the
+  // health controller here made every background/resume refresh rebuild the
+  // whole conversation while the member was typing. The health hub remains
+  // responsible for explicit refreshes; Coach reads the latest available
+  // snapshot without installing a live UI dependency.
+  final connectedHealth = ref.read(connectedHealthProvider).value;
   final preferences = ref.read(preferencesRepositoryProvider);
 
   // Start independent repository reads together. They used to run one after

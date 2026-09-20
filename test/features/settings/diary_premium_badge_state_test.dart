@@ -18,7 +18,7 @@ void main() {
   setUp(() => database = AppDatabase.forTesting(NativeDatabase.memory()));
   tearDown(() => database.close());
 
-  testWidgets('diary Pro badge reflects locked entitlement state', (
+  testWidgets('goal rows do not show a premium or lock badge when locked', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -29,25 +29,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final badge = find.byKey(const Key('diary-premium-feature-state'));
-    expect(badge, findsOneWidget);
     expect(
-      find.descendant(
-        of: badge,
-        matching: find.byIcon(Icons.lock_outline_rounded),
-      ),
-      findsOneWidget,
+      find.byKey(const Key('diary-premium-feature-chevron')),
+      findsWidgets,
     );
-    expect(
-      find.descendant(
-        of: badge,
-        matching: find.byIcon(Icons.workspace_premium_rounded),
-      ),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('diary-premium-feature-state')), findsNothing);
   });
 
-  testWidgets('diary Pro badge fills when entitlement is active', (
+  testWidgets('goal rows remain badge-free when entitlement is active', (
     tester,
   ) async {
     final active = SubscriptionState(
@@ -70,22 +59,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final badge = find.byKey(const Key('diary-premium-feature-state'));
-    expect(badge, findsOneWidget);
     expect(
-      find.descendant(
-        of: badge,
-        matching: find.byIcon(Icons.workspace_premium_rounded),
-      ),
-      findsOneWidget,
+      find.byKey(const Key('diary-premium-feature-chevron')),
+      findsWidgets,
     );
-    expect(
-      find.descendant(
-        of: badge,
-        matching: find.byIcon(Icons.lock_outline_rounded),
-      ),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('diary-premium-feature-state')), findsNothing);
   });
 }
 

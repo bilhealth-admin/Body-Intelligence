@@ -377,7 +377,10 @@ void main() {
     );
     await mountRouted(tester);
 
-    await tester.tap(find.byKey(const Key('onboarding-estimates-ack')));
+    final acknowledgement = find.byKey(const Key('onboarding-estimates-ack'));
+    await tester.ensureVisible(acknowledgement);
+    await tester.pump();
+    await tester.tap(acknowledgement);
     await tester.tap(find.byKey(const Key('onboarding-next')));
     await tester.pumpAndSettle();
 
@@ -536,6 +539,42 @@ void main() {
       find.text('Choose whether to enable cloud AI, or keep it off.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('explicit cloud AI opt-out is visible and selected', (
+    tester,
+  ) async {
+    await pump(tester, valid(step: 'ai'));
+    final decline = find.byKey(const Key('onboarding-decline-ai'));
+    await tester.ensureVisible(decline);
+    await tester.tap(decline);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cloud AI is off.'), findsOneWidget);
+    expect(
+      (await drafts.load())!.remoteAiConsent,
+      OnboardingRemoteAiConsent.declined,
+    );
+    expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
+  });
+
+  testWidgets('cloud AI opt-out stays local when consent RPC fails', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      valid(step: 'ai'),
+      remote: const _RemoteAiGateway(result: OnboardingRemoteAiResult.failed),
+    );
+    final decline = find.byKey(const Key('onboarding-decline-ai'));
+    await tester.ensureVisible(decline);
+    await tester.tap(decline);
+    await tester.pumpAndSettle();
+    expect(
+      (await drafts.load())!.remoteAiConsent,
+      OnboardingRemoteAiConsent.declined,
+    );
+    expect(find.textContaining('AI remains off'), findsOneWidget);
   });
 
   testWidgets('signed-out restart preserves an explicit cloud AI opt-out', (

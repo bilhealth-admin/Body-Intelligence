@@ -84,12 +84,14 @@ void main() {
     },
   );
 
-  test('dashboard Android back exits instead of revealing auth history', () {
+  test('shell back returns root tabs to dashboard before Android exits', () {
     final shell = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
 
-    expect(shell, contains('canPop: !isDashboard'));
+    expect(shell, contains('final hasRouteHistory = context.canPop()'));
+    expect(shell, contains('canPop: hasRouteHistory'));
+    expect(shell, contains("context.go('/dashboard')"));
     expect(shell, contains('defaultTargetPlatform == TargetPlatform.android'));
     expect(shell, contains('SystemNavigator.pop()'));
   });

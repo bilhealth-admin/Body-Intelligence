@@ -462,6 +462,15 @@ void main() {
         360,
       );
       _expectAtMostOneVisiblePremium(tester);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('fitness-devices-premium-gate')),
+          matching: find.byKey(const Key('dashboard-premium-label')),
+        ),
+        findsNothing,
+        reason:
+            'The BLE status and action must not sit under a floating badge.',
+      );
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(milliseconds: 1));

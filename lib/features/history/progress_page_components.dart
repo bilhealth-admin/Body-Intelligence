@@ -8,14 +8,18 @@ class _Point {
 
 class _ProgressSelector extends StatelessWidget {
   const _ProgressSelector({
-    required this.icon,
+    required this.kind,
     required this.eyebrow,
     required this.value,
     required this.onTap,
+    this.iconOverride,
+    this.appleIconOverride,
     super.key,
   });
 
-  final IconData icon;
+  final BilSemanticIconKind kind;
+  final IconData? iconOverride;
+  final IconData? appleIconOverride;
   final String eyebrow;
   final String value;
   final VoidCallback onTap;
@@ -30,20 +34,13 @@ class _ProgressSelector extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
         child: Row(
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: .62),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: Icon(
-                icon,
-                size: 19,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            BilSemanticIconBadge(
+              kind: kind,
+              iconOverride: iconOverride,
+              appleIconOverride: appleIconOverride,
+              size: 38,
+              iconSize: 19,
+              shape: BoxShape.rectangle,
             ),
             const SizedBox(width: 10),
             Expanded(

@@ -37,9 +37,9 @@ void main() {
       'Friends',
       'Messages',
       'Settings',
-      'Privacy',
+      'Sharing & Privacy',
       'Help',
-      'Sync',
+      'Sync now',
     ]) {
       final index = more.indexOf("copy('$label')");
       expect(index, greaterThan(-1), reason: label);
@@ -87,7 +87,7 @@ void main() {
       '/history',
       '/weekly-report',
       '/challenges',
-      '/nutrition',
+      '/nutrition?from=settings',
       '/notification-settings',
       '/connected-health',
       '/community',

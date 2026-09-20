@@ -118,10 +118,15 @@ class _ExerciseCaloriePreferencesBodyState
             child: Column(
               children: [
                 SwitchListTile.adaptive(
+                  key: const Key('exercise-calories-include-switch'),
                   title: Text(copy.includeTitle),
                   subtitle: Text(copy.includeBody),
-                  value: preferences.includeInRemainingGoal,
-                  onChanged: saving
+                  // Keep an unavailable health source visibly fail-closed.
+                  // The saved preference is retained and becomes effective
+                  // again only after verified energy is available, but the UI
+                  // must not imply that an unverified value is being applied.
+                  value: energy != null && preferences.includeInRemainingGoal,
+                  onChanged: saving || energy == null
                       ? null
                       : (value) => save(
                           ExerciseCaloriePreferences(
@@ -133,10 +138,17 @@ class _ExerciseCaloriePreferencesBodyState
                 ),
                 const Divider(height: 1),
                 SwitchListTile.adaptive(
+                  key: const Key('exercise-calories-macros-switch'),
                   title: Text(copy.macrosTitle),
                   subtitle: Text(copy.macrosBody),
-                  value: preferences.adjustMacroGoals,
-                  onChanged: preferences.includeInRemainingGoal && !saving
+                  value:
+                      energy != null &&
+                      preferences.includeInRemainingGoal &&
+                      preferences.adjustMacroGoals,
+                  onChanged:
+                      energy != null &&
+                          preferences.includeInRemainingGoal &&
+                          !saving
                       ? (value) => save(
                           ExerciseCaloriePreferences(
                             includeInRemainingGoal: true,

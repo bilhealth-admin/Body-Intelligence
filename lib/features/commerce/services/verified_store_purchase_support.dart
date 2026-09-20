@@ -11,6 +11,86 @@ enum VerifiedStoreState {
   failed,
 }
 
+/// A terminal StoreKit event replayed while a page is opening is historical
+/// state, not an error caused by the member's current tap. Keep valid loaded
+/// products purchasable; real current-attempt errors retain their feedback.
+@visibleForTesting
+({VerifiedStoreState state, String? messageCode}) terminalStorePurchaseOutcome({
+  required PurchaseStatus status,
+  required bool productsAvailable,
+  required bool initiatedByCurrentService,
+}) {
+  assert(status == PurchaseStatus.error || status == PurchaseStatus.canceled);
+  if (!initiatedByCurrentService) {
+    return (
+      state: productsAvailable
+          ? VerifiedStoreState.ready
+          : VerifiedStoreState.unavailable,
+      messageCode: null,
+    );
+  }
+  return switch (status) {
+    PurchaseStatus.error => (
+      state: VerifiedStoreState.failed,
+      messageCode: 'purchase_failed',
+    ),
+    PurchaseStatus.canceled => (
+      state: VerifiedStoreState.cancelled,
+      messageCode: 'purchase_cancelled',
+    ),
+    _ => throw ArgumentError.value(status, 'status'),
+  };
+}
+
+/// A store-stream fault without a purchase started by this service is not a
+/// member-visible purchase result. StoreKit can report it while replaying its
+/// history as the plans route opens. Keep an already loaded catalog usable;
+/// a fault during the current purchase attempt remains fail-closed.
+@visibleForTesting
+({VerifiedStoreState state, String? messageCode})
+storePurchaseStreamFailureOutcome({
+  required bool productsAvailable,
+  required bool initiatedByCurrentService,
+}) {
+  if (!initiatedByCurrentService) {
+    return (
+      state: productsAvailable
+          ? VerifiedStoreState.ready
+          : VerifiedStoreState.unavailable,
+      messageCode: null,
+    );
+  }
+  return (state: VerifiedStoreState.failed, messageCode: 'store_stream_failed');
+}
+
+/// Whether another explicit user tap may open the native billing flow.
+///
+/// Store catalog availability and the last transaction outcome are separate
+/// concerns. A verified subscriber can still change plans, and a cancelled or
+/// pre-launch failure can be retried while the already-loaded store product is
+/// valid. Pending and post-purchase verification failures stay fail-closed so
+/// duplicate billing cannot be used to work around an unfinished transaction.
+bool canStartStorePurchase({
+  required VerifiedStoreState state,
+  required bool productAvailable,
+  String? messageCode,
+}) {
+  if (!productAvailable) return false;
+  return switch (state) {
+    VerifiedStoreState.ready ||
+    VerifiedStoreState.verified ||
+    VerifiedStoreState.cancelled => true,
+    VerifiedStoreState.failed => const {
+      'purchase_failed',
+      'purchase_not_started',
+    }.contains(messageCode),
+    VerifiedStoreState.loading ||
+    VerifiedStoreState.unavailable ||
+    VerifiedStoreState.offline ||
+    VerifiedStoreState.purchasePending => false,
+  };
+}
+
 /// Produces an opaque, deterministic StoreKit account token while preserving
 /// the existing Google Play account hash byte-for-byte.
 String storeAccountIdentifier({

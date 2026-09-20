@@ -50,13 +50,13 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           title: Text(_mealCopy('noResult')),
         ),
         ListTile(
-          key: const Key('daily-search-open-food-library'),
+          key: const Key('daily-search-open-food-catalog'),
           leading: const Icon(Icons.library_books_outlined),
           title: Text(_mealCopy('openFoodLibrary')),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           onTap: () {
             controller.closeView(effectiveQuery);
-            context.push('/food-libraries');
+            context.push('/foods');
           },
         ),
       ];
@@ -84,13 +84,13 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           title: Text(_mealCopy('noResult')),
         ),
         ListTile(
-          key: const Key('daily-search-open-food-library'),
+          key: const Key('daily-search-open-food-catalog'),
           leading: const Icon(Icons.library_books_outlined),
           title: Text(_mealCopy('openFoodLibrary')),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           onTap: () {
             controller.closeView(effectiveQuery);
-            context.push('/food-libraries');
+            context.push('/foods');
           },
         ),
       ];
@@ -378,8 +378,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'protein': 'Protein',
     'didYouMean': 'Did you mean:',
     'noResult': 'No match yet. Try a broader name, brand, or barcode.',
-    'openFoodLibrary':
-        'No result after correction. Open the food catalog to download more.',
+    'openFoodLibrary': 'No result after correction. Open the food catalog.',
     'mealPhoto': 'Meal photo',
     'voiceInput': 'Voice input',
     'barcode': 'Barcode',

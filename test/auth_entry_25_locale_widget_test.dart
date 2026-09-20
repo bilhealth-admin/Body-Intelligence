@@ -11,7 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('sign-in wordmark is centered in LTR and RTL', (tester) async {
+  testWidgets('sign-in form stays focused without a duplicate wordmark', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -20,24 +22,40 @@ void main() {
       await tester.pumpWidget(_localizedApp(locale, const LoginPage()));
       await tester.pump(const Duration(milliseconds: 120));
 
-      final wordmark = find.byKey(const Key('login-wordmark'));
-      expect(wordmark, findsOneWidget);
-      final align = find.descendant(of: wordmark, matching: find.byType(Align));
-      expect(align, findsOneWidget);
-      expect(tester.widget<Align>(align).alignment, Alignment.center);
-
-      final lockup = find.descendant(of: wordmark, matching: find.byType(Row));
-      expect(lockup, findsOneWidget);
-      expect(
-        tester.getCenter(lockup).dx,
-        closeTo(tester.getCenter(wordmark).dx, 0.5),
-        reason: locale.toLanguageTag(),
-      );
+      expect(find.byKey(const Key('login-wordmark')), findsNothing);
+      expect(find.byKey(const Key('login-email')), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
     }
   });
+
+  for (final width in const <double>[320, 390, 430, 800, 1024]) {
+    for (final locale in const <Locale>[Locale('en'), Locale('ar')]) {
+      testWidgets('OTP visual wordmark is viewport-centred at ${width.toInt()} '
+          '${locale.languageCode}', (tester) async {
+        tester.view.physicalSize = Size(width, 932);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          _localizedApp(
+            locale,
+            const VerifyEmailPage(email: 'person@example.com'),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 120));
+
+        final lockup = _visualWordmark(const Key('verify-email-wordmark'));
+        expect(
+          (tester.getRect(lockup).center.dx - width / 2).abs(),
+          lessThanOrEqualTo(1),
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      });
+    }
+  }
 
   testWidgets('email login and OTP render across every declared locale', (
     tester,
@@ -141,11 +159,7 @@ void main() {
       darkTheme.colorScheme.surface,
     );
     expect(find.byKey(const Key('login-email')), findsOneWidget);
-    expect(find.text('BODY INTELLIGENCE LOG'), findsOneWidget);
-    expect(
-      tester.widget<Text>(find.text('BODY INTELLIGENCE LOG')).style?.color,
-      const Color(0xFF050505),
-    );
+    expect(find.text('BODY INTELLIGENCE LOG'), findsNothing);
 
     await tester.pumpWidget(
       _localizedApp(
@@ -236,6 +250,16 @@ Widget _localizedApp(
     home: home,
   ),
 );
+
+Finder _visualWordmark(Key ownerKey) => find
+    .ancestor(
+      of: find.descendant(
+        of: find.byKey(ownerKey),
+        matching: find.text('BODY INTELLIGENCE LOG'),
+      ),
+      matching: find.byType(Row),
+    )
+    .first;
 
 Locale _localeFromTag(String localeTag) {
   final parts = localeTag.trim().replaceAll('_', '-').split('-');

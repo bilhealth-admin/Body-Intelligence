@@ -359,7 +359,16 @@ class FoodRepository
     final byUuid = await (_database.select(
       _database.foods,
     )..where((row) => row.uuid.equals(food.id))).getSingleOrNull();
-    if (byUuid != null) {
+    // A previous barcode lookup may have materialized a name-only row under a
+    // different UUID. Merge the newly resolved nutrition into that row rather
+    // than returning the stale zero-valued record unchanged.
+    final byBarcode = byUuid == null && food.barcode?.trim().isNotEmpty == true
+        ? await (_database.select(_database.foods)
+                ..where((row) => row.barcode.equals(food.barcode!.trim())))
+              .getSingleOrNull()
+        : null;
+    final existing = byUuid ?? byBarcode;
+    if (existing != null) {
       final incomingCalories = food.knownValue(FoodNutrient.calories);
       final incomingProtein = food.knownValue(FoodNutrient.protein);
       final incomingCarbs = food.knownValue(FoodNutrient.carbohydrates);
@@ -379,95 +388,97 @@ class FoodRepository
       );
       final incomingArabicName = _optional(food.arabicName);
       final hasNewEvidence =
-          incomingEvidenceMask & ~byUuid.nutrientEvidenceMask != 0;
+          incomingEvidenceMask & ~existing.nutrientEvidenceMask != 0;
       final nutrientValuesChanged =
-          (incomingCalories != null && byUuid.calories != incomingCalories) ||
-          (incomingProtein != null && byUuid.protein != incomingProtein) ||
-          (incomingCarbs != null && byUuid.carbs != incomingCarbs) ||
-          (incomingFats != null && byUuid.fats != incomingFats) ||
+          (incomingCalories != null && existing.calories != incomingCalories) ||
+          (incomingProtein != null && existing.protein != incomingProtein) ||
+          (incomingCarbs != null && existing.carbs != incomingCarbs) ||
+          (incomingFats != null && existing.fats != incomingFats) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.fiber),
-            byUuid.fiber,
+            existing.fiber,
           ) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.sugar),
-            byUuid.sugar,
+            existing.sugar,
           ) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.sodium),
-            byUuid.sodium,
+            existing.sodium,
           ) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.potassium),
-            byUuid.potassium,
+            existing.potassium,
           ) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.calcium),
-            byUuid.calcium,
+            existing.calcium,
           ) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.magnesium),
-            byUuid.magnesium,
+            existing.magnesium,
           ) ||
           _knownValueChanged(
             food.knownValue(FoodNutrient.phosphorus),
-            byUuid.phosphorus,
+            existing.phosphorus,
           );
       final catalogIdentityChanged =
-          byUuid.name != food.name ||
-          byUuid.arabicName != incomingArabicName ||
-          byUuid.source != food.sourceLabel ||
-          byUuid.verified != food.verified;
+          existing.name != food.name ||
+          existing.arabicName != incomingArabicName ||
+          existing.source != food.sourceLabel ||
+          existing.verified != food.verified;
       final servingBasisChanged =
-          (byUuid.servingSize - canonicalServingGrams).abs() > 0.0001 ||
-          byUuid.servingUnit.toLowerCase() != 'g';
+          (existing.servingSize - canonicalServingGrams).abs() > 0.0001 ||
+          existing.servingUnit.toLowerCase() != 'g';
 
       if (!hasNewEvidence &&
           !nutrientValuesChanged &&
           !catalogIdentityChanged &&
           !servingBasisChanged) {
-        return byUuid;
+        return existing;
       }
 
       await (_database.update(
         _database.foods,
-      )..where((row) => row.id.equals(byUuid.id))).write(
+      )..where((row) => row.id.equals(existing.id))).write(
         FoodsCompanion(
           name: Value(food.name),
           // Null intentionally clears an old lossy generated translation.
           arabicName: Value(incomingArabicName),
-          category: Value(food.category ?? byUuid.category),
+          category: Value(food.category ?? existing.category),
           keywords: Value(food.keywords.join(',')),
           // The local diary stores quantities as mass. Preserve the catalog's
           // authoritative gram basis so portion labels such as "1 large" do
           // not accidentally become one gram after materialization.
           servingSize: Value(canonicalServingGrams),
           servingUnit: const Value('g'),
-          calories: Value(incomingCalories ?? byUuid.calories),
-          protein: Value(incomingProtein ?? byUuid.protein),
-          carbs: Value(incomingCarbs ?? byUuid.carbs),
-          fats: Value(incomingFats ?? byUuid.fats),
-          fiber: Value(food.knownValue(FoodNutrient.fiber) ?? byUuid.fiber),
-          sugar: Value(food.knownValue(FoodNutrient.sugar) ?? byUuid.sugar),
-          sodium: Value(food.knownValue(FoodNutrient.sodium) ?? byUuid.sodium),
+          calories: Value(incomingCalories ?? existing.calories),
+          protein: Value(incomingProtein ?? existing.protein),
+          carbs: Value(incomingCarbs ?? existing.carbs),
+          fats: Value(incomingFats ?? existing.fats),
+          fiber: Value(food.knownValue(FoodNutrient.fiber) ?? existing.fiber),
+          sugar: Value(food.knownValue(FoodNutrient.sugar) ?? existing.sugar),
+          sodium: Value(
+            food.knownValue(FoodNutrient.sodium) ?? existing.sodium,
+          ),
           potassium: Value(
-            food.knownValue(FoodNutrient.potassium) ?? byUuid.potassium,
+            food.knownValue(FoodNutrient.potassium) ?? existing.potassium,
           ),
           calcium: Value(
-            food.knownValue(FoodNutrient.calcium) ?? byUuid.calcium,
+            food.knownValue(FoodNutrient.calcium) ?? existing.calcium,
           ),
           magnesium: Value(
-            food.knownValue(FoodNutrient.magnesium) ?? byUuid.magnesium,
+            food.knownValue(FoodNutrient.magnesium) ?? existing.magnesium,
           ),
           phosphorus: Value(
-            food.knownValue(FoodNutrient.phosphorus) ?? byUuid.phosphorus,
+            food.knownValue(FoodNutrient.phosphorus) ?? existing.phosphorus,
           ),
-          iron: Value(food.knownValue(FoodNutrient.iron) ?? byUuid.iron),
+          iron: Value(food.knownValue(FoodNutrient.iron) ?? existing.iron),
           vitaminC: Value(
-            food.knownValue(FoodNutrient.vitaminC) ?? byUuid.vitaminC,
+            food.knownValue(FoodNutrient.vitaminC) ?? existing.vitaminC,
           ),
           nutrientEvidenceMask: Value(
-            byUuid.nutrientEvidenceMask | incomingEvidenceMask,
+            existing.nutrientEvidenceMask | incomingEvidenceMask,
           ),
           source: Value(food.sourceLabel),
           verified: Value(food.verified),
@@ -477,17 +488,10 @@ class FoodRepository
 
       return (_database.select(
         _database.foods,
-      )..where((row) => row.id.equals(byUuid.id))).getSingle();
+      )..where((row) => row.id.equals(existing.id))).getSingle();
     }
 
     final barcode = food.barcode?.trim();
-    if (barcode != null && barcode.isNotEmpty) {
-      final byBarcode = await (_database.select(
-        _database.foods,
-      )..where((row) => row.barcode.equals(barcode))).getSingleOrNull();
-      if (byBarcode != null) return byBarcode;
-    }
-
     final id = await addFood(
       uuid: food.id,
       name: food.name,

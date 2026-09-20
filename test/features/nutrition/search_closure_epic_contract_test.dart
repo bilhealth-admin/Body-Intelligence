@@ -36,11 +36,12 @@ void main() {
     expect(pubspec, contains('simple_barcode_scanner: ^0.6.0'));
     expect(scanner, contains('SimpleBarcodeScanner.scanBarcode'));
     expect(scanner, contains('TargetPlatform.windows'));
-    expect(foodPage, contains("context.push('/food-libraries')"));
+    expect(foodPage, contains(': _createFood'));
+    expect(foodPage, isNot(contains("context.push('/food-libraries')")));
     expect(
       foodPage,
       isNot(contains('https://fdc.nal.usda.gov/download-datasets/')),
-      reason: 'A failed search must stay inside the installable food guide.',
+      reason: 'A failed search must stay inside the app.',
     );
   });
 }

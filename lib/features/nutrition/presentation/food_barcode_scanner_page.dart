@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,19 +9,12 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/services/recoverable_image_picker.dart';
 import 'barcode_runtime_copy.dart';
+import 'barcode_scanner_helpers.dart';
 import 'nutrition_copy.dart';
 
-/// Extracts the first non-empty scanner value for both live-camera and image
-/// analysis captures. Validation stays downstream in BarcodeIdentity.
-String? barcodeRawValueFromCapture(BarcodeCapture? capture) {
-  if (capture == null) return null;
-  return capture.barcodes
-      .map((barcode) => barcode.rawValue?.trim())
-      .whereType<String>()
-      .where((value) => value.isNotEmpty)
-      .firstOrNull;
-}
+export 'barcode_scanner_helpers.dart';
 
 class FoodBarcodeScannerPage extends StatefulWidget {
   const FoodBarcodeScannerPage({super.key, this.scannerEnabled = true});
@@ -43,6 +38,8 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   bool starting = true;
   bool analyzingImage = false;
   bool handled = false;
+  bool _cameraShouldRun = true;
+  Future<void>? _mobileOperation;
   Object? startError;
   late final AnimationController _scanBeamController;
   late final Animation<double> _scanBeamProgress;
@@ -87,7 +84,12 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         if (mounted) _startWindows();
       });
     } else if (mobileScannerSupported) {
-      _startMobile();
+      // Wait until the platform view is attached before asking AVFoundation
+      // or CameraX to open a device. Starting from initState can race the
+      // plugin's native view registration on a cold iPhone launch.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _startMobile();
+      });
     } else {
       starting = false;
     }
@@ -151,7 +153,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         return;
       }
 
-      _lookupBarcodeValue(value);
+      await _lookupBarcodeValue(value);
     } catch (error) {
       if (mounted) {
         setState(() => startError = error);
@@ -167,9 +169,36 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     if (!mounted ||
         !widget.scannerEnabled ||
         !mobileScannerSupported ||
-        isWindows) {
+        isWindows ||
+        !_cameraShouldRun ||
+        handled) {
       return;
     }
+
+    final previous = _mobileOperation;
+    if (previous != null) {
+      await previous;
+      if (!mounted ||
+          !widget.scannerEnabled ||
+          !mobileScannerSupported ||
+          isWindows ||
+          !_cameraShouldRun ||
+          handled) {
+        return;
+      }
+    }
+
+    final operation = _startMobileInternal();
+    _mobileOperation = operation;
+    try {
+      await operation;
+    } finally {
+      if (identical(_mobileOperation, operation)) _mobileOperation = null;
+    }
+  }
+
+  Future<void> _startMobileInternal() async {
+    if (!mounted || !_cameraShouldRun || handled) return;
 
     setState(() {
       starting = true;
@@ -189,38 +218,73 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     }
   }
 
+  Future<void> _stopMobile() async {
+    _cameraShouldRun = false;
+    final previous = _mobileOperation;
+    final operation = () async {
+      if (previous != null) await previous;
+      try {
+        await controller.stop();
+      } catch (_) {
+        // Stopping an already-stopped native camera is harmless. Do not allow
+        // a vendor camera service exception to take down the Flutter route.
+      }
+    }();
+    _mobileOperation = operation;
+    try {
+      await operation;
+    } finally {
+      if (identical(_mobileOperation, operation)) _mobileOperation = null;
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!widget.scannerEnabled || !mobileScannerSupported || isWindows) return;
 
     if (state == AppLifecycleState.resumed && !handled) {
+      _cameraShouldRun = true;
       _syncScanBeamMotion();
-      _startMobile();
-    } else if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
+      unawaited(_startMobile());
+    } else if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
       _scanBeamController.stop();
-      controller.stop();
+      unawaited(_stopMobile());
     }
   }
 
   void _onDetect(BarcodeCapture capture) {
-    _lookupBarcodeValue(barcodeRawValueFromCapture(capture));
+    unawaited(_lookupBarcodeValue(barcodeRawValueFromCapture(capture)));
   }
 
-  void _lookupBarcodeValue(String? rawValue) {
+  Future<void> _lookupBarcodeValue(String? rawValue) async {
     if (handled) return;
     final value = rawValue?.trim();
     if (value == null || value.isEmpty) return;
     handled = true;
     _scanBeamController.stop();
-    controller.stop();
-    Navigator.of(context).pop(value);
+    await _stopMobile();
+    if (mounted) Navigator.of(context).pop(value);
   }
 
   Future<void> _analyzeGalleryImage() async {
     if (!galleryAnalysisSupported || analyzingImage || handled) return;
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (image == null || !mounted || handled) return;
+    final pick = await guardBarcodeGalleryPick(
+      () => BilRecoverableImagePicker.instance.pickImage(
+        purpose: BilImagePickerPurpose.barcodeGallery,
+        source: ImageSource.gallery,
+      ),
+    );
+    if (!mounted || handled) return;
+    if (pick.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_barcodeImageCopy(context).imageUnreadable)),
+      );
+      return;
+    }
+    final image = pick.value;
+    if (image == null) return;
 
     setState(() => analyzingImage = true);
     try {
@@ -241,7 +305,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         );
         return;
       }
-      _lookupBarcodeValue(value);
+      await _lookupBarcodeValue(value);
     } on Object {
       if (!mounted || handled) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -292,14 +356,25 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     );
     input.dispose();
     if (!mounted) return;
-    _lookupBarcodeValue(value);
+    await _lookupBarcodeValue(value);
   }
 
   @override
   void dispose() {
+    _cameraShouldRun = false;
     WidgetsBinding.instance.removeObserver(this);
     _scanBeamController.dispose();
-    controller.dispose();
+    // Keep native teardown ordered after an in-flight start/stop operation.
+    // Disposing the controller while AVFoundation is attaching its preview
+    // can terminate the process instead of reporting a Dart error.
+    final operation = _mobileOperation;
+    unawaited(() async {
+      if (operation != null) await operation;
+      try {
+        await controller.stop();
+      } catch (_) {}
+      await controller.dispose();
+    }());
     super.dispose();
   }
 

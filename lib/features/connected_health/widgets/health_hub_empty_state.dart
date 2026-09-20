@@ -26,10 +26,16 @@ class HealthHubEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final watchSize = compact ? 276.0 : 304.0;
     final carouselHeight = watchSize;
-    final shellHeight = compact ? 438.0 : 404.0;
-    return SizedBox(
+    final shellMinimumHeight = compact ? 438.0 : 404.0;
+    return ConstrainedBox(
       key: const Key('health-hub-empty-state'),
-      height: shellHeight,
+      // The watch and action are side by side only when the *inner* content
+      // rail is wide enough. At medium tablet widths they stack vertically,
+      // which needs more than the old fixed 404 px shell (and even more when
+      // accessibility text scaling enlarges the action). Preserve the visual
+      // minimum while allowing the constraint-selected layout to grow to its
+      // natural height.
+      constraints: BoxConstraints(minHeight: shellMinimumHeight),
       child: Container(
         padding: EdgeInsets.all(
           compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceLg,

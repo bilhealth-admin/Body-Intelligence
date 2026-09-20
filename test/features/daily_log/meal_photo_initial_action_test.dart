@@ -73,7 +73,7 @@ void main() {
   });
 
   test(
-    'Daily Log photo action verifies Boost then offers camera or gallery',
+    'Daily Log photo action verifies shared AI tokens then offers camera or gallery',
     () {
       final page = _librarySource('lib/features/daily_log/daily_log_page.dart');
       final captureActions = File(
@@ -81,16 +81,15 @@ void main() {
       ).readAsStringSync();
       expect(page, contains("case 'photo':"));
       expect(page, contains('await _analyzeMealImage();'));
-      expect(
-        captureActions,
-        contains('ref.read(aiBoostVisionAccessProvider.future)'),
-      );
+      expect(captureActions, contains('aiBoostVisionAccessProvider.future'));
+      expect(captureActions, contains('hasVisionTokens'));
       expect(captureActions, contains("context.push('/plans?focus=boost')"));
       expect(captureActions, contains('showModalBottomSheet<ImageSource>'));
       expect(captureActions, contains('ImageSource.camera'));
       expect(captureActions, contains('ImageSource.gallery'));
       expect(captureActions, contains('source: imageSource'));
       expect(captureActions, isNot(contains('openMealImageGuide(context)')));
+      expect(captureActions, isNot(contains("context.push('/ai-coach')")));
     },
   );
 }

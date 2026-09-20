@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import '../localization/bil_locale_policy.dart';
 import '../localization/runtime_copy.dart';
+import '../theme/bil_semantic_icons.dart';
 import 'bil_quick_add_locale_copy.dart';
 
 class BilQuickAddSheet extends StatelessWidget {
@@ -59,43 +60,44 @@ class BilQuickAddSheet extends StatelessWidget {
           ? const Color(0xFFE7EDFF)
           : const Color(0xFF071B46),
     );
-    final primaryActions = <({IconData icon, String label, VoidCallback onTap})>[
-      (
-        icon: Icons.restaurant_rounded,
-        label: _text(context, 'Log food'),
-        onTap: onFood,
-      ),
-      (
-        icon: Icons.verified_rounded,
-        label:
-            '${_text(context, 'Scan barcode')}\n${_text(context, 'Premium')}',
-        onTap: onBarcode,
-      ),
-      (
-        icon: Icons.mic_rounded,
-        label: _text(context, 'Log food by voice'),
-        onTap: onVoice,
-      ),
-      (
-        icon: Icons.center_focus_strong_rounded,
-        label: _text(context, 'Analyze meal photo'),
-        onTap: onPhoto,
-      ),
-    ];
-    final secondaryActions =
-        <({IconData icon, String label, VoidCallback onTap})>[
+    final primaryActions =
+        <({BilSemanticIconKind kind, String label, VoidCallback onTap})>[
           (
-            icon: Icons.fitness_center_rounded,
+            kind: BilSemanticIconKind.foodLog,
+            label: _text(context, 'Log food'),
+            onTap: onFood,
+          ),
+          (
+            kind: BilSemanticIconKind.barcode,
+            label:
+                '${_text(context, 'Scan barcode')}\n${_text(context, 'Premium')}',
+            onTap: onBarcode,
+          ),
+          (
+            kind: BilSemanticIconKind.voice,
+            label: _text(context, 'Log food by voice'),
+            onTap: onVoice,
+          ),
+          (
+            kind: BilSemanticIconKind.mealPhoto,
+            label: _text(context, 'Analyze meal photo'),
+            onTap: onPhoto,
+          ),
+        ];
+    final secondaryActions =
+        <({BilSemanticIconKind kind, String label, VoidCallback onTap})>[
+          (
+            kind: BilSemanticIconKind.exercise,
             label: _text(context, 'Exercise library'),
             onTap: onExercise,
           ),
           (
-            icon: Icons.edit_note_rounded,
+            kind: BilSemanticIconKind.notes,
             label: _text(context, 'Daily notes'),
             onTap: onNotes,
           ),
           (
-            icon: Icons.search_rounded,
+            kind: BilSemanticIconKind.foodSearch,
             label: _text(context, 'Search or create food'),
             onTap: onSearch,
           ),
@@ -105,6 +107,11 @@ class BilQuickAddSheet extends StatelessWidget {
       data: baseTheme.copyWith(colorScheme: bilScheme),
       child: Align(
         alignment: Alignment.bottomCenter,
+        // Shrink the route child to the visible sheet. Without a height
+        // factor Align expands to the full viewport, making the transparent
+        // area above the card intercept barrier taps and leaving the modal
+        // BottomSheet with no vertical room to follow a drag gesture.
+        heightFactor: 1,
         child: SizedBox(
           key: const Key('quick-add-half-sheet'),
           height: sheetHeight,
@@ -145,31 +152,45 @@ class BilQuickAddSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: BilFullWordmark(
-                                  key: Key('quick-add-wordmark'),
-                                  height: 28,
-                                  alignment: AlignmentDirectional.centerStart,
-                                ),
-                              ),
-                              if (photoAsset?.trim().isNotEmpty ?? false) ...[
-                                const SizedBox(width: 10),
-                                ExcludeSemantics(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.asset(
-                                      photoAsset!,
-                                      key: const Key('quick-add-photo-hero'),
-                                      width: 52,
-                                      height: 44,
-                                      fit: BoxFit.cover,
-                                    ),
+                          SizedBox(
+                            key: const Key('quick-add-identity-header'),
+                            height: 44,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                const Padding(
+                                  // Reserve the same physical rail on both
+                                  // sides. The optional photo occupies only
+                                  // the right rail, while the wordmark stays
+                                  // centred on the sheet/viewport in LTR and
+                                  // RTL instead of the Row's leftover width.
+                                  padding: EdgeInsets.symmetric(horizontal: 62),
+                                  child: BilFullWordmark(
+                                    key: Key('quick-add-wordmark'),
+                                    height: 28,
+                                    alignment: Alignment.center,
                                   ),
                                 ),
+                                if (photoAsset?.trim().isNotEmpty ?? false)
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: ExcludeSemantics(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.asset(
+                                          photoAsset!,
+                                          key: const Key(
+                                            'quick-add-photo-hero',
+                                          ),
+                                          width: 52,
+                                          height: 44,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
-                            ],
+                            ),
                           ),
                           const SizedBox(height: 12),
                           GridView.builder(
@@ -185,9 +206,18 @@ class BilQuickAddSheet extends StatelessWidget {
                                 ),
                             itemBuilder: (context, index) {
                               final action = primaryActions[index];
+                              final spec = BilSemanticIcons.spec(action.kind);
                               return _PrimaryQuickAction(
                                 actionKey: Key('quick-add-primary-$index'),
-                                icon: action.icon,
+                                badgeKey: Key('quick-add-primary-badge-$index'),
+                                iconKey: Key('quick-add-primary-icon-$index'),
+                                icon: spec.iconFor(baseTheme.platform),
+                                backgroundColor: spec.accent(
+                                  baseTheme.brightness,
+                                ),
+                                foregroundColor: spec.onAccent(
+                                  baseTheme.brightness,
+                                ),
                                 label: action.label,
                                 onTap: action.onTap,
                               );
@@ -199,13 +229,46 @@ class BilQuickAddSheet extends StatelessWidget {
                             index < secondaryActions.length;
                             index++
                           )
-                            _QuickActionTile(
-                              actionKey: Key('quick-add-secondary-$index'),
-                              icon: secondaryActions[index].icon,
-                              label: secondaryActions[index].label,
-                              onTap: secondaryActions[index].onTap,
+                            Builder(
+                              builder: (context) {
+                                final action = secondaryActions[index];
+                                final spec = BilSemanticIcons.spec(action.kind);
+                                return _QuickActionTile(
+                                  actionKey: Key('quick-add-secondary-$index'),
+                                  iconKey: Key(
+                                    'quick-add-secondary-icon-$index',
+                                  ),
+                                  icon: spec.iconFor(baseTheme.platform),
+                                  color: spec.accent(baseTheme.brightness),
+                                  label: action.label,
+                                  onTap: action.onTap,
+                                );
+                              },
                             ),
                         ],
+                      ),
+                    ),
+                  ),
+                  // Keep the visual handle compact so every Quick Add action
+                  // remains visible in the half-height sheet, while exposing
+                  // a full-size tap target. Vertical drags intentionally stay
+                  // unhandled here so the framework BottomSheet owns the
+                  // gesture and moves this handle together with the sheet.
+                  PositionedDirectional(
+                    top: 0,
+                    start: 0,
+                    end: 0,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Semantics(
+                        button: true,
+                        label: _text(context, 'Close Quick Add'),
+                        child: GestureDetector(
+                          key: const Key('quick-add-drag-handle'),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => Navigator.maybePop(context),
+                          child: const SizedBox(width: 96, height: 48),
+                        ),
                       ),
                     ),
                   ),
@@ -222,27 +285,46 @@ class BilQuickAddSheet extends StatelessWidget {
 class _PrimaryQuickAction extends StatelessWidget {
   const _PrimaryQuickAction({
     required this.actionKey,
+    required this.badgeKey,
+    required this.iconKey,
     required this.icon,
+    required this.backgroundColor,
+    required this.foregroundColor,
     required this.label,
     required this.onTap,
   });
 
   final Key actionKey;
+  final Key badgeKey;
+  final Key iconKey;
   final IconData icon;
+  final Color backgroundColor;
+  final Color foregroundColor;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => _GlassActionSurface(
     actionKey: actionKey,
+    semanticLabel: label.replaceAll('\n', ' '),
     radius: 19,
     onTap: onTap,
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 23),
+          Container(
+            key: badgeKey,
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, key: iconKey, color: foregroundColor, size: 20),
+          ),
           const SizedBox(height: 4),
           Flexible(
             child: Text(
@@ -265,13 +347,17 @@ class _PrimaryQuickAction extends StatelessWidget {
 class _QuickActionTile extends StatelessWidget {
   const _QuickActionTile({
     required this.actionKey,
+    required this.iconKey,
     required this.icon,
+    required this.color,
     required this.label,
     required this.onTap,
   });
 
   final Key actionKey;
+  final Key iconKey;
   final IconData icon;
+  final Color color;
   final String label;
   final VoidCallback onTap;
 
@@ -280,6 +366,7 @@ class _QuickActionTile extends StatelessWidget {
     padding: const EdgeInsets.only(top: 6),
     child: _GlassActionSurface(
       actionKey: actionKey,
+      semanticLabel: label,
       radius: 18,
       onTap: onTap,
       child: Padding(
@@ -290,14 +377,14 @@ class _QuickActionTile extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
+                color: color.withValues(
+                  alpha: Theme.of(context).brightness == Brightness.dark
+                      ? .22
+                      : .12,
+                ),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
+              child: Icon(key: iconKey, icon, color: color, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -327,12 +414,14 @@ class _QuickActionTile extends StatelessWidget {
 class _GlassActionSurface extends StatelessWidget {
   const _GlassActionSurface({
     required this.actionKey,
+    required this.semanticLabel,
     required this.radius,
     required this.onTap,
     required this.child,
   });
 
   final Key actionKey;
+  final String semanticLabel;
   final double radius;
   final VoidCallback onTap;
   final Widget child;
@@ -340,20 +429,29 @@ class _GlassActionSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
+    return Semantics(
       key: actionKey,
-      color: scheme.surface.withValues(alpha: .94),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius),
-        side: BorderSide(color: scheme.outlineVariant),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
-          child: child,
+      button: true,
+      label: semanticLabel,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Material(
+        color: scheme.surface.withValues(alpha: .94),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+          side: BorderSide(color: scheme.outlineVariant),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          // Semantics owns the single accessible tap action above; InkWell
+          // remains the visual/pointer target for touch and mouse input.
+          excludeFromSemantics: true,
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: child,
+          ),
         ),
       ),
     );

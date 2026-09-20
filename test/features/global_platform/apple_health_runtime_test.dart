@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/features/global_platform/health_data/apple_health_platform.dart';
 
 import 'global_platform_test_support.dart';
@@ -27,6 +29,39 @@ final class _RecordingAppleBridge implements NativeHealthBridge {
   Future<void> write(List<GlobalHealthSignal> signals) async {
     writes++;
   }
+}
+
+final class _HangingCancellableAppleBridge
+    implements NativeHealthCancellableReadBridge {
+  bool cancelled = false;
+  final Completer<NativeHealthPage> _never = Completer<NativeHealthPage>();
+
+  @override
+  String get id => 'bil/apple_health';
+
+  @override
+  Future<void> cancelReadChanges() async {
+    cancelled = true;
+  }
+
+  @override
+  Future<void> delete(List<String> recordIds) async {}
+
+  @override
+  Future<Map<String, bool>> permissions() async => const {};
+
+  @override
+  Future<NativeHealthPage> readChanges({
+    required String? anchor,
+    required DateTime asOf,
+    required Set<String> types,
+  }) => _never.future;
+
+  @override
+  Future<void> request(Set<String> types, {required bool write}) async {}
+
+  @override
+  Future<void> write(List<GlobalHealthSignal> signals) async {}
 }
 
 void main() {
@@ -85,4 +120,28 @@ void main() {
       expect(bridge.writes, 0);
     },
   );
+
+  test('a hanging native read is timed out and cancelled', () async {
+    final bridge = _HangingCancellableAppleBridge();
+    final runtime = UnifiedHealthDataRuntime(
+      bridges: [bridge],
+      store: InMemoryGlobalStore(),
+      audit: InMemoryGlobalAuditSink(),
+      foregroundReadTimeout: const Duration(milliseconds: 20),
+      nativeCancellationTimeout: const Duration(milliseconds: 20),
+    );
+
+    await expectLater(
+      runtime.synchronize(
+        asOf: DateTime.utc(2026),
+        consent: GlobalConsentGrant(
+          scope: 'health.read',
+          state: GlobalConsentState.granted,
+          updatedAt: DateTime.utc(2026),
+        ),
+      ),
+      throwsA(isA<TimeoutException>()),
+    );
+    expect(bridge.cancelled, isTrue);
+  });
 }

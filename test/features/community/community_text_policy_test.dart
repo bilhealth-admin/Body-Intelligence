@@ -203,8 +203,10 @@ void main() {
 
   test('publish screens show the localized policy message', () {
     for (final path in const [
-      'lib/features/community/presentation/community_feed_tab.dart',
-      'lib/features/community/presentation/community_food_tab.dart',
+      // Publishing moved from the feed into its own page.
+      'lib/features/community/presentation/community_post_composer_page.dart',
+      // Submission and localized policy errors now live inside the modal.
+      'lib/features/community/presentation/community_food_submission_sheet.dart',
       'lib/features/community/presentation/community_chat_page.dart',
       'lib/features/community/presentation/community_messages_page.dart',
       'lib/features/community/presentation/community_profile_page.dart',

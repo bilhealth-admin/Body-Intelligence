@@ -10,6 +10,7 @@ void main() {
               'intelligence_center_widgets.dart',
               'intelligence_center_message_widgets.dart',
               'intelligence_center_voice_widgets.dart',
+              'intelligence_conversation_persistence.dart',
               'intelligence_conversation_voice.dart',
               'intelligence_query_flow.dart',
               'intelligence_action_flow.dart',

@@ -7,6 +7,7 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     String value,
     String title,
     ValueChanged<String> apply,
+    Future<void> Function()? persist,
   ) => _Row(
     icon: icon,
     label: label,
@@ -15,11 +16,12 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
       final result = await edit(title, value);
       if (result != null) {
         _updateState(() => apply(result));
+        await persist?.call();
       }
     },
   );
 
-  Future<void> editNumber(
+  Future<bool> editNumber(
     String title,
     double current,
     double min,
@@ -30,10 +32,12 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     final parsed = double.tryParse(value?.replaceAll(',', '.') ?? '');
     if (parsed != null && parsed >= min && parsed <= max) {
       _updateState(() => apply(parsed));
+      return true;
     }
+    return false;
   }
 
-  Future<void> editDateOfBirth() async {
+  Future<bool> editDateOfBirth() async {
     final now = DateTime.now();
     final latestEligible = BilAdultEligibility.latestEligibleBirthDate(on: now);
     final current = dateOfBirth ?? DateTime(now.year - age);
@@ -44,7 +48,7 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
       lastDate: latestEligible,
       helpText: tr('Date of birth', 'تاريخ الميلاد'),
     );
-    if (selected == null || !mounted) return;
+    if (selected == null || !mounted) return false;
     var years = now.year - selected.year;
     if (now.month < selected.month ||
         (now.month == selected.month && now.day < selected.day)) {
@@ -54,10 +58,11 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
       dateOfBirth = selected;
       age = years;
     });
+    return true;
   }
 
-  Future<void> editHeight() async {
-    if (_heightEditorOpen) return;
+  Future<bool> editHeight() async {
+    if (_heightEditorOpen) return false;
     _heightEditorOpen = true;
     var editorUnit = units == 'imperial' ? 'imperial' : 'metric';
     final controller = TextEditingController(
@@ -166,7 +171,9 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
         nextHeight <= 250 &&
         mounted) {
       _updateState(() => height = nextHeight);
+      return true;
     }
+    return false;
   }
 
   Future<void> openSettingsRoute(String route, UserProfileData profile) async {

@@ -37,18 +37,56 @@ class BilAdMobConfiguration {
     final appId = platform == BilAdPlatform.android
         ? androidAppId.trim()
         : iosAppId.trim();
-    return publisherId.trim().startsWith('pub-') &&
-        appId.startsWith('ca-app-pub-') &&
-        unit.startsWith('ca-app-pub-') &&
-        !appId.contains('3940256099942544') &&
-        !unit.contains('3940256099942544');
+    return isProductionConfiguration(
+      publisherId: publisherId,
+      appId: appId,
+      bannerId: unit,
+    );
+  }
+
+  /// Accepts only one exact, non-placeholder AdMob publisher identity.
+  ///
+  /// Prefix-only checks can mistake a zero-filled placeholder, Google's sample
+  /// account, or an ad unit belonging to another publisher for production
+  /// configuration. Keep that state fail-closed before any SDK request.
+  static bool isProductionConfiguration({
+    required String publisherId,
+    required String appId,
+    required String bannerId,
+  }) {
+    final publisher = _productionPublisherNumber(publisherId);
+    final appMatch = RegExp(
+      r'^ca-app-pub-(\d{16})~\d{10}$',
+    ).firstMatch(appId.trim());
+    final bannerMatch = RegExp(
+      r'^ca-app-pub-(\d{16})/\d{10}$',
+    ).firstMatch(bannerId.trim());
+    if (publisher == null || appMatch == null || bannerMatch == null) {
+      return false;
+    }
+
+    return appMatch.group(1) == publisher && bannerMatch.group(1) == publisher;
+  }
+
+  static bool isProductionPublisherId(String value) =>
+      _productionPublisherNumber(value) != null;
+
+  static String? _productionPublisherNumber(String value) {
+    final match = RegExp(r'^pub-(\d{16})$').firstMatch(value.trim());
+    final publisher = match?.group(1);
+    if (publisher == null ||
+        publisher == '0000000000000000' ||
+        publisher == '3940256099942544') {
+      return null;
+    }
+    return publisher;
   }
 
   /// Exact record to publish only after the owner provides a verified ID.
   /// Returns null while incomplete so app-ads.txt cannot fabricate ownership.
   static String? appAdsRecord() {
     final publisher = publisherId.trim();
-    if (!RegExp(r'^pub-\d+$').hasMatch(publisher)) return null;
+    if (!isProductionPublisherId(publisher)) return null;
     return 'google.com, $publisher, DIRECT, f08c47fec0942fa0';
   }
 }

@@ -18,12 +18,30 @@ void main() {
     expect(page, contains('within 15 minutes'));
     expect(page, contains('accountUsesAppleSignIn'));
     expect(page, contains('https://support.apple.com/102571'));
-    expect(page, contains('does not retain an Apple token'));
-    expect(page, contains('optional Apple step'));
+    expect(page, contains('revokes Apple authorization'));
+    expect(page, contains('Older accounts may not have that token'));
     expect(page, isNot(contains('appleid.apple.com/auth/revoke')));
+    expect(
+      page.indexOf('await appleIdentifierStore.markPendingCleanup('),
+      lessThan(page.indexOf('await invalidateMatchingLocalSession(')),
+      reason:
+          'Apple cleanup intent must survive loss of the auth owner context',
+    );
+    expect(
+      page.indexOf('await invalidateMatchingLocalSession('),
+      lessThan(page.indexOf('await showDialog<void>(')),
+      reason:
+          'accepted pending/completed deletions must clear local auth before UI',
+    );
+    expect(
+      page,
+      contains('if (usedAppleSignIn) ...['),
+      reason:
+          'Apple cleanup guidance must remain reachable for queued deletion',
+    );
   });
 
-  test('worker removes and verifies Storage before deleting Auth', () {
+  test('worker revokes Apple, then verifies Storage before deleting Auth', () {
     final flat = source('supabase/functions/account_data_deletion.ts');
     final canonical = source(
       'supabase/functions/account-data-deletion/index.ts',
@@ -34,6 +52,9 @@ void main() {
     final storage = source(
       'supabase/functions/_shared/account_deletion_storage.ts',
     );
+    final appleLifecycle = source(
+      'supabase/functions/_shared/apple_sign_in_token_lifecycle.ts',
+    );
 
     expect(flat, contains('handleAccountDeletion'));
     expect(canonical, contains('handleAccountDeletion'));
@@ -42,6 +63,14 @@ void main() {
     expect(storage, contains('bucket.remove(chunk)'));
     expect(storage, contains('storage_cleanup_incomplete'));
     expect(storage, contains('MAX_OBJECTS_PER_ACCOUNT'));
+    expect(appleLifecycle, contains('https://appleid.apple.com'));
+    expect(appleLifecycle, contains('const appleRevokeEndpoint'));
+    expect(appleLifecycle, contains('/auth/revoke'));
+    expect(appleLifecycle, contains('token_type_hint: "refresh_token"'));
+    expect(
+      worker.indexOf('revokeAppleCredentialForDeletion'),
+      lessThan(worker.indexOf('removed = await deleteBilUserStorage')),
+    );
     expect(
       worker.indexOf('removed = await deleteBilUserStorage'),
       lessThan(worker.indexOf('client.auth.admin.deleteUser')),
@@ -84,15 +113,41 @@ void main() {
     },
   );
 
-  test('Sign in with Apple tokenless fallback follows TN3194', () {
-    final readiness = source(
-      'docs/release/BIL_APPLE_ACCOUNT_DELETION_READINESS_2026-08-30.md',
-    );
-    expect(readiness, contains('TN3194'));
-    expect(readiness, contains('https://support.apple.com/102571'));
-    expect(readiness, contains('Delete or Stop Using'));
-    expect(readiness, contains('does not block or undo'));
-    expect(readiness, contains('unauthenticated'));
-    expect(readiness, isNot(contains('revocation blocker')));
-  });
+  test(
+    'Sign in with Apple server revocation and legacy fallback follow TN3194',
+    () {
+      final readiness = source(
+        'docs/release/BIL_APPLE_ACCOUNT_DELETION_READINESS_2026-08-30.md',
+      );
+      final migration = source(
+        'supabase/migrations/20260905143000_apple_sign_in_token_lifecycle.sql',
+      );
+      final registration = source(
+        'supabase/functions/apple-sign-in-token/index.ts',
+      );
+      final notifications = source(
+        'supabase/functions/apple-sign-in-notifications/index.ts',
+      );
+      expect(readiness, contains('TN3194'));
+      expect(readiness, contains('https://support.apple.com/102571'));
+      expect(readiness, contains('Delete or Stop Using'));
+      expect(readiness, contains('fallback does not block or undo'));
+      expect(readiness, contains('apple-sign-in-notifications'));
+      expect(migration, contains('private.bil_apple_sign_in_credentials'));
+      expect(migration, contains('to service_role'));
+      expect(
+        migration,
+        isNot(
+          contains(
+            'to authenticated;\ngrant execute on function public.bil_read_apple',
+          ),
+        ),
+      );
+      expect(registration, contains('normalizeAppleAuthorizationPayload'));
+      expect(registration, contains('verifyAppleNonce'));
+      expect(registration, contains('storeAppleRefreshToken'));
+      expect(notifications, contains('verifyAppleNotification'));
+      expect(notifications, contains('applyAppleAccountEvent'));
+    },
+  );
 }

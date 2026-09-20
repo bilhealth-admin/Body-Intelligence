@@ -54,7 +54,11 @@ abstract final class GoalTimelineEstimator {
     }
 
     final distance = (currentWeightKg - targetWeightKg).abs();
-    if (distance <= atGoalToleranceKg) {
+    final crossedLossGoal =
+        goalType == 'lose' && currentWeightKg <= targetWeightKg;
+    final crossedGainGoal =
+        goalType == 'gain' && currentWeightKg >= targetWeightKg;
+    if (distance <= atGoalToleranceKg || crossedLossGoal || crossedGainGoal) {
       return GoalTimelineEstimate(
         state: GoalTimelineState.alreadyAtGoal,
         currentWeightKg: currentWeightKg,
@@ -75,7 +79,11 @@ abstract final class GoalTimelineEstimator {
       );
     }
 
-    final losing = targetWeightKg < currentWeightKg;
+    final losing = goalType == 'lose'
+        ? true
+        : goalType == 'gain'
+        ? false
+        : targetWeightKg < currentWeightKg;
     // These are conservative planning bands, not observed or promised rates.
     // Loss is capped below 0.75 kg/week; gain below 0.30 kg/week. The displayed
     // timeline then applies the explicit adherence assumption to both bounds.

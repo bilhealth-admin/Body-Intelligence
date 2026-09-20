@@ -26,12 +26,21 @@ void main() {
     expect(page, contains('diary.defaultSearchTab'));
     expect(page, contains('diary.sharingKeySha256'));
     expect(page, contains('sha256.convert'));
+    expect(page, contains('DiarySharingSupportRepository'));
+    expect(page, contains('setDiarySharing('));
+    expect(page, contains("'diary-sharing-\$option'"));
+    expect(
+      page,
+      isNot(
+        contains("for (final option in const ['public', 'friends', 'locked'])"),
+      ),
+    );
     expect(page, contains("'diary.mealName.\$i'"));
   });
 
   test('new diary truth copy has direct extended-locale entries', () {
     for (final key in const [
-      'Diary sharing is not available yet. Your diary remains private.',
+      'If you share your diary, your weight and eating habits may be visible to the people you choose.',
       'Customize the four supported meal names. Empty slots are hidden from the diary.',
     ]) {
       final values = ExtendedRuntimeCopy.values[key];

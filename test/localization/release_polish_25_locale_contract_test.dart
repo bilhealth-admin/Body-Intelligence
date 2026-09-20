@@ -276,6 +276,8 @@ void main() {
     final fitnessDevices = File(
       'lib/features/connected_health/connected_health_components.dart',
     ).readAsStringSync();
+    // The barcode action implementation is a part-file; only the copy keys
+    // that are actual user-visible call sites belong in this source contract.
     final foodActions = File(
       'lib/features/nutrition/presentation/food_page_actions.dart',
     ).readAsStringSync();
@@ -309,9 +311,13 @@ void main() {
     expect(barcode, contains(ReleaseActionRuntimeCopy.lookUp));
     expect(
       fitnessDevices,
-      contains(ReleaseActionRuntimeCopy.compatibleFitnessMeasurements),
+      contains(ConnectedHealthRuntimeCopy.supportedFitnessDevices),
     );
-    for (final source in FoodActionRuntimeCopy.sources) {
+    for (final source in const [
+      FoodActionRuntimeCopy.enableCamera,
+      FoodActionRuntimeCopy.verifiedCatalogUnavailable,
+      FoodActionRuntimeCopy.noVerifiedBarcodeMatch,
+    ]) {
       expect(foodActions, contains(source));
     }
     for (final source in DailyLogActionRuntimeCopy.sources) {

@@ -14,7 +14,7 @@ ConnectedHealthSignalView _signal(
   String key,
   double value,
   String unit, {
-  String source = 'verified-device',
+  String source = 'QA watch',
   double confidence = .98,
 }) => ConnectedHealthSignalView(
   key: key,
@@ -44,10 +44,11 @@ ConnectedHealthSnapshot _snapshot({
 Widget _subject(
   ConnectedHealthSnapshot snapshot, {
   Locale locale = const Locale('en'),
+  DateTime Function()? now,
 }) => ProviderScope(
   overrides: [
     liveHealthNowProvider.overrideWithValue(
-      () => DateTime(2026, 8, 31, 14, 22, 8),
+      now ?? () => DateTime(2026, 8, 31, 14, 22, 8),
     ),
   ],
   child: MaterialApp(
@@ -118,6 +119,28 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets(
+    'verified Apple Health readings without HKDevice still reach the watch',
+    (tester) async {
+      await tester.pumpWidget(
+        _subject(
+          _snapshot(
+            status: ConnectedHealthStatus.synchronized,
+            verified: true,
+            source: 'Apple Health',
+            signals: [
+              _signal('steps', 1234, 'steps', source: 'com.apple.health'),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+      expect(find.text('1234'), findsOneWidget);
+    },
+  );
+
   for (final status in const [
     ConnectedHealthStatus.unavailable,
     ConnectedHealthStatus.permissionRequired,
@@ -169,6 +192,11 @@ void main() {
       _snapshot(
         status: ConnectedHealthStatus.synchronized,
         verified: true,
+        signals: [_signal('steps', 100, 'steps', source: 'Health app')],
+      ),
+      _snapshot(
+        status: ConnectedHealthStatus.synchronized,
+        verified: true,
         signals: [
           _signal('steps', double.nan, 'steps'),
           _signal('heartRate', 70, 'bpm', source: ''),
@@ -189,6 +217,32 @@ void main() {
   test('watch scope contains no oxygen or SpO2 metric', () {
     expect(liveHealthWatchSignalIsActual(_signal('oxygen', 98, '%')), isFalse);
     expect(liveHealthWatchSignalIsActual(_signal('SpO2', 98, '%')), isFalse);
+  });
+
+  testWidgets('watch clock pauses offscreen and resumes without polling', (
+    tester,
+  ) async {
+    var now = DateTime(2026, 8, 31, 14, 22, 8);
+    await tester.pumpWidget(
+      _subject(const ConnectedHealthSnapshot.unavailable(), now: () => now),
+    );
+    await tester.pump();
+    String clockText() => tester
+        .widget<Text>(find.byKey(const Key('watch-digital-time')))
+        .textSpan!
+        .toPlainText();
+    expect(clockText(), contains('14:22'));
+
+    final observer =
+        tester.state(find.byType(LiveHealthWatch)) as WidgetsBindingObserver;
+    observer.didChangeAppLifecycleState(AppLifecycleState.paused);
+    now = DateTime(2026, 8, 31, 14, 24, 8);
+    await tester.pump(const Duration(seconds: 2));
+    expect(clockText(), contains('14:22'));
+
+    observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(clockText(), contains('14:24'));
   });
 
   testWidgets(

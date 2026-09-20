@@ -6,16 +6,34 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/localization/runtime_copy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../commerce/presentation/ai_boost_coach_artwork.dart';
 import '../../commerce/providers/commerce_providers.dart';
+import '../../onboarding/onboarding_runtime_copy.dart';
+import '../../profile/providers/user_profile_provider.dart';
+import '../domain/coach_context_preferences.dart';
 import '../services/ai_boost_purchase_service.dart';
 
 part 'ai_coach_settings_components.dart';
 part 'ai_coach_settings_usage_widgets.dart';
 
 const _globalResetGiftCopy =
-    'A gift from BIL 🎁 Your AI Coach usage has been fully reset. You can use your allowance again until the end of your current cycle.';
+    'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.';
+
+@visibleForTesting
+Set<CoachContextFocus> coachContextFocusesFromUsage(Object? raw) {
+  if (raw is! List) return const CoachContextPreferences().focuses;
+  final names = raw
+      .map((value) => value?.toString())
+      .whereType<String>()
+      .toSet();
+  return Set.unmodifiable(
+    CoachContextFocus.values.where((focus) => names.contains(focus.name)),
+  );
+}
 
 class AiCoachSettingsPage extends ConsumerStatefulWidget {
   const AiCoachSettingsPage({super.key});
@@ -30,6 +48,8 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   late final AiBoostPurchaseService boost;
   Future<Map<String, Object?>>? usage;
   bool changingConsent = false;
+  bool changingContextFocus = false;
+  Set<CoachContextFocus>? contextFocuses;
 
   @override
   void initState() {
@@ -43,7 +63,10 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !mounted) return;
-    setState(() => usage = _loadUsage());
+    setState(() {
+      contextFocuses = null;
+      usage = _loadUsage();
+    });
   }
 
   void _boostChanged() {
@@ -64,6 +87,12 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     if (ownerId == null) throw StateError('authentication_required');
     final value = await client.rpc('bil_get_ai_usage_status');
     final result = Map<String, Object?>.from(value as Map);
+    final storedContext = await ref
+        .read(preferencesRepositoryProvider)
+        .get(CoachContextPreferences.storageKey);
+    result['context_focuses'] = CoachContextPreferences.decode(
+      storedContext,
+    ).focuses.map((focus) => focus.name).toList(growable: false);
     try {
       final consent = await client.rpc('bil_get_remote_ai_consent');
       final consentMap = Map<String, Object?>.from(consent as Map);
@@ -80,7 +109,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     try {
       final notice = await client
           .from('bil_ai_coach_reset_notices')
-          .select('reset_id,created_at')
+          .select('reset_id,created_at,message')
           .eq('owner_id', ownerId)
           .isFilter('seen_at', null)
           .order('created_at', ascending: false)
@@ -96,10 +125,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     return result;
   }
 
-  Future<void> _setRemoteAiConsent(
-    bool granted, {
-    String policyVersion = '1',
-  }) async {
+  Future<void> _setRemoteAiConsent(bool granted) async {
     if (changingConsent) return;
     setState(() => changingConsent = true);
     try {
@@ -107,7 +133,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         'bil_record_consent',
         params: <String, Object?>{
           'p_purpose': 'remote_ai',
-          'p_policy_version': policyVersion,
+          'p_policy_version': '2',
           'p_granted': granted,
         },
       );
@@ -132,19 +158,68 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     }
   }
 
+  Future<void> _setContextFocus(
+    CoachContextFocus focus,
+    bool included,
+    Set<CoachContextFocus> current,
+  ) async {
+    if (changingContextFocus) return;
+    final next = <CoachContextFocus>{...current};
+    included ? next.add(focus) : next.remove(focus);
+    setState(() => changingContextFocus = true);
+    try {
+      await ref
+          .read(preferencesRepositoryProvider)
+          .set(
+            CoachContextPreferences.storageKey,
+            CoachContextPreferences(focuses: Set.unmodifiable(next)).encode(),
+          );
+      if (mounted) {
+        setState(() => contextFocuses = Set.unmodifiable(next));
+      }
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            t(
+              'Could not update Coach context categories. Nothing changed.',
+              'تعذر تحديث فئات سياق المدرب. لم يتغير شيء.',
+              'Impossible de modifier les catégories de contexte. Aucun changement.',
+              'No se pudieron actualizar las categorías de contexto. No cambió nada.',
+              'Koç bağlam kategorileri güncellenemedi. Hiçbir şey değişmedi.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => changingContextFocus = false);
+    }
+  }
+
   String t(String en, String ar, String fr, String es, String tr) {
-    return switch (Localizations.localeOf(context).languageCode) {
+    final locale = Localizations.localeOf(context);
+    return switch (locale.languageCode) {
       'ar' => ar,
       'en' => en,
       'fr' => fr,
       'es' => es,
       'tr' => tr,
-      _ => context.strings.text(en),
+      _ =>
+        RuntimeCopy.resolve(en, BilLocalePolicy.canonicalTag(locale)) ??
+            OnboardingRuntimeCopy.resolve(en, locale),
     };
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(aiCoachUsageRefreshProvider, (previous, next) {
+      if (previous == next || !mounted) return;
+      setState(() {
+        contextFocuses = null;
+        usage = _loadUsage();
+      });
+    });
     const navy = Color(0xFF071923);
     return Scaffold(
       backgroundColor: const Color(0xFFF3F7F9),
@@ -175,7 +250,10 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
           return RefreshIndicator(
             onRefresh: () async {
               final fresh = _loadUsage();
-              setState(() => usage = fresh);
+              setState(() {
+                contextFocuses = null;
+                usage = fresh;
+              });
               await fresh;
             },
             child: _settingsBody(snapshot.data!),
@@ -186,6 +264,8 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   }
 
   Widget _settingsBody(Map<String, Object?> data) {
+    final loadedFocuses = coachContextFocusesFromUsage(data['context_focuses']);
+    final effectiveFocuses = contextFocuses ?? loadedFocuses;
     final rawCredits = data['credits'];
     final credits = rawCredits is Map
         ? Map<String, Object?>.from(rawCredits)
@@ -205,6 +285,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         ? Map<String, Object?>.from(rawNotice)
         : const <String, Object?>{};
     final resetNoticeId = notice['reset_id']?.toString() ?? '';
+    final authoredResetMessage = notice['message']?.toString().trim();
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -212,7 +293,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
       children: [
         if (resetNoticeId.isNotEmpty) ...[
           _ResetGiftBanner(
-            message: context.strings.text(_globalResetGiftCopy),
+            message: authoredResetMessage?.isNotEmpty == true
+                ? authoredResetMessage!
+                : context.strings.text(_globalResetGiftCopy),
             onDismiss: () => _dismissResetNotice(resetNoticeId),
           ),
           const SizedBox(height: 14),
@@ -294,12 +377,20 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
             'Kişiselleştirilmiş zekâ',
           ),
           subtitle: t(
-            'Send only the bounded context needed to answer your question. Your full diary and full conversation are never uploaded.',
-            'يرسل فقط السياق المحدود اللازم للإجابة. لا تُرفع يومياتك أو محادثتك كاملة.',
-            'Seul le contexte strictement nécessaire est envoyé.',
-            'Solo se envía el contexto estrictamente necesario.',
-            'Yalnızca yanıt için gereken sınırlı bağlam gönderilir.',
+            'When enabled, only the bounded context needed for your question is sent to BIL’s Gemini service. Conversation history remains local except for the last 12 turns sent with that request. Turn this off at any time.',
+            'عند التفعيل، يُرسل إلى خدمة Gemini التابعة لـBIL فقط السياق المحدود اللازم لسؤالك. يبقى سجل المحادثة محليًا باستثناء آخر 12 رسالة تُرسل مع ذلك الطلب. يمكنك إيقافه في أي وقت.',
+            'Lorsque cette option est activée, seul le contexte limité nécessaire à votre question est envoyé au service Gemini de BIL. L’historique reste local, hormis les 12 derniers messages envoyés avec cette requête. Vous pouvez désactiver cette option à tout moment.',
+            'Cuando está activado, solo se envía al servicio Gemini de BIL el contexto limitado necesario para tu pregunta. El historial permanece local, salvo los últimos 12 mensajes enviados con esa solicitud. Puedes desactivarlo en cualquier momento.',
+            'Etkinleştirildiğinde yalnızca sorunuz için gereken sınırlı bağlam BIL’in Gemini hizmetine gönderilir. Konuşma geçmişi, istekle gönderilen son 12 mesaj dışında yerel kalır. İstediğiniz zaman kapatabilirsiniz.',
           ),
+        ),
+        const SizedBox(height: 10),
+        _ContextFocusCard(
+          focuses: effectiveFocuses,
+          enabled: !changingContextFocus,
+          onChanged: (focus, included) =>
+              _setContextFocus(focus, included, effectiveFocuses),
+          t: t,
         ),
         const SizedBox(height: 10),
         Container(
@@ -309,23 +400,27 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
             border: Border.all(color: const Color(0xFFD7E4E9)),
           ),
           child: ListTile(
-            leading: const Icon(Icons.phonelink_lock_rounded),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.privacy,
+              iconOverride: Icons.phonelink_lock_rounded,
+              appleIconOverride: Icons.phonelink_lock_rounded,
+            ),
             title: Text(
               t(
-                'Voice stays on this device',
-                'الصوت يبقى على هذا الجهاز',
-                'La voix reste sur cet appareil',
-                'La voz permanece en este dispositivo',
-                'Ses bu cihazda kalır',
+                'Your platform handles speech recognition',
+                'تتولى خدمة المنصة التعرّف على الكلام',
+                'Votre plateforme gère la reconnaissance vocale',
+                'Tu plataforma gestiona el reconocimiento de voz',
+                'Konuşma tanımayı platformunuz gerçekleştirir',
               ),
             ),
             subtitle: Text(
               t(
-                'Your device turns speech into text. Only that recognized text can be sent to Gemini.',
-                'يحوّل جهازك الكلام إلى نص. لا يُرسل إلى Gemini إلا النص الناتج.',
-                'Votre appareil transforme la parole en texte. Seul ce texte peut être envoyé à Gemini.',
-                'Tu dispositivo convierte la voz en texto. Solo ese texto puede enviarse a Gemini.',
-                'Cihazınız konuşmayı metne çevirir. Gemini’ye yalnızca bu metin gönderilebilir.',
+                'Raw microphone audio is not sent to BIL or Gemini. Your device or platform speech service converts it to text under its settings; only recognized text is sent when you submit.',
+                'لا يُرسل صوت الميكروفون الخام إلى BIL أو Gemini. تحوّله خدمة الكلام في جهازك أو منصتك إلى نص وفق إعداداتها؛ ولا يُرسل سوى النص المتعرّف عليه عندما ترسله.',
+                'Le son brut du microphone n’est pas envoyé à BIL ni à Gemini. Le service vocal de votre appareil ou de votre plateforme le convertit en texte selon ses réglages ; seul le texte reconnu est envoyé lorsque vous validez.',
+                'El audio sin procesar del micrófono no se envía a BIL ni a Gemini. El servicio de voz del dispositivo o de la plataforma lo convierte en texto según sus ajustes; solo se envía el texto reconocido cuando lo confirmas.',
+                'Ham mikrofon sesi BIL’e veya Gemini’ye gönderilmez. Cihazınızdaki ya da platformdaki konuşma hizmeti, kendi ayarlarına göre sesi metne dönüştürür; yalnızca gönderdiğinizde tanınan metin iletilir.',
               ),
             ),
           ),

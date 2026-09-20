@@ -42,6 +42,19 @@ void main() {
     expect(find.text('Cardio'), findsOneWidget);
     expect(find.text('Strength'), findsOneWidget);
     expect(find.text('Workout Videos & Routines'), findsOneWidget);
+    final chooserLockup = _visualWordmark(
+      const ValueKey('exercise-chooser-wordmark'),
+    );
+    expect(
+      (tester.getRect(chooserLockup).center.dx -
+              tester.view.physicalSize.width / tester.view.devicePixelRatio / 2)
+          .abs(),
+      lessThanOrEqualTo(1),
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('exercise-chooser-close'))),
+      const Size.square(48),
+    );
 
     await tester.tap(find.byKey(const ValueKey('exercise-path-cardio')));
     await tester.pumpAndSettle();
@@ -58,6 +71,36 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('exercise-path-routines')));
     await tester.pumpAndSettle();
     expect(find.text('guided-routines'), findsOneWidget);
+  });
+
+  testWidgets('exercise chooser keeps the visual identity centred in RTL', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final router = GoRouter(
+      initialLocation: '/wellness/workouts',
+      routes: [
+        GoRoute(
+          path: '/wellness/workouts',
+          builder: (_, _) => const WorkoutEntryChooserPage(),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      _LocalizedApp(router: router, locale: const Locale('ar')),
+    );
+    await tester.pumpAndSettle();
+
+    final lockup = _visualWordmark(const ValueKey('exercise-chooser-wordmark'));
+    expect(
+      (tester.getRect(lockup).center.dx - 195).abs(),
+      lessThanOrEqualTo(1),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('manual logger honors and can change its initial category', (
@@ -157,12 +200,14 @@ void main() {
 }
 
 class _LocalizedApp extends StatelessWidget {
-  const _LocalizedApp({required this.router});
+  const _LocalizedApp({required this.router, this.locale = const Locale('en')});
 
   final GoRouter router;
+  final Locale locale;
 
   @override
   Widget build(BuildContext context) => MaterialApp.router(
+    locale: locale,
     routerConfig: router,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: const [
@@ -171,3 +216,13 @@ class _LocalizedApp extends StatelessWidget {
     ],
   );
 }
+
+Finder _visualWordmark(Key ownerKey) => find
+    .ancestor(
+      of: find.descendant(
+        of: find.byKey(ownerKey),
+        matching: find.text('BODY INTELLIGENCE LOG'),
+      ),
+      matching: find.byType(Row),
+    )
+    .first;

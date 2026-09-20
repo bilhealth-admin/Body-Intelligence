@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
 import '../../commerce/domain/subscription_state.dart';
@@ -506,7 +507,7 @@ class _ConnectionsEducation extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     color: Theme.of(context).colorScheme.primaryContainer,
     child: ListTile(
-      leading: const Icon(Icons.shield_outlined),
+      leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.privacy),
       title: Text(copy.educationTitle),
       subtitle: Text(copy.educationBody),
     ),

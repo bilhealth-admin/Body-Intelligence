@@ -40,6 +40,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     for (var day = 1; day <= 7; day += 1) day: TextEditingController(),
   };
   final _resolvedTargets = <int, DietMacroTarget>{};
+  final _invalidMacroDays = <int>{};
   DietFatLevel _fatLevel = DietFatLevel.medium;
   int _trimester = 1;
   bool _clinicianAcknowledged = false;
@@ -88,6 +89,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     _trimester = draft.pregnancyTrimester ?? 1;
     final week = draft.resolveWeek();
     _resolvedTargets.clear();
+    _invalidMacroDays.clear();
     for (var day = 1; day <= 7; day += 1) {
       final target = week?[day];
       if (target == null) continue;
@@ -108,20 +110,16 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
 
   DietDraft? _draft() {
     final calories = _effectiveCalories;
-    if (calories == null) return null;
+    if (calories == null || _invalidMacroDays.isNotEmpty) return null;
     final carbs = <int, double>{};
     final protein = <int, double>{};
     final fat = <int, double>{};
     for (var day = 1; day <= 7; day += 1) {
-      final carbValue = double.tryParse(_carbs[day]!.text.trim());
-      final proteinValue = double.tryParse(_protein[day]!.text.trim());
-      final fatValue = double.tryParse(_fat[day]!.text.trim());
-      if (carbValue == null || proteinValue == null || fatValue == null) {
-        return null;
-      }
-      carbs[day] = carbValue;
-      protein[day] = proteinValue;
-      fat[day] = fatValue;
+      final target = _resolvedTargets[day];
+      if (target == null || !target.isValid) return null;
+      carbs[day] = target.carbsGrams;
+      protein[day] = target.proteinGrams;
+      fat[day] = target.fatGrams;
     }
     final draft = DietDraft(
       pathwayId: widget.pathwayId,
@@ -137,11 +135,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
   }
 
   String _macroText(double value) {
-    if ((value - value.round()).abs() < .00005) return '${value.round()}';
-    return value
-        .toStringAsFixed(6)
-        .replaceFirst(RegExp(r'0+$'), '')
-        .replaceFirst(RegExp(r'\.$'), '');
+    return '${roundedDietMacroGrams(value)}';
   }
 
   void _writeTarget(
@@ -149,6 +143,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     DietMacroTarget target, {
     DietMacroComponent? preserve,
   }) {
+    _invalidMacroDays.remove(day);
     if (preserve != DietMacroComponent.carbs) {
       _carbs[day]!.text = _macroText(target.carbsGrams);
     }
@@ -184,6 +179,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     final grams = double.tryParse(source.trim());
     final current = _resolvedTargets[day];
     if (grams == null || current == null) {
+      _invalidMacroDays.add(day);
       setState(() {});
       return;
     }
@@ -194,9 +190,11 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
       fallbackFatLevel: _fatLevel,
     );
     if (target == null) {
+      _invalidMacroDays.add(day);
       setState(() {});
       return;
     }
+    _invalidMacroDays.remove(day);
     _resolvedTargets[day] = target;
     _writeTarget(day, target, preserve: component);
     setState(() {});

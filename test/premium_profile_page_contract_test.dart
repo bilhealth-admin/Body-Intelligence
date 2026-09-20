@@ -18,9 +18,12 @@ void main() {
       router,
       contains("import '../../features/profile/premium_profile_page.dart'"),
     );
-    expect(router, contains('const PremiumProfilePage()'));
+    expect(router, contains('PremiumProfilePage('));
+    expect(router, contains("state.uri.queryParameters['resume']"));
+    expect(router, contains("'android-image-picker'"));
     expect(source, contains("Key('premium-profile-list')"));
-    expect(source, contains("Key('profile-settings-save')"));
+    expect(source, isNot(contains("Key('profile-settings-save')")));
+    expect(source, contains('showSuccess: false'));
     expect(source, contains('profilePhotoProvider'));
     expect(source, contains('userProfileRepositoryProvider'));
     expect(source, contains('goalRepositoryProvider'));
@@ -40,6 +43,9 @@ void main() {
       'profile-units-row',
       'profile-goals-row',
       'profile-dietary-system-row',
+      'profile-health-goal-row',
+      'profile-current-weight-row',
+      'profile-goal-weight-row',
     ]) {
       expect(source, contains("Key('$row')"));
     }

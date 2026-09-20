@@ -5,10 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/router/app_router.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../services/ai_coach_reset_notice_service.dart';
 
 const _resetGiftCopy =
-    'A gift from BIL 🎁 Your AI Coach usage has been fully reset. You can use your allowance again until the end of your current cycle.';
+    'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.';
 
 /// Surfaces durable owner-scoped notices after sign-in and on foreground
 /// resume. General admin notices take precedence over reset gifts; dismissing
@@ -166,6 +167,13 @@ class _AiCoachResetNoticeCoordinatorState
 
   void _openAiCoach() {
     setState(() => _handedToSettings = true);
+    // A reset notice is evidence that any cached access/balance snapshot may
+    // predate a server-side mutation. Invalidate access and notify an already
+    // mounted settings page before navigating. Neither operation waits on the
+    // network or derives a replacement balance locally; both consumers reload
+    // from bil_get_ai_usage_status.
+    ref.invalidate(aiCoachCreditAccessProvider);
+    ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
     AppRouter.router.go('/settings/ai-coach');
   }
 
@@ -239,6 +247,7 @@ class _AiCoachResetNoticeCoordinatorState
                                 ],
                                 Text(
                                   adminNotice?.body ??
+                                      resetNotice?.message ??
                                       context.strings.text(_resetGiftCopy),
                                   key: Key(
                                     adminNotice == null

@@ -9,7 +9,11 @@ import 'package:go_router/go_router.dart';
 
 import 'visual_evidence_font.dart';
 
-Widget _app({required Locale locale, required ThemeMode themeMode}) {
+Widget _app({
+  required Locale locale,
+  required ThemeMode themeMode,
+  required TargetPlatform platform,
+}) {
   final evidenceFont = locale.languageCode == 'ar'
       ? 'NotoArabicEvidence'
       : 'RobotoEvidence';
@@ -45,10 +49,12 @@ Widget _app({required Locale locale, required ThemeMode themeMode}) {
       locale: locale,
       themeMode: themeMode,
       theme: ThemeData(
+        platform: platform,
         colorSchemeSeed: const Color(0xFF087FCE),
         fontFamily: evidenceFont,
       ),
       darkTheme: ThemeData(
+        platform: platform,
         brightness: Brightness.dark,
         colorSchemeSeed: const Color(0xFF54D9FF),
         fontFamily: evidenceFont,
@@ -68,15 +74,21 @@ Widget _app({required Locale locale, required ThemeMode themeMode}) {
 void main() {
   setUpAll(loadVisualEvidenceFont);
   for (final scenario in const [
-    ('en_light', Locale('en'), ThemeMode.light),
-    ('ar_dark', Locale('ar'), ThemeMode.dark),
+    ('en_light', Locale('en'), ThemeMode.light, TargetPlatform.android),
+    ('ar_dark', Locale('ar'), ThemeMode.dark, TargetPlatform.android),
+    ('ios_en_light', Locale('en'), ThemeMode.light, TargetPlatform.iOS),
+    ('ios_ar_dark', Locale('ar'), ThemeMode.dark, TargetPlatform.iOS),
   ]) {
     testWidgets('quick add ${scenario.$1} production visual', (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
-        _app(locale: scenario.$2, themeMode: scenario.$3),
+        _app(
+          locale: scenario.$2,
+          themeMode: scenario.$3,
+          platform: scenario.$4,
+        ),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('shell-quick-add')));

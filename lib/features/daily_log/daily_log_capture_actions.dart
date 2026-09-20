@@ -2,7 +2,7 @@ part of 'daily_log_page.dart';
 
 extension _DailyLogCaptureActions on _DailyLogPageState {
   Future<bool> _ensureCameraPermission() async {
-    const policy = BilRuntimePermissionPolicy();
+    final policy = ref.read(dailyLogRuntimePermissionPolicyProvider);
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!mounted) return false;
@@ -10,7 +10,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         current == BilRuntimePermissionState.restricted) {
       final open = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => AlertDialog.adaptive(
           title: Text(context.strings.text('Camera access is off')),
           content: Text(
             context.strings.text(
@@ -32,28 +32,6 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       if (open == true) await policy.openSettings();
       return false;
     }
-    final continueRequest = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.strings.text('Allow camera for this action?')),
-        content: Text(
-          context.strings.text(
-            'The camera opens only for the barcode or meal photo you selected. BIL does not request access at startup.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.strings.text('Not now')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(context.strings.text('Continue')),
-          ),
-        ],
-      ),
-    );
-    if (continueRequest != true) return false;
     return await policy.request(BilRuntimeCapability.camera) ==
         BilRuntimePermissionState.granted;
   }
@@ -70,7 +48,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     if (outcome.invalid) {
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => AlertDialog.adaptive(
           title: Text(barcodeCopy.invalidTitle),
           content: Text(barcodeCopy.invalidBody),
           actions: [
@@ -99,7 +77,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     if (outcome.product != null) {
       final submitReview = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => AlertDialog.adaptive(
           title: Text(
             productKindLabel(
               outcome.product!.kind,
@@ -138,7 +116,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
 
     final submitReview = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AlertDialog.adaptive(
         title: Text(
           context.strings.text(
             outcome.degraded
@@ -174,8 +152,8 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
   Future<void> _scanBarcode() async {
     if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) return;
     if (!await _ensureCameraPermission() || !mounted) return;
-    final barcode = await Navigator.of(context).push<String>(
-      MaterialPageRoute<String>(builder: (_) => const FoodBarcodeScannerPage()),
+    final barcode = await ref.read(dailyLogBarcodeScannerLauncherProvider)(
+      context,
     );
     if (barcode != null) await _resolveBarcode(barcode);
   }
@@ -205,16 +183,18 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     _updateState(() => selectedFood = foods.first);
   }
 
-  Future<void> _analyzeMealImage() async {
+  Future<void> _analyzeMealImage({bool recoveredOnly = false}) async {
     if (mealImageBusy) return;
     _updateState(() => mealImageBusy = true);
     try {
       final visionCopy = MealVisionUiCopy.ofLocale(
         Localizations.localeOf(context),
       );
-      final hasPaidBoost = await ref.read(aiBoostVisionAccessProvider.future);
+      final hasVisionTokens = await ref.read(
+        aiBoostVisionAccessProvider.future,
+      );
       if (!mounted) return;
-      if (!hasPaidBoost) {
+      if (!hasVisionTokens) {
         await context.push('/plans?focus=boost');
         return;
       }
@@ -224,7 +204,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       if (!service.configured) {
         await showDialog<void>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => AlertDialog.adaptive(
             title: Text(visionCopy.text('unavailable')),
             content: Text(
               const MealImageAnalysisException(
@@ -244,44 +224,53 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         );
         return;
       }
-      final imageSource = await showModalBottomSheet<ImageSource>(
-        context: context,
-        showDragHandle: true,
-        builder: (sheetContext) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_camera_rounded),
-                title: Text(visionCopy.text('take')),
-                onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_rounded),
-                title: Text(visionCopy.text('choose')),
-                onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
-              ),
-              ListTile(
-                leading: const Icon(Icons.close_rounded),
-                title: Text(visionCopy.text('cancel')),
-                onTap: () => Navigator.pop(sheetContext),
-              ),
-            ],
-          ),
-        ),
-      );
-      if (imageSource == null || !mounted) return;
-      if (imageSource == ImageSource.camera &&
-          (!await _ensureCameraPermission() || !mounted)) {
-        return;
-      }
       XFile? image;
       try {
-        image = await ImagePicker().pickImage(
-          source: imageSource,
-          imageQuality: 88,
-          maxWidth: 1800,
-        );
+        if (recoveredOnly) {
+          image = await BilRecoverableImagePicker.instance.takeRecoveredImage(
+            BilImagePickerPurpose.mealPhoto,
+          );
+        } else {
+          final imageSource = await showModalBottomSheet<ImageSource>(
+            context: context,
+            showDragHandle: true,
+            builder: (sheetContext) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera_rounded),
+                    title: Text(visionCopy.text('take')),
+                    onTap: () =>
+                        Navigator.pop(sheetContext, ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_library_rounded),
+                    title: Text(visionCopy.text('choose')),
+                    onTap: () =>
+                        Navigator.pop(sheetContext, ImageSource.gallery),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.close_rounded),
+                    title: Text(visionCopy.text('cancel')),
+                    onTap: () => Navigator.pop(sheetContext),
+                  ),
+                ],
+              ),
+            ),
+          );
+          if (imageSource == null || !mounted) return;
+          if (imageSource == ImageSource.camera &&
+              (!await _ensureCameraPermission() || !mounted)) {
+            return;
+          }
+          image = await BilRecoverableImagePicker.instance.pickImage(
+            purpose: BilImagePickerPurpose.mealPhoto,
+            source: imageSource,
+            imageQuality: 88,
+            maxWidth: 1800,
+          );
+        }
       } catch (_) {
         if (!mounted) return;
         _message(visionCopy.text('camera_failed'));

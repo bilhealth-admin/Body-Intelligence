@@ -35,13 +35,17 @@ void main() {
       );
       for (final define in <String>[
         'BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true',
-        'BIL_FACEBOOK_LOGIN_ENABLED=false',
-        'BIL_FACEBOOK_LOGIN_READY=false',
+        'BIL_FACEBOOK_LOGIN_ENABLED=true',
+        'BIL_FACEBOOK_LOGIN_READY=true',
         'BIL_ADS_ENABLED=false',
         'BIL_AD_PROVIDER_READY=false',
         'BIL_ENABLE_CATALOG_TEST_ACCESS=false',
       ]) {
-        expect(source, contains('--dart-define=$define'), reason: '$path: $define');
+        expect(
+          source,
+          contains('--dart-define=$define'),
+          reason: '$path: $define',
+        );
       }
     }
   });

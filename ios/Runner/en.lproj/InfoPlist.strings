@@ -1,4 +1,4 @@
-"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—for your private on-device fitness timeline and insights. Only when you enable Personalized Intelligence and ask BIL Coach a question may the minimum relevant data be securely processed by cloud AI to answer it.";
 "NSHealthUpdateUsageDescription" = "BIL writes weight records only after you separately approve Health write access.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";

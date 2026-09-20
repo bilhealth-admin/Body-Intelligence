@@ -60,6 +60,26 @@ void main() {
       expect(maintain.state, GoalTimelineState.maintain);
       expect(maintain.hasDateRange, isFalse);
     });
+
+    test('crossing a durable goal stays reached instead of reversing it', () {
+      final crossedLoss = GoalTimelineEstimator.estimate(
+        currentWeightKg: 84,
+        targetWeightKg: 85,
+        goalType: 'lose',
+        asOf: asOf,
+      );
+      final crossedGain = GoalTimelineEstimator.estimate(
+        currentWeightKg: 76,
+        targetWeightKg: 75,
+        goalType: 'gain',
+        asOf: asOf,
+      );
+
+      expect(crossedLoss.state, GoalTimelineState.alreadyAtGoal);
+      expect(crossedLoss.hasDateRange, isFalse);
+      expect(crossedGain.state, GoalTimelineState.alreadyAtGoal);
+      expect(crossedGain.hasDateRange, isFalse);
+    });
   });
 
   test('plan origin parser accepts only profile and dashboard', () {

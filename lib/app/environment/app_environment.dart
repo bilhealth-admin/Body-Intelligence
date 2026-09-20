@@ -1,4 +1,5 @@
 import '../../features/commerce/domain/store_catalog_configuration.dart';
+import '../../features/ads/services/admob_configuration.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum EnvironmentProfile { development, testing, staging, production }
@@ -33,16 +34,17 @@ class AppEnvironment {
     'BIL_EMAIL_OTP_ENABLED',
     defaultValue: false,
   );
+
+  /// Controls whether Facebook is part of the compiled authentication surface.
+  /// Omitted defines fail closed for local, unsigned, and ad-hoc builds.
   static const bool facebookLoginEnabled = bool.fromEnvironment(
     'BIL_FACEBOOK_LOGIN_ENABLED',
     defaultValue: false,
   );
 
-  /// Keeps the Facebook entry point visible while Meta approval is pending,
-  /// without allowing a public user to start an OAuth flow that cannot finish.
-  ///
-  /// Meta-review builds set this to true. Store builds leave it false until
-  /// Business Verification and public access are approved.
+  /// Separately gates interaction so a review build can expose a non-actionable
+  /// entry point while provider readiness is incomplete. Reviewed signed
+  /// release workflows set both Facebook gates explicitly.
   static const bool facebookLoginReady = bool.fromEnvironment(
     'BIL_FACEBOOK_LOGIN_READY',
     defaultValue: false,
@@ -90,7 +92,7 @@ class AppEnvironment {
   );
   static const String _profileName = String.fromEnvironment(
     'BIL_ENVIRONMENT',
-    defaultValue: 'production',
+    defaultValue: 'development',
   );
 
   static EnvironmentProfile get profile => switch (_profileName) {
@@ -132,9 +134,14 @@ class AppEnvironment {
   static bool get adsConfigured =>
       adsEnabled &&
       adProviderReady &&
-      androidAdMobAppId.startsWith('ca-app-pub-') &&
-      iosAdMobAppId.startsWith('ca-app-pub-') &&
-      adMobPublisherId.startsWith('pub-') &&
-      androidContextualAdUnitId.isNotEmpty &&
-      iosContextualAdUnitId.isNotEmpty;
+      BilAdMobConfiguration.isProductionConfiguration(
+        publisherId: adMobPublisherId,
+        appId: androidAdMobAppId,
+        bannerId: androidContextualAdUnitId,
+      ) &&
+      BilAdMobConfiguration.isProductionConfiguration(
+        publisherId: adMobPublisherId,
+        appId: iosAdMobAppId,
+        bannerId: iosContextualAdUnitId,
+      );
 }

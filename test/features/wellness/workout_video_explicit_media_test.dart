@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -6,14 +7,17 @@ import 'package:body_intelligence_log/features/commerce/providers/commerce_provi
 import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/bil_workout_routines_page.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_media_cache.dart';
+import 'package:body_intelligence_log/features/wellness/services/wellness_video_stream.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues({}));
 
   _testWidgetsOnAndroid(
     'opening details resolves the poster but never requests MP4 online',
@@ -40,6 +44,70 @@ void main() {
       await _settleExplicitMedia(tester);
 
       expect(cache.videoOnlineResolutions, 1);
+    },
+  );
+
+  _testWidgetsOnAndroid(
+    'Play uses a streaming ticket without downloading the complete MP4',
+    (tester) async {
+      final directory = Directory.systemTemp.createTempSync('bil-stream-play-');
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final cache = _ExplicitMediaCache(
+        directory: directory,
+        streamVideo: true,
+      );
+
+      await tester.pumpWidget(_app(cache));
+      await _settleExplicitMedia(tester);
+      expect(cache.streamResolutions, 0);
+      await tester.tap(find.byKey(const ValueKey('workout-video-play')));
+      await _settleExplicitMedia(tester);
+
+      expect(cache.streamResolutions, 1);
+      expect(cache.videoOnlineResolutions, 0);
+      expect(cache.downloaded, isFalse);
+      expect(
+        find.byKey(const ValueKey('workout-video-fullscreen-back')),
+        findsOneWidget,
+      );
+      // This integration fixture has no native decoder. Player behavior is
+      // exercised separately with an injected platform; this checks routing.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
+
+  _testWidgetsOnAndroid(
+    'a pending network ticket cannot block Back or reopen a dismissed player',
+    (tester) async {
+      final directory = Directory.systemTemp.createTempSync('bil-stream-exit-');
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final pending = Completer<WellnessVideoStream?>();
+      final cache = _ExplicitMediaCache(
+        directory: directory,
+        pendingStream: pending.future,
+      );
+
+      await tester.pumpWidget(_app(cache));
+      await _settleExplicitMedia(tester);
+      await tester.tap(find.byKey(const ValueKey('workout-video-play')));
+      await _settleExplicitMedia(tester);
+      expect(cache.streamResolutions, 1);
+      expect(cache.videoOnlineResolutions, 0);
+
+      await tester.tap(
+        find.byKey(const ValueKey('workout-video-fullscreen-back')),
+      );
+      await _settleExplicitMedia(tester);
+      expect(find.byKey(const ValueKey('workout-video-play')), findsOneWidget);
+      pending.completeError(const HttpException('Connection lost'));
+      await _settleExplicitMedia(tester);
+      expect(
+        find.byKey(const ValueKey('workout-video-fullscreen-surface')),
+        findsNothing,
+      );
+      expect(cache.videoOnlineResolutions, 0);
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -165,15 +233,34 @@ final class _ExplicitMediaCache extends WellnessMediaCache {
   _ExplicitMediaCache({
     required this.directory,
     this.makeVideoReadyOnline = false,
+    this.streamVideo = false,
+    this.pendingStream,
   });
 
   final Directory directory;
   final bool makeVideoReadyOnline;
+  final bool streamVideo;
+  final Future<WellnessVideoStream?>? pendingStream;
+  int streamResolutions = 0;
   int posterOnlineResolutions = 0;
   int videoOnlineResolutions = 0;
   int videoOfflineResolutions = 0;
   int removals = 0;
   bool downloaded = false;
+
+  @override
+  Future<WellnessVideoStream?> resolveStream(
+    WellnessMediaAsset asset, {
+    required bool online,
+  }) async {
+    streamResolutions += 1;
+    if (pendingStream != null) return pendingStream;
+    if (!streamVideo) return null;
+    return WellnessVideoStream(
+      uri: asset.url,
+      httpHeaders: const {'if-match': '"test-entity"'},
+    );
+  }
 
   @override
   Future<WellnessMediaCacheResult> resolve(

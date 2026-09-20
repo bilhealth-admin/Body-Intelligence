@@ -35,6 +35,49 @@ void main() {
     },
   );
 
+  test('production AdMob identity rejects placeholders and mixed owners', () {
+    bool configured({
+      String publisherId = 'pub-1234567890123456',
+      String appId = 'ca-app-pub-1234567890123456~1234567890',
+      String bannerId = 'ca-app-pub-1234567890123456/1234567890',
+    }) => BilAdMobConfiguration.isProductionConfiguration(
+      publisherId: publisherId,
+      appId: appId,
+      bannerId: bannerId,
+    );
+
+    expect(configured(), isTrue);
+    expect(
+      configured(appId: 'ca-app-pub-0000000000000000~0000000000'),
+      isFalse,
+    );
+    expect(
+      configured(
+        publisherId: 'pub-3940256099942544',
+        appId: 'ca-app-pub-3940256099942544~3347511713',
+        bannerId: BilAdMobConfiguration.androidTestBanner,
+      ),
+      isFalse,
+    );
+    expect(
+      configured(bannerId: 'ca-app-pub-9999999999999999/1234567890'),
+      isFalse,
+    );
+    expect(configured(publisherId: 'pub-owner-placeholder'), isFalse);
+    expect(
+      BilAdMobConfiguration.isProductionPublisherId('pub-1234567890123456'),
+      isTrue,
+    );
+    expect(
+      BilAdMobConfiguration.isProductionPublisherId('pub-0000000000000000'),
+      isFalse,
+    );
+    expect(
+      BilAdMobConfiguration.isProductionPublisherId('pub-3940256099942544'),
+      isFalse,
+    );
+  });
+
   test('AdGate allows only Free in reviewed non-sensitive placement', () {
     const policy = AdPolicy();
     final free = _verifiedFree();

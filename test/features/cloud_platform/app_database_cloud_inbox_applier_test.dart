@@ -50,6 +50,48 @@ void main() {
     });
 
     test(
+      'selective startup batch rolls back when one payload is invalid',
+      () async {
+        final updatedAt = DateTime.utc(2026, 8, 23, 10);
+        final invalidHydration = CloudRecordEnvelope(
+          entityKind: CloudEntityKind.hydration,
+          recordId: 'water-invalid',
+          ownerId: 'owner-a',
+          revision: CloudRevision(deviceId: 'device-b', sequence: 1),
+          updatedAt: updatedAt,
+          payload: <String, Object?>{
+            'occurredAt': updatedAt.toIso8601String(),
+            'dayKey': '2026-08-23',
+            'createdAt': updatedAt.toIso8601String(),
+            // `amountMl` deliberately missing after two otherwise valid rows.
+          },
+        );
+
+        await expectLater(
+          applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'startup-read-only-restore',
+            records: <CloudRecordEnvelope>[
+              _profileRecord(updatedAt),
+              _weightRecord(
+                deviceId: 'device-b',
+                sequence: 1,
+                updatedAt: updatedAt,
+                weight: 79.2,
+              ),
+              invalidHydration,
+            ],
+          ),
+          throwsFormatException,
+        );
+
+        expect(await database.select(database.userProfile).get(), isEmpty);
+        expect(await database.select(database.weightEntries).get(), isEmpty);
+        expect(await database.select(database.waterEntries).get(), isEmpty);
+      },
+    );
+
+    test(
       'own echoed weight marks queued row synced and preserves photo path',
       () async {
         final id = await WeightRepository(database).addWeight(
@@ -216,6 +258,30 @@ void main() {
     );
   });
 }
+
+CloudRecordEnvelope _profileRecord(DateTime updatedAt) => CloudRecordEnvelope(
+  entityKind: CloudEntityKind.profile,
+  recordId: 'profile-a',
+  ownerId: 'owner-a',
+  revision: CloudRevision(deviceId: 'device-b', sequence: 1),
+  updatedAt: updatedAt,
+  payload: <String, Object?>{
+    'gender': 'male',
+    'age': 34,
+    'height': 178.0,
+    'currentWeight': 79.2,
+    'targetWeight': 75.0,
+    'activityLevel': 'moderate',
+    'exercises': true,
+    'medicalConditions': null,
+    'waist': null,
+    'neck': null,
+    'chest': null,
+    'arm': null,
+    'thigh': null,
+    'createdAt': updatedAt.toIso8601String(),
+  },
+);
 
 CloudRecordEnvelope _weightRecord({
   String recordId = 'weight-a',

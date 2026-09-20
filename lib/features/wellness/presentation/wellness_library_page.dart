@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/bil_flagship_tokens.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../ads/presentation/safe_free_ad_anchor.dart';
 import 'wellness_copy.dart';
 
@@ -109,7 +110,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
   List<_WellnessItem> _items(BuildContext context) => [
     _WellnessItem(
       asset: 'assets/images/flagship/bil_meal_discovery_v1.png',
-      icon: Icons.menu_book_rounded,
+      kind: BilSemanticIconKind.recipes,
       title: wellnessCopy(context, 'BIL recipes', 'وصفات BIL'),
       subtitle: wellnessCopy(
         context,
@@ -126,7 +127,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
     ),
     _WellnessItem(
       asset: 'assets/images/flagship/bil_sleep_insights_v2.png',
-      icon: Icons.bedtime_outlined,
+      kind: BilSemanticIconKind.sleep,
       title: wellnessCopy(context, 'Sleep intelligence', 'ذكاء النوم'),
       subtitle: wellnessCopy(
         context,
@@ -143,7 +144,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
     ),
     _WellnessItem(
       asset: 'assets/images/flagship/bil_movement_v1.png',
-      icon: Icons.fitness_center_rounded,
+      kind: BilSemanticIconKind.exercise,
       title: wellnessCopy(context, 'Movement & recovery', 'الحركة والتعافي'),
       subtitle: wellnessCopy(
         context,
@@ -161,7 +162,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
     _WellnessItem(
       asset:
           'assets/images/brand/generated/intermittent_fasting_meal_window_v3.png',
-      icon: Icons.timelapse_rounded,
+      kind: BilSemanticIconKind.fasting,
       title: wellnessCopy(context, 'Intermittent fasting', 'الصيام المتقطع'),
       subtitle: wellnessCopy(
         context,
@@ -182,7 +183,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
     ),
     _WellnessItem(
       asset: 'assets/images/flagship/bil_body_intelligence_journey_v1.png',
-      icon: Icons.insights_rounded,
+      kind: BilSemanticIconKind.report,
       title: wellnessCopy(context, 'Your weekly review', 'مراجعتك الأسبوعية'),
       subtitle: wellnessCopy(
         context,
@@ -241,7 +242,12 @@ class _WellnessExperienceCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(item.icon, color: BilFlagshipTokens.cyan400),
+                        BilSemanticIconBadge(
+                          key: Key('wellness-semantic-icon-${item.kind.name}'),
+                          kind: item.kind,
+                          size: 42,
+                          iconSize: 23,
+                        ),
                         const SizedBox(height: 8),
                         Text(
                           item.title,
@@ -299,7 +305,7 @@ class _WellnessExperienceCard extends StatelessWidget {
 class _WellnessItem {
   const _WellnessItem({
     required this.asset,
-    required this.icon,
+    required this.kind,
     required this.title,
     required this.subtitle,
     required this.status,
@@ -308,7 +314,7 @@ class _WellnessItem {
   });
 
   final String asset;
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String title;
   final String subtitle;
   final String status;

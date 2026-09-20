@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 
 import '../../data/database/app_database.dart';
 import '../../data/database/database_provider.dart';
@@ -183,7 +184,7 @@ class ChallengesPage extends ConsumerWidget {
           ListTile(title: Text(t('Choose a private challenge'))),
           for (final preset in presets)
             ListTile(
-              leading: const Icon(Icons.flag_outlined),
+              leading: BilSemanticIconBadge(kind: _challengeKind(preset.$1)),
               title: Text(t(preset.$2)),
               subtitle: Text(
                 '${preset.$3} ${t('days · private on this device')}',
@@ -198,6 +199,14 @@ class ChallengesPage extends ConsumerWidget {
         .read(challengeRepositoryProvider)
         .start(type: selected.$1, title: selected.$2, targetDays: selected.$3);
   }
+
+  static BilSemanticIconKind _challengeKind(String type) => switch (type) {
+    'water' => BilSemanticIconKind.water,
+    'weightCheckIn' => BilSemanticIconKind.weight,
+    'protein' || 'fiber' => BilSemanticIconKind.nutrition,
+    'consistentLogging' => BilSemanticIconKind.notes,
+    _ => BilSemanticIconKind.challenges,
+  };
 
   // ignore: unused_element
   static String _presetArabic(String type) => switch (type) {

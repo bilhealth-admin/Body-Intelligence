@@ -3,11 +3,23 @@ import 'dart:io';
 import 'package:body_intelligence_log/features/notifications/domain/daily_reminder.dart';
 import 'package:body_intelligence_log/features/notifications/services/bil_android_notification_presentation.dart';
 import 'package:body_intelligence_log/features/notifications/services/bil_notification_navigation.dart';
+import 'package:body_intelligence_log/features/notifications/services/community_push_service.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  tearDown(BilNotificationNavigation.resetForTesting);
+  TestWidgetsFlutterBinding.ensureInitialized();
+  const pushChannel = MethodChannel('bil/push');
+  const navigationTestChannel = MethodChannel('bil/push-navigation-test');
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+  tearDown(() {
+    BilNotificationNavigation.resetForTesting();
+    messenger.setMockMethodCallHandler(pushChannel, null);
+    messenger.setMockMethodCallHandler(navigationTestChannel, null);
+  });
 
   test(
     'every Android reminder payload resolves to its direct audited route',
@@ -75,16 +87,123 @@ void main() {
     },
   );
 
-  test('notification tap waits safely until the app router is configured', () {
+  test('pending taps drain once in FIFO order when router is configured', () {
     final routes = <String>[];
+    BilNotificationNavigation.handlePayload('bil://weekly-report');
+    BilNotificationNavigation.handlePayload('bil://daily-log?focus=meal');
     BilNotificationNavigation.handlePayload('bil://weekly-report');
     expect(routes, isEmpty);
 
     BilNotificationNavigation.configure(navigate: routes.add);
-    expect(routes, const ['/weekly-report']);
-
-    BilNotificationNavigation.handlePayload('bil://daily-log?focus=meal');
     expect(routes, const ['/weekly-report', '/daily-log?focus=meal']);
+
+    BilNotificationNavigation.handlePayload('bil://daily-log/water');
+    expect(routes, const <String>[
+      '/weekly-report',
+      '/daily-log?focus=meal',
+      '/daily-log/water',
+    ]);
+  });
+
+  test('a reentrant tap joins the FIFO tail while pending routes drain', () {
+    final routes = <String>[];
+    BilNotificationNavigation.handlePayload('bil://weekly-report');
+    BilNotificationNavigation.handlePayload('bil://daily-log?focus=meal');
+
+    BilNotificationNavigation.configure(
+      navigate: (route) {
+        routes.add(route);
+        if (route == '/weekly-report') {
+          BilNotificationNavigation.handlePayload('bil://daily-log/water');
+        }
+      },
+    );
+
+    expect(routes, const <String>[
+      '/weekly-report',
+      '/daily-log?focus=meal',
+      '/daily-log/water',
+    ]);
+  });
+
+  test('failed navigation retains the current pending route for retry', () {
+    BilNotificationNavigation.handlePayload('bil://weekly-report');
+
+    expect(
+      () => BilNotificationNavigation.configure(
+        navigate: (_) => throw StateError('router not ready'),
+      ),
+      throwsStateError,
+    );
+
+    final routes = <String>[];
+    BilNotificationNavigation.configure(navigate: routes.add);
+    expect(routes, const <String>['/weekly-report']);
+  });
+
+  test('Android remote push handles cold and warm allow-listed taps', () async {
+    final nativeCalls = <String>[];
+    messenger.setMockMethodCallHandler(navigationTestChannel, (call) async {
+      nativeCalls.add(call.method);
+      if (call.method == 'takeInitialPayload') {
+        return <String>['bil://weekly-report', 'bil://daily-log/water'];
+      }
+      return null;
+    });
+    final routes = <String>[];
+    BilNotificationNavigation.configure(navigate: routes.add);
+
+    await BilNotificationNavigation.initializeNativeRemoteTapBridge(
+      platform: TargetPlatform.android,
+      channel: navigationTestChannel,
+    );
+
+    expect(nativeCalls, ['takeInitialPayload']);
+    expect(routes, ['/weekly-report', '/daily-log/water']);
+
+    await messenger.handlePlatformMessage(
+      navigationTestChannel.name,
+      navigationTestChannel.codec.encodeMethodCall(
+        const MethodCall('notificationTap', 'bil://daily-log?focus=meal'),
+      ),
+      null,
+    );
+    await messenger.handlePlatformMessage(
+      navigationTestChannel.name,
+      navigationTestChannel.codec.encodeMethodCall(
+        const MethodCall('notificationTap', 'https://example.com/unsafe'),
+      ),
+      null,
+    );
+    expect(routes, [
+      '/weekly-report',
+      '/daily-log/water',
+      '/daily-log?focus=meal',
+    ]);
+  });
+
+  test('Android push provider capability fails closed', () async {
+    messenger.setMockMethodCallHandler(pushChannel, (call) async {
+      expect(call.method, 'providerStatus');
+      return <String, Object?>{
+        'configured': false,
+        'tokenRegistration': false,
+        'remoteTapRouting': true,
+        'provider': 'unconfigured',
+      };
+    });
+
+    final status = await const NativePushTokenProvider().capability();
+    expect(status.provider, 'unconfigured');
+    expect(status.remoteTapRouting, isTrue);
+    expect(status.ready, isFalse);
+  });
+
+  test('missing native push bridge cannot be treated as ready', () async {
+    final status = await const NativePushTokenProvider().capability();
+
+    expect(status.provider, 'unavailable');
+    expect(status.ready, isFalse);
   });
 
   test('rich Android presentation uses BIL identity and BigTextStyle', () {
@@ -112,7 +231,7 @@ void main() {
 
   test('multiple daily reminders receive one silent InboxStyle summary', () {
     final details = BilAndroidNotificationPresentation.dailySummary(
-      title: 'BIL',
+      title: '🔔 BIL',
       body: 'Today’s check-in · Log your meal',
       lines: const [
         'Today’s check-in: Log weight under consistent conditions.',
@@ -127,12 +246,16 @@ void main() {
     expect(details.onlyAlertOnce, isTrue);
     expect(details.styleInformation, isA<InboxStyleInformation>());
     expect(
+      (details.styleInformation! as InboxStyleInformation).contentTitle,
+      '🔔 BIL',
+    );
+    expect(
       (details.styleInformation! as InboxStyleInformation).lines,
       hasLength(2),
     );
   });
 
-  test('small icon and Android tap wiring remain production safe', () {
+  test('small icon and mobile tap wiring remain production safe', () {
     final icon = File(
       'android/app/src/main/res/drawable/ic_stat_bil_notification.xml',
     ).readAsStringSync();
@@ -145,6 +268,12 @@ void main() {
     final coordinator = File(
       'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
     ).readAsStringSync();
+    final activity = File(
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
+    ).readAsStringSync();
+    final pushProvider = File(
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILPushProvider.kt',
+    ).readAsStringSync();
 
     expect(icon, contains('<vector'));
     expect(icon, contains('android:fillColor="#FFFFFFFF"'));
@@ -154,11 +283,36 @@ void main() {
       platform,
       contains("AndroidInitializationSettings('ic_stat_bil_notification')"),
     );
-    expect(platform, contains('onDidReceiveNotificationResponse: isAndroid'));
+    expect(
+      platform,
+      contains(
+        'onDidReceiveNotificationResponse: supportsNotificationNavigation',
+      ),
+    );
     expect(platform, contains('getNotificationAppLaunchDetails()'));
     expect(platform, contains('payload: BilNotificationPayload.dashboard'));
     expect(presentation, contains('setAsGroupSummary: true'));
-    expect(coordinator, contains('TargetPlatform.android'));
+    expect(platform, contains("title: '🔔 BIL'"));
+    expect(
+      coordinator,
+      contains(
+        'BilNotificationNavigation.supportsPlatform(defaultTargetPlatform)',
+      ),
+    );
     expect(coordinator, contains('BilNotificationNavigation.configure'));
+    expect(coordinator, contains('initializeNativeRemoteTapBridge'));
+    expect(activity, contains('override fun onNewIntent(intent: Intent)'));
+    expect(activity, contains('"takeInitialPayload"'));
+    expect(activity, contains('"notificationTap"'));
+    expect(activity, contains('ArrayDeque<String>()'));
+    expect(activity, contains('pendingRemotePushDeepLinks.peekFirst()'));
+    expect(activity, contains('MAX_PENDING_PUSH_TAPS = 32'));
+    expect(activity, contains('"providerStatus"'));
+    expect(
+      activity,
+      contains('removeExtra(REMOTE_PUSH_DEEP_LINK_EXTRA)'),
+      reason: 'A delivered Intent payload must not replay after recreation.',
+    );
+    expect(pushProvider, contains('"configured" to false'));
   });
 }

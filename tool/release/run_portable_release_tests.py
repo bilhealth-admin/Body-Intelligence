@@ -5,11 +5,16 @@ The complete visual/evidence suite remains in the repository and in verify.yml.
 Signed release jobs use this runner because the files below either compare
 platform-specific raster output or require local, untracked audit artifacts.
 Every other Flutter test is still executed.
+
+The performance budget runs first in its own serial invocation so concurrent
+test workers cannot distort its timing measurements. Its budgets are unchanged,
+and any failure stops the release suite without retries.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -53,6 +58,10 @@ EXCLUDED_TESTS = frozenset(
     }
 )
 
+PERFORMANCE_BUDGET_TEST = "test/performance_budget_test.dart"
+WINDOWS_COMMAND_LENGTH_LIMIT = 7_000
+FLUTTER_EXECUTABLE = "flutter.bat" if os.name == "nt" else "flutter"
+
 
 def discover_tests() -> tuple[list[str], list[str]]:
     all_tests = sorted(
@@ -74,36 +83,97 @@ def discover_tests() -> tuple[list[str], list[str]]:
     return all_tests, portable
 
 
-def main() -> int:
+def partition_tests(portable: list[str]) -> tuple[list[str], list[str]]:
+    if len(portable) != len(set(portable)):
+        raise SystemExit("Portable release test discovery returned duplicate paths.")
+    if PERFORMANCE_BUDGET_TEST not in portable:
+        raise SystemExit("Portable release performance budget test is missing.")
+    return [PERFORMANCE_BUDGET_TEST], [
+        path for path in portable if path != PERFORMANCE_BUDGET_TEST
+    ]
+
+
+def _test_batches(command: list[str], tests: list[str]) -> list[list[str]]:
+    """Keep Windows CreateProcess calls below its command-line length limit."""
+    if os.name != "nt":
+        return [tests]
+    batches: list[list[str]] = []
+    current: list[str] = []
+    current_length = sum(len(part) + 1 for part in command)
+    for test in tests:
+        test_length = len(test) + 1
+        if current and current_length + test_length > WINDOWS_COMMAND_LENGTH_LIMIT:
+            batches.append(current)
+            current = []
+            current_length = sum(len(part) + 1 for part in command)
+        current.append(test)
+        current_length += test_length
+    if current:
+        batches.append(current)
+    return batches
+
+
+def _run_flutter(command: list[str], tests: list[str]) -> int:
+    result_code = 0
+    for batch in _test_batches(command, tests):
+        completed = subprocess.run([*command, *batch], cwd=REPOSITORY_ROOT, check=False)
+        result_code = completed.returncode
+        if result_code != 0:
+            break
+    return result_code
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--list-only",
         action="store_true",
         help="validate and print suite counts without invoking Flutter",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     all_tests, portable = discover_tests()
-    print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}")
-    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={len(EXCLUDED_TESTS)}")
-    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(portable)}")
+    performance_tests, remaining_tests = partition_tests(portable)
+    print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}", flush=True)
+    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={len(EXCLUDED_TESTS)}", flush=True)
+    print(f"PORTABLE_RELEASE_SCHEDULED_TEST_FILES={len(portable)}", flush=True)
+    print(
+        f"PORTABLE_RELEASE_PERFORMANCE_SCHEDULED_TEST_FILES={len(performance_tests)}",
+        flush=True,
+    )
+    print(
+        f"PORTABLE_RELEASE_REMAINING_SCHEDULED_TEST_FILES={len(remaining_tests)}",
+        flush=True,
+    )
 
     if args.list_only:
+        print("PORTABLE_RELEASE_EXECUTED_TEST_FILES=0", flush=True)
         return 0
 
-    completed = subprocess.run(
-        [
-            "flutter",
-            "test",
-            "--no-pub",
-            "--timeout",
-            "30s",
-            *portable,
-        ],
+    command = [
+        FLUTTER_EXECUTABLE,
+        "test",
+        "--no-pub",
+        "--timeout",
+        "30s",
+    ]
+    print("PORTABLE_RELEASE_PHASE=performance_serial", flush=True)
+    performance = subprocess.run(
+        [*command, "--concurrency", "1", *performance_tests],
         cwd=REPOSITORY_ROOT,
         check=False,
     )
-    return completed.returncode
+    if performance.returncode != 0 or not remaining_tests:
+        print(
+            f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(performance_tests)}",
+            flush=True,
+        )
+        return performance.returncode
+
+    print("PORTABLE_RELEASE_PHASE=remaining_portable", flush=True)
+    completed_code = _run_flutter(command, remaining_tests)
+    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(portable)}", flush=True)
+    return completed_code
 
 
 if __name__ == "__main__":

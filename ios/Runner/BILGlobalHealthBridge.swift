@@ -24,6 +24,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // native guard so a second tap cannot start another full set of queries while
   // the first one is still draining in the background.
   private var readChangesInFlight = false
+  private let readStateLock = NSLock()
+  private var activeReadQuery: HKQuery?
+  private var readChangesCancellationRequested = false
+  private var pendingReadResult: FlutterResult?
 
   init(store: HKHealthStore = HKHealthStore(), channelName: String = "bil/apple_health") {
     self.store = store
@@ -75,6 +79,8 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       }
     case "readChanges":
       readChanges(arguments: call.arguments, result: result)
+    case "cancelReadChanges":
+      cancelReadChanges(result: result)
     case "write":
       write(arguments: call.arguments, result: result)
     case "delete":
@@ -117,10 +123,17 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     guard HKHealthStore.isHealthDataAvailable() else {
       result(error("unavailable", "HealthKit is unavailable on this device.")); return
     }
-    guard !readChangesInFlight else {
+    readStateLock.lock()
+    let alreadyInFlight = readChangesInFlight
+    if !alreadyInFlight {
+      readChangesInFlight = true
+      readChangesCancellationRequested = false
+      pendingReadResult = result
+    }
+    readStateLock.unlock()
+    guard !alreadyInFlight else {
       result(error("operation_in_progress", "A HealthKit sync is already in progress.")); return
     }
-    readChangesInFlight = true
     let args = arguments as? [String: Any]
     let names = ((args?["types"] as? [String]) ?? Self.supportedTypeNames)
       .filter { sampleType($0) != nil }
@@ -142,19 +155,21 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     // can starve Flutter's main thread and leave both sync indicators stuck.
     var nextNameIndex = 0
     func executeNext() {
+      if self.isReadCancellationRequested() {
+        self.completeReadChanges(self.error("cancelled", "The HealthKit sync was cancelled."))
+        return
+      }
       guard nextNameIndex < names.count else {
-        DispatchQueue.main.async {
-          self.readChangesInFlight = false
-          if let firstError {
-            result(self.error("query_failed", firstError.localizedDescription)); return
-          }
-          result([
+        if let firstError {
+          self.completeReadChanges(self.error("query_failed", firstError.localizedDescription))
+          return
+        }
+        self.completeReadChanges([
             "records": records,
             "deletedIds": deleted,
             "nextAnchor": self.encodeAnchors(nextAnchors),
             "hasMore": pageHasMore,
-          ])
-        }
+        ])
         return
       }
       let name = names[nextNameIndex]
@@ -182,6 +197,11 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
           executeNext()
           return
         }
+        self.setActiveReadQuery(nil)
+        if self.isReadCancellationRequested() {
+          self.completeReadChanges(self.error("cancelled", "The HealthKit sync was cancelled."))
+          return
+        }
         lock.lock()
         if let queryError {
           firstError = firstError ?? queryError
@@ -196,9 +216,54 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
         lock.unlock()
         executeNext()
       }
+      self.setActiveReadQuery(query)
       store.execute(query)
     }
     executeNext()
+  }
+
+  private func cancelReadChanges(result: @escaping FlutterResult) {
+    readStateLock.lock()
+    let inFlight = readChangesInFlight
+    readChangesCancellationRequested = inFlight
+    let query = activeReadQuery
+    readStateLock.unlock()
+    guard inFlight else {
+      result(nil)
+      return
+    }
+    if let query { store.stop(query) }
+    result(nil)
+    // HealthKit normally invokes the anchored-query completion after stop().
+    // Keep a bounded fallback so a provider/OEM that omits that callback never
+    // leaves the channel in the single-flight state forever.
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+      self.completeReadChanges(self.error("cancelled", "The HealthKit sync was cancelled."))
+    }
+  }
+
+  private func isReadCancellationRequested() -> Bool {
+    readStateLock.lock(); defer { readStateLock.unlock() }
+    return readChangesCancellationRequested
+  }
+
+  private func setActiveReadQuery(_ query: HKQuery?) {
+    readStateLock.lock(); activeReadQuery = query; readStateLock.unlock()
+  }
+
+  private func completeReadChanges(_ value: Any?) {
+    readStateLock.lock()
+    guard readChangesInFlight else {
+      readStateLock.unlock()
+      return
+    }
+    readChangesInFlight = false
+    readChangesCancellationRequested = false
+    activeReadQuery = nil
+    let pending = pendingReadResult
+    pendingReadResult = nil
+    readStateLock.unlock()
+    DispatchQueue.main.async { pending?(value) }
   }
 
   private func write(arguments: Any?, result: @escaping FlutterResult) {

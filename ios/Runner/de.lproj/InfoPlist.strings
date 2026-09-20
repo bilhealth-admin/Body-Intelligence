@@ -1,7 +1,7 @@
-"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
+"NSHealthShareUsageDescription" = "BIL liest nur die von Ihnen ausgewählten Health-Kategorien – Aktivität, Schlaf, Körpermaße, Herzwerte, Flüssigkeitszufuhr und Ernährung –, um auf Ihrem Gerät eine private Fitness-Zeitleiste und Einblicke anzuzeigen. Nur wenn Sie die personalisierte Intelligenz (Personalized Intelligence) aktivieren und BIL Coach eine Frage stellen, dürfen die mindestens erforderlichen relevanten Daten zur Beantwortung sicher durch Cloud-AI verarbeitet werden.";
 "NSHealthUpdateUsageDescription" = "BIL schreibt Gewichtseinträge nur, nachdem Sie den Schreibzugriff auf Health separat erlaubt haben.";
-"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
-"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothAlwaysUsageDescription" = "BIL verbindet sich nur mit Fitnessgeräten, die Sie ausdrücklich koppeln, damit Messwerte lokal importiert werden können.";
+"NSBluetoothPeripheralUsageDescription" = "BIL verbindet sich nur mit Fitnessgeräten, die Sie ausdrücklich koppeln, damit Messwerte lokal importiert werden können.";
 "NSCameraUsageDescription" = "Verwenden Sie die Kamera nur, wenn Sie einen Barcode scannen, ein Essensfoto überprüfen oder ein privates Profil oder Fortschrittsfoto hinzufügen möchten.";
 "NSPhotoLibraryUsageDescription" = "BIL greift nur auf ein von Ihnen gewähltes Foto für Mahlzeiten, Profil, Fortschritt, Community-Beiträge oder Lebensmittelbeiträge zu, damit Sie es vor dem Speichern oder Hochladen prüfen können.";
 "NSMicrophoneUsageDescription" = "BIL nutzt das Mikrofon nur, wenn Sie Ihr Gewicht oder eine Mahlzeit per Sprache erfassen oder direkt mit BIL AI Coach sprechen.";

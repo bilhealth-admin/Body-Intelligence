@@ -147,49 +147,54 @@ void main() {
     expect(search, isNot(contains('verifiedSource :')));
   });
 
-  test('diary hierarchy keeps nutrition detail out of meal rows', () {
-    final page = File(
-      'lib/features/daily_log/daily_log_page.dart',
-    ).readAsStringSync();
-    final meals = <String>[
-      'lib/features/daily_log/presentation/daily_log_meals_list.dart',
-      'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
-    final search = File(
-      'lib/features/daily_log/daily_log_meal_search.dart',
-    ).readAsStringSync();
-    final detail = File(
-      'lib/features/daily_log/daily_log_meal_entry.dart',
-    ).readAsStringSync();
+  test(
+    'diary rows keep full nutrition detail out but allow compact insights',
+    () {
+      final page = File(
+        'lib/features/daily_log/daily_log_page.dart',
+      ).readAsStringSync();
+      final meals = <String>[
+        'lib/features/daily_log/presentation/daily_log_meals_list.dart',
+        'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
+      final search = File(
+        'lib/features/daily_log/daily_log_meal_search.dart',
+      ).readAsStringSync();
+      final detail = File(
+        'lib/features/daily_log/daily_log_meal_entry.dart',
+      ).readAsStringSync();
 
-    final rowStart = meals.indexOf('class _DiaryFoodRow');
-    final rowEnd = meals.indexOf('class _DiaryEmptyMeals', rowStart);
-    expect(rowStart, greaterThanOrEqualTo(0));
-    expect(rowEnd, greaterThan(rowStart));
-    final row = meals.substring(rowStart, rowEnd);
+      final rowStart = meals.indexOf('class _DiaryFoodRow');
+      final rowEnd = meals.indexOf('class _DiaryEmptyMeals', rowStart);
+      expect(rowStart, greaterThanOrEqualTo(0));
+      expect(rowEnd, greaterThan(rowStart));
+      final row = meals.substring(rowStart, rowEnd);
 
-    expect(search, isNot(contains('TabBar(')));
-    expect(search, isNot(contains('TabBarView(')));
-    expect(search, isNot(contains('_searchTab(')));
-    expect('$search\n$detail', isNot(contains("'myMeals'")));
-    expect('$search\n$detail', isNot(contains("'myRecipes'")));
-    expect('$search\n$detail', isNot(contains("'myFoods'")));
-    expect('$search\n$detail', isNot(contains("'all'")));
+      expect(search, isNot(contains('TabBar(')));
+      expect(search, isNot(contains('TabBarView(')));
+      expect(search, isNot(contains('_searchTab(')));
+      expect('$search\n$detail', isNot(contains("'myMeals'")));
+      expect('$search\n$detail', isNot(contains("'myRecipes'")));
+      expect('$search\n$detail', isNot(contains("'myFoods'")));
+      expect('$search\n$detail', isNot(contains("'all'")));
 
-    expect(meals, contains("Key('daily-meal-macros-\$type')"));
-    expect(meals, contains("Key('daily-food-row-\${item.id}')"));
-    expect(row, contains('item.calories.round().toString()'));
-    expect(row, contains('FoodPresentationLocalizer.servingText('));
-    expect(row, isNot(contains('item.protein')));
-    expect(row, isNot(contains('item.carbs')));
-    expect(row, isNot(contains('item.fats')));
-    expect(row, isNot(contains('NutrientMetric(')));
+      expect(meals, contains("Key('daily-meal-macros-\$type')"));
+      expect(meals, contains("Key('daily-food-row-\${item.id}')"));
+      expect(row, contains('item.calories.round().toString()'));
+      expect(row, contains('FoodPresentationLocalizer.servingText('));
+      expect(row, contains('this.showFoodInsights = false'));
+      expect(row, contains('if (showFoodInsights)'));
+      expect(row, contains("Key('daily-food-insights-\${item.id}')"));
+      expect(row, contains('formatDiaryMacroGrams(item.protein)'));
+      expect(row, contains('formatDiaryMacroGrams(item.fats)'));
+      expect(row, isNot(contains('NutrientMetric(')));
 
-    expect(detail, contains("Key('daily-log-nutrition-facts')"));
-    expect(page, isNot(contains("Key('daily-log-nutrition-facts')")));
-    expect(meals, isNot(contains("Key('daily-log-nutrition-facts')")));
-    expect(search, isNot(contains("Key('daily-log-nutrition-facts')")));
-  });
+      expect(detail, contains("Key('daily-log-nutrition-facts')"));
+      expect(page, isNot(contains("Key('daily-log-nutrition-facts')")));
+      expect(meals, isNot(contains("Key('daily-log-nutrition-facts')")));
+      expect(search, isNot(contains("Key('daily-log-nutrition-facts')")));
+    },
+  );
 
   test('water editor is isolated behind the dedicated diary route', () {
     final page = File(
@@ -207,5 +212,21 @@ void main() {
     expect(water, contains('DailyWaterSection('));
     expect(router, contains("path: '/daily-log/water'"));
     expect(router, contains('DailyWaterPage('));
+  });
+
+  test('localized nutrient labels are not translated a second time', () {
+    final summary = File(
+      'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
+    ).readAsStringSync();
+
+    expect(summary, isNot(contains('context.strings.text(label)')));
+    expect(
+      summary,
+      contains("'\$label: \${context.strings.text('Unavailable')}'"),
+    );
+    expect(
+      summary,
+      contains("'\$label \${value!.toStringAsFixed(1)} \$localizedUnit'"),
+    );
   });
 }

@@ -9,9 +9,9 @@ Set<String> _quotedCodes(String source) => RegExp(
 
 void main() {
   const migrationPath =
-      'supabase/migrations/20260830180011_canonical_store_market_pricing_policy.sql';
+      'supabase/migrations/20260905170000_owner_store_market_policy_nigeria_alignment.sql';
   const pricingPath =
-      'tool/apple_store_connect/canonical_store_pricing_2026-08-29.json';
+      'tool/apple_store_connect/canonical_store_pricing_2026-09-05.json';
 
   test(
     'canonical migration exactly matches the approved sale-market split',
@@ -25,10 +25,10 @@ void main() {
 
       final premiumCodes = _quotedCodes(unnestBlocks[0].group(1)!);
       final aiCodes = _quotedCodes(unnestBlocks[1].group(1)!);
-      expect(premiumCodes, equals({'EG', 'IN', 'PK', 'TR'}));
+      expect(premiumCodes, equals({'EG', 'NG', 'PK', 'TR'}));
       expect(aiCodes, hasLength(168));
-      expect(aiCodes, contains('NG'));
-      expect(aiCodes, isNot(contains('IN')));
+      expect(aiCodes, contains('IN'));
+      expect(aiCodes, isNot(contains('NG')));
       expect(premiumCodes.intersection(aiCodes), isEmpty);
 
       final pricing =
@@ -99,6 +99,44 @@ void main() {
     );
   });
 
+  test(
+    'active Apple review artifacts and price tools use Nigeria, never legacy India',
+    () {
+      final reviewPackager = File(
+        'tool/apple_store_connect/package_app_review_goldens.dart',
+      ).readAsStringSync();
+      final priceInspector = File(
+        'tool/apple_store_connect/asc_selected_prices_inspect.mjs',
+      ).readAsStringSync();
+      final packagedReviewManifest = File(
+        'store_assets/review/apple/v1.0/manifest.json',
+      ).readAsStringSync();
+
+      expect(
+        RegExp(
+          "'availabilityPolicy': 'EGY/NGA/PAK/TUR only'",
+        ).allMatches(reviewPackager),
+        hasLength(2),
+      );
+      expect(reviewPackager, isNot(contains('EGY/IND/PAK/TUR only')));
+      expect(
+        RegExp(
+          '"availabilityPolicy": "EGY/NGA/PAK/TUR only"',
+        ).allMatches(packagedReviewManifest),
+        hasLength(2),
+      );
+      expect(packagedReviewManifest, isNot(contains('EGY/IND/PAK/TUR only')));
+
+      for (final productId in ['bil_premium', 'bil_premium_annual']) {
+        expect(
+          priceInspector,
+          contains("$productId: ['EGY', 'NGA', 'PAK', 'TUR']"),
+        );
+      }
+      expect(priceInspector, isNot(contains("['EGY', 'IND', 'PAK', 'TUR']")));
+    },
+  );
+
   test('unknown and held markets fail closed instead of becoming Premium', () {
     final migration = File(migrationPath).readAsStringSync();
     expect(migration, contains('sale_enabled = true'));
@@ -140,5 +178,52 @@ void main() {
     );
     expect(catalog, contains('Prices, trials, availability'));
     expect(catalog, contains('always read from the active store'));
+  });
+
+  test('fresh migrations register all subscriptions for both stores', () {
+    final registryMigrations = [
+      File(
+        'supabase/migrations/20260831024716_register_apple_store_products.sql',
+      ).readAsStringSync(),
+      File(
+        'supabase/migrations/20260904020000_register_google_store_products.sql',
+      ).readAsStringSync(),
+    ].join('\n');
+
+    const expected = <({String product, String plan, String term})>[
+      (product: 'bil_premium', plan: 'premium', term: 'monthly'),
+      (product: 'bil_premium_annual', plan: 'premium', term: 'annual'),
+      (
+        product: 'bil_premium_ai_coach',
+        plan: 'premium_ai_coach',
+        term: 'monthly',
+      ),
+      (
+        product: 'bil_premium_ai_coach_annual',
+        plan: 'premium_ai_coach',
+        term: 'annual',
+      ),
+    ];
+
+    for (final provider in ['apple', 'google']) {
+      for (final row in expected) {
+        expect(
+          registryMigrations,
+          matches(
+            RegExp(
+              "'$provider'\\s*,\\s*'${row.product}'\\s*,\\s*"
+              "'com\\.bilhealth\\.bodyintelligencelog'\\s*,\\s*"
+              "'${row.plan}'\\s*,\\s*'${row.term}'\\s*,\\s*true",
+            ),
+          ),
+          reason: '$provider/${row.product}',
+        );
+      }
+    }
+
+    expect(
+      registryMigrations,
+      isNot(matches(RegExp(r"'(apple|google)'\s*,\s*'bil_ai_boost'"))),
+    );
   });
 }

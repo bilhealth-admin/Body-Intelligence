@@ -18,14 +18,20 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     required this.fatGoal,
     required this.fiberGoal,
     required this.sodiumGoal,
+    required this.potassiumGoal,
     required this.fiberEvidenceValue,
     required this.sodiumEvidenceValue,
+    required this.potassiumEvidenceValue,
     required this.nutrientDashboardPreset,
     required this.weightTrendValues,
     required this.stepTrendValues,
     required this.weightUnit,
     required this.loggingItems,
+    required this.hero,
+    required this.aiCoach,
+    required this.dailyIntelligence,
     required this.progressSection,
+    required this.personalHealthAi,
     required this.connectedHealth,
     required this.bodyTwinSummary,
     required this.actionTitle,
@@ -53,14 +59,20 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final int fatGoal;
   final int? fiberGoal;
   final int? sodiumGoal;
+  final int? potassiumGoal;
   final double? fiberEvidenceValue;
   final double? sodiumEvidenceValue;
+  final double? potassiumEvidenceValue;
   final String nutrientDashboardPreset;
   final List<double> weightTrendValues;
   final List<double> stepTrendValues;
   final String weightUnit;
   final List<DashboardLoggingItem> loggingItems;
+  final Widget? hero;
+  final Widget? aiCoach;
+  final Widget dailyIntelligence;
   final Widget? progressSection;
+  final Widget? personalHealthAi;
   final Widget? connectedHealth;
   final String bodyTwinSummary;
   final String actionTitle;
@@ -155,8 +167,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
           locked: !premiumUnlocked,
           title: tr('Heart health', 'صحة القلب'),
           detail: tr(
-            'Follow saturated fat, sodium, and fiber with clear rings.',
-            'تابع الدهون المشبعة والصوديوم والألياف بدوائر واضحة.',
+            'Heart, sodium, fiber, and custom targets',
+            'أهداف القلب والصوديوم والألياف والأهداف المخصصة',
           ),
           borderRadius: 12,
           showLabel: false,
@@ -165,11 +177,21 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             key: const Key('dashboard-heart-circle-card'),
             title: tr('Heart Healthy', 'صحة القلب'),
             onTap: () => context.push('/analytics/nutrition?tab=nutrients'),
+            emptyMessage:
+                sodiumEvidenceValue == null &&
+                    fiberEvidenceValue == null &&
+                    potassiumEvidenceValue == null
+                ? tr(
+                    'Goal or nutrition evidence is unavailable',
+                    'بيانات الهدف أو التغذية غير متاحة',
+                  )
+                : null,
             rings: [
               _MacroProgress(
-                label: tr('Saturated fat', 'الدهون المشبعة'),
-                value: null,
-                goal: null,
+                label: tr('Potassium', 'البوتاسيوم'),
+                value: potassiumEvidenceValue?.round(),
+                goal: potassiumGoal,
+                unit: 'mg',
                 color: const Color(0xFFF2B632),
               ),
               _MacroProgress(
@@ -207,7 +229,10 @@ class _ReferenceDashboardPhone extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (visibleSections.contains(DashboardSectionIds.aiCoach)) ...[
-          _ReferenceAiCoachCard(arabic: arabic),
+          KeyedSubtree(
+            key: const Key('dashboard-ai-coach-slot'),
+            child: hero ?? _ReferenceAiCoachCard(arabic: arabic),
+          ),
           const SizedBox(height: 12),
         ],
         // Reuse the full Health Hub instead of a second phone-only imitation.
@@ -216,6 +241,40 @@ class _ReferenceDashboardPhone extends StatelessWidget {
           connectedHealth!,
           const SizedBox(height: 12),
         ],
+        KeyedSubtree(
+          key: const Key('dashboard-daily-intelligence-slot'),
+          child: dailyIntelligence,
+        ),
+        if (visibleSections.contains(DashboardSectionIds.aiCoach) &&
+            aiCoach != null) ...[
+          const SizedBox(height: 12),
+          KeyedSubtree(
+            key: const Key('dashboard-secondary-ai-coach-slot'),
+            child: aiCoach!,
+          ),
+        ],
+        if (personalHealthAi != null) ...[
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final baseHeight = BilPremiumResponsiveLayout.twinBaseHeight(
+                constraints.maxWidth,
+              );
+              final height = MediaQuery.textScalerOf(context)
+                  .scale(baseHeight)
+                  .clamp(
+                    baseHeight,
+                    BilPremiumResponsiveLayout.maximumTwinHeight,
+                  );
+              return SizedBox(
+                key: const Key('dashboard-personal-health-ai-slot'),
+                height: height,
+                child: personalHealthAi!,
+              );
+            },
+          ),
+        ],
+        const SizedBox(height: 12),
         if (overviewCards.isNotEmpty)
           _OverviewCardsCarousel(
             cards: overviewCards,
@@ -242,7 +301,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
               children: [
                 Expanded(
                   child: _LogShortcut(
-                    icon: Icons.restaurant_rounded,
+                    kind: BilSemanticIconKind.foodLog,
                     label: tr('Food', 'الطعام'),
                     recorded: meals?.recorded ?? false,
                     onTap: () => context.go('/daily-log?focus=meal'),
@@ -251,7 +310,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _LogShortcut(
-                    icon: Icons.water_drop_rounded,
+                    kind: BilSemanticIconKind.water,
                     label: tr('Water', 'الماء'),
                     recorded: water?.recorded ?? false,
                     onTap: () => context.go('/daily-log?action=water'),
@@ -260,7 +319,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _LogShortcut(
-                    icon: Icons.monitor_weight_rounded,
+                    kind: BilSemanticIconKind.weight,
                     label: tr('Weight', 'الوزن'),
                     recorded: weight?.recorded ?? false,
                     onTap: () => context.push('/daily-check-in'),
@@ -283,12 +342,9 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         if (visibleSections.contains(DashboardSectionIds.progress) &&
             progressSection != null) ...[
           const SizedBox(height: 12),
-          _VisualInsightShortcut(
+          KeyedSubtree(
             key: const Key('dashboard-mobile-summary-card'),
-            title: tr('Today Summary', 'ملخص اليوم'),
-            subtitle: tr('Meals, water and progress', 'وجباتك وماؤك وتقدمك'),
-            imageAsset: 'assets/images/dashboard/today_summary_v1.png',
-            onTap: () => context.go('/daily-log'),
+            child: progressSection!,
           ),
         ],
         const SizedBox(height: 12),
@@ -346,12 +402,6 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'fr': 'Santé cardiaque',
     'es': 'Salud cardíaca',
     'tr': 'Kalp sağlığı',
-  },
-  'Follow saturated fat, sodium, and fiber with clear rings.': {
-    'fr':
-        'Suivez les graisses saturées, le sodium et les fibres avec des anneaux clairs.',
-    'es': 'Sigue las grasas saturadas, el sodio y la fibra con anillos claros.',
-    'tr': 'Doymuş yağ, sodyum ve lifi net halkalarla takip edin.',
   },
   'Premium nutrient goals': {
     'fr': 'Objectifs nutritionnels Premium',
@@ -417,11 +467,6 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'fr': 'Maîtrise des glucides',
     'es': 'Control de carbohidratos',
     'tr': 'Karbonhidrat kontrollü',
-  },
-  'Saturated fat': {
-    'fr': 'Graisses saturées',
-    'es': 'Grasa saturada',
-    'tr': 'Doymuş yağ',
   },
   'Protein': {'fr': 'Protéines', 'es': 'Proteína', 'tr': 'Protein'},
   'Fat': {'fr': 'Lipides', 'es': 'Grasa', 'tr': 'Yağ'},

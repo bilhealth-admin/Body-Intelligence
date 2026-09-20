@@ -18,6 +18,11 @@ void main() {
     final metrics = _normalized(File(productionFiles[0]).readAsStringSync());
     final frame = _normalized(File(productionFiles[1]).readAsStringSync());
     final benchmark = _normalized(File(productionFiles[2]).readAsStringSync());
+    final current = _normalized(
+      File(
+        'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      ).readAsStringSync(),
+    );
     final daily = _normalized(File(productionFiles[3]).readAsStringSync());
     final grid = _normalized(File(productionFiles[4]).readAsStringSync());
 
@@ -34,8 +39,12 @@ void main() {
         'final contentGap = compactVerticalRhythm ? 12.0 : PremiumDesignTokens.spaceMd',
       ),
     );
-    expect(benchmark, contains('BilPremiumResponsiveLayout.sectionGap('));
-    expect(benchmark, contains('SizedBox(height: sectionGap)'));
+    expect(
+      benchmark,
+      contains('constraints: const BoxConstraints(maxWidth: 840)'),
+    );
+    expect(benchmark, isNot(contains('if (constraints.maxWidth >= 600)')));
+    expect(current, contains('const SizedBox(height: 12)'));
     expect(daily, contains('const SizedBox(height: 6)'));
     expect(grid, contains('PremiumDashboardBenchmark('));
     expect(grid, isNot(contains('DashboardAnalyticsCenter(')));

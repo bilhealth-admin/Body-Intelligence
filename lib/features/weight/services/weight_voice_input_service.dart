@@ -14,6 +14,32 @@ export 'spoken_weight_parser.dart';
 
 typedef WeightVoicePermissionGate = Future<bool> Function(BuildContext context);
 
+@visibleForTesting
+({BilRuntimeCapability capability, BilRuntimePermissionState state})
+weightVoiceEffectivePermission({
+  required TargetPlatform platform,
+  required BilRuntimePermissionState microphoneState,
+  BilRuntimePermissionState? speechRecognitionState,
+}) {
+  final usesSpeechRecognition =
+      platform == TargetPlatform.iOS &&
+      microphoneState == BilRuntimePermissionState.granted;
+  return (
+    capability: usesSpeechRecognition
+        ? BilRuntimeCapability.speechRecognition
+        : BilRuntimeCapability.microphone,
+    state: usesSpeechRecognition
+        ? speechRecognitionState ?? BilRuntimePermissionState.denied
+        : microphoneState,
+  );
+}
+
+@visibleForTesting
+String weightVoiceSettingsRecoverySource(BilRuntimeCapability capability) =>
+    capability == BilRuntimeCapability.speechRecognition
+    ? 'Speech recognition access is off. Enable it in system settings to add weight by voice; manual entry remains available.'
+    : 'Microphone access is off. Enable it in system settings to add weight by voice; manual entry remains available.';
+
 /// Captures a multilingual transcript and returns a reviewed value only.
 /// Saving remains the responsibility of the surrounding weight dialog.
 final class WeightVoiceInputService {
@@ -336,25 +362,33 @@ final class WeightVoiceInputService {
 
   Future<bool> _ensurePermission(BuildContext context) async {
     const policy = BilRuntimePermissionPolicy();
-    var capability = BilRuntimeCapability.microphone;
-    var current = await policy.status(capability);
-    if (current == BilRuntimePermissionState.granted &&
-        defaultTargetPlatform == TargetPlatform.iOS) {
-      capability = BilRuntimeCapability.speechRecognition;
-      current = await policy.status(capability);
+    final microphoneState = await policy.status(
+      BilRuntimeCapability.microphone,
+    );
+    BilRuntimePermissionState? speechRecognitionState;
+    if (defaultTargetPlatform == TargetPlatform.iOS &&
+        microphoneState == BilRuntimePermissionState.granted) {
+      speechRecognitionState = await policy.status(
+        BilRuntimeCapability.speechRecognition,
+      );
     }
+    final decision = weightVoiceEffectivePermission(
+      platform: defaultTargetPlatform,
+      microphoneState: microphoneState,
+      speechRecognitionState: speechRecognitionState,
+    );
+    final capability = decision.capability;
+    final current = decision.state;
     if (current == BilRuntimePermissionState.granted) return true;
     if (!context.mounted) return false;
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
       final open = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => AlertDialog.adaptive(
           title: Text(context.strings.text('Voice input unavailable')),
           content: Text(
-            context.strings.text(
-              'Microphone access is off. Enable it in system settings to add weight by voice; manual entry remains available.',
-            ),
+            context.strings.text(weightVoiceSettingsRecoverySource(capability)),
           ),
           actions: [
             TextButton(
@@ -373,11 +407,19 @@ final class WeightVoiceInputService {
     }
     final proceed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.strings.text('Allow voice input for this action?')),
+      builder: (dialogContext) => AlertDialog.adaptive(
+        title: Text(
+          context.strings.text(
+            capability == BilRuntimeCapability.speechRecognition
+                ? 'Allow speech recognition for this action?'
+                : 'Allow voice input for this action?',
+          ),
+        ),
         content: Text(
           context.strings.text(
-            'BIL starts listening only after you choose voice weight entry. Review the recognized value before saving.',
+            capability == BilRuntimeCapability.speechRecognition
+                ? 'BIL uses speech recognition only after you choose voice weight entry. Review the recognized value before saving.'
+                : 'BIL starts listening only after you choose voice weight entry. Review the recognized value before saving.',
           ),
         ),
         actions: [

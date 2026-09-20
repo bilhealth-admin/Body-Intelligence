@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:body_intelligence_log/app/analytics/bil_launch_event.dart';
 import 'package:body_intelligence_log/app/analytics/consented_launch_analytics_sink.dart';
 import 'package:body_intelligence_log/app/launch/bil_verified_links_configuration.dart';
@@ -9,6 +11,40 @@ void main() {
   test('verified-link documents stay absent without owner signing values', () {
     expect(BilVerifiedLinksConfiguration.assetLinksJson(), isNull);
     expect(BilVerifiedLinksConfiguration.appleAppSiteAssociationJson(), isNull);
+  });
+
+  test('iOS AASA matches the narrow authenticated-return contract', () {
+    final encoded =
+        BilVerifiedLinksConfiguration.appleAppSiteAssociationJsonFor(
+          teamId: 'A1B2C3D4E5',
+          bundleId: 'com.bilhealth.bodyintelligencelog',
+        );
+    expect(encoded, isNotNull);
+
+    final document = jsonDecode(encoded!) as Map<String, Object?>;
+    final applinks = document['applinks']! as Map<String, Object?>;
+    final details = applinks['details']! as List<Object?>;
+    final app = details.single! as Map<String, Object?>;
+    final components = app['components']! as List<Object?>;
+
+    expect(applinks, isNot(contains('apps')));
+    expect(app['appIDs'], <String>[
+      'A1B2C3D4E5.com.bilhealth.bodyintelligencelog',
+    ]);
+    expect(
+      components
+          .cast<Map<String, Object?>>()
+          .map((component) => component['/'])
+          .toList(),
+      BilVerifiedLinksConfiguration.authenticatedReturnPaths,
+    );
+    expect(
+      BilVerifiedLinksConfiguration.appleAppSiteAssociationJsonFor(
+        teamId: 'YOUR_TEAM',
+        bundleId: 'com.bilhealth.bodyintelligencelog',
+      ),
+      isNull,
+    );
   });
 
   test(

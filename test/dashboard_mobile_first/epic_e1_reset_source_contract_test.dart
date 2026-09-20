@@ -5,26 +5,24 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Epic 1 exposes the approved mobile dashboard sequence', () {
     final source = File(
-      'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
-    ).readAsStringSync();
-    final mobileTwin = File(
-      'lib/features/dashboard/widgets/dashboard_mobile_body_twin_snapshot.dart',
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
     ).readAsStringSync();
 
-    expect(mobileTwin, contains("Key('dashboard-mobile-body-twin-snapshot')"));
-    expect(source, contains("Key('dashboard-summary-and-bio-rail')"));
+    expect(source, contains("Key('dashboard-ai-coach-slot')"));
+    expect(source, contains("Key('dashboard-daily-intelligence-slot')"));
+    expect(source, contains("Key('dashboard-personal-health-ai-slot')"));
     expect(source, contains("Key('dashboard-mobile-summary-card')"));
     expect(
-      source.indexOf('dayAndProgress,'),
-      lessThan(source.indexOf('aiCoach!]')),
+      source.indexOf("Key('dashboard-ai-coach-slot')"),
+      lessThan(source.indexOf("Key('dashboard-daily-intelligence-slot')")),
     );
     expect(
-      source.indexOf('aiCoach!]'),
-      lessThan(source.indexOf('mobileTwin,')),
+      source.indexOf("Key('dashboard-daily-intelligence-slot')"),
+      lessThan(source.indexOf("Key('dashboard-personal-health-ai-slot')")),
     );
     expect(
-      source.indexOf('connectedHealth!,'),
-      lessThan(source.indexOf('dayAndProgress,')),
+      source.indexOf("Key('dashboard-personal-health-ai-slot')"),
+      lessThan(source.indexOf("Key('dashboard-mobile-summary-card')")),
     );
   });
 

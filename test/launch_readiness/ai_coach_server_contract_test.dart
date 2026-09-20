@@ -20,7 +20,8 @@ void main() {
     );
     expect(source, contains('BIL_GEMINI_COST_RATES_JSON'));
     expect(source, contains('attempt <= 2'));
-    expect(source, contains('AbortSignal.timeout(30_000)'));
+    expect(source, contains('geminiAttemptTimeoutMs = 12_000'));
+    expect(source, contains('AbortSignal.timeout(geminiAttemptTimeoutMs)'));
     expect(source, contains('maxOutputTokens'));
     expect(source, contains('responseMimeType: "application/json"'));
     expect(
@@ -79,7 +80,7 @@ void main() {
     expect(page, isNot(contains('CoachVoicePayload')));
     expect(page, contains('pendingVoiceTranscript = transcript'));
     expect(page, contains('question.value = TextEditingValue('));
-    expect(page, contains('Duration(seconds: 2)'));
+    expect(page, contains('Duration(milliseconds: 3500)'));
     expect(page, contains('_LiveVoiceTranscript'));
     expect(page, contains('await speech.stop();'));
     expect(page, contains('_speakCoachText(spokenReply, spokenLocale)'));
@@ -93,7 +94,9 @@ void main() {
     expect(bridge, contains('EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES'));
     expect(bridge, isNot(contains('EXTRA_PREFER_OFFLINE')));
     expect(bridge, contains('if (recognizer == null)'));
-    expect(bridge, contains('if (sessionActive) recognizer?.stopListening()'));
+    expect(bridge, contains('val wasActive = sessionActive'));
+    expect(bridge, contains('if (wasActive)'));
+    expect(bridge, contains('recognizer?.stopListening()'));
     expect(bridge, contains('pauseForMs'));
     expect(
       bridge,

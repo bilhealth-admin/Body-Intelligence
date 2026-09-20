@@ -9,6 +9,11 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   private var advertisedProfiles: [UUID: Set<String>] = [:]
   private var sessions: [UUID: ReadSession] = [:]
   private var discoveryResult: FlutterResult?
+  // `peripherals` is a session cache needed for pairing and GATT reads. It is
+  // deliberately separate from the IDs seen by the current scan so an older
+  // cached device is never presented as nearby merely because it was found in
+  // a previous scan.
+  private var currentDiscoveryIds = Set<UUID>()
   private var seenPackets = Set<String>()
   private var pendingPairResults: [UUID: FlutterResult] = [:]
   private var permissionResult: FlutterResult?
@@ -29,7 +34,22 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   static func register(with registrar: FlutterPluginRegistrar) { _ = BILFitnessBleBridge(registrar: registrar) }
   init(registrar: FlutterPluginRegistrar) {
     channel = FlutterMethodChannel(name: Self.channelName, binaryMessenger: registrar.messenger())
-    super.init(); central = CBCentralManager(delegate: self, queue: nil); channel.setMethodCallHandler(handle)
+    super.init()
+    // Registering the Flutter bridge must not itself request Bluetooth access.
+    // CoreBluetooth is initialized lazily only after a user-initiated
+    // permission or device action reaches this channel.
+    channel.setMethodCallHandler(handle)
+  }
+
+  private func ensureCentralManager() -> CBCentralManager {
+    if let central { return central }
+    let manager = CBCentralManager(
+      delegate: self,
+      queue: nil,
+      options: [CBCentralManagerOptionShowPowerAlertKey: false]
+    )
+    central = manager
+    return manager
   }
 
   private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -42,6 +62,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       result(FlutterError(code:"bluetooth_permission_denied", message:"Bluetooth permission is required", details:nil))
       return
     }
+    let central = ensureCentralManager()
     guard central.state == .poweredOn else {
       result(FlutterError(code:"bluetooth_disabled", message:"Bluetooth unavailable", details:nil))
       return
@@ -51,8 +72,19 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       guard discoveryResult == nil else { result(FlutterError(code:"operation_in_progress",message:nil,details:nil)); return }
       let requestedTimeoutMs = (args["timeoutMs"] as? NSNumber)?.intValue ?? 3000
       let timeoutMs = min(max(requestedTimeoutMs, 500), 30000)
+      currentDiscoveryIds.removeAll()
       discoveryResult = result; central.scanForPeripherals(withServices: supportedServices, options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
-      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeoutMs)) { self.central.stopScan(); let callback=self.discoveryResult; self.discoveryResult=nil; callback?(self.peripherals.values.map(self.describe)) }
+      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeoutMs)) {
+        self.central.stopScan()
+        let callback = self.discoveryResult
+        self.discoveryResult = nil
+        let discovered = self.currentDiscoveryIds
+          .compactMap { self.peripherals[$0] }
+          .sorted { $0.identifier.uuidString < $1.identifier.uuidString }
+          .map(self.describe)
+        self.currentDiscoveryIds.removeAll()
+        callback?(discovered)
+      }
     case "pair":
       guard let p=peripheral(args) else { result(FlutterError(code:"not_found",message:nil,details:nil)); return }
       if p.state == .connected { result(nil); return }
@@ -87,6 +119,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   private func requestBluetoothPermission(_ result: @escaping FlutterResult) {
     switch CBManager.authorization {
     case .allowedAlways:
+      _ = ensureCentralManager()
       result(nil)
     case .denied, .restricted:
       result(FlutterError(code:"bluetooth_permission_denied", message:"Bluetooth permission is required", details:nil))
@@ -103,6 +136,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       }
       permissionTimeout = timeout
       DispatchQueue.main.asyncAfter(deadline: .now() + 20, execute: timeout)
+      _ = ensureCentralManager()
       resolvePermissionRequestIfPossible()
     @unknown default:
       result(FlutterError(code:"bluetooth_permission_unavailable", message:nil, details:nil))
@@ -122,7 +156,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       // CoreBluetooth owns the system prompt. A short, service-filtered scan
       // is the permission probe, but it is started only after the central is
       // ready; powered/adapter state never blocks the request itself.
-      guard central.state == .poweredOn, !permissionProbeActive else { return }
+      guard let central, central.state == .poweredOn, !permissionProbeActive else { return }
       permissionProbeActive = true
       central.scanForPeripherals(
         withServices: supportedServices,
@@ -141,7 +175,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     permissionTimeout?.cancel()
     permissionTimeout = nil
     if permissionProbeActive {
-      central.stopScan()
+      central?.stopScan()
       permissionProbeActive = false
     }
     if let error {
@@ -165,6 +199,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     let advertised = Set((advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] ?? []).map { $0.uuidString }.filter { supported.contains($0) })
     guard !advertised.isEmpty else { return }
     peripherals[peripheral.identifier]=peripheral; advertisedProfiles[peripheral.identifier]=advertised
+    if discoveryResult != nil { currentDiscoveryIds.insert(peripheral.identifier) }
   }
   func centralManager(_ central:CBCentralManager,didConnect peripheral:CBPeripheral){
     pendingPairResults.removeValue(forKey: peripheral.identifier)?(nil)
@@ -175,7 +210,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     pendingPairResults.removeValue(forKey: peripheral.identifier)?(FlutterError(code:"pairing_failed",message:error?.localizedDescription,details:nil))
     finish(peripheral.identifier,error:FlutterError(code:"gatt_connection_failed",message:error?.localizedDescription,details:nil))
   }
-  func centralManager(_ central:CBCentralManager,didDisconnectPeripheral peripheral:CBPeripheral,error:Error?){ if sessions[peripheral.identifier] != nil { finish(peripheral.identifier,error:error == nil ? nil : FlutterError(code:"gatt_disconnected",message:error?.localizedDescription,details:nil)) } }
+  func centralManager(_ central:CBCentralManager,didDisconnectPeripheral peripheral:CBPeripheral,error:Error?){ if sessions[peripheral.identifier] != nil { finish(peripheral.identifier,error:FlutterError(code:"gatt_disconnected",message:error?.localizedDescription,details:nil)) } }
   func peripheral(_ peripheral:CBPeripheral,didDiscoverServices error:Error?){
     if let error=error { finish(peripheral.identifier,error:FlutterError(code:"service_discovery_failed",message:error.localizedDescription,details:nil));return }
     guard let session=sessions[peripheral.identifier] else{return}
@@ -215,6 +250,18 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     completeIfReady(peripheral.identifier)
   }
   private func completeIfReady(_ id:UUID){ guard let session=sessions[id],session.pendingServiceDiscoveries==0,session.completedCharacteristics.isSuperset(of:session.expectedCharacteristics) else{return}; finish(id,error:nil) }
-  private func finish(_ id:UUID,error:FlutterError?){ guard let session=sessions.removeValue(forKey:id),!session.completed else{return};session.completed=true;session.timeout?.cancel();if let error=error{session.result(error)}else{session.result(session.packets)} }
+  private func finish(_ id:UUID,error:FlutterError?){
+    guard let session=sessions.removeValue(forKey:id),!session.completed else{return}
+    session.completed=true
+    session.timeout?.cancel()
+    if let error=error {
+      if let peripheral=peripherals[id], peripheral.state != .disconnected {
+        central.cancelPeripheralConnection(peripheral)
+      }
+      session.result(error)
+    } else {
+      session.result(session.packets)
+    }
+  }
   private func describe(_ p:CBPeripheral)->[String:Any]{["id":p.identifier.uuidString,"name":p.name ?? "Fitness device","manufacturer":"unknown","firmwareVersion":"unknown","profiles":Array(advertisedProfiles[p.identifier] ?? [])]}
 }

@@ -35,6 +35,34 @@ void main() {
       ),
       isNull,
     );
+    for (final invalid in <Object?>[
+      double.nan,
+      double.infinity,
+      double.negativeInfinity,
+    ]) {
+      expect(
+        registry.createAction(
+          name: 'log_weight',
+          arguments: <String, Object?>{'weightKg': invalid},
+          label: 'invalid numeric value',
+        ),
+        isNull,
+      );
+    }
+    for (final invalidDate in <Object?>[
+      '2026-02-30',
+      '2026-08-09T12:00:00Z',
+      20260809,
+    ]) {
+      expect(
+        registry.createAction(
+          name: 'log_weight',
+          arguments: <String, Object?>{'weightKg': 89, 'date': invalidDate},
+          label: 'invalid date',
+        ),
+        isNull,
+      );
+    }
     expect(
       registry.createAction(
         name: 'log_weight',
@@ -138,6 +166,7 @@ void main() {
       registry.createAction(
         name: 'quick_add_macros',
         arguments: const {
+          'date': '2026-08-10',
           'mealType': 'lunch',
           'calories': 420,
           'protein': 35,
@@ -150,9 +179,46 @@ void main() {
     );
     expect(
       registry.createAction(
+        name: 'quick_add_macros',
+        arguments: const {
+          'date': 'not-a-date',
+          'mealType': 'lunch',
+          'calories': 420,
+          'protein': 35,
+          'carbohydrates': 40,
+          'fat': 12,
+        },
+        label: 'bad date',
+      ),
+      isNull,
+    );
+    expect(
+      registry.createAction(
         name: 'save_measurements',
         arguments: const {'waistCm': 900},
         label: 'bad',
+      ),
+      isNull,
+    );
+    expect(
+      registry.createAction(
+        name: 'quick_add_macros',
+        arguments: const {
+          'mealType': 'lunch',
+          'calories': 10001,
+          'protein': 35,
+          'carbohydrates': 40,
+          'fat': 12,
+        },
+        label: 'repository would reject this',
+      ),
+      isNull,
+    );
+    expect(
+      registry.createAction(
+        name: 'save_measurements',
+        arguments: <String, Object?>{'waistCm': double.nan},
+        label: 'non-finite measurement',
       ),
       isNull,
     );

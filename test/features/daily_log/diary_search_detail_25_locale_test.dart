@@ -144,10 +144,20 @@ void main() {
       );
       expect(tester.takeException(), isNull, reason: '$tag search');
 
+      const query = 'chicken';
+      final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(
+        query: query,
+        interfaceLocaleTag: tag,
+      );
+      expect(
+        resultLocale,
+        'en',
+        reason: '$tag English query owns the result language',
+      );
       final expectedName = FoodPresentationLocalizer.foodName(
         name: food.name,
         arabicName: food.arabicName,
-        localeTag: tag,
+        localeTag: resultLocale,
         source: food.source,
       );
       expect(
@@ -155,7 +165,7 @@ void main() {
         findsNothing,
         reason: '$tag remains empty before a query',
       );
-      await tester.enterText(find.byType(SearchBar).last, 'chicken');
+      await tester.enterText(find.byType(SearchBar).last, query);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1500));
       expect(find.text(expectedName), findsOneWidget, reason: '$tag food name');

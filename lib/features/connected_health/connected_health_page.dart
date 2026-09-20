@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/localization/runtime_copy_connected_health.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../commerce/domain/commerce_plan.dart';
@@ -25,6 +29,51 @@ bool connectedHealthCanRequestPermissions(ConnectedHealthStatus status) =>
     status == ConnectedHealthStatus.permissionRequired ||
     status == ConnectedHealthStatus.permissionDenied;
 
+String connectedHealthStatusText(
+  BuildContext context,
+  ConnectedHealthStatus status,
+) {
+  String tr(String en, String ar) => connectedHealthText(context, en, ar);
+  return switch (status) {
+    ConnectedHealthStatus.unavailable => tr(
+      'Unavailable on this device.',
+      'غير متاح على هذا الجهاز.',
+    ),
+    ConnectedHealthStatus.updateRequired => tr(
+      'The health provider must be installed or updated.',
+      'يلزم تثبيت مصدر الصحة أو تحديثه.',
+    ),
+    ConnectedHealthStatus.permissionRequired => tr(
+      'BIL needs explicit permission before reading health data.',
+      'يحتاج BIL إلى إذن صريح قبل قراءة البيانات الصحية.',
+    ),
+    ConnectedHealthStatus.permissionDenied => tr(
+      'Permission was denied. You can grant it later in system settings.',
+      'تم رفض الإذن. يمكنك منحه لاحقًا من إعدادات النظام.',
+    ),
+    ConnectedHealthStatus.authorizationRequested => tr(
+      'The Health access request completed. Apple does not reveal read permission status; only records it provides will appear.',
+      'اكتمل طلب الوصول إلى الصحة. لا تكشف Apple حالة إذن القراءة؛ لن تظهر إلا السجلات التي يوفرها النظام.',
+    ),
+    ConnectedHealthStatus.ready => tr(
+      'Ready to synchronize.',
+      'جاهز للمزامنة.',
+    ),
+    ConnectedHealthStatus.syncing => tr(
+      'Synchronizing now.',
+      'تتم المزامنة الآن.',
+    ),
+    ConnectedHealthStatus.synchronized => tr(
+      'Connected and synchronized.',
+      'متصل ومتزامن.',
+    ),
+    ConnectedHealthStatus.degraded => tr(
+      'The native source could not be reached. Local data was not affected.',
+      'تعذر الوصول إلى المصدر الأصلي. البيانات المحلية لم تتأثر.',
+    ),
+  };
+}
+
 class ConnectedHealthPage extends ConsumerStatefulWidget {
   const ConnectedHealthPage({super.key});
 
@@ -33,8 +82,40 @@ class ConnectedHealthPage extends ConsumerStatefulWidget {
       _ConnectedHealthPageState();
 }
 
-class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
+class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
+    with WidgetsBindingObserver {
   bool _connectedOnly = false;
+  bool _refreshOnResume = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _refreshOnResume = true;
+      return;
+    }
+    if (state != AppLifecycleState.resumed || !_refreshOnResume) return;
+    _refreshOnResume = false;
+    unawaited(ref.read(connectedHealthProvider.notifier).refresh());
+  }
+
+  Future<void> _openSystemSettings() async {
+    _refreshOnResume = true;
+    await ref.read(connectedHealthProvider.notifier).openSystemSettings();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,65 +201,71 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                       data: (snapshot) => Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          PremiumSurface(
-                            key: const Key('connected-health-live-watch-card'),
-                            dashboardGlass: true,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        tr(
-                                          'Smart-watch reading',
-                                          'قراءة الساعة الذكية',
+                          // HealthKit and Health Connect also contain manual
+                          // and phone-authored records. Show a watch only when
+                          // native provenance actually identifies a wearable.
+                          if (connectedHealthSnapshotHasWearableEvidence(
+                            snapshot,
+                          )) ...[
+                            PremiumSurface(
+                              key: const Key(
+                                'connected-health-live-watch-card',
+                              ),
+                              dashboardGlass: true,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          tr(
+                                            'Smart-watch reading',
+                                            'قراءة الساعة الذكية',
+                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w900,
+                                              ),
                                         ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w900,
-                                            ),
+                                      ),
+                                      Icon(
+                                        Icons.sync_rounded,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: PremiumDesignTokens.spaceSm,
+                                  ),
+                                  Center(
+                                    child: SizedBox.square(
+                                      dimension: 196,
+                                      child: LiveHealthWatch(
+                                        snapshot: snapshot,
+                                        languageCode: Localizations.localeOf(
+                                          context,
+                                        ).languageCode,
                                       ),
                                     ),
-                                    Icon(
-                                      Icons.sync_rounded,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: PremiumDesignTokens.spaceSm,
-                                ),
-                                Center(
-                                  child: SizedBox.square(
-                                    dimension: 276,
-                                    child: LiveHealthWatch(
-                                      snapshot: snapshot,
-                                      languageCode: Localizations.localeOf(
-                                        context,
-                                      ).languageCode,
-                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: PremiumDesignTokens.spaceMd),
+                            const SizedBox(height: PremiumDesignTokens.spaceMd),
+                          ],
                           PremiumSurface(
+                            key: const Key('connected-health-source-card'),
                             dashboardGlass: true,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  snapshot.platformSource ??
-                                      tr(
-                                        'Unsupported platform',
-                                        'منصة غير مدعومة',
-                                      ),
+                                  _platformSourceTitle(context, snapshot),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: Theme.of(context)
@@ -194,9 +281,15 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                                     'Connection status',
                                     'حالة الاتصال',
                                   ),
-                                  value: _statusText(context, snapshot.status),
+                                  value: connectedHealthStatusText(
+                                    context,
+                                    snapshot.status,
+                                  ),
                                   child: Text(
-                                    _statusText(context, snapshot.status),
+                                    connectedHealthStatusText(
+                                      context,
+                                      snapshot.status,
+                                    ),
                                     style: Theme.of(context).textTheme.bodyLarge
                                         ?.copyWith(
                                           color: Theme.of(
@@ -227,6 +320,25 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                                 const SizedBox(
                                   height: PremiumDesignTokens.spaceMd,
                                 ),
+                                if (!kIsWeb &&
+                                    defaultTargetPlatform ==
+                                        TargetPlatform.iOS &&
+                                    snapshot.status ==
+                                        ConnectedHealthStatus
+                                            .authorizationRequested &&
+                                    snapshot.signals.isEmpty) ...[
+                                  Text(
+                                    tr(
+                                      'Apple Health does not reveal read permission status. Open the Health app, check BIL under Apps, then return and tap Sync now. Only records actually provided by Apple Health will appear.',
+                                      'لا تكشف Apple Health حالة إذن القراءة. افتح تطبيق الصحة، تحقق من BIL ضمن التطبيقات، ثم عد واضغط «مزامنة الآن». ستظهر فقط السجلات التي يوفرها Apple Health فعليًا.',
+                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(height: 1.35),
+                                  ),
+                                  const SizedBox(
+                                    height: PremiumDesignTokens.spaceSm,
+                                  ),
+                                ],
                                 Wrap(
                                   spacing: PremiumDesignTokens.spaceSm,
                                   runSpacing: PremiumDesignTokens.spaceSm,
@@ -259,11 +371,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                                         snapshot.failureCode ==
                                             'revoke_in_system_settings_required')
                                       OutlinedButton.icon(
-                                        onPressed: () => ref
-                                            .read(
-                                              connectedHealthProvider.notifier,
-                                            )
-                                            .openSystemSettings(),
+                                        onPressed: _openSystemSettings,
                                         icon: const Icon(
                                           Icons.settings_outlined,
                                         ),
@@ -320,6 +428,9 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                                             ConnectedHealthStatus
                                                 .synchronized ||
                                         snapshot.status ==
+                                            ConnectedHealthStatus
+                                                .authorizationRequested ||
+                                        snapshot.status ==
                                             ConnectedHealthStatus.degraded)
                                       FilledButton.icon(
                                         onPressed: () => ref
@@ -352,6 +463,11 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                           PremiumDashboardCardLock(
                             key: const Key('fitness-devices-premium-gate'),
                             locked: !fitnessDevicesUnlocked,
+                            // A centered floating badge obscures the live BLE
+                            // status/action copy on compact screens. The whole
+                            // card remains a semantic Premium gate and opens
+                            // the plans route when locked.
+                            showLabel: false,
                             title: tr(
                               'Premium fitness device connections',
                               'اتصال أجهزة اللياقة ضمن Premium',
@@ -364,14 +480,16 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                                 context.push('/plans?focus=subscription'),
                             child: const _FitnessDeviceSection(),
                           ),
+                          if (!kIsWeb &&
+                              defaultTargetPlatform ==
+                                  TargetPlatform.android) ...[
+                            const SizedBox(height: PremiumDesignTokens.spaceMd),
+                            const FoodNameHealthSyncCard(
+                              key: Key('connected-health-food-sync-card'),
+                            ),
+                          ],
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
-                          const FoodNameHealthSyncCard(),
-                          const SizedBox(height: PremiumDesignTokens.spaceMd),
-                          _CompatibilitySection(
-                            languageCode: Localizations.localeOf(
-                              context,
-                            ).languageCode,
-                          ),
+                          const _CompatibilitySection(),
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
                           PremiumSurface(
                             dashboardGlass: true,
@@ -390,52 +508,60 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                                 ),
                                 Text(
                                   tr(
-                                    'BIL reads only the health categories you authorize. Synchronization is local-first, preserves source provenance, and does not enable cloud upload, analytics, or commerce.',
-                                    'يقرأ BIL فقط فئات الصحة التي تسمح بها. المزامنة محلية أولًا وتحافظ على مصدر كل قيمة، ولا تفعّل الرفع السحابي أو التحليلات أو التجارة.',
+                                    'Only approved health categories are read. Sync stays local and keeps the original source of every value.',
+                                    'تُقرأ فئات الصحة التي توافق عليها فقط. تبقى المزامنة محلية وتحفظ المصدر الأصلي لكل قيمة.',
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: PremiumDesignTokens.spaceMd),
-                          PremiumSurface(
-                            dashboardGlass: true,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  tr(
-                                    'Recent synchronized signals',
-                                    'أحدث الإشارات المتزامنة',
-                                  ),
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                const SizedBox(
-                                  height: PremiumDesignTokens.spaceSm,
-                                ),
-                                if (snapshot.signals.isEmpty)
+                          if (snapshot.signals.isNotEmpty) ...[
+                            const SizedBox(height: PremiumDesignTokens.spaceMd),
+                            PremiumSurface(
+                              key: const Key('connected-health-signals-card'),
+                              dashboardGlass: true,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
                                   Text(
                                     tr(
-                                      'No synchronized signal is available yet.',
-                                      'لا توجد إشارة متزامنة متاحة بعد.',
+                                      'Recent synchronized signals',
+                                      'أحدث الإشارات المتزامنة',
                                     ),
-                                  )
-                                else
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge,
+                                  ),
+                                  const SizedBox(
+                                    height: PremiumDesignTokens.spaceSm,
+                                  ),
                                   for (final signal in snapshot.signals)
                                     ListTile(
                                       contentPadding: EdgeInsets.zero,
-                                      leading: const Icon(
-                                        Icons.monitor_heart_outlined,
+                                      leading: BilSemanticIconBadge(
+                                        kind:
+                                            BilSemanticIcons.kindForHealthSignal(
+                                              signal.key,
+                                            ),
+                                        size: 38,
+                                        iconSize: 21,
+                                        shape: BoxShape.rectangle,
                                       ),
-                                      title: Text(signal.key),
+                                      title: Text(
+                                        connectedHealthDataTypeText(
+                                          context,
+                                          signal.key,
+                                        ),
+                                      ),
                                       subtitle: Text(signal.source),
                                       trailing: Text(
                                         '${signal.value.toStringAsFixed(signal.value == signal.value.roundToDouble() ? 0 : 1)} ${signal.unit}',
                                       ),
                                     ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
@@ -447,6 +573,11 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
   }
 
   Future<void> _showConnectionSearch(BuildContext context) async {
+    final nativeSource = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS
+        ? 'Apple Health'
+        : !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? 'Health Connect'
+        : connectedHealthText(context, 'Health source', 'مصدر صحي');
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -469,17 +600,23 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
               ),
               const SizedBox(height: 12),
               ListTile(
-                leading: const Icon(Icons.health_and_safety_outlined),
-                title: Text(
-                  connectedHealthText(
-                    context,
-                    'Health Connect / Apple Health',
-                    'Health Connect / Apple Health',
-                  ),
+                leading: BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.health,
+                  size: 38,
+                  iconSize: 21,
+                  shape: BoxShape.rectangle,
                 ),
+                title: Text(nativeSource),
               ),
               ListTile(
-                leading: const Icon(Icons.bluetooth_rounded),
+                leading: BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.devices,
+                  iconOverride: Icons.bluetooth_rounded,
+                  appleIconOverride: CupertinoIcons.bluetooth,
+                  size: 38,
+                  iconSize: 21,
+                  shape: BoxShape.rectangle,
+                ),
                 title: Text(
                   connectedHealthText(
                     context,
@@ -490,7 +627,14 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
               ),
               ListTile(
                 key: const Key('available-connections-capabilities-link'),
-                leading: const Icon(Icons.fact_check_outlined),
+                leading: BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.verifiedFood,
+                  iconOverride: Icons.fact_check_outlined,
+                  appleIconOverride: CupertinoIcons.checkmark_seal,
+                  size: 38,
+                  iconSize: 21,
+                  shape: BoxShape.rectangle,
+                ),
                 title: Text(
                   connectedHealthText(
                     context,
@@ -517,45 +661,21 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
     );
   }
 
-  String _statusText(BuildContext context, ConnectedHealthStatus status) {
-    String tr(String en, String ar) => connectedHealthText(context, en, ar);
-    return switch (status) {
-      ConnectedHealthStatus.unavailable => tr(
-        'Unavailable on this device.',
-        'غير متاح على هذا الجهاز.',
-      ),
-      ConnectedHealthStatus.updateRequired => tr(
-        'The health provider must be installed or updated.',
-        'يلزم تثبيت مصدر الصحة أو تحديثه.',
-      ),
-      ConnectedHealthStatus.permissionRequired => tr(
-        'BIL needs explicit permission before reading health data.',
-        'يحتاج BIL إلى إذن صريح قبل قراءة البيانات الصحية.',
-      ),
-      ConnectedHealthStatus.permissionDenied => tr(
-        'Permission was denied. You can grant it later in system settings.',
-        'تم رفض الإذن. يمكنك منحه لاحقًا من إعدادات النظام.',
-      ),
-      ConnectedHealthStatus.authorizationRequested => tr(
-        'The Health access request completed. Apple does not reveal read permission status; only records it provides will appear.',
-        'اكتمل طلب الوصول إلى الصحة. لا تكشف Apple حالة إذن القراءة؛ لن تظهر إلا السجلات التي يوفرها النظام.',
-      ),
-      ConnectedHealthStatus.ready => tr(
-        'Ready to synchronize.',
-        'جاهز للمزامنة.',
-      ),
-      ConnectedHealthStatus.syncing => tr(
-        'Synchronizing now.',
-        'تتم المزامنة الآن.',
-      ),
-      ConnectedHealthStatus.synchronized => tr(
-        'Connected and synchronized.',
-        'متصل ومتزامن.',
-      ),
-      ConnectedHealthStatus.degraded => tr(
-        'The native source could not be reached. Local data was not affected.',
-        'تعذر الوصول إلى المصدر الأصلي. البيانات المحلية لم تتأثر.',
-      ),
-    };
+  String _platformSourceTitle(
+    BuildContext context,
+    ConnectedHealthSnapshot snapshot,
+  ) {
+    if (snapshot.platformSource != null) return snapshot.platformSource!;
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      return connectedHealthText(context, 'Apple Health', 'Apple Health');
+    }
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return connectedHealthText(context, 'Health Connect', 'Health Connect');
+    }
+    return connectedHealthText(
+      context,
+      'Unsupported platform',
+      'منصة غير مدعومة',
+    );
   }
 }

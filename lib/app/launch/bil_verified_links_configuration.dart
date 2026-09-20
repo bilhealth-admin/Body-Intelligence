@@ -3,6 +3,17 @@ import 'dart:convert';
 /// Produces verified-link documents only when owner/platform values are valid.
 /// Null means "do not publish" and prevents placeholder claims.
 abstract final class BilVerifiedLinksConfiguration {
+  /// Credential-bearing HTTPS returns that the native manifests and the
+  /// production association-document generator intentionally claim.
+  ///
+  /// All other in-app routes use the audited `bil://` route allow-list. Keeping
+  /// this list narrow prevents the website from opening arbitrary app pages
+  /// and keeps OAuth/recovery behavior identical on Android and iOS.
+  static const authenticatedReturnPaths = <String>[
+    '/auth/callback',
+    '/auth/reset-password',
+  ];
+
   static const androidPackage = String.fromEnvironment(
     'BIL_GOOGLE_PACKAGE_NAME',
     defaultValue: 'com.bilhealth.bodyintelligencelog',
@@ -33,25 +44,33 @@ abstract final class BilVerifiedLinksConfiguration {
     ]);
   }
 
-  static String? appleAppSiteAssociationJson() {
-    final team = appleTeamId.trim().toUpperCase();
-    if (!RegExp(r'^[A-Z0-9]{10}$').hasMatch(team) ||
-        !_validPackage(appleBundleId)) {
+  static String? appleAppSiteAssociationJson() =>
+      appleAppSiteAssociationJsonFor(
+        teamId: appleTeamId,
+        bundleId: appleBundleId,
+      );
+
+  /// Builds the same modern AASA shape used by the release generator.
+  ///
+  /// The explicit variant also lets release tests verify the exact document
+  /// without embedding a real production Team ID in source control.
+  static String? appleAppSiteAssociationJsonFor({
+    required String teamId,
+    required String bundleId,
+  }) {
+    final team = teamId.trim().toUpperCase();
+    final bundle = bundleId.trim();
+    if (!RegExp(r'^[A-Z0-9]{10}$').hasMatch(team) || !_validPackage(bundle)) {
       return null;
     }
     return const JsonEncoder.withIndent('  ').convert({
       'applinks': {
-        'apps': <String>[],
         'details': [
           {
-            'appID': '$team.$appleBundleId',
-            'components': [
-              {'/': '/plans', 'comment': 'BIL plans'},
-              {'/': '/login', 'comment': 'BIL login'},
-              {'/': '/register', 'comment': 'BIL registration'},
-              {'/': '/settings', 'comment': 'BIL settings'},
-              {'/': '/notifications', 'comment': 'BIL notification settings'},
-              {'/': '/privacy', 'comment': 'BIL privacy'},
+            'appIDs': ['$team.$bundle'],
+            'components': <Map<String, String>>[
+              for (final path in authenticatedReturnPaths)
+                {'/': path, 'comment': 'BIL authenticated return'},
             ],
           },
         ],

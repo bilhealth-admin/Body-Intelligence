@@ -81,18 +81,11 @@ class _CoachReplyProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final failed = phase == _CoachReplyPhase.failed;
-    final searching = phase == _CoachReplyPhase.searching;
     final label = failed
         ? intelligenceText(
             context,
             'The reply did not complete. Try again.',
             'لم يكتمل الرد. حاول مرة أخرى.',
-          )
-        : searching
-        ? intelligenceText(
-            context,
-            'Searching your BIL context…',
-            'أبحث في سياق BIL الخاص بك…',
           )
         : intelligenceText(context, 'Preparing your answer…', 'أجهز إجابتك…');
     return Semantics(
@@ -117,7 +110,7 @@ class _CoachReplyProgress extends StatelessWidget {
                 SizedBox.square(
                   dimension: 17,
                   child: CircularProgressIndicator(
-                    strokeWidth: searching ? 2.5 : 1.8,
+                    strokeWidth: 1.8,
                   ),
                 )
               else
@@ -133,9 +126,7 @@ class _CoachReplyProgress extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: searching || failed
-                        ? FontWeight.w800
-                        : FontWeight.w600,
+                    fontWeight: failed ? FontWeight.w800 : FontWeight.w600,
                   ),
                 ),
               ),

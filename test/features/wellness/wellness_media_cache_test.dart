@@ -128,28 +128,33 @@ void main() {
     expect(client.followRedirects, isFalse);
   });
 
-  test('public recipe previews never receive the Supabase bearer', () async {
+  test('public v3 and v4 recipe images never receive the bearer', () async {
     final bytes = utf8.encode('verified public recipe preview');
     final digest = sha256.convert(bytes).toString();
-    final asset = assetFor(
-      bytes,
-      url: Uri.parse(
-        'https://workouts.bilhealth.com/v3/recipes/images/recipe-id/$digest',
-      ),
-      mimeType: 'image/jpeg',
-    );
-    final client = _FakeHttpClient(bytes);
-    final cache = WellnessMediaCache(
-      client: client,
-      directory: directory,
-      accessTokenLoader: () => 'signed-session-token',
-    );
+    final cases = <(String, String)>[
+      ('/v3/recipes/images/recipe-id/$digest', 'image/jpeg'),
+      ('/v4/recipes/thumbnails/recipe-id/$digest.webp', 'image/webp'),
+    ];
+    for (final (path, mimeType) in cases) {
+      final asset = assetFor(
+        bytes,
+        url: Uri.https('workouts.bilhealth.com', path),
+        mimeType: mimeType,
+      );
+      final client = _FakeHttpClient(bytes);
+      final cache = WellnessMediaCache(
+        client: client,
+        directory: directory,
+        accessTokenLoader: () => 'signed-session-token',
+      );
 
-    final result = await cache.resolve(asset, online: true);
+      final result = await cache.resolve(asset, online: true);
 
-    expect(result.isReady, isTrue);
-    expect(client.authorization, isNull);
-    expect(client.followRedirects, isFalse);
+      expect(result.isReady, isTrue, reason: path);
+      expect(client.authorization, isNull, reason: path);
+      expect(client.followRedirects, isFalse, reason: path);
+      await cache.remove(asset);
+    }
   });
 
   test('wrong size or digest never becomes playable cache', () async {
@@ -284,6 +289,103 @@ void main() {
     expect(results.every((result) => result.isReady), isTrue);
     expect(client.requests, 1);
   });
+
+  test('stalled connection times out and a late request is aborted', () async {
+    final bytes = utf8.encode('video bytes');
+    final client = _FakeHttpClient(
+      bytes,
+      connectDelay: const Duration(milliseconds: 250),
+    );
+    final cache = WellnessMediaCache(
+      client: client,
+      directory: directory,
+      idleTimeout: const Duration(milliseconds: 80),
+    );
+    await expectLater(
+      cache.resolve(assetFor(bytes), online: true),
+      throwsA(isA<TimeoutException>()),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 280));
+    expect(client.lastRequest?.aborted, isTrue);
+    expect(await directory.list().toList(), isEmpty);
+  });
+
+  test(
+    'stalled headers abort and release the same asset for explicit retry',
+    () async {
+      final bytes = utf8.encode('retry video bytes');
+      final client = _FakeHttpClient(
+        bytes,
+        responseDelay: const Duration(milliseconds: 250),
+      );
+      final cache = WellnessMediaCache(
+        client: client,
+        directory: directory,
+        idleTimeout: const Duration(milliseconds: 80),
+      );
+      final asset = assetFor(bytes);
+      await expectLater(
+        cache.resolve(asset, online: true),
+        throwsA(isA<TimeoutException>()),
+      );
+      expect(client.lastRequest?.aborted, isTrue);
+      expect(await directory.list().toList(), isEmpty);
+      client.responseDelay = Duration.zero;
+      final retried = await cache.resolve(asset, online: true);
+      expect(retried.isReady, isTrue);
+      expect(client.requests, 2);
+    },
+  );
+
+  test(
+    'stalled body cancels transport and removes unverified partial bytes',
+    () async {
+      final bytes = utf8.encode('complete video bytes');
+      var cancelled = false;
+      final body = StreamController<List<int>>(
+        onCancel: () => cancelled = true,
+      );
+      final client = _FakeHttpClient(bytes, bodyStream: body.stream);
+      final cache = WellnessMediaCache(
+        client: client,
+        directory: directory,
+        idleTimeout: const Duration(milliseconds: 100),
+      );
+      body.add(bytes.take(4).toList());
+      await expectLater(
+        cache.resolve(assetFor(bytes), online: true),
+        throwsA(isA<TimeoutException>()),
+      );
+      expect(client.lastRequest?.aborted, isTrue);
+      expect(cancelled, isTrue);
+      expect(await directory.list().toList(), isEmpty);
+      await body.close();
+    },
+  );
+
+  test(
+    'slow but progressing body can exceed the idle timeout in total',
+    () async {
+      final bytes = utf8.encode('verified');
+      Stream<List<int>> progressingBody() async* {
+        for (final byte in bytes) {
+          await Future<void>.delayed(const Duration(milliseconds: 30));
+          yield [byte];
+        }
+      }
+
+      final client = _FakeHttpClient(bytes, bodyStream: progressingBody());
+      final cache = WellnessMediaCache(
+        client: client,
+        directory: directory,
+        idleTimeout: const Duration(milliseconds: 150),
+      );
+      final result = await cache.resolve(assetFor(bytes), online: true);
+      expect(result.isReady, isTrue);
+      expect(await result.file!.readAsBytes(), bytes);
+      expect(client.lastRequest?.aborted, isFalse);
+    },
+  );
 }
 
 class _FakeHttpClient implements HttpClient {
@@ -291,10 +393,16 @@ class _FakeHttpClient implements HttpClient {
     this.bytes, {
     this.statusCode = HttpStatus.ok,
     this.chunks = 1,
+    this.connectDelay = Duration.zero,
+    this.responseDelay = Duration.zero,
+    this.bodyStream,
   });
 
   final List<int> bytes;
   final int statusCode, chunks;
+  final Duration connectDelay;
+  Duration responseDelay;
+  final Stream<List<int>>? bodyStream;
   int requests = 0;
   _RecordingHttpHeaders? lastRequestHeaders;
   _FakeHttpClientRequest? lastRequest;
@@ -306,11 +414,18 @@ class _FakeHttpClient implements HttpClient {
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
     requests += 1;
+    if (connectDelay != Duration.zero) await Future<void>.delayed(connectDelay);
     final headers = _RecordingHttpHeaders();
     lastRequestHeaders = headers;
     final request = _FakeHttpClientRequest(
-      _FakeHttpClientResponse(bytes, statusCode: statusCode, chunks: chunks),
+      _FakeHttpClientResponse(
+        bytes,
+        statusCode: statusCode,
+        chunks: chunks,
+        bodyStream: bodyStream,
+      ),
       headers,
+      responseDelay,
     );
     lastRequest = request;
     return request;
@@ -324,9 +439,11 @@ class _FakeHttpClient implements HttpClient {
 }
 
 class _FakeHttpClientRequest implements HttpClientRequest {
-  _FakeHttpClientRequest(this.response, this.headers);
+  _FakeHttpClientRequest(this.response, this.headers, this.responseDelay);
 
   final HttpClientResponse response;
+  final Duration responseDelay;
+  bool aborted = false;
 
   @override
   final HttpHeaders headers;
@@ -335,7 +452,15 @@ class _FakeHttpClientRequest implements HttpClientRequest {
   bool followRedirects = true;
 
   @override
-  Future<HttpClientResponse> close() async => response;
+  Future<HttpClientResponse> close() async {
+    if (responseDelay != Duration.zero) {
+      await Future<void>.delayed(responseDelay);
+    }
+    return response;
+  }
+
+  @override
+  void abort([Object? exception, StackTrace? stackTrace]) => aborted = true;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -362,10 +487,12 @@ class _FakeHttpClientResponse extends Stream<List<int>>
     this.bytes, {
     required this.statusCode,
     required this.chunks,
+    this.bodyStream,
   });
 
   final List<int> bytes;
   final int chunks;
+  final Stream<List<int>>? bodyStream;
 
   @override
   final int statusCode;
@@ -380,6 +507,14 @@ class _FakeHttpClientResponse extends Stream<List<int>>
     void Function()? onDone,
     bool? cancelOnError,
   }) {
+    if (bodyStream != null) {
+      return bodyStream!.listen(
+        onData,
+        onError: onError,
+        onDone: onDone,
+        cancelOnError: cancelOnError,
+      );
+    }
     final size = (bytes.length / chunks).ceil();
     final data = <List<int>>[];
     for (var offset = 0; offset < bytes.length; offset += size) {

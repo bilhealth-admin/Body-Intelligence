@@ -599,6 +599,8 @@ void main() {
     final repository = _CommunityInteractionRepository()..failPublish = true;
     await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-create-post')));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Draft kept for retry');
     await tester.tap(find.byIcon(Icons.send_rounded));
     await tester.pumpAndSettle();
@@ -616,6 +618,8 @@ void main() {
     final repository = _CommunityInteractionRepository()
       ..policyRejectPublish = true;
     await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-create-post')));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byType(TextField),

@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 
+/// Hydration summary and quick-add controls for the dashboard.
 class DashboardWaterCard extends StatefulWidget {
   const DashboardWaterCard({
     super.key,
@@ -57,9 +59,10 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.water_drop_outlined,
-                  color: Theme.of(context).colorScheme.primary,
+                const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.water,
+                  size: 36,
+                  iconSize: 20,
                 ),
                 SizedBox(width: PremiumDesignTokens.spaceXs),
                 Expanded(

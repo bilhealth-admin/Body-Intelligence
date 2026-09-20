@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
 import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
@@ -138,7 +139,9 @@ class _DashboardPreferencesPageState
                           child: Card(
                             child: ListTile(
                               key: Key('dashboard-preset-${preset.id}'),
-                              leading: Icon(preset.icon),
+                              leading: BilSemanticIconBadge(
+                                kind: _dashboardPresetIconKind(preset.id),
+                              ),
                               title: Text(
                                 _copy(
                                   context,
@@ -216,7 +219,9 @@ class _DashboardPreferencesPageState
                         child: Card(
                           child: ListTile(
                             key: const Key('dashboard-preset-custom'),
-                            leading: const Icon(Icons.tune_rounded),
+                            leading: const BilSemanticIconBadge(
+                              kind: BilSemanticIconKind.preferences,
+                            ),
                             title: Text(
                               _copy(
                                 context,
@@ -350,23 +355,19 @@ class _DashboardPreferencesPageState
                           6,
                           6,
                         ),
-                        title: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(item.$2, size: 20),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                _sectionCopy(context, item.$3, item.$4),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
+                        secondary: BilSemanticIconBadge(
+                          kind: _dashboardSectionIconKind(item.$1),
+                          size: 36,
+                          iconSize: 20,
+                        ),
+                        title: Text(
+                          _sectionCopy(context, item.$3, item.$4),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         value: visible,
                         onChanged: _saving || state.isLoading
@@ -389,7 +390,9 @@ class _DashboardPreferencesPageState
                 children: [
                   ListTile(
                     key: const Key('dashboard-edit-nutrition-goals'),
-                    leading: const Icon(Icons.track_changes_rounded),
+                    leading: const BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.goals,
+                    ),
                     title: Text(
                       _copy(
                         context,
@@ -449,10 +452,8 @@ class _DashboardPreferencesPageState
                       if (state.hasError) {
                         return const Icon(Icons.error_outline_rounded);
                       }
-                      return Icon(
-                        state.value!.isEmpty
-                            ? Icons.add_chart_rounded
-                            : Icons.dashboard_customize_rounded,
+                      return const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.nutrition,
                       );
                     },
                   ),

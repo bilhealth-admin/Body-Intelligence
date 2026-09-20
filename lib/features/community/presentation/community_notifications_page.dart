@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../data/community_repository.dart';
 import 'community_copy.dart';
 
@@ -166,7 +167,9 @@ class _CommunityNotificationsPageState
           children: [
             if (updates.incomingRequests > 0)
               ListTile(
-                leading: const Icon(Icons.person_add_alt_1_rounded),
+                leading: const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.friends,
+                ),
                 title: Text(
                   communityText(context, 'Friend requests', 'طلبات الصداقة'),
                 ),
@@ -176,7 +179,9 @@ class _CommunityNotificationsPageState
               ),
             if (updates.unreadMessages > 0)
               ListTile(
-                leading: const Icon(Icons.mark_email_unread_outlined),
+                leading: const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.messages,
+                ),
                 title: Text(
                   communityText(
                     context,

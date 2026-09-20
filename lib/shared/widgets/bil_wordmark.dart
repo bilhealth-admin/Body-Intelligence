@@ -1,55 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Canonical body-free launch badge used across native and Flutter startup.
-class BilLaunchBadge extends StatelessWidget {
-  const BilLaunchBadge({super.key, this.diameter = 184});
-
-  final double diameter;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    image: true,
-    label: 'BIL, trademark',
-    child: ExcludeSemantics(
-      child: Container(
-        width: diameter,
-        height: diameter,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          textDirection: TextDirection.ltr,
-          children: [
-            Text(
-              'BIL',
-              style: TextStyle(
-                color: Color(0xFF050505),
-                fontSize: diameter * .30,
-                height: 1,
-                fontWeight: FontWeight.w800,
-                letterSpacing: diameter * .012,
-              ),
-            ),
-            Text(
-              '\u2122',
-              style: TextStyle(
-                color: Color(0xFF050505),
-                fontSize: diameter * .10,
-                height: 1,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 /// Canonical BIL product wordmark for every identity-bearing surface.
 /// BIL uses the trademark symbol (™), never the registered symbol (®).
 class BilWordmark extends StatelessWidget {
@@ -84,29 +34,22 @@ class BilFullWordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedColor =
+        color ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFFF7FAFC)
+            : const Color(0xFF050505));
     return Semantics(
       label: 'Body Intelligence Log',
       image: true,
       child: ExcludeSemantics(
-        child: Container(
+        child: SizedBox(
           height: height,
-          padding: EdgeInsets.symmetric(horizontal: height * .22),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(height * .24),
-          ),
           child: Align(
             alignment: alignment,
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: _WordmarkLockup(
-                height: height,
-                // The full product lockup is intentionally black on its own
-                // light identity surface. Keep [color] only for source
-                // compatibility with older callers; it cannot recolor the
-                // canonical mark.
-                color: const Color(0xFF050505),
-              ),
+              child: _WordmarkLockup(height: height, color: resolvedColor),
             ),
           ),
         ),

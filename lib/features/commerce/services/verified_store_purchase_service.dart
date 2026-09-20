@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/subscription_term.dart';
@@ -30,9 +31,17 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   VerifiedStoreEntitlement? entitlement;
   String? messageCode;
   GooglePlayPurchaseDetails? _activeGooglePurchase;
+  // StoreKit can replay a cancelled or failed transaction as soon as a new
+  // listener attaches. It is not a purchase initiated from this BIL screen.
+  bool _purchaseInitiatedByThisService = false;
 
   bool get configured => AppEnvironment.commerceConfigured;
   bool get busy => state == VerifiedStoreState.purchasePending;
+  bool get canStartPurchase => canStartStorePurchase(
+    state: state,
+    productAvailable: products.isNotEmpty,
+    messageCode: messageCode,
+  );
 
   Future<void> initialize() async {
     state = VerifiedStoreState.loading;
@@ -121,15 +130,26 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     GooglePlayPurchaseDetails? replacesGooglePurchase,
     bool downgradeAtRenewal = false,
   }) async {
+    // The button and service both guard this boundary. Keeping the service
+    // idempotent prevents a second UI event from overwriting the truthful
+    // pending state while the native sheet is opening.
+    if (busy) return;
     final user = Supabase.instance.client.auth.currentUser;
     final product = productFor(plan, term: term);
-    if (user == null || product == null || state != VerifiedStoreState.ready) {
+    if (user == null ||
+        product == null ||
+        !canStartStorePurchase(
+          state: state,
+          productAvailable: true,
+          messageCode: messageCode,
+        )) {
       messageCode = 'purchase_unavailable';
       notifyListeners();
       return;
     }
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
+    _purchaseInitiatedByThisService = true;
     notifyListeners();
     final accountHash = storeAccountIdentifier(
       ownerId: user.id,
@@ -169,10 +189,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         purchaseParam: purchaseParam,
       );
       if (started) return;
+      _purchaseInitiatedByThisService = false;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
       notifyListeners();
     } on Object {
+      _purchaseInitiatedByThisService = false;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
       notifyListeners();
@@ -180,15 +202,23 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   }
 
   Future<void> purchaseBoost({String? offerToken}) async {
+    if (busy) return;
     final user = Supabase.instance.client.auth.currentUser;
     final product = products[StoreCatalogConfiguration.aiBoost];
-    if (user == null || product == null || state != VerifiedStoreState.ready) {
+    if (user == null ||
+        product == null ||
+        !canStartStorePurchase(
+          state: state,
+          productAvailable: true,
+          messageCode: messageCode,
+        )) {
       messageCode = 'purchase_unavailable';
       notifyListeners();
       return;
     }
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
+    _purchaseInitiatedByThisService = true;
     notifyListeners();
     final accountHash = storeAccountIdentifier(
       ownerId: user.id,
@@ -206,10 +236,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         autoConsume: false,
       );
       if (started) return;
+      _purchaseInitiatedByThisService = false;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
       notifyListeners();
     } on Object {
+      _purchaseInitiatedByThisService = false;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
       notifyListeners();
@@ -343,12 +375,24 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           messageCode = 'purchase_pending';
           notifyListeners();
         case PurchaseStatus.error:
-          state = VerifiedStoreState.failed;
-          messageCode = 'purchase_failed';
+          final outcome = terminalStorePurchaseOutcome(
+            status: purchase.status,
+            productsAvailable: products.isNotEmpty,
+            initiatedByCurrentService: _purchaseInitiatedByThisService,
+          );
+          _purchaseInitiatedByThisService = false;
+          state = outcome.state;
+          messageCode = outcome.messageCode;
           notifyListeners();
         case PurchaseStatus.canceled:
-          state = VerifiedStoreState.cancelled;
-          messageCode = 'purchase_cancelled';
+          final outcome = terminalStorePurchaseOutcome(
+            status: purchase.status,
+            productsAvailable: products.isNotEmpty,
+            initiatedByCurrentService: _purchaseInitiatedByThisService,
+          );
+          _purchaseInitiatedByThisService = false;
+          state = outcome.state;
+          messageCode = outcome.messageCode;
           notifyListeners();
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
@@ -370,6 +414,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           state = verified
               ? VerifiedStoreState.verified
               : VerifiedStoreState.failed;
+          _purchaseInitiatedByThisService = false;
           messageCode = verified
               ? boost
                     ? 'ai_boost_verified'
@@ -400,15 +445,20 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       return false;
     }
     try {
+      final body = <String, Object?>{
+        'action': 'verify_purchase',
+        'product_id': purchase.productID,
+        'purchase_id': purchase.purchaseID,
+        'source': purchase.verificationData.source,
+        'verification_data': purchase.verificationData.serverVerificationData,
+      };
+      final protectedBody = await BilMobileIntegrityService.instance.protect(
+        action: 'store.verify_purchase',
+        payload: body,
+      );
       final response = await Supabase.instance.client.functions.invoke(
         'verify-store-purchase',
-        body: <String, Object?>{
-          'action': 'verify_purchase',
-          'product_id': purchase.productID,
-          'purchase_id': purchase.purchaseID,
-          'source': purchase.verificationData.source,
-          'verification_data': purchase.verificationData.serverVerificationData,
-        },
+        body: protectedBody,
       );
       final data = response.data;
       final verified =
@@ -426,14 +476,19 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   Future<bool> _verifyBoostOnServer(PurchaseDetails purchase) async {
     if (purchase.productID != StoreCatalogConfiguration.aiBoost) return false;
     try {
+      final body = <String, Object?>{
+        'action': 'verify_ai_boost',
+        'product_id': purchase.productID,
+        'source': purchase.verificationData.source,
+        'verification_data': purchase.verificationData.serverVerificationData,
+      };
+      final protectedBody = await BilMobileIntegrityService.instance.protect(
+        action: 'store.verify_ai_boost',
+        payload: body,
+      );
       final response = await Supabase.instance.client.functions.invoke(
         'verify-store-purchase',
-        body: <String, Object?>{
-          'action': 'verify_ai_boost',
-          'product_id': purchase.productID,
-          'source': purchase.verificationData.source,
-          'verification_data': purchase.verificationData.serverVerificationData,
-        },
+        body: protectedBody,
       );
       final data = response.data;
       return response.status == 200 && data is Map && data['verified'] == true;

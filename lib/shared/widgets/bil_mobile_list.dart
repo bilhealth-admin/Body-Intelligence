@@ -59,6 +59,9 @@ class BilMobileListRow extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.destructive = false,
+    this.labelFlex = 1,
+    this.valueFlex = 1,
+    this.showDisclosureIndicator = true,
   });
 
   final String label;
@@ -68,6 +71,9 @@ class BilMobileListRow extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? trailing;
   final bool destructive;
+  final int labelFlex;
+  final int valueFlex;
+  final bool showDisclosureIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +101,7 @@ class BilMobileListRow extends StatelessWidget {
                 const SizedBox(width: 14),
               ],
               Expanded(
+                flex: labelFlex,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,6 +137,7 @@ class BilMobileListRow extends StatelessWidget {
               if (value != null) ...[
                 const SizedBox(width: 12),
                 Flexible(
+                  flex: valueFlex,
                   child: Tooltip(
                     message: value!,
                     child: Text(
@@ -150,7 +158,7 @@ class BilMobileListRow extends StatelessWidget {
               if (trailing != null) ...[
                 const SizedBox(width: 8),
                 trailing!,
-              ] else if (onTap != null) ...[
+              ] else if (onTap != null && showDisclosureIndicator) ...[
                 const SizedBox(width: 4),
                 Icon(
                   Icons.chevron_right_rounded,

@@ -101,52 +101,9 @@ class _PremiumRow extends ConsumerWidget {
         enabled: entitlement.hasValue || entitlement.hasError,
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            gradient: active
-                ? const LinearGradient(
-                    colors: [Color(0xFFFFDA76), Color(0xFFB77A08)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color: active
-                ? null
-                : Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: active
-                  ? Colors.white.withValues(alpha: .7)
-                  : Theme.of(context).colorScheme.outlineVariant,
-            ),
-            boxShadow: active
-                ? const [
-                    BoxShadow(
-                      color: Color(0x4DB77A08),
-                      blurRadius: 14,
-                      offset: Offset(0, 5),
-                    ),
-                  ]
-                : const [],
-          ),
-          child: entitlement.isLoading
-              ? const Padding(
-                  padding: EdgeInsets.all(11),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Icon(
-                  active
-                      ? Icons.workspace_premium_rounded
-                      : entitlement.hasError
-                      ? Icons.refresh_rounded
-                      : Icons.lock_outline_rounded,
-                  color: active
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         onTap: !entitlement.hasValue
             ? entitlement.hasError

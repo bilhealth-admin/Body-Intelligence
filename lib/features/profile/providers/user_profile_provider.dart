@@ -225,7 +225,5 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
 bool _preferencesMatchCurrentAuth(PreferencesRepository preferences) {
   if (!AppEnvironment.supabaseRuntimeReady) return true;
   final owner = Supabase.instance.client.auth.currentUser?.id.trim();
-  return owner != null &&
-      owner.isNotEmpty &&
-      preferences.localOwnerId == owner;
+  return owner != null && owner.isNotEmpty && preferences.localOwnerId == owner;
 }

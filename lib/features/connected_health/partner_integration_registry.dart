@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../global_platform/health_data/unified_health_data_integration.dart';
 
 enum PartnerIntegrationState {
   nativeBridge,
@@ -34,54 +37,72 @@ class PartnerIntegrationCapability {
 /// credentials, token storage, callback routing and composition wiring must all
 /// exist before [canConnect] may become true.
 abstract final class PartnerIntegrationRegistry {
-  static const List<PartnerIntegrationCapability> capabilities = [
-    PartnerIntegrationCapability(
-      id: 'health-connect',
-      category: 'Health platform',
-      state: PartnerIntegrationState.nativeBridge,
-      dataTypes: {'steps', 'activeEnergy', 'workout', 'weight'},
-      reasonCode: 'android_native_bridge',
-    ),
-    PartnerIntegrationCapability(
-      id: 'healthkit',
-      category: 'Health platform',
-      state: PartnerIntegrationState.nativeBridge,
-      dataTypes: {'steps', 'activeEnergy', 'workout', 'weight'},
-      reasonCode: 'ios_native_bridge',
-    ),
-    PartnerIntegrationCapability(
-      id: 'fitness-ble',
-      category: 'Fitness device',
-      state: PartnerIntegrationState.deviceBridge,
-      dataTypes: {'weight', 'bodyComposition', 'heartRate'},
-      reasonCode: 'fitness_sig_gatt_profiles_device_verification_required',
-    ),
-    PartnerIntegrationCapability(
-      id: 'garmin',
-      category: 'Partner account',
-      state: PartnerIntegrationState.configurationRequired,
-      dataTypes: {},
-      reasonCode: 'oauth_credentials_and_runtime_registration_missing',
-      officialSetupUrl: 'https://connect.garmin.com/start/',
-    ),
-    PartnerIntegrationCapability(
-      id: 'fitbit',
-      category: 'Partner account',
-      state: PartnerIntegrationState.configurationRequired,
-      dataTypes: {},
-      reasonCode: 'oauth_credentials_and_runtime_registration_missing',
-      officialSetupUrl:
-          'https://support.google.com/googlehealth/answer/14236818?hl=en',
-    ),
-    PartnerIntegrationCapability(
-      id: 'samsung-health',
-      category: 'Partner account',
-      state: PartnerIntegrationState.noAdapter,
-      dataTypes: {},
-      reasonCode: 'no_registered_adapter',
-      officialSetupUrl: 'https://www.samsung.com/us/apps/samsung-health/',
-    ),
-  ];
+  static final List<PartnerIntegrationCapability> capabilities =
+      List<PartnerIntegrationCapability>.unmodifiable([
+        PartnerIntegrationCapability(
+          id: 'health-connect',
+          category: 'Health platform',
+          state: PartnerIntegrationState.nativeBridge,
+          dataTypes: BilHealthScope.healthConnectReadTypeNames,
+          reasonCode: 'android_native_bridge',
+        ),
+        PartnerIntegrationCapability(
+          id: 'healthkit',
+          category: 'Health platform',
+          state: PartnerIntegrationState.nativeBridge,
+          dataTypes: BilHealthScope.appleHealthReadTypeNames,
+          reasonCode: 'ios_native_bridge',
+        ),
+        PartnerIntegrationCapability(
+          id: 'fitness-ble',
+          category: 'Fitness device',
+          state: PartnerIntegrationState.deviceBridge,
+          dataTypes: {'weight', 'bodyComposition', 'heartRate'},
+          reasonCode: 'fitness_sig_gatt_profiles_device_verification_required',
+        ),
+        PartnerIntegrationCapability(
+          id: 'garmin',
+          category: 'Partner account',
+          state: PartnerIntegrationState.configurationRequired,
+          dataTypes: {},
+          reasonCode: 'oauth_credentials_and_runtime_registration_missing',
+          officialSetupUrl: 'https://connect.garmin.com/start/',
+        ),
+        PartnerIntegrationCapability(
+          id: 'fitbit',
+          category: 'Partner account',
+          state: PartnerIntegrationState.configurationRequired,
+          dataTypes: {},
+          reasonCode: 'oauth_credentials_and_runtime_registration_missing',
+          officialSetupUrl:
+              'https://support.google.com/googlehealth/answer/14236818?hl=en',
+        ),
+        PartnerIntegrationCapability(
+          id: 'samsung-health',
+          category: 'Partner account',
+          state: PartnerIntegrationState.noAdapter,
+          dataTypes: {},
+          reasonCode: 'no_registered_adapter',
+          officialSetupUrl: 'https://www.samsung.com/us/apps/samsung-health/',
+        ),
+      ]);
+
+  /// The consumer capabilities page lists only connections that can actually
+  /// operate on the current device: its native health store plus BLE.
+  static List<PartnerIntegrationCapability> forTargetPlatform(
+    TargetPlatform platform, {
+    bool isWeb = false,
+  }) {
+    if (isWeb) return const <PartnerIntegrationCapability>[];
+    final ids = switch (platform) {
+      TargetPlatform.android => const {'health-connect', 'fitness-ble'},
+      TargetPlatform.iOS => const {'healthkit', 'fitness-ble'},
+      _ => const <String>{},
+    };
+    return List<PartnerIntegrationCapability>.unmodifiable(
+      capabilities.where((entry) => ids.contains(entry.id)),
+    );
+  }
 
   static PartnerIntegrationCapability byId(String id) =>
       capabilities.singleWhere((entry) => entry.id == id);
@@ -98,5 +119,8 @@ abstract final class PartnerIntegrationRegistry {
 
 final partnerIntegrationRegistryProvider =
     Provider<List<PartnerIntegrationCapability>>(
-      (_) => PartnerIntegrationRegistry.capabilities,
+      (_) => PartnerIntegrationRegistry.forTargetPlatform(
+        defaultTargetPlatform,
+        isWeb: kIsWeb,
+      ),
     );

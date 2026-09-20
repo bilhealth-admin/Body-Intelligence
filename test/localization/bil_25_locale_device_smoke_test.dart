@@ -54,7 +54,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(find.byType(FilledButton), findsOneWidget);
-        expect(find.text(AppLocalizations(locale).get('settings')), findsOneWidget);
+        expect(
+          find.text(AppLocalizations(locale).get('settings')),
+          findsOneWidget,
+        );
         final direction = tester.widget<Directionality>(
           find.byType(Directionality).first,
         );

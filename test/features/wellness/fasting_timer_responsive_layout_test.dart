@@ -102,8 +102,7 @@ void main() {
 }
 
 final class _TestFastingNotificationService extends BilNotificationService {
-  _TestFastingNotificationService()
-    : super(FlutterLocalNotificationsPlugin());
+  _TestFastingNotificationService() : super(FlutterLocalNotificationsPlugin());
 
   @override
   Future<BilNotificationPermissionState> permissionState() async =>

@@ -366,11 +366,11 @@ void main() {
 
               final photo = find.byKey(Key('onboarding-photo-$step'));
               expect(photo, findsOneWidget);
-              expect(tester.getSize(photo).height, 80);
+              expect(tester.getSize(photo).height, 112);
               final image = tester.widget<Image>(
                 find.descendant(of: photo, matching: find.byType(Image)).first,
               );
-              expect(image.fit, BoxFit.contain);
+              expect(image.fit, BoxFit.cover);
               expect(
                 (image.image as AssetImage).assetName,
                 expectedPhotoAssets[step],
@@ -579,7 +579,7 @@ void main() {
   });
 
   testWidgets(
-    'black canonical wordmark keeps a white identity surface in RTL',
+    'canonical wordmark follows dark theme without a framed surface in RTL',
     (tester) async {
       final semantics = tester.ensureSemantics();
       await render(
@@ -610,20 +610,21 @@ void main() {
           ),
         ),
       );
-      expect(brandText.style?.color, const Color(0xFF050505));
-      final identity = tester.widget<DecoratedBox>(
+      expect(brandText.style?.color, const Color(0xFFF7FAFC));
+      final identity = tester.widget<SizedBox>(
         find.byKey(const Key('onboarding-identity-surface')),
       );
+      expect(identity.height, 32);
       expect(
-        (identity.decoration as BoxDecoration).color,
-        const Color(0xFFFEFEFF),
+        find.descendant(of: wordmark, matching: find.byType(Container)),
+        findsNothing,
       );
       expect(tester.takeException(), isNull);
       semantics.dispose();
     },
   );
 
-  testWidgets('progress truthfully reports 15 male and 16 female pages', (
+  testWidgets('progress truthfully reports platform-specific page counts', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();

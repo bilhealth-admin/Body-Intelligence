@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/runtime_copy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../domain/community_push_preferences.dart';
 import '../domain/daily_reminder.dart';
 import '../domain/notification_delivery_preferences.dart';
@@ -332,8 +333,8 @@ class _NotificationSettingsPageState
                       key: const Key('all-daily-reminders'),
                       value: _allDailyEnabled,
                       onChanged: _saving ? null : _setAllDaily,
-                      secondary: const Icon(
-                        Icons.notifications_active_outlined,
+                      secondary: const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.notifications,
                       ),
                       title: Text(
                         _ui(
@@ -503,8 +504,15 @@ class _NotificationSettingsPageState
                             SwitchListTile(
                               key: const Key('community-cloud-push'),
                               value: _pushPreferences?.enabled ?? false,
-                              onChanged: _pushSaving ? null : _setPushEnabled,
-                              secondary: const Icon(Icons.forum_outlined),
+                              onChanged:
+                                  _pushSaving ||
+                                      !(_pushPreferences?.providerReady ??
+                                          false)
+                                  ? null
+                                  : _setPushEnabled,
+                              secondary: const BilSemanticIconBadge(
+                                kind: BilSemanticIconKind.community,
+                              ),
                               title: Text(
                                 _ui(
                                   'Private community notifications',
@@ -515,13 +523,22 @@ class _NotificationSettingsPageState
                                 ),
                               ),
                               subtitle: Text(
-                                _ui(
-                                  'Friend requests and messages in your time zone.',
-                                  'طلبات الأصدقاء والرسائل حسب منطقتك الزمنية.',
-                                  'Demandes d’amis et messages selon votre fuseau horaire.',
-                                  'Solicitudes y mensajes según tu zona horaria.',
-                                  'Saat diliminize göre arkadaşlık istekleri ve mesajlar.',
-                                ),
+                                _pushPreferences != null &&
+                                        !_pushPreferences!.providerReady
+                                    ? _ui(
+                                        'Remote notification delivery is not configured in this build.',
+                                        'إرسال الإشعارات البعيدة غير مهيأ في هذا الإصدار.',
+                                        'Les notifications distantes ne sont pas configurées dans cette version.',
+                                        'Las notificaciones remotas no están configuradas en esta versión.',
+                                        'Uzak bildirim teslimi bu sürümde yapılandırılmadı.',
+                                      )
+                                    : _ui(
+                                        'Friend requests and messages in your time zone.',
+                                        'طلبات الأصدقاء والرسائل حسب منطقتك الزمنية.',
+                                        'Demandes d’amis et messages selon votre fuseau horaire.',
+                                        'Solicitudes y mensajes según tu zona horaria.',
+                                        'Saat diliminize göre arkadaşlık istekleri ve mesajlar.',
+                                      ),
                               ),
                             ),
                             if (_pushPreferences?.enabled ?? false)
@@ -533,8 +550,8 @@ class _NotificationSettingsPageState
                                 onChanged: _pushSaving
                                     ? null
                                     : _setSensitivePreview,
-                                secondary: const Icon(
-                                  Icons.visibility_outlined,
+                                secondary: const BilSemanticIconBadge(
+                                  kind: BilSemanticIconKind.privacy,
                                 ),
                                 title: Text(
                                   _ui(
@@ -557,7 +574,9 @@ class _NotificationSettingsPageState
                               ),
                             if (_pushPreferences != null)
                               ListTile(
-                                leading: const Icon(Icons.public_outlined),
+                                leading: const BilSemanticIconBadge(
+                                  kind: BilSemanticIconKind.time,
+                                ),
                                 title: Text(_pushPreferences!.timeZone),
                                 subtitle: Text(
                                   _ui(
@@ -598,7 +617,9 @@ class _NotificationSettingsPageState
                                     enabled: enabled,
                                   ),
                                 ),
-                          secondary: Icon(_icon(reminder.kind)),
+                          secondary: BilSemanticIconBadge(
+                            kind: _semanticKind(reminder.kind),
+                          ),
                           title: Text(_copy.label(reminder.kind)),
                           subtitle:
                               reminder.kind ==
@@ -766,13 +787,13 @@ class _NotificationSettingsPageState
     );
   }
 
-  IconData _icon(DailyReminderKind kind) => switch (kind) {
-    DailyReminderKind.weight => Icons.monitor_weight_outlined,
-    DailyReminderKind.meals => Icons.restaurant_outlined,
-    DailyReminderKind.water => Icons.water_drop_outlined,
-    DailyReminderKind.sleep => Icons.bedtime_outlined,
-    DailyReminderKind.fasting => Icons.timelapse_rounded,
-    DailyReminderKind.weeklyReview => Icons.insights_outlined,
-    DailyReminderKind.returnAfter24Hours => Icons.waving_hand_outlined,
+  BilSemanticIconKind _semanticKind(DailyReminderKind kind) => switch (kind) {
+    DailyReminderKind.weight => BilSemanticIconKind.weight,
+    DailyReminderKind.meals => BilSemanticIconKind.meal,
+    DailyReminderKind.water => BilSemanticIconKind.water,
+    DailyReminderKind.sleep => BilSemanticIconKind.sleep,
+    DailyReminderKind.fasting => BilSemanticIconKind.fasting,
+    DailyReminderKind.weeklyReview => BilSemanticIconKind.report,
+    DailyReminderKind.returnAfter24Hours => BilSemanticIconKind.notifications,
   };
 }

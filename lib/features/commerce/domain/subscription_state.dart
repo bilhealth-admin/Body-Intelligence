@@ -3,7 +3,7 @@ import 'commerce_plan.dart';
 import 'subscription_lifecycle.dart';
 import 'subscription_provider.dart';
 
-/// Source of an entitlement decision.
+/// Source of an entitlement decision for the current app session.
 enum EntitlementAuthority {
   /// Deterministic local default shipped with the application.
   localDefault,

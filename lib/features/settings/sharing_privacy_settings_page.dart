@@ -3,21 +3,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/runtime_copy.dart';
 import '../../app/localization/runtime_copy_cloud_sync.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_summary.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
 import '../cloud_platform/services/cloud_manual_sync_service.dart';
 import '../cloud_platform/services/cloud_sync_consent_repository.dart';
+import '../profile/providers/user_profile_provider.dart';
 import 'cloud_sync_status_presentation.dart';
 import 'reference_settings_copy.dart';
 
 String _privacyText(BuildContext context, String key) {
-  final code = Localizations.localeOf(context).languageCode;
-  return _privacyCopy[code]?[key] ?? context.strings.text(key);
+  final locale = Localizations.localeOf(context);
+  return RuntimeCopy.resolve(key, locale.toLanguageTag()) ??
+      _privacyCopy[locale.languageCode]?[key] ??
+      context.strings.text(key);
 }
+
+const _diarySharingValues = {'private', 'friends', 'public', 'locked'};
+
+String normalizeDiarySharingPreference(String? value) =>
+    _diarySharingValues.contains(value) ? value! : 'private';
+
+String diarySharingSummaryCopyKey(String value) => switch (value) {
+  'friends' => 'Friends only',
+  'public' => 'Public',
+  'locked' => 'Locked with a key',
+  _ => 'Private',
+};
+
+final diarySharingSummaryProvider = StreamProvider.autoDispose<String>((ref) {
+  return ref
+      .watch(preferencesRepositoryProvider)
+      .watch('diary.sharing')
+      .map(normalizeDiarySharingPreference);
+});
 
 const _privacyCopy = <String, Map<String, String>>{
   'en': {
@@ -256,26 +279,41 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final copy = ReferenceSettingsCopy.of(context);
+    final diarySharing = ref.watch(diarySharingSummaryProvider);
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text(copy('Sharing & Privacy'))),
       body: ListView(
         children: [
           ListTile(
+            key: const Key('sharing-privacy-diary-sharing'),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.notes,
+            ),
             title: Text(_privacyText(context, 'Diary sharing')),
-            subtitle: Text(_privacyText(context, 'Private')),
+            subtitle: diarySharing.when(
+              data: (value) => Text(
+                _privacyText(context, diarySharingSummaryCopyKey(value)),
+              ),
+              loading: () => null,
+              error: (_, _) => Text(context.strings.text('Unavailable')),
+            ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/diary/sharing'),
           ),
           const _CloudSyncConsentTile(),
           ListTile(
-            leading: const Icon(Icons.manage_accounts_outlined),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.profile,
+            ),
             title: Text(context.strings.text('Community profile')),
             subtitle: Text(_privacyText(context, 'Profile visibility')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/community/profile'),
           ),
           ListTile(
-            leading: const Icon(Icons.group_outlined),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.friends,
+            ),
             title: Text(context.strings.text('Friends and requests')),
             subtitle: Text(_privacyText(context, 'Allow people to find me')),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -283,21 +321,33 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
           ),
           const Divider(height: 1),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.legal,
+            ),
             title: Text(_privacyText(context, 'Terms of service')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/legal/terms'),
           ),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.privacy,
+            ),
             title: Text(_privacyText(context, 'Privacy policy')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/legal/privacy'),
           ),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.support,
+            ),
             title: Text(_privacyText(context, 'Trust & support')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/trust-support'),
           ),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.preferences,
+            ),
             title: Text(
               _privacyText(context, 'Manage personalization preferences'),
             ),
@@ -305,32 +355,30 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             onTap: () => context.push('/advertising-privacy'),
           ),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.notifications,
+              iconOverride: Icons.mail_outline_rounded,
+              appleIconOverride: Icons.mail_outline_rounded,
+            ),
             title: Text(_privacyText(context, 'Email settings')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/email'),
           ),
-          if (AppEnvironment.facebookLoginEnabled)
-            ListTile(
-              leading: const Icon(Icons.facebook_rounded),
-              title: Text(_privacyText(context, 'Facebook settings')),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () =>
-                  context.push('/settings/account-connections/facebook'),
-            ),
-          ListTile(
-            leading: const Icon(Icons.account_circle_outlined),
-            title: Text(_privacyText(context, 'Google settings')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/account-connections/google'),
-          ),
           ListTile(
             key: const Key('privacy-change-password'),
-            leading: const Icon(Icons.lock_outline_rounded),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.privacy,
+              iconOverride: Icons.lock_outline_rounded,
+              appleIconOverride: Icons.lock_outline_rounded,
+            ),
             title: Text(_privacyText(context, 'Change password')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/account-password'),
           ),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.support,
+            ),
             title: Text(_privacyText(context, 'Contact support')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => launchUrl(
@@ -339,6 +387,9 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             ),
           ),
           ListTile(
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.export,
+            ),
             title: Text(_privacyText(context, 'Export my data')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/local-export'),
@@ -371,6 +422,9 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
         onChanged: null,
         title: Text(context.strings.text(CloudSyncConsentCopy.settingsTitle)),
         subtitle: Text(_privacyText(context, 'Checking cloud sync…')),
+        secondary: const BilSemanticIconBadge(
+          kind: BilSemanticIconKind.cloudSync,
+        ),
       ),
       error: (_, _) => SwitchListTile.adaptive(
         value: false,
@@ -378,6 +432,9 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
         title: Text(context.strings.text(CloudSyncConsentCopy.settingsTitle)),
         subtitle: Text(
           _privacyText(context, 'Cloud sync is temporarily unavailable.'),
+        ),
+        secondary: const BilSemanticIconBadge(
+          kind: BilSemanticIconKind.cloudSync,
         ),
       ),
       data: (value) {
@@ -412,7 +469,9 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
                       dimension: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.backup_rounded),
+                  : const BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.cloudSync,
+                    ),
             ),
             if (value.granted &&
                 value.availability == CloudSyncConsentAvailability.available)
@@ -423,7 +482,9 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
                         dimension: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.sync_rounded),
+                    : const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.synchronization,
+                      ),
                 title: Text(_privacyText(context, 'Sync now')),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

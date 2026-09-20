@@ -73,28 +73,13 @@ class ModernOnboardingScaffold extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          DecoratedBox(
+                          SizedBox(
                             key: const Key('onboarding-identity-surface'),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFEFEFF),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: const Color(0xFFDCE6FA),
-                              ),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                12,
-                                8,
-                                12,
-                                8,
-                              ),
-                              child: BilFullWordmark(
-                                key: Key('onboarding-wordmark'),
-                                height: 24,
-                                alignment: AlignmentDirectional.centerStart,
-                                color: Colors.black,
-                              ),
+                            height: 32,
+                            child: const BilFullWordmark(
+                              key: Key('onboarding-wordmark'),
+                              height: 28,
+                              alignment: Alignment.center,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -265,8 +250,8 @@ class ModernOnboardingScaffold extends StatelessWidget {
 
 /// Responsive, decorative photo slot for approved BIL-owned onboarding
 /// photography. It is intentionally absent from semantics: every instruction
-/// remains available as real text. The photo keeps its complete source aspect
-/// ratio and sits directly on the page without a card, border, or tint layer.
+/// remains available as real text. The image fills the page-width hero without
+/// a card, border, inset frame, or tint layer.
 class ModernOnboardingPhotoHero extends StatelessWidget {
   const ModernOnboardingPhotoHero({
     super.key,
@@ -285,24 +270,21 @@ class ModernOnboardingPhotoHero extends StatelessWidget {
     final scale = media.textScaler.scale(1);
     final compactHeight = media.size.height < 650;
     final resolvedHeight = scale >= 1.8
-        ? 80.0
+        ? 112.0
         : scale >= 1.4
-        ? 96.0
+        ? 148.0
         : compactHeight && height > 160
-        ? 160.0
+        ? 188.0
         : height;
     return ExcludeSemantics(
       child: SizedBox(
         height: resolvedHeight,
         width: double.infinity,
-        child: Center(
-          child: Image(
-            image: image,
-            height: resolvedHeight,
-            fit: BoxFit.contain,
-            alignment: alignment,
-            filterQuality: FilterQuality.medium,
-          ),
+        child: Image(
+          image: image,
+          fit: BoxFit.cover,
+          alignment: alignment,
+          filterQuality: FilterQuality.high,
         ),
       ),
     );

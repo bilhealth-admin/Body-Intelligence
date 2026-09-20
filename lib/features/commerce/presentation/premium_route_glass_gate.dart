@@ -49,14 +49,37 @@ class PremiumRouteGlassGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final subscription = ref.watch(verifiedSubscriptionStateProvider);
     final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
-    final state = subscription.value;
+    final state = subscription.asData?.value;
     final isAiCoach = feature == PremiumGateFeature.aiCoach;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
-    final creditAccess = creditSnapshot.value ?? false;
+    final creditAccess = creditSnapshot.asData?.value ?? false;
     final activeAiSubscription = hasVerifiedAiSubscription(state);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (subscription.isLoading) {
+      return _PremiumRouteAccessChecking(isDark: isDark, child: child);
+    }
+    final verificationUnavailable =
+        subscription.hasError || (isAiCoach && creditSnapshot.hasError);
+    if (verificationUnavailable) {
+      return _PremiumRouteAccessUnavailable(
+        isDark: isDark,
+        child: child,
+        onRetry: () {
+          ref.invalidate(verifiedSubscriptionStateProvider);
+          if (isAiCoach) ref.invalidate(aiCoachCreditAccessProvider);
+        },
+      );
+    }
+    final loading = isAiCoach && creditSnapshot.isLoading;
+    // Never show an upgrade offer while the server is still resolving the
+    // member's entitlement. This avoids the brief (and confusing) paywall
+    // flash reported when an active AI subscription is opened from More.
+    if (loading) {
+      return _PremiumRouteAccessChecking(isDark: isDark, child: child);
+    }
     final hasAccess = isAiCoach
         ? creditAccess
         : isNutritionPrograms
@@ -65,8 +88,6 @@ class PremiumRouteGlassGate extends ConsumerWidget {
         : state != null && state.plan != CommercePlan.free;
     if (hasAccess) return child;
 
-    final loading =
-        subscription.isLoading || (isAiCoach && creditSnapshot.isLoading);
     final content = _contentFor(context, feature);
     final storeLocale = Localizations.localeOf(context).toLanguageTag();
     // The glass names the only subscription family exposed by the verified
@@ -79,8 +100,6 @@ class PremiumRouteGlassGate extends ConsumerWidget {
         : storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -151,6 +170,158 @@ class PremiumRouteGlassGate extends ConsumerWidget {
                 ),
               );
             },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PremiumRouteAccessChecking extends StatelessWidget {
+  const _PremiumRouteAccessChecking({
+    required this.child,
+    required this.isDark,
+  });
+
+  final Widget child;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      AbsorbPointer(child: ExcludeSemantics(child: child)),
+      ColoredBox(
+        color: isDark ? const Color(0x14000000) : const Color(0x08000000),
+        child: const Center(
+          child: SizedBox.square(
+            key: ValueKey('premium-route-access-checking'),
+            dimension: 24,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+        ),
+      ),
+      SafeArea(
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: IconButton(
+              key: const ValueKey('premium-route-loading-back'),
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: () =>
+                  context.canPop() ? context.pop() : context.go('/dashboard'),
+              style: IconButton.styleFrom(
+                backgroundColor: isDark
+                    ? const Color(0x99141414)
+                    : const Color(0xB8FFFFFF),
+                foregroundColor: isDark ? Colors.white : Colors.black87,
+              ),
+              icon: const BackButtonIcon(),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class _PremiumRouteAccessUnavailable extends StatelessWidget {
+  const _PremiumRouteAccessUnavailable({
+    required this.child,
+    required this.isDark,
+    required this.onRetry,
+  });
+
+  final Widget child;
+  final bool isDark;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        KeyedSubtree(
+          key: const ValueKey('premium-route-protected-content'),
+          child: AbsorbPointer(child: ExcludeSemantics(child: child)),
+        ),
+        Positioned.fill(
+          child: ColoredBox(
+            color: scheme.surface.withValues(alpha: isDark ? .96 : .94),
+          ),
+        ),
+        SafeArea(
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: IconButton(
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                onPressed: () =>
+                    context.canPop() ? context.pop() : context.go('/dashboard'),
+                icon: const BackButtonIcon(),
+              ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Card(
+                key: const ValueKey('premium-route-access-unavailable'),
+                elevation: 0,
+                color: scheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(color: scheme.outlineVariant),
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.sync_problem_rounded,
+                          size: 42,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.strings.text('Unavailable'),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.strings.text(
+                            'The request could not be completed. No partial change was kept. Try again.',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                height: 1.45,
+                              ),
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton.tonalIcon(
+                          key: const ValueKey('premium-route-access-retry'),
+                          onPressed: onRetry,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: Text(context.strings.text('Try again')),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ],

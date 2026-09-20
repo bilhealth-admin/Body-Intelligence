@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart' as image_picker;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/services/recoverable_image_picker.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../providers/user_profile_provider.dart';
 
@@ -13,6 +15,8 @@ const profilePhotoMaxBytes = 5 * 1024 * 1024;
 
 typedef ProfilePhotoPicker =
     Future<XFile?> Function(List<XTypeGroup> acceptedTypeGroups);
+typedef RecoveredProfilePhotoPicker = Future<XFile?> Function();
+typedef ProfilePhotoCloudRemover = Future<void> Function(String ownerId);
 
 class ProfilePhotoSaveResult {
   const ProfilePhotoSaveResult({
@@ -35,15 +39,24 @@ class ProfilePhotoService {
     this._preferences, {
     String? Function()? authenticatedOwnerId,
     ProfilePhotoPicker? photoPicker,
+    RecoveredProfilePhotoPicker? recoveredPhotoPicker,
+    ProfilePhotoCloudRemover? cloudRemover,
   }) : _authenticatedOwnerId =
            authenticatedOwnerId ?? _currentAuthenticatedOwnerId,
-       _photoPicker = photoPicker ?? _pickProfilePhoto;
+       _photoPicker = photoPicker ?? _pickProfilePhoto,
+       _recoveredPhotoPicker =
+           recoveredPhotoPicker ?? _takeRecoveredProfilePhoto,
+       _cloudRemover = cloudRemover ?? _removeCloudProfilePhoto;
 
   final PreferencesRepository _preferences;
   final String? Function() _authenticatedOwnerId;
   final ProfilePhotoPicker _photoPicker;
+  final RecoveredProfilePhotoPicker _recoveredPhotoPicker;
+  final ProfilePhotoCloudRemover _cloudRemover;
 
-  Future<ProfilePhotoSaveResult?> chooseAndSave() async {
+  Future<ProfilePhotoSaveResult?> chooseAndSave({
+    bool recoveredOnly = false,
+  }) async {
     final authenticatedOwnerAtSelection = _authenticatedOwnerId();
     final storageOwnerAtSelection = _preferences.localOwnerId;
     _requireAuthenticatedOwnerMatchesStorage(
@@ -55,7 +68,12 @@ class ProfilePhotoService {
       extensions: ['jpg', 'jpeg', 'png', 'webp'],
       mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
     );
-    final file = await _photoPicker(const [types]);
+    // An automatic Android process-death resume must never open a fresh
+    // picker when its one-shot recovered result is gone. This prevents a stale
+    // route query from manufacturing a new user action or looping.
+    final file = recoveredOnly
+        ? await _recoveredPhotoPicker()
+        : await _photoPicker(const [types]);
     if (file == null) return null;
     final bytes = await file.readAsBytes();
     if (bytes.lengthInBytes > profilePhotoMaxBytes) {
@@ -82,6 +100,33 @@ class ProfilePhotoService {
       expectedStorageOwnerId: storageOwnerId,
       expectedAuthenticatedOwnerId: authenticatedOwnerId,
     );
+  }
+
+  Future<void> remove() async {
+    final expectedAuthenticatedOwnerId = _authenticatedOwnerId();
+    final expectedStorageOwnerId = _preferences.localOwnerId;
+    _requireAuthenticatedOwnerMatchesStorage(
+      expectedAuthenticatedOwnerId,
+      expectedStorageOwnerId,
+    );
+    _requireUnchangedOwners(
+      expectedStorageOwnerId: expectedStorageOwnerId,
+      expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
+    );
+    if (expectedAuthenticatedOwnerId != null) {
+      // Keep the local copy until both cloud references are removed. A failed
+      // network request must not make the action appear complete while the
+      // public avatar remains accessible on another device.
+      await _cloudRemover(expectedAuthenticatedOwnerId);
+      _requireUnchangedOwners(
+        expectedStorageOwnerId: expectedStorageOwnerId,
+        expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
+      );
+    }
+    await _preferences.removeMany(const [
+      'profilePhoto',
+      'profilePhotoPublicUrl',
+    ]);
   }
 
   Future<ProfilePhotoSaveResult> _saveForOwner(
@@ -242,9 +287,46 @@ class ProfilePhotoService {
     return owner == null || owner.isEmpty ? null : owner;
   }
 
-  static Future<XFile?> _pickProfilePhoto(
-    List<XTypeGroup> acceptedTypeGroups,
-  ) => openFile(acceptedTypeGroups: acceptedTypeGroups);
+  static Future<void> _removeCloudProfilePhoto(String ownerId) async {
+    if (!AppEnvironment.supabaseRuntimeReady) return;
+    final client = Supabase.instance.client;
+    if (client.auth.currentUser?.id != ownerId) {
+      throw const ProfilePhotoIdentityChangedException();
+    }
+    final path = '$ownerId/avatar';
+    await client.storage.from('profile-avatars').remove([path]);
+    if (client.auth.currentUser?.id != ownerId) {
+      throw const ProfilePhotoIdentityChangedException();
+    }
+    await client
+        .from('bil_public_profiles')
+        .update({
+          'avatar_url': null,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('user_id', ownerId);
+  }
+
+  static Future<XFile?> _pickProfilePhoto(List<XTypeGroup> acceptedTypeGroups) {
+    // file_selector is reliable on desktop, but on iOS its document picker
+    // can dismiss without returning an asset for a photo-library selection.
+    // image_picker uses Apple's native PHPicker on iOS and the system picker
+    // on Android, so the Add photo action always presents a real photo flow.
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android) {
+      return BilRecoverableImagePicker.instance.pickImage(
+        purpose: BilImagePickerPurpose.profilePhoto,
+        source: image_picker.ImageSource.gallery,
+        imageQuality: 90,
+      );
+    }
+    return openFile(acceptedTypeGroups: acceptedTypeGroups);
+  }
+
+  static Future<XFile?> _takeRecoveredProfilePhoto() =>
+      BilRecoverableImagePicker.instance.takeRecoveredImage(
+        BilImagePickerPurpose.profilePhoto,
+      );
 
   static String _contentType(String name) {
     final lower = name.toLowerCase();

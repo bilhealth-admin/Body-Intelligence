@@ -50,7 +50,8 @@ void main() {
 
   test('remote context retains summary while limiting raw weight rows', () {
     final source = File(
-      'lib/features/intelligence_center/services/local_model_gateway_io.dart',
+      'lib/features/intelligence_center/services/'
+      'coach_cloud_privacy_boundary.dart',
     ).readAsStringSync();
     expect(
       source,

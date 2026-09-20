@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../domain/unified_food.dart';
+import 'food_presentation_localizer.dart';
 
 /// Trusted server-side enrichment used only after BIL's local, installed and
 /// community search sources have no match.
@@ -21,13 +22,18 @@ class TrustedFoodNetworkSearchResolver {
     try {
       final client = Supabase.instance.client;
       if (client.auth.currentSession == null) return const <UnifiedFood>[];
+      final interfaceLocale = AppLocalizations.activeLocale.toLanguageTag();
+      final queryLocale = FoodPresentationLocalizer.resultLocaleForQuery(
+        query: normalizedQuery,
+        interfaceLocaleTag: interfaceLocale,
+      );
       final response = await client.functions
           .invoke(
             'food-search',
             body: <String, Object?>{
               'query': normalizedQuery,
               'limit': limit.clamp(1, 20),
-              'locale': AppLocalizations.activeLocale.toLanguageTag(),
+              'locale': queryLocale,
             },
           )
           .timeout(const Duration(seconds: 8));

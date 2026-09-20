@@ -4,19 +4,16 @@ import 'package:body_intelligence_log/app/services/app_observability.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('production is the safe default environment profile', () {
-    expect(AppEnvironment.profile, EnvironmentProfile.production);
+  test('ad-hoc builds default to the development environment profile', () {
+    expect(AppEnvironment.profile, EnvironmentProfile.development);
   });
 
-  test(
-    'production cloud and AI are ready while paid commerce fails closed',
-    () {
-      expect(FeatureFlags.remoteOverridesAvailable, isFalse);
-      expect(FeatureFlags.enabled(AppFeature.cloud), isTrue);
-      expect(FeatureFlags.enabled(AppFeature.artificialIntelligence), isTrue);
-      expect(FeatureFlags.enabled(AppFeature.commerce), isFalse);
-    },
-  );
+  test('default cloud and AI are ready while paid commerce fails closed', () {
+    expect(FeatureFlags.remoteOverridesAvailable, isFalse);
+    expect(FeatureFlags.enabled(AppFeature.cloud), isTrue);
+    expect(FeatureFlags.enabled(AppFeature.artificialIntelligence), isTrue);
+    expect(FeatureFlags.enabled(AppFeature.commerce), isFalse);
+  });
 
   test('structured logger redacts health and identity attributes', () {
     final lines = <String>[];

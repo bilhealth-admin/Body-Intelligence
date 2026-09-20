@@ -558,11 +558,13 @@ class _CircularNutrientCard extends StatelessWidget {
     required this.title,
     required this.rings,
     this.onTap,
+    this.emptyMessage,
   });
 
   final String title;
   final List<Widget> rings;
   final VoidCallback? onTap;
+  final String? emptyMessage;
 
   @override
   Widget build(BuildContext context) => _ReferenceCard(
@@ -592,6 +594,16 @@ class _CircularNutrientCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [for (final ring in rings) Expanded(child: ring)],
         ),
+        if (emptyMessage != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            emptyMessage!,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ],
     ),
   );
@@ -693,12 +705,12 @@ class _MacroProgress extends StatelessWidget {
 
 class _LogShortcut extends StatelessWidget {
   const _LogShortcut({
-    required this.icon,
+    required this.kind,
     required this.label,
     required this.recorded,
     required this.onTap,
   });
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String label;
   final bool recorded;
   final VoidCallback onTap;
@@ -716,7 +728,12 @@ class _LogShortcut extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary),
+          BilSemanticIconBadge(
+            key: Key('dashboard-log-${kind.name}-icon'),
+            kind: kind,
+            size: 38,
+            iconSize: 21,
+          ),
           const SizedBox(height: 7),
           Text(
             label,

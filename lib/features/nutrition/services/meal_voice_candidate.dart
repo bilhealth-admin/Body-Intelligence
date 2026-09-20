@@ -68,6 +68,14 @@ abstract final class MealVoiceLocaleResolver {
       'ar-DZ',
       'ar-TN',
     ],
+    'pt': ['pt-BR', 'pt-PT'],
+    'pt-br': ['pt-BR'],
+    'pt-pt': ['pt-PT'],
+    'zh': ['zh-CN', 'zh-TW', 'zh-HK'],
+    // Speech engines commonly expose Chinese by region rather than script.
+    // Keep the selected BIL script authoritative when mapping that catalog.
+    'zh-hans': ['zh-Hans', 'zh-CN', 'zh-SG'],
+    'zh-hant': ['zh-Hant', 'zh-TW', 'zh-HK', 'zh-MO'],
   };
 
   static String? resolve({
@@ -80,7 +88,9 @@ abstract final class MealVoiceLocaleResolver {
         .toList(growable: false);
     if (available.isEmpty) return null;
     String normalize(String value) => value.replaceAll('_', '-').toLowerCase();
-    final language = normalize(appLanguage).split('-').first;
+    final normalizedAppLanguage = normalize(appLanguage);
+    final appLanguageParts = normalizedAppLanguage.split('-');
+    final language = appLanguageParts.first;
     final device = normalize(deviceLocale);
     String? exact(String wanted) {
       final target = normalize(wanted);
@@ -88,6 +98,19 @@ abstract final class MealVoiceLocaleResolver {
         if (normalize(locale) == target) return locale;
       }
       return null;
+    }
+
+    // Exact production region/script tags are a user choice. Resolve them
+    // before the device dialect so pt-BR cannot silently become pt-PT and
+    // zh-Hans cannot silently become Traditional Chinese (or vice versa).
+    if (appLanguageParts.length > 1) {
+      final appExact = exact(normalizedAppLanguage);
+      if (appExact != null) return appExact;
+      for (final preferred
+          in _fallbacks[normalizedAppLanguage] ?? const <String>[]) {
+        final match = exact(preferred);
+        if (match != null) return match;
+      }
     }
 
     if (device.split('-').first == language) {

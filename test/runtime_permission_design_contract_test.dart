@@ -90,13 +90,18 @@ void main() {
     expect(policy, contains('Permission.speech'));
     expect(policy, isNot(contains('Permission.photos')));
     expect(mealCapture, contains('_ensureCameraPermission'));
-    expect(mealCapture, contains('BIL does not request access at startup'));
+    expect(
+      mealCapture,
+      contains(
+        'BIL only uses the camera after you choose barcode or meal-photo capture.',
+      ),
+    );
     expect(voice, contains('_ensureMicrophonePermission'));
     expect(voice, contains('permanentlyDenied'));
     expect(coach, contains('_ensureCoachRuntimePermission'));
     expect(coach, contains('Open system settings'));
     expect(weightVoice, contains('BilRuntimeCapability.microphone'));
-    expect(dashboard, contains('It never requests camera access at startup'));
+    expect(dashboard, contains('await _ensureCameraPermission(context)'));
     expect(foodPage, contains('Manual barcode entry remains available'));
   });
 }

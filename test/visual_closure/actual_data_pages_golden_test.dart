@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
@@ -46,6 +48,7 @@ import 'package:body_intelligence_log/features/settings/reference_preferences_pa
 import 'package:body_intelligence_log/features/settings/sharing_privacy_settings_page.dart';
 import 'package:body_intelligence_log/features/settings/account_password_page.dart';
 import 'package:body_intelligence_log/features/settings/account_connection_settings_page.dart';
+import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -1149,7 +1152,7 @@ void main() {
       db: db,
       name: 'more_lower_phone',
       prepare: (tester) async {
-        final sync = find.text('Sync');
+        final sync = find.byKey(const Key('settings-cloud-sync-status-row'));
         await tester.scrollUntilVisible(
           sync,
           420,
@@ -1163,7 +1166,11 @@ void main() {
     );
   });
 
-  for (var page = 2; page <= 5; page++) {
+  // This list has four reachable capture viewports at the audited 390x844
+  // surface: the initial frame plus three forward scrolls. Every drag must
+  // advance the position; asking for another "page" would only recapture the
+  // terminal viewport under a different filename.
+  for (var page = 2; page <= 4; page++) {
     testWidgets('settings production phone capture page $page', (tester) async {
       setExplicitLightSettings();
       final db = await database(tester, profile: true);
@@ -1173,12 +1180,19 @@ void main() {
         db: db,
         name: 'settings_phone_$page',
         prepare: (tester) async {
+          final scrollable = find.byType(Scrollable).first;
+          final position = tester.state<ScrollableState>(scrollable).position;
           for (var step = 1; step < page; step++) {
-            await tester.drag(
-              find.byType(Scrollable).first,
-              const Offset(0, -700),
-            );
+            final before = position.pixels;
+            await tester.drag(scrollable, const Offset(0, -700));
             await tester.pumpAndSettle();
+            expect(
+              position.pixels,
+              greaterThan(before),
+              reason:
+                  'Settings capture page $page reached the terminal viewport '
+                  'before scroll step $step completed.',
+            );
           }
           if (page == 2) expect(find.byType(SettingsPage), findsOneWidget);
         },
@@ -1186,27 +1200,25 @@ void main() {
     });
   }
 
-  for (var page = 6; page <= 9; page++) {
-    testWidgets('settings production phone capture page $page', (tester) async {
-      setExplicitLightSettings();
-      final db = await database(tester, profile: true);
-      await capture(
-        tester,
-        page: const SettingsPage(),
-        db: db,
-        name: 'settings_phone_$page',
-        prepare: (tester) async {
-          for (var step = 1; step < page; step++) {
-            await tester.drag(
-              find.byType(Scrollable).first,
-              const Offset(0, -420),
-            );
-            await tester.pumpAndSettle();
-          }
-        },
+  test('settings capture viewports remain byte-distinct', () {
+    const captures = <String>[
+      'test/visual_closure/goldens/visual_closure_settings_phone.png',
+      'test/visual_closure/goldens/visual_closure_settings_phone_2.png',
+      'test/visual_closure/goldens/visual_closure_settings_phone_3.png',
+      'test/visual_closure/goldens/visual_closure_settings_phone_4.png',
+    ];
+    final digests = <String>{};
+    for (final path in captures) {
+      final file = File(path);
+      expect(file.existsSync(), isTrue, reason: 'Missing $path');
+      final digest = sha256.convert(file.readAsBytesSync()).toString();
+      expect(
+        digests.add(digest),
+        isTrue,
+        reason: 'Settings capture $path duplicates an earlier viewport.',
       );
-    });
-  }
+    }
+  });
 
   for (final analyticsTab in const [
     (0, 'calories'),

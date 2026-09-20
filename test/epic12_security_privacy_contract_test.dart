@@ -13,15 +13,25 @@ void main() {
     );
     expect(find.text('private health value'), findsOneWidget);
     expect(find.byKey(const Key('app-switcher-privacy-shield')), findsNothing);
+    final observer =
+        tester.state(find.byType(AppSwitcherPrivacyShield))
+            as WidgetsBindingObserver;
 
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    // iOS uses `inactive` while presenting camera/microphone/HealthKit
+    // permission sheets. Keep the live Flutter surface available for those
+    // flows; redact once the scene is actually hidden.
+    observer.didChangeAppLifecycleState(AppLifecycleState.inactive);
+    await tester.pump();
+    expect(find.byKey(const Key('app-switcher-privacy-shield')), findsNothing);
+
+    observer.didChangeAppLifecycleState(AppLifecycleState.hidden);
     await tester.pump();
     expect(
       find.byKey(const Key('app-switcher-privacy-shield')),
       findsOneWidget,
     );
 
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
     await tester.pump();
     expect(find.byKey(const Key('app-switcher-privacy-shield')), findsNothing);
   });
@@ -57,7 +67,7 @@ void main() {
     expect(
       settings,
       contains(
-        'id("org.jetbrains.kotlin.android") version "2.2.20" apply false',
+        'id("org.jetbrains.kotlin.android") version "2.3.20" apply false',
       ),
     );
     expect(pubspec, isNot(contains('speech_to_text:')));

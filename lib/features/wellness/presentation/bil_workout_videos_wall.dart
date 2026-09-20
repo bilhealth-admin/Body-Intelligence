@@ -38,10 +38,12 @@ class _WorkoutVideosWallState extends State<_WorkoutVideosWall> {
   @override
   Widget build(BuildContext context) {
     final visibleIds = widget.visibleItems.map((item) => item.stableId).toSet();
-    final sections = _sections()
-        .map((section) => section.onlyVisible(visibleIds))
-        .where((section) => section.items.isNotEmpty)
-        .toList(growable: false);
+    final uniqueVisibleItems = canonicalWorkoutVideoPayloads(
+      widget.catalogItems.where((item) => visibleIds.contains(item.stableId)),
+    );
+    final sections = _sections(
+      uniqueVisibleItems,
+    ).where((section) => section.items.isNotEmpty).toList(growable: false);
     return SliverList(
       key: const ValueKey('workout-videos-wall'),
       delegate: SliverChildBuilderDelegate(
@@ -80,9 +82,9 @@ class _WorkoutVideosWallState extends State<_WorkoutVideosWall> {
     );
   }
 
-  List<_WorkoutVideoSection> _sections() {
+  List<_WorkoutVideoSection> _sections(List<WellnessContentItem> catalogItems) {
     final byId = <String, WellnessContentItem>{
-      for (final item in widget.catalogItems)
+      for (final item in catalogItems)
         if (item.releaseBundleId == 'gym-six-month') item.id: item,
     };
     final sessions = <String, GymPlanSession>{
@@ -143,7 +145,7 @@ class _WorkoutVideosWallState extends State<_WorkoutVideosWall> {
       'gym-exercise-technique',
     ];
     for (final groupId in functionalGroups) {
-      _appendGroupSection(result, groupId);
+      _appendGroupSection(result, groupId, catalogItems);
     }
 
     const homeGroups = <String>[
@@ -159,14 +161,14 @@ class _WorkoutVideosWallState extends State<_WorkoutVideosWall> {
       'home-balance-coordination',
     ];
     for (final groupId in homeGroups) {
-      _appendGroupSection(result, groupId);
+      _appendGroupSection(result, groupId, catalogItems);
     }
     final categorizedIds = result
         .expand((section) => section.items)
         .map((item) => item.stableId)
         .toSet();
     final remaining =
-        widget.catalogItems
+        catalogItems
             .where((item) => !categorizedIds.contains(item.stableId))
             .toList(growable: false)
           ..sort((left, right) => left.title.compareTo(right.title));
@@ -180,11 +182,21 @@ class _WorkoutVideosWallState extends State<_WorkoutVideosWall> {
         ),
       );
     }
-    return result;
+    final distributed = distributeUniqueWorkoutVideoPayloads(
+      result.map((section) => section.items),
+    );
+    return List<_WorkoutVideoSection>.unmodifiable([
+      for (final entry in distributed)
+        result[entry.sourceIndex].withItems(entry.items),
+    ]);
   }
 
-  void _appendGroupSection(List<_WorkoutVideoSection> result, String groupId) {
-    final items = widget.catalogItems
+  void _appendGroupSection(
+    List<_WorkoutVideoSection> result,
+    String groupId,
+    List<WellnessContentItem> catalogItems,
+  ) {
+    final items = catalogItems
         .where((item) => item.planGroupIds.contains(groupId))
         .toList(growable: false);
     if (items.isEmpty) return;
@@ -249,16 +261,79 @@ class _WorkoutVideoSection {
     freePreviewStableId: null,
   );
 
-  _WorkoutVideoSection onlyVisible(Set<String> visibleIds) =>
-      _WorkoutVideoSection._(
+  _WorkoutVideoSection withItems(List<WellnessContentItem> nextItems) {
+    if (freePreviewStableId == null) {
+      return _WorkoutVideoSection.ungrouped(
         id: id,
         title: title,
         subtitle: subtitle,
-        items: items
-            .where((item) => visibleIds.contains(item.stableId))
-            .toList(growable: false),
-        freePreviewStableId: freePreviewStableId,
+        items: nextItems,
       );
+    }
+    return _WorkoutVideoSection.withOptionalPreview(
+      id: id,
+      title: title,
+      subtitle: subtitle,
+      items: nextItems,
+    );
+  }
+}
+
+@visibleForTesting
+String workoutVideoPayloadIdentity(WellnessContentItem item) {
+  final digest = item.videoMedia?.sha256.trim().toLowerCase();
+  return digest == null || digest.isEmpty
+      ? 'identity:${item.stableId}'
+      : 'sha256:$digest';
+}
+
+@visibleForTesting
+List<({int sourceIndex, List<WellnessContentItem> items})>
+distributeUniqueWorkoutVideoPayloads(
+  Iterable<Iterable<WellnessContentItem>> sections,
+) {
+  final seenPayloads = <String>{};
+  final result = <({int sourceIndex, List<WellnessContentItem> items})>[];
+  var sourceIndex = 0;
+  for (final section in sections) {
+    final uniqueItems = <WellnessContentItem>[];
+    for (final item in section) {
+      if (seenPayloads.add(workoutVideoPayloadIdentity(item))) {
+        uniqueItems.add(item);
+      }
+    }
+    if (uniqueItems.isNotEmpty) {
+      result.add((
+        sourceIndex: sourceIndex,
+        items: List<WellnessContentItem>.unmodifiable(uniqueItems),
+      ));
+    }
+    sourceIndex += 1;
+  }
+  return List.unmodifiable(result);
+}
+
+/// Collapses byte-identical videos before building the discovery wall.
+///
+/// Release bundles keep independent signed identities because a movement may
+/// participate in both a Home and Gym plan. The browse surface, however,
+/// should never show two cards that play the exact same payload. When both
+/// signed variants are visible, prefer the Gym identity because the six-month
+/// plan resolves its session exercises against that bundle.
+List<WellnessContentItem> canonicalWorkoutVideoPayloads(
+  Iterable<WellnessContentItem> source,
+) {
+  final byPayload = <String, WellnessContentItem>{};
+  for (final item in source) {
+    final identity = workoutVideoPayloadIdentity(item);
+    final existing = byPayload[identity];
+    if (existing == null ||
+        (existing.releaseBundleId != 'gym-six-month' &&
+            item.releaseBundleId == 'gym-six-month')) {
+      byPayload[identity] = item;
+    }
+  }
+  return List<WellnessContentItem>.unmodifiable(byPayload.values);
 }
 
 List<WellnessContentItem> _itemsForIds(

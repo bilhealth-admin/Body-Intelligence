@@ -32,11 +32,52 @@ class _ChoiceScaffold extends StatelessWidget {
   );
 }
 
-class ReferenceNutritionGoalsPage extends ConsumerWidget {
+class ReferenceNutritionGoalsPage extends ConsumerStatefulWidget {
   const ReferenceNutritionGoalsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReferenceNutritionGoalsPage> createState() =>
+      _ReferenceNutritionGoalsPageState();
+}
+
+class _ReferenceNutritionGoalsPageState
+    extends ConsumerState<ReferenceNutritionGoalsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Upgrade an already-saved legacy split (for example 20/70/20) as soon
+    // as this page opens. Without this repair, the percentages can remain
+    // above 100% and every derived gram target stays blank until the user
+    // happens to edit Calories again.
+    unawaited(_repairLegacyMacroGoal());
+  }
+
+  Future<void> _repairLegacyMacroGoal() async {
+    try {
+      final repository = ref.read(preferencesRepositoryProvider);
+      const keys = <String>[
+        'goal.calories',
+        'goal.carbsPercent',
+        'goal.proteinPercent',
+        'goal.fatPercent',
+        'goal.carbsGrams',
+        'goal.proteinGrams',
+        'goal.fatGrams',
+      ];
+      final values = await Future.wait(keys.map(repository.get));
+      final repair = nutritionGoalRepairSnapshot({
+        for (var index = 0; index < keys.length; index++)
+          keys[index]: values[index],
+      });
+      if (repair != null) await repository.setMany(repair);
+    } on Object {
+      // The rows keep their existing retry/error behavior if local storage is
+      // temporarily unavailable; migration must never block page rendering.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return _PreferenceListPage(
       title: _nutritionGoalText(context, 'Calorie and macro goals'),
       children: const [
@@ -147,46 +188,10 @@ class _PremiumFeature extends ConsumerWidget {
       subtitle: Text(_diaryText(context, subtitle)),
       trailing: Semantics(
         label: status,
-        child: AnimatedContainer(
-          key: const Key('diary-premium-feature-state'),
-          duration: const Duration(milliseconds: 220),
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: active
-                ? const LinearGradient(
-                    colors: [Color(0xFFFFD76A), Color(0xFFE79000)],
-                  )
-                : null,
-            color: active
-                ? null
-                : Theme.of(context).colorScheme.surfaceContainerHigh,
-            border: Border.all(
-              color: active
-                  ? const Color(0xFFFFE6A5)
-                  : Theme.of(context).colorScheme.outlineVariant,
-            ),
-            boxShadow: active
-                ? const [
-                    BoxShadow(
-                      color: Color(0x44E79000),
-                      blurRadius: 12,
-                      offset: Offset(0, 5),
-                    ),
-                  ]
-                : const [],
-          ),
-          child: Icon(
-            active
-                ? Icons.workspace_premium_rounded
-                : entitlement.hasError
-                ? Icons.refresh_rounded
-                : Icons.lock_outline_rounded,
-            color: active
-                ? Colors.white
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+        child: Icon(
+          Icons.chevron_right_rounded,
+          key: const Key('diary-premium-feature-chevron'),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
       enabled: entitlement.hasValue,

@@ -2,17 +2,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/security/bil_mobile_integrity_service.dart';
 
 abstract interface class AiCoachAdminGateway {
   Stream<String?> watchSignedInUserId();
 
   Future<bool> canManageAiCoach();
 
-  Future<AiCoachGlobalResetResult> globalReset(String idempotencyKey);
+  Future<AiCoachGlobalResetResult> globalReset({
+    required String message,
+    required String idempotencyKey,
+  });
 
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String message,
     required String idempotencyKey,
   });
 
@@ -69,13 +74,22 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
   }
 
   @override
-  Future<AiCoachGlobalResetResult> globalReset(String idempotencyKey) async {
+  Future<AiCoachGlobalResetResult> globalReset({
+    required String message,
+    required String idempotencyKey,
+  }) async {
+    final body = <String, Object?>{
+      'operation': 'global',
+      'message': message.trim(),
+      'idempotency_key': idempotencyKey,
+    };
+    final protectedBody = await BilMobileIntegrityService.instance.protect(
+      action: 'admin.ai_coach.global_reset',
+      payload: body,
+    );
     final response = await _client.functions.invoke(
       'ai-coach-global-reset',
-      body: <String, Object?>{
-        'operation': 'global',
-        'idempotency_key': idempotencyKey,
-      },
+      body: protectedBody,
     );
     if (response.status != 200 || response.data is! Map) {
       throw StateError('ai_coach_global_reset_failed');
@@ -89,16 +103,23 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String message,
     required String idempotencyKey,
   }) async {
+    final body = <String, Object?>{
+      'operation': 'individual',
+      'email': email.trim().toLowerCase(),
+      'reason': reason.trim(),
+      'message': message.trim(),
+      'idempotency_key': idempotencyKey,
+    };
+    final protectedBody = await BilMobileIntegrityService.instance.protect(
+      action: 'admin.ai_coach.individual_reset',
+      payload: body,
+    );
     final response = await _client.functions.invoke(
       'ai-coach-global-reset',
-      body: <String, Object?>{
-        'operation': 'individual',
-        'email': email.trim().toLowerCase(),
-        'reason': reason.trim(),
-        'idempotency_key': idempotencyKey,
-      },
+      body: protectedBody,
     );
     if (response.status != 200 || response.data is! Map) {
       throw StateError('ai_coach_individual_reset_failed');
@@ -119,17 +140,22 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
     String? message,
     required String idempotencyKey,
   }) async {
+    final body = <String, Object?>{
+      'operation': 'notification',
+      'notification_kind': kind.wireValue,
+      'audience': audience.wireValue,
+      if (audience == AiCoachAdminNotificationAudience.email)
+        'email': email?.trim().toLowerCase(),
+      if (message?.trim().isNotEmpty == true) 'message': message!.trim(),
+      'idempotency_key': idempotencyKey,
+    };
+    final protectedBody = await BilMobileIntegrityService.instance.protect(
+      action: 'admin.ai_coach.notification',
+      payload: body,
+    );
     final response = await _client.functions.invoke(
       'ai-coach-global-reset',
-      body: <String, Object?>{
-        'operation': 'notification',
-        'notification_kind': kind.wireValue,
-        'audience': audience.wireValue,
-        if (audience == AiCoachAdminNotificationAudience.email)
-          'email': email?.trim().toLowerCase(),
-        if (message?.trim().isNotEmpty == true) 'message': message!.trim(),
-        'idempotency_key': idempotencyKey,
-      },
+      body: protectedBody,
     );
     if (response.status != 200 || response.data is! Map) {
       throw StateError('ai_coach_admin_notification_failed');
@@ -175,13 +201,37 @@ final class AiCoachGlobalResetResult {
   });
 
   factory AiCoachGlobalResetResult.fromJson(Map<String, Object?> json) {
+    final resetId = json['reset_id'];
+    final usageRowsReset = _nonNegativeInteger(json['usage_rows_reset']);
+    final monthlyRowsReset = _nonNegativeInteger(json['monthly_rows_reset']);
+    final usersNotified = _nonNegativeInteger(json['users_notified']);
+    final duplicate = json['duplicate'];
+    final boostTokens = _nonNegativeInteger(json['boost_tokens_per_recipient']);
+    final customMessageApplied = json['custom_message_applied'];
+    if (resetId is! String ||
+        resetId.trim().isEmpty ||
+        usageRowsReset == null ||
+        monthlyRowsReset == null ||
+        usersNotified == null ||
+        duplicate is! bool ||
+        boostTokens != 2500 ||
+        customMessageApplied != true) {
+      throw const FormatException('invalid_ai_coach_global_reset_result');
+    }
     return AiCoachGlobalResetResult(
-      resetId: json['reset_id']?.toString() ?? '',
-      usageRowsReset: (json['usage_rows_reset'] as num?)?.toInt() ?? 0,
-      monthlyRowsReset: (json['monthly_rows_reset'] as num?)?.toInt() ?? 0,
-      usersNotified: (json['users_notified'] as num?)?.toInt() ?? 0,
-      duplicate: json['duplicate'] == true,
+      resetId: resetId,
+      usageRowsReset: usageRowsReset,
+      monthlyRowsReset: monthlyRowsReset,
+      usersNotified: usersNotified,
+      duplicate: duplicate,
     );
+  }
+
+  static int? _nonNegativeInteger(Object? value) {
+    if (value is! num || !value.isFinite || value < 0 || value % 1 != 0) {
+      return null;
+    }
+    return value.toInt();
   }
 
   final String resetId;
@@ -230,7 +280,10 @@ final class _UnavailableAiCoachAdminGateway implements AiCoachAdminGateway {
   Stream<String?> watchSignedInUserId() => Stream<String?>.value(null);
 
   @override
-  Future<AiCoachGlobalResetResult> globalReset(String idempotencyKey) {
+  Future<AiCoachGlobalResetResult> globalReset({
+    required String message,
+    required String idempotencyKey,
+  }) {
     throw StateError('ai_coach_admin_unavailable');
   }
 
@@ -238,6 +291,7 @@ final class _UnavailableAiCoachAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String message,
     required String idempotencyKey,
   }) {
     throw StateError('ai_coach_admin_unavailable');

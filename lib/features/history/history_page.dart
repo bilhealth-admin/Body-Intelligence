@@ -9,6 +9,7 @@ import '../../core/units/measurement_units.dart';
 import '../../engine/weight_analysis.dart';
 import '../../engine/progress_analysis.dart';
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../shared/widgets/wheel_number_field.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
@@ -94,7 +95,12 @@ class HistoryPage extends ConsumerWidget {
                       const SizedBox(height: 12),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.calendar_today_outlined),
+                        leading: BilSemanticIconBadge(
+                          kind: BilSemanticIconKind.calendar,
+                          size: 38,
+                          iconSize: 20,
+                          shape: BoxShape.rectangle,
+                        ),
                         title: Text(context.strings.text('Measurement date')),
                         subtitle: Text(
                           MaterialLocalizations.of(
@@ -391,6 +397,12 @@ class HistoryPage extends ConsumerWidget {
               ...rows.map(
                 (entry) => PremiumSurface(
                   child: ListTile(
+                    leading: BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.weight,
+                      size: 38,
+                      iconSize: 20,
+                      shape: BoxShape.rectangle,
+                    ),
                     title: Text(
                       '${UnitConverter.weightFromKg(entry.weight, system).toStringAsFixed(1)} $unit',
                     ),

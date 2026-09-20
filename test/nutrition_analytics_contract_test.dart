@@ -65,6 +65,17 @@ void main() {
     expect(source, isNot(contains('this.calories = 0')));
   });
 
+  test('heart dashboard uses only meal nutrients represented in evidence', () {
+    final source = analyticsSource();
+    expect(source, contains("storedGoal('goal.potassium')"));
+    expect(source, contains('evidence[TrackedNutrient.potassium]?.value'));
+    expect(source, contains('potassiumMg: potassiumGoal'));
+    expect(
+      source,
+      isNot(contains('value: null,\n              goal: goals.saturatedFatG')),
+    );
+  });
+
   test('selected-day export is wired through route into range page', () {
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final page = File(

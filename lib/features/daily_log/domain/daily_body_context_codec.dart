@@ -79,8 +79,7 @@ abstract final class DailyBodyContextCodec {
   }
 
   static Set<String> engineTypes(String? encoded) => {
-    for (final option in decode(encoded).selected)
-      ?_engineTypeByOption[option],
+    for (final option in decode(encoded).selected) ?_engineTypeByOption[option],
   };
 
   static String _tagValue(String encoded, String tag) =>

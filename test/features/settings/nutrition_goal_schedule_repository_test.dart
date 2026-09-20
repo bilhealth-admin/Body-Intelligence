@@ -57,4 +57,26 @@ void main() {
     expect(NutritionGoalSchedule.decode('{bad').dayTargets, isEmpty);
     expect(NutritionGoalSchedule.decode('[]').mealTargets, isEmpty);
   });
+
+  test('fromGrams derives percentages only when energy agrees', () {
+    final target = NutritionGoalTarget.fromGrams(
+      calories: 950,
+      carbsGrams: 71.25,
+      proteinGrams: 95,
+      fatGrams: 31.6666667,
+    );
+    expect(target.carbsPercent, closeTo(30, .0001));
+    expect(target.proteinPercent, closeTo(40, .0001));
+    expect(target.fatPercent, closeTo(30, .0001));
+
+    expect(
+      () => NutritionGoalTarget.fromGrams(
+        calories: 950,
+        carbsGrams: 71.25,
+        proteinGrams: 95,
+        fatGrams: 20,
+      ),
+      throwsArgumentError,
+    );
+  });
 }

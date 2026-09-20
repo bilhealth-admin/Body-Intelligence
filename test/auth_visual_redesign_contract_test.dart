@@ -100,45 +100,34 @@ void main() {
     },
   );
 
-  test(
-    'login and OTP use the canonical full wordmark below navigation headers',
-    () {
-      final login = File(
-        'lib/features/auth/premium_login_page.dart',
-      ).readAsStringSync();
-      final verify = File(
-        'lib/features/auth/verify_email_page.dart',
-      ).readAsStringSync();
+  test('sign-in is uncluttered while OTP keeps the canonical wordmark', () {
+    final login = File(
+      'lib/features/auth/premium_login_page.dart',
+    ).readAsStringSync();
+    final verify = File(
+      'lib/features/auth/verify_email_page.dart',
+    ).readAsStringSync();
 
-      for (final source in [login, verify]) {
-        expect(source, contains('backgroundColor: pageBackground'));
-        expect(source, contains('Color(0xFFFAFAFC)'));
-        expect(source, contains('scheme.surfaceContainerLow'));
-        expect(source, contains('scheme.onSurface'));
-        expect(source, contains('CircleBorder()'));
-        expect(source, contains('Icons.arrow_back_ios_new_rounded'));
-        expect(source, contains('BilFullWordmark'));
-        expect(source, isNot(contains('BilWordmark(')));
-        expect(source, isNot(contains('auth_language_selector.dart')));
-      }
+    for (final source in [login, verify]) {
+      expect(source, contains('backgroundColor: pageBackground'));
+      expect(source, contains('Color(0xFFFAFAFC)'));
+      expect(source, contains('scheme.surfaceContainerLow'));
+      expect(source, contains('scheme.onSurface'));
+      expect(source, contains('CircleBorder()'));
+      expect(source, contains('Icons.arrow_back_ios_new_rounded'));
+      expect(source, isNot(contains('BilWordmark(')));
+      expect(source, isNot(contains('auth_language_selector.dart')));
+    }
 
-      expect(login, contains('AuthEntryCopyKey.emailAddress'));
-      expect(login, contains("key: Key('login-wordmark')"));
-      expect(
-        login,
-        matches(
-          RegExp(
-            r"BilFullWordmark\([\s\S]{0,240}key: Key\('login-wordmark'\),"
-            r'[\s\S]{0,120}alignment: Alignment\.center,',
-          ),
-        ),
-      );
-      expect(login, contains('Color(0xFF0877F9)'));
-      expect(login, contains('elevation: 5'));
-      expect(verify, contains('List.generate(6'));
-      expect(verify, contains('authEntryResendCountdown(context, _clock)'));
-    },
-  );
+    expect(login, contains('AuthEntryCopyKey.emailAddress'));
+    expect(login, isNot(contains('BilFullWordmark')));
+    expect(login, isNot(contains("key: Key('login-wordmark')")));
+    expect(login, contains('Color(0xFF0877F9)'));
+    expect(login, contains('elevation: 5'));
+    expect(verify, contains('BilFullWordmark'));
+    expect(verify, contains('List.generate(6'));
+    expect(verify, contains('authEntryResendCountdown(context, _clock)'));
+  });
 
   test(
     'Google uses the multicolour brand asset and privacy remains reachable',

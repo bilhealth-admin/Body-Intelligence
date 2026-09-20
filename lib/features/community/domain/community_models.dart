@@ -50,6 +50,10 @@ enum CommunityProfileVisibility { public, friends, private }
 
 enum CommunityMessagePermission { friends, nobody }
 
+enum CommunityPostModerationStatus { pending, approved, rejected }
+
+enum CommunityPostModerationDecision { approved, rejected }
+
 class CommunityPost {
   const CommunityPost({
     required this.id,
@@ -64,6 +68,8 @@ class CommunityPost {
     this.mediaBytes,
     this.mediaWidth,
     this.mediaHeight,
+    this.moderationStatus = CommunityPostModerationStatus.approved,
+    this.reviewedAt,
   });
 
   final String id;
@@ -78,6 +84,8 @@ class CommunityPost {
   final int? mediaBytes;
   final int? mediaWidth;
   final int? mediaHeight;
+  final CommunityPostModerationStatus moderationStatus;
+  final DateTime? reviewedAt;
 
   bool get hasImage =>
       mediaObjectPath != null &&
@@ -108,7 +116,51 @@ class CommunityPost {
     mediaBytes: json['media_bytes'] as int?,
     mediaWidth: json['media_width'] as int?,
     mediaHeight: json['media_height'] as int?,
+    moderationStatus: CommunityPostModerationStatus.values.firstWhere(
+      (value) => value.name == json['moderation_status'],
+      orElse: () => CommunityPostModerationStatus.approved,
+    ),
+    reviewedAt: json['reviewed_at'] == null
+        ? null
+        : DateTime.parse(json['reviewed_at'] as String),
   );
+}
+
+class CommunityPostModerationResult {
+  const CommunityPostModerationResult({
+    required this.postId,
+    required this.decision,
+    required this.duplicate,
+    required this.tokensGranted,
+  });
+
+  final String postId;
+  final CommunityPostModerationDecision decision;
+  final bool duplicate;
+  final int tokensGranted;
+
+  factory CommunityPostModerationResult.fromJson(Map<String, dynamic> json) {
+    final postId = json['post_id'];
+    final decision = json['decision'];
+    final duplicate = json['duplicate'];
+    final tokensGranted = json['tokens_granted'];
+    if (postId is! String ||
+        decision is! String ||
+        duplicate is! bool ||
+        tokensGranted is! int ||
+        !const {'approved', 'rejected'}.contains(decision) ||
+        !const {0, 5}.contains(tokensGranted) ||
+        (decision == 'rejected' && tokensGranted != 0) ||
+        (duplicate && tokensGranted != 0)) {
+      throw const FormatException('Invalid community moderation result');
+    }
+    return CommunityPostModerationResult(
+      postId: postId,
+      decision: CommunityPostModerationDecision.values.byName(decision),
+      duplicate: duplicate,
+      tokensGranted: tokensGranted,
+    );
+  }
 }
 
 class CommunityMessage {

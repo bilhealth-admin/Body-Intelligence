@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 
 import '../../data/repositories/life_context_repository.dart';
 import '../../shared/widgets/secondary_page_app_bar.dart';
@@ -23,7 +24,11 @@ class LifeContextPage extends ConsumerWidget {
           children: LifeContextRepository.allowedTypes
               .map(
                 (value) => ListTile(
-                  leading: Icon(_icon(value)),
+                  leading: BilSemanticIconBadge(
+                    kind: _kind(value),
+                    iconOverride: _icon(value),
+                    appleIconOverride: _icon(value),
+                  ),
                   title: Text(_label(context, value)),
                   onTap: () => Navigator.pop(context, value),
                 ),
@@ -145,7 +150,11 @@ class LifeContextPage extends ConsumerWidget {
                   final row = rows[index];
                   return Card(
                     child: ListTile(
-                      leading: Icon(_icon(row.type)),
+                      leading: BilSemanticIconBadge(
+                        kind: _kind(row.type),
+                        iconOverride: _icon(row.type),
+                        appleIconOverride: _icon(row.type),
+                      ),
                       title: Text(_label(context, row.type)),
                       subtitle: Text(
                         [
@@ -216,6 +225,17 @@ class LifeContextPage extends ConsumerWidget {
     'illness' || 'medicationChange' => Icons.health_and_safety_outlined,
     'highSodiumMeal' => Icons.restaurant_outlined,
     _ => Icons.event_note_outlined,
+  };
+
+  static BilSemanticIconKind _kind(String type) => switch (type) {
+    'travel' => BilSemanticIconKind.location,
+    'poorSleep' => BilSemanticIconKind.sleep,
+    'fasting' || 'ramadan' => BilSemanticIconKind.fasting,
+    'illness' || 'medicationChange' || 'stress' => BilSemanticIconKind.health,
+    'highSodiumMeal' => BilSemanticIconKind.meal,
+    'stoppedTraining' => BilSemanticIconKind.exercise,
+    'event' => BilSemanticIconKind.calendar,
+    _ => BilSemanticIconKind.notes,
   };
 
   String _label(BuildContext context, String type) {

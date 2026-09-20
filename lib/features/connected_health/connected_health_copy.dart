@@ -28,6 +28,34 @@ String connectedHealthTextForLanguage(
       english;
 }
 
+String connectedHealthDataTypeText(BuildContext context, String key) {
+  String tr(String en, String ar) => connectedHealthText(context, en, ar);
+  return switch (key) {
+    'steps' => tr('Steps', 'الخطوات'),
+    'distance' => tr('Distance', 'المسافة'),
+    'activeEnergy' => tr('Active energy', 'الطاقة النشطة'),
+    'workout' => tr('Workouts', 'التمارين'),
+    'sleep' => tr('Sleep', 'النوم'),
+    'weight' => tr('Weight', 'الوزن'),
+    'bodyFat' => tr('Body fat', 'دهون الجسم'),
+    'bodyComposition' => tr('Body composition', 'تركيب الجسم'),
+    'leanMass' => tr('Lean mass', 'الكتلة الخالية من الدهون'),
+    'heartRate' => tr('Heart rate', 'معدل القلب'),
+    'restingHeartRate' => tr('Resting heart rate', 'نبض الراحة'),
+    'hrv' => tr('Heart-rate variability', 'تباين معدل القلب'),
+    'water' => tr('Water', 'الماء'),
+    'nutrition' => tr('Dietary energy', 'الطاقة الغذائية'),
+    'nutritionProtein' => tr('Protein', 'البروتين'),
+    'nutritionCarbohydrates' => tr('Carbohydrates', 'الكربوهيدرات'),
+    'nutritionFat' => tr('Total fat', 'إجمالي الدهون'),
+    'nutritionFiber' => tr('Fiber', 'الألياف'),
+    'nutritionSugar' => tr('Sugar', 'السكر الغذائي'),
+    'nutritionSodium' => tr('Sodium', 'الصوديوم'),
+    'nutritionPotassium' => tr('Potassium', 'البوتاسيوم'),
+    _ => key,
+  };
+}
+
 const _translations = <String, Map<String, String>>{
   'fr': {
     'Apps & Devices': 'Applications et appareils',

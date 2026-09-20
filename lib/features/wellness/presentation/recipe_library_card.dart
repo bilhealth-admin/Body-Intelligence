@@ -430,11 +430,13 @@ class _RecipeArtwork extends StatelessWidget {
     required this.recipe,
     required this.title,
     required this.imageResult,
+    this.useOriginalDecodeSize = false,
   });
 
   final RecipeCatalogSummary recipe;
   final String title;
   final Future<WellnessMediaCacheResult>? imageResult;
+  final bool useOriginalDecodeSize;
 
   @override
   Widget build(BuildContext context) {
@@ -444,7 +446,7 @@ class _RecipeArtwork extends StatelessWidget {
         asset,
         key: ValueKey('recipe-image-${recipe.id}'),
         fit: BoxFit.cover,
-        cacheWidth: 720,
+        cacheWidth: useOriginalDecodeSize ? null : 720,
         filterQuality: FilterQuality.medium,
         excludeFromSemantics: true,
         errorBuilder: (_, _, _) => _RecipeFallbackArtwork(recipe: recipe),
@@ -462,7 +464,7 @@ class _RecipeArtwork extends StatelessWidget {
           file,
           key: ValueKey('recipe-remote-image-${recipe.id}'),
           fit: BoxFit.cover,
-          cacheWidth: 720,
+          cacheWidth: useOriginalDecodeSize ? null : 720,
           filterQuality: FilterQuality.medium,
           gaplessPlayback: true,
           excludeFromSemantics: true,

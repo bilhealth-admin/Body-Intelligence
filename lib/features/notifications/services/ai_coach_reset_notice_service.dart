@@ -4,10 +4,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/environment/app_environment.dart';
 
 final class AiCoachResetNotice {
-  const AiCoachResetNotice({required this.ownerId, required this.resetId});
+  const AiCoachResetNotice({
+    required this.ownerId,
+    required this.resetId,
+    this.message,
+  });
 
   final String ownerId;
   final String resetId;
+  final String? message;
 }
 
 abstract interface class AiCoachResetNoticeGateway {
@@ -42,16 +47,20 @@ final class SupabaseAiCoachResetNoticeGateway
     if (ownerId == null) return null;
     final row = await _client
         .from('bil_ai_coach_reset_notices')
-        .select('reset_id')
+        .select('reset_id,message')
         .eq('owner_id', ownerId)
         .isFilter('seen_at', null)
         .order('created_at', ascending: false)
         .limit(1)
         .maybeSingle();
     final resetId = row?['reset_id']?.toString();
-    return resetId == null || resetId.isEmpty
-        ? null
-        : AiCoachResetNotice(ownerId: ownerId, resetId: resetId);
+    if (resetId == null || resetId.isEmpty) return null;
+    final rawMessage = row?['message']?.toString().trim();
+    return AiCoachResetNotice(
+      ownerId: ownerId,
+      resetId: resetId,
+      message: rawMessage?.isNotEmpty == true ? rawMessage : null,
+    );
   }
 
   @override

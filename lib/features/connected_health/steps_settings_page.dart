@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../data/repositories/preferences_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'providers/connected_health_provider.dart';
@@ -330,7 +331,9 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                             horizontal: 16,
                             vertical: 4,
                           ),
-                          leading: const Icon(Icons.add_circle_outline_rounded),
+                          leading: const BilSemanticIconBadge(
+                            kind: BilSemanticIconKind.devices,
+                          ),
                           title: Text(t('Add a device')),
                           subtitle: Text(
                             t('Open connected-health sources and permissions.'),
@@ -349,10 +352,16 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                   _Section(t('Step goal')),
                   ListTile(
                     key: const Key('steps-history-link'),
-                    leading: const Icon(Icons.insights_rounded),
+                    leading: const BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.progress,
+                    ),
                     title: Text(t('View step history')),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: saving ? null : () => context.push('/history'),
+                    // History is a shell destination, not a child of the
+                    // settings route. Replace the external settings stack so
+                    // the shell always receives a fully-built child instead
+                    // of a transient blank nested navigator on mobile.
+                    onTap: saving ? null : () => context.go('/history'),
                   ),
                   ListTile(
                     key: const Key('daily-step-goal'),

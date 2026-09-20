@@ -2,6 +2,18 @@ import '../../../core/units/measurement_units.dart';
 
 enum WeightGoalDirection { lose, gain, maintain }
 
+final class WeightGoalProgress {
+  const WeightGoalProgress({
+    required this.direction,
+    required this.remainingKg,
+    required this.reached,
+  });
+
+  final WeightGoalDirection direction;
+  final double remainingKg;
+  final bool reached;
+}
+
 /// Resolves the durable direction of a weight goal.
 ///
 /// Once a goal exists, crossing its target must not silently turn a loss goal
@@ -33,6 +45,40 @@ WeightGoalDirection resolveWeightGoalDirection({
   if (targetWeightKg < baseline) return WeightGoalDirection.lose;
   if (targetWeightKg > baseline) return WeightGoalDirection.gain;
   return WeightGoalDirection.maintain;
+}
+
+/// Resolves progress without turning a crossed target into a reversed goal.
+WeightGoalProgress resolveWeightGoalProgress({
+  required double currentWeightKg,
+  required double targetWeightKg,
+  required double? profileBaselineWeightKg,
+  String? storedGoalType,
+  double? storedTargetWeightKg,
+  double toleranceKg = 0.1,
+}) {
+  final direction = resolveWeightGoalDirection(
+    currentWeightKg: currentWeightKg,
+    targetWeightKg: targetWeightKg,
+    profileBaselineWeightKg: profileBaselineWeightKg,
+    storedGoalType: storedGoalType,
+    storedTargetWeightKg: storedTargetWeightKg,
+  );
+  final difference = currentWeightKg - targetWeightKg;
+  final reached = switch (direction) {
+    WeightGoalDirection.lose => difference <= toleranceKg,
+    WeightGoalDirection.gain => difference >= -toleranceKg,
+    WeightGoalDirection.maintain => difference.abs() <= toleranceKg,
+  };
+  final remaining = switch (direction) {
+    WeightGoalDirection.lose => difference.clamp(0, double.infinity),
+    WeightGoalDirection.gain => (-difference).clamp(0, double.infinity),
+    WeightGoalDirection.maintain => difference.abs(),
+  };
+  return WeightGoalProgress(
+    direction: direction,
+    remainingKg: remaining.toDouble(),
+    reached: reached,
+  );
 }
 
 /// Signed difference from the target in canonical kilograms.

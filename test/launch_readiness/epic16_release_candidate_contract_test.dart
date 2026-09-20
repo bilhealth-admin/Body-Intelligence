@@ -13,8 +13,14 @@ void main() {
               ).readAsStringSync(),
             )
             as Map<String, Object?>;
-    expect(status['android_application_id'], 'com.bilhealth.bodyintelligencelog');
-    expect(status['ios_bundle_identifier'], 'com.bilhealth.bodyintelligencelog');
+    expect(
+      status['android_application_id'],
+      'com.bilhealth.bodyintelligencelog',
+    );
+    expect(
+      status['ios_bundle_identifier'],
+      'com.bilhealth.bodyintelligencelog',
+    );
     expect(status['identifier_consistency'], 'CONSISTENT');
     expect(
       status['identity_rebranding_decision'],

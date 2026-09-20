@@ -10,6 +10,7 @@ import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../foods/providers/food_provider.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
 import '../commerce/presentation/premium_barcode_access.dart';
@@ -415,13 +416,13 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                             ? 'Custom food'
                             : favoritesEmpty || recentEmpty
                             ? 'Browse all foods'
-                            : 'Download more foods',
+                            : 'Custom food',
                       ),
                       onAction: widget.embedded
                           ? _createFood
                           : favoritesEmpty || recentEmpty
                           ? () => setState(() => catalogView = _CatalogView.all)
-                          : () => context.push('/food-libraries'),
+                          : _createFood,
                     ),
                   );
                 }

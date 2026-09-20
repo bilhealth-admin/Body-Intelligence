@@ -36,6 +36,7 @@ class FoodRuntimeBarcodeResult {
   final FoodRuntimeSearchSource source;
   final String normalizedBarcode;
   final ProductIdentity? product;
+  final String? ingredients;
 
   const FoodRuntimeBarcodeResult({
     required this.status,
@@ -43,6 +44,7 @@ class FoodRuntimeBarcodeResult {
     required this.source,
     required this.normalizedBarcode,
     this.product,
+    this.ingredients,
   });
 
   bool get found => status == FoodRuntimeBarcodeStatus.found;
@@ -346,6 +348,25 @@ class FoodRuntimeSearchAuthority {
         (a.servingSize - b.servingSize).abs() < 0.01;
   }
 
+  bool _hasCompleteLocalCoreNutrition(Food food) =>
+      const <FoodNutrient>[
+        FoodNutrient.calories,
+        FoodNutrient.protein,
+        FoodNutrient.carbohydrates,
+        FoodNutrient.fat,
+      ].every(
+        (nutrient) =>
+            UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient),
+      );
+
+  bool _hasCompleteUnifiedCoreNutrition(UnifiedFood food) =>
+      const <FoodNutrient>[
+        FoodNutrient.calories,
+        FoodNutrient.protein,
+        FoodNutrient.carbohydrates,
+        FoodNutrient.fat,
+      ].every(food.hasEvidence);
+
   Future<List<Food>> lookupBarcode(String barcode, {int limit = 50}) async {
     return (await lookupBarcodeDetailed(barcode, limit: limit)).foods;
   }
@@ -373,14 +394,44 @@ class FoodRuntimeSearchAuthority {
       localCandidates,
       identity,
     );
-    if (local.isNotEmpty) {
-      return FoodRuntimeBarcodeResult(
-        status: FoodRuntimeBarcodeStatus.found,
-        foods: local,
-        source: FoodRuntimeSearchSource.localOnly,
-        normalizedBarcode: barcode,
-      );
-    }
+    // Older installs could retain a barcode row containing only a name. Do
+    // not let that lossy row short-circuit the authoritative gateway; it must
+    // be enriched with calories/macros/ingredients when the network is
+    // available. Keep it as an offline fallback if enrichment is unavailable.
+    final localHasNutrition = local.any(
+      (food) => UnifiedFood.evidenceFromMask(
+        food.nutrientEvidenceMask,
+        FoodNutrient.calories,
+      ),
+    );
+    final localHasCompleteCoreNutrition = local.any(
+      _hasCompleteLocalCoreNutrition,
+    );
+    final localFallback = localHasNutrition && local.isNotEmpty
+        ? FoodRuntimeBarcodeResult(
+            status: FoodRuntimeBarcodeStatus.found,
+            foods: local,
+            source: FoodRuntimeSearchSource.localOnly,
+            normalizedBarcode: barcode,
+          )
+        : null;
+    final localProductFallback = local.isEmpty
+        ? null
+        : FoodRuntimeBarcodeResult(
+            status: FoodRuntimeBarcodeStatus.identifiedProduct,
+            foods: const <Food>[],
+            source: FoodRuntimeSearchSource.localOnly,
+            normalizedBarcode: barcode,
+            product: ProductIdentity(
+              barcode: barcode,
+              kind: ProductKind.food,
+              name: local.first.name,
+              arabicName: local.first.arabicName,
+              source: local.first.source,
+              confidence: ProductIdentityConfidence.low,
+            ),
+          );
+    if (localHasCompleteCoreNutrition) return localFallback!;
 
     UnifiedFoodRepository? catalog;
     try {
@@ -390,18 +441,56 @@ class FoodRuntimeSearchAuthority {
       // barcode journey. The BIL gateway is the authoritative final source
       // (Open Food Facts first, then USDA when configured server-side), so
       // attempt it exactly as we do for a clean local miss.
-      return _resolveOnlineBarcode(barcode);
+      final online = await _resolveOnlineBarcode(barcode);
+      return online.status == FoodRuntimeBarcodeStatus.notFound
+          ? localFallback ?? localProductFallback ?? online
+          : online;
     }
 
     if (catalog == null) {
-      return _resolveOnlineBarcode(barcode);
+      final online = await _resolveOnlineBarcode(barcode);
+      return online.status == FoodRuntimeBarcodeStatus.notFound
+          ? localFallback ?? localProductFallback ?? online
+          : online;
     }
 
     try {
       final resolution = await catalog.resolveBarcode(barcode);
       final food = resolution.food;
+      final catalogProductFallback = food == null
+          ? null
+          : FoodRuntimeBarcodeResult(
+              status: FoodRuntimeBarcodeStatus.identifiedProduct,
+              foods: const <Food>[],
+              source: FoodRuntimeSearchSource.catalogAndLocal,
+              normalizedBarcode: barcode,
+              product: ProductIdentity(
+                barcode: barcode,
+                kind: ProductKind.food,
+                name: food.name,
+                arabicName: food.arabicName,
+                source: food.sourceLabel,
+                confidence: ProductIdentityConfidence.low,
+              ),
+            );
       if (food == null || !BarcodeFoodContract.acceptsUnified(food, identity)) {
-        return _resolveOnlineBarcode(barcode);
+        final online = await _resolveOnlineBarcode(barcode);
+        return online.status == FoodRuntimeBarcodeStatus.notFound
+            ? localFallback ??
+                  localProductFallback ??
+                  catalogProductFallback ??
+                  online
+            : online;
+      }
+
+      // The bundled barcode index can contain an older name-only row. Treat
+      // that row as an offline fallback, not as a successful nutrition
+      // resolution: ask the barcode gateway to enrich it first so a scan
+      // cannot finish with just the product name when the provider has
+      // calories/macros/ingredients available.
+      if (!_hasCompleteUnifiedCoreNutrition(food)) {
+        final online = await _resolveOnlineBarcode(barcode);
+        if (online.status != FoodRuntimeBarcodeStatus.notFound) return online;
       }
 
       return FoodRuntimeBarcodeResult(
@@ -414,7 +503,10 @@ class FoodRuntimeSearchAuthority {
       // The installed catalog can fail independently of the network gateway
       // (for example while an offline pack is being replaced). Keep the real
       // barcode journey alive instead of presenting a false local-only miss.
-      return _resolveOnlineBarcode(barcode);
+      final online = await _resolveOnlineBarcode(barcode);
+      return online.status == FoodRuntimeBarcodeStatus.notFound
+          ? localFallback ?? localProductFallback ?? online
+          : online;
     } finally {
       if (catalog is CompositeFoodCatalogRepository) {
         catalog.close();
@@ -444,6 +536,7 @@ class FoodRuntimeSearchAuthority {
           source: FoodRuntimeSearchSource.catalogAndLocal,
           normalizedBarcode: barcode,
           product: remote.product,
+          ingredients: remote.ingredients,
         );
       }
       return FoodRuntimeBarcodeResult(
@@ -461,6 +554,7 @@ class FoodRuntimeSearchAuthority {
       foods: <Food>[materialized],
       source: FoodRuntimeSearchSource.catalogAndLocal,
       normalizedBarcode: barcode,
+      ingredients: remote.ingredients,
     );
   }
 

@@ -29,8 +29,13 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onPurchaseRequested,
     required this.onRestore,
     required this.onManage,
+    this.onRetry,
     this.loading = false,
     this.restoreInProgress = false,
+    this.purchaseInProgress = false,
+    this.purchaseEnabled = true,
+    this.purchaseStatusMessage,
+    this.purchaseStatusIsError = false,
     this.currentPlan = CommercePlan.free,
     this.initialFocus,
     super.key,
@@ -41,8 +46,24 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final ValueChanged<BilStoreOfferMetadata> onPurchaseRequested;
   final VoidCallback? onRestore;
   final VoidCallback? onManage;
+  final VoidCallback? onRetry;
   final bool loading;
   final bool restoreInProgress;
+
+  /// A native billing sheet or its server-verification handoff is running.
+  /// The CTA must be visibly unavailable during that handoff so a second tap
+  /// cannot look like it silently started another charge.
+  final bool purchaseInProgress;
+
+  /// The verified store service owns this gate. The display surface never
+  /// guesses that a stale product can be purchased.
+  final bool purchaseEnabled;
+
+  /// Plain-language feedback from the verified purchase boundary. This is
+  /// deliberately separate from entitlement state: a local callback grants
+  /// no access until the server verifies the receipt.
+  final String? purchaseStatusMessage;
+  final bool purchaseStatusIsError;
   final CommercePlan currentPlan;
   final String? initialFocus;
 
@@ -222,6 +243,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
                           onOfferSelected: (offer) =>
                               setState(() => _selectedOffer = offer),
+                          onRetry: widget.onRetry,
                         ),
                         const SizedBox(height: 14),
                       ],
@@ -295,7 +317,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
             child: _StickyPurchaseBar(
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
-              loading: widget.loading,
+              loading: widget.loading || widget.purchaseInProgress,
+              enabled: widget.purchaseEnabled,
+              statusMessage: widget.purchaseStatusMessage,
+              statusIsError: widget.purchaseStatusIsError,
               onPressed: () => widget.onPurchaseRequested(selectedOffer),
             ),
           ),

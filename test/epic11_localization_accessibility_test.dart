@@ -60,23 +60,23 @@ Widget _localizedHarness(Locale locale, {double textScale = 1}) => MaterialApp(
 );
 
 void main() {
-  test(
-    'all production catalogs use the complete 25-locale contract',
-    () {
-      expect(AppLocalizations.supportedLocales, hasLength(25));
-      expect(RuntimeCopy.supported, hasLength(25));
-      expect(AppLocalizations.baseCatalogsBalanced, isTrue);
-      expect(FeatureStrings.catalogsBalanced, isTrue);
-      expect(RuntimeCopy.balanced, isTrue);
-      for (final translations in RuntimeCopy.values.values) {
-        expect(
-          translations.keys.toSet(),
-          const <String>{'ar', 'en', 'fr', 'es', 'tr'},
-        );
-        expect(translations.values, everyElement(isNotEmpty));
-      }
-    },
-  );
+  test('all production catalogs use the complete 25-locale contract', () {
+    expect(AppLocalizations.supportedLocales, hasLength(25));
+    expect(RuntimeCopy.supported, hasLength(25));
+    expect(AppLocalizations.baseCatalogsBalanced, isTrue);
+    expect(FeatureStrings.catalogsBalanced, isTrue);
+    expect(RuntimeCopy.balanced, isTrue);
+    for (final translations in RuntimeCopy.values.values) {
+      expect(translations.keys.toSet(), const <String>{
+        'ar',
+        'en',
+        'fr',
+        'es',
+        'tr',
+      });
+      expect(translations.values, everyElement(isNotEmpty));
+    }
+  });
 
   test(
     'locale formatters preserve bidi isolation, plurals, and local numbers',

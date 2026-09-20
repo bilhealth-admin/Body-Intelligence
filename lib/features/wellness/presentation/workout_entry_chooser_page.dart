@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
 import 'wellness_copy.dart';
 
@@ -63,27 +64,41 @@ class WorkoutEntryChooserPage extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Row(
-                              children: [
-                                const Expanded(
-                                  child: Align(
-                                    alignment: AlignmentDirectional.centerStart,
+                            SizedBox(
+                              key: const ValueKey(
+                                'exercise-chooser-identity-header',
+                              ),
+                              height: 48,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 52,
+                                    ),
                                     child: BilWordmark(
+                                      key: ValueKey(
+                                        'exercise-chooser-wordmark',
+                                      ),
                                       height: 30,
-                                      alignment:
-                                          AlignmentDirectional.centerStart,
+                                      alignment: Alignment.center,
                                     ),
                                   ),
-                                ),
-                                IconButton(
-                                  key: const ValueKey('exercise-chooser-close'),
-                                  tooltip: MaterialLocalizations.of(
-                                    context,
-                                  ).closeButtonTooltip,
-                                  onPressed: close,
-                                  icon: const Icon(Icons.close_rounded),
-                                ),
-                              ],
+                                  Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: IconButton(
+                                      key: const ValueKey(
+                                        'exercise-chooser-close',
+                                      ),
+                                      tooltip: MaterialLocalizations.of(
+                                        context,
+                                      ).closeButtonTooltip,
+                                      onPressed: close,
+                                      icon: const Icon(Icons.close_rounded),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -104,6 +119,7 @@ class WorkoutEntryChooserPage extends StatelessWidget {
                             const SizedBox(height: 22),
                             _ExercisePathCard(
                               key: const ValueKey('exercise-path-cardio'),
+                              semanticKind: BilSemanticIconKind.exercise,
                               icon: Icons.directions_run_rounded,
                               title: strings.text('Cardio'),
                               description: strings.text(
@@ -116,6 +132,7 @@ class WorkoutEntryChooserPage extends StatelessWidget {
                             const SizedBox(height: 12),
                             _ExercisePathCard(
                               key: const ValueKey('exercise-path-strength'),
+                              semanticKind: BilSemanticIconKind.exercise,
                               icon: Icons.fitness_center_rounded,
                               title: strings.text('Strength'),
                               description: strings.text(
@@ -128,6 +145,7 @@ class WorkoutEntryChooserPage extends StatelessWidget {
                             const SizedBox(height: 12),
                             _ExercisePathCard(
                               key: const ValueKey('exercise-path-routines'),
+                              semanticKind: BilSemanticIconKind.learn,
                               icon: Icons.video_library_rounded,
                               title: wellnessWorkoutVideosAndRoutinesTitle(
                                 context,
@@ -157,12 +175,14 @@ class WorkoutEntryChooserPage extends StatelessWidget {
 class _ExercisePathCard extends StatelessWidget {
   const _ExercisePathCard({
     super.key,
+    required this.semanticKind,
     required this.icon,
     required this.title,
     required this.description,
     required this.onTap,
   });
 
+  final BilSemanticIconKind semanticKind;
   final IconData icon;
   final String title;
   final String description;
@@ -186,15 +206,12 @@ class _ExercisePathCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: .12),
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(icon, color: colors.primary, size: 25),
+                  BilSemanticIconBadge(
+                    kind: semanticKind,
+                    size: 44,
+                    iconSize: 25,
+                    iconOverride: icon,
+                    appleIconOverride: icon,
                   ),
                   const SizedBox(width: 15),
                   Expanded(

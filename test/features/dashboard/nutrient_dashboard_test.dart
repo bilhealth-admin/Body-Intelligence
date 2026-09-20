@@ -19,6 +19,7 @@ void main() {
     expect(NutrientDashboardPreset.heartHealthy.evidenceMetrics, [
       TrackedNutrient.sodium,
       TrackedNutrient.fiber,
+      TrackedNutrient.potassium,
     ]);
     expect(NutrientDashboardPreset.carbConscious.evidenceMetrics, [
       TrackedNutrient.carbohydrates,
@@ -45,6 +46,21 @@ void main() {
       NutrientDashboardEvidence.total([known], TrackedNutrient.sodium).value,
       400,
     );
+  });
+
+  test('partial aggregate keeps evidenced values visible', () {
+    final known = NutrientDashboardSample(
+      evidenceMask: NutrientEvidenceMask.bit(TrackedNutrient.fiber),
+      values: const {TrackedNutrient.fiber: 25},
+    );
+    const unknown = NutrientDashboardSample(evidenceMask: 0, values: {});
+    final result = NutrientDashboardEvidence.partialTotal([
+      known,
+      unknown,
+    ], TrackedNutrient.fiber);
+
+    expect(result.value, 25);
+    expect(result.complete, isFalse);
   });
 
   test('progress policy distinguishes minimum and upper-limit goals', () {

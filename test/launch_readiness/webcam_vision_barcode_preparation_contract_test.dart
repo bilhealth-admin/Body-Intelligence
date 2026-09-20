@@ -24,6 +24,9 @@ void main() {
     expect(scanner, contains('MobileScanner('));
     expect(scanner, contains('onDetect: _onDetect'));
     expect(scanner, contains('onRetry: _startMobile'));
+    expect(scanner, contains('addPostFrameCallback'));
+    expect(scanner, contains('_mobileOperation'));
+    expect(scanner, contains('Keep native teardown ordered'));
     expect(scanner, contains("Key('barcode-manual-entry-return')"));
     expect(scanner, contains('Enter barcode manually'));
     expect(scanner, contains('_WindowsScannerLauncher'));
@@ -34,6 +37,7 @@ void main() {
         [
               'intelligence_center_page.dart',
               'intelligence_conversation_voice.dart',
+              'intelligence_vision_flow.dart',
             ]
             .map(
               (name) => File(
@@ -48,7 +52,7 @@ void main() {
       'lib/features/nutrition/services/meal_image_analysis_service.dart',
     ).readAsStringSync();
 
-    expect(coach, contains('ImageSource.camera'));
+    expect(coach, contains('BilCameraCapturePage'));
     expect(diaryCapture, contains('ImageSource.gallery'));
     expect(coach, contains('Nothing was logged'));
     expect(coach, contains('Review and confirm a verified BIL food match'));

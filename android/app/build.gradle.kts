@@ -101,6 +101,7 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("androidx.browser:browser:1.9.0")
     implementation("androidx.health.connect:connect-client:1.1.0")
     implementation("com.google.android.play:integrity:1.6.0")
 }

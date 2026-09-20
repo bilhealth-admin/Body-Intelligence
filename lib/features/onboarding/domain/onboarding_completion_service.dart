@@ -56,9 +56,6 @@ final class OnboardingCompletionService {
     DateTime? now,
     bool reviewMode = false,
   }) async {
-    if (draft.preferredName.trim().isEmpty) {
-      throw StateError('preferred_name_required');
-    }
     if (draft.remoteAiConsent == OnboardingRemoteAiConsent.unknown) {
       throw StateError('remote_ai_choice_required');
     }
@@ -171,7 +168,8 @@ final class OnboardingCompletionService {
         focuses: Set.unmodifiable(draft.aiFocuses),
       );
       await preferences.setManyInCurrentTransaction({
-        'displayName': draft.preferredName.trim(),
+        if (draft.preferredName.trim().isNotEmpty)
+          'displayName': draft.preferredName.trim(),
         'units': draft.system.name,
         'countryRegion': draft.countryRegion.trim(),
         'locale': draft.localeTag,

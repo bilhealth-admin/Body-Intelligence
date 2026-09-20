@@ -463,7 +463,7 @@ class _MacroLegend extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                '${item.$2.round()} g',
+                '${roundedDietMacroGrams(item.$2)} g',
                 textDirection: TextDirection.ltr,
                 style: TextStyle(color: item.$3, fontWeight: FontWeight.w900),
               ),

@@ -236,7 +236,7 @@ void main() {
     expect(publicPolicy, contains('ليست مشفرة من طرف إلى طرف'));
     expect(publicPolicy, contains('لا يحمّل أداة تحليلات ويب من BIL'));
 
-    expect(inAppPolicy, contains("bilLegalPolicyRevision = '2026-08-29'"));
+    expect(inAppPolicy, contains("bilLegalPolicyRevision = '2026-09-05'"));
     expect(inAppPolicy, contains('receive only the recognized transcript'));
     expect(inAppPolicy, contains('not raw microphone audio'));
     expect(inAppPolicy, isNot(contains('Meal images and voice are not sent')));

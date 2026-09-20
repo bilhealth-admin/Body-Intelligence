@@ -61,40 +61,29 @@ extension _FoodPageActions on _FoodPageState {
     final blocked =
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
-    final proceed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          context.strings.text(
-            blocked ? 'Camera access is off' : 'Allow camera for this action?',
-          ),
-        ),
-        content: Text(
-          context.strings.text(
-            blocked
-                ? 'Enable camera access in system settings to scan a barcode. Manual barcode entry remains available.'
-                : 'BIL opens the camera only for the barcode scan you selected and never at startup.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.strings.text('Not now')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(
-              context.strings.text(
-                blocked ? 'Open system settings' : 'Continue',
-              ),
+    if (blocked) {
+      final openSettings = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.strings.text('Camera access is off')),
+          content: Text(
+            context.strings.text(
+              'Enable camera access in system settings to scan a barcode. Manual barcode entry remains available.',
             ),
           ),
-        ],
-      ),
-    );
-    if (proceed != true) return false;
-    if (blocked) {
-      await policy.openSettings();
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(context.strings.text('Cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(context.strings.text('Open system settings')),
+            ),
+          ],
+        ),
+      );
+      if (openSettings == true) await policy.openSettings();
       return false;
     }
     return await policy.request(BilRuntimeCapability.camera) ==

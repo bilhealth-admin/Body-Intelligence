@@ -45,6 +45,49 @@ final class ConnectedHealthSignalView {
   final Map<String, Object?> attributes;
 }
 
+bool connectedHealthSignalHasWearableProvenance(
+  ConnectedHealthSignalView signal,
+) {
+  final explicitKind = signal.attributes['wearableKind']
+      ?.toString()
+      .trim()
+      .toLowerCase();
+  if (explicitKind == 'apple_watch' ||
+      explicitKind == 'wear_os_watch' ||
+      explicitKind == 'watch' ||
+      explicitKind == 'ble_fitness_sensor') {
+    return true;
+  }
+  // Backward-compatible evidence for records imported before native bridges
+  // started attaching an explicit wearable kind.
+  final source = signal.source.trim().toLowerCase();
+  return source.contains('watch') || source.contains('wearable');
+}
+
+bool connectedHealthSnapshotHasWearableEvidence(
+  ConnectedHealthSnapshot snapshot,
+) {
+  if (snapshot.signals.any(connectedHealthSignalHasWearableProvenance)) {
+    return true;
+  }
+  // HealthKit may omit HKDevice for samples that were forwarded by Apple
+  // Health from a paired Watch. In that case the native bridge has still
+  // verified a real HealthKit record, while the record itself has no device
+  // string for the UI to inspect. Keep this fallback platform-specific and
+  // require native evidence so Health Connect/manual rows cannot masquerade
+  // as a wearable.
+  final platform = snapshot.platformSource?.trim().toLowerCase();
+  return snapshot.deviceVerified && platform == 'apple health';
+}
+
+bool connectedHealthSignalCanShowOnWatch(
+  ConnectedHealthSnapshot snapshot,
+  ConnectedHealthSignalView signal,
+) =>
+    connectedHealthSignalHasWearableProvenance(signal) ||
+    (snapshot.deviceVerified &&
+        snapshot.platformSource?.trim().toLowerCase() == 'apple health');
+
 final class ConnectedHealthSnapshot {
   const ConnectedHealthSnapshot({
     required this.status,

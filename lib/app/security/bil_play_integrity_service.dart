@@ -6,19 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-final class BilPlayIntegrityObservation {
-  const BilPlayIntegrityObservation({
-    required this.allowed,
-    required this.trustworthy,
-    required this.mode,
-    required this.reason,
-  });
-
-  final bool allowed;
-  final bool trustworthy;
-  final String mode;
-  final String reason;
-}
+import 'bil_integrity_exception.dart';
 
 /// Google Play Integrity Standard requests for Android.
 ///
@@ -30,8 +18,15 @@ final class BilPlayIntegrityService {
   static final BilPlayIntegrityService instance = BilPlayIntegrityService._();
 
   static const MethodChannel _channel = MethodChannel('bil/play_integrity');
-  static const int _cloudProjectNumber = 1041595138122;
+  static const String _cloudProjectNumberValue = String.fromEnvironment(
+    'BIL_PLAY_INTEGRITY_PROJECT_NUMBER',
+  );
   static const Uuid _uuid = Uuid();
+
+  static int? get _cloudProjectNumber {
+    final value = int.tryParse(_cloudProjectNumberValue);
+    return value != null && value > 0 ? value : null;
+  }
 
   bool _prepared = false;
   Future<void>? _prepareFuture;
@@ -51,12 +46,14 @@ final class BilPlayIntegrityService {
   }
 
   Future<void> _prepareNative() async {
+    final cloudProjectNumber = _cloudProjectNumber;
+    if (cloudProjectNumber == null) {
+      throw const BilIntegrityException('play_integrity_not_configured');
+    }
     try {
       final ready = await _channel.invokeMethod<bool>(
         'prepare',
-        <String, Object?>{
-          'cloudProjectNumber': _cloudProjectNumber,
-        },
+        <String, Object?>{'cloudProjectNumber': cloudProjectNumber},
       );
       _prepared = ready == true;
     } on PlatformException {
@@ -66,32 +63,29 @@ final class BilPlayIntegrityService {
     }
   }
 
-  Future<BilPlayIntegrityObservation> observe({
+  Future<String> authorize({
     required String action,
-    Map<String, Object?> payload = const <String, Object?>{},
+    required String payloadDigest,
   }) async {
-    if (!supported) return _allowUnavailable('platform_not_supported');
+    if (!supported) {
+      throw const BilIntegrityException('play_integrity_not_supported');
+    }
+    if (_cloudProjectNumber == null) {
+      throw const BilIntegrityException('play_integrity_not_configured');
+    }
 
     late final SupabaseClient client;
     try {
       client = Supabase.instance.client;
     } on Object {
-      return _allowUnavailable('cloud_not_initialized');
+      throw const BilIntegrityException('cloud_not_initialized');
     }
 
     if (client.auth.currentSession == null) {
-      return _allowUnavailable('authentication_required');
+      throw const BilIntegrityException('authentication_required');
     }
 
     final requestId = 'pi-${_uuid.v4()}';
-    final payloadDigest = sha256
-        .convert(
-          utf8.encode(
-            jsonEncode(_canonicalize(payload)),
-          ),
-        )
-        .toString();
-
     final requestHash = _requestHash(
       action: action,
       requestId: requestId,
@@ -108,7 +102,7 @@ final class BilPlayIntegrityService {
       try {
         integrityToken = await _requestToken(requestHash);
       } on Object {
-        return _allowUnavailable('integrity_token_unavailable');
+        throw const BilIntegrityException('integrity_token_unavailable');
       }
     }
 
@@ -126,17 +120,23 @@ final class BilPlayIntegrityService {
 
       final data = response.data;
       if (data is! Map) {
-        return _allowUnavailable('integrity_response_invalid');
+        throw const BilIntegrityException('integrity_response_invalid');
       }
-
-      return BilPlayIntegrityObservation(
-        allowed: data['allowed'] != false,
-        trustworthy: data['trustworthy'] == true,
-        mode: data['mode']?.toString() ?? 'observe',
-        reason: data['reason']?.toString() ?? 'unknown',
-      );
+      final grant = data['grant'];
+      final grantId = grant is Map ? grant['id']?.toString().trim() ?? '' : '';
+      if (response.status != 200 ||
+          data['allowed'] != true ||
+          data['trustworthy'] != true ||
+          grantId.isEmpty) {
+        throw BilIntegrityException(
+          data['reason']?.toString() ?? 'play_integrity_rejected',
+        );
+      }
+      return grantId;
+    } on BilIntegrityException {
+      rethrow;
     } on Object {
-      return _allowUnavailable('integrity_backend_unavailable');
+      throw const BilIntegrityException('integrity_backend_unavailable');
     } finally {
       // Do not retain Google's encrypted integrity token in application state.
       integrityToken = '';
@@ -163,38 +163,4 @@ final class BilPlayIntegrityService {
     final digestBytes = sha256.convert(utf8.encode(material)).bytes;
     return base64Url.encode(digestBytes).replaceAll('=', '');
   }
-
-  static Object? _canonicalize(Object? value) {
-    if (value is Map) {
-      final entries = value.entries
-          .map((entry) => MapEntry(entry.key.toString(), entry.value))
-          .toList()
-        ..sort((left, right) => left.key.compareTo(right.key));
-
-      return <String, Object?>{
-        for (final entry in entries)
-          entry.key: _canonicalize(entry.value),
-      };
-    }
-
-    if (value is Iterable) {
-      return value
-          .map<Object?>((item) => _canonicalize(item))
-          .toList(growable: false);
-    }
-
-    if (value == null || value is String || value is num || value is bool) {
-      return value;
-    }
-
-    return value.toString();
-  }
-
-  static BilPlayIntegrityObservation _allowUnavailable(String reason) =>
-      BilPlayIntegrityObservation(
-        allowed: true,
-        trustworthy: false,
-        mode: 'observe',
-        reason: reason,
-      );
 }

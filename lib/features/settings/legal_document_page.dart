@@ -5,7 +5,7 @@ import '../../app/localization/runtime_copy.dart';
 enum BilLegalDocument { terms, privacy, healthDisclaimer }
 
 const bilLegalPolicyId = 'BIL-LEGAL';
-const bilLegalPolicyRevision = '2026-08-29';
+const bilLegalPolicyRevision = '2026-09-05';
 const bilLegalEntity = 'BIL Health';
 const bilLegalPublicationStatus = 'PUBLISHED';
 
@@ -171,7 +171,7 @@ const _privacySectionsAr = <(String, String)>[
   ),
   (
     '3. الصور والصوت والخدمات المتصلة',
-    'لا تُرسل صورة الوجبة إلا إذا اخترت التحليل وكانت بوابة الخادم الآمنة مهيأة. قد تعالج خدمة Apple أو المنصة الصوت الذي بدأتَه للتعرّف على الكلام وفق شروطها، لكن خادم BIL وGemini يستلمان النص المتعرّف عليه فقط، وليس صوت الميكروفون الخام. ويمكنك سحب أذونات الجهاز من إعدادات النظام.',
+    'عند تفعيل «الذكاء المخصص» وطرح سؤال على مدرب الذكاء الاصطناعي، قد يرسل BIL أقل قدر من السياق ذي الصلة، مثل بيانات محددة من الملف واليوميات والصحة المتصلة، عبر بوابة BIL الآمنة إلى مزود الذكاء الاصطناعي المهيأ للإجابة عن ذلك الطلب. لا تُرسل صورة الوجبة إلا إذا اخترت التحليل وكانت بوابة الخادم الآمنة مهيأة. في مسار الكلام الحالي على الهاتف، يستلم خادم BIL وGemini النص المتعرّف عليه فقط، وليس صوت الميكروفون الخام؛ وقد تعالج خدمة Apple أو خدمة التعرّف على الكلام التابعة لمنصة أخرى الصوت الذي بدأتَه وفق شروطها وإعداداتها. ويمكنك سحب أذونات الجهاز من إعدادات النظام.',
   ),
   (
     '4. المجتمع والسلامة',
@@ -248,7 +248,7 @@ const _privacySections = <(String, String)>[
   ),
   (
     '3. Images, voice, and connected services',
-    'A meal image is sent only when you choose analysis and the secure server gateway is configured. Apple or another platform speech service may process audio you initiate under its terms, but BIL’s backend and Gemini receive only the recognized transcript—not raw microphone audio. Device permissions can be withdrawn in system settings.',
+    'When Personalized Intelligence is enabled and you ask the AI Coach, BIL may send the minimum relevant context—such as selected profile, diary, and connected-health data—through BIL’s secure gateway to its configured AI provider to answer that request. A meal image is sent only when you choose analysis and the secure server gateway is configured. In the current mobile speech flow, BIL’s backend and Gemini receive only the recognized transcript, not raw microphone audio; Apple or another platform speech-recognition service may process the audio you initiate under its own terms and settings. Device permissions can be withdrawn in system settings.',
   ),
   (
     '4. Community and safety',
@@ -325,7 +325,7 @@ const _privacySectionsFr = <(String, String)>[
   ),
   (
     '3. Images, voix et services connectés',
-    'Une image de repas n’est envoyée que si vous choisissez l’analyse et si la passerelle sécurisée est configurée. Apple ou un autre service vocal de la plateforme peut traiter l’audio que vous lancez selon ses conditions, mais le serveur BIL et Gemini ne reçoivent que la transcription reconnue, jamais l’audio brut du microphone. Les autorisations peuvent être retirées dans les réglages système.',
+    'Lorsque l’Intelligence personnalisée est activée et que vous interrogez le Coach IA, BIL peut envoyer le minimum de contexte pertinent — par exemple certaines données du profil, du journal et de santé connectée — via la passerelle sécurisée de BIL au fournisseur d’IA configuré afin de répondre à cette demande. Une image de repas n’est envoyée que si vous choisissez l’analyse et si la passerelle sécurisée est configurée. Dans le parcours vocal mobile actuel, le serveur BIL et Gemini ne reçoivent que la transcription reconnue, jamais l’audio brut du microphone ; Apple ou un autre service de reconnaissance vocale de la plateforme peut traiter l’audio que vous lancez selon ses propres conditions et réglages. Les autorisations peuvent être retirées dans les réglages système.',
   ),
   (
     '4. Communauté et sécurité',
@@ -400,7 +400,7 @@ const _privacySectionsEs = <(String, String)>[
   ),
   (
     '3. Imágenes, voz y servicios conectados',
-    'Una imagen de comida solo se envía si eliges analizarla y la pasarela segura está configurada. Apple u otro servicio de voz de la plataforma puede procesar el audio que inicies según sus condiciones, pero el servidor de BIL y Gemini solo reciben la transcripción reconocida, no el audio sin procesar del micrófono. Puedes retirar los permisos en los ajustes del sistema.',
+    'Cuando la Inteligencia personalizada está activada y preguntas al Coach de IA, BIL puede enviar el contexto pertinente mínimo —por ejemplo, determinados datos del perfil, diario y salud conectada— a través de la pasarela segura de BIL al proveedor de IA configurado para responder a esa solicitud. Una imagen de comida solo se envía si eliges analizarla y la pasarela segura está configurada. En el flujo de voz móvil actual, el servidor de BIL y Gemini solo reciben la transcripción reconocida, no el audio sin procesar del micrófono; Apple u otro servicio de reconocimiento de voz de la plataforma puede procesar el audio que inicies según sus propios términos y ajustes. Puedes retirar los permisos en los ajustes del sistema.',
   ),
   (
     '4. Comunidad y seguridad',
@@ -475,7 +475,7 @@ const _privacySectionsTr = <(String, String)>[
   ),
   (
     '3. Görüntü, ses ve bağlı hizmetler',
-    'Bir öğün görüntüsü yalnızca analizi seçtiğinizde ve güvenli sunucu geçidi yapılandırıldığında gönderilir. Apple veya başka bir platform konuşma hizmeti, başlattığınız sesi kendi koşulları kapsamında işleyebilir; ancak BIL sunucusu ve Gemini yalnızca tanınan metni alır, ham mikrofon sesini almaz. Cihaz izinlerini sistem ayarlarından kaldırabilirsiniz.',
+    'Kişiselleştirilmiş Zekâ açıkken AI Koç’a bir soru sorduğunuzda BIL, bu isteği yanıtlamak için seçilmiş profil, günlük ve bağlı sağlık verileri gibi gereken en az ilgili bağlamı BIL’in güvenli geçidi üzerinden yapılandırılmış AI sağlayıcısına gönderebilir. Bir öğün görüntüsü yalnızca analizi seçtiğinizde ve güvenli sunucu geçidi yapılandırıldığında gönderilir. Mevcut mobil konuşma akışında BIL sunucusu ve Gemini yalnızca tanınan metni alır, ham mikrofon sesini almaz; Apple veya başka bir platformun konuşma tanıma hizmeti, başlattığınız sesi kendi koşulları ve ayarları kapsamında işleyebilir. Cihaz izinlerini sistem ayarlarından kaldırabilirsiniz.',
   ),
   (
     '4. Topluluk ve güvenlik',
@@ -556,7 +556,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySections,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSections,
     },
-    effective: 'Last updated: 22 August 2026 • BIL Health',
+    effective: 'Last updated: 5 September 2026 • BIL Health',
     contact:
         'Questions: privacy@bilhealth.com • Support: support@bilhealth.com',
   ),
@@ -576,7 +576,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsAr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsAr,
     },
-    effective: 'آخر تحديث: 22 أغسطس 2026 • BIL Health',
+    effective: 'آخر تحديث: 5 سبتمبر 2026 • BIL Health',
     contact: 'الخصوصية: privacy@bilhealth.com • الدعم: support@bilhealth.com',
   ),
   'fr': _LegalPageCopy(
@@ -595,7 +595,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsFr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsFr,
     },
-    effective: 'Dernière mise à jour : 22 août 2026 • BIL Health',
+    effective: 'Dernière mise à jour : 5 septembre 2026 • BIL Health',
     contact:
         'Confidentialité : privacy@bilhealth.com • Assistance : support@bilhealth.com',
   ),
@@ -615,7 +615,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsEs,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsEs,
     },
-    effective: 'Última actualización: 22 de agosto de 2026 • BIL Health',
+    effective: 'Última actualización: 5 de septiembre de 2026 • BIL Health',
     contact:
         'Privacidad: privacy@bilhealth.com • Soporte: support@bilhealth.com',
   ),
@@ -635,7 +635,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsTr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsTr,
     },
-    effective: 'Son güncelleme: 22 Ağustos 2026 • BIL Health',
+    effective: 'Son güncelleme: 5 Eylül 2026 • BIL Health',
     contact: 'Gizlilik: privacy@bilhealth.com • Destek: support@bilhealth.com',
   ),
 };

@@ -142,6 +142,31 @@ void main() {
       expect((webp.mimeType, webp.extension), ('image/webp', 'webp'));
     });
 
+    test(
+      'automatically compresses an oversized phone image below the storage limit',
+      () async {
+        final source = img.Image(width: 640, height: 480)
+          ..clear(img.ColorRgb8(80, 170, 70));
+        final jpeg = Uint8List.fromList(img.encodeJpg(source, quality: 90));
+        final oversized = Uint8List.fromList([
+          ...jpeg,
+          ...Uint8List(communityPostImageMaxBytes - jpeg.lengthInBytes + 1),
+        ]);
+
+        final prepared = await prepareCommunityPostImageAsync(oversized);
+
+        expect(prepared.mimeType, 'image/jpeg');
+        expect(
+          prepared.byteLength,
+          lessThanOrEqualTo(communityPostImageTargetBytes),
+        );
+        expect(
+          prepared.byteLength,
+          lessThanOrEqualTo(communityPostImageMaxBytes),
+        );
+      },
+    );
+
     test('rejects unsupported, corrupt, oversized, and unsafe dimensions', () {
       expect(
         () => validateCommunityPostImage(Uint8List.fromList([1, 2, 3, 4])),
@@ -273,6 +298,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('community-post-add-photo')));
       await tester.pumpAndSettle();
       expect(
@@ -318,6 +345,8 @@ void main() {
         picker: _FakePostImagePicker(image),
       ),
     );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-create-post')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-post-add-photo')));
     await tester.pumpAndSettle();
@@ -390,12 +419,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('community-post-add-photo')),
         findsOneWidget,
         reason: tag,
       );
       expect(tester.takeException(), isNull, reason: tag);
+      // Community uses a Material route in this harness; pageBack() only
+      // targets CupertinoNavigationBarBackButton and would fail spuriously.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
     }
   });
 }

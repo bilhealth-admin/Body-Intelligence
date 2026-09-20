@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/commerce_plan.dart';
+import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
 import '../services/verified_store_catalog_adapter.dart';
@@ -33,17 +34,23 @@ class BilStorePlansPage extends ConsumerStatefulWidget {
   ConsumerState<BilStorePlansPage> createState() => _BilStorePlansPageState();
 }
 
-class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
+class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
+    with WidgetsBindingObserver {
   VerifiedStorePurchaseService? _ownedStore;
   late final BilStoreCatalogGateway? _catalog;
   List<BilStoreOfferMetadata> _offers = const [];
   bool _loading = true;
+  bool _loadInFlight = false;
   bool _restoring = false;
+  bool _purchaseRequestInFlight = false;
+  String? _purchaseFeedbackKey;
+  bool _purchaseFeedbackIsError = false;
   VerifiedStoreState? _lastStoreState;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.catalog != null) {
       _catalog = widget.catalog;
     } else if (widget.store != null) {
@@ -58,6 +65,16 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
     _load();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // StoreKit and Play Billing can become ready after account/store dialogs
+    // or after returning from the background. Retry only an empty catalog;
+    // verified prices already on screen remain untouched.
+    if (state == AppLifecycleState.resumed && _offers.isEmpty) {
+      unawaited(_load());
+    }
+  }
+
   void _onStoreChanged() {
     final store = widget.store ?? _ownedStore;
     if (store == null || !mounted) return;
@@ -67,36 +84,71 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
       ref.invalidate(aiCoachCreditAccessProvider);
     }
     _lastStoreState = store.state;
-    setState(() {});
+    final feedback = _purchaseFeedbackFor(store);
+    setState(() {
+      _purchaseFeedbackKey = feedback.$1;
+      _purchaseFeedbackIsError = feedback.$2;
+    });
+  }
+
+  (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
+    final code = store.messageCode;
+    final key = switch (code) {
+      'purchase_pending' => 'purchase_in_progress',
+      'purchase_cancelled' => 'purchase_error',
+      'purchase_not_started' => 'purchase_error',
+      'purchase_unavailable' || 'authentication_required' => 'purchase_error',
+      'verification_failed' => 'purchase_error',
+      'purchase_failed' || 'store_stream_failed' => 'purchase_error',
+      'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
+      _ => switch (store.state) {
+        VerifiedStoreState.purchasePending => 'purchase_in_progress',
+        VerifiedStoreState.cancelled => 'purchase_error',
+        VerifiedStoreState.failed => 'purchase_error',
+        _ => null,
+      },
+    };
+    final isError = const {'purchase_error'}.contains(key);
+    return (key, isError);
   }
 
   Future<void> _load() async {
-    final catalog = _catalog;
-    final productIds =
-        widget.productIds ?? StoreCatalogConfiguration.storefrontProductIds;
-    if (catalog == null || productIds.isEmpty) {
-      if (mounted) setState(() => _loading = false);
-      return;
-    }
-    List<BilStoreOfferMetadata> offers;
+    if (_loadInFlight) return;
+    _loadInFlight = true;
+    if (mounted) setState(() => _loading = true);
     try {
-      // Some device-store implementations never complete their product query
-      // when Play Billing is unavailable (common on emulators and offline
-      // devices). The plans surface must settle into its truthful unavailable
-      // state instead of displaying an endless loading claim.
-      offers = await catalog
-          .loadOffers(productIds)
-          .timeout(const Duration(seconds: 12));
-    } on TimeoutException {
-      offers = const [];
-    } catch (_) {
-      offers = const [];
-    }
-    if (mounted) {
-      setState(() {
-        _offers = offers;
-        _loading = false;
-      });
+      final catalog = _catalog;
+      final productIds =
+          widget.productIds ?? StoreCatalogConfiguration.storefrontProductIds;
+      if (catalog == null || productIds.isEmpty) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
+      List<BilStoreOfferMetadata> offers;
+      try {
+        // Some device-store implementations never complete their product
+        // query when Play Billing is unavailable (common on emulators and
+        // offline devices). The plans surface must settle into its truthful
+        // unavailable state instead of displaying an endless loading claim.
+        offers = await catalog
+            .loadOffers(productIds)
+            .timeout(const Duration(seconds: 12));
+      } on TimeoutException {
+        offers = const [];
+      } catch (_) {
+        offers = const [];
+      }
+      // Canonicalize at the page boundary too. Malformed provider entries
+      // must leave the catalog retryable on the next tap or app resume.
+      offers = MarketOfferPolicy.visibleOffers(offers);
+      if (mounted) {
+        setState(() {
+          _offers = offers;
+          _loading = false;
+        });
+      }
+    } finally {
+      _loadInFlight = false;
     }
   }
 
@@ -130,8 +182,43 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
       );
   }
 
+  Future<void> _requestPurchase(BilStoreOfferMetadata offer) async {
+    final catalog = _catalog;
+    final store = widget.store ?? _ownedStore;
+    if (catalog == null || _purchaseRequestInFlight || store?.busy == true) {
+      return;
+    }
+    setState(() {
+      _purchaseRequestInFlight = true;
+      _purchaseFeedbackKey = 'purchase_in_progress';
+      _purchaseFeedbackIsError = false;
+    });
+    try {
+      await catalog.requestPurchase(offer);
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _purchaseFeedbackKey = 'purchase_failed';
+          _purchaseFeedbackIsError = true;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _purchaseRequestInFlight = false;
+          // Injected preview/test catalogs have no native purchase stream.
+          // Their completed callback must not leave a fictional pending sale.
+          if (store == null && _purchaseFeedbackKey == 'purchase_in_progress') {
+            _purchaseFeedbackKey = null;
+          }
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     (widget.store ?? _ownedStore)?.removeListener(_onStoreChanged);
     _ownedStore?.dispose();
     super.dispose();
@@ -157,6 +244,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
     } on StateError {
       currentPlan = CommercePlan.free;
     }
+    final store = widget.store ?? _ownedStore;
+    final purchaseFeedbackKey = _purchaseFeedbackKey;
     return Scaffold(
       backgroundColor: pageBackground,
       appBar: AppBar(
@@ -184,16 +273,20 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
         offers: _offers,
         loading: _loading,
         restoreInProgress: _restoring,
+        purchaseInProgress: _purchaseRequestInFlight || (store?.busy ?? false),
+        purchaseEnabled: store?.canStartPurchase ?? true,
+        purchaseStatusMessage: purchaseFeedbackKey == null
+            ? null
+            : BilStoreCopy.text(locale, purchaseFeedbackKey),
+        purchaseStatusIsError: _purchaseFeedbackIsError,
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
-        onPurchaseRequested: (offer) async {
-          await _catalog?.requestPurchase(offer);
-          if (mounted) setState(() {});
-        },
+        onPurchaseRequested: _requestPurchase,
         onRestore: _catalog == null ? null : _restorePurchases,
         onManage: _catalog == null
             ? null
             : () => _catalog.openManageSubscriptions(),
+        onRetry: _catalog == null || _loading ? null : _load,
       ),
     );
   }

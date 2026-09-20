@@ -10,6 +10,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gotrue/gotrue.dart';
 
 void main() {
+  test('iOS native crypto runtime check is explicit opt-in with evidence', () {
+    final workflow = File(
+      '.github/workflows/bil_ios_signed_release.yml',
+    ).readAsStringSync();
+
+    expect(
+      workflow,
+      contains(
+        'run_native_crypto_checks:\n'
+        '        description: Run the optional iOS Simulator AES-GCM runtime check\n'
+        '        required: true\n'
+        '        default: false\n'
+        '        type: boolean',
+      ),
+    );
+    expect(
+      'if: \${{ inputs.run_native_crypto_checks }}'.allMatches(workflow),
+      hasLength(2),
+    );
+    expect(
+      workflow,
+      contains('NATIVE_CRYPTO_RUNTIME_GATE=NOT_RUN_OWNER_WAIVED'),
+    );
+    expect(workflow, contains('BIL-ios-native-crypto-gate.txt'));
+    expect(
+      workflow,
+      contains(
+        'test/launch_readiness/system_crypto_export_compliance_contract_test.dart',
+      ),
+    );
+    expect(
+      workflow,
+      contains('Reject forbidden bundled crypto implementations in signed IPA'),
+    );
+  });
+
   test('release uses only mobile operating-system AES-GCM providers', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final lock = File('pubspec.lock').readAsStringSync();

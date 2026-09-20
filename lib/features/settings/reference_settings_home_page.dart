@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../app/environment/app_environment.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'reference_settings_copy.dart';
@@ -45,74 +46,46 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
           children: [
             _SettingsGroup(
               title: copy('Account & profile'),
-              icon: Icons.person_outline_rounded,
-              color: const Color(0xFF2563EB),
+              kind: BilSemanticIconKind.profile,
               children: [
-                _SettingsRow(
-                  copy('Profile'),
-                  '/profile-settings',
-                  Icons.badge_outlined,
-                ),
-                _SettingsRow(
-                  copy('App Appearance'),
-                  '/settings/appearance',
-                  Icons.palette_outlined,
-                ),
-                _SettingsRow(
-                  copy('Language'),
-                  '/settings/language',
-                  Icons.language_rounded,
-                ),
+                _SettingsRow(copy('Profile'), '/profile-settings'),
+                _SettingsRow(copy('App Appearance'), '/settings/appearance'),
+                _SettingsRow(copy('Language'), '/settings/language'),
               ],
             ),
             _SettingsGroup(
               title: copy('Diary & goals'),
-              icon: Icons.menu_book_outlined,
-              color: const Color(0xFF7C3AED),
+              kind: BilSemanticIconKind.goals,
               children: [
-                _SettingsRow(
-                  copy('Diary Settings'),
-                  '/settings/diary',
-                  Icons.tune_rounded,
-                ),
+                _SettingsRow(copy('Diary Settings'), '/settings/diary'),
               ],
             ),
             _SettingsGroup(
               title: copy('Privacy & notifications'),
-              icon: Icons.shield_outlined,
-              color: const Color(0xFF059669),
+              kind: BilSemanticIconKind.privacy,
               children: [
                 _SettingsRow(
                   copy('Sharing & Privacy'),
                   '/settings/sharing-privacy',
-                  Icons.lock_outline_rounded,
                 ),
               ],
             ),
             _SettingsGroup(
               title: copy('Health preferences'),
-              icon: Icons.favorite_border_rounded,
-              color: const Color(0xFFEA580C),
+              kind: BilSemanticIconKind.health,
               children: [
-                _SettingsRow(
-                  copy('My Exercises'),
-                  '/wellness/workouts/log',
-                  Icons.fitness_center_rounded,
-                ),
+                _SettingsRow(copy('My Exercises'), '/wellness/workouts/log'),
                 _SettingsRow(
                   copy('Weekly Nutrition Settings'),
                   '/settings/nutrition-goals',
-                  Icons.track_changes_rounded,
                 ),
                 _SettingsRow(
                   copy('Exercise calories'),
                   '/settings/exercise-calories',
-                  Icons.local_fire_department_outlined,
                 ),
                 _SettingsRow(
                   copy('Push Notifications'),
                   '/notification-settings',
-                  Icons.notifications_none_rounded,
                 ),
               ],
             ),
@@ -210,13 +183,11 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
 class _SettingsGroup extends StatelessWidget {
   const _SettingsGroup({
     required this.title,
-    required this.icon,
-    required this.color,
+    required this.kind,
     required this.children,
   });
   final String title;
-  final IconData icon;
-  final Color color;
+  final BilSemanticIconKind kind;
   final List<Widget> children;
 
   @override
@@ -225,15 +196,28 @@ class _SettingsGroup extends StatelessWidget {
     child: CupertinoListSection.insetGrouped(
       margin: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 8),
       backgroundColor: Colors.transparent,
-      header: Text(
-        title,
-        style: TextStyle(
-          color: CupertinoColors.label
-              .resolveFrom(context)
-              .withValues(alpha: .82),
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
+      header: Row(
+        children: [
+          BilSemanticIconBadge(
+            kind: kind,
+            size: 26,
+            iconSize: 15,
+            shape: BoxShape.rectangle,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: CupertinoColors.label
+                    .resolveFrom(context)
+                    .withValues(alpha: .82),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
       children: children,
     ),
@@ -241,28 +225,41 @@ class _SettingsGroup extends StatelessWidget {
 }
 
 class _SettingsRow extends StatelessWidget {
-  const _SettingsRow(this.label, this.route, this.icon);
+  const _SettingsRow(this.label, this.route);
   final String label;
   final String route;
-  final IconData icon;
 
   @override
-  Widget build(BuildContext context) => CupertinoListTile(
-    padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
-    leadingSize: 24,
-    leadingToTitle: 12,
-    leading: Icon(icon, color: const Color(0xFF007AFF), size: 22),
-    title: Padding(
-      padding: const EdgeInsetsDirectional.only(start: 12),
-      child: Text(label),
-    ),
-    trailing: Icon(
-      Directionality.of(context) == TextDirection.rtl
-          ? CupertinoIcons.chevron_back
-          : CupertinoIcons.chevron_forward,
-      size: 18,
-      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-    ),
-    onTap: () => context.push(route),
-  );
+  Widget build(BuildContext context) {
+    final kind = BilSemanticIcons.kindForRoute(route);
+    return CupertinoListTile(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
+      leadingSize: 34,
+      leadingToTitle: 12,
+      leading: kind == null
+          ? Icon(
+              CupertinoIcons.circle,
+              size: 19,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            )
+          : BilSemanticIconBadge(
+              kind: kind,
+              size: 34,
+              iconSize: 19,
+              shape: BoxShape.rectangle,
+            ),
+      title: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 12),
+        child: Text(label),
+      ),
+      trailing: Icon(
+        Directionality.of(context) == TextDirection.rtl
+            ? CupertinoIcons.chevron_back
+            : CupertinoIcons.chevron_forward,
+        size: 18,
+        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+      ),
+      onTap: () => context.push(route),
+    );
+  }
 }

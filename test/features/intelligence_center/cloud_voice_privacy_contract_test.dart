@@ -25,6 +25,12 @@ void main() {
     final settings = File(
       'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
     ).readAsStringSync();
+    final iosSpeechBridge = File(
+      'ios/Runner/BILSpeechBridge.swift',
+    ).readAsStringSync();
+    final androidSpeechBridge = File(
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt',
+    ).readAsStringSync();
 
     expect(page, contains('if (await _startNativeVoiceCapture()) return;'));
     expect(page, contains('partialResults: true'));
@@ -36,8 +42,30 @@ void main() {
     expect(page, isNot(contains('base64Audio')));
     expect(contract, isNot(contains('CoachVoicePayload')));
     expect(gateway, isNot(contains("'audio':")));
-    expect(settings, contains('Voice stays on this device'));
-    expect(settings, contains('Only that recognized text can be sent'));
+    expect(settings, contains('Your platform handles speech recognition'));
+    expect(
+      settings,
+      contains('Raw microphone audio is not sent to BIL or Gemini'),
+    );
+    expect(settings, contains('only recognized text is sent when you submit'));
+    expect(iosSpeechBridge, contains('SFSpeechRecognizer(locale: locale)'));
+    expect(
+      iosSpeechBridge,
+      contains('SFSpeechAudioBufferRecognitionRequest()'),
+    );
+    expect(
+      androidSpeechBridge,
+      contains('SpeechRecognizer.createSpeechRecognizer(activity)'),
+    );
+    expect(
+      androidSpeechBridge,
+      contains('RecognizerIntent.ACTION_RECOGNIZE_SPEECH'),
+    );
+    final nativeSpeechBridges = '$iosSpeechBridge\n$androidSpeechBridge';
+    expect(nativeSpeechBridges, isNot(contains('URLSession')));
+    expect(nativeSpeechBridges, isNot(contains('HttpURLConnection')));
+    expect(nativeSpeechBridges, isNot(contains('OkHttpClient')));
+    expect(nativeSpeechBridges, isNot(contains('base64')));
     expect(settings, isNot(contains('Cloud voice processing')));
   });
 }

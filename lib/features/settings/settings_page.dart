@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../admin/services/ai_coach_admin_service.dart';
@@ -51,9 +52,12 @@ class SettingsPage extends ConsumerWidget {
     // been created. Watching both streams makes this card update immediately
     // after the Health Goal editor commits either source.
     final target = activeGoal?.targetWeight ?? profile?.targetWeight;
-    final remaining = _remainingToGoal(
+    final goalProgress = _goalProgress(
       current: current,
       target: target,
+      profileBaseline: profile?.currentWeight,
+      storedGoalType: activeGoal?.type,
+      storedTarget: activeGoal?.targetWeight,
       system: system,
     );
     final unit = copy(UnitConverter.weightUnit(system));
@@ -71,7 +75,10 @@ class SettingsPage extends ConsumerWidget {
               photoUrl: photoUrl,
               currentWeight: _displayWeight(current, system),
               goalWeight: _displayWeight(target, system),
-              lostWeight: remaining,
+              remainingWeight: goalProgress.value,
+              remainingLabel: copy(
+                goalProgress.reached ? 'Already at goal' : 'Remaining',
+              ),
               unit: unit,
               copy: copy,
               onTap: () => context.push('/profile-summary'),
@@ -95,7 +102,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 20),
           _MoreSection(
             title: copy('Account & profile'),
-            icon: Icons.person_outline_rounded,
+            kind: BilSemanticIconKind.profile,
             children: [
               _MoreRow(copy('My Profile'), '/profile-summary'),
               _MoreRow(
@@ -113,7 +120,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           _MoreSection(
             title: copy('Diary & goals'),
-            icon: Icons.track_changes_rounded,
+            kind: BilSemanticIconKind.goals,
             children: [
               _MoreRow(copy('Goals'), '/goals'),
               _MoreRow(copy('Progress'), '/history'),
@@ -133,7 +140,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           _MoreSection(
             title: copy('Health preferences'),
-            icon: Icons.favorite_outline_rounded,
+            kind: BilSemanticIconKind.health,
             children: [
               _MoreRow(
                 copy('AI Coach'),
@@ -164,7 +171,7 @@ class SettingsPage extends ConsumerWidget {
           if (AppEnvironment.communityConfigured) ...[
             _MoreSection(
               title: copy('Community'),
-              icon: Icons.people_outline_rounded,
+              kind: BilSemanticIconKind.community,
               children: [
                 _MoreRow(copy('Community'), '/community'),
                 _MoreRow(copy('Friends'), '/community/people'),
@@ -178,7 +185,7 @@ class SettingsPage extends ConsumerWidget {
           ],
           _MoreSection(
             title: copy('Privacy & notifications'),
-            icon: Icons.shield_outlined,
+            kind: BilSemanticIconKind.privacy,
             children: [
               _MoreRow(copy('Settings'), '/settings/preferences'),
               _MoreRow(
@@ -189,13 +196,10 @@ class SettingsPage extends ConsumerWidget {
               _MoreActionRow(
                 key: const Key('settings-review-onboarding'),
                 label: copy('Review initial setup'),
-                description: copy(
-                  'Reopen onboarding without deleting your profile or records.',
-                ),
-                icon: Icons.tune_rounded,
+                kind: BilSemanticIconKind.preferences,
                 onTap: () => _reviewSetupAgain(context, ref),
               ),
-              _MoreRow(copy('Privacy'), '/settings/sharing-privacy'),
+              _MoreRow(copy('Sharing & Privacy'), '/settings/sharing-privacy'),
               _MoreRow(
                 copy('Advertising privacy'),
                 '/advertising-privacy',
@@ -206,25 +210,24 @@ class SettingsPage extends ConsumerWidget {
           ),
           _MoreSection(
             title: copy('Help'),
-            icon: Icons.support_agent_rounded,
+            kind: BilSemanticIconKind.support,
             children: [
               _MoreRow(copy('Help'), '/help'),
-              _CloudSyncRow(label: copy('Sync'), status: cloudSyncStatus),
               _MoreRow(
                 copy('Delete account'),
                 '/help/delete-account',
                 key: const Key('settings-delete-account-entry'),
-                showDivider: false,
               ),
+              _CloudSyncRow(label: copy('Sync now'), status: cloudSyncStatus),
             ],
           ),
           if (adminAccess.asData?.value == true)
             _MoreSection(
               title: copy('Administration'),
-              icon: Icons.admin_panel_settings_outlined,
+              kind: BilSemanticIconKind.moderation,
               children: [
                 _MoreRow(
-                  copy('AI Coach administration'),
+                  copy('BIL Administration'),
                   '/admin/ai-coach',
                   key: const Key('settings-ai-coach-admin-entry'),
                   showDivider: false,
@@ -312,12 +315,12 @@ class _PremiumMembershipCard extends StatelessWidget {
 class _MoreSection extends StatelessWidget {
   const _MoreSection({
     required this.title,
-    required this.icon,
+    required this.kind,
     required this.children,
   });
 
   final String title;
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final List<Widget> children;
 
   @override
@@ -330,18 +333,11 @@ class _MoreSection extends StatelessWidget {
           padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 8),
           child: Row(
             children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                child: Icon(
-                  icon,
-                  size: 19,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              BilSemanticIconBadge(
+                kind: kind,
+                size: 34,
+                iconSize: 19,
+                shape: BoxShape.rectangle,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -364,18 +360,28 @@ class _MoreSection extends StatelessWidget {
   );
 }
 
-String _remainingToGoal({
+({String value, bool reached}) _goalProgress({
   required double? current,
   required double? target,
+  required double? profileBaseline,
+  required String? storedGoalType,
+  required double? storedTarget,
   required MeasurementSystem system,
 }) {
-  if (current == null || target == null) return '--';
-  return formatSignedWeightValue(
-    kilograms: signedWeightRemainingKg(
-      currentWeightKg: current,
-      targetWeightKg: target,
-    ),
-    system: system,
+  if (current == null || target == null) return (value: '--', reached: false);
+  final progress = resolveWeightGoalProgress(
+    currentWeightKg: current,
+    targetWeightKg: target,
+    profileBaselineWeightKg: profileBaseline,
+    storedGoalType: storedGoalType,
+    storedTargetWeightKg: storedTarget,
+  );
+  return (
+    value: UnitConverter.weightFromKg(
+      progress.remainingKg,
+      system,
+    ).toStringAsFixed(1),
+    reached: progress.reached,
   );
 }
 
@@ -391,7 +397,8 @@ class _ProfileSummary extends StatelessWidget {
     required this.photoUrl,
     required this.currentWeight,
     required this.goalWeight,
-    required this.lostWeight,
+    required this.remainingWeight,
+    required this.remainingLabel,
     required this.unit,
     required this.copy,
     required this.onTap,
@@ -402,7 +409,8 @@ class _ProfileSummary extends StatelessWidget {
   final String? photoUrl;
   final String currentWeight;
   final String goalWeight;
-  final String lostWeight;
+  final String remainingWeight;
+  final String remainingLabel;
   final String unit;
   final String Function(String) copy;
   final VoidCallback onTap;
@@ -450,7 +458,7 @@ class _ProfileSummary extends StatelessWidget {
             Row(
               children: [
                 _Metric(currentWeight, copy('Current'), unit),
-                _Metric(lostWeight, copy('Remaining'), unit),
+                _Metric(remainingWeight, remainingLabel, unit),
                 _Metric(goalWeight, copy('Goal'), unit),
               ],
             ),
@@ -496,124 +504,142 @@ class _MoreRow extends StatelessWidget {
   bool get _isDanger => route == '/help/delete-account';
   bool get _isFeatured => route == '/intelligence-center';
 
-  IconData get _icon => switch (Uri.parse(route).path) {
-    '/profile-summary' => Icons.person_outline_rounded,
-    '/settings/language' => Icons.language_rounded,
-    '/location-settings' => Icons.schedule_rounded,
-    '/wellness/fasting' => Icons.hourglass_bottom_rounded,
-    '/wellness/sleep' => Icons.bedtime_outlined,
-    '/wellness/recipes' => Icons.restaurant_menu_rounded,
-    '/wellness/workouts/routines' => Icons.fitness_center_rounded,
-    '/goals' => Icons.flag_outlined,
-    '/history' => Icons.monitor_weight_outlined,
-    '/weekly-report' => Icons.assessment_outlined,
-    '/challenges' => Icons.emoji_events_outlined,
-    '/intelligence-center' => Icons.auto_awesome_rounded,
-    '/settings/ai-coach' => Icons.tune_rounded,
-    '/analytics/nutrition' => Icons.pie_chart_outline_rounded,
-    '/nutrition' => Icons.menu_book_outlined,
-    '/notification-settings' => Icons.notifications_none_rounded,
-    '/connected-health' => Icons.watch_outlined,
-    '/connected-health/steps' => Icons.directions_walk_rounded,
-    '/wellness/learn' => Icons.school_outlined,
-    '/community' => Icons.people_outline_rounded,
-    '/community/people' => Icons.person_add_alt_rounded,
-    '/community/messages' => Icons.chat_bubble_outline_rounded,
-    '/settings/preferences' => Icons.settings_outlined,
-    '/settings/sharing-privacy' => Icons.lock_outline_rounded,
-    '/help/delete-account' => Icons.delete_outline_rounded,
-    '/advertising-privacy' => Icons.ads_click_outlined,
-    '/help' => Icons.help_outline_rounded,
-    _ => Icons.arrow_forward_rounded,
-  };
-
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      ListTile(
-        minTileHeight: 60,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        leading: Icon(
-          _icon,
-          color: _isDanger
-              ? Theme.of(context).colorScheme.error
-              : _isFeatured
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-        title: Text(
-          label,
-          style: TextStyle(
-            color: _isDanger ? Theme.of(context).colorScheme.error : null,
-            fontWeight: _isFeatured ? FontWeight.w700 : FontWeight.w500,
+  Widget build(BuildContext context) {
+    final semanticKind = BilSemanticIcons.kindForRoute(route);
+    return Column(
+      children: [
+        ListTile(
+          minTileHeight: 60,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          horizontalTitleGap: 12,
+          leading: _isDanger
+              ? Icon(
+                  Icons.delete_outline_rounded,
+                  color: Theme.of(context).colorScheme.error,
+                )
+              : semanticKind == null
+              ? Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )
+              : BilSemanticIconBadge(
+                  key: Key('more-semantic-icon-${semanticKind.name}'),
+                  kind: semanticKind,
+                  size: 36,
+                  iconSize: 20,
+                  shape: BoxShape.rectangle,
+                ),
+          title: Text(
+            label,
+            style: TextStyle(
+              color: _isDanger ? Theme.of(context).colorScheme.error : null,
+              fontWeight: _isFeatured ? FontWeight.w700 : FontWeight.w500,
+            ),
           ),
+          trailing: const Icon(
+            Icons.chevron_right_rounded,
+            color: Color(0xFFB7B9BD),
+          ),
+          onTap: () => context.push(route),
         ),
-        trailing: const Icon(
-          Icons.chevron_right_rounded,
-          color: Color(0xFFB7B9BD),
-        ),
-        onTap: () => context.push(route),
-      ),
-      if (showDivider) const Divider(height: 1, indent: 54),
-    ],
-  );
+        if (showDivider) const Divider(height: 1, indent: 54),
+      ],
+    );
+  }
 }
 
-class _CloudSyncRow extends StatelessWidget {
+class _CloudSyncRow extends ConsumerWidget {
   const _CloudSyncRow({required this.label, required this.status});
 
   final String label;
   final CloudManualSyncStatus status;
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context, WidgetRef ref) => Column(
     children: [
       ListTile(
         key: const Key('settings-cloud-sync-status-row'),
         minTileHeight: 70,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        horizontalTitleGap: 12,
         leading: status.isSyncing
             ? const SizedBox.square(
                 dimension: 22,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(Icons.cloud_sync_outlined),
+            : BilSemanticIconBadge(
+                kind: BilSemanticIconKind.cloudSync,
+                size: 36,
+                iconSize: 20,
+                shape: BoxShape.rectangle,
+              ),
         title: Text(label),
         subtitle: CloudSyncStatusLine(status: status),
-        trailing: const Icon(
-          Icons.chevron_right_rounded,
-          color: Color(0xFFB7B9BD),
-        ),
-        onTap: () => context.push('/settings/sharing-privacy'),
+        onTap: status.isSyncing ? null : () => _runSync(context, ref),
       ),
-      const Divider(height: 1, indent: 54),
     ],
   );
+
+  Future<void> _runSync(BuildContext context, WidgetRef ref) async {
+    if (ref.read(cloudManualSyncStatusProvider).isSyncing) return;
+    try {
+      final result = await ref
+          .read(cloudManualSyncStatusProvider.notifier)
+          .runOnce();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text(
+              result.completed
+                  ? 'Encrypted cloud sync completed.'
+                  : 'Cloud sync could not run. Check Premium, consent, and internet.',
+            ),
+          ),
+        ),
+      );
+    } on Object {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text(
+              'Cloud sync could not run. Check Premium, consent, and internet.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
 }
 
 class _MoreActionRow extends StatelessWidget {
   const _MoreActionRow({
     required this.label,
-    required this.description,
-    required this.icon,
+    required this.kind,
     required this.onTap,
     super.key,
   });
 
   final String label;
-  final String description;
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => Column(
     children: [
       ListTile(
-        minTileHeight: 68,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 4),
-        leading: Icon(icon),
+        minTileHeight: 60,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 22),
+        horizontalTitleGap: 12,
+        leading: BilSemanticIconBadge(
+          kind: kind,
+          size: 36,
+          iconSize: 20,
+          shape: BoxShape.rectangle,
+        ),
         title: Text(label),
-        subtitle: Text(description),
         trailing: const Icon(
           Icons.chevron_right_rounded,
           color: Color(0xFFB7B9BD),

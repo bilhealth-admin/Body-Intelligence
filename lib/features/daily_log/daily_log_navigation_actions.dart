@@ -1,5 +1,16 @@
 part of 'daily_log_page.dart';
 
+const _dailyLogInitialActions = <String>[
+  'barcode',
+  'voice',
+  'photo',
+  'recovered-photo',
+  'water',
+  'notes',
+  'exercise',
+  'quick-macros',
+];
+
 extension _DailyLogNavigationActions on _DailyLogPageState {
   void _openFoodSearchAfterBuild([int attempt = 0]) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -18,6 +29,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     if (!mounted || initialActionApplied) return;
     final action = widget.initialAction;
     if (action == null || initialActionInFlight != null) return;
+    if (!_dailyLogInitialActions.contains(action)) return;
     initialActionApplied = true;
     initialActionInFlight = action;
     try {
@@ -28,6 +40,8 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
           await _captureMealVoice();
         case 'photo':
           await _analyzeMealImage();
+        case 'recovered-photo':
+          await _analyzeMealImage(recoveredOnly: true);
         case 'water':
           final origin = Uri.encodeComponent(widget.returnPath ?? '/daily-log');
           context.go('/daily-log/water?from=$origin');
@@ -43,6 +57,13 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
           await _quickAddMacrosV2();
       }
     } finally {
+      // Deep-linked capture actions are one-shot. Once the requested flow has
+      // returned (including cancellation), remove only `action` from the
+      // current Daily Log URL so a rebuild/resume cannot launch it again. Keep
+      // the validated `from` destination and every unrelated query parameter.
+      if (mounted && widget.initialAction == action) {
+        _consumeInitialAction(action);
+      }
       if (initialActionInFlight == action) initialActionInFlight = null;
       if (mounted && widget.initialAction != action) {
         initialActionApplied = false;
@@ -51,6 +72,20 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
         );
       }
     }
+  }
+
+  void _consumeInitialAction(String action) {
+    final uri = GoRouter.of(context).routerDelegate.currentConfiguration.uri;
+    if (uri.path != '/daily-log' || uri.queryParameters['action'] != action) {
+      return;
+    }
+    final query = Map<String, String>.from(uri.queryParameters)
+      ..remove('action');
+    final cleanLocation = Uri(
+      path: '/daily-log',
+      queryParameters: query.isEmpty ? null : query,
+    ).toString();
+    context.go(cleanLocation);
   }
 
   Future<void> _reveal(GlobalKey key) async {

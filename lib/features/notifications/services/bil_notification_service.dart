@@ -34,10 +34,16 @@ class BilNotificationService {
   static const sleepWakeNotificationId = 14222;
   static const inactivityNotificationId = 14024;
   static const activationTestNotificationId = 14001;
-  static bool _androidLaunchDetailsHandled = false;
+  static final Set<TargetPlatform> _launchDetailsHandledPlatforms =
+      <TargetPlatform>{};
   bool _initialized = false;
 
   Future<void> initialize() => _initializeNotificationPlatform();
+
+  @visibleForTesting
+  static void resetLaunchDetailsHandlingForTesting() {
+    _launchDetailsHandledPlatforms.clear();
+  }
 
   Future<bool> areNotificationsEnabled() async {
     await initialize();
@@ -477,12 +483,17 @@ class BilNotificationService {
 
   (String, String) _copy(DailyReminderKind kind, String languageCode) {
     final localized = _notificationCopy[languageCode];
-    if (localized != null) return localized[kind]!;
+    if (localized != null) {
+      return _withCategoryMarker(localized[kind]!, _dailyReminderMarker(kind));
+    }
     final extended = bilExtendedNotificationCopy(
       languageCode,
       BilBackgroundCopyKind.dailyReminder,
     );
-    return extended ?? _notificationCopy['en']![kind]!;
+    return _withCategoryMarker(
+      extended ?? _notificationCopy['en']![kind]!,
+      _dailyReminderMarker(kind),
+    );
   }
 }
 
@@ -494,12 +505,14 @@ enum _SleepNotificationKind { windDown, bedtime, wake }
       .toLowerCase()
       .split('-')
       .first;
-  return _sleepScheduleCopy[language]?[kind] ??
+  final copy =
+      _sleepScheduleCopy[language]?[kind] ??
       bilExtendedNotificationCopy(
         localeTag,
         BilBackgroundCopyKind.dailyReminder,
       ) ??
       _sleepScheduleCopy['en']![kind]!;
+  return _withCategoryMarker(copy, _sleepReminderMarker(kind));
 }
 
 @visibleForTesting
@@ -593,9 +606,11 @@ const _sleepScheduleCopy =
       .toLowerCase()
       .split('-')
       .first;
-  return base[language] ??
+  final copy =
+      base[language] ??
       bilExtendedNotificationCopy(localeTag, kind) ??
       base['en']!;
+  return _withCategoryMarker(copy, _backgroundNotificationMarker(kind));
 }
 
 @visibleForTesting
@@ -646,13 +661,51 @@ const _sleepScheduleCopy =
       .split('-')
       .first;
   final localized = _notificationCopy[language];
-  return localized?[kind] ??
+  final copy =
+      localized?[kind] ??
       bilExtendedNotificationCopy(
         localeTag,
         BilBackgroundCopyKind.dailyReminder,
       ) ??
       _notificationCopy['en']![kind]!;
+  return _withCategoryMarker(copy, _dailyReminderMarker(kind));
 }
+
+/// Category markers are ordinary Unicode title text, so Android and Apple
+/// render the same distinction without replacing their platform-owned app
+/// icons. Android continues to use its required monochrome small icon.
+(String, String) _withCategoryMarker((String, String) copy, String marker) {
+  final title = copy.$1.trim();
+  return title.startsWith(marker)
+      ? (title, copy.$2)
+      : ('$marker $title', copy.$2);
+}
+
+String _dailyReminderMarker(DailyReminderKind kind) => switch (kind) {
+  DailyReminderKind.weight => '⚖️',
+  DailyReminderKind.meals => '🍽️',
+  DailyReminderKind.water => '💧',
+  DailyReminderKind.sleep => '🌙',
+  DailyReminderKind.fasting => '⏳',
+  DailyReminderKind.weeklyReview => '📊',
+  DailyReminderKind.returnAfter24Hours => '👋',
+};
+
+String _sleepReminderMarker(_SleepNotificationKind kind) => switch (kind) {
+  _SleepNotificationKind.windDown => '🌙',
+  _SleepNotificationKind.bedtime => '🛏️',
+  _SleepNotificationKind.wake => '☀️',
+};
+
+String _backgroundNotificationMarker(BilBackgroundCopyKind kind) =>
+    switch (kind) {
+      BilBackgroundCopyKind.activation => '✅',
+      BilBackgroundCopyKind.fastingTarget => '⏳',
+      BilBackgroundCopyKind.fastingOngoing => '⏳',
+      BilBackgroundCopyKind.fastingHydration => '💧',
+      BilBackgroundCopyKind.returnAfterDay => '👋',
+      BilBackgroundCopyKind.dailyReminder => '🔔',
+    };
 
 const _activationCopy = <String, (String, String)>{
   'ar': (

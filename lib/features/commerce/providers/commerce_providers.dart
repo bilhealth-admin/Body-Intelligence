@@ -37,8 +37,9 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   yield previousOwnerId;
 
   await for (final state in auth.onAuthStateChange) {
-    // A transient null event can occur while a native session is being
-    // persisted. Only signedOut is authoritative for clearing the owner.
+    // Some platforms can emit a transient null session while refresh/storage
+    // settles. Only the explicit signed-out event is authoritative for
+    // clearing the owner; otherwise keep the last verified owner identity.
     if (state.session == null && state.event != AuthChangeEvent.signedOut) {
       continue;
     }
@@ -134,15 +135,10 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
   },
 );
 
-/// Server-owned AI access truth for token markets.
-///
-/// A local purchase callback is never enough to unlock the coach. The gate
-/// opens only after Supabase reports a positive reserved-aware total from an
-/// AI subscription allowance and/or verified Boost balance. An active plan at
-/// zero does not bypass quota, and a consumed/forged callback grants nothing.
 /// In-memory, owner-scoped snapshot of the last server-authoritative Coach
-/// access result. It is UI continuity only and never grants access without a
-/// successful usage-status response for the active owner.
+/// access result. It is only a UI continuity cache: it never grants access
+/// before a successful usage-status RPC, and it is cleared on owner changes so
+/// one account can never inherit another account's access.
 final class AiCoachAccessSnapshotStore {
   String? _activeOwnerId;
   bool? _verifiedAccess;
@@ -178,9 +174,13 @@ String? _safeCurrentAuthenticatedOwnerId() {
 
 /// Server-owned AI access truth for token markets.
 ///
-/// Access is retained only as a same-owner UI continuity signal during a
-/// transient refresh failure. The server RPC remains the sole authority.
-final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
+/// A local purchase callback is never enough to unlock the coach. The gate
+/// opens only after Supabase reports a positive reserved-aware total from an
+/// AI subscription allowance and/or verified Boost balance. An active plan at
+/// zero does not bypass quota, and a consumed/forged callback grants nothing.
+final aiCoachCreditAccessProvider = FutureProvider<bool>((
+  ref,
+) async {
   final ownerState = ref.watch(verifiedEntitlementOwnerProvider);
   String? ownerId;
   if (ownerState.hasValue) {
@@ -202,18 +202,23 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
     final value = await ref
         .read(aiCoachUsageStatusLoaderProvider)()
         .timeout(const Duration(seconds: 8));
+    // A signed-in server response is the only source allowed to update this
+    // snapshot. Zero balance therefore records false and closes access.
     final access = aiCoachAccessFromUsageStatus(value);
     snapshots.recordServerResult(ownerId: ownerId, access: access);
     return access;
   } on Object {
     final cached = snapshots.cachedAccessFor(ownerId);
     if (cached != null) return cached;
+    // No prior verified answer exists: surface the real failure so the route
+    // can render its retry state instead of fabricating access.
     rethrow;
   }
 }, retry: (_, _) => null);
-/// Meal-photo analysis is purchased through AI Boost in every storefront.
-/// It deliberately ignores subscription/included allowance and opens only
-/// when Supabase confirms enough paid credit for one Vision reservation.
+
+/// Meal-photo analysis uses the same shared BIL AI Token balance as AI Coach.
+/// The server reports a reserved-aware total, so the client never unlocks a
+/// request from a stale local purchase callback or a plan label alone.
 final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
   ref.watch(verifiedEntitlementOwnerProvider);
   final client = Supabase.instance.client;
@@ -224,8 +229,10 @@ final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
     final rawCredits = status['credits'];
     if (rawCredits is! Map) return false;
     final credits = Map<String, Object?>.from(rawCredits);
-    final paidRemaining = credits['paid_remaining'];
-    return paidRemaining is num && paidRemaining >= 100;
+    final totalRemaining = credits['total_remaining'];
+    return totalRemaining is num &&
+        totalRemaining.isFinite &&
+        totalRemaining >= 100;
   } on Object {
     // Cloud-paid access fails closed when current credit cannot be verified.
     return false;

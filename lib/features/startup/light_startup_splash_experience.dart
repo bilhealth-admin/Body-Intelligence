@@ -157,10 +157,7 @@ class _LightSplashComposition extends StatelessWidget {
 }
 
 class _SplashName extends StatelessWidget {
-  const _SplashName({
-    required this.titleSize,
-    required this.reveal,
-  });
+  const _SplashName({required this.titleSize, required this.reveal});
 
   final double titleSize;
   final double reveal;

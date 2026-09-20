@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../data/database/app_database.dart';
 import '../../data/database/database_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -290,7 +291,9 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                 ListTile(
                   key: const Key('goals-starting-date'),
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.calendar_today_outlined),
+                  leading: const BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.calendar,
+                  ),
                   title: Text(c('Starting Date')),
                   subtitle: Text(
                     MaterialLocalizations.of(context).formatMediumDate(date),

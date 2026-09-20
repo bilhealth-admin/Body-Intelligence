@@ -3,15 +3,17 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_post_cloud_store.dart';
 
 class CommunityRepository {
-  CommunityRepository(this._client);
+  CommunityRepository(this._client, {this._postStore});
 
   final SupabaseClient _client;
+  final CommunityPostStoreContract? _postStore;
 
   static final RegExp _uuid = RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
@@ -59,6 +61,9 @@ class CommunityRepository {
     if (user == null) throw const AuthException('Sign-in required');
     return user;
   }
+
+  CommunityPostStoreContract get _posts =>
+      _postStore ?? CommunityPostCloudStore(_client, _user);
 
   Future<CommunityProfile?> loadMyProfile() async {
     final row = await _client
@@ -113,15 +118,50 @@ class CommunityRepository {
   }
 
   Future<List<CommunityPost>> loadFeed({int limit = 40}) =>
-      CommunityPostCloudStore(_client, _user).loadFeed(limit: limit);
+      _posts.loadFeed(limit: limit);
 
-  Future<void> publishPost(String body) =>
-      CommunityPostCloudStore(_client, _user).publishText(body);
+  Future<bool> isCommunityModerator() async {
+    if (_client.auth.currentUser == null) return false;
+    final response = await _client.rpc('bil_is_community_moderator');
+    if (response is! bool) {
+      throw const FormatException('Invalid community moderator result');
+    }
+    return response;
+  }
+
+  Future<List<CommunityPost>> loadPendingPostsForModeration({
+    int limit = 100,
+  }) => _posts.loadModerationQueue(limit: limit);
+
+  Future<CommunityPostModerationResult> moderatePost({
+    required String postId,
+    required CommunityPostModerationDecision decision,
+  }) async {
+    if (!_uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    final response = await _client.rpc(
+      'bil_moderate_community_post',
+      params: {'p_post_id': postId, 'p_decision': decision.name},
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid community moderation result');
+    }
+    return CommunityPostModerationResult.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
+
+  Future<void> publishPost(String body) async {
+    await _requireAcceptedContentPolicy();
+    await _runCommunityMutation(() => _posts.publishText(body));
+  }
 
   Future<void> publishPostWithImage(
     String body,
     CommunityPostImageDraft image,
-  ) => CommunityPostCloudStore(_client, _user).publishWithImage(body, image);
+  ) async {
+    await _requireAcceptedContentPolicy();
+    await _runCommunityMutation(() => _posts.publishWithImage(body, image));
+  }
 
   Future<List<Map<String, dynamic>>> loadFriendships() async {
     return await _client
@@ -393,11 +433,14 @@ class CommunityRepository {
       throw ArgumentError.value(body, 'body');
     }
     CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.message);
-    await _client.from('bil_messages').insert({
-      'sender_id': _user.id,
-      'recipient_id': recipientId,
-      'body': text,
-    });
+    await _requireAcceptedContentPolicy();
+    await _runCommunityMutation(
+      () => _client.from('bil_messages').insert({
+        'sender_id': _user.id,
+        'recipient_id': recipientId,
+        'body': text,
+      }),
+    );
   }
 
   Future<void> deleteMessage(String messageId) =>
@@ -410,10 +453,12 @@ class CommunityRepository {
   Future<Map<String, dynamic>?> loadActiveContentPolicy({
     required String localeCode,
   }) async {
+    final effectiveNow = DateTime.now().toUtc().toIso8601String();
     final preferred = await _client
         .from('bil_content_policies')
         .select('version,locale_code,document_url,effective_at')
         .eq('active', true)
+        .lte('effective_at', effectiveNow)
         .eq('locale_code', localeCode)
         .order('effective_at', ascending: false)
         .limit(1)
@@ -423,20 +468,112 @@ class CommunityRepository {
         .from('bil_content_policies')
         .select('version,locale_code,document_url,effective_at')
         .eq('active', true)
+        .lte('effective_at', effectiveNow)
         .eq('locale_code', 'en')
         .order('effective_at', ascending: false)
         .limit(1)
         .maybeSingle();
   }
 
-  Future<bool> hasAcceptedContentPolicy(String version) async {
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async {
+    final row = await loadActiveContentPolicy(localeCode: localeCode);
+    if (row == null) return const CommunityPolicyState.unavailable();
+    final policy = CommunityContentPolicy.fromJson(row);
+    final accepted = await hasAcceptedContentPolicy(
+      policy.version,
+      acceptedNotBefore: policy.effectiveAt,
+    );
+    return accepted
+        ? CommunityPolicyState.accepted(
+            policy,
+            acceptedVersion: policy.version,
+          )
+        : CommunityPolicyState.acceptanceRequired(policy);
+  }
+
+  Future<void> _requireAcceptedContentPolicy() async {
+    late final CommunityPolicyState state;
+    try {
+      // The production policy is a single canonical row. English is also the
+      // repository's documented fallback when a localized row is unavailable.
+      state = await loadCommunityPolicyState(localeCode: 'en');
+    } on CommunityPolicyAccessException {
+      rethrow;
+    } on Object {
+      throw const CommunityPolicyAccessException(
+        failure: CommunityPolicyAccessFailure.verificationFailed,
+      );
+    }
+
+    switch (state.status) {
+      case CommunityPolicyStatus.unavailable:
+        throw const CommunityPolicyAccessException(
+          failure: CommunityPolicyAccessFailure.unavailable,
+        );
+      case CommunityPolicyStatus.acceptanceRequired:
+        throw CommunityPolicyAccessException(
+          failure: CommunityPolicyAccessFailure.acceptanceRequired,
+          policyVersion: state.policy?.version,
+        );
+      case CommunityPolicyStatus.accepted:
+        if (state.permitsCommunityPublishing) return;
+        throw const CommunityPolicyAccessException(
+          failure: CommunityPolicyAccessFailure.verificationFailed,
+        );
+    }
+  }
+
+  Future<bool> hasAcceptedContentPolicy(
+    String version, {
+    DateTime? acceptedNotBefore,
+  }) async {
     final row = await _client
         .from('bil_content_policy_acceptances')
-        .select('policy_version')
+        .select('policy_version,accepted_at')
         .eq('user_id', _user.id)
         .eq('policy_version', version)
         .maybeSingle();
-    return row != null;
+    if (row == null) return false;
+    if (acceptedNotBefore == null) return true;
+    final acceptedAt = DateTime.tryParse('${row['accepted_at']}')?.toUtc();
+    return acceptedAt != null && !acceptedAt.isBefore(acceptedNotBefore.toUtc());
+  }
+
+  Future<T> _runCommunityMutation<T>(Future<T> Function() mutation) async {
+    try {
+      return await mutation();
+    } on PostgrestException catch (error, stackTrace) {
+      final message = error.message.toLowerCase();
+      final policyFailure = switch (message) {
+        'community_policy_unavailable' =>
+          CommunityPolicyAccessFailure.unavailable,
+        'community_policy_acceptance_required' =>
+          CommunityPolicyAccessFailure.acceptanceRequired,
+        _ => null,
+      };
+      if (policyFailure != null) {
+        Error.throwWithStackTrace(
+          CommunityPolicyAccessException(failure: policyFailure),
+          stackTrace,
+        );
+      }
+      final membershipFailure = switch (message) {
+        'community_access_suspended' =>
+          CommunityMembershipAccessFailure.suspended,
+        'community_relationship_blocked' =>
+          CommunityMembershipAccessFailure.relationshipBlocked,
+        _ => null,
+      };
+      if (membershipFailure != null) {
+        Error.throwWithStackTrace(
+          CommunityMembershipAccessException(failure: membershipFailure),
+          stackTrace,
+        );
+      }
+      rethrow;
+    }
   }
 
   Future<List<Map<String, dynamic>>> loadOpenModerationReports() async {
@@ -470,7 +607,7 @@ class CommunityRepository {
   }
 
   Future<void> deletePost(String postId) =>
-      CommunityPostCloudStore(_client, _user).delete(postId);
+      _posts.delete(postId);
 
   Future<List<Map<String, dynamic>>> loadReviewableFoods() async {
     final response = await _client.rpc('bil_list_reviewable_products');

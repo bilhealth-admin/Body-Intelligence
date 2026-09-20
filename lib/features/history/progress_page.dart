@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../data/database/app_database.dart';
 import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
@@ -155,7 +157,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               Expanded(
                 child: _ProgressSelector(
                   key: const Key('progress-metric-selector'),
-                  icon: _metricIcon(metric),
+                  kind: _metricKind(metric),
+                  iconOverride: _metricIcon(metric),
+                  appleIconOverride: _metricAppleIcon(metric),
                   eyebrow: copy.metric,
                   value: copy.metricLabel(metric),
                   onTap: _pickMetric,
@@ -165,7 +169,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               Expanded(
                 child: _ProgressSelector(
                   key: const Key('progress-range-selector'),
-                  icon: Icons.calendar_today_rounded,
+                  kind: BilSemanticIconKind.calendar,
                   eyebrow: copy.range,
                   value: copy.rangeLabel(range),
                   onTap: _pickRange,
@@ -362,7 +366,14 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             ListTile(title: Text(copy.selectMetric)),
             for (final value in ProgressMetric.values)
               ListTile(
-                leading: Icon(_metricIcon(value)),
+                leading: BilSemanticIconBadge(
+                  kind: _metricKind(value),
+                  iconOverride: _metricIcon(value),
+                  appleIconOverride: _metricAppleIcon(value),
+                  size: 38,
+                  iconSize: 21,
+                  shape: BoxShape.rectangle,
+                ),
                 title: Text(copy.metricLabel(value)),
                 trailing: value == metric
                     ? const Icon(Icons.check_rounded)
@@ -520,20 +531,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 ListTile(
                   minTileHeight: 58,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 18),
-                  leading: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: .58),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _metricIcon(metric),
-                      size: 18,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  leading: BilSemanticIconBadge(
+                    kind: _metricKind(metric),
+                    iconOverride: _metricIcon(metric),
+                    appleIconOverride: _metricAppleIcon(metric),
+                    size: 34,
+                    iconSize: 18,
                   ),
                   title: Text(
                     MaterialLocalizations.of(
@@ -611,4 +614,26 @@ IconData _metricIcon(ProgressMetric metric) => switch (metric) {
   ProgressMetric.chest => Icons.favorite_border_rounded,
   ProgressMetric.arm => Icons.fitness_center_rounded,
   ProgressMetric.thigh => Icons.directions_run_rounded,
+};
+
+IconData _metricAppleIcon(ProgressMetric metric) => switch (metric) {
+  ProgressMetric.steps => Icons.directions_walk_rounded,
+  ProgressMetric.weight => Icons.monitor_weight_outlined,
+  ProgressMetric.neck => Icons.accessibility_new_rounded,
+  ProgressMetric.waist => Icons.straighten_rounded,
+  ProgressMetric.hips => Icons.accessibility_rounded,
+  ProgressMetric.chest => CupertinoIcons.heart,
+  ProgressMetric.arm => Icons.fitness_center_rounded,
+  ProgressMetric.thigh => Icons.directions_run_rounded,
+};
+
+BilSemanticIconKind _metricKind(ProgressMetric metric) => switch (metric) {
+  ProgressMetric.steps => BilSemanticIconKind.steps,
+  ProgressMetric.weight => BilSemanticIconKind.weight,
+  ProgressMetric.neck ||
+  ProgressMetric.waist ||
+  ProgressMetric.hips ||
+  ProgressMetric.chest ||
+  ProgressMetric.arm ||
+  ProgressMetric.thigh => BilSemanticIconKind.measurements,
 };

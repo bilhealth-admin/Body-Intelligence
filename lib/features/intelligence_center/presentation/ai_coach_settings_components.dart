@@ -1,5 +1,118 @@
 part of 'ai_coach_settings_page.dart';
 
+class _ContextFocusCard extends StatelessWidget {
+  const _ContextFocusCard({
+    required this.focuses,
+    required this.enabled,
+    required this.onChanged,
+    required this.t,
+  });
+
+  final Set<CoachContextFocus> focuses;
+  final bool enabled;
+  final void Function(CoachContextFocus focus, bool included) onChanged;
+  final _Copy t;
+
+  @override
+  Widget build(BuildContext context) {
+    final options = <(CoachContextFocus, IconData, String)>[
+      (
+        CoachContextFocus.nutrition,
+        Icons.restaurant_menu_rounded,
+        t(
+          'Nutrition and meals',
+          'التغذية والوجبات',
+          'Nutrition et repas',
+          'Nutrición y comidas',
+          'Beslenme ve öğünler',
+        ),
+      ),
+      (
+        CoachContextFocus.training,
+        Icons.directions_run_rounded,
+        t(
+          'Training and activity',
+          'التدريب والنشاط',
+          'Entraînement et activité',
+          'Entrenamiento y actividad',
+          'Antrenman ve aktivite',
+        ),
+      ),
+      (
+        CoachContextFocus.habits,
+        Icons.bedtime_outlined,
+        t(
+          'Sleep, fasting and habits',
+          'النوم والصيام والعادات',
+          'Sommeil, jeûne et habitudes',
+          'Sueño, ayuno y hábitos',
+          'Uyku, oruç ve alışkanlıklar',
+        ),
+      ),
+      (
+        CoachContextFocus.analytics,
+        Icons.insights_rounded,
+        t(
+          'Progress analytics',
+          'تحليلات التقدم',
+          'Analyses de progression',
+          'Análisis del progreso',
+          'İlerleme analizleri',
+        ),
+      ),
+    ];
+
+    return _PremiumCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(
+            icon: Icons.tune_rounded,
+            title: t(
+              'Choose whether to use cloud AI',
+              'اختر ما إذا كنت تريد استخدام الذكاء السحابي',
+              'Choisissez si vous souhaitez utiliser l’IA cloud',
+              'Elige si quieres usar la IA en la nube',
+              'Bulut yapay zekâyı kullanıp kullanmayacağınızı seçin',
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            t(
+              'AI Coach is optional, is not a doctor, and receives text context only after explicit consent. Voice recognition remains separate from this consent.',
+              'مدرب AI اختياري وليس طبيبًا، ولا يتلقى السياق النصي إلا بعد موافقة صريحة. يظل التعرف على الكلام منفصلًا عن هذه الموافقة.',
+              'Le Coach IA est facultatif, ne remplace pas un médecin et ne reçoit le contexte textuel qu’après un consentement explicite. La reconnaissance vocale reste distincte.',
+              'El Coach con IA es opcional, no es un médico y solo recibe contexto de texto tras tu consentimiento explícito. El reconocimiento de voz es independiente.',
+              'AI Koç isteğe bağlıdır, doktor değildir ve metin bağlamını yalnızca açık onaydan sonra alır. Konuşma tanıma bu onaydan ayrıdır.',
+            ),
+            style: const TextStyle(color: Color(0xFF536873), height: 1.4),
+          ),
+          const SizedBox(height: 4),
+          for (final option in options)
+            CheckboxListTile(
+              key: Key('ai-coach-context-${option.$1.name}'),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.trailing,
+              secondary: BilSemanticIconBadge(
+                kind: BilSemanticIconKind.aiCoach,
+                iconOverride: option.$2,
+                appleIconOverride: option.$2,
+              ),
+              value: focuses.contains(option.$1),
+              onChanged: enabled
+                  ? (value) => onChanged(option.$1, value == true)
+                  : null,
+              title: Text(
+                option.$3,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ResetGiftBanner extends StatelessWidget {
   const _ResetGiftBanner({required this.message, required this.onDismiss});
 
