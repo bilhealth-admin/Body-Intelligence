@@ -13,10 +13,11 @@ void main() {
     ).firstMatch(pubspec);
     expect(match, isNotNull);
     final version = match!.group(1)!;
+    expect(version, '1.0.0+21');
     final candidateGate = read(
       'docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md',
     );
-    expect(candidateGate, contains('Version metadata: `$version`'));
+    expect(candidateGate, contains('Version metadata: iOS `1.0.0+26`; Android `1.0.0+21`.'));
 
     for (final path in <String>[
       'tool/epic14_release_audit.dart',
