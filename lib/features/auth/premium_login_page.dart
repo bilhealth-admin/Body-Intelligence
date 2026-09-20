@@ -71,9 +71,23 @@ class _LoginPageState extends State<LoginPage> {
       status = null;
     });
     try {
-      final opened = await SupabaseAuthService(
-        Supabase.instance.client,
-      ).signInWithOAuth(provider);
+      final authService = SupabaseAuthService(Supabase.instance.client);
+      final nativeApple =
+          provider == OAuthProvider.apple &&
+          !kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.iOS;
+      final nativeResponse = nativeApple
+          ? await authService.signInWithAppleNative()
+          : null;
+      final opened = nativeApple
+          ? nativeResponse != null
+          : await authService.signInWithOAuth(provider);
+      // Native Sign in with Apple completes inside the app, so there is no
+      // deep-link callback page to advance the authenticated journey.
+      if (nativeApple && opened && mounted) {
+        context.go('/startup', extra: nativeResponse?.session);
+        return;
+      }
       if (!opened && mounted) {
         setState(
           () => status = authEntryText(

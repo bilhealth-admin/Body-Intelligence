@@ -41,11 +41,20 @@ final startupCloudProfileRestoreProvider = FutureProvider.autoDispose
     });
 
 class StartupPage extends ConsumerStatefulWidget {
-  const StartupPage({super.key, this.authClient});
+  const StartupPage({
+    super.key,
+    this.authClient,
+    this.initialAuthSession,
+  });
 
   /// Optional authentication seam for deterministic widget tests.
   /// Production callers leave this null and use the initialized Supabase auth.
   final GoTrueClient? authClient;
+
+  /// Session observed by the OAuth callback/native provider before Supabase
+  /// finishes writing its local auth storage. This is a short-lived startup
+  /// handoff, not an entitlement grant.
+  final Session? initialAuthSession;
 
   @override
   ConsumerState<StartupPage> createState() => _StartupPageState();
@@ -87,7 +96,7 @@ class _StartupPageState extends ConsumerState<StartupPage>
     }
 
     final auth = widget.authClient ?? Supabase.instance.client.auth;
-    authSession = auth.currentSession;
+    authSession = widget.initialAuthSession ?? auth.currentSession;
     if (authSession != null) {
       authStateResolved = true;
     }
@@ -101,7 +110,13 @@ class _StartupPageState extends ConsumerState<StartupPage>
             state.event == AuthChangeEvent.signedOut ||
             state.session != null;
         setState(() {
-          authSession = state.session;
+          // A transient null event is not authoritative while a verified
+          // callback/native handoff is still being persisted. Only an
+          // explicit sign-out may clear that handoff before storage settles.
+          if (state.session != null ||
+              state.event == AuthChangeEvent.signedOut) {
+            authSession = state.session;
+          }
           if (resolved) authStateResolved = true;
           readyLocation = null;
           redirectScheduled = false;

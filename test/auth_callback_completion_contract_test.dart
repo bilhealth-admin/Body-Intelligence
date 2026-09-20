@@ -25,7 +25,17 @@ void main() {
       expect(page, contains('await Future<void>.delayed(Duration.zero)'));
       expect(page, contains('void didUpdateWidget'));
       expect(page, contains('widget.initiallyFailed'));
-      expect(page, contains("context.go('/startup')"));
+      expect(page, contains("context.go('/startup', extra: session)"));
+      expect(page, contains('void _finish([Session? session])'));
+      final startup = File(
+        'lib/features/startup/startup_page.dart',
+      ).readAsStringSync();
+      expect(startup, contains('initialAuthSession'));
+      expect(
+        startup,
+        contains('widget.initialAuthSession ?? auth.currentSession'),
+      );
+      expect(startup, contains('state.event == AuthChangeEvent.signedOut'));
       expect(page, isNot(contains("context.go('/dashboard')")));
 
       final bootstrap = File('lib/main.dart').readAsStringSync();
