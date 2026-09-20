@@ -12,6 +12,7 @@ import 'local_coach_api.dart';
 import 'local_model_gateway.dart';
 
 part 'intelligence_center_reply.dart';
+part 'intelligence_scope_classifiers.dart';
 
 class IntelligenceCenterEngine {
   const IntelligenceCenterEngine({
@@ -27,8 +28,7 @@ class IntelligenceCenterEngine {
         _isGreeting(normalized) ||
         _looksUrgent(normalized) ||
         _looksLikeDiagnosis(normalized) ||
-        question.length > 500 ||
-        const CoachSpeechPolicy().isSleepQuestion(question);
+        question.length > 500;
   }
 
   bool isGreetingQuestion(String question) =>
@@ -127,12 +127,18 @@ class IntelligenceCenterEngine {
       );
     }
 
-    final sleep = _answerSleepDuration(question, replyLocale);
-    if (sleep != null) return sleep;
-    final weight = _answerRecordedWeight(question, replyLocale, coachContext);
-    if (weight != null) return weight;
-    final target = _answerDailyTarget(normalized, replyLocale, coachContext);
-    if (target != null) return target;
+    // Exact local lookups remain available for the deliberately on-device
+    // engine. The model-backed engine must receive personal coaching and
+    // analysis questions first; otherwise these shortcuts can return a local
+    // value before the cloud answer has a chance to explain it.
+    if (localApi is DeterministicLocalCoachApi) {
+      final sleep = _answerSleepDuration(question, replyLocale);
+      if (sleep != null) return sleep;
+      final weight = _answerRecordedWeight(question, replyLocale, coachContext);
+      if (weight != null) return weight;
+      final target = _answerDailyTarget(normalized, replyLocale, coachContext);
+      if (target != null) return target;
+    }
     final local = await localApi.understand(
       LocalCoachRequest(
         text: question,
@@ -142,7 +148,10 @@ class IntelligenceCenterEngine {
         conversation: conversation,
       ),
     );
-    if (local.actions.isNotEmpty) {
+    // A model answer may include an action. Preserve the answer and its
+    // provenance; an action must not replace it with local-command copy.
+    final hasAnswer = local.answer?.trim().isNotEmpty == true;
+    if (local.actions.isNotEmpty && !hasAnswer) {
       return _reply(
         tr(
           'I understood your request locally. Review the action below; I will not write data or perform a sensitive action without your confirmation.',
@@ -154,9 +163,12 @@ class IntelligenceCenterEngine {
         actions: local.actions,
       );
     }
-    if (local.answer?.trim().isNotEmpty == true) {
+    if (hasAnswer) {
       return _reply(
         local.answer!.trim(),
+        kind: local.actions.isEmpty
+            ? IntelligenceMessageKind.freeQuestion
+            : IntelligenceMessageKind.action,
         evidence: local.evidence.isEmpty
             ? const ['BIL user context']
             : local.evidence,
@@ -167,6 +179,7 @@ class IntelligenceCenterEngine {
         serviceStatus: local.serviceStatus,
         runtime: local.runtime,
         responseId: local.responseId,
+        actions: local.actions,
       );
     }
     if (local.serviceStatus != CoachServiceStatus.ready) {
@@ -342,9 +355,9 @@ class IntelligenceCenterEngine {
           'It comes from the explicit protein goal saved in Nutrition Goals.',
           'مصدره هدف البروتين الصريح المحفوظ في أهداف التغذية.',
         ),
-        'scheduled_percentage_goal' => tr(
-          "It is derived from today's scheduled calories and protein percentage.",
-          'وهو مشتق من سعرات اليوم المجدولة ونسبة البروتين المحددة لها.',
+        'scheduled_gram_goal' => tr(
+          "It comes from today's scheduled protein goal in grams.",
+          'مصدره هدف بروتين اليوم المجدول بالغرام.',
         ),
         'saved_percentage_goal' => tr(
           'It is derived from your saved calorie and protein-percentage goals.',
@@ -536,161 +549,6 @@ class IntelligenceCenterEngine {
       runtime: CoachAnswerRuntime.localFallback,
     );
   }
-
-  bool _has(String value, List<String> markers) => markers.any(value.contains);
-  bool _isGreeting(String v) => _has(v, const [
-    'مرحبا',
-    'مرحبًا',
-    'أهلا',
-    'أهلًا',
-    'السلام عليكم',
-    'صباح الخير',
-    'مساء الخير',
-    'hi',
-    'hello',
-    'hey',
-    'how are you',
-    'assalamualaikum',
-    'assalamu alaikum',
-    'as-salamu alaykum',
-    'salamualaikum',
-    'salaam alaikum',
-  ]);
-  bool _isPlanRequest(String v) => _has(v, const [
-    'خطة',
-    'برنامج',
-    'رتب لي',
-    'اعمل لي',
-    'أعمل لي',
-    'plan',
-    'program',
-  ]);
-  bool _looksLikeLogging(String v) => _has(v, const [
-    'أكلت',
-    'شربت',
-    'تمرنت',
-    'وزني',
-    'i ate',
-    'i drank',
-    'i trained',
-    'my weight',
-  ]);
-  bool _looksPersonal(String v) => _has(v, const [
-    'جسمي',
-    'وزني',
-    'أكلي',
-    'وجباتي',
-    'بروتين',
-    'سعرات',
-    'تقدمي',
-    'الماء',
-    'ثبات',
-    'هدف',
-    'بياناتي',
-    'لماذا',
-    'my body',
-    'my weight',
-    'my food',
-    'protein',
-    'calories',
-    'progress',
-    'water',
-    'hydration',
-    'hydrate',
-    'dehydration',
-    'plateau',
-    'goal',
-    'my data',
-    'why',
-  ]);
-  bool _looksLikeDiagnosis(String v) => _has(v, const [
-    'شخصني',
-    'تشخيص',
-    'هل عندي',
-    'هل مصاب',
-    'مرض',
-    'دواء',
-    'جرعة',
-    'diagnose',
-    'diagnosis',
-    'do i have',
-    'disease',
-    'medication',
-    'dose',
-  ]);
-  bool _looksUrgent(String v) => _has(v, const [
-    'ألم صدر',
-    'لا أستطيع التنفس',
-    'صعوبة تنفس',
-    'إغماء',
-    'نزيف شديد',
-    'أفكر بالانتحار',
-    'chest pain',
-    "can't breathe",
-    'difficulty breathing',
-    'fainted',
-    'severe bleeding',
-    'suicide',
-  ]);
-  bool _isAllowedScope(String v) => _has(v, const [
-    'صحة',
-    'جسم',
-    'وزن',
-    'أكل',
-    'غذاء',
-    'وجبة',
-    'بروتين',
-    'سعرات',
-    'ماء',
-    'نوم',
-    'نشاط',
-    'رياضة',
-    'تمرين',
-    'خطوات',
-    'دهون',
-    'عضلات',
-    'قياس',
-    'هدف',
-    'تقدم',
-    'خطة',
-    'دواء',
-    'مرض',
-    'أعراض',
-    'ألم',
-    'bil',
-    'توأم',
-    'البرنامج',
-    'التطبيق',
-    'التسجيل',
-    'coach',
-    'health',
-    'body',
-    'weight',
-    'food',
-    'meal',
-    'nutrition',
-    'protein',
-    'calories',
-    'water',
-    'hydration',
-    'hydrate',
-    'dehydration',
-    'sleep',
-    'activity',
-    'exercise',
-    'steps',
-    'fat',
-    'muscle',
-    'measurement',
-    'goal',
-    'progress',
-    'plan',
-    'medicine',
-    'symptom',
-    'pain',
-    'app',
-    'log',
-  ]);
 
   String _legacyLocale(bool arabic) => switch (arabic) {
     true => 'ar',

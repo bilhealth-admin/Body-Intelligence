@@ -2,6 +2,7 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/coach_
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_center_engine.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_speech_policy.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_api.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -152,22 +153,27 @@ void main() {
     },
   );
 
-  test('short sleep question is answered and spoken locally', () async {
-    const engine = IntelligenceCenterEngine(localApi: _FailIfCalledLocalApi());
-    final reply = await engine.answer(
-      question: 'كم لازم أنام؟',
-      arabic: true,
-      localeCode: 'ar',
-    );
+  test(
+    'model-backed sleep question is answered and spoken by the model',
+    () async {
+      const engine = IntelligenceCenterEngine(
+        localApi: _SleepAnsweringLocalApi(),
+      );
+      final reply = await engine.answer(
+        question: 'كم لازم أنام؟',
+        arabic: true,
+        localeCode: 'ar',
+      );
 
-    expect(reply.message.text, contains('7–9'));
-    expect(reply.spokenText, reply.message.text);
-    expect(reply.runtime.name, 'onDevice');
-    expect(
-      const CoachSpeechPolicy().canSpeakWithinTenSeconds(reply.spokenText!),
-      isTrue,
-    );
-  });
+      expect(reply.message.text, contains('تعافيك'));
+      expect(reply.spokenText, reply.message.text);
+      expect(reply.runtime, CoachAnswerRuntime.cloudPersonalized);
+      expect(
+        const CoachSpeechPolicy().canSpeakWithinTenSeconds(reply.spokenText!),
+        isTrue,
+      );
+    },
+  );
 }
 
 class _AnsweringLocalApi implements LocalCoachApi {
@@ -182,10 +188,16 @@ class _AnsweringLocalApi implements LocalCoachApi {
       );
 }
 
-class _FailIfCalledLocalApi implements LocalCoachApi {
-  const _FailIfCalledLocalApi();
+class _SleepAnsweringLocalApi implements LocalCoachApi {
+  const _SleepAnsweringLocalApi();
 
   @override
-  Future<LocalCoachResult> understand(LocalCoachRequest request) =>
-      throw StateError('Sleep must be answered before any model gateway call.');
+  Future<LocalCoachResult> understand(LocalCoachRequest request) async =>
+      const LocalCoachResult(
+        actions: [],
+        processedOnDevice: false,
+        answer: 'سأربط احتياج النوم بنمط تعافيك وبياناتك الشخصية.',
+        spokenAnswer: 'سأربط احتياج النوم بنمط تعافيك وبياناتك الشخصية.',
+        runtime: CoachAnswerRuntime.cloudPersonalized,
+      );
 }

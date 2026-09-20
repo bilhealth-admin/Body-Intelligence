@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../core/global_platform_core.dart';
 
 abstract interface class NativeHealthCapabilityBridge {
@@ -5,6 +7,17 @@ abstract interface class NativeHealthCapabilityBridge {
   Future<void> enableBackgroundDelivery(Set<String> types);
   Future<Map<String, Object?>> revokeAccess();
   Future<void> openSettings();
+}
+
+/// Optional native cancellation hook for foreground reads.
+///
+/// A Dart timeout alone cannot stop a HealthKit/Health Connect query that is
+/// already running on the platform side. Bridges that can cancel their native
+/// query implement this interface so the UI can recover without leaving a
+/// second read running indefinitely.
+abstract interface class NativeHealthCancellableReadBridge
+    implements NativeHealthBridge {
+  Future<void> cancelReadChanges();
 }
 
 /// Health signals BIL can read after the user explicitly authorizes them.
@@ -33,9 +46,57 @@ abstract final class BilHealthScope {
     HealthDataType.nutritionPotassium,
   };
 
+  /// Canonical native read-capability contract used by both the runtime and
+  /// every consumer-facing connection surface. Keeping this derived from
+  /// [read] prevents the UI from advertising a stale subset of HealthKit or
+  /// Health Connect data types.
+  static final Set<String> readTypeNames = Set<String>.unmodifiable(
+    read.map((type) => type.name),
+  );
+
+  /// Logical types implemented by the Android Health Connect bridge.
+  ///
+  /// Several nutrition values share Health Connect's single NutritionRecord
+  /// permission and native record, but are emitted as separate canonical BIL
+  /// signals. Every other entry has a matching native record serializer and
+  /// manifest permission; clinical types remain deliberately excluded.
+  static const Set<String> healthConnectReadTypeNames = <String>{
+    'steps',
+    'distance',
+    'activeEnergy',
+    'workout',
+    'sleep',
+    'weight',
+    'bodyFat',
+    'leanMass',
+    'heartRate',
+    'restingHeartRate',
+    'hrv',
+    'water',
+    'nutrition',
+    'nutritionProtein',
+    'nutritionCarbohydrates',
+    'nutritionFat',
+    'nutritionFiber',
+    'nutritionSugar',
+    'nutritionSodium',
+    'nutritionPotassium',
+  };
+
+  static Set<String> get appleHealthReadTypeNames => readTypeNames;
+
   static const Set<HealthDataType> write = <HealthDataType>{
     HealthDataType.weight,
     HealthDataType.nutrition,
+  };
+
+  /// Native write types implemented and disclosed by each mobile bridge.
+  /// HealthKit currently exports reviewed weight records only; Android Health
+  /// Connect additionally supports the reviewed nutrition export pipeline.
+  static const Set<String> appleHealthWriteTypeNames = <String>{'weight'};
+  static const Set<String> healthConnectWriteTypeNames = <String>{
+    'weight',
+    'nutrition',
   };
 
   /// Reject every provider key that is not part of the explicit fitness-only
@@ -192,11 +253,18 @@ final class NativeHealthPage {
     required this.deletedIds,
     required this.nextAnchor,
     required this.hasMore,
+    this.changesTokenExpired = false,
   });
   final List<NativeHealthRecord> records;
   final List<String> deletedIds;
   final String? nextAnchor;
   final bool hasMore;
+
+  /// Health Connect could no longer serve the supplied changes token.
+  ///
+  /// The caller must discard that token and perform a bounded bootstrap read
+  /// with a newly issued token. HealthKit and other bridges leave this false.
+  final bool changesTokenExpired;
 }
 
 abstract interface class NativeHealthBridge {
@@ -218,14 +286,42 @@ final class UnifiedHealthDataRuntime {
     required this.store,
     required this.audit,
     this.pageLimit = 100,
+    this.foregroundReadTimeout = const Duration(seconds: 10),
+    this.nativeCancellationTimeout = const Duration(seconds: 2),
   });
 
   final List<NativeHealthBridge> bridges;
   final GlobalDurableStore store;
   final GlobalAuditSink audit;
   final int pageLimit;
+  final Duration foregroundReadTimeout;
+  final Duration nativeCancellationTimeout;
+
+  // Keep native reads single-flight even when two provider instances overlap
+  // during resume or account/lifecycle transitions. A caller timing out does
+  // not cancel the platform operation, so a second read must not compete for
+  // the same HealthKit/Health Connect anchor.
+  Future<List<GlobalHealthSignal>>? _synchronizationTask;
 
   Future<List<GlobalHealthSignal>> synchronize({
+    required DateTime asOf,
+    required GlobalConsentGrant consent,
+    Set<HealthDataType>? types,
+  }) {
+    final existing = _synchronizationTask;
+    if (existing != null) return existing;
+    late final Future<List<GlobalHealthSignal>> task;
+    task = _synchronize(asOf: asOf, consent: consent, types: types)
+        .whenComplete(() {
+          if (identical(_synchronizationTask, task)) {
+            _synchronizationTask = null;
+          }
+        });
+    _synchronizationTask = task;
+    return task;
+  }
+
+  Future<List<GlobalHealthSignal>> _synchronize({
     required DateTime asOf,
     required GlobalConsentGrant consent,
     Set<HealthDataType>? types,
@@ -235,8 +331,6 @@ final class UnifiedHealthDataRuntime {
         .where(BilHealthScope.read.contains)
         .toSet();
     if (requestedTypes.isEmpty) return const <GlobalHealthSignal>[];
-    final scopeSignature = requestedTypes.map((type) => type.name).toList()
-      ..sort();
     final collected = <GlobalHealthSignal>[];
     final backgroundEligible = <NativeHealthCapabilityBridge>[];
     for (final bridge in bridges) {
@@ -260,25 +354,90 @@ final class UnifiedHealthDataRuntime {
         backgroundEligible.add(capabilityBridge);
       }
       final permission = await bridge.permissions();
-      final allowed = requestedTypes
-          .where((type) => permission[type.name] == true)
-          .map((e) => e.name)
-          .toSet();
+      // HealthKit intentionally does not expose read authorization state.
+      // `HKHealthStore.authorizationStatus(for:)` describes sharing/write
+      // access, so using that value to gate a read query can incorrectly
+      // produce an empty allow-list even after the user enabled Apple Health
+      // reads. The query itself is the authority: denied read types simply
+      // return no records. Android/other providers retain their explicit
+      // permission filtering.
+      final appleHealthReadStateIsIndeterminate = _isAppleHealthBridge(bridge);
+      final allowed = appleHealthReadStateIsIndeterminate
+          ? requestedTypes.map((type) => type.name).toSet()
+          : requestedTypes
+                .where((type) => permission[type.name] == true)
+                .map((e) => e.name)
+                .toSet();
       if (allowed.isEmpty) continue;
+      // The native change token belongs to the exact record-type set queried,
+      // not merely to what the caller requested. On Health Connect a user can
+      // grant only part of the requested permissions and grant another type
+      // later. Reusing the old subset's token would skip that newly granted
+      // type's history, so reset the anchor whenever the effective permission
+      // scope changes.
+      // Native bridges may expose non-record permission markers whose state
+      // changes the meaning of an anchor. Health Connect history access is the
+      // first such marker: granting it later expands a bootstrap from 30 to
+      // 365 days even when the selected record types are unchanged.
+      final anchorScopeMarkers = permission.entries
+          .where((entry) => entry.key.startsWith('__') && entry.value)
+          .map((entry) => entry.key);
+      final allowedScopeSignature = (<String>{
+        ...allowed,
+        ...anchorScopeMarkers,
+      }.toList()..sort()).join(',');
       final anchorState = await store.get('health_anchor', bridge.id);
       final anchor =
-          anchorState != null &&
-              anchorState['scope'] == scopeSignature.join(',')
+          anchorState != null && anchorState['scope'] == allowedScopeSignature
           ? anchorState['anchor'] as String?
           : null;
       var nextAnchor = anchor;
       var pages = 0;
-      while (pages++ < pageLimit) {
-        final page = await bridge.readChanges(
+      var expiredTokenRecoveryAttempted = false;
+      while (pages < pageLimit) {
+        final page = await _readPageWithForegroundDeadline(
+          bridge: bridge,
           anchor: nextAnchor,
           asOf: asOf,
           types: allowed,
         );
+        if (page.changesTokenExpired) {
+          // Health Connect change tokens expire (and may be invalidated by the
+          // provider). Never persist the response's unusable next token. Drop
+          // the durable anchor and request one bounded bootstrap exactly once;
+          // health_seen then de-duplicates the historical snapshot by stable
+          // provider/record/type identity while preserving provenance.
+          await store.remove('health_anchor', bridge.id);
+          if (nextAnchor != null && !expiredTokenRecoveryAttempted) {
+            expiredTokenRecoveryAttempted = true;
+            nextAnchor = null;
+            await audit.record(
+              GlobalAuditEvent(
+                action: 'health.anchor.bootstrap_recovery',
+                subjectId: bridge.id,
+                at: asOf,
+                metadata: <String, Object?>{
+                  'reason': 'changes_token_expired',
+                  'scope': allowedScopeSignature,
+                },
+              ),
+            );
+            continue;
+          }
+          await audit.record(
+            GlobalAuditEvent(
+              action: 'health.anchor.bootstrap_failed',
+              subjectId: bridge.id,
+              at: asOf,
+              metadata: <String, Object?>{
+                'reason': 'changes_token_expired',
+                'scope': allowedScopeSignature,
+              },
+            ),
+          );
+          break;
+        }
+        pages++;
         for (final deleted in page.deletedIds) {
           await store.put(
             'health_tombstones',
@@ -290,6 +449,19 @@ final class UnifiedHealthDataRuntime {
             },
           );
         }
+        // An UpsertionChange replaces the whole native series. Purge any
+        // persisted children before writing its current samples so shortening
+        // or editing a series cannot leave stale measurements behind.
+        final replacedRecordFamilies = <String>{
+          ...page.deletedIds,
+          for (final record in page.records)
+            if (record.attributes['parentRecordId'] case final String parentId)
+              parentId,
+        };
+        // Scan the persisted bucket once for the entire page. A page may hold
+        // hundreds of HeartRateRecord series; scanning once per parent would
+        // otherwise turn synchronization into O(parents x stored signals).
+        await _removePersistedRecordFamilies(bridge.id, replacedRecordFamilies);
         for (final record in page.records) {
           if (record.observedAt.isAfter(asOf.toUtc())) continue;
           if (!BilHealthScope.read.contains(record.type)) {
@@ -337,7 +509,7 @@ final class UnifiedHealthDataRuntime {
         nextAnchor = page.nextAnchor;
         await store.put('health_anchor', bridge.id, <String, Object?>{
           'anchor': nextAnchor,
-          'scope': scopeSignature.join(','),
+          'scope': allowedScopeSignature,
         });
         if (!page.hasMore) break;
       }
@@ -359,6 +531,29 @@ final class UnifiedHealthDataRuntime {
       ),
     );
     return List<GlobalHealthSignal>.unmodifiable(collected);
+  }
+
+  Future<NativeHealthPage> _readPageWithForegroundDeadline({
+    required NativeHealthBridge bridge,
+    required String? anchor,
+    required DateTime asOf,
+    required Set<String> types,
+  }) async {
+    try {
+      return await bridge
+          .readChanges(anchor: anchor, asOf: asOf, types: types)
+          .timeout(foregroundReadTimeout);
+    } on TimeoutException {
+      if (bridge is NativeHealthCancellableReadBridge) {
+        try {
+          await bridge.cancelReadChanges().timeout(nativeCancellationTimeout);
+        } on Object {
+          // The read deadline is authoritative. A broken cancellation hook
+          // must not turn a recoverable sync timeout into another UI freeze.
+        }
+      }
+      rethrow;
+    }
   }
 
   Future<void> export({
@@ -400,7 +595,22 @@ final class UnifiedHealthDataRuntime {
       HealthDataType.workout => unit == 's' && value >= 0 && value <= 172800,
       HealthDataType.sleep => unit == 'h' && value >= 0 && value <= 24,
       HealthDataType.weight => unit == 'kg' && value >= 20 && value <= 500,
-      _ => value.isFinite,
+      HealthDataType.bodyFat => unit == '%' && value >= 0 && value <= 100,
+      HealthDataType.leanMass => unit == 'kg' && value >= 0 && value <= 500,
+      HealthDataType.heartRate || HealthDataType.restingHeartRate =>
+        unit == 'count/min' && value >= 20 && value <= 300,
+      HealthDataType.hrv => unit == 'ms' && value >= 0 && value <= 10000,
+      HealthDataType.water => unit == 'mL' && value >= 0 && value <= 100000,
+      HealthDataType.nutrition =>
+        unit == 'kcal' && value >= 0 && value <= 100000,
+      HealthDataType.nutritionProtein ||
+      HealthDataType.nutritionCarbohydrates ||
+      HealthDataType.nutritionFat ||
+      HealthDataType.nutritionFiber ||
+      HealthDataType.nutritionSugar =>
+        unit == 'g' && value >= 0 && value <= 100000,
+      HealthDataType.nutritionSodium || HealthDataType.nutritionPotassium =>
+        unit == 'mg' && value >= 0 && value <= 1000000,
     };
     if (!value.isFinite || !valid) {
       return null;
@@ -421,5 +631,40 @@ final class UnifiedHealthDataRuntime {
       ),
       attributes: record.attributes,
     );
+  }
+
+  Future<void> _removePersistedRecordFamilies(
+    String providerId,
+    Set<String> parentRecordIds,
+  ) async {
+    if (parentRecordIds.isEmpty) return;
+    for (final row in await store.list('health_signals')) {
+      if (row['providerId'] != providerId) continue;
+      final recordId = row['recordId'];
+      final attributes = row['attributes'] as Map?;
+      if (!parentRecordIds.contains(recordId) &&
+          !parentRecordIds.contains(attributes?['parentRecordId'])) {
+        continue;
+      }
+      final key = row['key'];
+      if (recordId is! String || key is! String) continue;
+      final identity = '$providerId:$recordId:$key';
+      await store.remove('health_signals', identity);
+      await store.remove('health_seen', identity);
+    }
+    // Preserve backward compatibility for pre-series records even when they
+    // are absent from health_signals but still have a health_seen fingerprint.
+    for (final parentRecordId in parentRecordIds) {
+      for (final type in BilHealthScope.read) {
+        final identity = '$providerId:$parentRecordId:${type.name}';
+        await store.remove('health_signals', identity);
+        await store.remove('health_seen', identity);
+      }
+    }
+  }
+
+  bool _isAppleHealthBridge(NativeHealthBridge bridge) {
+    final id = bridge.id.toLowerCase();
+    return id.contains('apple') || id.contains('healthkit');
   }
 }

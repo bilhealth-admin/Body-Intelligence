@@ -46,6 +46,39 @@ ConnectedHealthStatus connectedHealthStatusAfterSynchronization({
     ? ConnectedHealthStatus.authorizationRequested
     : ConnectedHealthStatus.synchronized;
 
+/// Keeps trusted metrics visible when a native read returns an empty or
+/// partial snapshot during a transient permission/provider failure.
+@visibleForTesting
+ConnectedHealthSnapshot preserveTrustedConnectedHealthSignals({
+  required ConnectedHealthSnapshot previous,
+  required ConnectedHealthSnapshot incoming,
+}) {
+  if (previous.signals.isEmpty) return incoming;
+  final validIncoming = incoming.signals
+      .where(
+        (signal) =>
+            signal.value.isFinite &&
+            signal.source.trim().isNotEmpty &&
+            signal.confidence > 0,
+      )
+      .toList(growable: false);
+  final incomingKeys = validIncoming.map((signal) => signal.key).toSet();
+  final merged = <ConnectedHealthSignalView>[
+    ...validIncoming,
+    for (final signal in previous.signals)
+      if (!incomingKeys.contains(signal.key)) signal,
+  ];
+  if (merged.isEmpty) return incoming;
+  return incoming.copyWith(
+    signals: merged,
+    importedCount: incoming.importedCount > 0
+        ? incoming.importedCount
+        : previous.importedCount,
+    lastSyncAt: incoming.lastSyncAt ?? previous.lastSyncAt,
+    deviceVerified: incoming.deviceVerified || previous.deviceVerified,
+  );
+}
+
 /// Converts HealthKit's overlapping in-bed/awake/stage samples into one
 /// measured asleep duration per source/night. Android SleepSessionRecord rows
 /// already carry a session total with nested stages and pass through unchanged.
@@ -235,12 +268,28 @@ final class ConnectedHealthController
   final Duration _operationTimeout;
   Future<void>? _mutationTask;
   Future<void>? _refreshTask;
+  var _disposed = false;
+  var _lifecycleGeneration = 0;
+
+  bool _isCurrent(int generation) =>
+      !_disposed && generation == _lifecycleGeneration;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _lifecycleGeneration += 1;
+    super.dispose();
+  }
 
   Future<ConnectedHealthSnapshot> _synchronizeWithinDeadline(
     ConnectedHealthSnapshot fallback,
   ) async {
     try {
-      return await _gateway.synchronize().timeout(_operationTimeout);
+      final incoming = await _gateway.synchronize().timeout(_operationTimeout);
+      return preserveTrustedConnectedHealthSignals(
+        previous: fallback,
+        incoming: incoming,
+      );
     } on TimeoutException {
       // A platform-channel read can outlive this screen. Do not leave the
       // dashboard or Apps & Devices trapped in a perpetual syncing state; the
@@ -257,6 +306,7 @@ final class ConnectedHealthController
     ConnectedHealthSnapshot Function(ConnectedHealthSnapshot current)?
     transition,
   }) {
+    if (_disposed) return Future<void>.value();
     final existing = _mutationTask;
     if (existing != null) return existing;
     final task = _performMutation(operation, transition: transition);
@@ -269,18 +319,22 @@ final class ConnectedHealthController
     ConnectedHealthSnapshot Function(ConnectedHealthSnapshot current)?
     transition,
   }) async {
+    final generation = _lifecycleGeneration;
     try {
       // The constructor starts a refresh immediately. A user action must wait
       // for it rather than being silently discarded when the screen is opened
       // and the permission button is tapped quickly.
       final activeRefresh = _refreshTask;
       if (activeRefresh != null) await activeRefresh;
+      if (!_isCurrent(generation)) return;
 
       final current = state.value;
       if (transition != null && current != null) {
-        state = AsyncValue.data(transition(current));
+        if (_isCurrent(generation)) {
+          state = AsyncValue.data(transition(current));
+        }
       } else {
-        state = const AsyncValue.loading();
+        if (_isCurrent(generation)) state = const AsyncValue.loading();
       }
       // Let the syncing state paint before HealthKit starts its native query.
       // This branch is deliberately iOS-only; Android/Health Connect keeps its
@@ -291,7 +345,9 @@ final class ConnectedHealthController
           await SchedulerBinding.instance.endOfFrame;
         }
       }
-      state = await AsyncValue.guard(operation);
+      if (!_isCurrent(generation)) return;
+      final result = await AsyncValue.guard(operation);
+      if (_isCurrent(generation)) state = result;
     } finally {
       _mutationTask = null;
     }
@@ -306,15 +362,19 @@ final class ConnectedHealthController
   }
 
   Future<void> _performRefresh() async {
+    final generation = _lifecycleGeneration;
     try {
       // Foreground/resume refreshes can arrive while a permission sheet or
       // another explicit action is completing. Queue the refresh so neither
       // operation is lost.
       final activeMutation = _mutationTask;
       if (activeMutation != null) await activeMutation;
+      if (!_isCurrent(generation)) return;
 
       final previous = state.value;
-      if (previous == null) state = const AsyncValue.loading();
+      if (previous == null && _isCurrent(generation)) {
+        state = const AsyncValue.loading();
+      }
       try {
         // Refresh only reads the cached connection state. It deliberately
         // never begins a HealthKit/Health Connect import: this provider is
@@ -323,8 +383,9 @@ final class ConnectedHealthController
         // Imports remain explicit through the Sync button or post-consent
         // first import below.
         final loaded = await _gateway.load();
-        state = AsyncValue.data(loaded);
+        if (_isCurrent(generation)) state = AsyncValue.data(loaded);
       } catch (error, stackTrace) {
+        if (!_isCurrent(generation)) return;
         // A lifecycle notification must not replace useful cached content with
         // a transient blank/error screen.
         state = previous == null
