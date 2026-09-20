@@ -64,6 +64,17 @@ void main() {
         estimatesAcknowledged: true,
       );
 
+  // iOS intentionally omits the name and integrations permission stages so
+  // Sign in with Apple remains the identity source and health permissions are
+  // reviewed from Settings. Render those two real stages on Android when the
+  // matrix needs to exercise their widgets.
+  TargetPlatform platformForStep(
+    String step, {
+    TargetPlatform fallback = TargetPlatform.iOS,
+  }) => step == 'name' || step == 'integrations'
+      ? TargetPlatform.android
+      : fallback;
+
   Future<void> render(
     WidgetTester tester, {
     required OnboardingDraft draft,
@@ -125,7 +136,10 @@ void main() {
             ),
             child: child!,
           ),
-          home: const OnboardingPage(),
+          // Each matrix case must start a fresh page state. Without a new key,
+          // pumpWidget can reuse the previous draft/page and assert against a
+          // stale step rather than the requested one.
+          home: OnboardingPage(key: UniqueKey()),
         ),
       ),
     );
@@ -347,7 +361,7 @@ void main() {
                 locale: locale,
                 themeMode: theme,
                 textScale: 2,
-                platform: TargetPlatform.iOS,
+                platform: platformForStep(step),
               );
 
               final photo = find.byKey(Key('onboarding-photo-$step'));
@@ -412,9 +426,11 @@ void main() {
               locale: locale,
               themeMode: dark ? ThemeMode.dark : ThemeMode.light,
               textScale: scale,
-              platform: (localeIndex + stepIndex).isEven
-                  ? TargetPlatform.iOS
-                  : TargetPlatform.android,
+              platform: step == 'name' || step == 'integrations'
+                  ? TargetPlatform.android
+                  : ((localeIndex + stepIndex).isEven
+                        ? TargetPlatform.iOS
+                        : TargetPlatform.android),
             );
             rendered++;
 
@@ -528,7 +544,7 @@ void main() {
     }
     final progress = find.byKey(const Key('onboarding-progress-semantics'));
     expect(tester.getSemantics(progress).label, isNotEmpty);
-    expect(tester.getSemantics(progress).value, '10 / 16');
+    expect(tester.getSemantics(progress).value, '10 / 15');
     expect(tester.takeException(), isNull);
     semantics.dispose();
   });
@@ -635,7 +651,7 @@ void main() {
       platform: TargetPlatform.iOS,
     );
     progress = find.byKey(const Key('onboarding-progress-semantics'));
-    expect(tester.getSemantics(progress).value, '16 / 16');
+    expect(tester.getSemantics(progress).value, '15 / 15');
     semantics.dispose();
   });
 }

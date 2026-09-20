@@ -77,7 +77,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     'neck',
     if (_draft.sex == 'female') 'hips',
     'plan',
-    'integrations',
+    if (defaultTargetPlatform != TargetPlatform.iOS) 'integrations',
     'ai',
     'review',
   ];

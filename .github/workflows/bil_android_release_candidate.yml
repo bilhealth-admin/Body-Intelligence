@@ -69,6 +69,32 @@ jobs:
       - name: Analyze release source
         run: flutter analyze --no-pub
 
+      - name: Validate frozen production configuration
+        shell: bash
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: android
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_PUSH_ENABLED: false
+          BIL_PUSH_PROVIDER_READY: false
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_PLUS8_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_PLUS8_STAGING_MANIFEST_SHA256 }}
+        run: dart run tool/release/validate_release_configuration.dart
+
       - name: Run portable release tests
         run: python3 tool/release/run_portable_release_tests.py
 

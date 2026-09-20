@@ -492,7 +492,8 @@ void main() {
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await pump(tester, valid(step: 'integrations'));
-    expect(find.text('Apple Health'), findsOneWidget);
+    expect(find.byKey(const Key('onboarding-health-permission')), findsNothing);
+    expect(find.text('Apple Health'), findsNothing);
     expect(find.textContaining('Health Connect'), findsNothing);
     expect(find.textContaining('blood pressure'), findsNothing);
     expect(find.textContaining('SpO2'), findsNothing);
