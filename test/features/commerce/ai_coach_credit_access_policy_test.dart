@@ -2,6 +2,7 @@ import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dar
 import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Map<String, Object?> usage(String plan, Object? totalRemaining) => {
@@ -12,6 +13,7 @@ Map<String, Object?> usage(String plan, Object? totalRemaining) => {
 void main() {
   test('zero -> Boost -> consumed zero is reflected exactly', () {
     expect(aiCoachAccessFromUsageStatus(usage('free', 0)), isFalse);
+    expect(aiCoachAccessFromUsageStatus(usage('free', 15)), isTrue);
     expect(aiCoachAccessFromUsageStatus(usage('free', 2500)), isTrue);
     expect(aiCoachAccessFromUsageStatus(usage('free', 0)), isFalse);
   });
@@ -60,6 +62,74 @@ void main() {
     ]) {
       expect(aiCoachAccessFromUsageStatus(value), isFalse, reason: '$value');
     }
+  });
+
+  test('credit access provider exposes an RPC failure as AsyncError', () async {
+    final rpcError = StateError('usage status unavailable');
+    final container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        verifiedEntitlementOwnerProvider.overrideWith(
+          (_) => Stream<String?>.value('test-owner'),
+        ),
+        aiCoachUsageStatusLoaderProvider.overrideWithValue(
+          () => Future<Object?>.error(rpcError),
+        ),
+      ],
+    );
+    final listener = container.listen(
+      aiCoachCreditAccessProvider,
+      (_, _) {},
+      fireImmediately: true,
+    );
+    addTearDown(() {
+      listener.close();
+      container.dispose();
+    });
+
+    await expectLater(
+      container.read(aiCoachCreditAccessProvider.future),
+      throwsA(same(rpcError)),
+    );
+    expect(
+      container.read(aiCoachCreditAccessProvider),
+      isA<AsyncError<bool>>(),
+    );
+  });
+
+  test('verified access snapshot survives a transient refresh for one owner', () async {
+    var calls = 0;
+    final container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        verifiedEntitlementOwnerProvider.overrideWithValue(
+          const AsyncData<String?>('owner-a'),
+        ),
+        aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
+          calls += 1;
+          if (calls == 1) return Future.value(usage('ai_coach', 2500));
+          return Future<Object?>.error(StateError('temporary'));
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+    container.invalidate(aiCoachCreditAccessProvider);
+    expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+  });
+
+  test('owner changes clear the access snapshot and cannot cross accounts', () {
+    final snapshots = AiCoachAccessSnapshotStore();
+    snapshots.activateOwner('owner-a');
+    snapshots.recordServerResult(ownerId: 'owner-a', access: true);
+    expect(snapshots.cachedAccessFor('owner-a'), isTrue);
+
+    snapshots.activateOwner('owner-b');
+    expect(snapshots.cachedAccessFor('owner-a'), isNull);
+    expect(snapshots.cachedAccessFor('owner-b'), isNull);
+    snapshots.recordServerResult(ownerId: 'owner-b', access: false);
+    expect(snapshots.cachedAccessFor('owner-b'), isFalse);
   });
 
   test('AI subscription identity requires a verified live store boundary', () {

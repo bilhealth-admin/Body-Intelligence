@@ -37,6 +37,11 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   yield previousOwnerId;
 
   await for (final state in auth.onAuthStateChange) {
+    // A transient null event can occur while a native session is being
+    // persisted. Only signedOut is authoritative for clearing the owner.
+    if (state.session == null && state.event != AuthChangeEvent.signedOut) {
+      continue;
+    }
     final ownerId = state.session?.user.id;
     if (ownerId == previousOwnerId) continue;
     previousOwnerId = ownerId;
@@ -135,19 +140,77 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// opens only after Supabase reports a positive reserved-aware total from an
 /// AI subscription allowance and/or verified Boost balance. An active plan at
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
-final aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>((
-  ref,
-) async {
-  ref.watch(verifiedEntitlementOwnerProvider);
-  final value = await ref
-      .read(aiCoachUsageStatusLoaderProvider)()
-      .timeout(const Duration(seconds: 8));
-  // A signed-out or malformed response is a verified no-access result. An
-  // RPC exception is deliberately allowed through so Riverpod exposes
-  // AsyncError and the route shows retry instead of a purchase offer.
-  return aiCoachAccessFromUsageStatus(value);
-}, retry: (_, _) => null);
+/// In-memory, owner-scoped snapshot of the last server-authoritative Coach
+/// access result. It is UI continuity only and never grants access without a
+/// successful usage-status response for the active owner.
+final class AiCoachAccessSnapshotStore {
+  String? _activeOwnerId;
+  bool? _verifiedAccess;
 
+  String? get activeOwnerId => _activeOwnerId;
+
+  void activateOwner(String? ownerId) {
+    final normalized = ownerId?.trim();
+    final next = normalized == null || normalized.isEmpty ? null : normalized;
+    if (next == _activeOwnerId) return;
+    _activeOwnerId = next;
+    _verifiedAccess = null;
+  }
+
+  bool? cachedAccessFor(String ownerId) =>
+      ownerId == _activeOwnerId ? _verifiedAccess : null;
+
+  void recordServerResult({required String ownerId, required bool access}) {
+    if (ownerId == _activeOwnerId) _verifiedAccess = access;
+  }
+}
+
+final aiCoachAccessSnapshotStoreProvider =
+    Provider<AiCoachAccessSnapshotStore>((_) => AiCoachAccessSnapshotStore());
+
+String? _safeCurrentAuthenticatedOwnerId() {
+  try {
+    return Supabase.instance.client.auth.currentUser?.id.trim();
+  } on Object {
+    return null;
+  }
+}
+
+/// Server-owned AI access truth for token markets.
+///
+/// Access is retained only as a same-owner UI continuity signal during a
+/// transient refresh failure. The server RPC remains the sole authority.
+final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
+  final ownerState = ref.watch(verifiedEntitlementOwnerProvider);
+  String? ownerId;
+  if (ownerState.hasValue) {
+    ownerId = ownerState.asData?.value;
+  } else {
+    try {
+      ownerId = await ref
+          .watch(verifiedEntitlementOwnerProvider.future)
+          .timeout(const Duration(seconds: 2));
+    } on Object {
+      ownerId = _safeCurrentAuthenticatedOwnerId();
+    }
+  }
+  final snapshots = ref.read(aiCoachAccessSnapshotStoreProvider);
+  snapshots.activateOwner(ownerId);
+  if (ownerId == null) return false;
+
+  try {
+    final value = await ref
+        .read(aiCoachUsageStatusLoaderProvider)()
+        .timeout(const Duration(seconds: 8));
+    final access = aiCoachAccessFromUsageStatus(value);
+    snapshots.recordServerResult(ownerId: ownerId, access: access);
+    return access;
+  } on Object {
+    final cached = snapshots.cachedAccessFor(ownerId);
+    if (cached != null) return cached;
+    rethrow;
+  }
+}, retry: (_, _) => null);
 /// Meal-photo analysis is purchased through AI Boost in every storefront.
 /// It deliberately ignores subscription/included allowance and opens only
 /// when Supabase confirms enough paid credit for one Vision reservation.
