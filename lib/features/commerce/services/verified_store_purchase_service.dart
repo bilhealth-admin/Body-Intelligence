@@ -50,6 +50,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     _subscription ??= _purchase.purchaseStream.listen(
       (purchases) => unawaited(_consumePurchaseUpdates(purchases)),
       onError: (_) {
+        if (state == VerifiedStoreState.verified) {
+          // A late native stream fault cannot invalidate a server-verified
+          // entitlement. The next explicit refresh remains available.
+          notifyListeners();
+          return;
+        }
         state = VerifiedStoreState.failed;
         messageCode = 'store_stream_failed';
         notifyListeners();
@@ -378,6 +384,10 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     try {
       await _handlePurchases(purchases);
     } on Object {
+      if (state == VerifiedStoreState.verified) {
+        notifyListeners();
+        return;
+      }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
       notifyListeners();
