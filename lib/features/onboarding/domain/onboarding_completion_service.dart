@@ -51,7 +51,11 @@ final class OnboardingCompletionService {
   final OnboardingDraftRepository drafts;
   final Future<void> Function(OnboardingCommitPhase phase)? phaseHook;
 
-  Future<void> commit({required OnboardingDraft draft, DateTime? now}) async {
+  Future<void> commit({
+    required OnboardingDraft draft,
+    DateTime? now,
+    bool reviewMode = false,
+  }) async {
     if (draft.preferredName.trim().isEmpty) {
       throw StateError('preferred_name_required');
     }
@@ -72,6 +76,7 @@ final class OnboardingCompletionService {
     final plan = OnboardingPlanCalculator.calculate(draft, now: committedAt);
     final age = BilAdultEligibility.ageOn(draft.birthDate!, on: committedAt);
     final existingProfile = await profiles.getProfile();
+    final existingWeights = await weights.getAll();
     final existingMeasurement = await measurements.getLatest();
     final existingGoal = await goals.getActive();
     final dietary = await dietaryPreferences.read();
@@ -101,11 +106,19 @@ final class OnboardingCompletionService {
       );
       await phaseHook?.call(OnboardingCommitPhase.profile);
 
-      await weights.addWeight(
-        draft.currentWeightKg!,
-        date: committedAt,
-        measurementContext: 'unspecified',
-      );
+      final latestWeight = existingWeights.isEmpty
+          ? null
+          : existingWeights.first;
+      final weightChanged =
+          latestWeight == null ||
+          (latestWeight.weight - draft.currentWeightKg!).abs() > .0001;
+      if (!reviewMode || weightChanged) {
+        await weights.addWeight(
+          draft.currentWeightKg!,
+          date: committedAt,
+          measurementContext: 'unspecified',
+        );
+      }
       await phaseHook?.call(OnboardingCommitPhase.weight);
 
       final profile = await profiles.getProfile();
@@ -119,16 +132,26 @@ final class OnboardingCompletionService {
       );
       await phaseHook?.call(OnboardingCommitPhase.goal);
 
-      await measurements.saveForDay(
-        date: committedAt,
-        waistCm: waist,
-        neckCm: neck,
-        hipsCm: hips,
-        chestCm: existingMeasurement?.chestCm,
-        armCm: existingMeasurement?.armCm,
-        thighCm: existingMeasurement?.thighCm,
-        allowEmptySnapshot: true,
-      );
+      final baselineMeasurement = existingMeasurement;
+      final measurementChanged = baselineMeasurement == null
+          ? (existingProfile?.waist != waist ||
+                existingProfile?.neck != neck ||
+                hips != null)
+          : baselineMeasurement.waistCm != waist ||
+                baselineMeasurement.neckCm != neck ||
+                baselineMeasurement.hipsCm != hips;
+      if (!reviewMode || measurementChanged) {
+        await measurements.saveForDay(
+          date: committedAt,
+          waistCm: waist,
+          neckCm: neck,
+          hipsCm: hips,
+          chestCm: existingMeasurement?.chestCm,
+          armCm: existingMeasurement?.armCm,
+          thighCm: existingMeasurement?.thighCm,
+          allowEmptySnapshot: true,
+        );
+      }
       await phaseHook?.call(OnboardingCommitPhase.measurements);
 
       final existingPlan = await plans.getForProfile(profile.uuid);

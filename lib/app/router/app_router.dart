@@ -148,7 +148,12 @@ class AppRouter {
         path: '/account-data-conflict',
         builder: (_, _) => const AccountDataConflictPage(),
       ),
-      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, state) => OnboardingPage(
+          reviewMode: state.uri.queryParameters['mode'] == 'review',
+        ),
+      ),
       GoRoute(
         path: '/daily-check-in',
         builder: (_, _) => const DailyCheckInPage(),

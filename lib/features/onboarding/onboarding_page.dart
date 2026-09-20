@@ -30,7 +30,12 @@ part 'onboarding_detail_steps.dart';
 part 'onboarding_components.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
-  const OnboardingPage({super.key});
+  const OnboardingPage({super.key, this.reviewMode = false});
+
+  /// Opens the completed setup as an explicit editor.  This must not be
+  /// inferred from the presence of a draft: an interrupted first-time flow
+  /// still needs to resume from that draft.
+  final bool reviewMode;
 
   @override
   ConsumerState<OnboardingPage> createState() => _OnboardingPageState();
@@ -61,6 +66,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   bool _permissionBusy = false;
   String? _inlineError;
   String? _aiStatusMessage;
+  final _aiStatusKey = GlobalKey();
   Future<void> _draftWrites = Future<void>.value();
 
   List<String> get _steps => <String>[
@@ -116,74 +122,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _load() async {
     try {
       final draftRepository = ref.read(onboardingDraftRepositoryProvider);
-      var value = await draftRepository.load();
-      if (value == null) {
-        final preferences = ref.read(preferencesRepositoryProvider);
-        final profile = await ref
-            .read(userProfileRepositoryProvider)
-            .getProfile();
-        final latestWeights = await ref.read(weightRepositoryProvider).getAll();
-        final measurement = await ref
-            .read(bodyMeasurementRepositoryProvider)
-            .getLatest();
-        final activeGoal = await ref.read(goalRepositoryProvider).getActive();
-        final units = await preferences.get('units');
-        final storedGoals = OnboardingGoalBindings.decode(
-          await preferences.get(OnboardingGoalBindings.storageKey),
-        );
-        final storedCoachContext = await preferences.get(
-          CoachContextPreferences.storageKey,
-        );
-        final inferredGoal = switch (activeGoal?.type) {
-          'lose' => OnboardingGoal.loseWeight,
-          'gain' => OnboardingGoal.gainWeight,
-          _ => OnboardingGoal.maintainWeight,
-        };
-        final goalSet = storedGoals.isNotEmpty
-            ? storedGoals
-            : profile == null
-            ? const <OnboardingGoal>{}
-            : <OnboardingGoal>{inferredGoal};
-        final birthDate = DateTime.tryParse(
-          await preferences.get('profileDateOfBirth') ?? '',
-        );
-        final currentWeight = latestWeights.isNotEmpty
-            ? latestWeights.first.weight
-            : profile?.currentWeight;
-        value = OnboardingDraft(
-          preferredName: await preferences.get('displayName') ?? '',
-          goals: goalSet,
-          activity: profile?.activityLevel,
-          regularExercise: profile?.exercises ?? false,
-          birthDate: birthDate,
-          sex: profile?.gender,
-          countryRegion: await preferences.get('countryRegion') ?? '',
-          localeTag:
-              BilLocalePolicy.canonicalSupportedTag(
-                await preferences.get('locale'),
-              ) ??
-              BilLocalePolicy.canonicalTag(
-                WidgetsBinding.instance.platformDispatcher.locale,
-              ),
-          system: units == 'imperial'
-              ? MeasurementSystem.imperial
-              : MeasurementSystem.metric,
-          heightCm: profile?.height,
-          currentWeightKg: currentWeight,
-          targetWeightKg: profile?.targetWeight,
-          weeklyPaceKg: _restoredPace(
-            currentWeight,
-            profile?.targetWeight,
-            activeGoal?.targetDate,
-          ),
-          waistCm: measurement?.waistCm ?? profile?.waist,
-          neckCm: measurement?.neckCm ?? profile?.neck,
-          hipsCm: profile?.gender == 'female' ? measurement?.hipsCm : null,
-          aiFocuses: storedCoachContext == null
-              ? OnboardingGoalBindings.suggestedAiFocuses(goalSet)
-              : CoachContextPreferences.decode(storedCoachContext).focuses,
-        );
-      }
+      var value = widget.reviewMode
+          ? await _loadCanonicalDraft(reviewMode: true)
+          : await draftRepository.load();
+      value ??= await _loadCanonicalDraft();
 
       final remoteResult = await ref
           .read(onboardingRemoteAiGatewayProvider)
@@ -195,14 +137,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             OnboardingRemoteAiConsent.declined,
           _ when value.remoteAiConsent == OnboardingRemoteAiConsent.declined =>
             OnboardingRemoteAiConsent.declined,
-          _ => OnboardingRemoteAiConsent.unknown,
+          _ => value.remoteAiConsent,
         },
       );
 
       if (!mounted) return;
       setState(() {
         _draft = value!;
-        final restored = _steps.indexOf(value.stepId);
+        final restored = widget.reviewMode ? 0 : _steps.indexOf(value.stepId);
         _index = restored < 0 ? 0 : restored;
         _loaded = true;
         _loadFailed = false;
@@ -215,6 +157,92 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         _loadFailed = true;
       });
     }
+  }
+
+  Future<OnboardingDraft> _loadCanonicalDraft({bool reviewMode = false}) async {
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final profile = await ref.read(userProfileRepositoryProvider).getProfile();
+    final latestWeights = await ref.read(weightRepositoryProvider).getAll();
+    final measurement = await ref
+        .read(bodyMeasurementRepositoryProvider)
+        .getLatest();
+    final activeGoal = await ref.read(goalRepositoryProvider).getActive();
+    final units = await preferences.get('units');
+    final storedGoals = OnboardingGoalBindings.decode(
+      await preferences.get(OnboardingGoalBindings.storageKey),
+    );
+    final storedCoachContext = await preferences.get(
+      CoachContextPreferences.storageKey,
+    );
+    OnboardingPermissionStatus permission(String? raw) =>
+        OnboardingPermissionStatus.values.firstWhere(
+          (value) => value.name == raw,
+          orElse: () => OnboardingPermissionStatus.notRequested,
+        );
+    final storedConsentName = await preferences.get(
+      'onboarding.remoteAiConsent',
+    );
+    final storedConsent = OnboardingRemoteAiConsent.values.firstWhere(
+      (value) => value.name == storedConsentName,
+      orElse: () => OnboardingRemoteAiConsent.unknown,
+    );
+    final inferredGoal = switch (activeGoal?.type) {
+      'lose' => OnboardingGoal.loseWeight,
+      'gain' => OnboardingGoal.gainWeight,
+      _ => OnboardingGoal.maintainWeight,
+    };
+    final goalSet = storedGoals.isNotEmpty
+        ? storedGoals
+        : profile == null
+        ? const <OnboardingGoal>{}
+        : <OnboardingGoal>{inferredGoal};
+    final birthDate = DateTime.tryParse(
+      await preferences.get('profileDateOfBirth') ?? '',
+    );
+    final currentWeight = latestWeights.isNotEmpty
+        ? latestWeights.first.weight
+        : profile?.currentWeight;
+    return OnboardingDraft(
+      preferredName: await preferences.get('displayName') ?? '',
+      goals: goalSet,
+      activity: profile?.activityLevel,
+      regularExercise: profile?.exercises ?? false,
+      birthDate: birthDate,
+      sex: profile?.gender,
+      countryRegion: await preferences.get('countryRegion') ?? '',
+      localeTag:
+          BilLocalePolicy.canonicalSupportedTag(
+            await preferences.get('locale'),
+          ) ??
+          BilLocalePolicy.canonicalTag(
+            WidgetsBinding.instance.platformDispatcher.locale,
+          ),
+      system: units == 'imperial'
+          ? MeasurementSystem.imperial
+          : MeasurementSystem.metric,
+      heightCm: profile?.height,
+      currentWeightKg: currentWeight,
+      targetWeightKg: profile?.targetWeight,
+      weeklyPaceKg: _restoredPace(
+        currentWeight,
+        profile?.targetWeight,
+        activeGoal?.targetDate,
+      ),
+      waistCm: measurement?.waistCm ?? profile?.waist,
+      neckCm: measurement?.neckCm ?? profile?.neck,
+      hipsCm: profile?.gender == 'female' ? measurement?.hipsCm : null,
+      aiFocuses: storedCoachContext == null
+          ? OnboardingGoalBindings.suggestedAiFocuses(goalSet)
+          : CoachContextPreferences.decode(storedCoachContext).focuses,
+      healthPermission: permission(
+        await preferences.get('onboarding.permission.health'),
+      ),
+      notificationPermission: permission(
+        await preferences.get('onboarding.permission.notifications'),
+      ),
+      remoteAiConsent: storedConsent,
+      estimatesAcknowledged: reviewMode,
+    );
   }
 
   static double? _restoredPace(
@@ -268,6 +296,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> _queueDraftSave([OnboardingDraft? snapshot]) {
+    if (widget.reviewMode) return Future<void>.value();
     final value = snapshot ?? _draft;
     _draftWrites = _draftWrites
         .catchError((Object _) {})
@@ -314,6 +343,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     setState(() => _transitionBusy = true);
     try {
       if (_index == 0) {
+        if (widget.reviewMode) {
+          if (mounted) context.go('/settings');
+          return;
+        }
         final savedDraft = _draft.copyWith(stepId: 'name');
         await _queueDraftSave(savedDraft);
         if (mounted) context.go('/account-gateway');
@@ -477,7 +510,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         dietaryPreferences: ref.read(dietaryPreferencesRepositoryProvider),
         drafts: ref.read(onboardingDraftRepositoryProvider),
       );
-      await service.commit(draft: _draft);
+      await service.commit(draft: _draft, reviewMode: widget.reviewMode);
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       ref.invalidate(coachContextSnapshotProvider);
@@ -525,7 +558,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     final view = _stepView(_stepId);
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
-    final navigationBusy = _busy || _transitionBusy || _permissionBusy;
+    // Permission requests (including explicit Cloud AI consent) must not turn
+    // the bottom navigation into a transient spinner.  Keep that navigation
+    // surface stable while the request is in flight; Continue is disabled
+    // below through `nextEnabled` until the result arrives.
+    final navigationBusy = _busy || _transitionBusy;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -557,7 +594,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         onNext: () => unawaited(_goNext()),
         onSkip: view.skip,
         nextLabel: _stepId == 'review' ? t('Finish setup') : null,
-        nextEnabled: view.nextEnabled,
+        nextEnabled: view.nextEnabled && !_permissionBusy,
         busy: navigationBusy,
       ),
     );
