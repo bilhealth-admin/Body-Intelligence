@@ -18,19 +18,12 @@ void main() {
           ),
         ),
       );
-      expect(backend, contains('verifiedAppleCertificateChain(header.x5c)'));
-      expect(
-        backend,
-        contains(
-          'certificates[index - 1].verify(certificates[index].publicKey)',
-        ),
-      );
-      expect(backend, contains('root.verify(root.publicKey)'));
-      expect(backend, contains('now < validFrom || now > validTo'));
-      expect(
-        backend,
-        contains('digestBytes(decodeBase64Bytes(header.x5c.at(-1)!))'),
-      );
+      expect(backend, contains('verifiedAppleCertificateChain('));
+      expect(backend, contains('verifyCertificateSignature('));
+      expect(backend, contains('certificateIsCurrent('));
+      expect(backend, contains('intermediate.certificate.issuer'));
+      expect(backend, contains('candidate.certificate.subject'));
+      expect(backend, contains('digestBytes(certificateChain[2].der)'));
       expect(backend, contains('if (!pinnedRoots.has(rootDigest))'));
       expect(backend, matches(RegExp(r'''\.split\(["'],["']\)''')));
     },

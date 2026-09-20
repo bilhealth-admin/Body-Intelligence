@@ -101,7 +101,10 @@ void main() {
       matches(RegExp(r'''productId\s*!==\s*["']bil_ai_boost["']''')),
     );
     expect(store, contains('verifyGoogleConsumable'));
-    expect(store, contains('verifyApple(verification)'));
+    // Apple consumables are verified through the bounded JWS wrapper before
+    // the ownership/persistence path. The old variable-level call was removed
+    // when the v57 certificate-chain boundary became explicit.
+    expect(store, contains('verifyApple(String('));
     expect(
       store,
       matches(
