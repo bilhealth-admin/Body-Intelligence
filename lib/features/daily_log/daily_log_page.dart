@@ -18,6 +18,7 @@ import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/services/runtime_permission_policy.dart';
+import '../../app/services/recoverable_image_picker.dart';
 import '../../app/services/store_review_prompt_service.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../../shared/widgets/premium_surface.dart';
@@ -30,7 +31,6 @@ import '../commerce/presentation/premium_nutrition_glass.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../settings/premium_meal_features_page.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
-import '../nutrition/presentation/food_barcode_scanner_page.dart';
 import '../nutrition/presentation/product_identity_copy.dart';
 import '../nutrition/presentation/barcode_food_review_dialog.dart';
 import '../nutrition/presentation/barcode_runtime_copy.dart';
@@ -44,6 +44,7 @@ import '../nutrition/services/bil_speech_to_text.dart';
 import '../connected_health/food_name_health_sync_policy.dart';
 import '../global_platform/core/global_platform_core.dart';
 import '../global_platform/runtime/global_product_composition_root.dart';
+import 'daily_log_capture_providers.dart';
 import 'providers/daily_log_provider.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'presentation/daily_log_input_sections.dart';
@@ -58,6 +59,7 @@ part 'daily_log_capture_actions.dart';
 part 'daily_log_copy.dart';
 part 'daily_log_meal_entry_components.dart';
 part 'daily_log_navigation_actions.dart';
+part 'daily_log_page_skeleton.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
   const DailyLogPage({
@@ -394,7 +396,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         const SizedBox(height: 12),
                         DailyMealDetailSummary(
                           meal: focusedMeal,
-                          calorieGoal: mealCalorieGoals[mealType],
+                          calorieGoal:
+                              goalSchedule.mealTargets[mealType]?.calories ??
+                              mealCalorieGoals[mealType],
                         ),
                         const SizedBox(height: 12),
                         DailyMealDetailItems(
@@ -695,45 +699,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _DailyLedgerSkeleton extends StatelessWidget {
-  const _DailyLedgerSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.surfaceContainerHighest;
-    return Column(
-      key: const Key('daily-log-ledger-loading-skeleton'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          width: 150,
-          height: 18,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          height: 14,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        const SizedBox(height: 14),
-        Container(
-          height: 42,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-      ],
     );
   }
 }
