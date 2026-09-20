@@ -8,6 +8,7 @@ class _MessageBubble extends StatelessWidget {
     this.onFeedback,
     this.onReport,
     this.onSpeak,
+    this.onRetry,
     this.onAction,
     this.animateReveal = false,
   });
@@ -17,6 +18,7 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<bool>? onFeedback;
   final ValueChanged<String>? onReport;
   final VoidCallback? onSpeak;
+  final VoidCallback? onRetry;
   final ValueChanged<IntelligenceAction>? onAction;
   final bool animateReveal;
 
@@ -79,6 +81,20 @@ class _MessageBubble extends StatelessWidget {
                   ).textTheme.bodyLarge?.copyWith(height: 1.55),
                   animateReveal: animateReveal,
                 ),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('ai-coach-retry'),
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: Text(
+                        intelligenceText(context, 'Retry', 'إعادة المحاولة'),
+                      ),
+                    ),
+                  ),
+                ],
                 if (trustedLinks.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Wrap(

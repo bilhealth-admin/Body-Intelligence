@@ -468,57 +468,67 @@ const _copy = <String, Map<String, String>>{
 class WeeklyReportPage extends ConsumerWidget {
   const WeeklyReportPage({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(
-      title: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: AlignmentDirectional.centerStart,
-        child: Text(_t(context, 'title')),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return Scaffold(
+      appBar: AppBar(
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(_t(context, 'title')),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/settings'),
+        ),
+        actions: [
+          IconButton(
+            key: const Key('weekly-report-previous'),
+            constraints: const BoxConstraints.tightFor(width: 40, height: 48),
+            tooltip: _weekNavigationCopy(context, previous: true),
+            onPressed: () {
+              final selected = ref.read(selectedWeeklyReportDateProvider);
+              ref.read(selectedWeeklyReportDateProvider.notifier).state =
+                  selected.subtract(const Duration(days: 7));
+            },
+            icon: Icon(
+              rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+            ),
+          ),
+          IconButton(
+            key: const Key('weekly-report-next'),
+            constraints: const BoxConstraints.tightFor(width: 40, height: 48),
+            tooltip: _weekNavigationCopy(context, previous: false),
+            onPressed: _canSelectNextWeek(ref)
+                ? () {
+                    final selected = ref.read(selectedWeeklyReportDateProvider);
+                    final today = ref.read(weeklyReportClockProvider)();
+                    final candidate = selected.add(const Duration(days: 7));
+                    ref.read(selectedWeeklyReportDateProvider.notifier).state =
+                        candidate.isAfter(today) ? today : candidate;
+                  }
+                : null,
+            icon: Icon(
+              rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+            ),
+          ),
+        ],
       ),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_rounded),
-        onPressed: () =>
-            context.canPop() ? context.pop() : context.go('/settings'),
-      ),
-      actions: [
-        IconButton(
-          key: const Key('weekly-report-previous'),
-          constraints: const BoxConstraints.tightFor(width: 40, height: 48),
-          tooltip: _weekNavigationCopy(context, previous: true),
-          onPressed: () {
-            final selected = ref.read(selectedWeeklyReportDateProvider);
-            ref.read(selectedWeeklyReportDateProvider.notifier).state = selected
-                .subtract(const Duration(days: 7));
-          },
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-        IconButton(
-          key: const Key('weekly-report-next'),
-          constraints: const BoxConstraints.tightFor(width: 40, height: 48),
-          tooltip: _weekNavigationCopy(context, previous: false),
-          onPressed: _canSelectNextWeek(ref)
-              ? () {
-                  final selected = ref.read(selectedWeeklyReportDateProvider);
-                  final today = ref.read(weeklyReportClockProvider)();
-                  final candidate = selected.add(const Duration(days: 7));
-                  ref.read(selectedWeeklyReportDateProvider.notifier).state =
-                      candidate.isAfter(today) ? today : candidate;
-                }
-              : null,
-          icon: const Icon(Icons.chevron_right_rounded),
-        ),
-      ],
-    ),
-    body: ref
-        .watch(weeklyReportProvider)
-        .when(
-          skipLoadingOnRefresh: true,
-          skipLoadingOnReload: true,
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => _Message(_t(context, 'read_error')),
-          data: (report) => _Body(report: report),
-        ),
-  );
+      body: ref
+          .watch(weeklyReportProvider)
+          .when(
+            skipLoadingOnRefresh: true,
+            skipLoadingOnReload: true,
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, _) => _Message(
+              _t(context, 'read_error'),
+              onRetry: () => ref.invalidate(weeklyReportProvider),
+            ),
+            data: (report) => _Body(report: report),
+          ),
+    );
+  }
 }
 
 bool _canSelectNextWeek(WidgetRef ref) {

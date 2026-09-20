@@ -28,6 +28,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       sending = true;
       replyPhase = _CoachReplyPhase.preparing;
       failedRequest = null;
+      retryableErrorMessageIds.clear();
       introVisible = false;
       if (addUserMessage) {
         messages.add(
@@ -320,6 +321,9 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             autoSpeak: autoSpeakReply,
             channel: inputChannel,
           );
+          if (!repeatedServiceNotice) {
+            retryableErrorMessageIds.add(presented.id);
+          }
         }
         if (!repeatedServiceNotice) {
           messageRuntimes[presented.id] = reply.runtime;
@@ -380,6 +384,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         );
         messages.add(errorMessage);
         animatedResponseIds.add(errorMessage.id);
+        retryableErrorMessageIds.add(errorMessage.id);
       });
       _scrollToLatest();
       unawaited(_saveConversation());

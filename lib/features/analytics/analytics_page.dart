@@ -130,11 +130,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final weightUnit = UnitConverter.weightUnit(system);
-    if (weightsAsync.isLoading ||
-        mealsAsync.isLoading ||
-        waterAsync.isLoading ||
-        dailyLogsAsync.isLoading ||
-        contextsAsync.isLoading) {
+    // Keep a previously resolved snapshot visible while a provider refreshes.
+    // A full-page skeleton is only appropriate when there is no value to show
+    // yet; replacing valid content during refresh causes a visible flash and
+    // makes the selected analytics range appear to reset.
+    if ((weightsAsync.isLoading && !weightsAsync.hasValue) ||
+        (mealsAsync.isLoading && !mealsAsync.hasValue) ||
+        (waterAsync.isLoading && !waterAsync.hasValue) ||
+        (dailyLogsAsync.isLoading && !dailyLogsAsync.hasValue) ||
+        (contextsAsync.isLoading && !contextsAsync.hasValue)) {
       return Scaffold(
         appBar: _settingsAppBar(context),
         body: Semantics(

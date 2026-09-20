@@ -146,6 +146,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final messageRuntimes = <String, CoachAnswerRuntime>{};
   final messageFeedback = <String, bool>{};
   final reportedMessages = <String>{};
+  // Only the latest failed turn owns a retry affordance. The failure remains
+  // part of the transcript, while the transient progress row is not rendered
+  // as a second error surface.
+  final retryableErrorMessageIds = <String>{};
   // Only replies created during this mounted session animate. Restored
   // transcript rows remain immediately readable and selectable.
   final animatedResponseIds = <String>{};
@@ -352,9 +356,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     final showLiveVoiceDraft =
         listening && pendingVoiceTranscript.trim().isNotEmpty;
     // A sent turn is already visible at the newest end of the conversation.
-    // Keep that space clear while BIL prepares the answer; only a failure
-    // needs an in-thread action for the member.
-    final showReplyProgress = replyPhase == _CoachReplyPhase.failed;
+    // Failures are rendered once as a transcript message with its Retry
+    // action; retain the progress row only as a defensive fallback if a
+    // failure has no persisted message yet.
+    final showReplyProgress =
+        replyPhase == _CoachReplyPhase.failed &&
+        retryableErrorMessageIds.isEmpty;
     final showIntroBrief = introVisible && dailyBrief != null;
     final coachStatus = !conversationReady
         ? tr('Restoring conversation', 'جارٍ استعادة المحادثة')
@@ -695,6 +702,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
           : null,
       onReport: canRate
           ? (reason) => _recordFeedback(message, false, reason: reason)
+          : null,
+      onRetry: retryableErrorMessageIds.contains(message.id)
+          ? _retryFailedCoachRequest
           : null,
       onAction: (action) => unawaited(_executeAction(action)),
       animateReveal: animatedResponseIds.contains(message.id),
