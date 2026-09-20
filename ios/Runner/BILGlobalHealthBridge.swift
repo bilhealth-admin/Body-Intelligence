@@ -9,40 +9,30 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // A first foreground import must not ask HealthKit for an account's entire
   // lifetime in one unbounded query. One year still preserves useful Apple
   // Watch history (sleep, workouts, heart rate and daily activity), while the
-  // per-type page limit keeps each platform-channel reply bounded enough for
-  // the Flutter main isolate to remain responsive. The existing per-type
-  // HKQueryAnchor continues each page and later incremental refreshes without
-  // restarting the backfill.
+  // per-type page limit keeps each platform-channel reply bounded. The
+  // existing per-type HKQueryAnchor continues each page and later incremental
+  // refreshes without restarting the backfill.
   private static let initialHistoryDays = 365
+  // Keep each native reply small enough for Flutter to paint the sync state
+  // between HealthKit callbacks. The anchor still resumes the next page on
+  // the following explicit sync, so this is a throughput bound, not a data
+  // loss policy.
   private static let readPageLimit = 100
   private let store: HKHealthStore
   private let channelName: String
-  private let healthQueryQueue = DispatchQueue(label: "com.bilhealth.apple-health.read")
-  private let activeReadLock = NSLock()
-  private var activeReadResult: FlutterResult?
-  private var activeReadQueries: [HKQuery] = []
-  private var backgroundObserver: NSObjectProtocol?
+  // A Dart timeout cannot cancel an already executing HealthKit query. Keep a
+  // native guard so a second tap cannot start another full set of queries while
+  // the first one is still draining in the background.
+  private var readChangesInFlight = false
+  private let readStateLock = NSLock()
+  private var activeReadQuery: HKQuery?
+  private var readChangesCancellationRequested = false
+  private var pendingReadResult: FlutterResult?
 
   init(store: HKHealthStore = HKHealthStore(), channelName: String = "bil/apple_health") {
     self.store = store
     self.channelName = channelName
     super.init()
-    backgroundObserver = NotificationCenter.default.addObserver(
-      forName: UIApplication.didEnterBackgroundNotification,
-      object: nil,
-      queue: nil
-    ) { [weak self] _ in
-      self?.cancelActiveReadChanges(
-        message: "HealthKit reading stopped because the app entered the background."
-      )
-    }
-  }
-
-  deinit {
-    if let backgroundObserver {
-      NotificationCenter.default.removeObserver(backgroundObserver)
-    }
-    _ = cancelActiveReadChanges(message: "HealthKit bridge was released.")
   }
 
   static func register(with registrar: FlutterPluginRegistrar) {
@@ -71,8 +61,6 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       result(permissionSnapshot(arguments: call.arguments))
     case "requestPermissions":
       requestAuthorization(arguments: call.arguments, result: result)
-    case "authorizationRequestStatus":
-      authorizationRequestStatus(arguments: call.arguments, result: result)
     case "enableBackgroundDelivery":
       // BIL v1 deliberately ships without the HealthKit background-delivery
       // entitlement. A foreground refresh remains available after explicit
@@ -92,13 +80,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     case "readChanges":
       readChanges(arguments: call.arguments, result: result)
     case "cancelReadChanges":
-      result([
-        "cancelled": cancelActiveReadChanges(
-          message: "HealthKit reading was cancelled by BIL."
-        ),
-      ])
-    case "readDailyTotals":
-      readDailyTotals(arguments: call.arguments, result: result)
+      cancelReadChanges(result: result)
     case "write":
       write(arguments: call.arguments, result: result)
     case "delete":
@@ -113,37 +95,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     let requested = (args?["types"] as? [String]) ?? Self.supportedTypeNames
     var output: [String: Bool] = [:]
     for name in requested {
-      guard sampleType(name) != nil else { output[name] = false; continue }
-      // HealthKit hides read authorization. sharingDenied describes WRITE
-      // access and cannot be used to suppress a permitted read. This flag
-      // means queryable type, not that the user granted read permission;
-      // HealthKit still filters results and Dart requires explicit consent.
-      output[name] = true
+      guard let type = sampleType(name) else { output[name] = false; continue }
+      output[name] = store.authorizationStatus(for: type) != .sharingDenied
     }
     return output
-  }
-
-  private func authorizationRequestStatus(arguments: Any?, result: @escaping FlutterResult) {
-    guard HKHealthStore.isHealthDataAvailable() else {
-      result(error("unavailable", "HealthKit is unavailable on this device.")); return
-    }
-    let args = arguments as? [String: Any]
-    let names = Set((args?["types"] as? [String]) ?? Self.supportedTypeNames)
-    let readTypes = Set(names.compactMap(sampleType))
-    // This API reports whether a sheet is needed, never the user's read grants.
-    store.getRequestStatusForAuthorization(toShare: [], read: readTypes) { status, failure in
-      DispatchQueue.main.async {
-        if let failure {
-          result(self.error("authorization_status_failed", failure.localizedDescription)); return
-        }
-        switch status {
-        case .shouldRequest: result("shouldRequest")
-        case .unnecessary: result("unnecessary")
-        case .unknown: result("unknown")
-        @unknown default: result("unknown")
-        }
-      }
-    }
   }
 
   private func requestAuthorization(arguments: Any?, result: @escaping FlutterResult) {
@@ -168,209 +123,147 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     guard HKHealthStore.isHealthDataAvailable() else {
       result(error("unavailable", "HealthKit is unavailable on this device.")); return
     }
-    guard beginActiveRead(result: result) else {
-      result(error("read_in_progress", "A HealthKit read is already in progress.")); return
+    readStateLock.lock()
+    let alreadyInFlight = readChangesInFlight
+    if !alreadyInFlight {
+      readChangesInFlight = true
+      readChangesCancellationRequested = false
+      pendingReadResult = result
+    }
+    readStateLock.unlock()
+    guard !alreadyInFlight else {
+      result(error("operation_in_progress", "A HealthKit sync is already in progress.")); return
     }
     let args = arguments as? [String: Any]
     let names = ((args?["types"] as? [String]) ?? Self.supportedTypeNames)
       .filter { sampleType($0) != nil }
-      .sorted()
     let asOf = ISO8601DateFormatter().date(from: args?["asOf"] as? String ?? "") ?? Date()
     let anchors = decodeAnchors(args?["anchor"] as? String)
+    let lock = NSLock()
+    var records: [[String: Any]] = []
+    var deleted: [String] = []
+    var nextAnchors = anchors
+    var pageHasMore = false
+    var firstError: Error?
     let historyStart = asOf.addingTimeInterval(
       -TimeInterval(Self.initialHistoryDays * 24 * 60 * 60)
     )
-    guard !names.isEmpty else {
-      completeActiveRead([
-        "records": [], "deletedIds": [], "nextAnchor": encodeAnchors(anchors), "hasMore": false,
-      ])
-      return
-    }
 
-    // HealthKit executes every query asynchronously. Run one bounded query at
-    // a time rather than creating a burst of all supported types, and keep the
-    // response assembly off the main thread. The persisted anchor makes later
-    // explicit syncs continue exactly where this page stopped.
-    healthQueryQueue.async { [weak self] in
-      guard let self else { return }
-      var nextIndex = 0
-      var records: [[String: Any]] = []
-      var deleted: [String] = []
-      var nextAnchors = anchors
-      var pageHasMore = false
-
-      func executeNext() {
-        guard self.isActiveRead else { return }
-        guard nextIndex < names.count else {
-          self.completeActiveRead([
+    // Query one record type at a time. HealthKit can contain a very large
+    // number of heart-rate and workout samples; launching every type at once
+    // creates a burst of callbacks and a large platform-channel reply, which
+    // can starve Flutter's main thread and leave both sync indicators stuck.
+    var nextNameIndex = 0
+    func executeNext() {
+      if self.isReadCancellationRequested() {
+        self.completeReadChanges(self.error("cancelled", "The HealthKit sync was cancelled."))
+        return
+      }
+      guard nextNameIndex < names.count else {
+        if let firstError {
+          self.completeReadChanges(self.error("query_failed", firstError.localizedDescription))
+          return
+        }
+        self.completeReadChanges([
             "records": records,
             "deletedIds": deleted,
             "nextAnchor": self.encodeAnchors(nextAnchors),
             "hasMore": pageHasMore,
-          ])
-          return
-        }
-
-        let name = names[nextIndex]
-        nextIndex += 1
-        guard let type = self.sampleType(name) else {
+        ])
+        return
+      }
+      let name = names[nextNameIndex]
+      nextNameIndex += 1
+      guard let type = sampleType(name) else {
+        executeNext()
+        return
+      }
+      // Keep the same bounded historical window while an anchored page is
+      // being drained. Moving `asOf` forward on later syncs never resets the
+      // anchor; it only admits newly observed samples into the query scope.
+      let predicate = HKQuery.predicateForSamples(
+        withStart: historyStart,
+        end: asOf,
+        options: []
+      )
+      let query = HKAnchoredObjectQuery(
+        type: type,
+        predicate: predicate,
+        anchor: anchors[name],
+        limit: Self.readPageLimit
+      ) {
+        [weak self] _, samples, deletedObjects, newAnchor, queryError in
+        guard let self else {
           executeNext()
           return
         }
-        let predicate = HKQuery.predicateForSamples(
-          withStart: historyStart,
-          end: asOf,
-          options: []
-        )
-        let query = HKAnchoredObjectQuery(
-          type: type,
-          predicate: predicate,
-          anchor: anchors[name],
-          limit: Self.readPageLimit
-        ) { [weak self] query, samples, deletedObjects, newAnchor, queryError in
-          guard let self else { return }
-          self.healthQueryQueue.async {
-            self.removeActiveReadQuery(query)
-            guard self.isActiveRead else { return }
-            if let queryError {
-              self.completeActiveRead(
-                self.error("query_failed", queryError.localizedDescription)
-              )
-              return
-            }
-            records.append(
-              contentsOf: (samples ?? []).compactMap {
-                self.serialize(sample: $0, logicalType: name)
-              }
-            )
-            deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
-            if (samples?.count ?? 0) + (deletedObjects?.count ?? 0) >= Self.readPageLimit {
-              pageHasMore = true
-            }
-            if let newAnchor { nextAnchors[name] = newAnchor }
-            executeNext()
+        self.setActiveReadQuery(nil)
+        if self.isReadCancellationRequested() {
+          self.completeReadChanges(self.error("cancelled", "The HealthKit sync was cancelled."))
+          return
+        }
+        lock.lock()
+        if let queryError {
+          firstError = firstError ?? queryError
+        } else {
+          records.append(contentsOf: (samples ?? []).compactMap { self.serialize(sample: $0, logicalType: name) })
+          deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
+          if (samples?.count ?? 0) + (deletedObjects?.count ?? 0) >= Self.readPageLimit {
+            pageHasMore = true
           }
+          if let newAnchor { nextAnchors[name] = newAnchor }
         }
-        guard self.registerActiveReadQuery(query) else { return }
-        self.store.execute(query)
+        lock.unlock()
+        executeNext()
       }
-
-      executeNext()
-    }
-  }
-
-  private var isActiveRead: Bool {
-    activeReadLock.lock(); defer { activeReadLock.unlock() }
-    return activeReadResult != nil
-  }
-
-  private func beginActiveRead(result: @escaping FlutterResult) -> Bool {
-    activeReadLock.lock(); defer { activeReadLock.unlock() }
-    guard activeReadResult == nil else { return false }
-    activeReadResult = result
-    activeReadQueries.removeAll(keepingCapacity: true)
-    return true
-  }
-
-  private func registerActiveReadQuery(_ query: HKQuery) -> Bool {
-    activeReadLock.lock(); defer { activeReadLock.unlock() }
-    guard activeReadResult != nil else { return false }
-    activeReadQueries.append(query)
-    return true
-  }
-
-  private func removeActiveReadQuery(_ query: HKQuery) {
-    activeReadLock.lock(); defer { activeReadLock.unlock() }
-    activeReadQueries.removeAll { $0 === query }
-  }
-
-  private func completeActiveRead(_ value: Any?) {
-    let callback: FlutterResult?
-    activeReadLock.lock()
-    callback = activeReadResult
-    activeReadResult = nil
-    activeReadQueries.removeAll(keepingCapacity: true)
-    activeReadLock.unlock()
-    guard let callback else { return }
-    DispatchQueue.main.async { callback(value) }
-  }
-
-  @discardableResult
-  private func cancelActiveReadChanges(message: String) -> Bool {
-    let callback: FlutterResult?
-    let queries: [HKQuery]
-    activeReadLock.lock()
-    callback = activeReadResult
-    queries = activeReadQueries
-    activeReadResult = nil
-    activeReadQueries.removeAll(keepingCapacity: true)
-    activeReadLock.unlock()
-    guard let callback else { return false }
-    for query in queries { store.stop(query) }
-    DispatchQueue.main.async {
-      callback(self.error("read_cancelled", message))
-    }
-    return true
-  }
-
-  /// One-shot statistics, not an observer/background query. HealthKit merges
-  /// overlapping sources; adding raw iPhone/Watch samples would count twice.
-  private func readDailyTotals(arguments: Any?, result: @escaping FlutterResult) {
-    guard HKHealthStore.isHealthDataAvailable() else {
-      result(error("unavailable", "HealthKit is unavailable on this device.")); return
-    }
-    let args = arguments as? [String: Any]
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    let asOf = formatter.date(from: args?["asOf"] as? String ?? "") ?? Date()
-    let calendar = Calendar.current
-    let today = calendar.startOfDay(for: asOf)
-    guard let start = calendar.date(byAdding: .day, value: -29, to: today) else {
-      result(error("invalid_date", "Could not resolve calendar days.")); return
-    }
-    let group = DispatchGroup()
-    let lock = NSLock()
-    var records = [[String: Any]]()
-    var firstError: Error?
-    for (name, unitName) in [("steps", "count"), ("distance", "m"), ("activeEnergy", "kcal")] {
-      guard let type = sampleType(name) as? HKQuantityType,
-            let unit = preferredUnit(name) else { continue }
-      group.enter()
-      let query = HKStatisticsCollectionQuery(
-        quantityType: type,
-        quantitySamplePredicate: HKQuery.predicateForSamples(withStart: start, end: asOf, options: []),
-        options: .cumulativeSum,
-        anchorDate: today,
-        intervalComponents: DateComponents(day: 1)
-      )
-      query.initialResultsHandler = { _, collection, failure in
-        defer { group.leave() }
-        lock.lock(); defer { lock.unlock() }
-        if let failure { firstError = firstError ?? failure; return }
-        collection?.enumerateStatistics(from: start, to: asOf) { statistics, _ in
-          guard let quantity = statistics.sumQuantity() else { return }
-          let value = quantity.doubleValue(for: unit)
-          guard value.isFinite, value >= 0 else { return }
-          let observedAt = min(statistics.endDate.addingTimeInterval(-0.001), asOf)
-          records.append([
-            "id": "daily:\(name):\(formatter.string(from: statistics.startDate))",
-            "type": name, "value": value, "unit": unitName,
-            "observedAt": formatter.string(from: observedAt),
-            "sourceId": "healthkit.statistics", "confidence": 1.0,
-            "timeZoneId": calendar.timeZone.identifier,
-            "attributes": [
-              "aggregation": "native_daily",
-              "sources": (statistics.sources ?? []).map { $0.bundleIdentifier }.sorted(),
-            ],
-          ])
-        }
-      }
+      self.setActiveReadQuery(query)
       store.execute(query)
     }
-    group.notify(queue: .main) {
-      if let firstError { result(self.error("daily_totals_failed", firstError.localizedDescription)); return }
-      result(records)
+    executeNext()
+  }
+
+  private func cancelReadChanges(result: @escaping FlutterResult) {
+    readStateLock.lock()
+    let inFlight = readChangesInFlight
+    readChangesCancellationRequested = inFlight
+    let query = activeReadQuery
+    readStateLock.unlock()
+    guard inFlight else {
+      result(nil)
+      return
     }
+    if let query { store.stop(query) }
+    result(nil)
+    // HealthKit normally invokes the anchored-query completion after stop().
+    // Keep a bounded fallback so a provider/OEM that omits that callback never
+    // leaves the channel in the single-flight state forever.
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+      self.completeReadChanges(self.error("cancelled", "The HealthKit sync was cancelled."))
+    }
+  }
+
+  private func isReadCancellationRequested() -> Bool {
+    readStateLock.lock(); defer { readStateLock.unlock() }
+    return readChangesCancellationRequested
+  }
+
+  private func setActiveReadQuery(_ query: HKQuery?) {
+    readStateLock.lock(); activeReadQuery = query; readStateLock.unlock()
+  }
+
+  private func completeReadChanges(_ value: Any?) {
+    readStateLock.lock()
+    guard readChangesInFlight else {
+      readStateLock.unlock()
+      return
+    }
+    readChangesInFlight = false
+    readChangesCancellationRequested = false
+    activeReadQuery = nil
+    let pending = pendingReadResult
+    pendingReadResult = nil
+    readStateLock.unlock()
+    DispatchQueue.main.async { pending?(value) }
   }
 
   private func write(arguments: Any?, result: @escaping FlutterResult) {
@@ -434,27 +327,24 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     let rawDeviceName = sample.device?.name
     let deviceModel = sample.device?.model
     let deviceManufacturer = sample.device?.manufacturer
-    let sourceName = source.name
     let sourceProductType = sample.sourceRevision.productType
     if let rawDeviceName { attributes["deviceName"] = rawDeviceName }
     if let deviceModel { attributes["deviceModel"] = deviceModel }
     if let deviceManufacturer { attributes["deviceManufacturer"] = deviceManufacturer }
-    if !sourceName.isEmpty { attributes["sourceName"] = sourceName }
-    if let sourceProductType, !sourceProductType.isEmpty {
-      attributes["sourceProductType"] = sourceProductType
-    }
-    let normalizedDevice = [rawDeviceName, deviceModel, deviceManufacturer]
+    if let sourceProductType { attributes["sourceProductType"] = sourceProductType }
+    let normalizedDevice = [
+      rawDeviceName,
+      deviceModel,
+      deviceManufacturer,
+      sourceProductType,
+    ]
       .compactMap { $0?.lowercased() }
       .joined(separator: " ")
-    // HealthKit can omit HKDevice for Apple Watch activity samples. The source
-    // revision's product type is still explicit device evidence (for example,
-    // Watch6,2), so keep that provenance rather than dropping valid steps.
-    let normalizedSourceName = sourceName.lowercased()
-    let normalizedProductType = sourceProductType?.lowercased() ?? ""
+    let watchProductType = sourceProductType?.lowercased().contains("watch") == true
+    let watchModel = deviceModel?.lowercased().contains("watch") == true
     if normalizedDevice.contains("apple watch") ||
        (normalizedDevice.contains("apple") && normalizedDevice.contains("watch")) ||
-       normalizedSourceName.contains("apple watch") ||
-       normalizedProductType.hasPrefix("watch") {
+       watchProductType || watchModel {
       attributes["wearableKind"] = "apple_watch"
     }
     if let sleep = sample as? HKCategorySample, logicalType == "sleep" {

@@ -74,7 +74,6 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     if (boost.state == AiBoostPurchaseState.verified) {
       usage = _loadUsage();
       ref.invalidate(aiCoachCreditAccessProvider);
-      ref.invalidate(aiBoostVisionAccessProvider);
     }
     setState(() {});
   }

@@ -56,10 +56,9 @@ class StartupPage extends ConsumerStatefulWidget {
   /// Production callers leave this null and use the initialized Supabase auth.
   final GoTrueClient? authClient;
 
-  /// A native sign-in response can be authoritative before Android finishes
-  /// persisting `currentSession`. The login route passes this short-lived
-  /// handoff so startup cannot undo a successful provider sign-in during that
-  /// storage window.
+  /// Session observed by the OAuth callback/native provider before Supabase
+  /// finishes writing its local auth storage. This is a short-lived startup
+  /// handoff, not an entitlement grant.
   final Session? initialAuthSession;
 
   /// Deterministic seam for startup widget tests. Production resolves the
@@ -125,9 +124,9 @@ class _StartupPageState extends ConsumerState<StartupPage>
             state.event == AuthChangeEvent.signedOut ||
             state.session != null;
         setState(() {
-          // Do not let a transient null initialSession event erase the
-          // verified native handoff. An explicit signedOut event is the only
-          // authoritative clear operation.
+          // A transient null event is not authoritative while a verified
+          // callback/native handoff is still being persisted. Only an
+          // explicit sign-out may clear that handoff before storage settles.
           if (state.session != null ||
               state.event == AuthChangeEvent.signedOut) {
             authSession = state.session;

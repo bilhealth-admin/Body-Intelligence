@@ -381,10 +381,6 @@ Future<void> _pumpAdmin(
     ),
   );
   await tester.pumpAndSettle();
-  if (allowed) {
-    await tester.tap(find.byKey(const Key('admin-action-notifications')));
-    await tester.pumpAndSettle();
-  }
 }
 
 MaterialApp _localizedApp({required Widget home}) => MaterialApp(

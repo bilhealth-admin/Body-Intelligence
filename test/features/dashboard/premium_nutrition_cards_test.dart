@@ -71,29 +71,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> revealHeartHealthy(WidgetTester tester) async {
-    // A saved dietary preset must not displace Calories from the first page.
-    expect(
-      find.byKey(const Key('dashboard-reference-calories-card')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('dashboard-heart-circle-card')), findsNothing);
-    expect(tester.takeException(), isNull);
-    for (var page = 0; page < 2; page++) {
-      await tester.drag(
-        find.byKey(const Key('dashboard-calories-macros-horizontal')),
-        const Offset(-320, 0),
-      );
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    }
-  }
-
   testWidgets('heart health reuses the three macro ring colors', (
     tester,
   ) async {
     await pumpDashboard(tester, premiumUnlocked: true);
-    await revealHeartHealthy(tester);
 
     final heart = find.byKey(const Key('dashboard-heart-circle-card'));
     expect(heart, findsOneWidget);
@@ -116,41 +97,16 @@ void main() {
     expect(find.text('Fiber'), findsOneWidget);
     expect(find.descendant(of: heart, matching: find.text('—')), findsNothing);
     expect(
-      find.descendant(of: heart, matching: find.text('800')),
-      findsOneWidget,
-    );
-    expect(
       find.descendant(of: heart, matching: find.text('2300')),
-      findsNothing,
-    );
-    await tester.drag(
-      find.byKey(const Key('dashboard-calories-macros-horizontal')),
-      const Offset(320, 0),
-    );
-    await tester.pumpAndSettle();
-    final macros = find.byKey(const Key('dashboard-reference-macros-card'));
-    expect(
-      find.descendant(
-        of: macros,
-        matching: find.text('40 g', findRichText: true),
-      ),
       findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: macros,
-        matching: find.textContaining('/ 100', findRichText: true),
-      ),
-      findsNothing,
     );
     expect(find.byKey(const Key('dashboard-premium-lock')), findsNothing);
   });
 
   testWidgets(
-    'free users see Premium labels on macros and heart health locks',
+    'free users see minimal Premium locks on macros and heart health',
     (tester) async {
       await pumpDashboard(tester, premiumUnlocked: false);
-      await revealHeartHealthy(tester);
 
       final heartLock = find.descendant(
         of: find.byKey(const Key('dashboard-heart-premium-lock')),
@@ -162,20 +118,13 @@ void main() {
           of: find.byKey(const Key('dashboard-heart-premium-lock')),
           matching: find.byType(PremiumLabelBadge),
         ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('dashboard-heart-premium-lock')),
-          matching: find.byType(BackdropFilter),
-        ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.byKey(const Key('dashboard-premium-page-label')),
         findsOneWidget,
       );
-      expect(find.byType(PremiumLabelBadge), findsNWidgets(2));
+      expect(find.byType(PremiumLabelBadge), findsOneWidget);
 
       await tester.drag(
         find.byKey(const Key('dashboard-calories-macros-horizontal')),
@@ -192,7 +141,7 @@ void main() {
           of: find.byKey(const Key('dashboard-macros-premium-lock')),
           matching: find.byType(BackdropFilter),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.descendant(
@@ -205,10 +154,10 @@ void main() {
         of: find.byKey(const Key('dashboard-macros-premium-lock')),
         matching: find.byType(PremiumLabelBadge),
       );
-      expect(macroBadge, findsOneWidget);
+      expect(macroBadge, findsNothing);
       expect(
         find.descendant(of: macrosLock, matching: find.byType(Text)),
-        findsOneWidget,
+        findsNothing,
       );
 
       await tester.tap(macrosLock);

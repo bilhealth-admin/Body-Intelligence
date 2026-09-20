@@ -100,6 +100,7 @@ final _dashboardPresets =
           DashboardSectionIds.macros,
           DashboardSectionIds.activity,
           DashboardSectionIds.connectedHealth,
+          DashboardSectionIds.progress,
           DashboardSectionIds.aiCoach,
         },
         premium: true,
@@ -184,6 +185,14 @@ final _dashboardPreferenceItems =
         'الذكاء الشخصي',
         'One Best Action, evidence, and Body Twin',
         'أفضل إجراء والأدلة والتوأم الجسدي',
+      ),
+      (
+        DashboardSectionIds.progress,
+        Icons.show_chart_rounded,
+        'Progress',
+        'التقدم',
+        'Measured trends from your saved records',
+        'الاتجاهات المقاسة من سجلاتك المحفوظة',
       ),
       (
         DashboardSectionIds.connectedHealth,

@@ -86,58 +86,6 @@ void main() {
   });
 
   test(
-    'canonicalizes regional locale tags instead of leaking English names',
-    () {
-      expect(
-        FoodPresentationLocalizer.foodName(
-          name: 'Egg',
-          localeTag: 'ar-EG',
-          source: 'USDA FoodData Central',
-        ),
-        'بيض',
-      );
-      expect(
-        FoodPresentationLocalizer.foodName(
-          name: 'Egg',
-          localeTag: 'fr-FR',
-          source: 'USDA FoodData Central',
-        ),
-        'Œufs',
-      );
-    },
-  );
-
-  test('rare trusted USDA identities have bounded 25-locale names', () {
-    for (final tag in tags) {
-      for (final food in const ['Teff, cooked', 'Cloud ear mushroom, dried']) {
-        final localized = FoodPresentationLocalizer.foodName(
-          name: food,
-          localeTag: tag,
-          source: 'USDA FoodData Central',
-        );
-        expect(localized.trim(), isNotEmpty, reason: '$tag / $food');
-        expect(
-          FoodPresentationLocalizer.hasLocalizedBrowseName(
-            name: food,
-            localeTag: tag,
-            source: 'USDA FoodData Central',
-          ),
-          isTrue,
-          reason: '$tag / $food',
-        );
-      }
-    }
-    expect(
-      FoodPresentationLocalizer.foodName(
-        name: 'Cloud ear mushroom, dried',
-        localeTag: 'ar',
-        source: 'USDA FoodData Central',
-      ),
-      'فطر أذن الخشب',
-    );
-  });
-
-  test(
     'brand, custom, and unknown scientific identities are never invented',
     () {
       expect(
@@ -292,14 +240,6 @@ void main() {
       ),
       'zh-Hant',
     );
-    expect(
-      FoodPresentationLocalizer.resultLocaleForQuery(
-        query: 'Теф',
-        interfaceLocaleTag: 'en',
-      ),
-      'en',
-      reason: 'The same reviewed spelling exists in Russian and Ukrainian.',
-    );
   });
 
   test('Search and Add Food UI copy has no English fallback in 25 locales', () {
@@ -416,18 +356,6 @@ void main() {
         source: 'USDA FoodData Central',
       ),
       isNot(contains('Chicken')),
-    );
-  });
-
-  test('reviewed Arabic source wins over a malformed stored translation', () {
-    expect(
-      FoodPresentationLocalizer.foodName(
-        name: 'Bread, white, commercially prepared',
-        arabicName: 'خبز جبين',
-        localeTag: 'ar',
-        source: 'USDA FoodData Central',
-      ),
-      'خبز أبيض محضر',
     );
   });
 }

@@ -43,5 +43,4 @@ Future<void> main() async {
   }
   repository.close();
 }
-
 // ignore_for_file: avoid_print

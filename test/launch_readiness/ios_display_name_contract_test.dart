@@ -3,39 +3,36 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'iOS device display and bundle names use the approved public name and trademark',
-    () {
-      final plist = File('ios/Runner/Info.plist').readAsStringSync();
+  test('iOS device display and bundle names use the approved public name', () {
+    final plist = File('ios/Runner/Info.plist').readAsStringSync();
 
-      expect(
-        plist,
+    expect(
+      plist,
+      matches(
+        RegExp(
+          r'<key>CFBundleDisplayName</key>\s*<string>Body Intelligence Log</string>',
+        ),
+      ),
+    );
+    expect(
+      plist,
+      matches(
+        RegExp(
+          r'<key>CFBundleName</key>\s*<string>Body Intelligence Log</string>',
+        ),
+      ),
+    );
+    expect(
+      plist,
+      isNot(
         matches(
-          RegExp(
-            r'<key>CFBundleDisplayName</key>\s*<string>Body Intelligence Log™</string>',
-          ),
+          RegExp(r'<key>CFBundleDisplayName</key>\s*<string>BIL</string>'),
         ),
-      );
-      expect(
-        plist,
-        matches(
-          RegExp(
-            r'<key>CFBundleName</key>\s*<string>Body Intelligence Log™</string>',
-          ),
-        ),
-      );
-      expect(
-        plist,
-        isNot(
-          matches(
-            RegExp(r'<key>CFBundleDisplayName</key>\s*<string>BIL</string>'),
-          ),
-        ),
-      );
-    },
-  );
+      ),
+    );
+  });
 
-  test('Android launcher name uses the approved public name and trademark', () {
+  test('Android launcher names keep the full name without a BIL prefix', () {
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',
     ).readAsStringSync();
@@ -52,7 +49,7 @@ void main() {
     expect(manifest, contains('android:label="@string/app_name"'));
     expect(
       defaultStrings,
-      contains('<string name="app_name">Body Intelligence Log™</string>'),
+      contains('<string name="app_name">Body Intelligence Log</string>'),
     );
     expect(localizedStrings, hasLength(25));
     for (final file in localizedStrings) {

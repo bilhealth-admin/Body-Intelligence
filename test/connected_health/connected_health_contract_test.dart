@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dar
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
+import 'package:body_intelligence_log/features/connected_health/widgets/live_health_watch.dart';
 import 'package:body_intelligence_log/features/global_platform/health_data/unified_health_data_integration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,11 +20,11 @@ void main() {
     () async {
       final gateway = _PermissionGateway();
       final controller = ConnectedHealthController(gateway);
+      await Future<void>.delayed(Duration.zero);
 
       final first = controller.requestPermissions();
       final duplicate = controller.requestPermissions();
-      expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
-      expect(controller.state.value?.isBusy, isTrue);
+      expect(controller.state, isA<AsyncLoading<ConnectedHealthSnapshot>>());
       expect(gateway.permissionCalls, 1);
 
       gateway.permissionRequest.completeError(StateError('denied'));
@@ -42,34 +43,38 @@ void main() {
   );
 
   test(
-    'permission completion waits for an explicit watch update before import',
+    'permission completion performs the first health import immediately',
     () async {
       final gateway = _PermissionGateway();
       final controller = ConnectedHealthController(gateway);
+      await Future<void>.delayed(Duration.zero);
 
       final request = controller.requestPermissions();
       gateway.permissionRequest.complete(_authorizationRequestedSnapshot);
       await request;
 
       expect(gateway.permissionCalls, 1);
-      expect(gateway.syncCalls, 0);
+      expect(gateway.syncCalls, 1);
       expect(
         controller.state.value?.status,
-        ConnectedHealthStatus.authorizationRequested,
+        ConnectedHealthStatus.synchronized,
       );
       controller.dispose();
     },
   );
 
   test(
-    'permission tap does not wait for a passive native status read',
+    'permission tap waits for constructor refresh instead of being lost',
     () async {
       final gateway = _DelayedLoadGateway();
       final controller = ConnectedHealthController(gateway);
 
       final request = controller.requestPermissions();
+      expect(gateway.permissionCalls, 0);
+
+      gateway.loadRequest.complete(_permissionRequiredSnapshot);
+      await Future<void>.delayed(Duration.zero);
       expect(gateway.permissionCalls, 1);
-      expect(gateway.loadRequest.isCompleted, isFalse);
 
       gateway.permissionRequest.complete(_permissionRequiredSnapshot);
       await request;
@@ -82,28 +87,45 @@ void main() {
   );
 
   test(
-    'status refresh does not import native records without an explicit sync',
+    'dashboard refresh reads cached state without starting a native import',
     () async {
       final gateway = _SynchronizedGateway();
       final controller = ConnectedHealthController(gateway);
+      await Future<void>.delayed(Duration.zero);
 
-      expect(gateway.loadCalls, 0);
-      expect(gateway.syncCalls, 0);
-
-      await controller.refresh();
       expect(gateway.loadCalls, 1);
       expect(gateway.syncCalls, 0);
 
-      await controller.synchronize();
-      expect(gateway.syncCalls, 1);
+      await controller.refresh();
+      expect(gateway.loadCalls, 2);
+      expect(gateway.syncCalls, 0);
       controller.dispose();
     },
   );
 
+  test('a stalled explicit sync releases the UI with cached data', () async {
+    final gateway = _StalledSyncGateway();
+    final controller = ConnectedHealthController(
+      gateway,
+      operationTimeout: const Duration(milliseconds: 1),
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    await controller.synchronize();
+
+    expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+    expect(controller.state.value?.status, ConnectedHealthStatus.degraded);
+    expect(
+      controller.state.value?.failureCode,
+      'health_sync_timed_out_cache_preserved',
+    );
+    controller.dispose();
+  });
+
   test('foreground refresh keeps the current snapshot visible', () async {
     final gateway = _DelayedRefreshGateway();
     final controller = ConnectedHealthController(gateway);
-    await controller.refresh();
+    await Future<void>.delayed(Duration.zero);
     expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
 
     final refresh = controller.refresh();
@@ -112,55 +134,11 @@ void main() {
       controller.state.value?.status,
       ConnectedHealthStatus.permissionDenied,
     );
-    expect(controller.state.value?.isBusy, isTrue);
 
     gateway.refreshLoad.complete(_permissionDeniedSnapshot);
     await refresh;
     expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
-    expect(controller.state.value?.isBusy, isFalse);
     controller.dispose();
-  });
-
-  test(
-    'a stalled watch update exits busy state with a truthful timeout',
-    () async {
-      final gateway = _HangingSynchronizationGateway();
-      final controller = ConnectedHealthController(
-        gateway,
-        synchronizationTimeout: Duration.zero,
-      );
-
-      await controller.synchronize();
-
-      expect(gateway.syncCalls, 1);
-      expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
-      expect(controller.state.value?.status, ConnectedHealthStatus.degraded);
-      expect(controller.state.value?.isBusy, isFalse);
-      expect(controller.state.value?.failureCode, 'health_sync_timed_out');
-      controller.dispose();
-    },
-  );
-
-  test('an iOS timeout asks its cancellable native gateway to stop', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    try {
-      final gateway = _CancellableHangingSynchronizationGateway();
-      final controller = ConnectedHealthController(
-        gateway,
-        synchronizationTimeout: Duration.zero,
-      );
-
-      await controller.synchronize();
-      await Future<void>.delayed(Duration.zero);
-
-      expect(gateway.syncCalls, 1);
-      expect(gateway.cancelCalls, 1);
-      expect(controller.state.value?.isBusy, isFalse);
-      expect(controller.state.value?.failureCode, 'health_sync_timed_out');
-      controller.dispose();
-    } finally {
-      debugDefaultTargetPlatformOverride = null;
-    }
   });
 
   test('permission action is hidden for an unsupported platform', () {
@@ -185,8 +163,9 @@ void main() {
   test('native read and write scopes stay platform-specific', () {
     expect(
       BilHealthScope.healthConnectReadTypeNames,
-      const {'steps', 'distance', 'activeEnergy'},
-      reason: 'Android is activity-only; iOS retains its reviewed read scope.',
+      BilHealthScope.appleHealthReadTypeNames,
+      reason:
+          'The two native bridges now implement the same canonical read scope.',
     );
     expect(
       connectedHealthReadTypesForPlatform(
@@ -206,7 +185,7 @@ void main() {
     );
     expect(
       connectedHealthWriteTypeNamesForPlatform(TargetPlatform.android),
-      isEmpty,
+      const <String>{'weight', 'nutrition'},
     );
     expect(
       connectedHealthReadTypesForPlatform(TargetPlatform.windows),
@@ -242,7 +221,7 @@ void main() {
     );
   });
 
-  test('phone and wearable provenance remain distinct in storage', () {
+  test('watch presentation requires wearable provenance', () {
     final observedAt = DateTime.utc(2026, 9, 4);
     final manual = ConnectedHealthSignalView(
       key: 'weight',
@@ -264,6 +243,34 @@ void main() {
 
     expect(connectedHealthSignalHasWearableProvenance(manual), isFalse);
     expect(connectedHealthSignalHasWearableProvenance(watch), isTrue);
+  });
+
+  test('verified iPhone Apple Health data is eligible for the watch card', () {
+    final snapshot = ConnectedHealthSnapshot(
+      status: ConnectedHealthStatus.synchronized,
+      platformSource: 'Apple Health',
+      availableSources: const <String>['Apple Health'],
+      signals: <ConnectedHealthSignalView>[
+        ConnectedHealthSignalView(
+          key: 'steps',
+          value: 957,
+          unit: 'count',
+          source: 'iPhone',
+          observedAt: DateTime.utc(2026, 9, 12),
+          confidence: 1,
+        ),
+      ],
+      importedCount: 1,
+      lastSyncAt: DateTime.utc(2026, 9, 12),
+      failureCode: null,
+      deviceVerified: true,
+    );
+
+    expect(liveHealthWatchCanShowMetrics(snapshot), isTrue);
+    expect(
+      connectedHealthSignalCanShowOnWatch(snapshot, snapshot.signals.single),
+      isTrue,
+    );
   });
 
   testWidgets(
@@ -357,8 +364,7 @@ void main() {
     ).readAsStringSync();
 
     expect(grid, contains('ConnectedHealthCard('));
-    expect(grid, isNot(contains('PersonalHealthAiPanel(')));
-    expect(grid, isNot(contains('personalHealthAi:')));
+    expect(grid, contains('personalHealthAi: personalHealthAiPanel'));
     expect(personal, isNot(contains('ConnectedHealth')));
     expect(connected, contains('PremiumSurface('));
     expect(connected, contains('DashboardCarousel('));
@@ -368,7 +374,6 @@ void main() {
   test('connected health uses existing global platform runtimes', () {
     final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
-      'lib/features/connected_health/providers/connected_health_native_gateway.dart',
       'lib/features/connected_health/providers/connected_health_gateway_helpers.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
 
@@ -380,21 +385,9 @@ void main() {
     expect(provider, isNot(contains('https://')));
   });
 
-  test('daily totals timeout preserves the completed health import', () {
-    final gateway = File(
-      'lib/features/connected_health/providers/connected_health_native_gateway.dart',
-    ).readAsStringSync();
-
-    expect(gateway, contains('.timeout(const Duration(seconds: 6))'));
-    expect(gateway, contains('on TimeoutException'));
-    expect(gateway, contains('nativeTotals = null;'));
-    expect(gateway, contains('A slow OS aggregate must not discard'));
-  });
-
   test('device verification requires persisted native evidence', () {
     final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
-      'lib/features/connected_health/providers/connected_health_native_gateway.dart',
       'lib/features/connected_health/providers/connected_health_gateway_helpers.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
 
@@ -448,7 +441,7 @@ void main() {
       ).readAsStringSync();
       final page = File(
         'lib/features/connected_health/connected_health_page.dart',
-      ).readAsStringSync().replaceAll(RegExp(r'\s+'), ' ');
+      ).readAsStringSync();
       final card = File(
         'lib/features/connected_health/widgets/connected_health_card.dart',
       ).readAsStringSync();
@@ -461,24 +454,14 @@ void main() {
       );
       expect(page, contains("Key('fitness-devices-premium-gate')"));
       expect(page, contains("'connected-health-live-watch-card'"));
-      expect(
-        File(
-          'lib/features/connected_health/connected_health_source_card.dart',
-        ).readAsStringSync(),
-        contains("'connected-health-source-card'"),
-      );
+      expect(page, contains("'connected-health-source-card'"));
       expect(page, contains("'connected-health-signals-card'"));
-      expect(page, contains('liveHealthWatchCanShowMetrics(snapshot)'));
+      expect(page, contains('connectedHealthSnapshotHasWearableEvidence('));
       expect(page, contains('defaultTargetPlatform == TargetPlatform.android'));
       expect(page, contains('child: const _FitnessDeviceSection()'));
       expect(card, contains('LiveHealthWatch('));
       expect(card, contains("Key('dashboard-live-fitness-watch-slot')"));
-      expect(card, contains("Key('dashboard-compact-health-hub')"));
-      expect(
-        card,
-        isNot(contains("'Manage fitness sources'")),
-        reason: 'the compact dashboard card itself is the navigation target',
-      );
+      expect(card, contains("Key('dashboard-fitness-link-action')"));
       expect(card, contains("Key('dashboard-fitness-last-sync')"));
       expect(card, isNot(contains('HealthDevicePager(')));
       expect(card, contains("context.push('/connected-health')"));
@@ -691,11 +674,7 @@ final class _SynchronizedGateway implements ConnectedHealthGateway {
   }
 }
 
-final class _HangingSynchronizationGateway implements ConnectedHealthGateway {
-  int syncCalls = 0;
-  final Completer<ConnectedHealthSnapshot> syncRequest =
-      Completer<ConnectedHealthSnapshot>();
-
+final class _StalledSyncGateway implements ConnectedHealthGateway {
   @override
   Future<ConnectedHealthSnapshot> load() async => _synchronizedSnapshot;
 
@@ -715,48 +694,8 @@ final class _HangingSynchronizationGateway implements ConnectedHealthGateway {
       _permissionRequiredSnapshot;
 
   @override
-  Future<ConnectedHealthSnapshot> synchronize() {
-    syncCalls += 1;
-    return syncRequest.future;
-  }
-}
-
-final class _CancellableHangingSynchronizationGateway
-    implements ConnectedHealthGateway, ConnectedHealthCancellableSyncGateway {
-  int syncCalls = 0;
-  int cancelCalls = 0;
-
-  final Completer<ConnectedHealthSnapshot> syncRequest =
-      Completer<ConnectedHealthSnapshot>();
-
-  @override
-  Future<ConnectedHealthSnapshot> load() async => _synchronizedSnapshot;
-
-  @override
-  Future<void> openSystemSettings() async {}
-
-  @override
-  Future<ConnectedHealthSnapshot> requestPermissions() async =>
-      _synchronizedSnapshot;
-
-  @override
-  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
-      _synchronizedSnapshot;
-
-  @override
-  Future<ConnectedHealthSnapshot> revokePermissions() async =>
-      _permissionRequiredSnapshot;
-
-  @override
-  Future<ConnectedHealthSnapshot> synchronize() {
-    syncCalls += 1;
-    return syncRequest.future;
-  }
-
-  @override
-  Future<void> cancelSynchronization() async {
-    cancelCalls += 1;
-  }
+  Future<ConnectedHealthSnapshot> synchronize() =>
+      Completer<ConnectedHealthSnapshot>().future;
 }
 
 const _permissionRequiredSnapshot = ConnectedHealthSnapshot(

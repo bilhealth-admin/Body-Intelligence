@@ -52,7 +52,6 @@ class ReferenceSettingsCopy {
       'AI Coach': 'مدرب BIL الذكي',
       'AI Coach settings': 'إعدادات المدرب الذكي',
       'BIL Administration': 'إدارة BIL',
-      'Administration': 'الإدارة',
       'Advertising privacy': 'خصوصية الإعلانات',
       'Delete account': 'حذف الحساب',
       'My Profile': 'ملفي الشخصي',
@@ -69,6 +68,7 @@ class ReferenceSettingsCopy {
       'Apps & Devices': 'التطبيقات والأجهزة',
       'Steps': 'الخطوات',
       'Community': 'المجتمع',
+      'Learn': 'تعلّم',
       'Friends': 'الأصدقاء',
       'Messages': 'الرسائل',
       'Settings': 'الإعدادات',
@@ -84,8 +84,6 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'إعدادات التغذية الأسبوعية',
       'Push Notifications': 'الإشعارات الفورية',
       'Logout': 'تسجيل الخروج',
-      'Could not sign out. Check your connection and retry.':
-          'تعذر تسجيل الخروج. تحقق من اتصالك وحاول مجددًا.',
       'Go Premium': 'الانتقال إلى Premium',
       'Explore Premium': 'استكشف Premium',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':
@@ -119,7 +117,6 @@ class ReferenceSettingsCopy {
       'AI Coach': 'Coach IA BIL',
       'AI Coach settings': 'Réglages du coach IA',
       'BIL Administration': 'Administration BIL',
-      'Administration': 'Administration',
       'Advertising privacy': 'Confidentialité publicitaire',
       'Delete account': 'Supprimer le compte',
       'My Profile': 'Mon profil',
@@ -136,6 +133,7 @@ class ReferenceSettingsCopy {
       'Apps & Devices': 'Applications et appareils',
       'Steps': 'Pas',
       'Community': 'Communauté',
+      'Learn': 'Apprendre',
       'Friends': 'Amis',
       'Messages': 'Messages',
       'Settings': 'Paramètres',
@@ -151,8 +149,6 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'Nutrition hebdomadaire',
       'Push Notifications': 'Notifications push',
       'Logout': 'Déconnexion',
-      'Could not sign out. Check your connection and retry.':
-          'Impossible de vous déconnecter. Vérifiez votre connexion et réessayez.',
       'Go Premium': 'Passer à Premium',
       'Explore Premium': 'Découvrir Premium',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':
@@ -186,7 +182,6 @@ class ReferenceSettingsCopy {
       'AI Coach': 'Coach de IA de BIL',
       'AI Coach settings': 'Ajustes del coach de IA',
       'BIL Administration': 'Administración de BIL',
-      'Administration': 'Administración',
       'Advertising privacy': 'Privacidad publicitaria',
       'Delete account': 'Eliminar cuenta',
       'My Profile': 'Mi perfil',
@@ -203,6 +198,7 @@ class ReferenceSettingsCopy {
       'Apps & Devices': 'Aplicaciones y dispositivos',
       'Steps': 'Pasos',
       'Community': 'Comunidad',
+      'Learn': 'Aprender',
       'Friends': 'Amigos',
       'Messages': 'Mensajes',
       'Settings': 'Configuración',
@@ -218,8 +214,6 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'Nutrición semanal',
       'Push Notifications': 'Notificaciones push',
       'Logout': 'Cerrar sesión',
-      'Could not sign out. Check your connection and retry.':
-          'No se pudo cerrar la sesión. Comprueba tu conexión e inténtalo de nuevo.',
       'Go Premium': 'Hazte Premium',
       'Explore Premium': 'Explorar Premium',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':
@@ -253,7 +247,6 @@ class ReferenceSettingsCopy {
       'AI Coach': 'BIL Yapay Zekâ Koçu',
       'AI Coach settings': 'Yapay zekâ koçu ayarları',
       'BIL Administration': 'BIL Yönetimi',
-      'Administration': 'Yönetim',
       'Advertising privacy': 'Reklam gizliliği',
       'Delete account': 'Hesabı sil',
       'My Profile': 'Profilim',
@@ -270,6 +263,7 @@ class ReferenceSettingsCopy {
       'Apps & Devices': 'Uygulamalar ve cihazlar',
       'Steps': 'Adımlar',
       'Community': 'Topluluk',
+      'Learn': 'Öğren',
       'Friends': 'Arkadaşlar',
       'Messages': 'Mesajlar',
       'Settings': 'Ayarlar',
@@ -285,8 +279,6 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'Haftalık beslenme ayarları',
       'Push Notifications': 'Anlık bildirimler',
       'Logout': 'Çıkış yap',
-      'Could not sign out. Check your connection and retry.':
-          'Çıkış yapılamadı. Bağlantınızı kontrol edip tekrar deneyin.',
       'Go Premium': 'Premium’a geç',
       'Explore Premium': 'Premium’u keşfet',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':

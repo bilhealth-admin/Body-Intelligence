@@ -14,14 +14,6 @@ Future<void> loadVisualEvidenceFont() {
   return _fontLoad ??= _loadRobotoIntoTestFamily();
 }
 
-Future<void> loadVisualEvidenceFontWhenCapturing(String environmentKey) {
-  // The code-only release suite still exercises these review fixtures. Load
-  // a deterministic local face for those assertions too; the environment key
-  // only controls PNG capture, not whether text should use Flutter's Ahem
-  // placeholder font.
-  return loadVisualEvidenceFont();
-}
-
 Future<void> _loadRobotoIntoTestFamily() async {
   var cursor = File(Platform.resolvedExecutable).parent;
   File? font;
@@ -39,16 +31,8 @@ Future<void> _loadRobotoIntoTestFamily() async {
     if (parent.path == cursor.path) break;
     cursor = parent;
   }
-  // Hosted Flutter caches can omit material_fonts even though the SDK itself
-  // is present. The project font keeps code-only layout assertions real and
-  // deterministic; capture runners still use SDK Roboto whenever available.
-  font ??= File(
-    '${Directory.current.path}${Platform.pathSeparator}assets'
-    '${Platform.pathSeparator}fonts${Platform.pathSeparator}'
-    'Montserrat-Bold.ttf',
-  );
-  if (!font.existsSync()) {
-    throw StateError('No deterministic visual-evidence font was found.');
+  if (font == null) {
+    throw StateError('Flutter SDK Roboto font was not found.');
   }
   Future<ByteData> bytes(File source) =>
       source.readAsBytes().then((value) => ByteData.sublistView(value));
@@ -63,27 +47,24 @@ Future<void> _loadRobotoIntoTestFamily() async {
     '${Platform.pathSeparator}fonts${Platform.pathSeparator}'
     'NotoNaskhArabic-Bold.ttf',
   );
-  final loader = FontLoader('RobotoEvidence')..addFont(bytes(font));
-  final robotoMedium = File('${fontDirectory.path}/roboto-medium.ttf');
-  final robotoBold = File('${fontDirectory.path}/roboto-bold.ttf');
-  if (robotoMedium.existsSync()) loader.addFont(bytes(robotoMedium));
-  if (robotoBold.existsSync()) loader.addFont(bytes(robotoBold));
-  loader
+  final loader = FontLoader('RobotoEvidence')
+    ..addFont(bytes(font))
+    ..addFont(bytes(File('${fontDirectory.path}/roboto-medium.ttf')))
+    ..addFont(bytes(File('${fontDirectory.path}/roboto-bold.ttf')))
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
   // Widget tests install Ahem as the implicit fallback. A number of legacy
   // production controls intentionally inherit the platform family instead of
   // the Material text theme, so they otherwise render as Ahem rectangles in
   // visual evidence. Register the real UI face for that fallback family too.
-  final fallback = FontLoader('Ahem')..addFont(bytes(font));
-  if (robotoMedium.existsSync()) fallback.addFont(bytes(robotoMedium));
-  if (robotoBold.existsSync()) fallback.addFont(bytes(robotoBold));
-  fallback
+  final fallback = FontLoader('Ahem')
+    ..addFont(bytes(font))
+    ..addFont(bytes(File('${fontDirectory.path}/roboto-medium.ttf')))
+    ..addFont(bytes(File('${fontDirectory.path}/roboto-bold.ttf')))
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
-  final materialIcons = File('${fontDirectory.path}/materialicons-regular.otf');
-  final icons = FontLoader('MaterialIcons');
-  if (materialIcons.existsSync()) icons.addFont(bytes(materialIcons));
+  final icons = FontLoader('MaterialIcons')
+    ..addFont(bytes(File('${fontDirectory.path}/materialicons-regular.otf')));
   // Platform-aware production glyphs need their real font too; without this,
   // an iOS-themed golden can silently capture fallback/tofu instead of icons.
   final cupertinoIcons = FontLoader('packages/cupertino_icons/CupertinoIcons')
@@ -112,7 +93,7 @@ Future<void> _loadRobotoIntoTestFamily() async {
     arabic.load(),
     productionArabic.load(),
     bilDisplay.load(),
-    if (materialIcons.existsSync()) icons.load(),
+    icons.load(),
     cupertinoIcons.load(),
   ]);
 }

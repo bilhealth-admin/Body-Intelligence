@@ -16,8 +16,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 93607,
-    "evidence_sha256": "388abdb5b60c342779a3852d90b5935719d0838d1f36c33b7b8a9e7d96af6266"
+    "evidence_bytes": 95146,
+    "evidence_sha256": "77d5cbf96c6a818a0b6eb1f9433ab635e4d806d1e1d4e5f053d7c79dd7eaa4d5"
   },
   {
     "reference": 4822,
@@ -36,8 +36,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_2.png",
-    "evidence_bytes": 63945,
-    "evidence_sha256": "dcc1b3dd51361e419cc3852be1b61fb256aaa76a84f9d58823cf16917b472c93"
+    "evidence_bytes": 62274,
+    "evidence_sha256": "601db3b35877b80d41b22be3770ba1a9273aefae60ab859c205fa823d4b50d4b"
   },
   {
     "reference": 4823,
@@ -56,8 +56,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_3.png",
-    "evidence_bytes": 42571,
-    "evidence_sha256": "3213098d3d923ced135ca783c810039d2b451ef02e49eda31376151a85f6171c"
+    "evidence_bytes": 41742,
+    "evidence_sha256": "634d73be7f1f0ca653a572546ae5f79e13af218b5598d15e8ba42cea812bd9b3"
   },
   {
     "reference": 4824,
@@ -216,8 +216,8 @@
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_trend_phone.png",
-    "evidence_bytes": 53097,
-    "evidence_sha256": "e692cbf932cf6c950a5cdd63c17587dc1f133439f2c8fb32f855a4bb3e74c0ee"
+    "evidence_bytes": 54138,
+    "evidence_sha256": "4da4be7301d1c45b82d3bbaef3f097ab5c6b07c81569ba7668ff8a88f66a32a5"
   },
   {
     "reference": 4832,
@@ -617,7 +617,7 @@
     "status": "independent_visual_review_limited_state_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png",
     "evidence_bytes": 88535,
-    "evidence_sha256": "89a12e85b03795a79ee4c10f2c36236167bf73897d9ea1f0f75ef967278c0fcc"
+    "evidence_sha256": "78b8f16368e47f2b7853476eccddc827bd31e5484b78d1278c315b6190b36b09"
   },
   {
     "reference": 4852,
@@ -916,8 +916,8 @@
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
-    "evidence_bytes": 19614,
-    "evidence_sha256": "e529b0993396f89028b9d5d85ef983d6773b08c97e68f73f5f4aec4d44f9c015"
+    "evidence_bytes": 20158,
+    "evidence_sha256": "50574e8fa61dabe0143af06ac015c51fe4b7028ddb7f00d9780f44ecffc7488a"
   },
   {
     "reference": 4867,
@@ -936,8 +936,8 @@
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png",
-    "evidence_bytes": 24145,
-    "evidence_sha256": "1822c6ab4c963fd6bc4624ec1dd5d3d75d5dfdff9aed4cdb75c7f1adb9cea635"
+    "evidence_bytes": 24927,
+    "evidence_sha256": "f5a3498cd0ce37ed3b3a6715b5563b610379960f3195e1b7d96e74f524fb119e"
   },
   {
     "reference": 4868,
@@ -1056,8 +1056,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
-    "evidence_bytes": 43215,
-    "evidence_sha256": "375da4ccd467af03e4c5c07d62cec2a802b57c136bce101504d92ab0de2898b8"
+    "evidence_bytes": 51769,
+    "evidence_sha256": "b299b54d85ac2751fcb7b80d6e9e77c736eead5023b1859a0b96c064e7fa226c"
   },
   {
     "reference": 4874,
@@ -1116,8 +1116,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 93607,
-    "evidence_sha256": "388abdb5b60c342779a3852d90b5935719d0838d1f36c33b7b8a9e7d96af6266"
+    "evidence_bytes": 95146,
+    "evidence_sha256": "77d5cbf96c6a818a0b6eb1f9433ab635e4d806d1e1d4e5f053d7c79dd7eaa4d5"
   },
   {
     "reference": 4877,
@@ -1136,8 +1136,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
-    "evidence_bytes": 46886,
-    "evidence_sha256": "c329b8969f12495a6daac6d83f493584fc04ac6746869ce62e50f54ad92c6415"
+    "evidence_bytes": 52451,
+    "evidence_sha256": "5cbc2809029aff942204bf07d06a1c9d6687cac4da1387980dc3cae4ba90943f"
   },
   {
     "reference": 4878,
@@ -1156,8 +1156,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
-    "evidence_bytes": 48270,
-    "evidence_sha256": "14c3aa316d3de75e0b0c016f0d07177a0649f18debce54c4a0905127d4142864"
+    "evidence_bytes": 52840,
+    "evidence_sha256": "3be925b9094704132e491e31b7145b246c05023ce242286f5bb575acb283cd9d"
   },
   {
     "reference": 4879,
@@ -1176,8 +1176,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone_2.png",
-    "evidence_bytes": 46607,
-    "evidence_sha256": "a89158b2be4500ba8288d26590040deb1a424270d129df42ca225974ea9498b7"
+    "evidence_bytes": 52822,
+    "evidence_sha256": "ba3c318e68e61e23e219e5503fc613f36c0b90ab214c501aa50cff21266f070e"
   },
   {
     "reference": 4880,
@@ -1196,8 +1196,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
-    "evidence_bytes": 46886,
-    "evidence_sha256": "c329b8969f12495a6daac6d83f493584fc04ac6746869ce62e50f54ad92c6415"
+    "evidence_bytes": 52451,
+    "evidence_sha256": "5cbc2809029aff942204bf07d06a1c9d6687cac4da1387980dc3cae4ba90943f"
   },
   {
     "reference": 4881,
@@ -1216,8 +1216,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_macros_phone.png",
-    "evidence_bytes": 43800,
-    "evidence_sha256": "e2aac2eb9f7b3f2eae1f5a1b7031515c27fb17691ef93357fb782c4c8fc6ad80"
+    "evidence_bytes": 48887,
+    "evidence_sha256": "9b8d0ea466e89bfb3f9b4ba75bef845cca3de3e1c2c6c98971c07f8661cafdc8"
   },
   {
     "reference": 4882,
@@ -1236,8 +1236,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_activity_phone.png",
-    "evidence_bytes": 43801,
-    "evidence_sha256": "d5a42afc20576528e604448997ac01739fd777c2beec2d1ecc837eb750c8336a"
+    "evidence_bytes": 48886,
+    "evidence_sha256": "3e5dd38ed70cbd05d007abad7d17302b44c80965b727b22304b3ee0fb4ee9668"
   },
   {
     "reference": 4883,
@@ -1256,8 +1256,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_quick_log_phone.png",
-    "evidence_bytes": 45878,
-    "evidence_sha256": "967bb5df19f0fa59040e6e833eb2d22d0efadc78a020f1d4b4396ed262f5b9eb"
+    "evidence_bytes": 52230,
+    "evidence_sha256": "b0f4633ff1505e400bacc77b74d857c28b60f2c4be63d4b065ceca8a6d3e09b1"
   },
   {
     "reference": 4884,
@@ -1276,8 +1276,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_discover_phone.png",
-    "evidence_bytes": 41619,
-    "evidence_sha256": "aa3cd11c93033c6d0784099be9d481de420d643b28bf6ca771bb68ebbbdb0493"
+    "evidence_bytes": 46874,
+    "evidence_sha256": "6e3ca6fdab74dc8b19bde7b5c533e7c860dd977b939cdd70d81f0e526c624d7a"
   },
   {
     "reference": 4885,
@@ -1296,8 +1296,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_best_action_phone.png",
-    "evidence_bytes": 45593,
-    "evidence_sha256": "bee590ef8491b164357703243c3803557898c809be4d67ee07e6ec992cea17ed"
+    "evidence_bytes": 51698,
+    "evidence_sha256": "99bfe09bb68171844f7785f708a3f39c4d5c3f6facfbfa98bfc54ee25434271b"
   },
   {
     "reference": 4886,
@@ -1336,8 +1336,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_progress_phone.png",
-    "evidence_bytes": 41825,
-    "evidence_sha256": "310091946bee60aee4320ff83fc890ae5d891c0d91bf3582a431200271d18798"
+    "evidence_bytes": 47198,
+    "evidence_sha256": "29f716fcb856f8c370e537e089468c1a07d6231e836a160405dc1bf57f1db1e2"
   },
   {
     "reference": 4888,
@@ -1356,8 +1356,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_connected_health_phone.png",
-    "evidence_bytes": 43288,
-    "evidence_sha256": "d3b0e181baaef5a7d20c929bcf48cddc0869838c872da2c7523c940c7e41fba9"
+    "evidence_bytes": 48946,
+    "evidence_sha256": "f96fd9689ae23083a4bace7a3e7f256725bb4bba753ad80e506d7530e6544f45"
   },
   {
     "reference": 4889,
@@ -1376,8 +1376,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_body_twin_phone.png",
-    "evidence_bytes": 43314,
-    "evidence_sha256": "1e8e96c50ca5847cf024566d2072723791d7e78e01d90848fb4352aa141f87a9"
+    "evidence_bytes": 48953,
+    "evidence_sha256": "d941fe7212c02c25a27bf53d903c328297c9d6b76279212b002b26fd5ecbf199"
   },
   {
     "reference": 4890,
@@ -1396,8 +1396,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/quick_add_en_light_phone.png",
-    "evidence_bytes": 52721,
-    "evidence_sha256": "05974a3d09fee364f0dbb216c4977521ce790739134203921d91bb08d91bd669"
+    "evidence_bytes": 55815,
+    "evidence_sha256": "ea00d65b75d91945e423abfa8d317dfbed09db8618aafb62a1fdd92cf0d9a395"
   },
   {
     "reference": 4891,
@@ -1436,8 +1436,8 @@
     "production_file": "lib/features/daily_check_in/daily_check_in_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png",
-    "evidence_bytes": 130861,
-    "evidence_sha256": "163e308712a941bfc41e7076e1634f580333f5ccd8601917330703164f458b19"
+    "evidence_bytes": 131518,
+    "evidence_sha256": "2a352ba792457b65f1526a36bdfdd239537a2ebe6a3b18f72e6b767ace936b8e"
   },
   {
     "reference": 4893,
@@ -1936,8 +1936,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png",
-    "evidence_bytes": 196069,
-    "evidence_sha256": "fbe900f7e8b1ae2412e4fec765233981a6bb7a3be5d875654a6640de134593c3"
+    "evidence_bytes": 196786,
+    "evidence_sha256": "e2cd8acba96cd437a3f480e06c675e0c5fc5401d040f36f5fd01fdec9a6109e9"
   },
   {
     "reference": 4918,
@@ -1956,8 +1956,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_favorite_result_phone.png",
-    "evidence_bytes": 196041,
-    "evidence_sha256": "354ff05223899b02cbbefb1f49f2415bc9436f9c5edd871ed32cca894f3d47f9"
+    "evidence_bytes": 196761,
+    "evidence_sha256": "b92e7be950d3d85067d692024e90173ae71e4cc391fd63ac8c8c0e766262086d"
   },
   {
     "reference": 4919,
@@ -1976,8 +1976,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_recent_result_phone.png",
-    "evidence_bytes": 196287,
-    "evidence_sha256": "a473d33e2a6cd125d539712b635c51f180abb169048170c52265bcb39554c9df"
+    "evidence_bytes": 197020,
+    "evidence_sha256": "9e5d548af54913380dadd7925eda8d68c3728d98c563f405d37dd85a4aa3ef0c"
   },
   {
     "reference": 4920,
@@ -2016,8 +2016,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 191104,
-    "evidence_sha256": "1a5de0d282cdf1e212f5d9590315c90d114b480687efe346f50f2d77cb0aaad1"
+    "evidence_bytes": 191764,
+    "evidence_sha256": "c80c62b228d9e539be272d2eabe2e26395d4ef29124c2e42b49956e74f34975e"
   },
   {
     "reference": 4922,
@@ -2036,8 +2036,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
-    "evidence_bytes": 44667,
-    "evidence_sha256": "90b6e76d5d2fb0c99a17294987cb4d1ad0edfc26fc881197407ecc6edfd4ed28"
+    "evidence_bytes": 43777,
+    "evidence_sha256": "95da8bd1ccef3225ca640b2fbc1d80e3d22687e8dfe98d75dda7538dd5981a09"
   },
   {
     "reference": 4923,
@@ -2056,8 +2056,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
-    "evidence_bytes": 40042,
-    "evidence_sha256": "85114ddf16e1ce24a539970c347966a457563d4262bc31fbf1e9ad4c774b5340"
+    "evidence_bytes": 40375,
+    "evidence_sha256": "2967e3fde6341d488401098663a45b3e4729dba442636c7d33c630e86cdd2eef"
   },
   {
     "reference": 4924,
@@ -2096,8 +2096,8 @@
     "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
-    "evidence_bytes": 48270,
-    "evidence_sha256": "14c3aa316d3de75e0b0c016f0d07177a0649f18debce54c4a0905127d4142864"
+    "evidence_bytes": 52840,
+    "evidence_sha256": "3be925b9094704132e491e31b7145b246c05023ce242286f5bb575acb283cd9d"
   },
   {
     "reference": 4926,
@@ -2116,8 +2116,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png",
-    "evidence_bytes": 74588,
-    "evidence_sha256": "f8ef611622a72f32ae63f38ef6e7653eb11493dd8d28562356aa48029e14fb84"
+    "evidence_bytes": 75396,
+    "evidence_sha256": "b6f1b7bd6cc53b2e4c717554b6de18111a69dd5f6d75f1057e9815b6935f386c"
   },
   {
     "reference": 4927,
@@ -2136,8 +2136,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png",
-    "evidence_bytes": 26082,
-    "evidence_sha256": "03694f8eecd97e3210877b508eb6be92c60d480c040ed26ab7177a6dd2499647"
+    "evidence_bytes": 26391,
+    "evidence_sha256": "3742a805e452249d66ac230ed4f7fb1b5665b5f8411a6f2ba758e38bbf5c62fd"
   },
   {
     "reference": 4928,
@@ -2156,8 +2156,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png",
-    "evidence_bytes": 32105,
-    "evidence_sha256": "72dd04dc0aa1694193dcaef3d1df5b6dd88f81e0d146fad101bbf453a05aa0f0"
+    "evidence_bytes": 35109,
+    "evidence_sha256": "39546369afbc3a2996d04e2f8e23321775fabdf2b7c51f93bc134affc35a4214"
   },
   {
     "reference": 4929,
@@ -2176,8 +2176,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png",
-    "evidence_bytes": 30833,
-    "evidence_sha256": "d254462e3ea3778bb5b1c28284ee99c5b53abd1dca6b14300be2b3b6e79ffaec"
+    "evidence_bytes": 34201,
+    "evidence_sha256": "9bb09774b4fde9dda1f29c5ca9a10957efda69e36a7f3cb42925c9a0f1d3933f"
   },
   {
     "reference": 4930,
@@ -2196,8 +2196,8 @@
     "production_file": "lib/features/settings/settings_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_more_phone.png",
-    "evidence_bytes": 53725,
-    "evidence_sha256": "aa0477567a002025ae8d1e64da36e0c4a3633e86ee3e1d1d00f0a0aa7c4dca53"
+    "evidence_bytes": 56638,
+    "evidence_sha256": "723a97672b1dea206b031d3aeeb20cfc9387153c73c66ce721212f48724caa4e"
   },
   {
     "reference": 4931,
@@ -2216,8 +2216,8 @@
     "production_file": "lib/features/settings/settings_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_more_lower_phone.png",
-    "evidence_bytes": 30906,
-    "evidence_sha256": "701b6715552a75569643f1bf5b6255aa29c2e1a202a0cf72744fe739bf660906"
+    "evidence_bytes": 34215,
+    "evidence_sha256": "52cc2e232ed945e3fac54babebde14958f87e94dd7d0424b0d03f3aa1de1500c"
   },
   {
     "reference": 4932,
@@ -2236,8 +2236,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png",
-    "evidence_bytes": 26383,
-    "evidence_sha256": "8537503dc8b53c95dd61d65cbb5db9f3adc783c8f9d003d5c0d56dd28422b0e4"
+    "evidence_bytes": 26647,
+    "evidence_sha256": "f9c335e9885f09d7481b2153ca272aeb129448a2743b81e2796acc9be884795a"
   },
   {
     "reference": 4933,
@@ -2496,8 +2496,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png",
-    "evidence_bytes": 25237,
-    "evidence_sha256": "19062b8b81fe22b9c988e8fa47507a58de03b6eb23807ba61bb7563b536ec11f"
+    "evidence_bytes": 27283,
+    "evidence_sha256": "b3f8c950e3ef7f8768edbc096fbfed0b93906ab8516db860def39f9d5391f6ed"
   },
   {
     "reference": 4946,
@@ -2516,8 +2516,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png",
-    "evidence_bytes": 21100,
-    "evidence_sha256": "d1cb1daa2b727fcbcd54842e85b6863283b1c06f6fb245bedef02fdb4130dc53"
+    "evidence_bytes": 22332,
+    "evidence_sha256": "dd6419ae858bf6e4f014a106e6e2153144a860a8b571b0b1abaadcba2469ca41"
   },
   {
     "reference": 4947,
@@ -2556,8 +2556,8 @@
     "production_file": "lib/features/notifications/presentation/notification_settings_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png",
-    "evidence_bytes": 53942,
-    "evidence_sha256": "a2c6c719c2b229b4480703bd2474a18183823c8dbd742a7d6c60a74554d9a63a"
+    "evidence_bytes": 54532,
+    "evidence_sha256": "a86e613c6d76ed1d03bab2de5d0cd13e873e9e11500bf0d0a28d6040833ce17e"
   },
   {
     "reference": 4949,
@@ -2576,8 +2576,8 @@
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
-    "evidence_bytes": 32234,
-    "evidence_sha256": "83e0397794e51c9e8fafd09a235a96521b12aab9209fafcb2499c090ce83407b"
+    "evidence_bytes": 24835,
+    "evidence_sha256": "c289ff81354c5101f2a28a4e74b8e06cf637dbd125d61210c4995d1b7ce5cf6b"
   },
   {
     "reference": 4950,
@@ -2616,8 +2616,8 @@
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png",
-    "evidence_bytes": 37185,
-    "evidence_sha256": "f21c4ae35ac5c31cd91d1af924e2b05aa0dcf4eccd35605036b361f4edb10eff"
+    "evidence_bytes": 31603,
+    "evidence_sha256": "9857339df16a4a07ae88e8cdce33902077fba9bcf2986d1dc8c4ec6a1cec7b59"
   },
   {
     "reference": 4952,
@@ -2636,8 +2636,8 @@
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
-    "evidence_bytes": 32234,
-    "evidence_sha256": "83e0397794e51c9e8fafd09a235a96521b12aab9209fafcb2499c090ce83407b"
+    "evidence_bytes": 24835,
+    "evidence_sha256": "c289ff81354c5101f2a28a4e74b8e06cf637dbd125d61210c4995d1b7ce5cf6b"
   },
   {
     "reference": 4953,
@@ -2796,8 +2796,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_article_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png",
-    "evidence_bytes": 91082,
-    "evidence_sha256": "37d6c8de66320249c8557b4aa5bc23279ffe411885e5f206bb95fd4731872ca0"
+    "evidence_bytes": 91135,
+    "evidence_sha256": "edecaf2a2d373b16659850ec65cf09b8a295d13d6d5dcb5294f31e5e5f597bb7"
   },
   {
     "reference": 4961,
@@ -2836,8 +2836,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_article_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png",
-    "evidence_bytes": 70210,
-    "evidence_sha256": "2fc64f29f5e1e93664b8ece2413c311f0c0d1d852e5a7c847a1cbfde9982b34b"
+    "evidence_bytes": 70136,
+    "evidence_sha256": "85b6c0febf62d115e38d34f3cde41526d1825a1c0a5bc512dac4060bd15718ff"
   },
   {
     "reference": 4963,
@@ -2936,8 +2936,8 @@
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
-    "evidence_bytes": 19614,
-    "evidence_sha256": "e529b0993396f89028b9d5d85ef983d6773b08c97e68f73f5f4aec4d44f9c015"
+    "evidence_bytes": 20158,
+    "evidence_sha256": "50574e8fa61dabe0143af06ac015c51fe4b7028ddb7f00d9780f44ecffc7488a"
   },
   {
     "reference": 4968,
@@ -2996,8 +2996,8 @@
     "production_file": "lib/features/settings/reference_settings_home_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 54901,
-    "evidence_sha256": "15c96d86f9b56a8d34ecfcb41588b73a518bd77e230829642a96251aacbd86d0"
+    "evidence_bytes": 57846,
+    "evidence_sha256": "8055eeb5ac2bdd790b01d9d8e3b35cff175cee9190a852285d2469282d427988"
   },
   {
     "reference": 4971,
@@ -3016,8 +3016,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
-    "evidence_bytes": 43215,
-    "evidence_sha256": "375da4ccd467af03e4c5c07d62cec2a802b57c136bce101504d92ab0de2898b8"
+    "evidence_bytes": 51769,
+    "evidence_sha256": "b299b54d85ac2751fcb7b80d6e9e77c736eead5023b1859a0b96c064e7fa226c"
   },
   {
     "reference": 4972,
@@ -3136,8 +3136,8 @@
     "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
-    "evidence_bytes": 48270,
-    "evidence_sha256": "14c3aa316d3de75e0b0c016f0d07177a0649f18debce54c4a0905127d4142864"
+    "evidence_bytes": 52840,
+    "evidence_sha256": "3be925b9094704132e491e31b7145b246c05023ce242286f5bb575acb283cd9d"
   },
   {
     "reference": 4978,
@@ -3196,8 +3196,8 @@
     "production_file": "lib/features/ads/advertising_privacy_page.dart",
     "status": "family_equivalent_fail_closed_advertising_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png",
-    "evidence_bytes": 41900,
-    "evidence_sha256": "d28fe902db7c3d6bbe10356d561f98c7d1211e2bf06f85c9a423e8c96c14d7ec"
+    "evidence_bytes": 42327,
+    "evidence_sha256": "0f2034e4569b5e3d608531d6cf78cb89e4eabb4d7139a27d4b190cb4ae12396c"
   },
   {
     "reference": 4981,
@@ -3216,8 +3216,8 @@
     "production_file": "lib/features/settings/sharing_privacy_settings_page.dart",
     "status": "family_equivalent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png",
-    "evidence_bytes": 39905,
-    "evidence_sha256": "96e0fb81afa01a7d874567877d43009e3760c3dabdbd8b172f7cbb192f442bed"
+    "evidence_bytes": 51617,
+    "evidence_sha256": "0ba409c410f4bfd70e5be201b646f29b6db7949d4f66bb305c816a3d00023612"
   },
   {
     "reference": 4982,
@@ -3396,8 +3396,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png",
-    "evidence_bytes": 64640,
-    "evidence_sha256": "abfffea627f7cb26fe1c6c719c2a11482b36e3e00160cd98a704ba8f75075cfc"
+    "evidence_bytes": 67824,
+    "evidence_sha256": "543352ae70921b3e12da8341bfa71117efa90d7554af536d3f85e83b13d6a3e6"
   },
   {
     "reference": 4991,
@@ -3436,8 +3436,8 @@
     "production_file": "lib/features/settings/help_center_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_help_center_phone.png",
-    "evidence_bytes": 24617,
-    "evidence_sha256": "480b856122af1a03600bd5c2ad41db6414f82fcf1a35571e13b02af6f04b556e"
+    "evidence_bytes": 24782,
+    "evidence_sha256": "9222cf90f47a4e6c6c76219410688f7b1f38e73b1288454c5041579d39411c93"
   },
   {
     "reference": 4993,
@@ -3516,8 +3516,8 @@
     "production_file": "lib/features/settings/help_center_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_help_troubleshooting_phone.png",
-    "evidence_bytes": 28498,
-    "evidence_sha256": "64628bdeb25532cc514eb12061fd67596fe880cac76adbb6b74fa152c0fcb226"
+    "evidence_bytes": 28421,
+    "evidence_sha256": "a18f40f719154d9f0b9fd65df425ead4748ce46c11829b94d2160d85b26a4ce3"
   },
   {
     "reference": 4997,
@@ -3536,7 +3536,7 @@
     "production_file": "lib/features/settings/help_center_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_help_service_status_phone.png",
-    "evidence_bytes": 30168,
-    "evidence_sha256": "5035f906ad2174b2d0ab5c8bf1c23480bc94213ef84fe9e3d4b1719a40835b80"
+    "evidence_bytes": 30026,
+    "evidence_sha256": "3ec132208c2ed89d487d6af20840003bc3bb282c4b1e5b23f422f379db875d99"
   }
 ]

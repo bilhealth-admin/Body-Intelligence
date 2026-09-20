@@ -24,32 +24,30 @@ class BilAccountAvatar extends StatelessWidget {
   final Color? backgroundColor;
   final Color? placeholderColor;
 
-  ImageProvider<Object>? get _foregroundImage {
+  ImageProvider<Object>? get _backgroundImage {
     final bytes = photoBytes;
     if (bytes != null && bytes.isNotEmpty) return MemoryImage(bytes);
     return null;
   }
 
-  ImageProvider<Object>? get _backgroundImage {
+  ImageProvider<Object>? get _foregroundImage {
     final url = networkUrl?.trim();
     return url == null || url.isEmpty ? null : NetworkImage(url);
   }
 
   @override
   Widget build(BuildContext context) {
-    // A just-selected local image is the visible source of truth. The cloud
-    // image remains only behind it as a cross-device/offline fallback, so a
-    // delayed NetworkImage can never replace a newer local selection or flash
-    // during an unrelated rebuild.
     final foreground = _foregroundImage;
     final background = _backgroundImage;
     final avatar = CircleAvatar(
       radius: radius,
       backgroundColor: backgroundColor,
+      // The cloud URL is authoritative across devices. Local bytes remain a
+      // resilient offline fallback. The coach identity is never an account
+      // placeholder.
       foregroundImage: foreground,
       onForegroundImageError: foreground == null ? null : (_, _) {},
       backgroundImage: background,
-      onBackgroundImageError: background == null ? null : (_, _) {},
       child: foreground == null && background == null
           ? Icon(
               Icons.person_rounded,

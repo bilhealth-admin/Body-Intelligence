@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
 import 'package:body_intelligence_log/features/global_platform/intelligence/global_health_evidence_graph.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,41 +61,6 @@ void main() {
       expect(graph.confidence, greaterThan(0.75));
     },
   );
-
-  test('large evidence reconciliation yields an event turn', () async {
-    final store = InMemoryGlobalStore();
-    final engine = BilGlobalHealthEvidenceGraphEngine(
-      memory: SourceReliabilityMemory(store: store),
-    );
-    final at = DateTime.utc(2026, 9, 13, 20);
-    var completed = false;
-    var uiTurnObservedBeforeCompletion = false;
-    Timer.run(() {
-      uiTurnObservedBeforeCompletion = !completed;
-    });
-
-    await engine
-        .build([
-          for (var index = 0; index < 64; index++)
-            GlobalHealthSignal(
-              key: 'heartRate',
-              canonicalValue: 70 + (index % 5),
-              canonicalUnit: 'count/min',
-              provenance: GlobalProvenance(
-                providerId: 'healthkit',
-                sourceId: 'watch',
-                recordId: 'hr-$index',
-                observedAt: at.subtract(Duration(minutes: index)),
-                confidence: 1,
-                deviceId: 'watch',
-              ),
-            ),
-        ])
-        .whenComplete(() => completed = true);
-    await Future<void>.delayed(Duration.zero);
-
-    expect(uiTurnObservedBeforeCompletion, isTrue);
-  });
 
   test('same evidence produces the same selected identity', () async {
     Future<String> run() async {

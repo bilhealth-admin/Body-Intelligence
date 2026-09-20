@@ -457,9 +457,11 @@ void main() {
     expect(auth, contains("'identity_token': identityToken"));
     expect(auth, contains("'raw_nonce': rawNonce"));
     expect(auth, contains('SecureAppleCredentialIdentifierStore'));
-    expect(auth, contains('AppleIDAuthorizationScopes.fullName'));
-    expect(auth, contains("'full_name': appleDisplayName"));
-    expect(auth, contains('client.auth.updateUser('));
+    expect(
+      auth,
+      isNot(contains('AppleIDAuthorizationScopes.fullName')),
+      reason: 'BIL must not request a one-shot Apple name it does not retain.',
+    );
     expect(deletion, contains('SecureAppleCredentialIdentifierStore'));
     expect(deletion, contains('.delete('));
   });

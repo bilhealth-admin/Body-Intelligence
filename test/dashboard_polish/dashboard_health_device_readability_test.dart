@@ -128,14 +128,6 @@ Widget _subject({
   );
 }
 
-Future<void> _loadReadableHealthSnapshot(WidgetTester tester) async {
-  final container = ProviderScope.containerOf(
-    tester.element(find.byType(MaterialApp)),
-  );
-  await container.read(connectedHealthProvider.notifier).refresh();
-  await tester.pumpAndSettle();
-}
-
 void main() {
   testWidgets('empty dashboard widget shows only the external link control', (
     tester,
@@ -149,7 +141,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('dashboard-compact-health-hub')),
+      find.byKey(const Key('dashboard-fitness-link-action')),
       findsOneWidget,
     );
     expect(find.byKey(const Key('dashboard-fitness-last-sync')), findsNothing);
@@ -171,7 +163,8 @@ void main() {
 
       for (final locale in AppLocalizations.supportedLocales) {
         await tester.pumpWidget(_subject(locale: locale, textScale: 1.6));
-        await _loadReadableHealthSnapshot(tester);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
         expect(
           find.byKey(const Key('dashboard-live-fitness-watch-slot')),
           findsOneWidget,
@@ -180,7 +173,7 @@ void main() {
         expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
 
         expect(
-          find.byKey(const Key('dashboard-compact-health-hub')),
+          find.byKey(const Key('dashboard-fitness-link-action')),
           findsOneWidget,
           reason: locale.toLanguageTag(),
         );
@@ -229,7 +222,8 @@ void main() {
             textScale: configuration.scale,
           ),
         );
-        await _loadReadableHealthSnapshot(tester);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
 
         final watchSlot = find.byKey(
           const Key('dashboard-live-fitness-watch-slot'),
@@ -239,7 +233,7 @@ void main() {
         expect(artwork, findsOneWidget);
         final size = tester.getSize(artwork);
         final expectedSide =
-            224 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 112);
+            212 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 68);
         expect(size.width, closeTo(expectedSide, .1));
         expect(size.height, closeTo(expectedSide, .1));
         expect(
@@ -269,7 +263,7 @@ void main() {
         );
         expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
         expect(
-          find.byKey(const Key('dashboard-compact-health-hub')),
+          find.byKey(const Key('dashboard-fitness-link-action')),
           findsOneWidget,
         );
         expect(find.text('Connected'), findsNothing);

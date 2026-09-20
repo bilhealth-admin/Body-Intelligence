@@ -686,10 +686,7 @@ void main() {
     expect(account, contains('textTheme.labelLarge?.fontFamily'));
     expect(account, isNot(contains("? 'BILArabic'")));
     expect(mealEntry, contains("Key('daily-meal-food-search-bar')"));
-    expect(mealEntry, contains('leading: Icon('));
-    expect(mealEntry, contains('Icons.search_rounded'));
-    expect(mealEntry, contains('colorScheme.primary'));
-    expect(mealEntry, isNot(contains('leading: const Icon(Icons.search)')));
+    expect(mealEntry, contains('leading: const Icon(Icons.search)'));
     expect(mealEntry, contains("hintText: _mealCopy('searchFoods')"));
     expect(onboarding, contains('"ar": "بماذا تحب أن يناديك BIL؟"'));
 
@@ -729,14 +726,18 @@ void main() {
       isNot(contains("Key('daily-log-nutrition-facts-glass')")),
     );
     expect(mealSummary, contains("Key('daily-meal-detail-premium-group')"));
-    expect(mealList, isNot(contains("Key('daily-meal-macros-\$type')")));
-    expect(mealList, isNot(contains('_DiaryFoodRow(')));
-    expect(mealList, isNot(contains('PremiumNutritionGlass(')));
+    expect(
+      mealList,
+      matches(
+        RegExp(
+          r"Key\('daily-meal-macros-\$type'\),\s*compact: true,\s*showLabel: false",
+        ),
+      ),
+    );
     expect(dashboard, isNot(contains("tr('Premium nutrient goals'")));
     expect(dashboard, isNot(contains("tr('Premium heart health'")));
     expect(dashboard, contains("Key('dashboard-premium-page-label')"));
-    expect(RegExp('showLabel: false').allMatches(dashboard).length, 0);
-    expect(RegExp('showLabel: true').allMatches(dashboard).length, 2);
+    expect(RegExp('showLabel: false').allMatches(dashboard).length, 2);
     expect(dashboardLock, contains('this.showLabel = true'));
     expect(dashboardLock, isNot(contains('Icons.lock_rounded')));
     expect(
@@ -758,7 +759,7 @@ void main() {
     expect(referenceSettings, isNot(contains("copy('Explore Premium')")));
     expect(
       RegExp("_text\\(context, 'Premium'\\)").allMatches(quickAdd).length,
-      0,
+      1,
     );
     expect(
       RegExp(

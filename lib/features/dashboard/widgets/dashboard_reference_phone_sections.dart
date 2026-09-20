@@ -11,8 +11,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final tileHeight = 108 + (textScale - 1).clamp(0, 2) * 108;
-    final wideTileHeight = 84 + (textScale - 1).clamp(0, 2) * 88;
+    final tileHeight = 164 + (textScale - 1).clamp(0, 2) * 72;
     final items = <(String, IconData, String, String, String, bool)>[
       (
         'assets/images/nutrition_plans/carb_cycling_lifestyle_v1.webp',
@@ -50,19 +49,15 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
         '/wellness/recipes',
         true,
       ),
-      (
-        'assets/images/flagship/bil_movement_v1.png',
-        Icons.play_circle_outline_rounded,
-        _referenceText(context, 'Workout videos', 'فيديوهات التمارين'),
-        _referenceText(
-          context,
-          'Videos & training routines',
-          'فيديوهات وروتينات تدريبية',
-        ),
-        '/wellness/workouts/routines',
-        true,
-      ),
       if (AppEnvironment.communityConfigured) ...[
+        (
+          'assets/images/flagship/bil_body_intelligence_journey_v1.png',
+          Icons.group_outlined,
+          _referenceText(context, 'Friends', 'الأصدقاء'),
+          _referenceText(context, 'Your support squad', 'دائرة دعمك'),
+          '/community/connections',
+          true,
+        ),
         (
           'assets/images/dashboard/bio_intelligence_v1.png',
           Icons.forum_outlined,
@@ -90,10 +85,9 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           GridView.builder(
             shrinkWrap: true,
-            padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: pairedItemCount,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -118,7 +112,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
             const SizedBox(height: 10),
             SizedBox(
               key: const Key('dashboard-discover-balanced-final-tile'),
-              height: wideTileHeight.toDouble(),
+              height: tileHeight.toDouble(),
               child: _DiscoverTile(
                 imageAsset: items.last.$1,
                 fallbackIcon: items.last.$2,
@@ -187,9 +181,9 @@ class _DiscoverTile extends StatelessWidget {
               ),
             ),
             PositionedDirectional(
-              start: 10,
-              end: 10,
-              bottom: 8,
+              start: 12,
+              end: 12,
+              bottom: 12,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -200,7 +194,6 @@ class _DiscoverTile extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
-                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -210,7 +203,6 @@ class _DiscoverTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Colors.white.withValues(alpha: .86),
-                      fontSize: 11,
                       height: 1.25,
                     ),
                   ),
@@ -218,8 +210,8 @@ class _DiscoverTile extends StatelessWidget {
               ),
             ),
             PositionedDirectional(
-              top: 8,
-              end: 8,
+              top: 10,
+              start: 10,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: premium
@@ -233,10 +225,10 @@ class _DiscoverTile extends StatelessWidget {
                   ),
                 ),
                 child: const Padding(
-                  padding: EdgeInsets.all(5),
+                  padding: EdgeInsets.all(6),
                   child: Icon(
                     Icons.arrow_forward_rounded,
-                    size: 15,
+                    size: 18,
                     color: Colors.white,
                   ),
                 ),

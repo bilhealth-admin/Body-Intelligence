@@ -1,0 +1,1387 @@
+{
+  "schemaVersion": 1,
+  "batch": "A",
+  "recordCount": 9,
+  "sourceSeed": {
+    "path": "artifacts/meal_catalog/existing_recipe_canonical_seeds.json",
+    "sha256": "279ca4d3e95b37d2d98ae7fa73f6f148f4545fe04d415d8b3943705afc96b02a",
+    "selection": "records[0..8]"
+  },
+  "nutritionSource": {
+    "type": "bil-usda-sqlite-local-only",
+    "path": "assets/catalogs/bil_food_core.sqlite",
+    "sha256": "9e6ab0c9be242a5edcf35d4e1f0391a321585636190628f9138a0845918a1d85"
+  },
+  "calculationPolicy": {
+    "formula": "sum(nutrient_per_100g * ingredient_grams / 100) / servings",
+    "requiresCompleteGramFormulation": true,
+    "requiresPositiveServingCount": true,
+    "missingValuePolicy": "blocked-not-zero",
+    "candidateSourceRefsAreNotCalculableMatches": true
+  },
+  "records": [
+    {
+      "canonicalId": "lentil-soup",
+      "seedContentFingerprint": "e7ffa051d3787df514874ade38e136be810ee4d980048e102e6e604b7efebca1",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "red-lentils",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:172420",
+              "fdcId": 172420,
+              "description": "Lentils, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 352.0,
+            "proteinG": 24.63,
+            "carbsG": 63.35,
+            "fatG": 1.06,
+            "fiberG": 10.7,
+            "sugarG": 2.03,
+            "sodiumMg": 6.0,
+            "potassiumMg": 677.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790646",
+              "fdcId": 790646,
+              "description": "Onions, yellow, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbsG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 120.0,
+          "unit": "g",
+          "grams": 120.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168568",
+              "fdcId": 168568,
+              "description": "Carrots, baby, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.64,
+            "carbsG": 8.24,
+            "fatG": 0.13,
+            "fiberG": 2.9,
+            "sugarG": 4.76,
+            "sodiumMg": 78.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "cumin",
+          "quantity": 4.0,
+          "unit": "g",
+          "grams": 4.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170923",
+              "fdcId": 170923,
+              "description": "Spices, cumin seed"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 375.0,
+            "proteinG": 17.81,
+            "carbsG": 44.24,
+            "fatG": 22.27,
+            "fiberG": 10.5,
+            "sugarG": 2.25,
+            "sodiumMg": 168.0,
+            "potassiumMg": 1788.0
+          }
+        },
+        {
+          "itemId": "water-or-unsalted-stock",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173647",
+              "fdcId": 173647,
+              "description": "Beverages, water, tap, drinking"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 0.0,
+            "proteinG": 0.0,
+            "carbsG": 0.0,
+            "fatG": 0.0,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 4.0,
+            "potassiumMg": 0.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 203.75,
+        "proteinG": 13.0,
+        "carbsG": 37.82,
+        "fatG": 0.81,
+        "fiberG": 7.04,
+        "sugarG": 4.65,
+        "sodiumMg": 36.46,
+        "potassiumMg": 495.73
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 25,
+        "totalMinutes": 35
+      },
+      "method": [
+        "Rinse the lentils.",
+        "Simmer all ingredients until tender.",
+        "Blend to the preferred texture and season after tasting."
+      ]
+    },
+    {
+      "canonicalId": "yogurt-oats",
+      "seedContentFingerprint": "048169570e5e1eacfe4fe7cde72f2a99e0f00692b6c13a96233600b5200580a5",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 1,
+      "formulation": [
+        {
+          "itemId": "plain-yogurt",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171284",
+              "fdcId": 171284,
+              "description": "Yogurt, plain, whole milk"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 61.0,
+            "proteinG": 3.47,
+            "carbsG": 4.66,
+            "fatG": 3.25,
+            "fiberG": 0.0,
+            "sugarG": 4.66,
+            "sodiumMg": 46.0,
+            "potassiumMg": 155.0
+          }
+        },
+        {
+          "itemId": "rolled-oats",
+          "quantity": 50.0,
+          "unit": "g",
+          "grams": 50.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173904",
+              "fdcId": 173904,
+              "description": "Cereals, oats, regular and quick, not fortified, dry"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 379.0,
+            "proteinG": 13.15,
+            "carbsG": 67.7,
+            "fatG": 6.52,
+            "fiberG": 10.1,
+            "sugarG": 0.99,
+            "sodiumMg": 6.0,
+            "potassiumMg": 362.0
+          }
+        },
+        {
+          "itemId": "fresh-fruit",
+          "quantity": 120.0,
+          "unit": "g",
+          "grams": 120.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:1105897",
+              "fdcId": 1105897,
+              "description": "Apples, fuji, with skin, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 58.0,
+            "proteinG": 0.15,
+            "carbsG": 15.7,
+            "fatG": 0.16,
+            "fiberG": 2.1,
+            "sugarG": 12.6,
+            "sodiumMg": 1.0,
+            "potassiumMg": 104.0
+          }
+        },
+        {
+          "itemId": "optional-nuts-or-seeds",
+          "quantity": 15.0,
+          "unit": "g",
+          "grams": 15.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170158",
+              "fdcId": 170158,
+              "description": "Nuts, almonds, dry roasted, without salt added"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 598.0,
+            "proteinG": 20.96,
+            "carbsG": 21.01,
+            "fatG": 52.54,
+            "fiberG": 10.9,
+            "sugarG": 4.86,
+            "sodiumMg": 3.0,
+            "potassiumMg": 713.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 470.8,
+        "proteinG": 16.84,
+        "carbsG": 65.16,
+        "fatG": 17.83,
+        "fiberG": 9.21,
+        "sugarG": 25.66,
+        "sodiumMg": 96.65,
+        "potassiumMg": 722.75
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 5,
+        "cookMinutes": 0,
+        "totalMinutes": 5
+      },
+      "method": [
+        "Combine yogurt and oats.",
+        "Top with fruit and optional nuts or seeds."
+      ]
+    },
+    {
+      "canonicalId": "chickpea-salad",
+      "seedContentFingerprint": "b09de5d08778b4565707a8b05c499a69122bf31c91c02d58d095d730ecb23de7",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 2,
+      "formulation": [
+        {
+          "itemId": "cooked-chickpeas",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173757",
+              "fdcId": 173757,
+              "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 164.0,
+            "proteinG": 8.86,
+            "carbsG": 27.42,
+            "fatG": 2.59,
+            "fiberG": 7.6,
+            "sugarG": 4.8,
+            "sodiumMg": 7.0,
+            "potassiumMg": 291.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168409",
+              "fdcId": 168409,
+              "description": "Cucumber, with peel, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 15.0,
+            "proteinG": 0.65,
+            "carbsG": 3.63,
+            "fatG": 0.11,
+            "fiberG": 0.5,
+            "sugarG": 1.67,
+            "sodiumMg": 2.0,
+            "potassiumMg": 147.0
+          }
+        },
+        {
+          "itemId": "parsley",
+          "quantity": 20.0,
+          "unit": "g",
+          "grams": 20.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170416",
+              "fdcId": 170416,
+              "description": "Parsley, fresh"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 2.97,
+            "carbsG": 6.33,
+            "fatG": 0.79,
+            "fiberG": 3.3,
+            "sugarG": 0.85,
+            "sodiumMg": 56.0,
+            "potassiumMg": 554.0
+          }
+        },
+        {
+          "itemId": "lemon-juice",
+          "quantity": 30.0,
+          "unit": "g",
+          "grams": 30.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:167747",
+              "fdcId": 167747,
+              "description": "Lemon juice, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 22.0,
+            "proteinG": 0.35,
+            "carbsG": 6.9,
+            "fatG": 0.24,
+            "fiberG": 0.3,
+            "sugarG": 2.52,
+            "sodiumMg": 1.0,
+            "potassiumMg": 103.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 277.65,
+        "proteinG": 14.79,
+        "carbsG": 48.44,
+        "fatG": 4.23,
+        "fiberG": 13.05,
+        "sugarG": 10.89,
+        "sodiumMg": 21.5,
+        "potassiumMg": 795.35
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 0,
+        "totalMinutes": 15
+      },
+      "method": [
+        "Drain and rinse the chickpeas.",
+        "Chop the vegetables and parsley.",
+        "Combine and dress with lemon just before serving."
+      ]
+    },
+    {
+      "canonicalId": "shakshuka",
+      "seedContentFingerprint": "e289567c25774af5dce2e29d7b764e6c59dacbea8e49658bb772e39837f25f02",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 2,
+      "formulation": [
+        {
+          "itemId": "eggs",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173424",
+              "fdcId": 173424,
+              "description": "Egg, whole, cooked, hard-boiled"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 155.0,
+            "proteinG": 12.58,
+            "carbsG": 1.12,
+            "fatG": 10.61,
+            "fiberG": 0.0,
+            "sugarG": 1.12,
+            "sodiumMg": 124.0,
+            "potassiumMg": 126.0
+          }
+        },
+        {
+          "itemId": "tomatoes",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 120.0,
+          "unit": "g",
+          "grams": 120.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 42.0,
+            "proteinG": 0.94,
+            "carbsG": 9.93,
+            "fatG": 0.1,
+            "fiberG": 2.2,
+            "sugarG": 5.76,
+            "sodiumMg": 1.0,
+            "potassiumMg": 197.0
+          }
+        },
+        {
+          "itemId": "parsley",
+          "quantity": 15.0,
+          "unit": "g",
+          "grams": 15.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170416",
+              "fdcId": 170416,
+              "description": "Parsley, fresh"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 2.97,
+            "carbsG": 6.33,
+            "fatG": 0.79,
+            "fiberG": 3.3,
+            "sugarG": 0.85,
+            "sodiumMg": 56.0,
+            "potassiumMg": 554.0
+          }
+        },
+        {
+          "itemId": "cumin",
+          "quantity": 3.0,
+          "unit": "g",
+          "grams": 3.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170923",
+              "fdcId": 170923,
+              "description": "Spices, cumin seed"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 375.0,
+            "proteinG": 17.81,
+            "carbsG": 44.24,
+            "fatG": 22.27,
+            "fiberG": 10.5,
+            "sugarG": 2.25,
+            "sodiumMg": 168.0,
+            "potassiumMg": 1788.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 224.52,
+        "proteinG": 15.39,
+        "carbsG": 16.0,
+        "fatG": 11.46,
+        "fiberG": 4.13,
+        "sugarG": 9.93,
+        "sodiumMg": 141.32,
+        "potassiumMg": 786.57
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 15,
+        "totalMinutes": 25
+      },
+      "method": [
+        "Cook the tomato base.",
+        "Add eggs and cover until just set."
+      ]
+    },
+    {
+      "canonicalId": "grilled-fish-vegetables",
+      "seedContentFingerprint": "68bebda89f647ae14ce38c22c5d2aae1ac9efa2e5ff1bdbb876cf7b72e0b6014",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 2,
+      "formulation": [
+        {
+          "itemId": "fish-fillet",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171956",
+              "fdcId": 171956,
+              "description": "Fish, cod, Atlantic, cooked, dry heat"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 105.0,
+            "proteinG": 22.83,
+            "carbsG": 0.0,
+            "fatG": 0.86,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 244.0
+          }
+        },
+        {
+          "itemId": "zucchini",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169291",
+              "fdcId": 169291,
+              "description": "Squash, summer, zucchini, includes skin, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 17.0,
+            "proteinG": 1.21,
+            "carbsG": 3.11,
+            "fatG": 0.32,
+            "fiberG": 1.0,
+            "sugarG": 2.5,
+            "sodiumMg": 8.0,
+            "potassiumMg": 261.0
+          }
+        },
+        {
+          "itemId": "tomatoes",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "lemon",
+          "quantity": 60.0,
+          "unit": "g",
+          "grams": 60.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:167746",
+              "fdcId": 167746,
+              "description": "Lemons, raw, without peel"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 29.0,
+            "proteinG": 1.1,
+            "carbsG": 9.32,
+            "fatG": 0.3,
+            "fiberG": 2.8,
+            "sugarG": 2.5,
+            "sodiumMg": 2.0,
+            "potassiumMg": 138.0
+          }
+        },
+        {
+          "itemId": "herbs",
+          "quantity": 10.0,
+          "unit": "g",
+          "grams": 10.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170416",
+              "fdcId": 170416,
+              "description": "Parsley, fresh"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 2.97,
+            "carbsG": 6.33,
+            "fatG": 0.79,
+            "fiberG": 3.3,
+            "sugarG": 0.85,
+            "sodiumMg": 56.0,
+            "potassiumMg": 554.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 207.25,
+        "proteinG": 37.12,
+        "carbsG": 10.89,
+        "fatG": 2.02,
+        "fiberG": 3.46,
+        "sugarG": 6.55,
+        "sodiumMg": 135.4,
+        "potassiumMg": 998.35
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 20,
+        "totalMinutes": 30
+      },
+      "method": [
+        "Season the fish and vegetables.",
+        "Grill until safely cooked."
+      ]
+    },
+    {
+      "canonicalId": "chicken-shawarma-bowl",
+      "seedContentFingerprint": "cd7101593deaec7b2189c34ace9f1bfbcac0a4041f5ab83c80e65f54d007d276",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 2,
+      "formulation": [
+        {
+          "itemId": "chicken-breast",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 165.0,
+            "proteinG": 31.02,
+            "carbsG": 0.0,
+            "fatG": 3.57,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 74.0,
+            "potassiumMg": 256.0
+          }
+        },
+        {
+          "itemId": "cooked-grain",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169704",
+              "fdcId": 169704,
+              "description": "Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 123.0,
+            "proteinG": 2.74,
+            "carbsG": 25.58,
+            "fatG": 0.97,
+            "fiberG": 1.6,
+            "sugarG": 0.24,
+            "sodiumMg": 4.0,
+            "potassiumMg": 86.0
+          }
+        },
+        {
+          "itemId": "cabbage",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169975",
+              "fdcId": 169975,
+              "description": "Cabbage, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 25.0,
+            "proteinG": 1.28,
+            "carbsG": 5.8,
+            "fatG": 0.1,
+            "fiberG": 2.5,
+            "sugarG": 3.2,
+            "sodiumMg": 18.0,
+            "potassiumMg": 170.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "yogurt",
+          "quantity": 100.0,
+          "unit": "g",
+          "grams": 100.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171284",
+              "fdcId": 171284,
+              "description": "Yogurt, plain, whole milk"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 61.0,
+            "proteinG": 3.47,
+            "carbsG": 4.66,
+            "fatG": 3.25,
+            "fiberG": 0.0,
+            "sugarG": 4.66,
+            "sodiumMg": 46.0,
+            "potassiumMg": 155.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 494.75,
+        "proteinG": 54.0,
+        "carbsG": 47.97,
+        "fatG": 8.66,
+        "fiberG": 5.18,
+        "sugarG": 7.06,
+        "sodiumMg": 157.25,
+        "potassiumMg": 895.75
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 20,
+        "totalMinutes": 35
+      },
+      "method": [
+        "Cook the seasoned chicken.",
+        "Arrange with grains and vegetables."
+      ]
+    },
+    {
+      "canonicalId": "vegetable-lentil-stew",
+      "seedContentFingerprint": "25776a7c8c49118e3fea5f8aa83bd0c316c38c547abeafb79e1816be8b5e064a",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "brown-lentils",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:172420",
+              "fdcId": 172420,
+              "description": "Lentils, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 352.0,
+            "proteinG": 24.63,
+            "carbsG": 63.35,
+            "fatG": 1.06,
+            "fiberG": 10.7,
+            "sugarG": 2.03,
+            "sodiumMg": 6.0,
+            "potassiumMg": 677.0
+          }
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168568",
+              "fdcId": 168568,
+              "description": "Carrots, baby, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.64,
+            "carbsG": 8.24,
+            "fatG": 0.13,
+            "fiberG": 2.9,
+            "sugarG": 4.76,
+            "sodiumMg": 78.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "spinach",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168462",
+              "fdcId": 168462,
+              "description": "Spinach, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 23.0,
+            "proteinG": 2.86,
+            "carbsG": 3.63,
+            "fatG": 0.39,
+            "fiberG": 2.2,
+            "sugarG": 0.42,
+            "sodiumMg": 79.0,
+            "potassiumMg": 558.0
+          }
+        },
+        {
+          "itemId": "cumin",
+          "quantity": 4.0,
+          "unit": "g",
+          "grams": 4.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170923",
+              "fdcId": 170923,
+              "description": "Spices, cumin seed"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 375.0,
+            "proteinG": 17.81,
+            "carbsG": 44.24,
+            "fatG": 22.27,
+            "fiberG": 10.5,
+            "sugarG": 2.25,
+            "sodiumMg": 168.0,
+            "potassiumMg": 1788.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 215.0,
+        "proteinG": 14.47,
+        "carbsG": 39.49,
+        "fatG": 1.1,
+        "fiberG": 8.27,
+        "sugarG": 4.95,
+        "sodiumMg": 67.31,
+        "potassiumMg": 832.26
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 30,
+        "totalMinutes": 40
+      },
+      "method": [
+        "Simmer lentils and vegetables.",
+        "Add spinach near the end."
+      ]
+    },
+    {
+      "canonicalId": "hummus-falafel-plate",
+      "seedContentFingerprint": "743ce687569d04e3d0397f1b72bc57c7d6c06b797f5fca492775c2ce90b3090e",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 2,
+      "formulation": [
+        {
+          "itemId": "chickpeas",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173757",
+              "fdcId": 173757,
+              "description": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 164.0,
+            "proteinG": 8.86,
+            "carbsG": 27.42,
+            "fatG": 2.59,
+            "fiberG": 7.6,
+            "sugarG": 4.8,
+            "sodiumMg": 7.0,
+            "potassiumMg": 291.0
+          }
+        },
+        {
+          "itemId": "tahini",
+          "quantity": 60.0,
+          "unit": "g",
+          "grams": 60.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170189",
+              "fdcId": 170189,
+              "description": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 595.0,
+            "proteinG": 17.0,
+            "carbsG": 21.19,
+            "fatG": 53.76,
+            "fiberG": 9.3,
+            "sugarG": 0.49,
+            "sodiumMg": 115.0,
+            "potassiumMg": 414.0
+          }
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168409",
+              "fdcId": 168409,
+              "description": "Cucumber, with peel, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 15.0,
+            "proteinG": 0.65,
+            "carbsG": 3.63,
+            "fatG": 0.11,
+            "fiberG": 0.5,
+            "sugarG": 1.67,
+            "sodiumMg": 2.0,
+            "potassiumMg": 147.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 150.0,
+          "unit": "g",
+          "grams": 150.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "flatbread",
+          "quantity": 120.0,
+          "unit": "g",
+          "grams": 120.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:174915",
+              "fdcId": 174915,
+              "description": "Bread, pita, white, enriched"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 275.0,
+            "proteinG": 9.1,
+            "carbsG": 55.7,
+            "fatG": 1.2,
+            "fiberG": 2.2,
+            "sugarG": 1.3,
+            "sodiumMg": 536.0,
+            "potassiumMg": 120.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 614.25,
+        "proteinG": 25.0,
+        "carbsG": 86.55,
+        "fatG": 20.97,
+        "fiberG": 16.79,
+        "sugarG": 11.35,
+        "sodiumMg": 371.85,
+        "potassiumMg": 920.7
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 20,
+        "totalMinutes": 35
+      },
+      "method": [
+        "Blend the hummus.",
+        "Bake falafel and serve with salad."
+      ]
+    },
+    {
+      "canonicalId": "quinoa-tabbouleh",
+      "seedContentFingerprint": "6b3126c78ff1ac1a3d183fb7bac181615f22cd352a442d86382c9cdf4a921c7b",
+      "status": "verified-calculation",
+      "formulationProvenance": "BIL standardized recipe formulation v1; editorial quantities, not inferred from an image or the incomplete legacy seed",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "cooked-quinoa",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168917",
+              "fdcId": 168917,
+              "description": "Quinoa, cooked"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 120.0,
+            "proteinG": 4.4,
+            "carbsG": 21.3,
+            "fatG": 1.92,
+            "fiberG": 2.8,
+            "sugarG": 0.87,
+            "sodiumMg": 7.0,
+            "potassiumMg": 172.0
+          }
+        },
+        {
+          "itemId": "parsley",
+          "quantity": 80.0,
+          "unit": "g",
+          "grams": 80.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170416",
+              "fdcId": 170416,
+              "description": "Parsley, fresh"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 2.97,
+            "carbsG": 6.33,
+            "fatG": 0.79,
+            "fiberG": 3.3,
+            "sugarG": 0.85,
+            "sodiumMg": 56.0,
+            "potassiumMg": 554.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbsG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168409",
+              "fdcId": 168409,
+              "description": "Cucumber, with peel, raw"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 15.0,
+            "proteinG": 0.65,
+            "carbsG": 3.63,
+            "fatG": 0.11,
+            "fiberG": 0.5,
+            "sugarG": 1.67,
+            "sodiumMg": 2.0,
+            "potassiumMg": 147.0
+          }
+        },
+        {
+          "itemId": "lemon",
+          "quantity": 100.0,
+          "unit": "g",
+          "grams": 100.0,
+          "sourceMatchStatus": "selected",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:167746",
+              "fdcId": 167746,
+              "description": "Lemons, raw, without peel"
+            }
+          ],
+          "nutrientsPer100g": {
+            "kcal": 29.0,
+            "proteinG": 1.1,
+            "carbsG": 9.32,
+            "fatG": 0.3,
+            "fiberG": 2.8,
+            "sugarG": 2.5,
+            "sodiumMg": 2.0,
+            "potassiumMg": 138.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 183.2,
+        "proteinG": 7.24,
+        "carbsG": 34.47,
+        "fatG": 2.81,
+        "fiberG": 5.86,
+        "sugarG": 4.36,
+        "sodiumMg": 24.58,
+        "potassiumMg": 581.92
+      },
+      "calculationRevision": "bil-usda-local-formulation-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 0,
+        "totalMinutes": 20
+      },
+      "method": [
+        "Cool the quinoa.",
+        "Combine with chopped vegetables and lemon."
+      ]
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_action.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
-import 'package:body_intelligence_log/features/intelligence_center/ai_coach_safety_copy.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_center_engine.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_api.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
@@ -137,26 +136,6 @@ void main() {
     expect(response.message.text, contains('temporarily unavailable'));
     expect(response.actions, isEmpty);
     expect(response.serviceStatus, CoachServiceStatus.temporarilyUnavailable);
-  });
-
-  test('safety-blocked cloud payload exposes no answer or action', () async {
-    final response = await _answer(
-      const LocalCoachResult(
-        actions: [_openMeals],
-        processedOnDevice: false,
-        answer: 'Provider output must never reach the user.',
-        spokenAnswer: 'Provider speech must never play.',
-        serviceStatus: CoachServiceStatus.safetyBlocked,
-        runtime: CoachAnswerRuntime.cloudPersonalized,
-      ),
-    );
-    expect(response.message.text, AiCoachSafetyCopy.resolve('en'));
-    expect(response.message.text, isNot(contains('Provider output')));
-    expect(response.spokenText, isNull);
-    expect(response.actions, isEmpty);
-    expect(response.serviceStatus, CoachServiceStatus.safetyBlocked);
-    expect(response.runtime, CoachAnswerRuntime.localFallback);
-    expect(response.message.kind, IntelligenceMessageKind.safety);
   });
 
   test(

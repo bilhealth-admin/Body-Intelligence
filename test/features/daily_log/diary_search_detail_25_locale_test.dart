@@ -8,17 +8,11 @@ import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
-import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
-import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
-import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_presentation_localizer.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
-import 'package:body_intelligence_log/features/nutrition/services/trusted_food_network_search_resolver.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +95,6 @@ void main() {
               FoodRuntimeSearchAuthority(
                 foods,
                 catalogResolver: () async => null,
-                networkSearchResolver: const _TeffGateway(),
               ),
             ),
             mealRepositoryProvider.overrideWithValue(MealRepository(database)),
@@ -110,17 +103,6 @@ void main() {
             ),
             measurementSystemProvider.overrideWithValue(
               const AsyncData(MeasurementSystem.metric),
-            ),
-            verifiedSubscriptionStateProvider.overrideWithValue(
-              AsyncData(
-                SubscriptionState(
-                  plan: CommercePlan.free,
-                  entitlements: FreePlan.entitlements,
-                  authority: EntitlementAuthority.verifiedServer,
-                  isPurchasable: true,
-                  canRestorePurchases: true,
-                ),
-              ),
             ),
           ],
           child: MaterialApp(
@@ -162,18 +144,6 @@ void main() {
       );
       expect(tester.takeException(), isNull, reason: '$tag search');
 
-      final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
-      final searchController =
-          tester.widget<SearchBar>(searchEntry).controller! as SearchController;
-      expect(
-        searchController.isOpen,
-        isFalse,
-        reason: '$tag user opens search',
-      );
-      await tester.tap(searchEntry);
-      await tester.pumpAndSettle();
-      expect(searchController.isOpen, isTrue);
-
       const query = 'chicken';
       final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(
         query: query,
@@ -195,23 +165,9 @@ void main() {
         findsNothing,
         reason: '$tag remains empty before a query',
       );
-      if (tag == 'ar') {
-        await tester.enterText(find.byType(SearchBar).last, 'تيف مطبوخ');
-        final trustedTeffName = FoodPresentationLocalizer.foodName(
-          name: 'Teff, cooked',
-          localeTag: 'ar',
-          source: 'USDA FoodData Central',
-        );
-        await _settleSearch(tester, find.text(trustedTeffName));
-        expect(
-          find.text(trustedTeffName),
-          findsOneWidget,
-          reason:
-              'Explicit Arabic search must not hide a trusted USDA cloud hit',
-        );
-      }
       await tester.enterText(find.byType(SearchBar).last, query);
-      await _settleSearch(tester, find.text(expectedName));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1500));
       expect(find.text(expectedName), findsOneWidget, reason: '$tag food name');
       final verifiedBadge = find.byKey(
         const Key('daily-search-verified-food-badge'),
@@ -320,40 +276,5 @@ void main() {
       await tester.pump(Duration.zero);
       await tester.idle();
     });
-  }
-}
-
-// The database search and debounce schedule successive asynchronous stages.
-// Retain the exact result assertions after advancing them in bounded steps.
-Future<void> _settleSearch(WidgetTester tester, Finder result) async {
-  for (var tick = 0; tick < 60 && result.evaluate().isEmpty; tick++) {
-    await tester.pump(const Duration(milliseconds: 50));
-  }
-}
-
-class _TeffGateway extends TrustedFoodNetworkSearchResolver {
-  const _TeffGateway();
-
-  @override
-  Future<List<UnifiedFood>> search(String query, {int limit = 10}) async {
-    if (query.trim() != 'تيف مطبوخ') return const <UnifiedFood>[];
-    return const <UnifiedFood>[
-      UnifiedFood(
-        id: 'usda:172672',
-        name: 'Teff, cooked',
-        category: 'Foundation',
-        serving: FoodServing(amount: 100, unit: 'g', grams: 100),
-        nutrients: <FoodNutrient, NutrientAmount>{
-          FoodNutrient.calories: NutrientAmount.known(101),
-          FoodNutrient.protein: NutrientAmount.known(3.87),
-          FoodNutrient.carbohydrates: NutrientAmount.known(19.86),
-          FoodNutrient.fat: NutrientAmount.known(0.65),
-        },
-        source: FoodDataSource.foundation,
-        sourceLabel: 'USDA FoodData Central — verified',
-        verified: true,
-        isCustom: false,
-      ),
-    ];
   }
 }

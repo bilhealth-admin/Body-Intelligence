@@ -15,13 +15,11 @@ import 'app/analytics/bil_launch_event.dart';
 import 'app/localization/app_localizations.dart';
 import 'app/localization/bil_locale_policy.dart';
 import 'app/router/app_router.dart';
-import 'app/services/app_resume_dashboard_coordinator.dart';
 import 'app/services/app_switcher_privacy_shield.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
 import 'app/services/recoverable_image_picker.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
-import 'features/commerce/providers/commerce_providers.dart';
 import 'features/auth/apple_credential_lifecycle.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/auth/oauth_browser_return.dart';
@@ -32,9 +30,9 @@ import 'app/theme/bil_flagship_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // BIL is a portrait-only mobile experience. Keep Flutter aligned with the
-  // native Android/iOS declarations so device rotation cannot rebuild the
-  // responsive route tree while a form, scanner, or conversation is active.
+  // BIL is a portrait-only mobile experience. Keep the Flutter window in the
+  // same orientation as the native Android/iOS declarations so a physical
+  // device rotation cannot trigger a full responsive-tree rebuild mid-flow.
   await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[
     DeviceOrientation.portraitUp,
   ]);
@@ -141,7 +139,8 @@ class _BILBootstrapState extends State<_BILBootstrap> {
     );
     // Keep the initialization future available to the link bootstrap. The
     // client object exists synchronously, but its PKCE verifier/session
-    // storage is not ready until this future completes.
+    // storage is not ready until this future completes. A cold Android OAuth
+    // return can arrive during that window.
     _cloudInitializationFuture = cloudInitialization;
     if (mounted) setState(() => ready = true);
     try {
@@ -168,7 +167,7 @@ class _BILBootstrapState extends State<_BILBootstrap> {
   @override
   Widget build(BuildContext context) {
     if (ready) {
-      return BilMobileUmpBootstrap(
+      return BilAndroidUmpBootstrap(
         child: _BILLinkBootstrap(
           cloudInitialization: _cloudInitializationFuture,
           child: const BILApp(),
@@ -249,8 +248,10 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
     );
     _authController = BilAuthCallbackController(
       resolve: (uri) async {
-        // A cold Android return can arrive before Supabase has finished
-        // preparing SharedPreferences and the PKCE verifier store.
+        // On a cold Android return the link can be replayed before
+        // Supabase.initialize has finished preparing SharedPreferences and
+        // the PKCE verifier store. Never exchange the one-time code before
+        // that preparation is complete.
         await widget.cloudInitialization;
         await dismissIosOAuthBrowserAfterCallback();
         await Supabase.instance.client.auth.getSessionFromUrl(uri);
@@ -280,8 +281,9 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
 
   void _bind() {
     final appLinks = AppLinks();
+    // app_links replays the cold-start URI when the event listener attaches.
     // Subscribe synchronously so a return from native consent/browser UI
-    // cannot arrive in the gap created by an awaited initial-link read.
+    // cannot arrive in the gap created by awaiting getInitialLink first.
     _linkSubscription = appLinks.uriLinkStream.listen(
       _uriDispatcher.add,
       onError: (Object error, StackTrace _) {
@@ -292,26 +294,6 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
         );
       },
     );
-    // Android can launch a stopped BIL process directly from the Google
-    // browser return. Keep the stream attached first, then consume the
-    // initial URI as a second, deduplicated delivery path.
-    unawaited(_consumeInitialLink(appLinks));
-  }
-
-  Future<void> _consumeInitialLink(AppLinks appLinks) async {
-    try {
-      final initial = await appLinks.getInitialLink();
-      if (initial != null) _uriDispatcher.add(initial);
-    } on Object catch (error, stackTrace) {
-      AppObservability.logger.record(
-        AppLogLevel.warning,
-        'incoming_initial_link_failed',
-        attributes: {
-          'errorType': error.runtimeType.toString(),
-          'stackType': stackTrace.runtimeType.toString(),
-        },
-      );
-    }
   }
 
   Future<void> _handleIncomingUri(Uri uri) async {
@@ -420,22 +402,19 @@ class BILApp extends ConsumerWidget {
             child: AiCoachResetNoticeCoordinator(
               child: InactivityReminderCoordinator(
                 child: BilAppleCredentialLifecycleCoordinator(
-                  child: AppResumeDashboardCoordinator(
-                    onMeaningfulResume: () {
-                      // Resume is not a cold launch. Retain the active route,
-                      // theme, locale and draft while refreshing server truth.
-                      // Re-entering startup here raced restored iOS metrics.
-                      ref.invalidate(verifiedSubscriptionStateProvider);
-                      ref
-                          .read(aiCoachUsageRefreshProvider.notifier)
-                          .requestAuthoritativeReload();
-                    },
-                    child: AppSwitcherPrivacyShield(
-                      child: Semantics(
-                        container: true,
-                        label: AppLocalizations.of(context).get('app_title'),
-                        child: content,
-                      ),
+                  child: AppSwitcherPrivacyShield(
+                    currentPath: () => AppRouter
+                        .router
+                        .routerDelegate
+                        .currentConfiguration
+                        .uri
+                        .path,
+                    onLongBackgroundResume: () =>
+                        AppRouter.router.go('/startup'),
+                    child: Semantics(
+                      container: true,
+                      label: AppLocalizations.of(context).get('app_title'),
+                      child: content,
                     ),
                   ),
                 ),

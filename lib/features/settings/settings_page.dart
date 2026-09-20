@@ -102,6 +102,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 20),
           _MoreSection(
             title: copy('Account & profile'),
+            kind: BilSemanticIconKind.profile,
             children: [
               _MoreRow(copy('My Profile'), '/profile-summary'),
               _MoreRow(
@@ -119,6 +120,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           _MoreSection(
             title: copy('Diary & goals'),
+            kind: BilSemanticIconKind.goals,
             children: [
               _MoreRow(copy('Goals'), '/goals'),
               _MoreRow(copy('Progress'), '/history'),
@@ -138,6 +140,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           _MoreSection(
             title: copy('Health preferences'),
+            kind: BilSemanticIconKind.health,
             children: [
               _MoreRow(
                 copy('AI Coach'),
@@ -158,6 +161,7 @@ class SettingsPage extends ConsumerWidget {
                 key: const Key('settings-connected-health-entry'),
               ),
               _MoreRow(copy('Steps'), '/connected-health/steps'),
+              _MoreRow(copy('Learn'), '/wellness/learn', showDivider: false),
             ],
           ),
           const SafeFreeAdAnchor(
@@ -167,6 +171,7 @@ class SettingsPage extends ConsumerWidget {
           if (AppEnvironment.communityConfigured) ...[
             _MoreSection(
               title: copy('Community'),
+              kind: BilSemanticIconKind.community,
               children: [
                 _MoreRow(copy('Community'), '/community'),
                 _MoreRow(copy('Friends'), '/community/people'),
@@ -180,6 +185,7 @@ class SettingsPage extends ConsumerWidget {
           ],
           _MoreSection(
             title: copy('Privacy & notifications'),
+            kind: BilSemanticIconKind.privacy,
             children: [
               _MoreRow(copy('Settings'), '/settings/preferences'),
               _MoreRow(
@@ -204,14 +210,21 @@ class SettingsPage extends ConsumerWidget {
           ),
           _MoreSection(
             title: copy('Help'),
+            kind: BilSemanticIconKind.support,
             children: [
               _MoreRow(copy('Help'), '/help'),
+              _MoreRow(
+                copy('Delete account'),
+                '/help/delete-account',
+                key: const Key('settings-delete-account-entry'),
+              ),
               _CloudSyncRow(label: copy('Sync now'), status: cloudSyncStatus),
             ],
           ),
           if (adminAccess.asData?.value == true)
             _MoreSection(
               title: copy('Administration'),
+              kind: BilSemanticIconKind.moderation,
               children: [
                 _MoreRow(
                   copy('BIL Administration'),
@@ -300,9 +313,14 @@ class _PremiumMembershipCard extends StatelessWidget {
 }
 
 class _MoreSection extends StatelessWidget {
-  const _MoreSection({required this.title, required this.children});
+  const _MoreSection({
+    required this.title,
+    required this.kind,
+    required this.children,
+  });
 
   final String title;
+  final BilSemanticIconKind kind;
   final List<Widget> children;
 
   @override
@@ -313,11 +331,24 @@ class _MoreSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 8),
-          child: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          child: Row(
+            children: [
+              BilSemanticIconBadge(
+                kind: kind,
+                size: 34,
+                iconSize: 19,
+                shape: BoxShape.rectangle,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         Card(
@@ -406,10 +437,6 @@ class _ProfileSummary extends StatelessWidget {
                     children: [
                       Text(
                         name,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        semanticsLabel: name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -489,20 +516,18 @@ class _MoreRow extends StatelessWidget {
           leading: _isDanger
               ? Icon(
                   Icons.delete_outline_rounded,
-                  size: 18,
                   color: Theme.of(context).colorScheme.error,
                 )
               : semanticKind == null
               ? Icon(
                   Icons.arrow_forward_rounded,
-                  size: 18,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 )
               : BilSemanticIconBadge(
                   key: Key('more-semantic-icon-${semanticKind.name}'),
                   kind: semanticKind,
-                  size: 28,
-                  iconSize: 17,
+                  size: 36,
+                  iconSize: 20,
                   shape: BoxShape.rectangle,
                 ),
           title: Text(
@@ -540,13 +565,13 @@ class _CloudSyncRow extends ConsumerWidget {
         horizontalTitleGap: 12,
         leading: status.isSyncing
             ? const SizedBox.square(
-                dimension: 18,
+                dimension: 22,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : BilSemanticIconBadge(
                 kind: BilSemanticIconKind.cloudSync,
-                size: 28,
-                iconSize: 17,
+                size: 36,
+                iconSize: 20,
                 shape: BoxShape.rectangle,
               ),
         title: Text(label),
@@ -610,8 +635,8 @@ class _MoreActionRow extends StatelessWidget {
         horizontalTitleGap: 12,
         leading: BilSemanticIconBadge(
           kind: kind,
-          size: 28,
-          iconSize: 17,
+          size: 36,
+          iconSize: 20,
           shape: BoxShape.rectangle,
         ),
         title: Text(label),

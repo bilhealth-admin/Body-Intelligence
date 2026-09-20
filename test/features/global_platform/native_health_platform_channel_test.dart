@@ -43,9 +43,6 @@ void main() {
             'changesTokenExpired': true,
           };
         }
-        if (call.method == 'cancelReadChanges') {
-          return <String, Object?>{'cancelled': true};
-        }
         return null;
       });
       final bridge = MethodChannelHealthBridge(channelName: 'bil/apple_health');
@@ -60,8 +57,8 @@ void main() {
       expect(page.deletedIds, ['gone']);
       expect(page.nextAnchor, 'encoded-anchor');
       expect(page.changesTokenExpired, isTrue);
-      await bridge.enableBackgroundDelivery({'weight'});
       await bridge.cancelReadChanges();
+      await bridge.enableBackgroundDelivery({'weight'});
       expect(
         calls.map((e) => e.method),
         containsAll(<String>[

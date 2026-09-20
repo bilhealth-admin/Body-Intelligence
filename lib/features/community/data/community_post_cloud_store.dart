@@ -12,40 +12,15 @@ abstract interface class CommunityPostStoreContract {
 
   Future<void> publishText(String body);
 
-  Future<void> publishWithImage(String body, CommunityPostImageDraft image);
+  Future<void> publishWithImage(
+    String body,
+    CommunityPostImageDraft image,
+  );
 
   Future<void> delete(String postId);
 }
 
-abstract interface class CommunityPostLookupContract {
-  Future<List<CommunityPost>> loadPostsByIds(List<String> postIds);
-}
-
-abstract interface class CommunityPostPaginationContract {
-  Future<CommunityFeedBatch> loadFeedPage({
-    DateTime? before,
-    String? beforeId,
-    int limit = 40,
-  });
-}
-
-/// Page through the signed-in member's posts, including pending or rejected
-/// posts. It relies on the existing owner-only RLS policy and never creates a
-/// second public feed surface.
-abstract interface class CommunityPostAuthorPaginationContract {
-  Future<CommunityFeedBatch> loadMyPostsPage({
-    DateTime? before,
-    String? beforeId,
-    int limit = 40,
-  });
-}
-
-final class CommunityPostCloudStore
-    implements
-        CommunityPostStoreContract,
-        CommunityPostLookupContract,
-        CommunityPostPaginationContract,
-        CommunityPostAuthorPaginationContract {
+final class CommunityPostCloudStore implements CommunityPostStoreContract {
   CommunityPostCloudStore(this._client, this._user);
 
   final SupabaseClient _client;
@@ -58,107 +33,16 @@ final class CommunityPostCloudStore
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
   );
   static final _unsafeText = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]');
-  static const _postSelection =
-      'id,author_id,body,created_at,media_object_path,media_mime_type,'
-      'media_bytes,media_width,media_height,moderation_status,reviewed_at';
 
   @override
-  Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
-      (await loadFeedPage(limit: limit)).posts;
-
-  @override
-  Future<CommunityFeedBatch> loadFeedPage({
-    DateTime? before,
-    String? beforeId,
-    int limit = 40,
-  }) async {
-    if ((before == null) != (beforeId == null) ||
-        (beforeId != null && !_uuid.hasMatch(beforeId))) {
-      throw ArgumentError('Invalid Community feed cursor');
-    }
-    final boundedLimit = limit.clamp(1, 100);
-    final selection = _client
-        .from('bil_community_posts')
-        .select(_postSelection)
-        .eq('moderation_status', 'approved')
-        .isFilter('deleted_at', null);
-    final filtered = before == null
-        ? selection
-        : selection.or(
-            'created_at.lt.${before.toUtc().toIso8601String()},'
-            'and(created_at.eq.${before.toUtc().toIso8601String()},id.lt.$beforeId)',
-          );
-    final rows = await filtered
-        .order('created_at', ascending: false)
-        .order('id', ascending: false)
-        .limit(boundedLimit);
-    final posts = await _hydrateVisibleRows(rows);
-    final cursor = posts.isEmpty ? null : posts.last;
-    return CommunityFeedBatch(
-      posts: posts,
-      hasMore: rows.length == boundedLimit,
-      nextBefore: cursor?.createdAt,
-      nextBeforeId: cursor?.id,
-    );
-  }
-
-  @override
-  Future<CommunityFeedBatch> loadMyPostsPage({
-    DateTime? before,
-    String? beforeId,
-    int limit = 40,
-  }) async {
-    if ((before == null) != (beforeId == null) ||
-        (beforeId != null && !_uuid.hasMatch(beforeId))) {
-      throw ArgumentError('Invalid Community authored-post cursor');
-    }
-    final boundedLimit = limit.clamp(1, 100);
-    final selection = _client
-        .from('bil_community_posts')
-        .select(_postSelection)
-        .eq('author_id', _user.id)
-        .isFilter('deleted_at', null);
-    final filtered = before == null
-        ? selection
-        : selection.or(
-            'created_at.lt.${before.toUtc().toIso8601String()},'
-            'and(created_at.eq.${before.toUtc().toIso8601String()},id.lt.$beforeId)',
-          );
-    final rows = await filtered
-        .order('created_at', ascending: false)
-        .order('id', ascending: false)
-        .limit(boundedLimit);
-    final posts = await _hydrateVisibleRows(rows);
-    final cursor = posts.isEmpty ? null : posts.last;
-    return CommunityFeedBatch(
-      posts: posts,
-      hasMore: rows.length == boundedLimit,
-      nextBefore: cursor?.createdAt,
-      nextBeforeId: cursor?.id,
-    );
-  }
-
-  @override
-  Future<List<CommunityPost>> loadPostsByIds(List<String> postIds) async {
-    if (postIds.isEmpty) return const [];
-    if (postIds.length > 100 || postIds.any((id) => !_uuid.hasMatch(id))) {
-      throw ArgumentError.value(postIds, 'postIds');
-    }
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) async {
     final rows = await _client
         .from('bil_community_posts')
-        .select(_postSelection)
-        .inFilter('id', postIds);
-    final hydrated = await _hydrateVisibleRows(rows);
-    final byId = {for (final post in hydrated) post.id: post};
-    return postIds
-        .map((id) => byId[id])
-        .whereType<CommunityPost>()
-        .toList(growable: false);
-  }
-
-  Future<List<CommunityPost>> _hydrateVisibleRows(
-    List<Map<String, dynamic>> rows,
-  ) async {
+        .select(
+          'id,author_id,body,created_at,media_object_path,media_mime_type,media_bytes,media_width,media_height,moderation_status,reviewed_at',
+        )
+        .order('created_at', ascending: false)
+        .limit(limit.clamp(1, 100));
     final validRows = rows.where(_validPostRow).toList(growable: false);
     if (validRows.isEmpty) return const [];
     final authorIds = validRows
@@ -329,22 +213,24 @@ final class CommunityPostCloudStore
           !_validMediaPath(mediaPath, _user.id, postId)) {
         throw StateError('Post image path did not pass the ownership boundary');
       }
+      await _client.storage.from(_bucket).remove([mediaPath]);
     }
-    final deleted = await _client.rpc(
-      'bil_delete_community_post',
-      params: {'p_post_id': postId},
-    );
-    if (deleted != true) {
+    final changed = await _client
+        .from('bil_community_posts')
+        .update({
+          'deleted_at': DateTime.now().toUtc().toIso8601String(),
+          'media_url': null,
+          'media_object_path': null,
+          'media_mime_type': null,
+          'media_bytes': null,
+          'media_width': null,
+          'media_height': null,
+        })
+        .eq('id', postId)
+        .eq('author_id', _user.id)
+        .select('id');
+    if (changed.length != 1) {
       throw StateError('Post was not available to delete');
-    }
-    // The database mutation is authoritative. Storage cleanup is best effort:
-    // a stale image must never make a successfully deleted post look undeleted.
-    if (mediaPath is String) {
-      try {
-        await _client.storage.from(_bucket).remove([mediaPath]);
-      } on Object {
-        // The row is already safely hidden; retrying storage cleanup is safe.
-      }
     }
   }
 

@@ -1,15 +1,12 @@
 part of 'intelligence_center_page.dart';
 
 extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
-  Future<bool> _executeAction(
+  Future<void> _executeAction(
     IntelligenceAction action, {
     bool confirmationAlreadyProvided = false,
   }) async {
-    final executionKey = _coachActionExecutionKey(action);
-    if (!executingActionKeys.add(executionKey)) return false;
-    final tracksInlineNavigation = const CoachActionPresentationPolicy()
-        .isNavigation(action);
-    var succeeded = false;
+    final executionKey = '${action.type.name}:${action.id}';
+    if (!executingActionKeys.add(executionKey)) return;
     try {
       final acceptsTypedConfirmation =
           confirmationAlreadyProvided &&
@@ -18,29 +15,21 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
       if (action.requiresConfirmation &&
           !acceptsTypedConfirmation &&
           !await _confirmAction(action)) {
-        return false;
+        return;
       }
-      if (!mounted) return false;
-      if (tracksInlineNavigation) {
-        _updateState(
-          () => actionExecutionPhases[executionKey] =
-              _CoachActionExecutionPhase.running,
-        );
-      }
+      if (!mounted) return;
       switch (action.type) {
         case IntelligenceActionType.navigate:
           final target = action.payload['target']?.toString();
           final path = target == null
               ? null
               : const BilNavigationRegistry().resolve(target);
-          if (path == null) throw StateError('invalid_navigation_target');
-          await _openCoachRoute(path);
+          if (path == null) return;
+          context.go(path);
         case IntelligenceActionType.readNutritionRemaining:
           final snapshot = await ref.read(coachContextSnapshotProvider.future);
           final remaining = snapshot.nutritionRemainingFor(DateTime.now());
-          if (remaining == null) {
-            throw StateError('nutrition_remaining_unavailable');
-          }
+          if (remaining == null) return;
           if (mounted) {
             _appendToolReceipt(
               tr(
@@ -75,7 +64,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           final safeAction = supportedActions.contains(requested)
               ? requested
               : null;
-          await _openCoachRoute(
+          context.go(
             Uri(
               path: '/daily-log',
               queryParameters: safeAction == null
@@ -85,7 +74,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           );
         case IntelligenceActionType.addWater:
           final amount = action.payload['amountMl'];
-          if (amount is! int) throw StateError('invalid_water_amount');
+          if (amount is! int) return;
           final entityId = await ref
               .read(waterRepositoryProvider)
               .add(occurredAt: DateTime.now(), amountMl: amount);
@@ -112,15 +101,14 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
         case IntelligenceActionType.addWeight:
           final value = action.payload['weightKg'];
           if (value is! num) {
-            await _openCoachRoute('/daily-check-in');
-            succeeded = true;
-            return true;
+            context.go('/daily-check-in');
+            return;
           }
           final requestedDate = action.payload['date']?.toString();
           final occurredAt = requestedDate == null
               ? DateTime.now()
               : DateTime.tryParse(requestedDate);
-          if (occurredAt == null) throw StateError('invalid_weight_date');
+          if (occurredAt == null) return;
           final entityId = await ref
               .read(weightRepositoryProvider)
               .addWeight(
@@ -159,24 +147,22 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             ref.read(selectedLogDateProvider.notifier).state = DateTime.now()
                 .add(Duration(days: dayOffset));
           }
-          await _openCoachRoute('/daily-log?focus=meal');
+          context.go('/daily-log?focus=meal');
         case IntelligenceActionType.reviewWorkout:
-          await _openCoachRoute('/wellness/workouts/log', push: true);
+          context.push('/wellness/workouts/log');
         case IntelligenceActionType.openPlan:
-          await _openCoachRoute('/plan?origin=dashboard');
+          context.go('/plan?origin=dashboard');
         case IntelligenceActionType.openReport:
-          await _openCoachRoute('/analytics');
+          context.go('/analytics');
         case IntelligenceActionType.openAiCoachSubscription:
-          await _openCoachRoute('/plans?focus=ai-coach', push: true);
+          context.push('/plans?focus=ai-coach');
         case IntelligenceActionType.buyAiBoost:
-          await _openCoachRoute('/plans?focus=boost', push: true);
+          context.push('/plans?focus=boost');
         case IntelligenceActionType.manageSubscription:
-          await _openCoachRoute('/plans', push: true);
+          context.push('/plans');
         case IntelligenceActionType.setThemeMode:
           final mode = action.payload['mode']?.toString();
-          if (!const {'dark', 'light', 'system'}.contains(mode)) {
-            throw StateError('invalid_theme_mode');
-          }
+          if (!const {'dark', 'light', 'system'}.contains(mode)) return;
           await ref.read(appSettingsProvider.notifier).setThemeMode(mode!);
           if (mounted) {
             _appendToolReceipt(
@@ -188,7 +174,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           final locale = BilLocalePolicy.canonicalSupportedTag(
             action.payload['locale']?.toString(),
           );
-          if (locale == null) throw StateError('invalid_locale');
+          if (locale == null) return;
           await ref.read(appSettingsProvider.notifier).setLocale(locale);
           if (mounted) {
             _appendToolReceipt(
@@ -198,7 +184,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           }
         case IntelligenceActionType.updateGoal:
           final target = action.payload['targetWeightKg'];
-          if (target is! num) throw StateError('invalid_goal_target');
+          if (target is! num) return;
           final requestedTargetDate = action.payload['targetDate'];
           final targetDate = requestedTargetDate == null
               ? null
@@ -262,10 +248,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           // save is queued after dispose's snapshot too, so a completed write
           // cannot reappear as a replayable action when Coach is reopened.
           await _retireDurableAction(action);
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(userProfileProvider);
           ref.invalidate(activeGoalProvider);
           ref.invalidate(coachContextSnapshotProvider);
@@ -283,7 +266,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           final date = requestedDate == null
               ? DateTime.now()
               : DateTime.tryParse(requestedDate);
-          if (date == null) throw StateError('invalid_measurement_date');
+          if (date == null) return;
           await ref
               .read(bodyMeasurementRepositoryProvider)
               .saveForDay(
@@ -296,10 +279,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 thighCm: measurement('thighCm'),
                 preserveExistingValues: true,
               );
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(bodyMeasurementHistoryProvider);
           ref.invalidate(coachContextSnapshotProvider);
           _appendToolReceipt(
@@ -315,7 +295,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           final date = action.payload['date'] == null
               ? DateTime.now()
               : DateTime.tryParse(action.payload['date'].toString());
-          if (date == null) throw StateError('invalid_meal_date');
+          if (date == null) return;
           final entityId = await ref
               .read(mealRepositoryProvider)
               .addQuickMacroEntry(
@@ -331,22 +311,20 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 carbohydratesKnown: true,
                 fatKnown: true,
               );
-          if (entityId <= 0) throw StateError('meal_not_committed');
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
-          _appendToolReceipt(
-            tr(
-              'Quick macros added to ${action.payload['mealType']}: '
-                  '${(action.payload['calories']! as num).round()} kcal.',
-              'تمت إضافة المغذيات السريعة إلى ${action.payload['mealType']}: '
-                  '${(action.payload['calories']! as num).round()} سعرة.',
-            ),
-          );
-          _showActionCompleted(tr('Meal updated.', 'تم تحديث الوجبة.'));
+          if (entityId > 0) {
+            _appendToolReceipt(
+              tr(
+                'Quick macros added to ${action.payload['mealType']}: '
+                    '${(action.payload['calories']! as num).round()} kcal.',
+                'تمت إضافة المغذيات السريعة إلى ${action.payload['mealType']}: '
+                    '${(action.payload['calories']! as num).round()} سعرة.',
+              ),
+            );
+            _showActionCompleted(tr('Meal updated.', 'تم تحديث الوجبة.'));
+          }
         case IntelligenceActionType.updateMealItem:
           await ref
               .read(mealRepositoryProvider)
@@ -354,10 +332,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 id: action.payload['itemId']! as int,
                 quantity: (action.payload['quantityGrams']! as num).toDouble(),
               );
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
           _appendToolReceipt(
@@ -375,10 +350,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           await ref
               .read(mealRepositoryProvider)
               .deleteMealItem(action.payload['itemId']! as int);
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
           _appendToolReceipt(
@@ -395,10 +367,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 id: action.payload['itemId']! as int,
                 mealType: action.payload['mealType']!.toString(),
               );
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
           _appendToolReceipt(
@@ -411,22 +380,17 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           );
           _showActionCompleted(tr('Meal item moved.', 'تم نقل عنصر الوجبة.'));
         case IntelligenceActionType.requestAccountDeletion:
-          await _openCoachRoute('/help/delete-account', push: true);
+          context.push('/help/delete-account');
         case IntelligenceActionType.saveMemory:
           final value = action.payload['text']?.toString().trim() ?? '';
-          if (value.isEmpty || value.length > 500) {
-            throw StateError('invalid_memory_value');
-          }
+          if (value.isEmpty || value.length > 500) return;
           await CoachMemoryRepository(
             preferences: ref.read(preferencesRepositoryProvider),
           ).saveConfirmed(
             text: value,
             kind: action.payload['kind']?.toString() ?? 'user_fact',
           );
-          if (!mounted) {
-            succeeded = true;
-            return true;
-          }
+          if (!mounted) return;
           ref.invalidate(coachContextSnapshotProvider);
           _appendToolReceipt(
             tr(
@@ -435,16 +399,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             ),
           );
       }
-      succeeded = true;
-      return true;
     } on Object {
-      if (!mounted) return false;
-      if (tracksInlineNavigation) {
-        _updateState(
-          () => actionExecutionPhases[executionKey] =
-              _CoachActionExecutionPhase.failed,
-        );
-      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -455,18 +411,10 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           ),
         ),
       );
-      return false;
     } finally {
       executingActionKeys.remove(executionKey);
-      if (mounted && succeeded && tracksInlineNavigation) {
-        _updateState(() => actionExecutionPhases.remove(executionKey));
-      }
     }
   }
-
-  Future<void> _openCoachRoute(String path, {bool push = false}) => ref.read(
-    intelligenceCenterNavigationExecutorProvider,
-  )(context, path, push);
 
   Future<void> _retireDurableAction(IntelligenceAction action) async {
     var changed = false;
@@ -500,7 +448,6 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        scrollable: true,
         icon: Icon(
           action.destructive
               ? BilSemanticIcons.deleteAccount
@@ -535,7 +482,6 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             context: context,
             barrierDismissible: false,
             builder: (dialogContext) => AlertDialog(
-              scrollable: true,
               icon: Icon(
                 BilSemanticIcons.deleteAccount,
                 color: Theme.of(context).colorScheme.error,

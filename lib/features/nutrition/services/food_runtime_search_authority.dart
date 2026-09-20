@@ -140,13 +140,6 @@ class FoodRuntimeSearchAuthority {
       );
     }
 
-    // Non-Latin food queries must reach the authenticated BIL gateway before
-    // the offline catalog decides whether the phrase is understood. This is
-    // the production path for Arabic and other multilingual searches; local
-    // catalog rows remain a resilient fallback when the network is unavailable.
-    final networkFirst = _isMultilingualQuery(query)
-        ? await _loadTrustedNetwork(query, limit: limit)
-        : const <Food>[];
     final local = await _searchLocal(query, limit: limit);
     final community = await _loadCommunity(query, limit: limit);
 
@@ -154,19 +147,16 @@ class FoodRuntimeSearchAuthority {
     try {
       catalog = await _catalogResolver();
     } catch (_) {
-      final network = networkFirst.isNotEmpty
-          ? networkFirst
-          : local.isEmpty && community.isEmpty
+      final network = local.isEmpty && community.isEmpty
           ? await _loadTrustedNetwork(query, limit: limit)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
           local,
-          const <Food>[],
+          network,
           community,
           query: query,
           limit: limit,
-          trusted: network,
         ),
         source: network.isNotEmpty || community.isNotEmpty
             ? FoodRuntimeSearchSource.catalogAndLocal
@@ -175,19 +165,16 @@ class FoodRuntimeSearchAuthority {
     }
 
     if (catalog == null) {
-      final network = networkFirst.isNotEmpty
-          ? networkFirst
-          : local.isEmpty && community.isEmpty
+      final network = local.isEmpty && community.isEmpty
           ? await _loadTrustedNetwork(query, limit: limit)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
           local,
-          const <Food>[],
+          network,
           community,
           query: query,
           limit: limit,
-          trusted: network,
         ),
         source: network.isNotEmpty || community.isNotEmpty
             ? FoodRuntimeSearchSource.catalogAndLocal
@@ -225,21 +212,18 @@ class FoodRuntimeSearchAuthority {
         query: query,
         limit: limit,
       );
-      final network = networkFirst.isNotEmpty
-          ? networkFirst
-          : current.isEmpty
+      final network = current.isEmpty
           ? await _loadTrustedNetwork(query, limit: limit)
           : const <Food>[];
       return FoodRuntimeSearchResult(
         foods: network.isEmpty
             ? current
             : _mergeCommunity(
+                network,
                 current,
-                const <Food>[],
                 community,
                 query: query,
                 limit: limit,
-                trusted: network,
               ),
         source: FoodRuntimeSearchSource.catalogAndLocal,
       );
@@ -250,11 +234,10 @@ class FoodRuntimeSearchAuthority {
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
           local,
-          const <Food>[],
+          network,
           community,
           query: query,
           limit: limit,
-          trusted: network,
         ),
         source: network.isNotEmpty || community.isNotEmpty
             ? FoodRuntimeSearchSource.catalogAndLocal
@@ -282,15 +265,7 @@ class FoodRuntimeSearchAuthority {
         limit: limit < 20 ? limit : 20,
       );
       final foods = <Food>[];
-      // The trusted Edge gateway may translate the typed phrase before asking
-      // USDA, while USDA correctly returns its canonical English identity.
-      // Re-matching that canonical name against the original non-English text
-      // discards a valid server answer (for example "تيف مطبوخ" ->
-      // "Teff, cooked"). The gateway already binds every response to this
-      // authenticated request and USDA's requireAllWords query, so preserve
-      // its bounded order here instead of applying the offline text matcher a
-      // second time with a different language.
-      for (final food in unified) {
+      for (final food in _rankUnifiedFoods(unified, query)) {
         foods.add(await _localRepository.materializeUnifiedFood(food));
         if (foods.length >= limit) break;
       }
@@ -332,23 +307,15 @@ class FoodRuntimeSearchAuthority {
     return _rankLocalFoods(all, query).take(limit).toList(growable: false);
   }
 
-  bool _isMultilingualQuery(String query) {
-    final normalized = query.trim();
-    return normalized.length >= 3 &&
-        normalized.runes.any((rune) => rune > 0x7f);
-  }
-
   List<Food> _mergeCommunity(
     Iterable<Food> primary,
     Iterable<Food> fallback,
     Iterable<Food> community, {
     required String query,
     required int limit,
-    Iterable<Food> trusted = const <Food>[],
   }) {
     if (limit <= 0) return const <Food>[];
     final communityRows = community.toList(growable: false);
-    final trustedRows = trusted.toList(growable: false);
     final reserve = communityRows.isEmpty ? 0 : (limit >= 10 ? 10 : 1);
     final nonCommunity = <Food>[];
     for (final candidate in <Food>[...primary, ...fallback]) {
@@ -363,13 +330,6 @@ class FoodRuntimeSearchAuthority {
       nonCommunity,
       query,
     ).take(limit - reserve).toList(growable: true);
-    for (final candidate in trustedRows) {
-      if (result.any((existing) => _sameFoodIdentity(existing, candidate))) {
-        continue;
-      }
-      result.add(candidate);
-      if (result.length >= limit - reserve) break;
-    }
     for (final candidate in _rankLocalFoods(communityRows, query)) {
       if (result.any((existing) => _sameFoodIdentity(existing, candidate))) {
         continue;
@@ -377,12 +337,7 @@ class FoodRuntimeSearchAuthority {
       result.add(candidate);
       if (result.length >= limit) break;
     }
-    // Trusted results can own a translated query whose canonical USDA name no
-    // longer matches the original script. All other rows still pass the local
-    // matcher above; preserve the authenticated gateway rows when present.
-    return trustedRows.isEmpty
-        ? _rankLocalFoods(result, query).take(limit).toList(growable: false)
-        : result.take(limit).toList(growable: false);
+    return _rankLocalFoods(result, query).take(limit).toList(growable: false);
   }
 
   bool _sameFoodIdentity(Food a, Food b) {

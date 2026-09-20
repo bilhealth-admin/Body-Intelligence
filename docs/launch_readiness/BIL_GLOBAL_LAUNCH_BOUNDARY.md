@@ -11,7 +11,8 @@
 
 The accepted baseline currently establishes these release-relevant facts:
 
-- Flutter version identity is `1.0.0+8`.
+- Flutter release defaults to `1.0.0+21`; the signed iOS workflow overrides
+  the platform build number to `26`.
 - Android namespace and application ID are `com.bilhealth.bodyintelligencelog`.
 - Android uses minimum API 26 and target API 36.
 - Android release signing reads an optional private `key.properties`; it does

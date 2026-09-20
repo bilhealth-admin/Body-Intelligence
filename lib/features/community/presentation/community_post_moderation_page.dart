@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
-import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
@@ -62,9 +61,7 @@ class _CommunityPostModerationPageState
     await refreshed;
   }
 
-  void _reload() => setState(() {
-    _queue = _load();
-  });
+  void _reload() => setState(() => _queue = _load());
 
   Future<bool> _confirmPostDecision(
     CommunityPostModerationDecision decision,
@@ -400,13 +397,7 @@ class _PendingPostCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          SelectableText(
-            post.body,
-            textDirection: BilWrittenLanguageResolver.directionFor(
-              post.body,
-              fallback: Directionality.of(context),
-            ),
-          ),
+          SelectableText(post.body),
           if (post.hasImage) ...[
             const SizedBox(height: 12),
             ClipRRect(

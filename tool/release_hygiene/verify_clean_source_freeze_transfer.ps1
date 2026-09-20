@@ -331,7 +331,8 @@ if ($Phase -eq 'PostFinalization') {
         CANDIDATE_FROZEN_OR_ACCEPTED = 'YES'
         UNRESOLVED_REVIEW_COUNT = '0'
         RELEASE_VERSION = '1.0.0'
-        RELEASE_BUILD_NUMBER = '8'
+        RELEASE_BUILD_NUMBER_IOS = '26'
+        RELEASE_BUILD_NUMBER_ANDROID = '21'
     }
     foreach ($marker in $requiredMarkers.GetEnumerator()) {
         if ((Get-ManifestMarker -Source $manifestSource -Name $marker.Key) -ne $marker.Value) {

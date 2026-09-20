@@ -334,53 +334,16 @@ class AdvertisingPrivacyPage extends ConsumerStatefulWidget {
 
 class _AdvertisingPrivacyPageState
     extends ConsumerState<AdvertisingPrivacyPage> {
-  late UmpConsentCoordinator _umpConsent;
-  Listenable? _umpConsentListenable;
+  late final UmpConsentCoordinator _umpConsent;
   UmpConsentSnapshot _umpSnapshot = const UmpConsentSnapshot.uninitialized();
   bool _umpBusy = false;
   bool _refreshScheduled = false;
 
-  UmpConsentCoordinator get _selectedUmpConsent =>
-      widget.umpConsentCoordinator ?? AdMobUmpConsentGate.instance;
-
-  void _bindUmpConsent(UmpConsentCoordinator coordinator) {
-    _umpConsentListenable?.removeListener(_umpConsentChanged);
-    _umpConsent = coordinator;
-    _umpSnapshot = coordinator.snapshot;
-    _umpBusy = false;
-    final Listenable? listenable = switch (coordinator) {
-      Listenable value => value,
-      _ => null,
-    };
-    _umpConsentListenable = listenable;
-    listenable?.addListener(_umpConsentChanged);
-  }
-
-  void _umpConsentChanged() {
-    if (!mounted) return;
-    final snapshot = _umpConsent.snapshot;
-    setState(() => _umpSnapshot = snapshot);
-  }
-
   @override
   void initState() {
     super.initState();
-    _bindUmpConsent(_selectedUmpConsent);
-  }
-
-  @override
-  void didUpdateWidget(covariant AdvertisingPrivacyPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final coordinator = _selectedUmpConsent;
-    if (!identical(coordinator, _umpConsent)) {
-      _bindUmpConsent(coordinator);
-    }
-  }
-
-  @override
-  void dispose() {
-    _umpConsentListenable?.removeListener(_umpConsentChanged);
-    super.dispose();
+    _umpConsent = widget.umpConsentCoordinator ?? AdMobUmpConsentGate.instance;
+    _umpSnapshot = _umpConsent.snapshot;
   }
 
   bool get _umpEnabled =>
@@ -406,10 +369,9 @@ class _AdvertisingPrivacyPageState
     if (_umpBusy || !_umpSnapshot.privacyOptionsRequired) {
       return;
     }
-    final coordinator = _umpConsent;
     setState(() => _umpBusy = true);
-    final snapshot = await coordinator.showPrivacyOptions();
-    if (!mounted || !identical(coordinator, _umpConsent)) return;
+    final snapshot = await _umpConsent.showPrivacyOptions();
+    if (!mounted) return;
     setState(() {
       _umpSnapshot = snapshot;
       _umpBusy = false;
@@ -418,10 +380,9 @@ class _AdvertisingPrivacyPageState
 
   Future<void> _refreshUmp({bool force = false}) async {
     if (_umpBusy || !_umpEnabled) return;
-    final coordinator = _umpConsent;
     setState(() => _umpBusy = true);
-    final snapshot = await coordinator.refresh(force: force);
-    if (!mounted || !identical(coordinator, _umpConsent)) return;
+    final snapshot = await _umpConsent.refresh(force: force);
+    if (!mounted) return;
     setState(() {
       _umpSnapshot = snapshot;
       _umpBusy = false;

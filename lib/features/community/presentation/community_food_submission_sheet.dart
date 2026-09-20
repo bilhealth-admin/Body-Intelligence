@@ -12,16 +12,13 @@ class CommunityFoodSubmissionSheet extends StatefulWidget {
   final Future<void> Function(CommunityFoodDraft draft) onSubmit;
 
   @override
-  State<CommunityFoodSubmissionSheet> createState() =>
-      _CommunityFoodSubmissionSheetState();
+  State<CommunityFoodSubmissionSheet> createState() => _CommunityFoodSubmissionSheetState();
 }
 
-class _CommunityFoodSubmissionSheetState
-    extends State<CommunityFoodSubmissionSheet> {
+class _CommunityFoodSubmissionSheetState extends State<CommunityFoodSubmissionSheet> {
   final _formKey = GlobalKey<FormState>();
   final _controllers = {
-    for (final field in CommunityFoodField.values)
-      field: TextEditingController(),
+    for (final field in CommunityFoodField.values) field: TextEditingController(),
   };
   bool _submitting = false;
   String? _failure;
@@ -45,34 +42,13 @@ class _CommunityFoodSubmissionSheetState
     final issue = validateCommunityFoodInput(_input).issues[field];
     return switch (issue) {
       null => null,
-      CommunityFoodInputIssue.missingValue => _text(
-        'This value is required.',
-        'هذه القيمة مطلوبة.',
-      ),
-      CommunityFoodInputIssue.nameLength => _text(
-        'Use 2 to 180 characters.',
-        'اكتب من حرفين إلى 180 حرفًا.',
-      ),
-      CommunityFoodInputIssue.invalidNumber => _text(
-        'Enter a non-negative decimal number.',
-        'أدخل رقمًا عشريًا غير سالب.',
-      ),
-      CommunityFoodInputIssue.positiveServing => _text(
-        'Serving weight must be greater than zero.',
-        'يجب أن يكون وزن الحصة أكبر من صفر.',
-      ),
-      CommunityFoodInputIssue.tooLarge => _text(
-        'Check this value and its unit; it is too large.',
-        'راجع هذه القيمة ووحدتها؛ القيمة كبيرة جدًا.',
-      ),
-      CommunityFoodInputIssue.macroExceedsServing => _text(
-        'Nutrient grams cannot exceed the serving weight.',
-        'غرامات العنصر الغذائي لا يمكن أن تتجاوز وزن الحصة.',
-      ),
-      CommunityFoodInputIssue.macroTotalExceedsServing => _text(
-        'Total macro grams exceed this serving weight.',
-        'مجموع غرامات الماكروز يتجاوز وزن هذه الحصة.',
-      ),
+      CommunityFoodInputIssue.missingValue => _text('This value is required.', 'هذه القيمة مطلوبة.'),
+      CommunityFoodInputIssue.nameLength => _text('Use 2 to 180 characters.', 'اكتب من حرفين إلى 180 حرفًا.'),
+      CommunityFoodInputIssue.invalidNumber => _text('Enter a non-negative decimal number.', 'أدخل رقمًا عشريًا غير سالب.'),
+      CommunityFoodInputIssue.positiveServing => _text('Serving weight must be greater than zero.', 'يجب أن يكون وزن الحصة أكبر من صفر.'),
+      CommunityFoodInputIssue.tooLarge => _text('Check this value and its unit; it is too large.', 'راجع هذه القيمة ووحدتها؛ القيمة كبيرة جدًا.'),
+      CommunityFoodInputIssue.macroExceedsServing => _text('Nutrient grams cannot exceed the serving weight.', 'غرامات العنصر الغذائي لا يمكن أن تتجاوز وزن الحصة.'),
+      CommunityFoodInputIssue.macroTotalExceedsServing => _text('Total macro grams exceed this serving weight.', 'مجموع غرامات الماكروز يتجاوز وزن هذه الحصة.'),
     };
   }
 
@@ -91,19 +67,13 @@ class _CommunityFoodSubmissionSheetState
       Navigator.of(context).pop(true);
     } on CommunityTextPolicyException catch (error) {
       if (!mounted) return;
-      setState(
-        () => _failure = error.localizedMessage(
-          Localizations.localeOf(context).toLanguageTag(),
-        ),
-      );
+      setState(() => _failure = error.localizedMessage(Localizations.localeOf(context).toLanguageTag()));
     } on Object {
       if (!mounted) return;
-      setState(
-        () => _failure = _text(
-          'Submission could not be confirmed. Your values are kept. Check your submissions before retrying.',
-          'تعذر تأكيد الإرسال. احتفظنا بالقيم. تحقق من مساهماتك قبل إعادة المحاولة.',
-        ),
-      );
+      setState(() => _failure = _text(
+        'Submission could not be confirmed. Your values are kept. Check your submissions before retrying.',
+        'تعذر تأكيد الإرسال. احتفظنا بالقيم. تحقق من مساهماتك قبل إعادة المحاولة.',
+      ));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -123,29 +93,18 @@ class _CommunityFoodSubmissionSheetState
     child: SafeArea(
       top: false,
       child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.viewInsetsOf(context).bottom + 20,
-        ),
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.viewInsetsOf(context).bottom + 20),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                _text('Submit community food', 'إضافة غذاء مجتمعي'),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+              Text(_text('Submit community food', 'إضافة غذاء مجتمعي'),
+                style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
-              Text(
-                _text(
-                  'Enter all nutrition values for this serving, not per 100 g.',
-                  'أدخل جميع القيم الغذائية لهذه الحصة، وليس لكل 100 غرام.',
-                ),
-              ),
+              Text(_text('Enter all nutrition values for this serving, not per 100 g.',
+                'أدخل جميع القيم الغذائية لهذه الحصة، وليس لكل 100 غرام.')),
               const SizedBox(height: 16),
               for (final field in CommunityFoodField.values) ...[
                 TextFormField(
@@ -155,22 +114,17 @@ class _CommunityFoodSubmissionSheetState
                   validator: (_) => _validate(field),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   keyboardType: field == CommunityFoodField.name
-                      ? TextInputType.text
-                      : const TextInputType.numberWithOptions(decimal: true),
+                      ? TextInputType.text : const TextInputType.numberWithOptions(decimal: true),
                   textInputAction: field == CommunityFoodField.fat
-                      ? TextInputAction.done
-                      : TextInputAction.next,
+                      ? TextInputAction.done : TextInputAction.next,
                   onFieldSubmitted: (_) {
                     if (field == CommunityFoodField.fat) _submit();
                   },
                   decoration: InputDecoration(
                     labelText: _label(field),
                     errorMaxLines: 3,
-                    suffixText: field == CommunityFoodField.name
-                        ? null
-                        : field == CommunityFoodField.calories
-                        ? 'kcal'
-                        : 'g',
+                    suffixText: field == CommunityFoodField.name ? null
+                        : field == CommunityFoodField.calories ? 'kcal' : 'g',
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -178,36 +132,23 @@ class _CommunityFoodSubmissionSheetState
               if (_failure != null) ...[
                 Semantics(
                   liveRegion: true,
-                  child: Text(
-                    _failure!,
-                    key: const Key('community-food-submit-error'),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
+                  child: Text(_failure!, key: const Key('community-food-submit-error'),
+                    style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
                 const SizedBox(height: 12),
               ],
               FilledButton.icon(
                 key: const Key('community-food-submit'),
                 onPressed: _submitting ? null : _submit,
-                icon: _submitting
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                icon: _submitting ? const SizedBox.square(dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.fact_check_outlined),
-                label: Text(
-                  _submitting
-                      ? _text('Sending…', 'جارٍ الإرسال…')
-                      : _text('Send for review', 'إرسال للمراجعة'),
-                ),
+                label: Text(_submitting ? _text('Sending…', 'جارٍ الإرسال…')
+                    : _text('Send for review', 'إرسال للمراجعة')),
               ),
               TextButton(
                 key: const Key('community-food-cancel'),
-                onPressed: _submitting
-                    ? null
-                    : () => Navigator.of(context).pop(false),
+                onPressed: _submitting ? null : () => Navigator.of(context).pop(false),
                 child: Text(_text('Cancel', 'إلغاء')),
               ),
             ],

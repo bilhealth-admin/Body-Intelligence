@@ -23,11 +23,10 @@ const _files = <String, String>{
 };
 
 Future<String> _sha256(File file) async {
-  final result = await Process.run('powershell', [
-    '-NoProfile',
-    '-Command',
-    '(Get-FileHash -Algorithm SHA256 -LiteralPath "${file.absolute.path}").Hash.ToLowerInvariant()',
-  ]);
+  final result = await Process.run(
+    'powershell',
+    ['-NoProfile', '-Command', '(Get-FileHash -Algorithm SHA256 -LiteralPath "${file.absolute.path}").Hash.ToLowerInvariant()'],
+  );
   if (result.exitCode != 0) {
     throw StateError('Unable to hash ${file.path}: ${result.stderr}');
   }
@@ -40,9 +39,7 @@ Future<void> main() async {
   final hashes = <String>{};
   for (final entry in _files.entries) {
     final source = File('$_sourceRoot/${entry.value}');
-    if (!source.existsSync()) {
-      throw StateError('Missing source: ${source.path}');
-    }
+    if (!source.existsSync()) throw StateError('Missing source: ${source.path}');
     final target = File('${output.path}/${entry.key}.png');
     source.copySync(target.path);
     final hash = await _sha256(target);
@@ -59,8 +56,12 @@ Future<void> main() async {
     });
   }
   final manifest = File(_manifestPath)..parent.createSync(recursive: true);
-  manifest.writeAsStringSync(
-    '${const JsonEncoder.withIndent('  ').convert({'schemaVersion': 1, 'batchOwner': 'fasting_runtime_reliability', 'status': 'visually-confirmed', 'count': records.length, 'records': records})}\n',
-  );
+  manifest.writeAsStringSync('${const JsonEncoder.withIndent('  ').convert({
+    'schemaVersion': 1,
+    'batchOwner': 'fasting_runtime_reliability',
+    'status': 'visually-confirmed',
+    'count': records.length,
+    'records': records,
+  })}\n');
   stdout.writeln('INSTALLED=${records.length} UNIQUE_SHA=${hashes.length}');
 }

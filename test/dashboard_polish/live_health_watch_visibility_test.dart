@@ -29,18 +29,15 @@ ConnectedHealthSnapshot _snapshot({
   required ConnectedHealthStatus status,
   required bool verified,
   required List<ConnectedHealthSignalView> signals,
-  List<ConnectedHealthSignalView> stepHistory = const [],
   String? source = 'Health Connect',
-  String? failureCode,
 }) => ConnectedHealthSnapshot(
   status: status,
   platformSource: source,
   availableSources: source == null ? const [] : [source],
   signals: signals,
-  stepHistory: stepHistory,
   importedCount: signals.length,
   lastSyncAt: DateTime.utc(2026, 8, 31, 12),
-  failureCode: failureCode,
+  failureCode: null,
   deviceVerified: verified,
 );
 
@@ -123,7 +120,7 @@ void main() {
   });
 
   testWidgets(
-    'Apple Health uses its selected phone step total with verified watch data',
+    'verified Apple Health readings without HKDevice still reach the watch',
     (tester) async {
       await tester.pumpWidget(
         _subject(
@@ -131,19 +128,16 @@ void main() {
             status: ConnectedHealthStatus.synchronized,
             verified: true,
             source: 'Apple Health',
-            signals: [_signal('heartRate', 71, 'bpm', source: 'Apple Watch')],
-            stepHistory: [_signal('steps', 4321, 'count', source: 'iPhone')],
+            signals: [
+              _signal('steps', 1234, 'steps', source: 'com.apple.health'),
+            ],
           ),
         ),
       );
       await tester.pump();
 
       expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
-      expect(find.text('4321'), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(RegExp(r'Steps, 4321 steps')),
-        findsOneWidget,
-      );
+      expect(find.text('1234'), findsOneWidget);
     },
   );
 
@@ -180,51 +174,25 @@ void main() {
     });
   }
 
-  testWidgets('iPhone HealthKit readings do not require Apple Watch evidence', (
+  testWidgets('unverified, source-less, and invalid signals stay hidden', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      _subject(
-        _snapshot(
-          status: ConnectedHealthStatus.synchronized,
-          verified: false,
-          source: 'Apple Health',
-          signals: [_signal('steps', 100, 'count', source: 'iPhone')],
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
-    expect(find.text('100'), findsOneWidget);
-  });
-
-  testWidgets('sync failure keeps the last confirmed watch readings visible', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _subject(
-        _snapshot(
-          status: ConnectedHealthStatus.degraded,
-          verified: true,
-          signals: [_signal('steps', 83, 'count')],
-          failureCode: 'health_sync_failed_offline_cache_preserved',
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
-    expect(find.text('83'), findsOneWidget);
-  });
-
-  testWidgets('source-less and invalid signals stay hidden', (tester) async {
     for (final snapshot in [
+      _snapshot(
+        status: ConnectedHealthStatus.synchronized,
+        verified: false,
+        signals: [_signal('steps', 100, 'steps')],
+      ),
       _snapshot(
         status: ConnectedHealthStatus.synchronized,
         verified: true,
         source: null,
         signals: [_signal('steps', 100, 'steps')],
+      ),
+      _snapshot(
+        status: ConnectedHealthStatus.synchronized,
+        verified: true,
+        signals: [_signal('steps', 100, 'steps', source: 'Health app')],
       ),
       _snapshot(
         status: ConnectedHealthStatus.synchronized,
@@ -364,16 +332,16 @@ void main() {
     expect(merged.signals, isEmpty);
   });
 
-  test('dashboard snapshot and status follow aggregate connection truth', () {
-    final card = [
+  test('dashboard CTA and status follow aggregate connection truth', () {
+    final card = File(
       'lib/features/connected_health/widgets/connected_health_card.dart',
-      'lib/features/connected_health/widgets/connected_health_dashboard_snapshot.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
+    ).readAsStringSync();
 
-    expect(card, contains('final hasMeasuredData ='));
-    expect(card, contains('liveHealthWatchCanShowMetrics(watchSnapshot)'));
-    expect(card, contains('final showLastSync ='));
-    expect(card, contains('child: _DashboardHealthDeviceSection('));
+    expect(
+      card,
+      contains('final hasConnectedSource = liveHealthWatchCanShowMetrics'),
+    );
+    expect(card, contains('child: hasConnectedSource'));
     expect(
       card,
       contains('ConnectedHealthStatusDot(status: watchSnapshot.status)'),

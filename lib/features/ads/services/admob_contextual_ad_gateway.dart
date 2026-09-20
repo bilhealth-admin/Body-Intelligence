@@ -10,48 +10,21 @@ import 'admob_configuration.dart';
 import 'admob_ump_consent_gate.dart';
 import 'contextual_ad_gateway.dart';
 
-final class AdMobContextualAdGateway extends ChangeNotifier
-    implements ContextualBannerGateway, ContextualAdPrivacyBoundary {
+final class AdMobContextualAdGateway implements ContextualBannerGateway {
   AdMobContextualAdGateway({
     this.useTestUnits = !kReleaseMode,
     UmpConsentCoordinator? umpConsent,
     bool Function()? adultConfirmed,
-    String? Function()? accountKey,
     this.configuredOverride,
-    this.sdkOperationTimeout = const Duration(seconds: 45),
-    this.bannerLoadTimeout = const Duration(seconds: 65),
   }) : _umpConsent = umpConsent ?? AdMobUmpConsentGate.instance,
-       _adultConfirmed = adultConfirmed ?? _denyUnknownAge,
-       _accountKey = accountKey ?? _unknownAccount {
-    final consent = _umpConsent;
-    if (consent case Listenable source) source.addListener(_consentChanged);
-  }
+       _adultConfirmed = adultConfirmed ?? _denyUnknownAge;
 
   final bool useTestUnits;
   final UmpConsentCoordinator _umpConsent;
   final bool Function() _adultConfirmed;
-  final String? Function() _accountKey;
   @visibleForTesting
   final bool? configuredOverride;
-  @visibleForTesting
-  final Duration sdkOperationTimeout;
-  @visibleForTesting
-  final Duration bannerLoadTimeout;
   Future<InitializationStatus>? _initialization;
-  bool _disposed = false;
-
-  @override
-  bool get mayDisplayAd => !_disposed && _umpConsent.snapshot.canRequestAds;
-
-  void _consentChanged() => notifyListeners();
-
-  @override
-  void dispose() {
-    _disposed = true;
-    final consent = _umpConsent;
-    if (consent case Listenable source) source.removeListener(_consentChanged);
-    super.dispose();
-  }
 
   BilAdPlatform? get _platform => switch (defaultTargetPlatform) {
     TargetPlatform.android => BilAdPlatform.android,
@@ -61,7 +34,6 @@ final class AdMobContextualAdGateway extends ChangeNotifier
 
   @override
   bool get isConfigured {
-    if (_disposed) return false;
     final override = configuredOverride;
     if (override != null) return override;
     final platform = _platform;
@@ -74,23 +46,8 @@ final class AdMobContextualAdGateway extends ChangeNotifier
   }
 
   Future<void> _initialize() async {
-    final operation = _initialization ??= _initializeWithoutPublisherId();
-    try {
-      await operation;
-    } on Object {
-      if (identical(_initialization, operation)) _initialization = null;
-      rethrow;
-    }
-  }
-
-  Future<InitializationStatus> _initializeWithoutPublisherId() async {
-    // iOS enables publisher first-party ID by default. BIL's contextual-only
-    // contract does not use it (this SDK call is a no-op on Android).
-    await MobileAds.instance
-        .setSameAppKeyEnabled(false)
-        .timeout(sdkOperationTimeout);
-    if (_disposed) throw StateError('The advertising gateway was disposed.');
-    return MobileAds.instance.initialize().timeout(sdkOperationTimeout);
+    _initialization ??= MobileAds.instance.initialize();
+    await _initialization;
   }
 
   @override
@@ -103,29 +60,17 @@ final class AdMobContextualAdGateway extends ChangeNotifier
   @override
   Future<ContextualBannerHandle?> loadBanner(AdPlacement placement) async {
     final platform = _platform;
-    if (kIsWeb ||
-        !isConfigured ||
-        platform == null ||
-        placement != AdPlacement.generalDiscovery) {
-      return null;
+    if (!isConfigured || platform == null) return null;
+    if (platform == BilAdPlatform.android) {
+      // The production UMP bridge sends TFUA=false because BIL serves ads only
+      // to a registered Free account that passed the existing 18+ product
+      // gate. Keep that complete audience assertion at the final provider
+      // boundary as well as the presentation policy.
+      if (!_adultConfirmed()) return null;
+      final ump = await _umpConsent.verifyCanRequestAds();
+      if (!ump.canRequestAds) return null;
     }
-    final owner = _accountKey();
-    bool stillEligible() =>
-        !_disposed &&
-        owner != null &&
-        _accountKey() == owner &&
-        _adultConfirmed();
-    // Both platforms require the same live adult Free account and Google's
-    // consent. Neither an iOS build nor a reviewer identity bypasses this gate.
-    if (!stillEligible()) return null;
-    final ump = await _umpConsent.verifyCanRequestAds();
-    if (!ump.canRequestAds || !stillEligible()) return null;
-    try {
-      await _initialize();
-    } on Object {
-      return null;
-    }
-    if (!stillEligible() || !_umpConsent.snapshot.canRequestAds) return null;
+    await _initialize();
     final completer = Completer<ContextualBannerHandle?>();
     late final BannerAd ad;
     ad = BannerAd(
@@ -140,12 +85,7 @@ final class AdMobContextualAdGateway extends ChangeNotifier
           if (kDebugMode) {
             debugPrint('BIL test banner loaded for ${placement.name}.');
           }
-          if (completer.isCompleted ||
-              !stillEligible() ||
-              !_umpConsent.snapshot.canRequestAds) {
-            loaded.dispose();
-            if (!completer.isCompleted) completer.complete(null);
-          } else {
+          if (!completer.isCompleted) {
             completer.complete(_AdMobBannerHandle(ad));
           }
         },
@@ -161,29 +101,17 @@ final class AdMobContextualAdGateway extends ChangeNotifier
         },
       ),
     );
-    final operation = () async {
-      try {
-        await ad.load();
-      } on Object {
-        ad.dispose();
-        if (!completer.isCompleted) completer.complete(null);
-      }
-      return completer.future;
-    }();
-    return operation.timeout(
+    await ad.load();
+    return completer.future.timeout(
       // The native Google Mobile Ads request timeout is 60 seconds. A shorter
       // wrapper timeout disposed valid cold-start/test-device requests before
       // the SDK could finish on slower Android devices and emulators.
-      // Bound the platform-channel acknowledgement as well as the callback.
-      bannerLoadTimeout,
+      const Duration(seconds: 65),
       onTimeout: () {
         if (kDebugMode) {
           debugPrint('BIL test banner timed out for ${placement.name}.');
         }
         ad.dispose();
-        // Complete the original future too: a late SDK callback must dispose
-        // its native ad instead of handing an abandoned handle to nobody.
-        if (!completer.isCompleted) completer.complete(null);
         return null;
       },
     );
@@ -191,7 +119,6 @@ final class AdMobContextualAdGateway extends ChangeNotifier
 }
 
 bool _denyUnknownAge() => false;
-String? _unknownAccount() => null;
 
 final class _AdMobBannerHandle implements ContextualBannerHandle {
   const _AdMobBannerHandle(this._ad);

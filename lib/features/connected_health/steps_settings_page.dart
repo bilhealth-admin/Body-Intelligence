@@ -357,6 +357,10 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                     ),
                     title: Text(t('View step history')),
                     trailing: const Icon(Icons.chevron_right_rounded),
+                    // History is a shell destination, not a child of the
+                    // settings route. Replace the external settings stack so
+                    // the shell always receives a fully-built child instead
+                    // of a transient blank nested navigator on mobile.
                     onTap: saving ? null : () => context.go('/history'),
                   ),
                   ListTile(

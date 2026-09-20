@@ -138,7 +138,6 @@ void main() {
     final repository = PreferencesRepository(database);
     final gateway = _RetryHealthGateway();
     await _pump(tester, repository, gateway: gateway);
-    await _refreshConnectedSources(tester);
     expect(
       find.text('Connected sources could not be checked.'),
       findsOneWidget,
@@ -191,14 +190,6 @@ Future<void> _pump(
       ),
     ),
   );
-  await tester.pumpAndSettle();
-}
-
-Future<void> _refreshConnectedSources(WidgetTester tester) async {
-  final container = ProviderScope.containerOf(
-    tester.element(find.byType(MaterialApp)),
-  );
-  await container.read(connectedHealthProvider.notifier).refresh();
   await tester.pumpAndSettle();
 }
 

@@ -98,22 +98,7 @@ void main() {
       final repository = File(
         'lib/features/commerce/repositories/server_entitlement_repository.dart',
       ).readAsStringSync();
-      final closedTestBranch = repository.indexOf('if (closedTestActive) {');
-      final subscriptionQuery = repository.indexOf(
-        ".from('bil_subscriptions')",
-      );
-      final verifiedFree = repository.indexOf(
-        '_remember(user.id, _verifiedFree(), now)',
-      );
-      expect(closedTestBranch, greaterThanOrEqualTo(0));
-      expect(subscriptionQuery, greaterThan(closedTestBranch));
-      expect(verifiedFree, greaterThan(subscriptionQuery));
-      final closedTestBody = repository.substring(
-        closedTestBranch,
-        subscriptionQuery,
-      );
-      expect(closedTestBody, contains('return _remember('));
-      expect(closedTestBody, contains('_closedTestState('));
+      expect(repository, contains('if (!closedTestActive) {'));
       expect(repository, contains('_remember(user.id, _verifiedFree(), now)'));
       expect(
         repository,

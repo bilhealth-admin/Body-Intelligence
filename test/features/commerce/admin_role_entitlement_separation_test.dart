@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'administrator authority stays separate from billing and Free Community',
+    'administrator authority never substitutes for customer entitlement',
     () {
       final providers = File(
         'lib/features/commerce/providers/commerce_providers.dart',
@@ -18,11 +18,6 @@ void main() {
       expect(providers, contains('verifiedSubscriptionStateProvider'));
       expect(providers, isNot(contains('bil_can_manage_ai_coach')));
       expect(providers, isNot(contains('administrativeOverride')));
-      expect(
-        gate,
-        contains('if (feature == PremiumGateFeature.community) return child;'),
-      );
-      expect(gate, isNot(contains('aiCoachAdminAccessProvider')));
       expect(gate, isNot(contains('administrativeOverride')));
     },
   );

@@ -62,22 +62,19 @@ extension _FoodPageActions on _FoodPageState {
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
-      final open = await showDialog<bool>(
+      final openSettings = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text(context.strings.text('Camera access is off')),
           content: Text(
-            '${context.strings.text('Enable camera access in system settings to scan a barcode. Manual barcode entry remains available.')} '
-            '${context.strings.text('BIL opens the camera only for the barcode scan you selected and never at startup.')}',
+            context.strings.text(
+              'Enable camera access in system settings to scan a barcode. Manual barcode entry remains available.',
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(context.strings.text('Not now')),
+              child: Text(context.strings.text('Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
@@ -86,7 +83,7 @@ extension _FoodPageActions on _FoodPageState {
           ],
         ),
       );
-      if (open == true) await policy.openSettings();
+      if (openSettings == true) await policy.openSettings();
       return false;
     }
     return await policy.request(BilRuntimeCapability.camera) ==
@@ -294,8 +291,8 @@ extension _FoodPageActions on _FoodPageState {
       case _FoodAddMethod.mealPhoto:
         final origin = widget.embedded ? '/nutrition' : '/foods';
         final route = Uri(
-          path: '/intelligence-center',
-          queryParameters: {'vision': 'capture', 'from': origin},
+          path: '/daily-log',
+          queryParameters: {'action': 'photo', 'from': origin},
         ).toString();
         await context.push(route);
         return;

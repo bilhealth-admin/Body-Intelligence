@@ -39,8 +39,7 @@ final cloudManualSyncStatusProvider =
       CloudManualSyncStatusController,
       CloudManualSyncStatus
     >((ref) {
-      final authOwner = ref.watch(cloudAuthOwnerIdProvider);
-      final ownerId = authOwner.value ?? _activeCloudOwnerId();
+      final ownerId = _activeCloudOwnerId();
       final controller = CloudManualSyncStatusController(
         preferences: ref.watch(preferencesRepositoryProvider),
         runSync: () => ref.read(cloudManualSyncServiceProvider).runOnce(),

@@ -25,10 +25,9 @@ String coachGreetingSeparator({required bool arabic}) =>
 extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
   Future<void> _loadConversation() async {
     if (!mounted) return;
-    _updateState(() {
-      conversationReady = false;
-      conversationLoadFailed = false;
-    });
+    if (conversationReady) {
+      _updateState(() => conversationReady = false);
+    }
     try {
       final preferences = conversationPreferences;
       final storedValues = await Future.wait([
@@ -41,22 +40,17 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
       final storedContextFingerprint = storedValues[1];
       final storedConversationId = storedValues[2]?.trim();
       final historyArchive = decodeCoachConversationHistory(storedValues[3]);
-      final contextRevision = await _coachContextRevision();
       if (!mounted) return;
       final restored = <IntelligenceMessage>[];
       var storedMessageValues = <Object?>[];
       var storedTranscriptReadable = stored != null && stored.isEmpty;
-      final contextFingerprintChanged =
-          storedContextFingerprint != contextRevision.fingerprint;
       // Conversation history is user-owned content, not a cache of the current
       // health snapshot. A context change, including a legacy transcript that
       // predates fingerprints, must never delete or skip the stored turns.
       if (stored != null && stored.isNotEmpty) {
         try {
           final decoded = jsonDecode(stored);
-          if (decoded is! List || decoded.any((item) => item is! Map)) {
-            throw const FormatException('invalid_conversation_snapshot');
-          }
+          if (decoded is! List) throw const FormatException();
           storedMessageValues = List<Object?>.from(decoded);
           storedTranscriptReadable = true;
           for (final value in decoded.whereType<Map>()) {
@@ -107,45 +101,20 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
           }
         }
       }
-      if (stored != null &&
-          stored.isNotEmpty &&
-          !storedTranscriptReadable &&
-          restored.isEmpty) {
-        throw const FormatException('unrecoverable_conversation_snapshot');
-      }
       final displayName = await _resolvedCoachDisplayName();
       if (!mounted) return;
       final now = ref.read(intelligenceConversationClockProvider)();
       final welcome = _sessionWelcome(displayName, at: now);
-      restored.removeWhere((message) => message.id.startsWith('welcome'));
-      String? restoredWritingLanguage;
-      for (final message in restored.reversed) {
-        if (message.role != IntelligenceMessageRole.user ||
-            message.modality != IntelligenceMessageModality.text) {
-          continue;
-        }
-        final candidate = const CoachLanguageResolver().resolve(
-          input: message.text,
-          uiLocale: 'en',
-        );
-        if (candidate.detected && !candidate.usedPreviousInput) {
-          restoredWritingLanguage = candidate.languageTag;
-          break;
-        }
-      }
       _updateState(() {
         activeConversationId = resolvedConversationId;
-        lastClearWritingLanguageTag = restoredWritingLanguage;
-        introVisible = restored.isEmpty;
+        introVisible = true;
         conversationReady = true;
-        animatedResponseIds.clear();
         messages
           ..clear()
-          ..addAll(restored);
-        // A welcome belongs at the start of an empty conversation, never
-        // underneath restored replies when the route is opened again.
-        if (messages.isEmpty) {
-          messages.add(
+          ..addAll(
+            restored.where((message) => !message.id.startsWith('welcome')),
+          )
+          ..add(
             IntelligenceMessage(
               id: 'welcome-session-${now.microsecondsSinceEpoch}',
               role: IntelligenceMessageRole.bil,
@@ -155,18 +124,13 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
               modality: IntelligenceMessageModality.system,
             ),
           );
-        }
       });
-      _scrollToLatest(jump: true);
-      // Keep the fingerprint for diagnostics/migrations, but never rewrite the
-      // transcript merely because the current health context changed.
-      if (contextFingerprintChanged ||
-          historyArchive.needsMigration ||
-          selectionNeedsMigration) {
+      // The transcript is ready without loading every weight and diary entry.
+      // Keep only actual transcript-format migrations on the opening path;
+      // the health-context fingerprint refreshes independently below.
+      if (historyArchive.needsMigration || selectionNeedsMigration) {
         try {
           await preferences.setMany(<String, String>{
-            if (contextFingerprintChanged)
-              'intelligenceConversationContextV1': contextRevision.fingerprint,
             if (historyArchive.needsMigration || selectionNeedsMigration)
               _conversationHistoryKey: encodeCoachConversationHistory(
                 conversations: historyArchive.conversations,
@@ -179,11 +143,31 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
           // already present in memory and remains user-owned content.
         }
       }
+      unawaited(
+        _refreshRestoredConversationContextFingerprint(
+          storedContextFingerprint: storedContextFingerprint,
+        ),
+      );
+      _scrollToLatest(jump: true);
     } on Object {
-      // Never treat unread history as an empty chat: a subsequent save would
-      // overwrite it. Keep Back and an explicit retry available, and preserve
-      // the original snapshot until a read succeeds.
-      if (mounted) _updateState(() => conversationLoadFailed = true);
+      // A local read failure must not leave Coach permanently disabled. Keep
+      // the already-seeded in-memory welcome, but never merge a partial
+      // restore over a user turn.
+      if (mounted) _updateState(() => conversationReady = true);
+    }
+  }
+
+  Future<void> _refreshRestoredConversationContextFingerprint({
+    required String? storedContextFingerprint,
+  }) async {
+    final contextRevision = await _coachContextRevision();
+    if (storedContextFingerprint == contextRevision.fingerprint) return;
+    try {
+      await conversationPreferences.setMany(<String, String>{
+        'intelligenceConversationContextV1': contextRevision.fingerprint,
+      });
+    } on Object {
+      // This value is diagnostic only; it must never delay or block chat.
     }
   }
 
@@ -204,20 +188,32 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     String? oldestWeightDay;
     String? latestWeightDay;
     try {
-      final weights = await weightSource.revisionSummary();
-      weightCount = weights.count;
-      latest = weights.updatedAt;
-      oldestWeightDay = weights.firstDay;
-      latestWeightDay = weights.lastDay;
+      final weights = await weightSource.getAll();
+      weightCount = weights.length;
+      for (final entry in weights) {
+        if (latest == null || entry.updatedAt.isAfter(latest)) {
+          latest = entry.updatedAt;
+        }
+        final day = entry.dayKey;
+        if (day != null) {
+          if (oldestWeightDay == null || day.compareTo(oldestWeightDay) < 0) {
+            oldestWeightDay = day;
+          }
+          if (latestWeightDay == null || day.compareTo(latestWeightDay) > 0) {
+            latestWeightDay = day;
+          }
+        }
+      }
     } on Object {
       // Conversation restore must remain available if one local source fails.
     }
     try {
-      final logs = await dailyLogSource.revisionSummary();
-      dailyLogCount = logs.count;
-      final changedAt = logs.updatedAt;
-      if (changedAt != null && (latest == null || changedAt.isAfter(latest))) {
-        latest = changedAt;
+      final logs = await dailyLogSource.getAll();
+      dailyLogCount = logs.length;
+      for (final log in logs) {
+        if (latest == null || log.updatedAt.isAfter(latest)) {
+          latest = log.updatedAt;
+        }
       }
     } on Object {
       // The available source still provides a safe lower-bound cutoff.
@@ -283,7 +279,6 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         jump ||
         force ||
         !conversationScroll.hasClients ||
-        !conversationScroll.position.hasContentDimensions ||
         conversationScroll.position.pixels -
                 conversationScroll.position.minScrollExtent <=
             72;
@@ -294,7 +289,6 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted ||
           !conversationScroll.hasClients ||
-          !conversationScroll.position.hasContentDimensions ||
           conversationId != activeConversationId) {
         return;
       }
@@ -305,10 +299,10 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
               72) {
         return;
       }
-      // The fixed history anchor allows a negative extent for new messages.
-      // Follow the measured newest end, not a hard-coded offset of zero.
+      // The chat is rendered in reverse, so offset zero is always the newest
+      // turn regardless of how tall or lazily built the restored history is.
       final target = conversationScroll.position.minScrollExtent;
-      if (jump || MediaQuery.disableAnimationsOf(context)) {
+      if (jump) {
         conversationScroll.jumpTo(target);
       } else {
         conversationScroll.animateTo(
@@ -321,7 +315,6 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
   }
 
   Future<void> _saveConversation() async {
-    if (!conversationReady) return;
     // Capture every provider-owned dependency synchronously. `dispose` cannot
     // await, but the resulting repository operations remain valid after the
     // WidgetRef itself is no longer usable.
@@ -412,75 +405,21 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     }
   }
 
-  Future<void> _deleteConversation(
-    String deletedId, {
-    required String title,
-  }) async {
-    if (!mounted || !conversationReady || foodImageFlowOpening) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        scrollable: true,
-        title: Text(tr('Clear conversation', 'مسح المحادثة')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, maxLines: 3, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 12),
-            Text(
-              tr(
-                'Delete this conversation and its entry from history? Other conversations will be kept.',
-                'حذف هذه المحادثة وبطاقتها من السجل؟ ستبقى المحادثات الأخرى محفوظة.',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(tr('Cancel', 'إلغاء')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(tr('Delete', 'حذف')),
-          ),
-        ],
-      ),
-    );
-    if (!mounted || confirmed != true || !conversationReady) return;
-    final preferences = conversationPreferences;
-    if (deletedId != activeConversationId) {
-      try {
-        // Do not interrupt the current reply, erase its draft, or switch chats
-        // when the user deletes a different conversation from the list.
-        await preferences.update(
-          _conversationHistoryKey,
-          (raw) => deleteCoachConversationFromArchive(raw, deletedId),
-        );
-      } on Object {
-        _showConversationDeleteFailure();
-      }
-      return;
-    }
+  Future<void> _clearConversation() async {
     _cancelCurrentCoachRequest();
-    _updateState(() => conversationReady = false);
+    await _invalidatePendingConversationSaves();
     try {
-      // Invalidate voice callbacks immediately, but local deletion must not
-      // wait for an OS recognizer (which may already be suspended).
-      unawaited(_stopVoiceCapture(resetMode: true));
-      await _invalidatePendingConversationSaves();
-      if (!mounted) return;
-      final displayName = await _resolvedCoachDisplayName();
-      if (!mounted) return;
-      final now = ref.read(intelligenceConversationClockProvider)();
-      final welcome = _sessionWelcome(displayName, at: now);
-      final updatedArchive = deleteCoachConversationFromArchive(
+      final preferences = ref.read(preferencesRepositoryProvider);
+      final historyArchive = decodeCoachConversationHistory(
         await preferences.get(_conversationHistoryKey),
-        deletedId,
       );
       await preferences.mutate(
-        set: <String, String>{_conversationHistoryKey: updatedArchive},
+        set: <String, String>{
+          _conversationHistoryKey: encodeCoachConversationHistory(
+            conversations: historyArchive.conversations,
+            activeConversationId: null,
+          ),
+        },
         remove: const <String>{
           'intelligenceConversationV1',
           'intelligenceConversationContextV1',
@@ -488,46 +427,39 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         },
       );
       activeConversationId = null;
-      if (!mounted) return;
-      _updateState(() {
-        question.clear();
-        introVisible = true;
-        lastClearWritingLanguageTag = null;
-        messageFeedback.clear();
-        messageRuntimes.clear();
-        reportedMessages.clear();
-        messages
-          ..clear()
-          ..add(
-            IntelligenceMessage(
-              id: 'welcome-${now.microsecondsSinceEpoch}',
-              role: IntelligenceMessageRole.bil,
-              kind: IntelligenceMessageKind.coach,
-              text: welcome,
-              createdAt: now,
-              modality: IntelligenceMessageModality.system,
-            ),
-          );
-      });
-      _scrollToLatest(jump: true);
     } on Object {
-      _showConversationDeleteFailure();
-    } finally {
-      if (mounted) _updateState(() => conversationReady = true);
-    }
-  }
-
-  void _showConversationDeleteFailure() {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          tr(
-            'The local conversation could not be cleared. Your data was unchanged.',
-            'تعذر مسح المحادثة المحلية. لم تتغير بياناتك.',
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(
+              'The local conversation could not be cleared. Your data was unchanged.',
+              'تعذر مسح المحادثة المحلية. لم تتغير بياناتك.',
+            ),
           ),
         ),
-      ),
-    );
+      );
+      return;
+    }
+    if (!mounted) return;
+    final displayName = await _resolvedCoachDisplayName();
+    if (!mounted) return;
+    final now = ref.read(intelligenceConversationClockProvider)();
+    final welcome = _sessionWelcome(displayName, at: now);
+    _updateState(() {
+      messages
+        ..clear()
+        ..add(
+          IntelligenceMessage(
+            id: 'welcome-${now.microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: welcome,
+            createdAt: now,
+            modality: IntelligenceMessageModality.system,
+          ),
+        );
+    });
+    unawaited(_saveConversation());
   }
 }

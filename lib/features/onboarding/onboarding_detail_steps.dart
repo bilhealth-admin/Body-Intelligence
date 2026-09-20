@@ -281,20 +281,6 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
-                const SizedBox(height: 10),
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: TextButton.icon(
-                    onPressed: () =>
-                        context.push('/health-information-sources'),
-                    icon: const Icon(Icons.menu_book_outlined),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'ar'
-                          ? 'المصادر والمنهجية'
-                          : 'Sources & methodology',
-                    ),
-                  ),
-                ),
               ],
             ),
     );
@@ -318,7 +304,6 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
       body: Column(
         children: [
           OnboardingStatusCard(
-            key: const Key('onboarding-health-permission'),
             icon: Icons.favorite_outline_rounded,
             title: healthName,
             body: supported
@@ -326,13 +311,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                     'Import supported activity, steps, sleep and weight evidence you approve. Only compatible fitness watches and scales can feed this system source.',
                   )
                 : t('This connection is unavailable on this device.'),
-            status: _permissionStatus(
-              isIos &&
-                      _draft.healthPermission ==
-                          OnboardingPermissionStatus.granted
-                  ? OnboardingPermissionStatus.requested
-                  : _draft.healthPermission,
-            ),
+            status: _permissionStatus(_draft.healthPermission),
             action: !supported || _permissionBusy
                 ? null
                 : () => unawaited(_requestHealth()),
@@ -378,14 +357,6 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
     if (!mounted) return;
     _updateState(() => _permissionBusy = false);
     _setDraft(_draft.copyWith(healthPermission: status), persist: true);
-    if (state.value?.failureCode == 'health_permissions_review_required') {
-      await showAppleHealthPermissionReview(
-        context,
-        onOpenSettings: ref
-            .read(connectedHealthProvider.notifier)
-            .openSystemSettings,
-      );
-    }
   }
 
   OnboardingPermissionStatus _healthPermissionStatus(
@@ -393,10 +364,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
   ) => switch (value.status) {
     ConnectedHealthStatus.ready ||
     ConnectedHealthStatus.synchronized ||
-    ConnectedHealthStatus.syncing =>
-      defaultTargetPlatform == TargetPlatform.iOS
-          ? OnboardingPermissionStatus.requested
-          : OnboardingPermissionStatus.granted,
+    ConnectedHealthStatus.syncing => OnboardingPermissionStatus.granted,
     ConnectedHealthStatus.authorizationRequested =>
       OnboardingPermissionStatus.requested,
     ConnectedHealthStatus.permissionDenied => OnboardingPermissionStatus.denied,
@@ -473,41 +441,70 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             ),
             const SizedBox(height: 10),
           ],
-          // Reserve the status slot so consent never makes the page jump or
-          // briefly hide the controls. One card is the only cloud-AI control:
-          // selected means enabled; tapping it again safely opts out.
-          SizedBox(
-            height: 68,
-            child: _aiStatusMessage == null
-                ? null
-                : _InfoBanner(
-                    icon:
-                        _draft.remoteAiConsent ==
-                            OnboardingRemoteAiConsent.granted
-                        ? Icons.cloud_done_outlined
-                        : Icons.cloud_off_outlined,
-                    text: _aiStatusMessage!,
-                  ),
+          // Keep a stable status slot beside the choices.  Without a reserved
+          // slot, the result appears below the fold and looks like the tap did
+          // nothing on a phone-sized viewport.
+          KeyedSubtree(
+            key: _aiStatusKey,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 58),
+              child: _aiStatusMessage == null
+                  ? const SizedBox.shrink()
+                  : _InfoBanner(
+                      icon:
+                          _draft.remoteAiConsent ==
+                              OnboardingRemoteAiConsent.granted
+                          ? Icons.cloud_done_outlined
+                          : Icons.cloud_off_outlined,
+                      text: _aiStatusMessage!,
+                    ),
+            ),
           ),
           const SizedBox(height: 10),
-          OnboardingChoiceCard(
-            key: const Key('onboarding-cloud-ai-toggle'),
-            title: t('Cloud AI'),
-            subtitle:
-                _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
-                ? t('Enabled with your explicit consent.')
-                : t('Off by default. Tap to enable when you are ready.'),
-            icon: _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
-                ? Icons.cloud_done_outlined
-                : Icons.cloud_off_outlined,
-            selected:
-                _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted,
-            enabled: !_permissionBusy && _draft.aiFocuses.isNotEmpty,
-            onTap: () => unawaited(
-              _setAiConsent(
-                _draft.remoteAiConsent != OnboardingRemoteAiConsent.granted,
-              ),
+          FilledButton.icon(
+            key: const Key('onboarding-enable-ai'),
+            style: _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
+                ? FilledButton.styleFrom(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onPrimaryContainer,
+                  )
+                : null,
+            onPressed: _permissionBusy || _draft.aiFocuses.isEmpty
+                ? null
+                : () => unawaited(_setAiConsent(true)),
+            icon: Icon(
+              _draft.remoteAiConsent == OnboardingRemoteAiConsent.granted
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cloud_done_outlined,
             ),
+            label: Text(t('I agree — enable cloud AI')),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            key: const Key('onboarding-decline-ai'),
+            style: _draft.remoteAiConsent == OnboardingRemoteAiConsent.declined
+                ? OutlinedButton.styleFrom(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : null,
+            onPressed: _permissionBusy
+                ? null
+                : () => unawaited(_setAiConsent(false)),
+            icon: Icon(
+              _draft.remoteAiConsent == OnboardingRemoteAiConsent.declined
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.cloud_off_outlined,
+            ),
+            label: Text(t('Keep cloud AI off')),
           ),
         ],
       ),
@@ -517,7 +514,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
   Future<void> _setAiConsent(bool granted, {bool thenContinue = false}) async {
     if (_permissionBusy) return;
     if (!granted) {
-      // Opting out is local and safe. Show the resulting state immediately
+      // Opting out is local and safe.  Show the resulting state immediately
       // even if the remote gateway is slow or unavailable.
       _updateState(() {
         _permissionBusy = true;
@@ -526,6 +523,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
           remoteAiConsent: OnboardingRemoteAiConsent.declined,
         );
       });
+      _revealAiStatus();
     } else {
       _updateState(() {
         _permissionBusy = true;
@@ -536,15 +534,15 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
         .read(onboardingRemoteAiGatewayProvider)
         .setGranted(granted);
     if (!mounted) return;
-    // Opting out is always a safe local decision. Even if the RPC cannot be
-    // reached, never turn an explicit off choice back into an unknown state.
-    final consent = !granted
-        ? OnboardingRemoteAiConsent.declined
-        : switch (result) {
-            OnboardingRemoteAiResult.granted =>
-              OnboardingRemoteAiConsent.granted,
-            _ => OnboardingRemoteAiConsent.unknown,
-          };
+    final consent = switch (result) {
+      OnboardingRemoteAiResult.granted => OnboardingRemoteAiConsent.granted,
+      OnboardingRemoteAiResult.declined => OnboardingRemoteAiConsent.declined,
+      OnboardingRemoteAiResult.authenticationRequired when !granted =>
+        OnboardingRemoteAiConsent.declined,
+      OnboardingRemoteAiResult.failed when !granted =>
+        OnboardingRemoteAiConsent.declined,
+      _ => OnboardingRemoteAiConsent.unknown,
+    };
     final message = switch (result) {
       OnboardingRemoteAiResult.authenticationRequired =>
         granted
@@ -561,10 +559,27 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
       _aiStatusMessage = message;
       _draft = _draft.copyWith(remoteAiConsent: consent);
     });
+    _revealAiStatus();
     await _queueDraftSave();
     if (thenContinue && consent == OnboardingRemoteAiConsent.declined) {
       await _goNext();
     }
+  }
+
+  void _revealAiStatus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _aiStatusMessage == null) return;
+      final statusContext = _aiStatusKey.currentContext;
+      if (statusContext == null) return;
+      Scrollable.ensureVisible(
+        statusContext,
+        alignment: .35,
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   _StepView _reviewStep() {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -49,6 +50,42 @@ void main() {
       await _pumpUntilVisible(tester, find.text('Dashboard Page'));
       expect(find.text('Dashboard Page'), findsOneWidget);
       expect(find.text('Onboarding Page'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'startup keeps a callback session when auth emits a transient null event',
+    (tester) async {
+      final events = StreamController<AuthState>.broadcast();
+      addTearDown(events.close);
+      await tester.pumpWidget(
+        _app(
+          authClient: _FakeGoTrueClient(null, events.stream),
+          initialAuthSession: _session('owner-handoff'),
+          overrides: [
+            userProfileProvider.overrideWith((ref) => Stream.value(null)),
+            dailyCheckInDueProvider.overrideWith((ref) async => false),
+            forceOnboardingProvider.overrideWith((ref) async => false),
+            accountGatewayReviewedProvider.overrideWith((ref) async => false),
+            localDataAccountBindingProvider.overrideWith(
+              (ref) => Future.value(_cleanBinding),
+            ),
+            startupCloudProfileRestoreProvider.overrideWith((ref, owner) async {
+              expect(owner, 'owner-handoff');
+              return true;
+            }),
+            cloudRuntimePreparationProvider.overrideWith(
+              (ref) async => const CloudRuntimePreparation(
+                disposition: CloudRuntimeAccessDisposition.unavailable,
+              ),
+            ),
+          ],
+        ),
+      );
+      events.add(AuthState(AuthChangeEvent.tokenRefreshed, null));
+      await tester.pump(const Duration(milliseconds: 2300));
+      await _pumpUntilVisible(tester, find.text('Dashboard Page'));
+      expect(find.text('Dashboard Page'), findsOneWidget);
     },
   );
 
@@ -126,43 +163,6 @@ void main() {
     expect(find.text('Dashboard Page'), findsNothing);
   });
 
-  testWidgets(
-    'native auth handoff survives a delayed currentSession persistence',
-    (tester) async {
-      const ownerId = 'owner-native-handoff';
-
-      await tester.pumpWidget(
-        _app(
-          authClient: _FakeGoTrueClient(null),
-          initialAuthSession: _session(ownerId),
-          overrides: [
-            userProfileProvider.overrideWith((ref) => Stream.value(null)),
-            dailyCheckInDueProvider.overrideWith((ref) async => false),
-            forceOnboardingProvider.overrideWith((ref) async => false),
-            accountGatewayReviewedProvider.overrideWith((ref) async => false),
-            localDataAccountBindingProvider.overrideWith(
-              (ref) => Future.value(_cleanBinding),
-            ),
-            startupCloudProfileRestoreProvider.overrideWith(
-              (ref, owner) async => false,
-            ),
-            cloudRuntimePreparationProvider.overrideWith(
-              (ref) async => const CloudRuntimePreparation(
-                disposition: CloudRuntimeAccessDisposition.unavailable,
-              ),
-            ),
-          ],
-        ),
-      );
-
-      await tester.pump(const Duration(milliseconds: 2300));
-      await _pumpUntilVisible(tester, find.text('Onboarding Page'));
-
-      expect(find.text('Onboarding Page'), findsOneWidget);
-      expect(find.text('Account Gateway Page'), findsNothing);
-    },
-  );
-
   test('restored progress is re-read before startup chooses its route', () {
     final source = File(
       'lib/features/startup/startup_page.dart',
@@ -204,53 +204,53 @@ Widget _app({
   required dynamic overrides,
   required GoTrueClient authClient,
   Session? initialAuthSession,
-}) => ProviderScope(
-  overrides: overrides,
-  child: MaterialApp.router(
-    locale: const Locale('ar'),
-    routerConfig: _router(authClient, initialAuthSession),
-    supportedLocales: AppLocalizations.supportedLocales,
-    localizationsDelegates: const [
-      AppLocalizations.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
-  ),
-);
-
-GoRouter _router(GoTrueClient authClient, Session? initialAuthSession) =>
-    GoRouter(
-      routes: [
-        GoRoute(
-          path: '/startup',
-          builder: (context, state) => MediaQuery(
-            data: const MediaQueryData(),
-            child: StartupPage(
-              authClient: authClient,
-              initialAuthSession: initialAuthSession,
-            ),
-          ),
-        ),
-        GoRoute(
-          path: '/onboarding',
-          builder: (_, _) => const Scaffold(body: Text('Onboarding Page')),
-        ),
-        GoRoute(
-          path: '/account-gateway',
-          builder: (_, _) => const Scaffold(body: Text('Account Gateway Page')),
-        ),
-        GoRoute(
-          path: '/daily-check-in',
-          builder: (_, _) => const Scaffold(body: Text('Daily Check-in Page')),
-        ),
-        GoRoute(
-          path: '/dashboard',
-          builder: (_, _) => const Scaffold(body: Text('Dashboard Page')),
-        ),
-      ],
-      initialLocation: '/startup',
+}) =>
+    ProviderScope(
+      overrides: overrides,
+      child: MaterialApp.router(
+        locale: const Locale('ar'),
+        routerConfig: _router(authClient, initialAuthSession),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+      ),
     );
+
+GoRouter _router(GoTrueClient authClient, Session? initialAuthSession) => GoRouter(
+  routes: [
+    GoRoute(
+      path: '/startup',
+      builder: (context, state) => MediaQuery(
+        data: const MediaQueryData(),
+        child: StartupPage(
+          authClient: authClient,
+          initialAuthSession: initialAuthSession,
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/onboarding',
+      builder: (_, _) => const Scaffold(body: Text('Onboarding Page')),
+    ),
+    GoRoute(
+      path: '/account-gateway',
+      builder: (_, _) => const Scaffold(body: Text('Account Gateway Page')),
+    ),
+    GoRoute(
+      path: '/daily-check-in',
+      builder: (_, _) => const Scaffold(body: Text('Daily Check-in Page')),
+    ),
+    GoRoute(
+      path: '/dashboard',
+      builder: (_, _) => const Scaffold(body: Text('Dashboard Page')),
+    ),
+  ],
+  initialLocation: '/startup',
+);
 
 final _cleanBinding = LocalDataAccountBinding(
   disposition: LocalDataAccountBindingDisposition.matchedExistingOwner,
@@ -274,11 +274,13 @@ Session _session(String ownerId) => Session(
 );
 
 final class _FakeGoTrueClient extends Fake implements GoTrueClient {
-  _FakeGoTrueClient(this.currentSession);
+  _FakeGoTrueClient(this.currentSession, [this._events = const Stream.empty()]);
 
   @override
   final Session? currentSession;
 
+  final Stream<AuthState> _events;
+
   @override
-  Stream<AuthState> get onAuthStateChange => const Stream<AuthState>.empty();
+  Stream<AuthState> get onAuthStateChange => _events;
 }

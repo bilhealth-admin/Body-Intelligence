@@ -1,17 +1,17 @@
 # BIL V1 Release Candidate Gate
 
-## Current +8 status
+## Current iOS 26 / Android 21 status
 
-- `CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE`
-- Version metadata: `1.0.0+8`.
-- This workflow revision accepts build number `8` only; build `7` is historical
-  tester evidence and must not be selected, promoted, or submitted.
+- `CURRENT_IOS26_ANDROID21_CANDIDATE_ACCEPTED: TRUE`
+- Version metadata: iOS `1.0.0+26`; Android `1.0.0+21`.
+- The iOS workflow accepts build number `26` and the Android workflow accepts
+  build number `21`; older store builds are historical evidence only.
 - The former `phase-3-product-excellence` / `BIL-V1-LAUNCH-005` record was a
   historical parent baseline. It is not the accepted source identity for the
   current heavily modified release worktree.
 - This marker describes the complete signed release package, not permission to
   run the workflow that creates it. Source-only freeze acceptance is recorded
-  separately in `docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md`.
+  separately in `docs/release/BIL_IOS26_ANDROID21_FROZEN_SOURCE_MANIFEST_2026-09-20.md`.
   It requires a reviewed clean commit and immutable source hashes; final package
   acceptance additionally requires actual signed-artifact verification.
 - The owner's latest instruction on 2026-09-06 authorizes signed builds and
@@ -19,8 +19,20 @@
 
 ## Repository release-candidate gate
 
+## Local validation evidence (2026-09-20)
+
+- Validated candidate HEAD: `6b4b9ee55e85ce64f87cce33543601b1ddcbd1f1`.
+- Full Master Run: `4608` unique tests, `4607` passed, `0` failed, `1` skipped.
+- Flutter: `4455` passed, `0` failed, `1` skipped.
+- Portable release suite: `887/887` scheduled files passed.
+- Deno AI Coach: `20/20` passed; Deno Store: `132/132` passed; Deno type-check: pass.
+- Production release configuration validator: pass for Android build `21` and
+  iOS build `26` using the approved application identifier and frozen manifest.
+- Signing credentials, store-console access, device validation, and Mobile
+  Integrity production binding remain external gates and are not claimed here.
+
 A repository release candidate is accepted only when all of these checks pass
-against the same immutable build-8 commit in one package run:
+against the same immutable source commit in one package run:
 
 1. The complete Dart source and test tree is already formatted.
 2. Full Flutter static analysis reports no issues.
@@ -33,8 +45,8 @@ against the same immutable build-8 commit in one package run:
    closure or readiness contracts remain present.
 6. The generated AAB path, byte size, and SHA-256 are written into package
    evidence.
-7. The signed iOS and Android workflows reject every build number except `8`
-   and record the exact source commit.
+7. The signed iOS workflow rejects every build number except `26`, and the
+   signed Android workflow rejects every build number except `21`.
 8. Optional simulator/emulator checks not run under the owner's waiver report
    `NOT_RUN_OWNER_WAIVED`, never PASS. Source tests and final artifact identity,
    SDK compatibility, signing, entitlements, and store requirements remain
@@ -58,7 +70,7 @@ Apple archive and device validation, private signing assets, store-console
 records, legal approvals, public privacy-policy hosting, declarations,
 screenshots, review credentials, TestFlight or testing tracks, store review,
 and rollout remain external. Passing this gate does not claim public launch.
-Until the clean build-8 commit and validated signed artifacts exist, the complete
+Until the clean candidate commit and validated signed artifacts exist, the complete
 release-package status remains `FALSE`. Simulator/emulator runtime reports are
 not a prerequisite under the owner's latest explicit waiver; unperformed native
 coverage remains unproved and must be reported honestly.

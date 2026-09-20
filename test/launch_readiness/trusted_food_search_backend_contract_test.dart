@@ -15,8 +15,8 @@ void main() {
 
     expect(backend, contains('BIL_USDA_API_KEY'));
     expect(backend, contains('SUPABASE_ANON_KEY'));
-    expect(backend, contains('auth.auth.getUser(token)'));
-    expect(backend, contains('Authorization: `Bearer \${token}`'));
+    expect(backend, contains('auth.auth.getUser()'));
+    expect(backend, contains('Authorization: authorization'));
     expect(backend, isNot(contains('SUPABASE_SERVICE_ROLE_KEY')));
     expect(backend, contains('request.body.getReader()'));
     expect(backend, contains('total > maxRequestBytes'));
@@ -29,9 +29,6 @@ void main() {
     );
     expect(backend, contains('requireAllWords: true'));
     expect(backend, contains('Math.min(requestedLimit, 20)'));
-    expect(backend, contains('BIL_TRANSLATION_API_KEY'));
-    expect(backend, contains('query: translatedQuery'));
-    expect(backend, contains('search_query: translatedQuery'));
     expect(client, contains("'food-search'"));
     expect(client, isNot(contains('BIL_USDA_API_KEY')));
     expect(client, isNot(contains('api.nal.usda.gov')));

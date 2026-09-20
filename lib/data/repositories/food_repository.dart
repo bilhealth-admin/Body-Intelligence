@@ -529,12 +529,10 @@ class FoodRepository
   }
 
   Future<List<Food>> search(String query, {int limit = 50}) async {
+    final foods = await getFoods();
     if (FoodSearchNormalizer.normalize(query).isEmpty) {
-      final foods = await getFoods();
       return _rankPersonalizedFoods(foods, limit: limit);
     }
-
-    final foods = await _searchCandidates(query);
 
     final hits = _searchPipeline.search(
       foods: _adapter.adaptAll(foods),
@@ -549,14 +547,12 @@ class FoodRepository
   }
 
   Future<List<Food>> searchCustomFoods(String query, {int limit = 50}) async {
+    final foods = (await getFoods())
+        .where((food) => food.isCustom)
+        .toList(growable: false);
     if (FoodSearchNormalizer.normalize(query).isEmpty) {
-      final foods = (await getFoods())
-          .where((food) => food.isCustom)
-          .toList(growable: false);
       return _rankPersonalizedFoods(foods, limit: limit);
     }
-
-    final foods = await _searchCandidates(query, customOnly: true);
 
     final hits = _searchPipeline.search(
       foods: _adapter.adaptAll(foods),
@@ -575,8 +571,8 @@ class FoodRepository
     String query, {
     int limit = 50,
   }) async {
+    final foods = await getFoods();
     if (FoodSearchNormalizer.normalize(query).isEmpty) {
-      final foods = await getFoods();
       final ranked = await _rankPersonalizedFoods(foods, limit: limit);
       return List<FoodSearchHit>.unmodifiable(
         ranked.map(
@@ -589,7 +585,6 @@ class FoodRepository
       );
     }
 
-    final foods = await _searchCandidates(query);
     return _searchPipeline.search(
       foods: _adapter.adaptAll(foods),
       query: query,

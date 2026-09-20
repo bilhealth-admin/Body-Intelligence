@@ -69,7 +69,8 @@ class BilQuickAddSheet extends StatelessWidget {
           ),
           (
             kind: BilSemanticIconKind.barcode,
-            label: _text(context, 'Scan barcode'),
+            label:
+                '${_text(context, 'Scan barcode')}\n${_text(context, 'Premium')}',
             onTap: onBarcode,
           ),
           (

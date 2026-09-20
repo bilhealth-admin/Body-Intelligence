@@ -1,8 +1,7 @@
-import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +15,6 @@ import '../../data/database/database_provider.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
 import '../../shared/widgets/secondary_page_app_bar.dart';
 import '../../shared/widgets/bil_mobile_list.dart';
-import '../../shared/widgets/bil_native_settings_icon.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
 import '../nutrition/domain/dietary_preferences.dart';
 import '../nutrition_plans/domain/nutrition_pathway_catalog.dart';

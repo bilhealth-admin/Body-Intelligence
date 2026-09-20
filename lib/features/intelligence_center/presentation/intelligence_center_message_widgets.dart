@@ -8,8 +8,8 @@ class _MessageBubble extends StatelessWidget {
     this.onFeedback,
     this.onReport,
     this.onSpeak,
+    this.onRetry,
     this.onAction,
-    this.actionPhases = const <String, _CoachActionExecutionPhase>{},
     this.animateReveal = false,
   });
   final IntelligenceMessage message;
@@ -18,8 +18,8 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<bool>? onFeedback;
   final ValueChanged<String>? onReport;
   final VoidCallback? onSpeak;
+  final VoidCallback? onRetry;
   final ValueChanged<IntelligenceAction>? onAction;
-  final Map<String, _CoachActionExecutionPhase> actionPhases;
   final bool animateReveal;
 
   @override
@@ -80,85 +80,21 @@ class _MessageBubble extends StatelessWidget {
                     context,
                   ).textTheme.bodyLarge?.copyWith(height: 1.55),
                   animateReveal: animateReveal,
-                  showTime: false,
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CoachMessageTime(createdAt: message.createdAt),
-                    const Spacer(),
-                    if (onSpeak != null)
-                      IconButton(
-                        key: Key('ai-coach-speak-${message.id}'),
-                        tooltip: intelligenceText(
-                          context,
-                          'Read answer aloud',
-                          'اقرأ الإجابة بصوت عالٍ',
-                        ),
-                        onPressed: onSpeak,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(
-                          width: 40,
-                          height: 40,
-                        ),
-                        icon: const Icon(Icons.volume_up_rounded, size: 19),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('ai-coach-retry'),
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: Text(
+                        intelligenceText(context, 'Retry', 'إعادة المحاولة'),
                       ),
-                    if (onFeedback != null)
-                      _QuickFeedbackBar(
-                        value: feedbackValue,
-                        onChanged: onFeedback!,
-                        compact: true,
-                      ),
-                    if (onReport != null)
-                      IconButton(
-                        key: Key('ai-coach-report-${message.id}'),
-                        tooltip: intelligenceText(
-                          context,
-                          'Report answer',
-                          'الإبلاغ عن الإجابة',
-                        ),
-                        onPressed: () =>
-                            _showAiAnswerReportSheet(context, onReport!),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(
-                          width: 40,
-                          height: 40,
-                        ),
-                        style: IconButton.styleFrom(
-                          foregroundColor: reported
-                              ? scheme.error
-                              : scheme.onSurfaceVariant,
-                          backgroundColor: reported
-                              ? scheme.error.withValues(alpha: .14)
-                              : Colors.transparent,
-                        ),
-                        icon: Icon(
-                          reported ? Icons.flag_rounded : Icons.flag_outlined,
-                          size: 18,
-                        ),
-                      ),
-                  ],
-                ),
-                TextButton.icon(
-                  key: Key('ai-coach-health-sources'),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => context.push('/health-information-sources'),
-                  icon: const Icon(Icons.menu_book_outlined, size: 17),
-                  label: Text(
-                    intelligenceText(
-                      context,
-                      'Health sources & methodology',
-                      'المصادر والمنهجية الصحية',
                     ),
                   ),
-                ),
+                ],
                 if (trustedLinks.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Wrap(
@@ -194,11 +130,17 @@ class _MessageBubble extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       for (final action in trustedActions)
-                        _CoachMessageActionControl(
-                          action: action,
-                          phase:
-                              actionPhases['${action.type.name}:${action.id}'] ??
-                              _CoachActionExecutionPhase.idle,
+                        ActionChip(
+                          key: Key(
+                            'ai-coach-action-${action.type.name}-${action.id}',
+                          ),
+                          avatar: Icon(_iconForAction(action.type), size: 18),
+                          label: Text(action.label),
+                          tooltip: intelligenceText(
+                            context,
+                            'Open {label}',
+                            'افتح {label}',
+                          ).replaceAll('{label}', action.label),
                           onPressed: onAction == null
                               ? null
                               : () => onAction!(action.toAction()),
@@ -206,80 +148,64 @@ class _MessageBubble extends StatelessWidget {
                     ],
                   ),
                 ],
+                if (onFeedback != null ||
+                    onReport != null ||
+                    onSpeak != null) ...[
+                  const SizedBox(height: 7),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 3,
+                    runSpacing: 2,
+                    children: [
+                      if (onSpeak != null)
+                        IconButton(
+                          key: Key('ai-coach-speak-${message.id}'),
+                          tooltip: intelligenceText(
+                            context,
+                            'Read answer aloud',
+                            'اقرأ الإجابة بصوت عالٍ',
+                          ),
+                          onPressed: onSpeak,
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.volume_up_rounded, size: 19),
+                        ),
+                      if (onFeedback != null)
+                        _QuickFeedbackBar(
+                          value: feedbackValue,
+                          onChanged: onFeedback!,
+                          compact: true,
+                        ),
+                      if (onReport != null)
+                        IconButton(
+                          key: Key('ai-coach-report-${message.id}'),
+                          tooltip: intelligenceText(
+                            context,
+                            'Report answer',
+                            'الإبلاغ عن الإجابة',
+                          ),
+                          onPressed: () =>
+                              _showAiAnswerReportSheet(context, onReport!),
+                          style: IconButton.styleFrom(
+                            minimumSize: const Size.square(32),
+                            visualDensity: VisualDensity.compact,
+                            foregroundColor: reported
+                                ? scheme.error
+                                : scheme.onSurfaceVariant,
+                            backgroundColor: reported
+                                ? scheme.error.withValues(alpha: .14)
+                                : Colors.transparent,
+                          ),
+                          icon: Icon(
+                            reported ? Icons.flag_rounded : Icons.flag_outlined,
+                            size: 18,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CoachMessageActionControl extends StatelessWidget {
-  const _CoachMessageActionControl({
-    required this.action,
-    required this.phase,
-    required this.onPressed,
-  });
-
-  final IntelligenceMessageAction action;
-  final _CoachActionExecutionPhase phase;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final locale = BilLocalePolicy.canonicalTag(
-      Localizations.localeOf(context),
-    );
-    final running = phase == _CoachActionExecutionPhase.running;
-    final failed = phase == _CoachActionExecutionPhase.failed;
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 320),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ActionChip(
-            key: Key('ai-coach-action-${action.type.name}-${action.id}'),
-            avatar: running
-                ? const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Icon(_iconForAction(action.type), size: 18),
-            label: Text(
-              running
-                  ? AiCoachChatCopy.resolve(locale, AiCoachChatCopy.opening)
-                  : action.label,
-            ),
-            tooltip: action.label,
-            onPressed: running ? null : onPressed,
-          ),
-          if (failed) ...[
-            const SizedBox(height: 4),
-            Semantics(
-              liveRegion: true,
-              child: Text(
-                AiCoachChatCopy.resolve(
-                  locale,
-                  AiCoachChatCopy.navigationFailed,
-                ),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            ),
-            TextButton.icon(
-              key: Key(
-                'ai-coach-action-retry-${action.type.name}-${action.id}',
-              ),
-              onPressed: onPressed,
-              icon: const Icon(Icons.refresh_rounded, size: 17),
-              label: Text(
-                AiCoachChatCopy.resolve(locale, AiCoachChatCopy.retry),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -438,8 +364,8 @@ class _FeedbackReaction extends StatelessWidget {
           customBorder: const CircleBorder(),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            width: 48,
-            height: 48,
+            width: compact ? 32 : 36,
+            height: compact ? 32 : 36,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: selected

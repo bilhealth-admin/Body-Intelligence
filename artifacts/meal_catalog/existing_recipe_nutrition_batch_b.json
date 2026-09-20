@@ -1,0 +1,1373 @@
+{
+  "schemaVersion": 1,
+  "batch": "B",
+  "scope": "existing recipes 10-18",
+  "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+  "sourceDatabase": "assets/catalogs/bil_food_core.sqlite",
+  "summary": {
+    "records": 9,
+    "calculated": 9,
+    "blocked": 0
+  },
+  "records": [
+    {
+      "canonicalId": "overnight-oats-figs",
+      "contentFingerprint": "c3daacd53e1650a88bc48e66246a290974e53625d1cfe98a290ddb45bd7823c1",
+      "seedContentFingerprint": "c3daacd53e1650a88bc48e66246a290974e53625d1cfe98a290ddb45bd7823c1",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/overnight_oats_figs.jpg",
+        "sha256": "8f3c00b5c5bf8abc2ebb598f943ee67b6ba7468851593312a66b77fbcb2c1406",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 5,
+        "cookMinutes": 0,
+        "totalMinutes": 5
+      },
+      "ingredients": [
+        {
+          "ingredient": "raw oat bran",
+          "grams": 40.0,
+          "fdcId": 168872,
+          "recordId": "usda:168872",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168872",
+              "fdcId": 168872,
+              "description": "Oat bran, raw"
+            }
+          ],
+          "description": "Oat bran, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "plain low-fat yogurt",
+          "grams": 150.0,
+          "fdcId": 170903,
+          "recordId": "usda:170903",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170903",
+              "fdcId": 170903,
+              "description": "Yogurt, Greek, plain, lowfat"
+            }
+          ],
+          "description": "Yogurt, Greek, plain, lowfat",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw figs",
+          "grams": 100.0,
+          "fdcId": 173021,
+          "recordId": "usda:173021",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173021",
+              "fdcId": 173021,
+              "description": "Figs, raw"
+            }
+          ],
+          "description": "Figs, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Combine 40 g oat bran and 150 g yogurt."
+        },
+        {
+          "order": 2,
+          "instruction": "Refrigerate overnight; top with 100 g figs before serving."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:168872",
+          "USDA-FDC:170903",
+          "USDA-FDC:173021"
+        ],
+        "recordIds": [
+          "usda:168872",
+          "usda:170903",
+          "usda:173021"
+        ],
+        "perServing": {
+          "kcal": 281.9,
+          "proteinG": 22.59,
+          "carbohydrateG": 51.58,
+          "fatG": 5.99,
+          "fiberG": 9.06,
+          "sugarG": 22.18,
+          "sodiumMg": 53.6,
+          "potassiumMg": 669.9
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 281.9,
+        "proteinG": 22.59,
+        "carbsG": 51.58,
+        "fatG": 5.99,
+        "fiberG": 9.06,
+        "sugarG": 22.18,
+        "sodiumMg": 53.6,
+        "potassiumMg": 669.9
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "spinach-omelet",
+      "contentFingerprint": "899e3377f2c15250a5ccbbbaa01d2168a95dc817287296531e4e48459d191a1b",
+      "seedContentFingerprint": "899e3377f2c15250a5ccbbbaa01d2168a95dc817287296531e4e48459d191a1b",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/spinach_omelet.jpg",
+        "sha256": "e17ff86e832aea7982bac315cbc31f1cd8d4464eb0fd847c9b3c5d8ab9e3d95e",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 5,
+        "cookMinutes": 7,
+        "totalMinutes": 12
+      },
+      "ingredients": [
+        {
+          "ingredient": "cooked whole egg",
+          "grams": 100.0,
+          "fdcId": 173424,
+          "recordId": "usda:173424",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173424",
+              "fdcId": 173424,
+              "description": "Egg, whole, cooked, hard-boiled"
+            }
+          ],
+          "description": "Egg, whole, cooked, hard-boiled",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw spinach",
+          "grams": 50.0,
+          "fdcId": 168462,
+          "recordId": "usda:168462",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168462",
+              "fdcId": 168462,
+              "description": "Spinach, raw"
+            }
+          ],
+          "description": "Spinach, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw red ripe tomato",
+          "grams": 100.0,
+          "fdcId": 170457,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "description": "Tomatoes, red, ripe, raw, year round average",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "black pepper",
+          "grams": 0.5,
+          "fdcId": 170931,
+          "recordId": "usda:170931",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170931",
+              "fdcId": 170931,
+              "description": "Spices, pepper, black"
+            }
+          ],
+          "description": "Spices, pepper, black",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Wilt 50 g spinach and 100 g tomato in a non-stick pan."
+        },
+        {
+          "order": 2,
+          "instruction": "Add 100 g beaten cooked-equivalent egg, season with 0.5 g pepper, and cook gently until set."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:173424",
+          "USDA-FDC:168462",
+          "USDA-FDC:170457",
+          "USDA-FDC:170931"
+        ],
+        "recordIds": [
+          "usda:173424",
+          "usda:168462",
+          "usda:170457",
+          "usda:170931"
+        ],
+        "perServing": {
+          "kcal": 185.75,
+          "proteinG": 14.94,
+          "carbohydrateG": 7.14,
+          "fatG": 11.02,
+          "fiberG": 2.43,
+          "sugarG": 3.96,
+          "sodiumMg": 168.6,
+          "potassiumMg": 648.64
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 185.75,
+        "proteinG": 14.94,
+        "carbsG": 7.14,
+        "fatG": 11.02,
+        "fiberG": 2.43,
+        "sugarG": 3.96,
+        "sodiumMg": 168.6,
+        "potassiumMg": 648.64
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "shrimp-rice-bowl",
+      "contentFingerprint": "975c57ce4a1c58b8cd68f71c9f4c4e7515d51e68912bcec8ed81cb49eadd69ed",
+      "seedContentFingerprint": "975c57ce4a1c58b8cd68f71c9f4c4e7515d51e68912bcec8ed81cb49eadd69ed",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/shrimp_rice_bowl.jpg",
+        "sha256": "834766ed47c0a43d8959fe259a483f80a9e7b6e972c6f3ccbcf77ce8b8f3e6e0",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 15,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "ingredient": "cooked shrimp",
+          "grams": 120.0,
+          "fdcId": 171971,
+          "recordId": "usda:171971",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171971",
+              "fdcId": 171971,
+              "description": "Crustaceans, shrimp, mixed species, cooked, moist heat (may contain additives to retain moisture)"
+            }
+          ],
+          "description": "Crustaceans, shrimp, mixed species, cooked, moist heat (may contain additives to retain moisture)",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked long-grain white rice",
+          "grams": 150.0,
+          "fdcId": 168878,
+          "recordId": "usda:168878",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168878",
+              "fdcId": 168878,
+              "description": "Rice, white, long-grain, regular, enriched, cooked"
+            }
+          ],
+          "description": "Rice, white, long-grain, regular, enriched, cooked",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw green cabbage",
+          "grams": 60.0,
+          "fdcId": 169975,
+          "recordId": "usda:169975",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169975",
+              "fdcId": 169975,
+              "description": "Cabbage, raw"
+            }
+          ],
+          "description": "Cabbage, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw carrot",
+          "grams": 50.0,
+          "fdcId": 168568,
+          "recordId": "usda:168568",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168568",
+              "fdcId": 168568,
+              "description": "Carrots, baby, raw"
+            }
+          ],
+          "description": "Carrots, baby, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "prepared frozen edamame",
+          "grams": 50.0,
+          "fdcId": 168411,
+          "recordId": "usda:168411",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168411",
+              "fdcId": 168411,
+              "description": "Edamame, frozen, prepared"
+            }
+          ],
+          "description": "Edamame, frozen, prepared",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Prepare the measured cabbage, carrot, and edamame."
+        },
+        {
+          "order": 2,
+          "instruction": "Cook shrimp until opaque and food-safe."
+        },
+        {
+          "order": 3,
+          "instruction": "Serve with 150 g cooked rice and the measured vegetables."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:171971",
+          "USDA-FDC:168878",
+          "USDA-FDC:169975",
+          "USDA-FDC:168568",
+          "USDA-FDC:168411"
+        ],
+        "recordIds": [
+          "usda:171971",
+          "usda:168878",
+          "usda:169975",
+          "usda:168568",
+          "usda:168411"
+        ],
+        "perServing": {
+          "kcal": 430.8,
+          "proteinG": 38.41,
+          "carbohydrateG": 56.13,
+          "fatG": 5.19,
+          "fiberG": 6.15,
+          "sugarG": 5.46,
+          "sodiumMg": 1190.7,
+          "potassiumMg": 695.0
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 430.8,
+        "proteinG": 38.41,
+        "carbsG": 56.13,
+        "fatG": 5.19,
+        "fiberG": 6.15,
+        "sugarG": 5.46,
+        "sodiumMg": 1190.7,
+        "potassiumMg": 695.0
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "tofu-stir-fry",
+      "contentFingerprint": "4fe35e03badb10802cb55f109899f7c7821c6f3c7dcf655c89d2b1492c2509d8",
+      "seedContentFingerprint": "4fe35e03badb10802cb55f109899f7c7821c6f3c7dcf655c89d2b1492c2509d8",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/tofu_vegetable_stir_fry.jpg",
+        "sha256": "be0b8e0b629b29cdad5774a38703f9c796986ff10293d9fc077001b23bc5a4fd",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 15,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "ingredient": "firm tofu",
+          "grams": 150.0,
+          "fdcId": 172448,
+          "recordId": "usda:172448",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:172448",
+              "fdcId": 172448,
+              "description": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)"
+            }
+          ],
+          "description": "Tofu, firm, prepared with calcium sulfate and magnesium chloride (nigari)",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked broccoli",
+          "grams": 100.0,
+          "fdcId": 168510,
+          "recordId": "usda:168510",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168510",
+              "fdcId": 168510,
+              "description": "Broccoli, cooked, boiled, drained, with salt"
+            }
+          ],
+          "description": "Broccoli, cooked, boiled, drained, with salt",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw green sweet pepper",
+          "grams": 80.0,
+          "fdcId": 170427,
+          "recordId": "usda:170427",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170427",
+              "fdcId": 170427,
+              "description": "Peppers, sweet, green, raw"
+            }
+          ],
+          "description": "Peppers, sweet, green, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw edible-podded peas",
+          "grams": 80.0,
+          "fdcId": 170010,
+          "recordId": "usda:170010",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170010",
+              "fdcId": 170010,
+              "description": "Peas, edible-podded, raw"
+            }
+          ],
+          "description": "Peas, edible-podded, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Cut tofu and measured vegetables evenly."
+        },
+        {
+          "order": 2,
+          "instruction": "Brown tofu in a non-stick pan."
+        },
+        {
+          "order": 3,
+          "instruction": "Stir-fry vegetables until tender-crisp and combine."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:172448",
+          "USDA-FDC:168510",
+          "USDA-FDC:170427",
+          "USDA-FDC:170010"
+        ],
+        "recordIds": [
+          "usda:172448",
+          "usda:168510",
+          "usda:170427",
+          "usda:170010"
+        ],
+        "perServing": {
+          "kcal": 201.6,
+          "proteinG": 18.87,
+          "carbohydrateG": 21.21,
+          "fatG": 6.96,
+          "fiberG": 8.09,
+          "sugarG": 7.41,
+          "sodiumMg": 285.6,
+          "potassiumMg": 815.0
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 201.6,
+        "proteinG": 18.87,
+        "carbsG": 21.21,
+        "fatG": 6.96,
+        "fiberG": 8.09,
+        "sugarG": 7.41,
+        "sodiumMg": 285.6,
+        "potassiumMg": 815.0
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "bean-corn-salad",
+      "contentFingerprint": "b74b8a85a095db3c5ea0dc2c35731b655453c355f6ba904320d7dc83efb5e129",
+      "seedContentFingerprint": "b74b8a85a095db3c5ea0dc2c35731b655453c355f6ba904320d7dc83efb5e129",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/bean_corn_salad.jpg",
+        "sha256": "6deea9acbaea7ffdd48f74885b1b5b98c9b770a0c185e3455a4a03163ad8d1e3",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 12,
+        "cookMinutes": 0,
+        "totalMinutes": 12
+      },
+      "ingredients": [
+        {
+          "ingredient": "cooked black beans without salt",
+          "grams": 130.0,
+          "fdcId": 173735,
+          "recordId": "usda:173735",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173735",
+              "fdcId": 173735,
+              "description": "Beans, black, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "description": "Beans, black, mature seeds, cooked, boiled, without salt",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked sweet corn without salt",
+          "grams": 100.0,
+          "fdcId": 169999,
+          "recordId": "usda:169999",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169999",
+              "fdcId": 169999,
+              "description": "Corn, sweet, yellow, cooked, boiled, drained, without salt"
+            }
+          ],
+          "description": "Corn, sweet, yellow, cooked, boiled, drained, without salt",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw red ripe tomato",
+          "grams": 100.0,
+          "fdcId": 170457,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "description": "Tomatoes, red, ripe, raw, year round average",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw red onion",
+          "grams": 30.0,
+          "fdcId": 790577,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "description": "Onions, red, raw",
+          "sourceDataset": "foundation",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw lime juice",
+          "grams": 15.0,
+          "fdcId": 168156,
+          "recordId": "usda:168156",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168156",
+              "fdcId": 168156,
+              "description": "Lime juice, raw"
+            }
+          ],
+          "description": "Lime juice, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Drain and rinse beans and corn."
+        },
+        {
+          "order": 2,
+          "instruction": "Combine all measured ingredients and dress with 15 g lime juice."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:173735",
+          "USDA-FDC:169999",
+          "USDA-FDC:170457",
+          "USDA-FDC:790577",
+          "USDA-FDC:168156"
+        ],
+        "recordIds": [
+          "usda:173735",
+          "usda:169999",
+          "usda:170457",
+          "usda:790577",
+          "usda:168156"
+        ],
+        "perServing": {
+          "kcal": 301.95,
+          "proteinG": 16.15,
+          "carbohydrateG": 59.93,
+          "fatG": 2.44,
+          "fiberG": 15.63,
+          "sugarG": 9.57,
+          "sodiumMg": 7.9,
+          "potassiumMg": 993.15
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 301.95,
+        "proteinG": 16.15,
+        "carbsG": 59.93,
+        "fatG": 2.44,
+        "fiberG": 15.63,
+        "sugarG": 9.57,
+        "sodiumMg": 7.9,
+        "potassiumMg": 993.15
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "chicken-sweet-potato",
+      "contentFingerprint": "1cbb8fa635b93ee286e3b73125d11ebe4b449f9e72dbbd4d750200d763511d78",
+      "seedContentFingerprint": "1cbb8fa635b93ee286e3b73125d11ebe4b449f9e72dbbd4d750200d763511d78",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/chicken_sweet_potato.jpg",
+        "sha256": "6fbfa8d4fb33f17440dce7f402d5576c04ccd2bf25ddb19917e85ea39c073e69",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 30,
+        "totalMinutes": 40
+      },
+      "ingredients": [
+        {
+          "ingredient": "roasted chicken breast meat only",
+          "grams": 150.0,
+          "fdcId": 171477,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "boiled sweet potato",
+          "grams": 200.0,
+          "fdcId": 168484,
+          "recordId": "usda:168484",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168484",
+              "fdcId": 168484,
+              "description": "Sweet potato, cooked, boiled, without skin"
+            }
+          ],
+          "description": "Sweet potato, cooked, boiled, without skin",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked green beans without salt",
+          "grams": 100.0,
+          "fdcId": 169141,
+          "recordId": "usda:169141",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169141",
+              "fdcId": 169141,
+              "description": "Beans, snap, green, cooked, boiled, drained, without salt"
+            }
+          ],
+          "description": "Beans, snap, green, cooked, boiled, drained, without salt",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "fresh parsley as specified herb",
+          "grams": 5.0,
+          "fdcId": 170416,
+          "recordId": "usda:170416",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170416",
+              "fdcId": 170416,
+              "description": "Parsley, fresh"
+            }
+          ],
+          "description": "Parsley, fresh",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Cut sweet potato and arrange with chicken and green beans."
+        },
+        {
+          "order": 2,
+          "instruction": "Roast until chicken is food-safe and sweet potato tender."
+        },
+        {
+          "order": 3,
+          "instruction": "Finish with 5 g parsley."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:171477",
+          "USDA-FDC:168484",
+          "USDA-FDC:169141",
+          "USDA-FDC:170416"
+        ],
+        "recordIds": [
+          "usda:171477",
+          "usda:168484",
+          "usda:169141",
+          "usda:170416"
+        ],
+        "perServing": {
+          "kcal": 436.3,
+          "proteinG": 51.31,
+          "carbohydrateG": 43.64,
+          "fatG": 5.95,
+          "fiberG": 8.36,
+          "sugarG": 15.15,
+          "sodiumMg": 168.8,
+          "potassiumMg": 1017.7
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 436.3,
+        "proteinG": 51.31,
+        "carbsG": 43.64,
+        "fatG": 5.95,
+        "fiberG": 8.36,
+        "sugarG": 15.15,
+        "sodiumMg": 168.8,
+        "potassiumMg": 1017.7
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "mediterranean-chicken-bowl",
+      "contentFingerprint": "45d67c158e47e771c2451dba309031db65bdd75e381318e0cd5fba63976ee480",
+      "seedContentFingerprint": "45d67c158e47e771c2451dba309031db65bdd75e381318e0cd5fba63976ee480",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/mediterranean_chicken_bowl.jpg",
+        "sha256": "62da65ce273d82e2ca7563452f5e41ed194008d29187adeafadfc1f48469b3b6",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 20,
+        "totalMinutes": 30
+      },
+      "ingredients": [
+        {
+          "ingredient": "roasted chicken breast meat only",
+          "grams": 150.0,
+          "fdcId": 171477,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked quinoa as specified grain",
+          "grams": 150.0,
+          "fdcId": 168917,
+          "recordId": "usda:168917",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168917",
+              "fdcId": 168917,
+              "description": "Quinoa, cooked"
+            }
+          ],
+          "description": "Quinoa, cooked",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw red ripe tomato",
+          "grams": 100.0,
+          "fdcId": 170457,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "description": "Tomatoes, red, ripe, raw, year round average",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw cucumber",
+          "grams": 100.0,
+          "fdcId": 168409,
+          "recordId": "usda:168409",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168409",
+              "fdcId": 168409,
+              "description": "Cucumber, with peel, raw"
+            }
+          ],
+          "description": "Cucumber, with peel, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "plain low-fat yogurt",
+          "grams": 50.0,
+          "fdcId": 170903,
+          "recordId": "usda:170903",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170903",
+              "fdcId": 170903,
+              "description": "Yogurt, Greek, plain, lowfat"
+            }
+          ],
+          "description": "Yogurt, Greek, plain, lowfat",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Cook chicken until food-safe and prepare the measured vegetables."
+        },
+        {
+          "order": 2,
+          "instruction": "Build the bowl with cooked quinoa, vegetables, yogurt, and chicken."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:171477",
+          "USDA-FDC:168917",
+          "USDA-FDC:170457",
+          "USDA-FDC:168409",
+          "USDA-FDC:170903"
+        ],
+        "recordIds": [
+          "usda:171477",
+          "usda:168917",
+          "usda:170457",
+          "usda:168409",
+          "usda:170903"
+        ],
+        "perServing": {
+          "kcal": 497.0,
+          "proteinG": 59.64,
+          "carbohydrateG": 41.44,
+          "fatG": 9.5,
+          "fiberG": 5.9,
+          "sugarG": 7.38,
+          "sodiumMg": 145.5,
+          "potassiumMg": 1096.5
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 497.0,
+        "proteinG": 59.64,
+        "carbsG": 41.44,
+        "fatG": 9.5,
+        "fiberG": 5.9,
+        "sugarG": 7.38,
+        "sodiumMg": 145.5,
+        "potassiumMg": 1096.5
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "roasted-quinoa-bowl",
+      "contentFingerprint": "6b00858d2e95d94aaecf97cd9ee71a439387fbd706bcdcd3d1659e9fd2652977",
+      "seedContentFingerprint": "6b00858d2e95d94aaecf97cd9ee71a439387fbd706bcdcd3d1659e9fd2652977",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/roasted_quinoa_bowl.jpg",
+        "sha256": "d6540f54161bdab08429b29bb8d39ccdecf30b01522e93f694c948796c5f1bc9",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 25,
+        "totalMinutes": 35
+      },
+      "ingredients": [
+        {
+          "ingredient": "cooked quinoa",
+          "grams": 150.0,
+          "fdcId": 168917,
+          "recordId": "usda:168917",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168917",
+              "fdcId": 168917,
+              "description": "Quinoa, cooked"
+            }
+          ],
+          "description": "Quinoa, cooked",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked zucchini as seasonal vegetable",
+          "grams": 100.0,
+          "fdcId": 169292,
+          "recordId": "usda:169292",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169292",
+              "fdcId": 169292,
+              "description": "Squash, summer, zucchini, includes skin, cooked, boiled, drained, without salt"
+            }
+          ],
+          "description": "Squash, summer, zucchini, includes skin, cooked, boiled, drained, without salt",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw green sweet pepper as seasonal vegetable",
+          "grams": 100.0,
+          "fdcId": 170427,
+          "recordId": "usda:170427",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170427",
+              "fdcId": 170427,
+              "description": "Peppers, sweet, green, raw"
+            }
+          ],
+          "description": "Peppers, sweet, green, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw lemon juice",
+          "grams": 15.0,
+          "fdcId": 167747,
+          "recordId": "usda:167747",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:167747",
+              "fdcId": 167747,
+              "description": "Lemon juice, raw"
+            }
+          ],
+          "description": "Lemon juice, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "fresh parsley as specified herb",
+          "grams": 5.0,
+          "fdcId": 170416,
+          "recordId": "usda:170416",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170416",
+              "fdcId": 170416,
+              "description": "Parsley, fresh"
+            }
+          ],
+          "description": "Parsley, fresh",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Roast the measured zucchini and pepper until tender."
+        },
+        {
+          "order": 2,
+          "instruction": "Serve over cooked quinoa with lemon juice and parsley."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:168917",
+          "USDA-FDC:169292",
+          "USDA-FDC:170427",
+          "USDA-FDC:167747",
+          "USDA-FDC:170416"
+        ],
+        "recordIds": [
+          "usda:168917",
+          "usda:169292",
+          "usda:170427",
+          "usda:167747",
+          "usda:170416"
+        ],
+        "perServing": {
+          "kcal": 220.1,
+          "proteinG": 8.8,
+          "carbohydrateG": 40.63,
+          "fatG": 3.49,
+          "fiberG": 7.11,
+          "sugarG": 5.84,
+          "sodiumMg": 19.45,
+          "potassiumMg": 740.15
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 220.1,
+        "proteinG": 8.8,
+        "carbsG": 40.63,
+        "fatG": 3.49,
+        "fiberG": 7.11,
+        "sugarG": 5.84,
+        "sodiumMg": 19.45,
+        "potassiumMg": 740.15
+      },
+      "blockedReasons": []
+    },
+    {
+      "canonicalId": "salmon-avocado-bowl",
+      "contentFingerprint": "5d505cb44e78be890cfadc8ceeab3bb6dbb50c24b4bd3e122609ae8b551d444f",
+      "seedContentFingerprint": "5d505cb44e78be890cfadc8ceeab3bb6dbb50c24b4bd3e122609ae8b551d444f",
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/salmon_avocado_bowl.jpg",
+        "sha256": "6ce6450c74290392b2fdcb3324b8977835f8186144ffdc7be12b009e11d02e22",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      },
+      "formulationStatus": "calculated",
+      "formulationDisclosure": "Standardized BIL recipe formulation; quantities were assigned for reproducible calculation and were not inferred from the image.",
+      "servings": 1,
+      "timing": {
+        "prepMinutes": 10,
+        "cookMinutes": 15,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "ingredient": "cooked pink salmon",
+          "grams": 150.0,
+          "fdcId": 172001,
+          "recordId": "usda:172001",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:172001",
+              "fdcId": 172001,
+              "description": "Fish, salmon, pink, cooked, dry heat"
+            }
+          ],
+          "description": "Fish, salmon, pink, cooked, dry heat",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "cooked quinoa as specified grain",
+          "grams": 150.0,
+          "fdcId": 168917,
+          "recordId": "usda:168917",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168917",
+              "fdcId": 168917,
+              "description": "Quinoa, cooked"
+            }
+          ],
+          "description": "Quinoa, cooked",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw avocado",
+          "grams": 75.0,
+          "fdcId": 171705,
+          "recordId": "usda:171705",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171705",
+              "fdcId": 171705,
+              "description": "Avocados, raw, all commercial varieties"
+            }
+          ],
+          "description": "Avocados, raw, all commercial varieties",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        },
+        {
+          "ingredient": "raw cucumber",
+          "grams": 100.0,
+          "fdcId": 168409,
+          "recordId": "usda:168409",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168409",
+              "fdcId": 168409,
+              "description": "Cucumber, with peel, raw"
+            }
+          ],
+          "description": "Cucumber, with peel, raw",
+          "sourceDataset": "sr_legacy",
+          "basis": "per 100 g",
+          "requiredNutrientsComplete": true
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instruction": "Cook salmon until food-safe."
+        },
+        {
+          "order": 2,
+          "instruction": "Arrange with cooked quinoa, avocado, and cucumber."
+        }
+      ],
+      "nutrition": {
+        "status": "calculated",
+        "calculationRevision": "bil-usda-local-recipe-formulation-v1",
+        "sourceRefs": [
+          "USDA-FDC:172001",
+          "USDA-FDC:168917",
+          "USDA-FDC:171705",
+          "USDA-FDC:168409"
+        ],
+        "recordIds": [
+          "usda:172001",
+          "usda:168917",
+          "usda:171705",
+          "usda:168409"
+        ],
+        "perServing": {
+          "kcal": 544.5,
+          "proteinG": 45.62,
+          "carbohydrateG": 41.98,
+          "fatG": 21.91,
+          "fiberG": 9.73,
+          "sugarG": 3.47,
+          "sodiumMg": 152.75,
+          "potassiumMg": 1427.25
+        }
+      },
+      "nutritionPerServing": {
+        "kcal": 544.5,
+        "proteinG": 45.62,
+        "carbsG": 41.98,
+        "fatG": 21.91,
+        "fiberG": 9.73,
+        "sugarG": 3.47,
+        "sodiumMg": 152.75,
+        "potassiumMg": 1427.25
+      },
+      "blockedReasons": []
+    }
+  ]
+}

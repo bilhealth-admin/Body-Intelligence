@@ -15,25 +15,9 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     effectiveQuery = controller.text.trim();
     if (effectiveQuery.isEmpty) return const <Widget>[];
 
-    final authority = ref.read(foodRuntimeSearchAuthorityProvider);
-    var results = await authority.search(effectiveQuery, limit: 20);
-    if (results.isEmpty) {
-      // A phrase can contain a reviewed food concept plus an extra word that
-      // USDA does not index as part of the food name (for example
-      // "بطيخ الكيوي"). Retry once with the first reviewed Latin concept so
-      // the daily-log picker can still show the authoritative food row.
-      final fallbackQuery = _DailyLogPageState._searchAssistance
-          .expand(effectiveQuery)
-          .firstWhere(
-            (candidate) =>
-                candidate != effectiveQuery &&
-                RegExp(r'^[A-Za-z0-9]').hasMatch(candidate),
-            orElse: () => '',
-          );
-      if (fallbackQuery.isNotEmpty) {
-        results = await authority.search(fallbackQuery, limit: 20);
-      }
-    }
+    var results = await ref
+        .read(foodRuntimeSearchAuthorityProvider)
+        .search(effectiveQuery, limit: 20);
     for (var refresh = 0; refresh < 3; refresh++) {
       final latestQuery = controller.text.trim();
       if (latestQuery == effectiveQuery) break;
@@ -54,11 +38,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       return <Widget>[
         if (correction != null)
           ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.foodSearch,
-              iconOverride: Icons.auto_fix_high,
-              appleIconOverride: Icons.auto_fix_high,
-            ),
+            leading: const Icon(Icons.auto_fix_high),
             title: Text('${_mealCopy('didYouMean')} $correction?'),
             onTap: () {
               controller.text = correction;
@@ -71,9 +51,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         ),
         ListTile(
           key: const Key('daily-search-open-food-catalog'),
-          leading: const BilSemanticIconBadge(
-            kind: BilSemanticIconKind.foodSearch,
-          ),
+          leading: const Icon(Icons.library_books_outlined),
           title: Text(_mealCopy('openFoodLibrary')),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           onTap: () {
@@ -86,11 +64,15 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     final uniqueResults = <Food>[];
     final identities = <String>{};
     for (final food in results) {
-      // This is an explicit typed search, not the anonymous/popular browse
-      // surface. A trusted USDA hit must remain selectable even when BIL has
-      // no reviewed native display alias yet; hiding it turns a real cloud
-      // answer into a false "no result" state. The canonical provider name is
-      // preserved by [foodName] until a reviewed localization exists.
+      if (!FoodPresentationLocalizer.hasLocalizedBrowseName(
+        name: food.name,
+        arabicName: food.arabicName,
+        localeTag: resultLocale,
+        isCustom: food.isCustom,
+        source: food.source,
+      )) {
+        continue;
+      }
       final displayName = _displayFoodName(food, resultLocale);
       final identity = _mealFoodDisplayIdentity(food, displayName);
       if (identities.add(identity)) uniqueResults.add(food);
@@ -103,9 +85,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         ),
         ListTile(
           key: const Key('daily-search-open-food-catalog'),
-          leading: const BilSemanticIconBadge(
-            kind: BilSemanticIconKind.foodSearch,
-          ),
+          leading: const Icon(Icons.library_books_outlined),
           title: Text(_mealCopy('openFoodLibrary')),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           onTap: () {
@@ -168,7 +148,6 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                       key: food.verified
                           ? const Key('daily-search-verified-food-badge')
                           : null,
-                      radius: 18,
                       backgroundColor: food.verified
                           ? const Color(0xFFE2F8EC)
                           : accent.withValues(alpha: 0.10),
@@ -248,7 +227,6 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           key: food.verified
               ? const Key('daily-search-verified-food-badge')
               : null,
-          radius: 18,
           backgroundColor: food.verified
               ? const Color(0xFFE2F8EC)
               : accent.withValues(alpha: 0.10),
@@ -351,7 +329,6 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
   }
 
   void _selectFood(Food food, SearchController controller, String displayName) {
-    final returnQuery = controller.text.trim();
     _updateState(() {
       selectedFood = food;
       final sourceGrams = dailyLogAmountInGrams(
@@ -364,10 +341,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         amount == amount.roundToDouble() ? 0 : 1,
       );
     });
-    // Keep the user's query authoritative so both the visible Back button and
-    // the platform back gesture can reopen the same result set. The selected
-    // food name is only a fallback for non-text entry points.
-    controller.closeView(returnQuery.isEmpty ? displayName : returnQuery);
+    controller.closeView(displayName);
     WidgetsBinding.instance.addPostFrameCallback((_) => _focusMealEntry());
   }
 
@@ -442,7 +416,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'didYouMean': 'هل تقصد:',
     'noResult':
         'لا توجد نتيجة مطابقة بعد. جرّب اسمًا أبسط أو علامة تجارية أو باركود.',
-    'openFoodLibrary': 'لا نتيجة بعد التصحيح. افتح دليل الأطعمة.',
+    'openFoodLibrary': 'لا نتيجة بعد التصحيح. افتح دليل الأطعمة لتنزيل المزيد.',
     'mealPhoto': 'تصوير الوجبة',
     'voiceInput': 'إدخال صوتي',
     'barcode': 'باركود',
@@ -482,7 +456,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'noResult':
         'Aucun résultat pour le moment. Essayez un nom plus simple, une marque ou un code-barres.',
     'openFoodLibrary':
-        'Aucun résultat après correction. Ouvrez le catalogue alimentaire.',
+        'Aucun résultat après correction. Ouvrez le catalogue pour en télécharger davantage.',
     'mealPhoto': 'Photo du repas',
     'voiceInput': 'Saisie vocale',
     'barcode': 'Code-barres',
@@ -521,7 +495,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'noResult':
         'Aún no hay coincidencias. Prueba un nombre más simple, una marca o un código de barras.',
     'openFoodLibrary':
-        'No hay resultado tras la corrección. Abre el catálogo de alimentos.',
+        'No hay resultado tras la corrección. Abre el catálogo para descargar más.',
     'mealPhoto': 'Foto de la comida',
     'voiceInput': 'Entrada de voz',
     'barcode': 'Código',
@@ -558,7 +532,8 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'didYouMean': 'Bunu mu demek istediniz:',
     'noResult':
         'Henüz eşleşme yok. Daha sade bir ad, marka veya barkod deneyin.',
-    'openFoodLibrary': 'Düzeltmeden sonra sonuç yok. Gıda kataloğunu açın.',
+    'openFoodLibrary':
+        'Düzeltmeden sonra sonuç yok. Daha fazlasını indirmek için gıda kataloğunu açın.',
     'mealPhoto': 'Öğün fotoğrafı',
     'voiceInput': 'Sesli giriş',
     'barcode': 'Barkod',

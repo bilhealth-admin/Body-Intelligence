@@ -12,7 +12,6 @@ import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
 import 'auth_input_validation.dart';
-import 'premium_login_status_panel.dart';
 import 'supabase_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -28,21 +27,6 @@ class _LoginPageState extends State<LoginPage> {
   bool loading = false;
   OAuthProvider? oauthLoading;
   String? status;
-
-  bool get _usesNativeAppleButton =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
-
-  // Apple derives its title size from the button height (43%). Keep the
-  // provider group on the same 44pt / 18.92pt scale on iOS instead of pairing
-  // a 24pt Apple title with 15.5pt Google/Facebook titles in 56pt buttons.
-  double get _oauthFontSize => _usesNativeAppleButton ? 44 * .43 : 15.5;
-
-  double _oauthHeight(BuildContext context) {
-    final baseHeight = _usesNativeAppleButton ? 44.0 : 56.0;
-    final scale =
-        MediaQuery.textScalerOf(context).scale(_oauthFontSize) / _oauthFontSize;
-    return baseHeight * (scale < 1 ? 1 : scale);
-  }
 
   Future<void> submitEmail() async {
     if (loading || oauthLoading != null || !AppEnvironment.cloudConfigured) {
@@ -93,60 +77,19 @@ class _LoginPageState extends State<LoginPage> {
           provider == OAuthProvider.apple &&
           !kIsWeb &&
           defaultTargetPlatform == TargetPlatform.iOS;
-      final nativeGoogle = SupabaseAuthService.usesNativeGoogleSignIn(
-        provider,
-        isWeb: kIsWeb,
-        platform: defaultTargetPlatform,
-      );
-      final nativeFacebook = SupabaseAuthService.usesNativeFacebookSignIn(
-        provider,
-        isWeb: kIsWeb,
-        platform: defaultTargetPlatform,
-      );
-      final nativeSignIn = nativeApple || nativeGoogle || nativeFacebook;
-      AuthResponse? nativeResponse;
-      final completed = await (nativeApple
-          ? (() async {
-              nativeResponse = await authService.signInWithAppleNative();
-              return true;
-            })()
-          : nativeGoogle
-          ? (() async {
-              nativeResponse = await authService.signInWithGoogleNative();
-              return nativeResponse != null;
-            })()
-          : nativeFacebook
-          ? (() async {
-              nativeResponse = await authService.signInWithFacebookNative();
-              return nativeResponse != null;
-            })()
-          : authService.signInWithOAuth(provider));
-      // Native Apple, Google, and Facebook sign-in complete inside BIL, so
-      // there is no browser callback page to advance the authenticated journey.
-      if (nativeSignIn && completed && mounted) {
-        final sessionReady = await authService.waitForAuthenticatedSession(
-          knownSession: nativeResponse?.session,
-        );
-        if (!mounted) return;
-        if (sessionReady) {
-          // Carry the verified native response into Startup. Android can
-          // publish the signed-in event before its auth storage finishes
-          // writing currentSession; dropping this response used to send a
-          // successful Google account selection back to Sign in.
-          context.go('/startup', extra: nativeResponse?.session);
-        } else {
-          setState(
-            () => status = authEntryText(
-              context,
-              AuthEntryCopyKey.openSecureFailure,
-            ),
-          );
-        }
+      final nativeResponse = nativeApple
+          ? await authService.signInWithAppleNative()
+          : null;
+      final opened = nativeApple
+          ? nativeResponse != null
+          : await authService.signInWithOAuth(provider);
+      // Native Sign in with Apple completes inside the app, so there is no
+      // deep-link callback page to advance the authenticated journey.
+      if (nativeApple && opened && mounted) {
+        context.go('/startup', extra: nativeResponse?.session);
         return;
       }
-      // Dismissing a native provider sheet is a deliberate cancellation, not a
-      // provider outage. Keep the polished sign-in page quietly ready.
-      if (!completed && mounted && !nativeGoogle && !nativeFacebook) {
+      if (!opened && mounted) {
         setState(
           () => status = authEntryText(
             context,
@@ -254,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 if (status != null) ...[
                                   const SizedBox(height: 12),
-                                  AuthStatusPanel(message: status!),
+                                  _StatusPanel(message: status!),
                                 ],
                                 const SizedBox(height: 18),
                                 FilledButton(
@@ -319,31 +262,25 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 11),
-                                if (_usesNativeAppleButton)
-                                  // Height already incorporates text enlargement.
-                                  // Avoid applying it twice inside the package;
-                                  // smaller accessibility text remains respected.
-                                  MediaQuery.withClampedTextScaling(
-                                    maxScaleFactor: 1,
-                                    child: SignInWithAppleButton(
-                                      key: const Key('oauth-apple'),
-                                      onPressed:
-                                          configured &&
-                                              !loading &&
-                                              oauthLoading == null
-                                          ? () =>
-                                                submitOAuth(OAuthProvider.apple)
-                                          : null,
-                                      text: authEntryText(
-                                        context,
-                                        AuthEntryCopyKey.continueApple,
-                                      ),
-                                      height: _oauthHeight(context),
-                                      borderRadius: BorderRadius.circular(12),
-                                      style: dark
-                                          ? SignInWithAppleButtonStyle.white
-                                          : SignInWithAppleButtonStyle.black,
+                                if (!kIsWeb &&
+                                    defaultTargetPlatform == TargetPlatform.iOS)
+                                  SignInWithAppleButton(
+                                    key: const Key('oauth-apple'),
+                                    onPressed:
+                                        configured &&
+                                            !loading &&
+                                            oauthLoading == null
+                                        ? () => submitOAuth(OAuthProvider.apple)
+                                        : null,
+                                    text: authEntryText(
+                                      context,
+                                      AuthEntryCopyKey.continueApple,
                                     ),
+                                    height: 56,
+                                    borderRadius: BorderRadius.circular(12),
+                                    style: dark
+                                        ? SignInWithAppleButtonStyle.white
+                                        : SignInWithAppleButtonStyle.black,
                                   )
                                 else
                                   _oauthButton(
@@ -493,7 +430,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(12),
         onTap: enabled ? () => submitOAuth(provider) : null,
         child: SizedBox(
-          height: _oauthHeight(context),
+          height: 56,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -520,7 +457,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: enabled
                         ? scheme.onSurface
                         : scheme.onSurfaceVariant.withValues(alpha: .7),
-                    fontSize: _oauthFontSize,
+                    fontSize: 15.5,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
                   ),
@@ -693,6 +630,29 @@ class _OrDivider extends StatelessWidget {
         ),
         Expanded(child: Divider(color: scheme.outlineVariant)),
       ],
+    );
+  }
+}
+
+class _StatusPanel extends StatelessWidget {
+  const _StatusPanel({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: scheme.onErrorContainer, height: 1.35),
+      ),
     );
   }
 }

@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/localization/app_localizations.dart';
 import '../domain/commerce_entitlement.dart';
-import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
 import '../providers/commerce_providers.dart';
 
@@ -30,41 +28,13 @@ class PremiumNutritionGlass extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
-    if (subscription.isLoading || subscription.hasError) {
-      return _PremiumNutritionStatusGlass(
-        borderRadius: borderRadius,
-        compact: compact,
-        loading: subscription.isLoading,
-        onRetry: subscription.hasError
-            ? () => ref.invalidate(verifiedSubscriptionStateProvider)
-            : null,
-        child: child,
-      );
-    }
+    final subscription = ref.watch(verifiedSubscriptionStateProvider);
     final state = subscription.value;
-    if (state?.authority != EntitlementAuthority.verifiedServer) {
-      // A known local Free state is a normal locked entitlement, not an
-      // entitlement-service failure. Free users should see only the Premium
-      // gate; Retry is reserved for an unavailable subscription check.
-      if (state?.plan == CommercePlan.free) {
-        return _lockedGlass(context);
-      }
-      return _PremiumNutritionStatusGlass(
-        borderRadius: borderRadius,
-        compact: compact,
-        loading: false,
-        onRetry: () => ref.invalidate(verifiedSubscriptionStateProvider),
-        child: child,
-      );
-    }
-    final unlocked = state!.grants(CommerceEntitlement.advancedIntelligence);
+    final unlocked =
+        state?.authority == EntitlementAuthority.verifiedServer &&
+        (state?.grants(CommerceEntitlement.advancedIntelligence) ?? false);
     if (unlocked) return child;
 
-    return _lockedGlass(context);
-  }
-
-  Widget _lockedGlass(BuildContext context) {
     final light = Theme.of(context).brightness == Brightness.light;
     return Stack(
       fit: StackFit.passthrough,
@@ -149,129 +119,6 @@ class PremiumNutritionGlass extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PremiumNutritionStatusGlass extends StatelessWidget {
-  const _PremiumNutritionStatusGlass({
-    required this.child,
-    required this.borderRadius,
-    required this.loading,
-    required this.compact,
-    this.onRetry,
-  });
-
-  final Widget child;
-  final double borderRadius;
-  final bool loading;
-  final bool compact;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final light = Theme.of(context).brightness == Brightness.light;
-    final label = context.strings.text(
-      loading ? 'Checking subscription' : 'Subscription check unavailable',
-    );
-    return Stack(
-      fit: StackFit.passthrough,
-      children: [
-        ExcludeSemantics(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: IgnorePointer(child: child),
-          ),
-        ),
-        Positioned.fill(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-              child: Material(
-                color: light
-                    ? const Color(0x24FFFFFF)
-                    : const Color(0x29000000),
-                child: Semantics(
-                  container: true,
-                  liveRegion: true,
-                  label: label,
-                  child: Center(
-                    child: loading
-                        ? const SizedBox.square(
-                            key: Key('premium-nutrition-checking'),
-                            dimension: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
-                          )
-                        : FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _PremiumNutritionLabel(compact: compact),
-                                const SizedBox(width: 10),
-                                FilledButton.tonalIcon(
-                                  key: const Key(
-                                    'premium-nutrition-entitlement-retry',
-                                  ),
-                                  onPressed: onRetry,
-                                  icon: const Icon(Icons.refresh_rounded),
-                                  label: Text(context.strings.text('Retry')),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PremiumNutritionLabel extends StatelessWidget {
-  const _PremiumNutritionLabel({required this.compact});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final light = Theme.of(context).brightness == Brightness.light;
-    return DecoratedBox(
-      key: const Key('premium-nutrition-status-label'),
-      decoration: BoxDecoration(
-        color: light ? const Color(0xD9FFFFFF) : const Color(0xB8141820),
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: const Color(0x99D79A1E)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 9 : 14,
-          vertical: compact ? 4 : 8,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.workspace_premium_rounded,
-              color: const Color(0xFFD79A1E),
-              size: compact ? 16 : 20,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Premium',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: light ? const Color(0xFF231B0B) : Colors.white,
-                fontWeight: FontWeight.w900,
-                fontSize: compact ? 12 : null,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

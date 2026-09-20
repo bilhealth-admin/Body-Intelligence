@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -19,9 +18,6 @@ import '../../onboarding/models/onboarding_draft.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
 import '../../nutrition/repositories/dietary_preferences_repository.dart';
 import '../../nutrition_plans/data/diet_plan_repository.dart';
-import '../services/display_name_sync.dart';
-
-export '../services/display_name_sync.dart' show DisplayNameSync;
 
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
   final database = ref.watch(databaseProvider);
@@ -114,54 +110,39 @@ final firstValueHandoffProvider = StreamProvider<bool>((ref) {
       .map((value) => value == 'true');
 });
 
-final displayNameSyncProvider = Provider<DisplayNameSync>((ref) {
-  final sync = DisplayNameSync(
-    preferences: ref.watch(preferencesRepositoryProvider),
-    currentOwnerId: () => AppEnvironment.supabaseRuntimeReady
-        ? Supabase.instance.client.auth.currentUser?.id
-        : null,
-    readRemote: (owner) async {
-      final client = Supabase.instance.client;
-      if (client.auth.currentUser?.id != owner) return null;
-      final row = await client
-          .from('bil_public_profiles')
-          .select('display_name')
-          .eq('user_id', owner)
-          .maybeSingle();
-      return row?['display_name'] as String?;
-    },
-    writeRemote: (owner, name) async {
-      final client = Supabase.instance.client;
-      if (client.auth.currentUser?.id != owner) return false;
-      // Do not create a discoverable Community profile as a side effect of
-      // editing a private profile. A missing row keeps the edit pending.
-      final row = await client
-          .from('bil_public_profiles')
-          .update({
-            'display_name': name,
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('user_id', owner)
-          .select('display_name')
-          .maybeSingle();
-      return row?['display_name'] == name;
-    },
-  );
-  ref.onDispose(sync.dispose);
-  return sync;
-});
-
-final displayNameProvider = StreamProvider<String?>((ref) {
+final displayNameProvider = StreamProvider<String?>((ref) async* {
   final preferences = ref.watch(preferencesRepositoryProvider);
-  final sync = ref.watch(displayNameSyncProvider);
-  return preferences.watch('displayName').distinct().map((value) {
+  await for (final value in preferences.watch('displayName')) {
     if (!_preferencesMatchCurrentAuth(preferences)) {
-      return null;
+      yield null;
+      continue;
     }
     final localName = value?.trim();
-    unawaited(sync.synchronize());
-    return localName == null || localName.isEmpty ? null : localName;
-  });
+    if (AppEnvironment.supabaseRuntimeReady) {
+      try {
+        final client = Supabase.instance.client;
+        final user = client.auth.currentUser;
+        if (user != null) {
+          final row = await client
+              .from('bil_public_profiles')
+              .select('display_name')
+              .eq('user_id', user.id)
+              .maybeSingle();
+          final remoteName = row?['display_name']?.toString().trim();
+          if (remoteName != null && remoteName.isNotEmpty) {
+            if (remoteName != localName) {
+              await preferences.set('displayName', remoteName);
+            }
+            yield remoteName;
+            continue;
+          }
+        }
+      } on Object {
+        // Offline/cloud failures fall back to the last locally known identity.
+      }
+    }
+    yield localName == null || localName.isEmpty ? null : localName;
+  }
 });
 
 final activeNutritionPathwayProvider = StreamProvider<String?>((ref) {
@@ -218,16 +199,8 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
 ) async {
   final preferences = ref.watch(preferencesRepositoryProvider);
   final stored = (await preferences.get('profilePhotoPublicUrl'))?.trim();
-  final hasStoredUrl = stored != null && stored.isNotEmpty;
-  // The local bytes are the exact image the member just chose. Do not launch a
-  // redundant cloud profile query during normal avatar rebuilds; it can race
-  // the local stream and briefly swap the avatar back to a network image.
-  final localPhoto = await preferences.get('profilePhoto');
-  if ((localPhoto != null && localPhoto.isNotEmpty) || hasStoredUrl) {
-    return hasStoredUrl ? stored : null;
-  }
   if (!AppEnvironment.supabaseRuntimeReady) {
-    return null;
+    return stored == null || stored.isEmpty ? null : stored;
   }
   final client = Supabase.instance.client;
   final user = client.auth.currentUser;
@@ -240,12 +213,12 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
         .maybeSingle();
     final url = (row?['avatar_url'] as String?)?.trim();
     if (url == null || url.isEmpty) {
-      return null;
+      return stored == null || stored.isEmpty ? null : stored;
     }
     await preferences.set('profilePhotoPublicUrl', url);
     return url;
   } on Object {
-    return null;
+    return stored == null || stored.isEmpty ? null : stored;
   }
 });
 

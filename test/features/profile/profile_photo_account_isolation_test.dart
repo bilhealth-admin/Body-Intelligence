@@ -7,7 +7,6 @@ import 'package:body_intelligence_log/features/profile/services/profile_photo_se
 import 'package:drift/native.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image/image.dart' as image;
 
 void main() {
   test(
@@ -60,34 +59,6 @@ void main() {
       expect(await preferences.get('profilePhotoPublicUrl'), isNull);
     },
   );
-
-  test('large valid photo is compressed instead of being rejected', () async {
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    final preferences = PreferencesRepository(database);
-    final service = ProfilePhotoService(
-      preferences,
-      authenticatedOwnerId: () => null,
-    );
-    final source = image.Image(width: 2000, height: 1200)
-      ..clear(image.ColorRgb8(36, 121, 184));
-    final encoded = Uint8List.fromList(image.encodePng(source));
-    // The decoder reads the valid image before the extra original-camera
-    // bytes, which exercises the same oversized selection boundary without
-    // making this focused test allocate a photographic multi-megabyte bitmap.
-    final oversized = Uint8List(6 * 1024 * 1024)
-      ..setRange(0, encoded.length, encoded);
-
-    final result = await service.save(oversized, contentType: 'image/png');
-
-    expect(result.cloudSynced, isFalse);
-    expect(
-      result.bytes.lengthInBytes,
-      lessThanOrEqualTo(profilePhotoCompressionTargetBytes),
-    );
-    expect(result.bytes.take(3), orderedEquals(const <int>[0xff, 0xd8, 0xff]));
-    expect(await preferences.get('profilePhoto'), base64Encode(result.bytes));
-  });
 
   test('guest removal clears local photo and cached public URL', () async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());

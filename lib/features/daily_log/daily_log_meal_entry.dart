@@ -26,24 +26,19 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                   key: const Key('daily-meal-food-search-bar'),
                   enabled: !mealSaving,
                   controller: controller,
-                  leading: Icon(
-                    Icons.search_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  leading: const Icon(Icons.search),
                   elevation: const WidgetStatePropertyAll(0),
                   backgroundColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.surfaceContainerLow,
+                    Theme.of(context).colorScheme.surface,
                   ),
                   side: WidgetStatePropertyAll(
                     BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: .18),
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
                   shape: WidgetStatePropertyAll(
                     RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   hintText: _mealCopy('searchFoods'),
@@ -119,7 +114,7 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                       tooltip: context.strings.text('Close'),
                       onPressed: mealSaving
                           ? null
-                          : _returnFromSelectedFoodToSearch,
+                          : () => _updateState(() => selectedFood = null),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -383,8 +378,9 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
                       ),
-                      leading: const BilSemanticIconBadge(
-                        kind: BilSemanticIconKind.verifiedFood,
+                      leading: Icon(
+                        Icons.fact_check_outlined,
+                        color: scheme.primary,
                       ),
                       title: Text(
                         FoodPresentationLocalizer.label(

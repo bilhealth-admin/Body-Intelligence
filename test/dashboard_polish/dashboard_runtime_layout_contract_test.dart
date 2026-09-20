@@ -18,14 +18,9 @@ void main() {
     final shell = File(
       'lib/features/dashboard/widgets/dashboard_twin_deck_shell.dart',
     ).readAsStringSync();
-    final grid = <String>[
-      File(
-        'lib/features/dashboard/widgets/dashboard_grid.dart',
-      ).readAsStringSync(),
-      File(
-        'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
-      ).readAsStringSync(),
-    ].join('\n');
+    final grid = File(
+      'lib/features/dashboard/widgets/dashboard_grid.dart',
+    ).readAsStringSync();
     final summary = File(
       'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
     ).readAsStringSync();
@@ -34,12 +29,10 @@ void main() {
     expect(health, contains('SizedBox.square'));
     expect(health, contains("Key('bil-live-health-watch')"));
     expect(benchmark, isNot(contains('IntrinsicHeight(')));
-    expect(current, isNot(contains('height: height')));
-    expect(
-      current,
-      isNot(contains("Key('dashboard-personal-health-ai-slot')")),
-    );
-    expect(current, isNot(contains("Key('dashboard-mobile-summary-card')")));
+    expect(current, contains('height: height'));
+    expect(current, contains("Key('dashboard-personal-health-ai-slot')"));
+    expect(current, contains("Key('dashboard-mobile-summary-card')"));
+    expect(current, contains('BilPremiumResponsiveLayout.twinBaseHeight('));
     expect(benchmark, contains('BoxConstraints(maxWidth: 840)'));
     expect(shell, contains('.clamp(0.0, constraints.maxHeight)'));
     expect(shell, contains('height: deckHeight'));

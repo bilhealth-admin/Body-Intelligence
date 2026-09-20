@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +17,6 @@ import '../commerce/presentation/premium_barcode_access.dart';
 import '../commerce/presentation/premium_nutrition_glass.dart';
 import 'services/food_runtime_search_authority.dart';
 import 'services/food_search_assistance.dart';
-import 'services/food_presentation_localizer.dart';
 import 'domain/unified_food.dart';
 import 'presentation/food_barcode_scanner_page.dart';
 import 'presentation/product_identity_copy.dart';

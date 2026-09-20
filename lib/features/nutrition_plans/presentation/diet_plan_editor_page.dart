@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
@@ -42,7 +41,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
   };
   final _resolvedTargets = <int, DietMacroTarget>{};
   final _invalidMacroDays = <int>{};
-  final _macroEditHistory = <int, DietMacroEditHistory>{};
   DietFatLevel _fatLevel = DietFatLevel.medium;
   int _trimester = 1;
   bool _clinicianAcknowledged = false;
@@ -92,7 +90,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     final week = draft.resolveWeek();
     _resolvedTargets.clear();
     _invalidMacroDays.clear();
-    _macroEditHistory.clear();
     for (var day = 1; day <= 7; day += 1) {
       final target = week?[day];
       if (target == null) continue;
@@ -101,26 +98,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     }
   }
 
-  double? get _baseCalories => _parseNumber(_calories.text);
-
-  double? _parseNumber(String source) {
-    final normalized = source
-        .trim()
-        .replaceAll('،', '.')
-        .replaceAll('٫', '.')
-        .replaceAllMapped(RegExp(r'[٠-٩۰-۹０-９]'), (match) {
-          const arabic = '٠١٢٣٤٥٦٧٨٩';
-          const persian = '۰۱۲۳۴۵۶۷۸۹';
-          const fullWidth = '０１２３４５６７８９';
-          final value = match.group(0)!;
-          final index = arabic.indexOf(value);
-          if (index >= 0) return '$index';
-          final persianIndex = persian.indexOf(value);
-          if (persianIndex >= 0) return '$persianIndex';
-          return '${fullWidth.indexOf(value)}';
-        });
-    return double.tryParse(normalized);
-  }
+  double? get _baseCalories => double.tryParse(_calories.text.trim());
 
   double? get _effectiveCalories {
     final base = _baseCalories;
@@ -183,7 +161,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
       setState(() {});
       return;
     }
-    _macroEditHistory.clear();
     for (var day = 1; day <= 7; day += 1) {
       final current = _resolvedTargets[day];
       if (current == null) continue;
@@ -199,23 +176,17 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
   }
 
   void _onMacroChanged(int day, DietMacroComponent component, String source) {
-    final grams = _parseNumber(source);
+    final grams = double.tryParse(source.trim());
     final current = _resolvedTargets[day];
     if (grams == null || current == null) {
       _invalidMacroDays.add(day);
       setState(() {});
       return;
     }
-    final history = _macroEditHistory.putIfAbsent(
-      day,
-      DietMacroEditHistory.new,
-    );
-    final locked = history.lockedFor(component);
-    final target = DietMacroAllocator.rebalancePreserving(
+    final target = DietMacroAllocator.rebalance(
       current: current,
       edited: component,
       grams: grams,
-      locked: locked,
       fallbackFatLevel: _fatLevel,
     );
     if (target == null) {
@@ -225,7 +196,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     }
     _invalidMacroDays.remove(day);
     _resolvedTargets[day] = target;
-    history.accept(component);
     _writeTarget(day, target, preserve: component);
     setState(() {});
   }
@@ -401,7 +371,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
         : 0.0;
     final editableCalories = math.max(.01, target.calories - extra);
     _calories.text = editableCalories.round().toString();
-    _macroEditHistory.clear();
     final macroTarget = DietMacroTarget(
       calories: target.calories,
       carbsGrams: target.calories * target.carbsPercent / 100 / 4,
@@ -469,6 +438,8 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     final localeTag = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
+    final draft = _draft();
+    final week = draft?.resolveWeek();
     final restricted = pathway.safety != NutritionPathwaySafety.standard;
     final medicallyLocked =
         pathway.safety == NutritionPathwaySafety.medicalSupervision;
@@ -477,22 +448,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        leading: IconButton(
-          key: const Key('diet-plan-back'),
-          tooltip: nutritionText(
-            context,
-            'Back to pathways',
-            'العودة للمسارات',
-          ),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/nutrition-plans');
-            }
-          },
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
         title: Text(nutritionPathwayTitle(pathway, localeTag)),
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
@@ -552,11 +507,10 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
               padding: const EdgeInsets.only(bottom: 28),
               children: [
                 _DietHero(pathway: pathway, localeTag: localeTag),
-                if (restricted)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                    child: _EvidenceNotice(pathwayId: pathway.id),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+                  child: _EvidenceNotice(pathwayId: pathway.id),
+                ),
                 if (_isPregnancy)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
@@ -578,6 +532,10 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
                       onChanged: _onCaloriesChanged,
                     ),
                   ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 14, 18, 0),
+                  child: _MacroEditingNotice(),
+                ),
                 if (_isPregnancy)
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 14, 18, 0),
@@ -604,12 +562,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
                       carbController: _carbs[day]!,
                       proteinController: _protein[day]!,
                       fatController: _fat[day]!,
-                      // Keep the last valid allocation visible when a single
-                      // edited field is impossible. `week` is deliberately
-                      // null while saving is blocked, but that must not erase
-                      // the other six days or the user's prior values.
-                      target: _resolvedTargets[day],
-                      invalidMacro: _invalidMacroDays.contains(day),
+                      target: week?[day],
                       enabled: editable,
                       onCarbsChanged: (value) =>
                           _onMacroChanged(day, DietMacroComponent.carbs, value),

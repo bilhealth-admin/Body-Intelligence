@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 
 import 'package:body_intelligence_log/features/ads/advertising_privacy_page.dart';
 import 'package:body_intelligence_log/features/ads/domain/ad_policy.dart';
@@ -12,133 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  test('UMP supports Android and iOS, never desktop or web', () {
-    for (final platform in TargetPlatform.values) {
-      expect(
-        AdMobUmpConsentGate.supportsPlatform(platform),
-        platform == TargetPlatform.android || platform == TargetPlatform.iOS,
-      );
-      expect(
-        AdMobUmpConsentGate.supportsPlatform(platform, isWeb: true),
-        isFalse,
-      );
-    }
-  });
-  for (final target in [TargetPlatform.android, TargetPlatform.iOS]) {
-    group('final provider boundary on ${target.name}', () {
-      setUp(() => debugDefaultTargetPlatformOverride = target);
-      tearDown(() => debugDefaultTargetPlatformOverride = null);
-
-      test('blocked consent never initializes the SDK', () async {
-        final consent = _FakeCoordinator(
-          const UmpConsentSnapshot.uninitialized(),
-        );
-        final gateway = AdMobContextualAdGateway(
-          configuredOverride: true,
-          umpConsent: consent,
-          adultConfirmed: () => true,
-          accountKey: () => 'free-a',
-        );
-        expect(await gateway.loadBanner(AdPlacement.generalDiscovery), isNull);
-        expect(consent.verifyCalls, 1);
-      });
-
-      test('missing account never initializes consent or SDK', () async {
-        final consent = _FakeCoordinator(
-          const UmpConsentSnapshot.uninitialized(),
-        );
-        final gateway = AdMobContextualAdGateway(
-          configuredOverride: true,
-          umpConsent: consent,
-          adultConfirmed: () => true,
-        );
-        expect(await gateway.loadBanner(AdPlacement.generalDiscovery), isNull);
-        expect(consent.verifyCalls, 0);
-      });
-
-      test(
-        'paid or otherwise ineligible account never starts consent',
-        () async {
-          final consent = _FakeCoordinator(
-            const UmpConsentSnapshot.uninitialized(),
-          );
-          final gateway = AdMobContextualAdGateway(
-            configuredOverride: true,
-            umpConsent: consent,
-            adultConfirmed: () => false,
-            accountKey: () => 'premium-owner',
-          );
-          expect(
-            await gateway.loadBanner(AdPlacement.generalDiscovery),
-            isNull,
-          );
-          expect(consent.verifyCalls, 0);
-        },
-      );
-
-      test(
-        'account switch while waiting for UMP invalidates the request',
-        () async {
-          var owner = 'free-a';
-          final consent = _FakeCoordinator(
-            const UmpConsentSnapshot(
-              phase: UmpConsentPhase.ready,
-              canRequestAds: true,
-              privacyOptionsRequirement:
-                  UmpPrivacyOptionsRequirement.notRequired,
-            ),
-          );
-          consent.onVerify = () => owner = 'free-b';
-          final gateway = AdMobContextualAdGateway(
-            configuredOverride: true,
-            umpConsent: consent,
-            adultConfirmed: () => true,
-            accountKey: () => owner,
-          );
-          expect(
-            await gateway.loadBanner(AdPlacement.generalDiscovery),
-            isNull,
-          );
-          expect(consent.verifyCalls, 1);
-        },
-      );
-
-      test('upgrade while waiting for UMP invalidates the request', () async {
-        var eligible = true;
-        final consent = _FakeCoordinator(
-          const UmpConsentSnapshot(
-            phase: UmpConsentPhase.ready,
-            canRequestAds: true,
-            privacyOptionsRequirement: UmpPrivacyOptionsRequirement.notRequired,
-          ),
-        );
-        consent.onVerify = () => eligible = false;
-        final gateway = AdMobContextualAdGateway(
-          configuredOverride: true,
-          umpConsent: consent,
-          adultConfirmed: () => eligible,
-          accountKey: () => 'free-a',
-        );
-        expect(await gateway.loadBanner(AdPlacement.generalDiscovery), isNull);
-        expect(consent.verifyCalls, 1);
-      });
-
-      test('sensitive placement never reaches consent or SDK', () async {
-        final consent = _FakeCoordinator(
-          const UmpConsentSnapshot.uninitialized(),
-        );
-        final gateway = AdMobContextualAdGateway(
-          configuredOverride: true,
-          umpConsent: consent,
-          adultConfirmed: () => true,
-          accountKey: () => 'free-a',
-        );
-        expect(await gateway.loadBanner(AdPlacement.connectedHealth), isNull);
-        expect(consent.verifyCalls, 0);
-      });
-    });
-  }
-
   test('UMP must authorize before the contextual ad boundary opens', () async {
     final platform = _FakeUmpPlatform(
       canRequest: true,
@@ -166,7 +38,7 @@ void main() {
     expect(snapshot.failure, isA<StateError>());
   });
 
-  test('unsupported UMP boundary remains not applicable and closed', () async {
+  test('non-Android UMP boundary remains not applicable and closed', () async {
     final platform = _FakeUmpPlatform(canRequest: true);
     final gate = AdMobUmpConsentGate(platform: platform, isApplicable: false);
 
@@ -239,7 +111,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
-            home: BilMobileUmpBootstrap(
+            home: BilAndroidUmpBootstrap(
               enabled: true,
               audienceEligible: true,
               accountKey: 'free-a',
@@ -269,7 +141,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
-          home: BilMobileUmpBootstrap(
+          home: BilAndroidUmpBootstrap(
             enabled: true,
             audienceEligible: false,
             accountKey: 'free-a',
@@ -284,7 +156,7 @@ void main() {
     expect(coordinator.refreshCalls, 0);
   });
 
-  testWidgets('disabled platform bootstrap never starts consent', (
+  testWidgets('disabled platform bootstrap leaves iOS ad state untouched', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues(<String, Object>{
@@ -298,7 +170,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
-          home: BilMobileUmpBootstrap(
+          home: BilAndroidUmpBootstrap(
             enabled: false,
             audienceEligible: true,
             accountKey: 'free-a',
@@ -327,7 +199,7 @@ void main() {
     Widget app({required bool eligible, required String? owner}) =>
         ProviderScope(
           child: MaterialApp(
-            home: BilMobileUmpBootstrap(
+            home: BilAndroidUmpBootstrap(
               enabled: true,
               audienceEligible: eligible,
               accountKey: owner,
@@ -364,7 +236,6 @@ void main() {
         configuredOverride: true,
         umpConsent: coordinator,
         adultConfirmed: () => true,
-        accountKey: () => 'adult-free',
       );
 
       expect(await gateway.loadBanner(AdPlacement.generalDiscovery), isNull);
@@ -386,7 +257,6 @@ void main() {
         configuredOverride: true,
         umpConsent: coordinator,
         adultConfirmed: () => false,
-        accountKey: () => 'adult-free',
       );
 
       expect(await gateway.loadBanner(AdPlacement.generalDiscovery), isNull);
@@ -403,7 +273,6 @@ void main() {
       configuredOverride: true,
       umpConsent: gate,
       adultConfirmed: () => true,
-      accountKey: () => 'adult-free',
     );
 
     expect(await gateway.loadBanner(AdPlacement.generalDiscovery), isNull);
@@ -494,7 +363,6 @@ final class _FakeCoordinator implements UmpConsentCoordinator {
   int verifyCalls = 0;
   int privacyCalls = 0;
   bool lastForce = false;
-  void Function()? onVerify;
 
   @override
   bool get isApplicable => true;
@@ -512,7 +380,6 @@ final class _FakeCoordinator implements UmpConsentCoordinator {
   @override
   Future<UmpConsentSnapshot> verifyCanRequestAds() async {
     verifyCalls++;
-    onVerify?.call();
     return value;
   }
 

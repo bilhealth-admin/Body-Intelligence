@@ -18,19 +18,16 @@ class _CommunityPostComposerPage extends StatefulWidget {
   final _CommunityComposerDraft draft;
 
   @override
-  State<_CommunityPostComposerPage> createState() =>
-      _CommunityPostComposerPageState();
+  State<_CommunityPostComposerPage> createState() => _CommunityPostComposerPageState();
 }
 
-class _CommunityPostComposerPageState
-    extends State<_CommunityPostComposerPage> {
+class _CommunityPostComposerPageState extends State<_CommunityPostComposerPage> {
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
   late CommunityPostImageDraft? _selectedImage = widget.draft.image;
   bool _publishing = false;
   bool _selectingImage = false;
   bool _completed = false;
-  TextDirection? _composerDirection;
   String? _composerError;
   String? _submitError;
 
@@ -45,19 +42,9 @@ class _CommunityPostComposerPageState
     if (_publishing || _selectingImage || _completed) return;
     final text = _composer.text.trim();
     if (text.isEmpty) {
-      setState(
-        () => _composerError = _selectedImage == null
-            ? communityText(
-                context,
-                'Write your post before publishing.',
-                'اكتب منشورك قبل النشر.',
-              )
-            : communityText(
-                context,
-                'Write a caption before publishing your photo.',
-                'اكتب وصفًا قبل نشر الصورة.',
-              ),
-      );
+      setState(() => _composerError = _selectedImage == null
+          ? communityText(context, 'Write your post before publishing.', 'اكتب منشورك قبل النشر.')
+          : communityText(context, 'Write a caption before publishing your photo.', 'اكتب وصفًا قبل نشر الصورة.'));
       _composerFocus.requestFocus();
       return;
     }
@@ -110,29 +97,25 @@ class _CommunityPostComposerPageState
         error.arabicMessage(CommunityPolicyProtectedAction.publishing),
       );
       setState(() => _submitError = message);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
     } on CommunityTextPolicyException catch (error) {
       if (!mounted) return;
-      setState(
-        () => _submitError = error.localizedMessage(
-          Localizations.localeOf(context).toLanguageTag(),
-        ),
-      );
+      setState(() => _submitError = error.localizedMessage(
+        Localizations.localeOf(context).toLanguageTag(),
+      ));
     } catch (_) {
       if (!mounted) return;
-      setState(
-        () => _submitError = communityText(
-          context,
-          _selectedImage == null
-              ? 'Could not publish now. Your text is kept so you can retry.'
-              : 'Could not publish now. Your text and photo are kept so you can retry.',
-          _selectedImage == null
-              ? 'تعذر نشر المشاركة الآن. احتفظنا بالنص لتعيد المحاولة.'
-              : 'تعذر النشر الآن. احتفظنا بالنص والصورة لتعيد المحاولة.',
-        ),
-      );
+      setState(() => _submitError = communityText(
+        context,
+        _selectedImage == null
+          ? 'Could not publish now. Your text is kept so you can retry.'
+          : 'Could not publish now. Your text and photo are kept so you can retry.',
+        _selectedImage == null
+          ? 'تعذر نشر المشاركة الآن. احتفظنا بالنص لتعيد المحاولة.'
+          : 'تعذر النشر الآن. احتفظنا بالنص والصورة لتعيد المحاولة.',
+      ));
     } finally {
       if (mounted) setState(() => _publishing = false);
     }
@@ -170,13 +153,9 @@ class _CommunityPostComposerPageState
       setState(() => _submitError = communityText(context, english, arabic));
     } on Object {
       if (!mounted) return;
-      setState(
-        () => _submitError = communityText(
-          context,
-          'Photo picker could not open. Try again.',
-          'تعذر فتح اختيار الصور. حاول مجددًا.',
-        ),
-      );
+      setState(() => _submitError = communityText(context,
+        'Photo picker could not open. Try again.',
+        'تعذر فتح اختيار الصور. حاول مجددًا.'));
     } finally {
       if (mounted) setState(() => _selectingImage = false);
     }
@@ -192,15 +171,9 @@ class _CommunityPostComposerPageState
           key: const Key('community-post-editor-page'),
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
-            title: Text(
-              communityText(
-                context,
-                'Share an experience or win',
-                'شارك تجربة أو إنجازًا',
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            title: Text(communityText(context,
+              'Share an experience or win', 'شارك تجربة أو إنجازًا'),
+              maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
           body: SafeArea(
             top: false,
@@ -209,8 +182,7 @@ class _CommunityPostComposerPageState
                 Expanded(
                   child: SingleChildScrollView(
                     key: const Key('community-post-editor-scroll'),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -223,21 +195,11 @@ class _CommunityPostComposerPageState
                           maxLength: 1200,
                           minLines: 3,
                           maxLines: 8,
-                          textDirection:
-                              _composerDirection ?? Directionality.of(context),
                           textCapitalization: TextCapitalization.sentences,
                           onChanged: (value) {
                             widget.draft.body = value;
-                            final direction =
-                                BilWrittenLanguageResolver.directionFor(
-                                  value,
-                                  fallback: Directionality.of(context),
-                                );
-                            if (_composerError != null ||
-                                _submitError != null ||
-                                direction != _composerDirection) {
+                            if (_composerError != null || _submitError != null) {
                               setState(() {
-                                _composerDirection = direction;
                                 _composerError = null;
                                 _submitError = null;
                               });
@@ -245,35 +207,26 @@ class _CommunityPostComposerPageState
                           },
                           decoration: InputDecoration(
                             alignLabelWithHint: true,
-                            labelText: communityText(
-                              context,
-                              'Share an experience or win',
-                              'شارك تجربة أو إنجازًا',
-                            ),
-                            helperText: communityText(
-                              context,
+                            labelText: communityText(context,
+                              'Share an experience or win', 'شارك تجربة أو إنجازًا'),
+                            helperText: communityText(context,
                               'Do not share private health data you want to keep private.',
-                              'لا تشارك بيانات صحية خاصة لا تريد ظهورها.',
-                            ),
+                              'لا تشارك بيانات صحية خاصة لا تريد ظهورها.'),
                             helperMaxLines: 3,
                             errorText: _composerError,
                             errorMaxLines: 3,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
                           ),
                         ),
                         if (_selectedImage case final image?) ...[
                           const SizedBox(height: 16),
                           _CommunityPostImagePreview(
                             image: image,
-                            onRemove: busy
-                                ? null
-                                : () => setState(() {
-                                    _selectedImage = null;
-                                    widget.draft.image = null;
-                                    _composerError = null;
-                                  }),
+                            onRemove: busy ? null : () => setState(() {
+                              _selectedImage = null;
+                              widget.draft.image = null;
+                              _composerError = null;
+                            }),
                           ),
                         ],
                       ],
@@ -295,19 +248,13 @@ class _CommunityPostComposerPageState
                           const SizedBox(height: 12),
                           Semantics(
                             liveRegion: true,
-                            child: Text(
-                              error,
+                            child: Text(error,
                               key: const Key('community-post-submit-error'),
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
+                              style: TextStyle(color: Theme.of(context).colorScheme.error)),
                           ),
                         ],
                         if (_publishing && _selectedImage != null) ...[
-                          const LinearProgressIndicator(
-                            key: Key('community-post-upload-progress'),
-                          ),
+                          const LinearProgressIndicator(key: Key('community-post-upload-progress')),
                           const SizedBox(height: 8),
                         ],
                         Wrap(
@@ -319,43 +266,21 @@ class _CommunityPostComposerPageState
                               key: const Key('community-post-add-photo'),
                               onPressed: busy ? null : _pickImage,
                               icon: _selectingImage
-                                  ? const SizedBox.square(
-                                      dimension: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.add_photo_alternate_outlined,
-                                    ),
-                              label: Text(
-                                communityText(
-                                  context,
-                                  'Add photo',
-                                  'إضافة صورة',
-                                ),
-                              ),
+                                ? const SizedBox.square(dimension: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.add_photo_alternate_outlined),
+                              label: Text(communityText(context, 'Add photo', 'إضافة صورة')),
                             ),
                             FilledButton.icon(
                               key: const Key('community-post-publish'),
                               onPressed: busy ? null : _publish,
                               icon: _publishing
-                                  ? const SizedBox.square(
-                                      dimension: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.send_rounded),
-                              label: Text(
-                                _publishing && _selectedImage != null
-                                    ? communityText(
-                                        context,
-                                        'Uploading photo…',
-                                        'جارٍ رفع الصورة…',
-                                      )
-                                    : communityText(context, 'Publish', 'نشر'),
-                              ),
+                                ? const SizedBox.square(dimension: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.send_rounded),
+                              label: Text(_publishing && _selectedImage != null
+                                ? communityText(context, 'Uploading photo…', 'جارٍ رفع الصورة…')
+                                : communityText(context, 'Publish', 'نشر')),
                             ),
                           ],
                         ),

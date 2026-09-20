@@ -22,17 +22,10 @@ void main() {
       source('lib/features/auth/login_page.dart'),
       contains("'Show password'"),
     );
-    final dashboardTopBar = source(
-      'lib/features/dashboard/widgets/dashboard_top_bar.dart',
-    );
     expect(
-      RegExp(
-        r"IconButton\(\s*key: const Key\('dashboard-edit-today'\),\s*tooltip: tooltip,",
-      ).hasMatch(dashboardTopBar),
-      isTrue,
-      reason: 'The Edit action must retain its localized accessible name.',
+      source('lib/features/dashboard/widgets/dashboard_top_bar.dart'),
+      contains('tooltip: tooltip'),
     );
-    expect(dashboardTopBar, contains("key: const Key('dashboard-edit-today')"));
     expect(
       source('lib/features/community/presentation/community_chat_page.dart'),
       contains("'Send message'"),

@@ -149,10 +149,9 @@ void main() {
     final auth = File(
       'lib/features/auth/supabase_auth_service.dart',
     ).readAsStringSync();
-    final purchase = [
+    final purchase = File(
       'lib/features/commerce/services/verified_store_purchase_service.dart',
-      'lib/features/commerce/services/verified_store_purchase_processing.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
+    ).readAsStringSync();
     final voice = File(
       'lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart',
     ).readAsStringSync();

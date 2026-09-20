@@ -66,9 +66,27 @@ bool connectedHealthSignalHasWearableProvenance(
 
 bool connectedHealthSnapshotHasWearableEvidence(
   ConnectedHealthSnapshot snapshot,
+) {
+  if (snapshot.signals.any(connectedHealthSignalHasWearableProvenance)) {
+    return true;
+  }
+  // HealthKit may omit HKDevice for samples that were forwarded by Apple
+  // Health from a paired Watch. In that case the native bridge has still
+  // verified a real HealthKit record, while the record itself has no device
+  // string for the UI to inspect. Keep this fallback platform-specific and
+  // require native evidence so Health Connect/manual rows cannot masquerade
+  // as a wearable.
+  final platform = snapshot.platformSource?.trim().toLowerCase();
+  return snapshot.deviceVerified && platform == 'apple health';
+}
+
+bool connectedHealthSignalCanShowOnWatch(
+  ConnectedHealthSnapshot snapshot,
+  ConnectedHealthSignalView signal,
 ) =>
-    snapshot.signals.any(connectedHealthSignalHasWearableProvenance) ||
-    snapshot.stepHistory.any(connectedHealthSignalHasWearableProvenance);
+    connectedHealthSignalHasWearableProvenance(signal) ||
+    (snapshot.deviceVerified &&
+        snapshot.platformSource?.trim().toLowerCase() == 'apple health');
 
 final class ConnectedHealthSnapshot {
   const ConnectedHealthSnapshot({
@@ -81,8 +99,6 @@ final class ConnectedHealthSnapshot {
     required this.failureCode,
     this.availabilityStatus,
     this.deviceVerified = false,
-    this.isBusy = false,
-    this.stepHistory = const <ConnectedHealthSignalView>[],
   });
 
   const ConnectedHealthSnapshot.unavailable()
@@ -94,9 +110,7 @@ final class ConnectedHealthSnapshot {
       lastSyncAt = null,
       failureCode = null,
       availabilityStatus = null,
-      deviceVerified = false,
-      isBusy = false,
-      stepHistory = const <ConnectedHealthSignalView>[];
+      deviceVerified = false;
 
   final ConnectedHealthStatus status;
   final String? platformSource;
@@ -111,16 +125,6 @@ final class ConnectedHealthSnapshot {
   /// simulator must never set this flag.
   final bool deviceVerified;
 
-  /// Keeps the last usable snapshot rendered while a native operation is in
-  /// flight. This prevents permission/sync actions from replacing the whole
-  /// page with a blank loading state and makes the action's progress explicit.
-  final bool isBusy;
-
-  /// Daily step totals imported from the connected source. [signals] remains
-  /// the latest representative snapshot for the live card; this separate
-  /// history is what powers the dashboard trend.
-  final List<ConnectedHealthSignalView> stepHistory;
-
   ConnectedHealthSnapshot copyWith({
     ConnectedHealthStatus? status,
     String? platformSource,
@@ -132,8 +136,6 @@ final class ConnectedHealthSnapshot {
     bool clearFailure = false,
     String? availabilityStatus,
     bool? deviceVerified,
-    bool? isBusy,
-    List<ConnectedHealthSignalView>? stepHistory,
   }) => ConnectedHealthSnapshot(
     status: status ?? this.status,
     platformSource: platformSource ?? this.platformSource,
@@ -144,80 +146,5 @@ final class ConnectedHealthSnapshot {
     failureCode: clearFailure ? null : failureCode ?? this.failureCode,
     availabilityStatus: availabilityStatus ?? this.availabilityStatus,
     deviceVerified: deviceVerified ?? this.deviceVerified,
-    isBusy: isBusy ?? this.isBusy,
-    stepHistory: stepHistory ?? this.stepHistory,
   );
-}
-
-/// Returns one value for each of the last 30 local calendar days.
-///
-/// The dashboard chart consumes these totals as bars; it is not a Cartesian
-/// line chart. Missing days are represented by zero so the time axis remains
-/// honest and stable.
-List<double> connectedHealthStepTrendValues(
-  ConnectedHealthSnapshot? snapshot,
-  DateTime now,
-) {
-  final totals = connectedHealthDailyStepTotals(snapshot, now);
-  final local = now.toLocal();
-  return List<double>.generate(
-    30,
-    (index) =>
-        totals[DateTime(local.year, local.month, local.day - 29 + index)] ?? 0,
-    growable: false,
-  );
-}
-
-/// Missing data is absent, not zero. Only chart bars may fill a missing day
-/// with zero; the Today value must come from an actual record for today.
-Map<DateTime, double> connectedHealthDailyStepTotals(
-  ConnectedHealthSnapshot? snapshot,
-  DateTime now,
-) {
-  if (snapshot == null ||
-      const {
-        ConnectedHealthStatus.unavailable,
-        ConnectedHealthStatus.permissionRequired,
-        ConnectedHealthStatus.permissionDenied,
-        ConnectedHealthStatus.authorizationRequested,
-      }.contains(snapshot.status)) {
-    return const {};
-  }
-  final source = snapshot.stepHistory.isNotEmpty
-      ? snapshot.stepHistory
-      : snapshot.signals;
-  final local = now.toLocal();
-  final today = DateTime(local.year, local.month, local.day);
-  final first = DateTime(local.year, local.month, local.day - 29);
-  final totals = <DateTime, double>{};
-  for (final signal in source) {
-    if (signal.key != 'steps' || signal.unit != 'count') continue;
-    if (!signal.value.isFinite || signal.value < 0) continue;
-    final observed = signal.observedAt.toLocal();
-    final day = DateTime(observed.year, observed.month, observed.day);
-    if (day.isBefore(first) || day.isAfter(today)) continue;
-    totals.update(
-      day,
-      (current) => current + signal.value,
-      ifAbsent: () => signal.value,
-    );
-  }
-  // Older snapshots may have history ending yesterday but a current daily
-  // total in signals. Fill only missing days; never count the same native
-  // total twice when it appears in both projections.
-  if (snapshot.stepHistory.isNotEmpty) {
-    for (final signal in snapshot.signals) {
-      if (signal.key != 'steps' ||
-          signal.unit != 'count' ||
-          !signal.value.isFinite ||
-          signal.value < 0) {
-        continue;
-      }
-      final observed = signal.observedAt.toLocal();
-      final day = DateTime(observed.year, observed.month, observed.day);
-      if (day.isBefore(first) || day.isAfter(today)) continue;
-      totals.putIfAbsent(day, () => signal.value);
-    }
-  }
-  return Map.unmodifiable(totals);
 }

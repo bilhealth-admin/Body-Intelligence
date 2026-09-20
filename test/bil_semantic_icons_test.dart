@@ -269,13 +269,14 @@ void main() {
 
   test('major user-facing surfaces use the central badge contract', () {
     const paths = <String>[
-      'lib/features/dashboard/widgets/dashboard_reference_progress_components.dart',
+      'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
       'lib/features/dashboard/widgets/dashboard_water_card.dart',
       'lib/features/settings/settings_page.dart',
       'lib/features/settings/reference_settings_home_page.dart',
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
       'lib/features/daily_log/presentation/quick_macro_entry_dialog.dart',
       'lib/features/wellness/presentation/wellness_library_page.dart',
+      'lib/features/wellness/presentation/wellness_learn_page.dart',
       'lib/features/history/history_page.dart',
       'lib/features/history/progress_page.dart',
       'lib/features/connected_health/connected_health_page.dart',
@@ -286,14 +287,7 @@ void main() {
     for (final path in paths) {
       expect(File(path).existsSync(), isTrue, reason: path);
       final source = File(path).readAsStringSync();
-      expect(
-        source,
-        anyOf(
-          contains('BilSemanticIconBadge'),
-          contains('BilNativeSettingsIcon'),
-        ),
-        reason: path,
-      );
+      expect(source, contains('BilSemanticIconBadge'), reason: path);
     }
 
     final health = File(

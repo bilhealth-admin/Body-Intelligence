@@ -175,7 +175,6 @@ class _StoreTierCard extends StatelessWidget {
     required this.viewAllFeaturesLabel,
     required this.showFewerFeaturesLabel,
     required this.loading,
-    required this.interactionLocked,
     required this.selectedOfferIdentity,
     required this.onOfferSelected,
     required this.onRetry,
@@ -206,7 +205,6 @@ class _StoreTierCard extends StatelessWidget {
   final String viewAllFeaturesLabel;
   final String showFewerFeaturesLabel;
   final bool loading;
-  final bool interactionLocked;
   final String selectedOfferIdentity;
   final ValueChanged<BilStoreOfferMetadata> onOfferSelected;
   final VoidCallback? onRetry;
@@ -456,7 +454,7 @@ class _StoreTierCard extends StatelessWidget {
                                     _ => null,
                                   }
                                 : null,
-                            onPressed: interactionLocked
+                            onPressed: loading
                                 ? null
                                 : () => onOfferSelected(offer),
                           ),

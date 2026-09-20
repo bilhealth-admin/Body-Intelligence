@@ -29,11 +29,10 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onPurchaseRequested,
     required this.onRestore,
     required this.onManage,
-    this.onOfferSelected,
     this.onRetry,
     this.loading = false,
-    this.purchaseInProgress = false,
     this.restoreInProgress = false,
+    this.purchaseInProgress = false,
     this.purchaseEnabled = true,
     this.purchaseStatusMessage,
     this.purchaseStatusIsError = false,
@@ -47,15 +46,14 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final ValueChanged<BilStoreOfferMetadata> onPurchaseRequested;
   final VoidCallback? onRestore;
   final VoidCallback? onManage;
-
-  /// Called after a member chooses a different store offer. The owning page
-  /// can clear transient feedback from the previous attempt without changing
-  /// the verified store outcome or re-enabling an unverified transaction.
-  final ValueChanged<BilStoreOfferMetadata>? onOfferSelected;
   final VoidCallback? onRetry;
   final bool loading;
-  final bool purchaseInProgress;
   final bool restoreInProgress;
+
+  /// A native billing sheet or its server-verification handoff is running.
+  /// The CTA must be visibly unavailable during that handoff so a second tap
+  /// cannot look like it silently started another charge.
+  final bool purchaseInProgress;
 
   /// The verified store service owns this gate. The display surface never
   /// guesses that a stale product can be purchased.
@@ -159,7 +157,6 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
           ];
 
     final selectedOffer = _selectedOffer;
-    final controlsLocked = widget.loading || widget.purchaseInProgress;
     return Stack(
       children: [
         Positioned.fill(
@@ -243,12 +240,9 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           viewAllFeaturesLabel: _copy('view_all_features'),
                           showFewerFeaturesLabel: _copy('show_fewer_features'),
                           loading: widget.loading,
-                          interactionLocked: controlsLocked,
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
-                          onOfferSelected: (offer) {
-                            setState(() => _selectedOffer = offer);
-                            widget.onOfferSelected?.call(offer);
-                          },
+                          onOfferSelected: (offer) =>
+                              setState(() => _selectedOffer = offer),
                           onRetry: widget.onRetry,
                         ),
                         const SizedBox(height: 14),
@@ -258,8 +252,6 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                         benefits: [
                           for (var index = 1; index <= 5; index++)
                             _copy('free_benefit_$index'),
-                          _copy('premium_benefit_community'),
-                          _copy('premium_benefit_messages'),
                         ],
                         currentLabel: widget.currentPlan == CommercePlan.free
                             ? _copy('current_plan')
@@ -325,7 +317,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
             child: _StickyPurchaseBar(
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
-              loading: controlsLocked,
+              loading: widget.loading || widget.purchaseInProgress,
               enabled: widget.purchaseEnabled,
               statusMessage: widget.purchaseStatusMessage,
               statusIsError: widget.purchaseStatusIsError,
@@ -360,6 +352,8 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
     'premium_benefit_body',
     'premium_benefit_4',
     'premium_benefit_fitness_devices',
+    'premium_benefit_community',
+    'premium_benefit_messages',
     'premium_benefit_5',
   ];
 

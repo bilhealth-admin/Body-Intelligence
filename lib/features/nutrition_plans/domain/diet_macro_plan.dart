@@ -4,25 +4,9 @@ import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 
 enum DietFatLevel { lighter, medium, richer }
 
-/// A macro that can be selected explicitly or used to balance fixed calories.
+/// The macro the user most recently chose. The allocator preserves this value
+/// and rebalances the other two macros inside the fixed calorie target.
 enum DietMacroComponent { carbs, protein, fat }
-
-/// Recency belongs to distinct fields, not individual keyboard events.
-/// Preserve the current field and the most recently edited *other* field;
-/// the untouched (or oldest) field remains available for the calorie balance.
-class DietMacroEditHistory {
-  final _recent = <DietMacroComponent>[];
-
-  Set<DietMacroComponent> lockedFor(DietMacroComponent edited) {
-    final other = _recent.where((component) => component != edited);
-    return {edited, if (other.isNotEmpty) other.first};
-  }
-
-  void accept(DietMacroComponent edited) {
-    _recent.remove(edited);
-    _recent.insert(0, edited);
-  }
-}
 
 /// User-facing diet-plan grams are intentionally shown as whole numbers.
 ///
@@ -172,76 +156,6 @@ abstract final class DietMacroAllocator {
       carbsGrams: carbsEnergy / 4,
       proteinGrams: proteinEnergy / 4,
       fatGrams: fatEnergy / 9,
-    );
-    return target.isValid ? target : null;
-  }
-
-  /// Reconciles an edit while keeping the requested macro components fixed.
-  /// The editor passes the current and immediately previous fields here, so
-  /// one remaining macro is always available to absorb the calorie delta.
-  static DietMacroTarget? rebalancePreserving({
-    required DietMacroTarget current,
-    required DietMacroComponent edited,
-    required double grams,
-    required Set<DietMacroComponent> locked,
-    required DietFatLevel fallbackFatLevel,
-  }) {
-    if (!current.isValid || !grams.isFinite || grams <= 0) return null;
-
-    final preserved = {...locked, edited};
-    if (preserved.length == 1) {
-      return rebalance(
-        current: current,
-        edited: edited,
-        grams: grams,
-        fallbackFatLevel: fallbackFatLevel,
-      );
-    }
-
-    final factor = <DietMacroComponent, double>{
-      DietMacroComponent.carbs: 4,
-      DietMacroComponent.protein: 4,
-      DietMacroComponent.fat: 9,
-    };
-    final values = <DietMacroComponent, double>{
-      DietMacroComponent.carbs: current.carbsGrams,
-      DietMacroComponent.protein: current.proteinGrams,
-      DietMacroComponent.fat: current.fatGrams,
-    };
-    values[edited] = grams;
-
-    final unlocked = DietMacroComponent.values
-        .where((component) => !preserved.contains(component))
-        .toList(growable: false);
-    if (unlocked.length != 1) {
-      final total = values.entries.fold<double>(
-        0,
-        (sum, entry) => sum + entry.value * factor[entry.key]!,
-      );
-      return (unlocked.isEmpty && (total - current.calories).abs() < .0001)
-          ? DietMacroTarget(
-              calories: current.calories,
-              carbsGrams: values[DietMacroComponent.carbs]!,
-              proteinGrams: values[DietMacroComponent.protein]!,
-              fatGrams: values[DietMacroComponent.fat]!,
-            )
-          : null;
-    }
-
-    final unlockedComponent = unlocked.single;
-    final lockedEnergy = preserved.fold<double>(
-      0,
-      (sum, component) => sum + values[component]! * factor[component]!,
-    );
-    final remainingEnergy = current.calories - lockedEnergy;
-    if (remainingEnergy <= 0) return null;
-    values[unlockedComponent] = remainingEnergy / factor[unlockedComponent]!;
-
-    final target = DietMacroTarget(
-      calories: current.calories,
-      carbsGrams: values[DietMacroComponent.carbs]!,
-      proteinGrams: values[DietMacroComponent.protein]!,
-      fatGrams: values[DietMacroComponent.fat]!,
     );
     return target.isValid ? target : null;
   }

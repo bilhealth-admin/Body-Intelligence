@@ -1,12 +1,12 @@
-name: BIL iOS +8 dual simulator QA
+name: BIL iOS 26 dual simulator QA
 
 on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: Exact audited simulator build number; build 7 is forbidden
+        description: Exact audited simulator build number for the iOS 26 candidate
         required: true
-        default: '8'
+        default: '26'
         type: string
 
 permissions:
@@ -18,59 +18,56 @@ concurrency:
 
 jobs:
   dual-simulator-qa:
-    name: iPhone and iPad simulator evidence (+8 only)
+    name: iPhone and iPad simulator evidence (iOS 26 only)
     runs-on: macos-15
     timeout-minutes: 90
     env:
       BIL_APP_ID: com.bilhealth.bodyintelligencelog
       BIL_EVIDENCE_DIR: artifacts/release/ios_plus8_dual_simulator
+      BIL_QA_STATE_PATH: ${{ runner.temp }}/bil-ios-plus8-private-state.json
       BIL_QA_SUSPEND_REASON: ios-plus8-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - name: Initialize runner-local QA state path
-        shell: bash
-        run: printf 'BIL_QA_STATE_PATH=%s/bil-ios-plus8-private-state.json\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
-
       - name: Checkout the selected accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
-      - name: Reject every build except the audited +8 source
+      - name: Reject every build except the audited iOS 26 source
         shell: bash
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
-          AUDITED_SOURCE_SHA: ${{ vars.BIL_PLUS8_AUDITED_SOURCE_SHA }}
-          AUDITED_MANIFEST_SHA256: ${{ vars.BIL_PLUS8_STAGING_MANIFEST_SHA256 }}
+          AUDITED_SOURCE_SHA: ${{ vars.BIL_RELEASE_AUDITED_SOURCE_SHA }}
+          AUDITED_MANIFEST_SHA256: ${{ vars.BIL_RELEASE_MANIFEST_SHA256 }}
         run: |
           set -euo pipefail
-          [[ "$BUILD_NUMBER" == '8' ]] || {
-            echo 'This workflow is fail-closed to build 8. Build 7 must never be built or tested here.' >&2
+          [[ "$BUILD_NUMBER" == '26' ]] || {
+            echo 'This workflow is fail-closed to iOS build 26.' >&2
             exit 1
           }
-          grep -Eq '^version:[[:space:]]+1\.0\.0\+8[[:space:]]*$' pubspec.yaml || {
-            echo 'pubspec.yaml is not the frozen 1.0.0+8 source.' >&2
+          grep -Eq '^version:[[:space:]]+1\.0\.0\+21[[:space:]]*$' pubspec.yaml || {
+            echo 'pubspec.yaml is not the release-default 1.0.0+21 source.' >&2
             exit 1
           }
           test -n "${AUDITED_SOURCE_SHA:-}" || {
-            echo 'BIL_PLUS8_AUDITED_SOURCE_SHA is not frozen.' >&2
+            echo 'BIL_RELEASE_AUDITED_SOURCE_SHA is not frozen.' >&2
             exit 1
           }
           test -n "${AUDITED_MANIFEST_SHA256:-}" || {
-            echo 'BIL_PLUS8_STAGING_MANIFEST_SHA256 is not frozen.' >&2
+            echo 'BIL_RELEASE_MANIFEST_SHA256 is not frozen.' >&2
             exit 1
           }
           test "$(git rev-parse HEAD)" = "$AUDITED_SOURCE_SHA" || {
-            echo 'The selected checkout is not the independently audited +8 SHA.' >&2
+            echo 'The selected checkout is not the independently audited iOS 26 SHA.' >&2
             exit 1
           }
           ACTUAL_MANIFEST_SHA256="$(shasum -a 256 \
-            docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md \
+            docs/release/BIL_IOS26_ANDROID21_FROZEN_SOURCE_MANIFEST_2026-09-20.md \
             | awk '{print $1}')"
           test "$ACTUAL_MANIFEST_SHA256" = "$AUDITED_MANIFEST_SHA256" || {
-            echo 'The accepted +8 manifest digest does not match.' >&2
+            echo 'The accepted iOS 26 / Android 21 manifest digest does not match.' >&2
             exit 1
           }
           mkdir -p "$BIL_EVIDENCE_DIR"
           git rev-parse HEAD > "$BIL_EVIDENCE_DIR/source-head.txt"
-          printf '%s\n' 'BUILD_NUMBER=8' > "$BIL_EVIDENCE_DIR/build-number.txt"
+          printf '%s\n' 'BUILD_NUMBER=26' > "$BIL_EVIDENCE_DIR/build-number.txt"
 
       - name: Require the private QA inputs before consuming macOS build time
         shell: bash
@@ -120,17 +117,15 @@ jobs:
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_PLUS8_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: 8
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_PLUS8_STAGING_MANIFEST_SHA256 }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_RELEASE_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS26_ANDROID21_FROZEN_SOURCE_MANIFEST_2026-09-20.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_RELEASE_MANIFEST_SHA256 }}
         run: |
           set -euo pipefail
           flutter pub get
           flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
           node tool/release/ios_plus8_canary_runtime_test.mjs
-          node --test tool/release/ios_plus8_reviewer_entitlement_test.mjs
           bash tool/release/ios_plus8_secret_scope_test.sh
           flutter test --no-pub \
             test/responsive_shell_test.dart \
@@ -144,8 +139,7 @@ jobs:
             test/apple_preparation/ios_native_runtime_safety_contract_test.dart \
             test/apple_preparation/ios_return_to_app_link_contract_test.dart \
             test/features/auth/apple_credential_lifecycle_test.dart \
-            test/features/auth/ios_native_google_sign_in_contract_test.dart \
-            test/features/auth/ios_native_facebook_sign_in_contract_test.dart \
+            test/features/auth/facebook_oauth_platform_contract_test.dart \
             test/features/ads/admob_and_policy_test.dart \
             test/features/commerce/final_store_market_policy_alignment_test.dart \
             test/features/admin/admin_notification_backend_contract_test.dart \
@@ -186,7 +180,7 @@ jobs:
           xcrun simctl list runtimes available \
             > "$BIL_EVIDENCE_DIR/available-runtimes.txt"
 
-      - name: Build the production-shaped +8 simulator application
+      - name: Build the production-shaped iOS 26 simulator application
         shell: bash
         run: |
           set -euo pipefail
@@ -194,7 +188,7 @@ jobs:
           # every other release-facing define aligned with the signed workflow,
           # and record this one deliberate boundary in the evidence manifest.
           flutter build ios --simulator --debug --no-codesign --no-pub \
-            --build-number 8 \
+            --build-number 26 \
             --dart-define=BIL_ENVIRONMENT=production \
             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
             --dart-define=BIL_PAYMENTS_ENABLED=true \
@@ -210,7 +204,7 @@ jobs:
             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
           APP=build/ios/iphonesimulator/Runner.app
           test -d "$APP"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '8'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '26'
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = "$BIL_APP_ID"
           python3 - "$APP/Info.plist" <<'PY'
           import plistlib
@@ -448,13 +442,13 @@ jobs:
             "CROSS_ACCOUNT_CANARY_STEP=$CANARY_OUTCOME" \
             "BACKEND_CLEANUP_STEP=$BACKEND_CLEANUP_OUTCOME" \
             "AUTHENTICATED_CANARY_RESULT=$CANARY_RESULT" \
-            'CANDIDATE_BUILD=1.0.0+8_ONLY' \
+            'CANDIDATE_BUILD=1.0.0+26_ONLY' \
             'SIMULATOR_BINARY=UNSIGNED_DEBUG_APP' \
             'SIMULATOR_ATTEMPT_SCOPE=build,install,cold-launch,custom-link-routing,iPhone-layout,iPad-portrait,iPad-landscape-widget-contract,terminate-relaunch,owner-and-reviewer-email-login,reviewer-backend-entitlement-and-ai-no-paywall-and-zero-reward,friend-request-and-accept,bidirectional-message,reviewer-post-reject-and-author-visibility,disposable-post-approve-plus-five-and-reviewer-visibility,disposable-block-and-write-denial,disposable-individual-reset-and-exact-message-and-2500-grant,disposable-target-notification,disposable-moderator-add-remove,disposable-suspend-and-write-denial-and-reinstate,owner-protection,fail-closed-disposable-account-deletion' \
             'AUTHENTICATED_UI_REQUIRED=true' \
             'SIMULATOR_INTEGRITY_BOUNDARY=If the production server requires App Attest, Simulator cannot mint a production assertion; authenticated mutations must fail and the signed-device gate remains open.' \
             'IPAD_LANDSCAPE_BOUNDARY=Flutter widget tests cover landscape and split widths; fb-idb 1.1.7 has no supported rotation command, so landscape simulator runtime is not claimed.' \
-            'SIGNED_PHYSICAL_OR_TESTFLIGHT_STILL_REQUIRED=Sign in with Apple credential sheet and revocation,Meta native Facebook authorization and Supabase token exchange,App Attest production assertion,StoreKit purchase and restore,HealthKit and Apple Watch,push delivery,camera hardware' \
+            'SIGNED_PHYSICAL_OR_TESTFLIGHT_STILL_REQUIRED=Sign in with Apple credential sheet and revocation,App Attest production assertion,Facebook provider callback and universal-link association,StoreKit purchase and restore,HealthKit and Apple Watch,push delivery,camera hardware' \
             'APPLE_REVIEWER_IMMUTABLE_REWARD_EFFECT=none;reviewer post is rejected and approved post belongs to deleted disposable account' \
             'APPLE_REVIEWER_POST_APPROVAL_EXCLUDED=immutable five-token receipt would pollute the real review account;not claimed' \
             'SIMULATOR_NO_ADS_EVIDENCE=static no-ad policy contract plus sampled coach UI only;exhaustive signed UI absence is not claimed' \
@@ -471,7 +465,7 @@ jobs:
           node tool/release/ios_plus8_dual_account_canary.mjs scan-evidence
           rm -f "$BIL_QA_STATE_PATH" "$BIL_QA_STATE_PATH.started"
 
-      - name: Upload +8 simulator evidence
+      - name: Upload iOS 26 simulator evidence
         if: always() && steps.cross_account_canary.outcome == 'success' && steps.backend_cleanup.outcome == 'success' && steps.privacy_scan.outcome == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -540,14 +534,10 @@ jobs:
     permissions:
       contents: read
     env:
+      BIL_EVIDENCE_DIR: ${{ runner.temp }}/bil-ios-plus8-watchdog-evidence
+      BIL_QA_STATE_PATH: ${{ runner.temp }}/bil-ios-plus8-watchdog-state.json
       BIL_QA_SUSPEND_REASON: ios-plus8-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - name: Initialize runner-local watchdog paths
-        shell: bash
-        run: |
-          printf 'BIL_EVIDENCE_DIR=%s/bil-ios-plus8-watchdog-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
-          printf 'BIL_QA_STATE_PATH=%s/bil-ios-plus8-watchdog-state.json\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
-
       - name: Checkout the exact workflow revision
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 

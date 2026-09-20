@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "competitorClaim": {
+    "product": "MyFitnessPal Premium+ Meal Planner",
+    "officialClaim": "more than 1,500 goal-friendly recipes",
+    "minimumImpliedCount": 1501,
+    "localEvidence": "artifacts/mfp_official_release_parity_2026-08-10.md:160"
+  },
+  "bilReleaseTarget": {
+    "canonicalRecipeCount": 1500,
+    "rule": "A translation never creates another canonical recipe record.",
+    "primaryLocaleAllocation": {
+      "ar": 300,
+      "en": 300,
+      "fr": 300,
+      "es": 300,
+      "tr": 300
+    },
+    "regionalTaxonomy": {
+      "ar": ["egypt", "levant", "gulf", "iraq", "maghreb"],
+      "en": ["global", "united-states", "canada", "united-kingdom", "ireland", "australia", "new-zealand"],
+      "fr": ["france", "quebec", "maghreb", "west-africa"],
+      "es": ["spain", "mexico", "central-america", "south-america", "caribbean"],
+      "tr": ["marmara", "aegean", "mediterranean", "central-anatolia", "black-sea", "eastern-anatolia", "southeastern-anatolia"]
+    },
+    "regionalTargetAllocation": {
+      "ar": { "egypt": 60, "levant": 60, "gulf": 60, "iraq": 60, "maghreb": 60 },
+      "en": { "global": 18, "united-states": 49, "canada": 47, "united-kingdom": 47, "ireland": 47, "australia": 46, "new-zealand": 46 },
+      "fr": { "france": 76, "quebec": 76, "maghreb": 74, "west-africa": 74 },
+      "es": { "spain": 60, "mexico": 60, "central-america": 60, "south-america": 60, "caribbean": 60 },
+      "tr": { "marmara": 44, "aegean": 44, "mediterranean": 43, "central-anatolia": 43, "black-sea": 42, "eastern-anatolia": 42, "southeastern-anatolia": 42 }
+    },
+    "releaseGates": {
+      "canonicalRecords": 1500,
+      "uniqueReviewedImages": 100,
+      "nutritionVerifiedRecords": 1500,
+      "primaryLocaleRecordsPerLocale": 300
+    }
+  },
+  "currentTruth": {
+    "canonicalRecords": 18,
+    "existingImageFiles": 100,
+    "nutritionVerifiedRecords": 0,
+    "notes": [
+      "The current private _Recipe model has no calories or macro fields.",
+      "Current UI copy correctly says nutrition is added only from verified food records.",
+      "All 100 canonical recipes now have project-local image files; generated assets are tracked by prompt ID, dimensions, and SHA-256."
+    ]
+  }
+}

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'support/read_push_dispatcher.dart';
 
 void main() {
   String source(String path) => File(path).readAsStringSync();
@@ -60,12 +59,9 @@ void main() {
   test(
     'authenticated repository covers privacy social safety and moderation loops',
     () {
-      final repository = <String>[
-        source('lib/features/community/data/community_repository.dart'),
-        source(
-          'lib/features/community/data/community_social_repository_mixin.dart',
-        ),
-      ].join('\n');
+      final repository = source(
+        'lib/features/community/data/community_repository.dart',
+      );
       for (final method in <String>[
         'searchProfiles',
         'saveMyProfile',
@@ -96,9 +92,7 @@ void main() {
       final settings = source(
         'lib/features/notifications/presentation/notification_settings_page.dart',
       );
-      final dispatch = readPushDispatcherImplementation(
-        'supabase/functions/community_push_dispatch.ts',
-      );
+      final dispatch = source('supabase/functions/community_push_dispatch.ts');
       final androidBridge = source(
         'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILPushProvider.kt',
       );
@@ -111,7 +105,6 @@ void main() {
         'lib/features/notifications/domain/community_deep_link.dart',
       );
       final router = source('lib/app/router/app_router.dart');
-      final redirect = source('lib/app/router/app_route_redirect.dart');
       expect(service, contains('AppEnvironment.pushConfigured'));
       expect(service, contains('bil_disable_push_tokens'));
       expect(service, contains('bil_set_sensitive_push_previews'));
@@ -135,9 +128,8 @@ void main() {
       expect(deepLinks, contains("uri.scheme.toLowerCase() != 'bil'"));
       expect(deepLinks, contains("segments.first == 'community'"));
       expect(deepLinks, contains("return null"));
-      expect(router, contains("part 'app_route_redirect.dart'"));
-      expect(redirect, contains('CommunityDeepLink.routeFor'));
-      expect(redirect, contains('!AppEnvironment.communityConfigured'));
+      expect(router, contains('CommunityDeepLink.routeFor'));
+      expect(router, contains('!AppEnvironment.communityConfigured'));
     },
   );
 
@@ -168,30 +160,17 @@ void main() {
   });
 
   test('edge functions exist in canonical deploy directories', () {
-    // Release gates must inspect tracked production sources, not a missing
-    // historical PowerShell artifact that was never part of this checkout.
-    final gate = source('lib/app/environment/app_environment.dart');
-    final dispatch = readPushDispatcherImplementation(
+    final gate = source('artifacts/release/run_epic9_gate.ps1');
+    final dispatch = source(
       'supabase/functions/community-push-dispatch/index.ts',
     );
     final deletion = source(
       'supabase/functions/account-data-deletion/index.ts',
     );
-    expect(
-      gate,
-      contains(
-        'useSupabase && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty',
-      ),
-    );
-    expect(gate, contains('if (!cloudConfigured) return false'));
-    expect(
-      gate,
-      contains('communityConfigured => cloudConfigured && communityEnabled'),
-    );
-    expect(
-      gate,
-      contains('communityConfigured && pushEnabled && pushProviderReady'),
-    );
+    expect(gate, contains('community-push-dispatch'));
+    expect(gate, contains('account-data-deletion'));
+    expect(gate, contains('index.ts'));
+    expect(gate, contains('BLOCKED_CREDENTIALS_FEATURE_HIDDEN'));
     expect(dispatch, contains('BIL_INTERNAL_DISPATCH_SECRET'));
     expect(deletion, contains('handleAccountDeletion'));
   });

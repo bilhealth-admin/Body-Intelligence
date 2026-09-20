@@ -19,7 +19,7 @@ param(
   [string]$IosWorkflow = 'bil_ios_signed_release.yml',
 
   [Parameter(Mandatory = $false)]
-  [string]$IosBuildNumber = '11',
+  [string]$IosBuildNumber = '10',
 
   [Parameter(Mandatory = $false)]
   [string]$AndroidBuildNumber = '9',
@@ -137,8 +137,8 @@ function Test-PositiveInt {
 }
 
 $ref = Resolve-ReleaseRef -RequestedRef $Ref
-if (-not (Test-PositiveInt $IosBuildNumber) -or [int]$IosBuildNumber -lt 11) {
-  throw 'iOS build number must be a positive integer of 11 or greater.'
+if (-not (Test-PositiveInt $IosBuildNumber) -or [int]$IosBuildNumber -lt 10) {
+  throw 'iOS build number must be a positive integer of 10 or greater.'
 }
 if (-not (Test-PositiveInt $AndroidBuildNumber) -or [int]$AndroidBuildNumber -lt 9) {
   throw 'Android build number must be a positive integer of 9 or greater.'

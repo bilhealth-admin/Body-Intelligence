@@ -22,21 +22,8 @@ void main() {
       expect(estimate.plannedWeeklyHighKg, lessThanOrEqualTo(0.600001));
       expect(estimate.minimumWeeks, 17);
       expect(estimate.maximumWeeks, 42);
-      expect(estimate.earliestDate, DateTime(2026, 12, 21));
-      expect(estimate.latestDate, DateTime(2027, 6, 14));
-    });
-
-    test('UTC goal dates stay UTC and use calendar-day arithmetic', () {
-      final estimate = GoalTimelineEstimator.estimate(
-        currentWeightKg: 93.4,
-        targetWeightKg: 85,
-        goalType: 'lose',
-        asOf: DateTime.utc(2026, 8, 30, 23, 45),
-      );
-
-      expect(estimate.minimumWeeks, 15);
-      expect(estimate.earliestDate, DateTime.utc(2026, 12, 13));
-      expect(estimate.earliestDate?.isUtc, isTrue);
+      expect(estimate.earliestDate, asOf.add(const Duration(days: 17 * 7)));
+      expect(estimate.latestDate, asOf.add(const Duration(days: 42 * 7)));
     });
 
     test('gain uses a slower non-aggressive planning range', () {

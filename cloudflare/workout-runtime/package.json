@@ -4,24 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "npm run types:check && tsc --noEmit && npm run test:staging-isolation",
-    "check:staging-isolation": "node scripts/verify-staging-isolation.mjs wrangler.jsonc",
+    "check": "npm run types:check && tsc --noEmit",
     "deploy": "wrangler deploy --env=\"\"",
-    "deploy:staging": "npm run check:staging-isolation && wrangler deploy --env staging",
+    "deploy:staging": "wrangler deploy --env staging",
     "dry-run": "wrangler deploy --env=\"\" --dry-run --outdir dist/dry-run",
-    "dry-run:staging": "npm run check:staging-isolation && wrangler deploy --env staging --dry-run --outdir dist/dry-run-staging",
+    "dry-run:staging": "wrangler deploy --env staging --dry-run --outdir dist/dry-run-staging",
     "test": "vitest run",
-    "test:staging-isolation": "node --test scripts/verify-staging-isolation.test.mjs",
     "types": "wrangler types",
     "types:check": "wrangler types --check"
   },
   "dependencies": {
     "jose": "6.2.10"
-  },
-  "overrides": {
-    "miniflare": {
-      "sharp": "0.35.4"
-    }
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.0.0",

@@ -24,14 +24,8 @@ class CommunityFoodInputResult {
 /// separators are deliberately not removed: their interpretation is ambiguous.
 double? parseCommunityFoodNumber(String input) {
   var text = input.trim();
-  const digitSets = [
-    '٠١٢٣٤٥٦٧٨٩',
-    '۰۱۲۳۴۵۶۷۸۹',
-    '０１２３４５６７８９',
-    '०१२३४५६७८९',
-    '০১২৩৪৫৬৭৮৯',
-    '๐๑๒๓๔๕๖๗๘๙',
-  ];
+  const digitSets = ['٠١٢٣٤٥٦٧٨٩', '۰۱۲۳۴۵۶۷۸۹', '０１２３４５６７８９',
+    '०१२३४५६७८९', '০১২৩৪৫৬৭৮৯', '๐๑๒๓๔๕๖๗๘๙'];
   for (final digits in digitSets) {
     for (var index = 0; index < 10; index++) {
       text = text.replaceAll(digits[index], '$index');
@@ -94,19 +88,11 @@ CommunityFoodInputResult validateCommunityFoodInput(
     for (final field in macros) {
       final value = numbers[field];
       if (value != null && value > serving + tolerance) {
-        issues.putIfAbsent(
-          field,
-          () => CommunityFoodInputIssue.macroExceedsServing,
-        );
+        issues.putIfAbsent(field, () => CommunityFoodInputIssue.macroExceedsServing);
       }
     }
-    if (macros.every(
-      (field) => numbers.containsKey(field) && !issues.containsKey(field),
-    )) {
-      final total = macros.fold<double>(
-        0,
-        (sum, field) => sum + numbers[field]!,
-      );
+    if (macros.every((field) => numbers.containsKey(field) && !issues.containsKey(field))) {
+      final total = macros.fold<double>(0, (sum, field) => sum + numbers[field]!);
       if (total > serving + tolerance) {
         for (final field in macros) {
           issues[field] = CommunityFoodInputIssue.macroTotalExceedsServing;
@@ -116,15 +102,13 @@ CommunityFoodInputResult validateCommunityFoodInput(
   }
   return CommunityFoodInputResult(
     issues: Map.unmodifiable(issues),
-    draft: issues.isNotEmpty
-        ? null
-        : CommunityFoodDraft(
-            name: name,
-            servingGrams: numbers[CommunityFoodField.serving]!,
-            calories: numbers[CommunityFoodField.calories]!,
-            protein: numbers[CommunityFoodField.protein]!,
-            carbohydrate: numbers[CommunityFoodField.carbohydrate]!,
-            fat: numbers[CommunityFoodField.fat]!,
-          ),
+    draft: issues.isNotEmpty ? null : CommunityFoodDraft(
+      name: name,
+      servingGrams: numbers[CommunityFoodField.serving]!,
+      calories: numbers[CommunityFoodField.calories]!,
+      protein: numbers[CommunityFoodField.protein]!,
+      carbohydrate: numbers[CommunityFoodField.carbohydrate]!,
+      fat: numbers[CommunityFoodField.fat]!,
+    ),
   );
 }

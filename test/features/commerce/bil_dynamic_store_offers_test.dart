@@ -129,18 +129,7 @@ void main() {
     expect(find.text('Export your own data'), findsOneWidget);
     expect(find.text('Watch and health sync'), findsOneWidget);
     expect(find.text('300+ home workout videos'), findsNothing);
-    expect(find.text('View all features (17)'), findsOneWidget);
-    final freeCard = find.byKey(const ValueKey('store-free-tier-card'));
-    final premiumCard = find.byKey(
-      const ValueKey('store-tier-premiumSubscription'),
-    );
-    for (final benefit in ['Friends and requests', 'Private messages']) {
-      expect(
-        find.descendant(of: freeCard, matching: find.text(benefit)),
-        findsOneWidget,
-        reason: '$benefit is included in Free without a purchase',
-      );
-    }
+    expect(find.text('View all features (19)'), findsOneWidget);
     expect(find.text('More insights. No ads.'), findsOneWidget);
     final heroTitle = tester.widget<Text>(
       find.text('Know your body. Go further.'),
@@ -168,16 +157,11 @@ void main() {
       'Compatible fitness device connections',
       '100+ video-guided weight-training plans',
       'Connected health',
+      'Friends and requests',
+      'Private messages',
       'Custom calories and macros',
     ]) {
       expect(find.text(benefit), findsOneWidget, reason: benefit);
-    }
-    for (final benefit in ['Friends and requests', 'Private messages']) {
-      expect(
-        find.descendant(of: premiumCard, matching: find.text(benefit)),
-        findsNothing,
-        reason: 'Free benefits must not be presented as paid-only additions',
-      );
     }
     expect(find.text('7-day trial includes 1,000 AI tokens'), findsNothing);
     expect(find.text('YOUR COACH. YOUR PLAN. EVERY DAY.'), findsOneWidget);
@@ -493,6 +477,7 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('store-offer-bil_premium')));
     await tester.pump();
+    expect(requested, isNull);
     await tester.tap(find.byKey(const ValueKey('store-purchase-cta')));
 
     expect(requested, same(monthly));

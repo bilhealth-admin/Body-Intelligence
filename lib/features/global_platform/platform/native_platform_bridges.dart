@@ -7,8 +7,6 @@ final class MethodChannelHealthBridge
     implements
         NativeHealthBridge,
         NativeHealthCapabilityBridge,
-        NativeHealthAuthorizationReviewBridge,
-        NativeHealthDailyTotalsBridge,
         NativeHealthCancellableReadBridge {
   MethodChannelHealthBridge({required String channelName})
     : _channel = MethodChannel(channelName);
@@ -42,43 +40,6 @@ final class MethodChannelHealthBridge
 
   @override
   Future<void> openSettings() => _channel.invokeMethod<void>('openSettings');
-
-  @override
-  Future<HealthAuthorizationRequestStatus> authorizationRequestStatus(
-    Set<String> types,
-  ) async {
-    try {
-      final status = await _channel.invokeMethod<String>(
-        'authorizationRequestStatus',
-        <String, Object?>{'types': types.toList()..sort()},
-      );
-      return switch (status) {
-        'shouldRequest' => HealthAuthorizationRequestStatus.shouldRequest,
-        'unnecessary' => HealthAuthorizationRequestStatus.unnecessary,
-        _ => HealthAuthorizationRequestStatus.unknown,
-      };
-    } on MissingPluginException {
-      // Older hosts still support the normal, explicit authorization request.
-      return HealthAuthorizationRequestStatus.unknown;
-    }
-  }
-
-  @override
-  Future<List<NativeHealthRecord>> readDailyTotals({
-    required DateTime asOf,
-  }) async {
-    final rows = await _channel.invokeListMethod<Object?>(
-      'readDailyTotals',
-      <String, Object?>{'asOf': asOf.toUtc().toIso8601String()},
-    );
-    return [
-      for (final row in rows ?? const <Object?>[])
-        NativeHealthRecord.fromMap(
-          Map<String, Object?>.from(row! as Map),
-          providerId: id,
-        ),
-    ];
-  }
 
   @override
   Future<Map<String, bool>> permissions() async {

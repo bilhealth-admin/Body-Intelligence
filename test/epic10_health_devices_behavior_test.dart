@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/features/connected_health/device_compatibility.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/fitness_device_provider.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
@@ -11,6 +13,8 @@ final class _ManagedBridge implements ManagedBleFitnessBridge {
   bool forgotten = false;
   bool disconnected = false;
   bool failReads = false;
+  int readCalls = 0;
+  Completer<List<Map<String, Object?>>>? blockedRead;
 
   @override
   Future<void> requestPermissions() async {}
@@ -58,6 +62,12 @@ final class _ManagedBridge implements ManagedBleFitnessBridge {
     required BlePeripheral peripheral,
     required DateTime asOf,
   }) async {
+    readCalls++;
+    final pending = blockedRead;
+    if (pending != null) {
+      blockedRead = null;
+      return pending.future;
+    }
     if (failReads) throw StateError('gatt_disconnected');
     return [
       {
@@ -92,6 +102,29 @@ final class _ManagedBridge implements ManagedBleFitnessBridge {
       },
     ];
   }
+}
+
+final class _BlockingScanBridge implements BleFitnessBridge {
+  final Completer<List<BlePeripheral>> discovery =
+      Completer<List<BlePeripheral>>();
+
+  @override
+  Future<void> requestPermissions() async {}
+
+  @override
+  Future<List<BlePeripheral>> discover(Duration timeout) => discovery.future;
+
+  @override
+  Future<void> pair(String peripheralId) async {}
+
+  @override
+  Future<void> disconnect(String peripheralId) async {}
+
+  @override
+  Future<List<Map<String, Object?>>> readMeasurements({
+    required BlePeripheral peripheral,
+    required DateTime asOf,
+  }) async => const <Map<String, Object?>>[];
 }
 
 final class _HealthBridge implements NativeHealthBridge {
@@ -455,6 +488,71 @@ void main() {
       await store.get('connected_fitness_device_state', 'scale-1'),
       containsPair('connected', false),
     );
+  });
+
+  test('BLE refresh taps share one native measurement session', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final bridge = _ManagedBridge();
+    final controller = FitnessDeviceController(
+      bridge,
+      store: InMemoryGlobalStore(),
+    );
+
+    await controller.scan();
+    await controller.connect(controller.state.devices.single);
+    expect(controller.state.status, FitnessDeviceConnectionStatus.connected);
+
+    final gate = Completer<List<Map<String, Object?>>>();
+    bridge.blockedRead = gate;
+    final first = controller.refreshMeasurements();
+    final second = controller.refreshMeasurements();
+    expect(identical(first, second), isTrue);
+    expect(bridge.readCalls, 2); // connect + one refresh
+
+    gate.complete(const <Map<String, Object?>>[]);
+    await first;
+    expect(controller.state.status, FitnessDeviceConnectionStatus.connected);
+  });
+
+  test(
+    'BLE refresh result cannot resurrect a device after disconnect',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final bridge = _ManagedBridge();
+      final controller = FitnessDeviceController(
+        bridge,
+        store: InMemoryGlobalStore(),
+      );
+
+      await controller.scan();
+      await controller.connect(controller.state.devices.single);
+      final gate = Completer<List<Map<String, Object?>>>();
+      bridge.blockedRead = gate;
+      final refresh = controller.refreshMeasurements();
+
+      await controller.disconnect();
+      gate.complete(const <Map<String, Object?>>[]);
+      await refresh;
+
+      expect(controller.state.status, FitnessDeviceConnectionStatus.idle);
+      expect(controller.state.connectedDeviceId, isNull);
+    },
+  );
+
+  test('BLE scan taps share one native discovery session', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final bridge = _BlockingScanBridge();
+    final controller = FitnessDeviceController(
+      bridge,
+      store: InMemoryGlobalStore(),
+    );
+
+    final first = controller.scan();
+    final second = controller.scan();
+    expect(identical(first, second), isTrue);
+    bridge.discovery.complete(const <BlePeripheral>[]);
+    await first;
+    expect(controller.state.status, FitnessDeviceConnectionStatus.idle);
   });
 
   test('compatibility matrix never claims physical-device verification', () {

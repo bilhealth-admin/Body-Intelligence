@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import '../../../engine/body_model_engine.dart';
 import '../../../engine/body_profile.dart';
 import '../../../engine/daily_targets.dart';
@@ -89,9 +87,7 @@ final class OnboardingPlanCalculator {
           'maintenance_pace_must_be_zero',
         );
       }
-    } else if (!pace.isFinite ||
-        pace <= 0 ||
-        pace > maxSafePaceKg(draft, on: on)) {
+    } else if (!pace.isFinite || pace <= 0 || pace > maxSafePaceKg(draft)) {
       return const OnboardingPlanValidation.invalid('pace_out_of_range');
     }
 
@@ -162,18 +158,10 @@ final class OnboardingPlanCalculator {
     return const OnboardingPlanValidation.valid();
   }
 
-  static double maxSafePaceKg(OnboardingDraft draft, {DateTime? on}) {
+  static double maxSafePaceKg(OnboardingDraft draft) {
     final current = draft.currentWeightKg ?? 0;
     if (draft.primaryWeightGoal == 'lose') {
-      // A one-kilogram choice is an upper bound, not an unconditional promise.
-      // Do not render/select a pace that would later fail BIL's calorie floor.
-      final model = _tryCalculateModel(draft, on: on);
-      if (model == null) return 1.0;
-      final maximumFromEnergyFloor =
-          (model.tdeeKcal - 1200) *
-          DateTime.daysPerWeek /
-          kilocaloriesPerKilogram;
-      return math.min(1.0, math.max(0.0, maximumFromEnergyFloor));
+      return (current * .01).clamp(.1, 1.0).toDouble();
     }
     if (draft.primaryWeightGoal == 'gain') {
       return (current * .005).clamp(.1, .5).toDouble();
@@ -199,10 +187,21 @@ final class OnboardingPlanCalculator {
     final validation = validate(draft, on: now);
     if (!validation.isValid) throw StateError(validation.code!);
 
-    final model = _tryCalculateModel(draft, on: now);
-    if (model == null) {
-      throw StateError('body_model_inputs_invalid');
-    }
+    final age = BilAdultEligibility.ageOn(draft.birthDate!, on: now);
+    final profile = BodyProfile(
+      age: age,
+      gender: draft.sex!,
+      height: draft.heightCm!,
+      weight: draft.currentWeightKg!,
+      targetWeight: draft.targetWeightKg!,
+      activityLevel: draft.activity!,
+      exercises: draft.regularExercise,
+      goalType: draft.primaryWeightGoal,
+      waistCm: draft.waistCm,
+      neckCm: draft.neckCm,
+      hipCm: draft.sex == 'female' ? draft.hipsCm : null,
+    );
+    final model = BodyModelEngine.calculate(profile);
     final pace = draft.weeklyPaceKg ?? 0;
     final signedPace = switch (draft.primaryWeightGoal) {
       'lose' => -pace,
@@ -259,40 +258,5 @@ final class OnboardingPlanCalculator {
         'Food intake, activity and scale weight can change the forecast',
       ],
     );
-  }
-
-  static BodyModelResult? _tryCalculateModel(
-    OnboardingDraft draft, {
-    DateTime? on,
-  }) {
-    final birthDate = draft.birthDate;
-    final sex = draft.sex;
-    final height = draft.heightCm;
-    final currentWeight = draft.currentWeightKg;
-    final targetWeight = draft.targetWeightKg;
-    final activity = draft.activity;
-    if (birthDate == null ||
-        sex == null ||
-        height == null ||
-        currentWeight == null ||
-        targetWeight == null ||
-        activity == null) {
-      return null;
-    }
-    final age = BilAdultEligibility.ageOn(birthDate, on: on);
-    final profile = BodyProfile(
-      age: age,
-      gender: sex,
-      height: height,
-      weight: currentWeight,
-      targetWeight: targetWeight,
-      activityLevel: activity,
-      exercises: draft.regularExercise,
-      goalType: draft.primaryWeightGoal,
-      waistCm: draft.waistCm,
-      neckCm: draft.neckCm,
-      hipCm: draft.sex == 'female' ? draft.hipsCm : null,
-    );
-    return BodyModelEngine.calculate(profile);
   }
 }

@@ -8,36 +8,19 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool addUserMessage = true,
     bool autoSpeakReply = false,
   }) async {
-    if (!mounted) return;
-    final rawText = (textOverride ?? question.text).trim();
-    final text = inputChannel == CoachInputChannel.voice
-        ? normalizeCoachVoiceTranscript(rawText)
-        : rawText;
-    if (!conversationReady || text.isEmpty || sending || foodImageFlowOpening) {
-      return;
-    }
+    final text = (textOverride ?? question.text).trim();
+    if (!conversationReady || text.isEmpty || sending) return;
     if (addUserMessage) _beginConversationForUserAction();
     final localeCode = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final languageResolution = const CoachLanguageResolver().resolve(
-      input: text,
-      uiLocale: localeCode,
-      detectedLanguageTag: detectedLanguageTag,
-      previousClearLanguageTag: inputChannel == CoachInputChannel.text
-          ? lastClearWritingLanguageTag
-          : null,
-    );
-    final questionLocale = languageResolution.languageTag;
-    final effectiveLanguageHint = languageResolution.detected
-        ? languageResolution.languageTag
-        : detectedLanguageTag;
-    if (inputChannel == CoachInputChannel.text &&
-        languageResolution.detected &&
-        !languageResolution.usedPreviousInput &&
-        detectedLanguageTag == null) {
-      lastClearWritingLanguageTag = languageResolution.languageTag;
-    }
+    final questionLocale = const CoachLanguageResolver()
+        .resolve(
+          input: text,
+          uiLocale: localeCode,
+          detectedLanguageTag: detectedLanguageTag,
+        )
+        .languageTag;
     final speechPlan = _IntelligenceCenterPageState._speechPolicy.planFor(text);
     final generation = ++requestGeneration;
     replyDelayTimer?.cancel();
@@ -45,6 +28,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       sending = true;
       replyPhase = _CoachReplyPhase.preparing;
       failedRequest = null;
+      retryableErrorMessageIds.clear();
       introVisible = false;
       if (addUserMessage) {
         messages.add(
@@ -68,7 +52,9 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       if (!mounted || generation != requestGeneration || !sending) return;
       _updateState(() => replyPhase = _CoachReplyPhase.searching);
     });
-    _scrollToLatest(force: true);
+    // The member's newly sent turn belongs at the bottom immediately, not at
+    // the end of a scroll animation behind a temporary loading row.
+    _scrollToLatest(jump: true, force: true);
     unawaited(_saveConversation());
     if (autoSpeakReply && speechPlan != CoachSpeechPlan.directAnswer) {
       final acknowledgement = switch (speechPlan) {
@@ -92,14 +78,6 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       unawaited(_speakCoachText(acknowledgement, questionLocale));
     }
     try {
-      const actionPresentation = CoachActionPresentationPolicy();
-      if (actionPresentation.isContextualOpenFollowUp(text)) {
-        final contextualNavigation = _latestSafeNavigationAction();
-        if (contextualNavigation != null) {
-          await _executeAction(contextualNavigation);
-          return;
-        }
-      }
       final pendingAction = _latestPendingGoalAction();
       final pendingDecision = coachPendingActionDecision(text);
       if (pendingAction != null &&
@@ -120,16 +98,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final immediateEngine = const IntelligenceCenterEngine();
-      final voiceGreeting =
-          inputChannel == CoachInputChannel.voice &&
-          immediateEngine.isGreetingQuestion(text);
-      final catalogAnswer = voiceGreeting
-          ? null
-          : await catalogGrounding.answer(
-              question: text,
-              locale: questionLocale,
-            );
+      final catalogAnswer = await catalogGrounding.answer(
+        question: text,
+        locale: questionLocale,
+      );
       if (!mounted || generation != requestGeneration) return;
       if (catalogAnswer != null) {
         final message = IntelligenceMessage(
@@ -157,12 +129,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
+      final immediateEngine = const IntelligenceCenterEngine();
       late final IntelligenceCenterReply reply;
       if (immediateEngine.canAnswerWithoutPersonalContext(text)) {
-        final fastEngine =
-            immediateEngine.isGreetingQuestion(text) &&
-                !voiceGreeting &&
-                !isTransliteratedArabicGreeting(text.trim().toLowerCase())
+        final fastEngine = immediateEngine.isGreetingQuestion(text)
             ? IntelligenceCenterEngine(
                 localApi: ModelBackedLocalCoachApi(
                   gateway: ref.read(intelligenceCenterModelGatewayProvider),
@@ -185,7 +155,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               question: text,
               arabic: arabic,
               localeCode: localeCode,
-              detectedLanguageTag: effectiveLanguageHint,
+              detectedLanguageTag: detectedLanguageTag,
               inputChannel: inputChannel,
               conversation: conversation,
             )
@@ -236,7 +206,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               question: text,
               arabic: arabic,
               localeCode: localeCode,
-              detectedLanguageTag: effectiveLanguageHint,
+              detectedLanguageTag: detectedLanguageTag,
               healthContext: healthContext,
               coachContext: coachContext,
               inputChannel: inputChannel,
@@ -247,12 +217,12 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       if (!mounted || generation != requestGeneration) return;
       if (reply.serviceStatus == CoachServiceStatus.consentRequired) {
         final enabled = await _offerPersonalIntelligence();
-        if (!mounted || generation != requestGeneration) return;
+        if (!mounted) return;
         if (enabled) {
           _updateState(() => sending = false);
           await ask(
             inputChannel: inputChannel,
-            detectedLanguageTag: effectiveLanguageHint,
+            detectedLanguageTag: detectedLanguageTag,
             textOverride: text,
             addUserMessage: false,
             autoSpeakReply: autoSpeakReply,
@@ -282,17 +252,21 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final availableActions = reply.actions;
+      final activeAiSubscription =
+          reply.serviceStatus == CoachServiceStatus.creditsRequired &&
+          hasVerifiedAiSubscription(
+            ref.read(verifiedSubscriptionStateProvider).value,
+          );
+      final availableActions = activeAiSubscription
+          ? reply.actions
+                .where(
+                  (action) =>
+                      action.type !=
+                      IntelligenceActionType.openAiCoachSubscription,
+                )
+                .toList(growable: false)
+          : reply.actions;
       final safeMessage = _presentationSafeMessage(reply.message);
-      IntelligenceAction? directNavigationAction;
-      if (reply.serviceStatus == CoachServiceStatus.ready) {
-        for (final action in availableActions) {
-          if (actionPresentation.isDirectNavigationRequest(text, action)) {
-            directNavigationAction = action;
-            break;
-          }
-        }
-      }
       final persistedActions = <String, IntelligenceMessageAction>{
         for (final action in safeMessage.actionLinks)
           if (action.isTrusted) '${action.type.name}:${action.id}': action,
@@ -312,17 +286,14 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           }
         }
       }
-      final allowAutomaticSpeech =
-          autoSpeakReply &&
-          coachServiceStatusAllowsAutomaticSpeech(reply.serviceStatus);
       final presented = safeMessage.copyWith(
-        text: directNavigationAction == null
-            ? safeMessage.text
-            : AiCoachChatCopy.resolve(
-                questionLocale,
-                AiCoachChatCopy.navigationReady,
-              ),
-        modality: allowAutomaticSpeech
+        text: activeAiSubscription
+            ? tr(
+                'Your Premium AI Coach subscription is active, but its available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue now.',
+                'اشتراك Premium AI Coach لديك فعّال، لكن توكينات AI المتاحة نفدت. لم تُحتسب الرسالة. أضف توكينات AI Boost للمتابعة الآن.',
+              )
+            : safeMessage.text,
+        modality: autoSpeakReply
             ? IntelligenceMessageModality.voice
             : IntelligenceMessageModality.text,
         actionLinks: persistedActions.values.toList(growable: false),
@@ -342,14 +313,17 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         lastServiceStatus = reply.serviceStatus;
         lastRuntime = reply.runtime;
-        if (coachServiceStatusAllowsSameRequestRetry(reply.serviceStatus)) {
+        if (reply.serviceStatus == CoachServiceStatus.temporarilyUnavailable) {
           replyPhase = _CoachReplyPhase.failed;
           failedRequest = (
             text: text,
-            detectedLanguageTag: effectiveLanguageHint,
+            detectedLanguageTag: detectedLanguageTag,
             autoSpeak: autoSpeakReply,
             channel: inputChannel,
           );
+          if (!repeatedServiceNotice) {
+            retryableErrorMessageIds.add(presented.id);
+          }
         }
         if (!repeatedServiceNotice) {
           messageRuntimes[presented.id] = reply.runtime;
@@ -358,19 +332,15 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       _scrollToLatest();
       unawaited(_saveConversation());
       if (repeatedServiceNotice) return;
-      if (directNavigationAction != null) {
-        await _executeAction(directNavigationAction);
-        return;
-      }
       final spokenReply = reply.spokenText?.trim().isNotEmpty == true
           ? reply.spokenText!.trim()
           : _compactSpokenCoachReply(presented.text);
-      if (allowAutomaticSpeech) {
+      if (autoSpeakReply) {
         final spokenLocale = const CoachLanguageResolver()
             .resolve(
               input: text,
               uiLocale: localeCode,
-              detectedLanguageTag: effectiveLanguageHint,
+              detectedLanguageTag: detectedLanguageTag,
             )
             .languageTag;
         await _speakCoachText(spokenReply, spokenLocale);
@@ -393,7 +363,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         replyPhase = _CoachReplyPhase.failed;
         failedRequest = (
           text: text,
-          detectedLanguageTag: effectiveLanguageHint,
+          detectedLanguageTag: detectedLanguageTag,
           autoSpeak: autoSpeakReply,
           channel: inputChannel,
         );
@@ -414,20 +384,19 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         );
         messages.add(errorMessage);
         animatedResponseIds.add(errorMessage.id);
+        retryableErrorMessageIds.add(errorMessage.id);
       });
       _scrollToLatest();
       unawaited(_saveConversation());
     } finally {
+      replyDelayTimer?.cancel();
       if (mounted) {
         // Refresh even when the local request generation was cancelled: the
         // server may still have settled a reservation before its reply was
         // discarded. autoDispose clears the snapshot when this page is gone.
         ref.invalidate(aiCoachCreditAccessProvider);
-        ref.invalidate(aiBoostVisionAccessProvider);
       }
       if (mounted && generation == requestGeneration) {
-        // A cancelled, older response must not cancel the next turn's timer.
-        replyDelayTimer?.cancel();
         // A successful settlement or a quota rejection may have changed the
         // reserved-aware total. Refresh once after the request completes so
         // zero returns the AI Coach glass immediately without polling/loops.
@@ -456,29 +425,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     return null;
   }
 
-  IntelligenceAction? _latestSafeNavigationAction() {
-    const policy = CoachActionPresentationPolicy();
-    for (final message in messages.reversed) {
-      if (message.role != IntelligenceMessageRole.bil) continue;
-      if (message.modality == IntelligenceMessageModality.system) continue;
-      for (final action in message.actionLinks.reversed) {
-        if (!action.isTrusted) continue;
-        final candidate = action.toAction();
-        if (policy.isNavigation(candidate)) return candidate;
-      }
-      // Pronouns such as "open it" may only bind to the immediately previous
-      // Coach response. Never replay an older screen action by accident.
-      return null;
-    }
-    return null;
-  }
-
   void _cancelCurrentCoachRequest() {
-    if (listening || voiceCaptureStarting) {
-      unawaited(
-        _stopVoiceCapture(resetMode: voiceMode != _CoachVoiceMode.liveCall),
-      );
-    }
     requestGeneration += 1;
     replyDelayTimer?.cancel();
     _updateState(() {
@@ -519,7 +466,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         builder: (sheetContext) {
           final scheme = Theme.of(sheetContext).colorScheme;
           return SafeArea(
-            child: SingleChildScrollView(
+            child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

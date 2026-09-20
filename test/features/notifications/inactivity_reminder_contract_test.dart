@@ -21,8 +21,6 @@ void main() {
       expect(source, contains('cancelReturnAfter24Hours()'));
       expect(source, contains('AppLifecycleState.paused'));
       expect(source, contains('AppLifecycleState.resumed'));
-      expect(source, contains('_generation += 1;'));
-      expect(source, contains('_backgroundHandled = false;'));
     },
   );
 }

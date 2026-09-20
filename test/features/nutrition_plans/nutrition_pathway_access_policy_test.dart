@@ -1,7 +1,6 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/nutrition_plans/domain/nutrition_pathway_access_policy.dart';
@@ -10,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-final _now = DateTime.utc(2026, 9, 16);
 
 void main() {
   test(
@@ -75,29 +72,7 @@ void main() {
       find.byKey(const ValueKey('premium-route-glass-veil')),
       findsNothing,
     );
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
   });
-
-  testWidgets(
-    'paid deep link stays locked without a verified period boundary',
-    (tester) async {
-      await tester.pumpWidget(
-        _premiumApp(
-          state: _state(
-            authority: EntitlementAuthority.verifiedServer,
-            entitlements: const {CommerceEntitlement.premiumPrograms},
-            hasPeriodBoundary: false,
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey('premium-route-protected-content')),
-        findsOneWidget,
-      );
-    },
-  );
 
   testWidgets('Premium deep link keeps preview under glass for Free', (
     tester,
@@ -143,7 +118,6 @@ void main() {
 
 Widget _premiumApp({required SubscriptionState state}) => ProviderScope(
   overrides: [
-    verifiedEntitlementClockProvider.overrideWithValue(() => _now),
     verifiedSubscriptionStateProvider.overrideWith((_) async => state),
     storefrontTargetPlanProvider.overrideWith(
       (_) async => CommercePlan.premium,
@@ -168,7 +142,6 @@ Widget _premiumApp({required SubscriptionState state}) => ProviderScope(
 SubscriptionState _state({
   required EntitlementAuthority authority,
   Set<CommerceEntitlement> entitlements = const <CommerceEntitlement>{},
-  bool hasPeriodBoundary = true,
 }) => SubscriptionState(
   plan:
       authority == EntitlementAuthority.verifiedServer &&
@@ -177,10 +150,6 @@ SubscriptionState _state({
       : CommercePlan.free,
   entitlements: entitlements,
   authority: authority,
-  lifecycle: SubscriptionLifecycle.active,
-  currentPeriodEndsAt: hasPeriodBoundary
-      ? _now.add(const Duration(days: 1))
-      : null,
   isPurchasable: false,
   canRestorePurchases: false,
 );

@@ -178,7 +178,7 @@ void main() {
       expect('$search\n$detail', isNot(contains("'myFoods'")));
       expect('$search\n$detail', isNot(contains("'all'")));
 
-      expect(meals, isNot(contains("Key('daily-meal-macros-\$type')")));
+      expect(meals, contains("Key('daily-meal-macros-\$type')"));
       expect(meals, contains("Key('daily-food-row-\${item.id}')"));
       expect(row, contains('item.calories.round().toString()'));
       expect(row, contains('FoodPresentationLocalizer.servingText('));
@@ -215,10 +215,9 @@ void main() {
   });
 
   test('localized nutrient labels are not translated a second time', () {
-    final summary = <String>[
+    final summary = File(
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-      'lib/features/daily_log/presentation/daily_log_summary_metrics.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
+    ).readAsStringSync();
 
     expect(summary, isNot(contains('context.strings.text(label)')));
     expect(

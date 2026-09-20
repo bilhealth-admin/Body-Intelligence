@@ -18,21 +18,15 @@ jobs:
   flutter:
     name: flutter
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
-      - name: Configure Git LF checkout
-        shell: pwsh
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-
       - name: Check out accepted source
         uses: actions/checkout@v4
 
       - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.44.6
+          channel: stable
           cache: true
 
       - name: Resolve packages
@@ -41,28 +35,9 @@ jobs:
       - name: Check formatting
         shell: pwsh
         run: |
-          if ("${{ github.event_name }}" -eq "pull_request") {
-            git fetch origin "${{ github.base_ref }}" --depth=1
-            $baseSha = git rev-parse "origin/${{ github.base_ref }}"
-            $targets = git diff --name-only $baseSha HEAD -- '*.dart' |
-              Where-Object {
-                (Test-Path $_) -and (
-                  $_ -like 'lib/*' -or
-                  $_ -like 'test/*' -or
-                  $_ -like 'integration_test/*'
-                )
-              }
-            if (-not $targets) {
-              Write-Host "No changed Dart files to format-check."
-              exit 0
-            }
-            Write-Host "Format-checking $($targets.Count) changed Dart files."
-            dart format --output=none --set-exit-if-changed @targets
-          } else {
-            $targets = @('lib', 'test')
-            if (Test-Path integration_test) { $targets += 'integration_test' }
-            dart format --output=none --set-exit-if-changed @targets
-          }
+          $targets = @('lib', 'test')
+          if (Test-Path integration_test) { $targets += 'integration_test' }
+          dart format --output=none --set-exit-if-changed @targets
 
       - name: Analyze complete source
         run: flutter analyze --no-pub

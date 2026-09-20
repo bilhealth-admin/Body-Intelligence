@@ -11,15 +11,7 @@ class _GlassTopNavigation extends StatelessWidget {
   });
 
   final int selectedIndex;
-  final List<
-    ({
-      IconData icon,
-      IconData selected,
-      String label,
-      BilNavigationDestination destination,
-    })
-  >
-  items;
+  final List<({IconData icon, IconData selected, String label})> items;
   final ValueChanged<int> onSelected;
   final VoidCallback onProfile;
   final String profileLabel;
@@ -66,7 +58,6 @@ class _GlassTopNavigation extends StatelessWidget {
                           child: _TopNavigationItem(
                             item: (
                               icon: profileIcons.icon,
-                              destination: BilNavigationDestination.profile,
                               selected: profileIcons.selected,
                               label: profileLabel,
                             ),
@@ -120,13 +111,7 @@ class _TopNavigationItem extends StatelessWidget {
     required this.onTap,
   });
 
-  final ({
-    IconData icon,
-    IconData selected,
-    String label,
-    BilNavigationDestination destination,
-  })
-  item;
+  final ({IconData icon, IconData selected, String label}) item;
   final bool selected;
   final VoidCallback onTap;
 
@@ -169,11 +154,7 @@ class _TopNavigationItem extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                BilNativeNavigationGlyph(
-                  destination: item.destination,
-                  selected: selected,
-                  color: foreground,
-                ),
+                Icon(selected ? item.selected : item.icon, color: foreground),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(

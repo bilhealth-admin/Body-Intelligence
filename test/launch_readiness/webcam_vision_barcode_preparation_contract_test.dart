@@ -65,10 +65,10 @@ void main() {
     'final webcam acceptance runner fixes the 31-case evidence contract',
     () {
       final runner = File(
-        'tool/release/run_bil_webcam_acceptance.ps1',
+        'artifacts/release/run_bil_webcam_acceptance.ps1',
       ).readAsStringSync();
       final protocol = File(
-        'tool/release/BIL_WEBCAM_ACCEPTANCE_PROTOCOL.md',
+        'artifacts/release/BIL_WEBCAM_ACCEPTANCE_PROTOCOL.md',
       ).readAsStringSync();
 
       expect(runner, contains('hw.camera.back=webcam0'));

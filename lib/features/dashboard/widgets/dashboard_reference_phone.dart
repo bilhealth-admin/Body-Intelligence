@@ -25,13 +25,13 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     required this.nutrientDashboardPreset,
     required this.weightTrendValues,
     required this.stepTrendValues,
-    required this.stepSourceName,
-    this.todaySteps,
     required this.weightUnit,
     required this.loggingItems,
     required this.hero,
     required this.aiCoach,
     required this.dailyIntelligence,
+    required this.progressSection,
+    required this.personalHealthAi,
     required this.connectedHealth,
     required this.bodyTwinSummary,
     required this.actionTitle,
@@ -66,13 +66,13 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final String nutrientDashboardPreset;
   final List<double> weightTrendValues;
   final List<double> stepTrendValues;
-  final String? stepSourceName;
-  final double? todaySteps;
   final String weightUnit;
   final List<DashboardLoggingItem> loggingItems;
   final Widget? hero;
   final Widget? aiCoach;
   final Widget dailyIntelligence;
+  final Widget? progressSection;
+  final Widget? personalHealthAi;
   final Widget? connectedHealth;
   final String bodyTwinSummary;
   final String actionTitle;
@@ -86,10 +86,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String tr(String en, String ar) => _referenceText(context, en, ar);
-    final groupedFitness =
-        visibleSections.contains(DashboardSectionIds.connectedHealth) &&
-        connectedHealth is ConnectedHealthCard &&
-        dailyIntelligence is DailyReturnCard;
     final meals = loggingItems
         .where(
           (item) =>
@@ -138,7 +134,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             'تابع تقدم البروتين والكربوهيدرات والدهون بلمحة.',
           ),
           borderRadius: 12,
-          showLabel: true,
+          showLabel: false,
           onTap: () => context.push('/plans'),
           child: _ReferenceMacrosCard(
             onEdit: () => context.push('/settings/nutrition-goals'),
@@ -175,7 +171,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             'أهداف القلب والصوديوم والألياف والأهداف المخصصة',
           ),
           borderRadius: 12,
-          showLabel: true,
+          showLabel: false,
           onTap: () => context.push('/plans'),
           child: _CircularNutrientCard(
             key: const Key('dashboard-heart-circle-card'),
@@ -194,25 +190,22 @@ class _ReferenceDashboardPhone extends StatelessWidget {
               _MacroProgress(
                 label: tr('Potassium', 'البوتاسيوم'),
                 value: potassiumEvidenceValue?.round(),
-                goal: DashboardHeartHealthPolicy.potassiumGoal(potassiumGoal),
+                goal: potassiumGoal,
                 unit: 'mg',
                 color: const Color(0xFFF2B632),
-                showRemaining: false,
               ),
               _MacroProgress(
                 label: tr('Sodium', 'الصوديوم'),
                 value: sodiumEvidenceValue?.round(),
-                goal: DashboardHeartHealthPolicy.sodiumGoal(sodiumGoal),
+                goal: sodiumGoal,
                 unit: 'mg',
                 color: const Color(0xFF7656C9),
-                showRemaining: false,
               ),
               _MacroProgress(
                 label: tr('Fiber', 'الألياف'),
                 value: fiberEvidenceValue?.round(),
-                goal: DashboardHeartHealthPolicy.fiberGoal(fiberGoal),
+                goal: fiberGoal,
                 color: const Color(0xFF38A66B),
-                showRemaining: false,
               ),
             ],
           ),
@@ -245,28 +238,13 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         // Reuse the full Health Hub instead of a second phone-only imitation.
         if (visibleSections.contains(DashboardSectionIds.connectedHealth) &&
             connectedHealth != null) ...[
-          if (groupedFitness)
-            DashboardHealthSidePanel(
-              panel: DashboardDailyReturnLayout(
-                weightValue: weightTrendValues.isEmpty
-                    ? null
-                    : '${weightTrendValues.last.toStringAsFixed(1)} $weightUnit',
-                child: KeyedSubtree(
-                  key: const Key('dashboard-daily-intelligence-slot'),
-                  child: dailyIntelligence,
-                ),
-              ),
-              child: connectedHealth!,
-            )
-          else
-            connectedHealth!,
+          connectedHealth!,
           const SizedBox(height: 12),
         ],
-        if (!groupedFitness)
-          KeyedSubtree(
-            key: const Key('dashboard-daily-intelligence-slot'),
-            child: dailyIntelligence,
-          ),
+        KeyedSubtree(
+          key: const Key('dashboard-daily-intelligence-slot'),
+          child: dailyIntelligence,
+        ),
         if (visibleSections.contains(DashboardSectionIds.aiCoach) &&
             aiCoach != null) ...[
           const SizedBox(height: 12),
@@ -275,17 +253,32 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             child: aiCoach!,
           ),
         ],
-        if (!groupedFitness) const SizedBox(height: 12),
+        if (personalHealthAi != null) ...[
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final baseHeight = BilPremiumResponsiveLayout.twinBaseHeight(
+                constraints.maxWidth,
+              );
+              final height = MediaQuery.textScalerOf(context)
+                  .scale(baseHeight)
+                  .clamp(
+                    baseHeight,
+                    BilPremiumResponsiveLayout.maximumTwinHeight,
+                  );
+              return SizedBox(
+                key: const Key('dashboard-personal-health-ai-slot'),
+                height: height,
+                child: personalHealthAi!,
+              );
+            },
+          ),
+        ],
+        const SizedBox(height: 12),
         if (overviewCards.isNotEmpty)
           _OverviewCardsCarousel(
             cards: overviewCards,
-            hasBurnPolicyNote:
-                visibleSections.contains(DashboardSectionIds.calories) &&
-                caloriesBurned > 0 &&
-                !burnedCaloriesApplied,
-            // Calories remain the first visible dashboard card. Saved dietary
-            // preferences must not jump this carousel to Heart Healthy.
-            initialPage: 0,
+            initialPage: nutrientDashboardPreset == 'Heart healthy' ? 2 : 0,
           ),
         if (visibleSections.contains(DashboardSectionIds.macros)) ...[
           const SafeFreeAdAnchor(
@@ -298,8 +291,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
           _ReferenceTrendRail(
             weightValues: weightTrendValues,
             stepValues: stepTrendValues,
-            todaySteps: todaySteps,
-            stepSourceName: stepSourceName,
             weightUnit: weightUnit,
           ),
         ],
@@ -322,8 +313,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                     kind: BilSemanticIconKind.water,
                     label: tr('Water', 'الماء'),
                     recorded: water?.recorded ?? false,
-                    onTap: () =>
-                        context.go('/daily-log/water?from=%2Fdashboard'),
+                    onTap: () => context.go('/daily-log?action=water'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -339,8 +329,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             ),
           ),
         ],
-        if (visibleSections.contains(DashboardSectionIds.bestAction)) ...[
-          const SizedBox(height: 12),
+        const SizedBox(height: 12),
+        if (visibleSections.contains(DashboardSectionIds.bestAction))
           _CompactIntelligenceCard(
             arabic: arabic,
             title: actionTitle,
@@ -349,16 +339,22 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             onAction: onAction,
             onExplain: onExplain,
           ),
-        ],
-        if (visibleSections.contains(DashboardSectionIds.bodyTwin)) ...[
+        if (visibleSections.contains(DashboardSectionIds.progress) &&
+            progressSection != null) ...[
           const SizedBox(height: 12),
+          KeyedSubtree(
+            key: const Key('dashboard-mobile-summary-card'),
+            child: progressSection!,
+          ),
+        ],
+        const SizedBox(height: 12),
+        if (visibleSections.contains(DashboardSectionIds.bodyTwin))
           _BodyTwinImageCard(
             key: const Key('dashboard-mobile-body-twin-snapshot'),
             title: tr('Body Twin', 'التوأم الجسدي'),
             summary: bodyTwinSummary,
             onTap: () => context.go('/analytics'),
           ),
-        ],
         if (visibleSections.contains(DashboardSectionIds.discover)) ...[
           const SizedBox(height: 12),
           _ReferenceDiscoverGrid(

@@ -5,12 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
-import '../../app/services/app_observability.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_notice.dart';
-import '../connected_health/providers/connected_health_provider.dart';
-import '../connected_health/widgets/dashboard_health_activity_refresh.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../profile/services/profile_photo_service.dart';
@@ -28,27 +25,6 @@ import 'widgets/first_value_handoff_card.dart';
 /// slow. The refresh work continues safely after the indicator is dismissed.
 @visibleForTesting
 const dashboardRefreshIndicatorMaximum = Duration(milliseconds: 850);
-
-/// One slow local source must not make an otherwise usable dashboard look as
-/// though its whole refresh failed. Each source is bounded independently and
-/// its failure is retained in local diagnostics instead of replacing the
-/// visible dashboard with an all-or-nothing error.
-@visibleForTesting
-const dashboardSourceRefreshMaximum = Duration(seconds: 2);
-
-Future<bool> _settleDashboardRefresh<T>(Future<T> Function() refresh) async {
-  try {
-    await refresh().timeout(dashboardSourceRefreshMaximum);
-    return true;
-  } on Object catch (error, _) {
-    AppObservability.logger.record(
-      AppLogLevel.warning,
-      'dashboard_refresh_source_failed',
-      attributes: <String, Object?>{'errorType': error.runtimeType.toString()},
-    );
-    return false;
-  }
-}
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -167,6 +143,11 @@ class DashboardPage extends ConsumerWidget {
 
     try {
       await ref.read(profilePhotoServiceProvider).chooseAndSave();
+    } on ProfilePhotoTooLargeException {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_dashboardText(locale, 'imageTooLarge'))),
+      );
     } on ProfilePhotoIdentityChangedException {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -185,15 +166,10 @@ class DashboardPage extends ConsumerWidget {
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!context.mounted) return false;
-
     final blocked =
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
       final openSettings = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog.adaptive(
@@ -206,9 +182,7 @@ class DashboardPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(
-                MaterialLocalizations.of(dialogContext).closeButtonLabel,
-              ),
+              child: Text(context.strings.text('Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
@@ -220,7 +194,6 @@ class DashboardPage extends ConsumerWidget {
       if (openSettings == true) await policy.openSettings();
       return false;
     }
-
     return await policy.request(BilRuntimeCapability.camera) ==
         BilRuntimePermissionState.granted;
   }
@@ -237,41 +210,35 @@ class DashboardPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final refreshed = await Future.wait<bool>([
-      _settleDashboardRefresh(
-        () => ref
-            .read(connectedHealthProvider.notifier)
-            .refreshDailyActivity(force: true),
-      ),
-      _settleDashboardRefresh(() => ref.refresh(latestWeightProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(weightHistoryProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(userProfileProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(todayMealsProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(todayWaterProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(allMealsProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(allWaterProvider.future)),
-      _settleDashboardRefresh(
-        () => ref.refresh(weightReminderSkippedTodayProvider.future),
-      ),
-      _settleDashboardRefresh(
-        () => ref.refresh(todayLifeContextProvider.future),
-      ),
-    ]);
-
-    // Pull-to-refresh is intentionally quiet when at least one source is
-    // available. Individual cards retain their last usable value and show
-    // their own truthful state; a single temporary local timeout is not a
-    // dashboard-wide failure.
-    if (context.mounted && refreshed.every((succeeded) => !succeeded)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text(
-              'Some local Today data could not be refreshed.',
+    try {
+      await Future.wait([
+        ref.refresh(latestWeightProvider.future),
+        ref.refresh(weightHistoryProvider.future),
+        ref.refresh(userProfileProvider.future),
+        ref.refresh(todayMealsProvider.future),
+        ref.refresh(todayWaterProvider.future),
+        ref.refresh(allMealsProvider.future),
+        ref.refresh(allWaterProvider.future),
+        ref.refresh(weightReminderSkippedTodayProvider.future),
+        ref.refresh(todayLifeContextProvider.future),
+      ], eagerError: true).timeout(const Duration(seconds: 6));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.strings.text('Today is up to date.'))),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text(
+                'Some local Today data could not be refreshed.',
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -290,6 +257,19 @@ class DashboardPage extends ConsumerWidget {
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const CloudSyncConsentNotice(),
+        DashboardTopBar(
+          profilePhoto: profilePhoto,
+          profilePhotoUrl: profilePhotoUrl,
+          onProfile: () => manageProfilePhoto(
+            context,
+            ref,
+            profilePhoto,
+            profilePhotoUrl,
+            locale,
+          ),
+        ),
+        const SizedBox(height: 18),
         if (showFirstValue) ...[
           FirstValueHandoffCard(
             onContinue: () async {
@@ -310,7 +290,7 @@ class DashboardPage extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
         ],
       ],
     );
@@ -329,23 +309,9 @@ class DashboardPage extends ConsumerWidget {
       data: dashboardTheme,
       child: DashboardShell(
         onRefresh: () => refresh(context, ref),
-        leading: const CloudSyncConsentNotice(),
-        edgeHeader: DashboardTopBar(
-          profilePhoto: profilePhoto,
-          profilePhotoUrl: profilePhotoUrl,
-          onProfile: () => manageProfilePhoto(
-            context,
-            ref,
-            profilePhoto,
-            profilePhotoUrl,
-            locale,
-          ),
-        ),
-        child: DashboardHealthActivityRefresh(
-          child: DashboardComposition(
-            hero: hero,
-            content: const DashboardGrid(hero: DashboardHeader()),
-          ),
+        child: DashboardComposition(
+          hero: hero,
+          content: const DashboardGrid(hero: DashboardHeader()),
         ),
       ),
     );

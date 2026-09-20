@@ -4,7 +4,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart' as image_picker;
-import 'package:image/image.dart' as image;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
@@ -12,11 +11,7 @@ import '../../../app/services/recoverable_image_picker.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../providers/user_profile_provider.dart';
 
-/// Photos above this budget are compressed automatically before local storage
-/// and upload. It is deliberately a target, not a rejection limit.
-const profilePhotoCompressionTargetBytes = 1024 * 1024;
-const _profilePhotoLargestEdge = 1600;
-const _profilePhotoSmallestEdge = 720;
+const profilePhotoMaxBytes = 5 * 1024 * 1024;
 
 typedef ProfilePhotoPicker =
     Future<XFile?> Function(List<XTypeGroup> acceptedTypeGroups);
@@ -33,69 +28,6 @@ class ProfilePhotoSaveResult {
   final Uint8List bytes;
   final bool cloudSynced;
   final String? publicUrl;
-}
-
-class _PreparedProfilePhoto {
-  const _PreparedProfilePhoto({required this.bytes, required this.contentType});
-
-  final Uint8List bytes;
-  final String contentType;
-}
-
-Future<_PreparedProfilePhoto> _prepareProfilePhoto(
-  Uint8List bytes, {
-  required String contentType,
-}) async {
-  if (bytes.lengthInBytes <= profilePhotoCompressionTargetBytes) {
-    return _PreparedProfilePhoto(bytes: bytes, contentType: contentType);
-  }
-  final compressed = await compute(_compressProfilePhoto, bytes);
-  return _PreparedProfilePhoto(bytes: compressed, contentType: 'image/jpeg');
-}
-
-/// Runs away from the UI isolate. Real photos are never rejected merely for
-/// being large; orientation is baked and the smallest high-quality JPEG under
-/// the target is chosen. A valid but unusually detailed image still returns
-/// its smallest candidate rather than blocking the member from saving it.
-Uint8List _compressProfilePhoto(Uint8List source) {
-  final decoded = image.decodeImage(source);
-  if (decoded == null) throw const ProfilePhotoCompressionException();
-  final normalized = image.bakeOrientation(decoded);
-  final longest = normalized.width > normalized.height
-      ? normalized.width
-      : normalized.height;
-  final initialEdge = longest > _profilePhotoLargestEdge
-      ? _profilePhotoLargestEdge
-      : longest;
-  Uint8List? smallest;
-  for (final edge in <int>{
-    initialEdge,
-    1280,
-    1080,
-    900,
-    _profilePhotoSmallestEdge,
-  }) {
-    if (edge > longest || edge < _profilePhotoSmallestEdge) continue;
-    final candidateImage = edge == longest
-        ? normalized
-        : normalized.width >= normalized.height
-        ? image.copyResize(normalized, width: edge)
-        : image.copyResize(normalized, height: edge);
-    for (final quality in const [86, 78, 70, 62, 54]) {
-      final candidate = Uint8List.fromList(
-        image.encodeJpg(candidateImage, quality: quality),
-      );
-      if (smallest == null ||
-          candidate.lengthInBytes < smallest.lengthInBytes) {
-        smallest = candidate;
-      }
-      if (candidate.lengthInBytes <= profilePhotoCompressionTargetBytes) {
-        return candidate;
-      }
-    }
-  }
-  return smallest ??
-      Uint8List.fromList(image.encodeJpg(normalized, quality: 54));
 }
 
 final profilePhotoServiceProvider = Provider<ProfilePhotoService>((ref) {
@@ -144,6 +76,9 @@ class ProfilePhotoService {
         : await _photoPicker(const [types]);
     if (file == null) return null;
     final bytes = await file.readAsBytes();
+    if (bytes.lengthInBytes > profilePhotoMaxBytes) {
+      throw const ProfilePhotoTooLargeException();
+    }
     final contentType = _contentType(file.name);
     return _saveForOwner(
       bytes,
@@ -201,6 +136,9 @@ class ProfilePhotoService {
     required String? expectedAuthenticatedOwnerId,
   }) async {
     if (bytes.isEmpty) throw const FormatException('Empty profile photo');
+    if (bytes.lengthInBytes > profilePhotoMaxBytes) {
+      throw const ProfilePhotoTooLargeException();
+    }
     _requireAuthenticatedOwnerMatchesStorage(
       expectedAuthenticatedOwnerId,
       expectedStorageOwnerId,
@@ -212,32 +150,18 @@ class ProfilePhotoService {
       expectedStorageOwnerId: expectedStorageOwnerId,
       expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
     );
-    final prepared = await _prepareProfilePhoto(
-      bytes,
-      contentType: contentType,
-    );
-    _requireUnchangedOwners(
-      expectedStorageOwnerId: expectedStorageOwnerId,
-      expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
-    );
-    // A newly selected local image supersedes any cached cloud URL. This also
-    // prevents a Community save from reusing or repeatedly refreshing a stale
-    // avatar URL while the new upload is still pending.
-    await _preferences.mutate(
-      set: {'profilePhoto': base64Encode(prepared.bytes)},
-      remove: const ['profilePhotoPublicUrl'],
-    );
+    await _preferences.set('profilePhoto', base64Encode(bytes));
     _requireUnchangedOwners(
       expectedStorageOwnerId: expectedStorageOwnerId,
       expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
     );
     final publicUrl = await _upload(
-      prepared.bytes,
-      contentType: prepared.contentType,
+      bytes,
+      contentType: contentType,
       expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
     );
     return ProfilePhotoSaveResult(
-      bytes: prepared.bytes,
+      bytes: bytes,
       cloudSynced: publicUrl != null,
       publicUrl: publicUrl,
     );
@@ -265,21 +189,9 @@ class ProfilePhotoService {
     if (expectedAuthenticatedOwnerId == null) {
       return ProfilePhotoSaveResult(bytes: bytes, cloudSynced: false);
     }
-    final cachedPublicUrl = (await _preferences.get(
-      'profilePhotoPublicUrl',
-    ))?.trim();
-    if (cachedPublicUrl != null && cachedPublicUrl.isNotEmpty) {
-      // The current image already has a public reference. Community profile
-      // saves must not create a new cache-busting URL and flicker every avatar.
-      return ProfilePhotoSaveResult(
-        bytes: bytes,
-        cloudSynced: true,
-        publicUrl: cachedPublicUrl,
-      );
-    }
     final publicUrl = await _upload(
       bytes,
-      contentType: _contentTypeForStoredBytes(bytes),
+      contentType: 'image/jpeg',
       expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
     );
     return ProfilePhotoSaveResult(
@@ -422,32 +334,10 @@ class ProfilePhotoService {
     if (lower.endsWith('.webp')) return 'image/webp';
     return 'image/jpeg';
   }
-
-  static String _contentTypeForStoredBytes(Uint8List bytes) {
-    if (bytes.lengthInBytes >= 8 &&
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4e &&
-        bytes[3] == 0x47) {
-      return 'image/png';
-    }
-    if (bytes.lengthInBytes >= 12 &&
-        bytes[0] == 0x52 &&
-        bytes[1] == 0x49 &&
-        bytes[2] == 0x46 &&
-        bytes[3] == 0x46 &&
-        bytes[8] == 0x57 &&
-        bytes[9] == 0x45 &&
-        bytes[10] == 0x42 &&
-        bytes[11] == 0x50) {
-      return 'image/webp';
-    }
-    return 'image/jpeg';
-  }
 }
 
-class ProfilePhotoCompressionException implements Exception {
-  const ProfilePhotoCompressionException();
+class ProfilePhotoTooLargeException implements Exception {
+  const ProfilePhotoTooLargeException();
 }
 
 class ProfilePhotoIdentityChangedException implements Exception {

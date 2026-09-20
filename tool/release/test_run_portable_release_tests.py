@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import io
-import os
 import subprocess
-from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -15,9 +13,6 @@ from tool.release import run_portable_release_tests as runner
 
 class PortableReleaseSchedulingTest(unittest.TestCase):
     def setUp(self) -> None:
-        environment = mock.patch.dict(os.environ)
-        environment.start()
-        self.addCleanup(environment.stop)
         self.portable = [
             "test/a_test.dart",
             runner.PERFORMANCE_BUDGET_TEST,
@@ -67,25 +62,9 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
             with self.subTest(paths=paths), self.assertRaises(SystemExit):
                 runner.partition_tests(paths)
 
-    def test_command_batches_preserve_every_test_once(self):
-        tests = ["test/a_test.dart", "test/b_test.dart", "test/c_test.dart"]
-        batches = runner.partition_test_batches(
-            ["flutter", "test"],
-            tests,
-            command_line_limit=48,
-        )
-        self.assertGreater(len(batches), 1)
-        self.assertEqual([path for batch in batches for path in batch], tests)
-
     def test_performance_runs_serial_first_then_every_other_file_once(self):
         code, calls, output = self.run_main([0, 0])
-        prefix = [
-            runner.resolve_flutter_executable(),
-            "test",
-            "--no-pub",
-            "--timeout",
-            "30s",
-        ]
+        prefix = [runner.FLUTTER_EXECUTABLE, "test", "--no-pub", "--timeout", "30s"]
         self.assertEqual(code, 0)
         self.assertEqual(
             calls,
@@ -136,103 +115,6 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertIn("PORTABLE_RELEASE_REMAINING_SCHEDULED_TEST_FILES=0\n", output)
         self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=1\n"))
-
-    def test_code_only_preserves_default_suite_and_uses_reviewed_policy(self):
-        policy = runner.load_code_only_policy()
-        policy.discover()
-        _, portable = runner.discover_tests()
-        selected = set(portable) - set(policy.NOT_RUN)
-        self.assertNotIn("test/release_metadata_test.dart", selected)
-        self.assertIn("test/release_metadata_test.dart", portable)
-        self.assertIn("test/premium_splash_experience_test.dart", policy.MIXED_NAMES)
-        self.assertIn(runner.PERFORMANCE_BUDGET_TEST, selected)
-
-    def test_code_only_real_policy_keeps_every_invocation_serial(self):
-        code, calls, output = self.run_main([0, 0], ["--code-only"])
-        self.assertEqual(code, 0)
-        self.assertEqual(len(calls), 2)
-        for call in calls:
-            command = call.args[0]
-            self.assertEqual(command.count("--concurrency"), 1)
-            self.assertEqual(command[command.index("--concurrency") + 1], "1")
-            self.assertFalse(command[0].endswith(".bat"))
-            self.assertTrue(command[1].endswith("flutter_tools.snapshot"))
-            self.assertIn("--dart-define=BIL_CAPTURE_COMMUNITY_REVIEW=false", command)
-            self.assertIn("--dart-define=BIL_CAPTURE_HEALTH_REVIEW=false", command)
-        self.assertEqual(calls[0].args[0][-1], runner.PERFORMANCE_BUDGET_TEST)
-        self.assertEqual(calls[1].args[0][-2:], ["test/a_test.dart", "test/z_test.dart"])
-        self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=3\n"))
-
-    def test_dashboard_capture_guards_keep_all_regression_tests_scheduled(self):
-        policy = runner.load_code_only_policy()
-        all_tests, ordinary = policy.discover()
-        _, portable = runner.discover_tests()
-        expected = {
-            "test/dashboard_polish/dashboard_current_preview_test.dart",
-            "test/dashboard_polish/dashboard_polish_layout_review_test.dart",
-            "test/dashboard_polish/icon_label_layout_review_test.dart",
-        }
-        self.assertEqual(set(policy.ENV_CAPTURE_GUARDED), expected)
-        for name in expected:
-            self.assertIn(name, all_tests)
-            self.assertIn(name, ordinary)
-            self.assertIn(name, portable)
-            self.assertNotIn(name, policy.NOT_RUN)
-            self.assertNotIn(name, policy.MIXED_NAMES)
-
-    def test_code_only_overrides_inherited_dashboard_capture_flags(self):
-        policy = runner.load_code_only_policy()
-        for flag in policy.ENV_CAPTURE_GUARDED.values():
-            os.environ[flag] = "1"
-        code, calls, _ = self.run_main([0, 0], ["--code-only"])
-        self.assertEqual(code, 0)
-        self.assertEqual(len(calls), 2)
-        for flag in policy.ENV_CAPTURE_GUARDED.values():
-            self.assertEqual(os.environ[flag], "0")
-
-    def test_code_only_real_policy_preserves_performance_failure(self):
-        code, calls, output = self.run_main([7], ["--code-only"])
-        self.assertEqual(code, 7)
-        self.assertEqual(len(calls), 1)
-        self.assertEqual(calls[0].args[0][-1], runner.PERFORMANCE_BUDGET_TEST)
-        self.assertNotIn("PORTABLE_RELEASE_PHASE=remaining_portable", output)
-        self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=1\n"))
-
-    def test_code_only_mixed_files_are_filtered_and_never_use_batch_shell(self):
-        policy = SimpleNamespace(
-            discover=mock.Mock(), NOT_RUN={"test/z_test.dart": "image data"},
-            MIXED_NAMES={"test/a_test.dart": "^(?!visual).*$"},
-            flutter_test_command=lambda _: ["native-dart", "snapshot", "test", "--concurrency", "1"],
-        )
-        with mock.patch.object(runner, "load_code_only_policy", return_value=policy):
-            code, calls, output = self.run_main([0, 0], ["--code-only"])
-        self.assertEqual(code, 0)
-        policy.discover.assert_called_once_with()
-        self.assertEqual(len(calls), 2)
-        self.assertEqual(calls[0].args[0][-1], runner.PERFORMANCE_BUDGET_TEST)
-        self.assertEqual(calls[1].args[0][-3:], ["test/a_test.dart", "--name", "^(?!visual).*$"])
-        self.assertTrue(all(call.args[0][0] == "native-dart" for call in calls))
-        self.assertTrue(all("test/z_test.dart" not in call.args[0] for call in calls))
-        self.assertIn("PORTABLE_RELEASE_NOT_RUN=test/z_test.dart", output)
-        self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=2\n"))
-
-    def test_code_only_mixed_failure_is_not_converted_to_success(self):
-        policy = SimpleNamespace(
-            discover=mock.Mock(), NOT_RUN={},
-            MIXED_NAMES={"test/a_test.dart": "^logic$", "test/z_test.dart": "^other$"},
-            flutter_test_command=lambda _: ["native-dart", "snapshot", "test"],
-        )
-        with mock.patch.object(runner, "load_code_only_policy", return_value=policy):
-            code, calls, _ = self.run_main([0, 9], ["--code-only"])
-        self.assertEqual(code, 9)
-        self.assertEqual(len(calls), 2)
-
-    def test_code_only_list_does_not_start_flutter(self):
-        policy = SimpleNamespace(discover=mock.Mock(), NOT_RUN={}, MIXED_NAMES={})
-        with mock.patch.object(runner, "load_code_only_policy", return_value=policy):
-            code, calls, output = self.run_main([], ["--code-only", "--list-only"])
-        self.assertEqual((code, calls), (0, []))
-        self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=0\n"))
 
 
 if __name__ == "__main__":

@@ -11,7 +11,6 @@ enum BilImagePickerPurpose {
   profilePhoto,
   communityPost,
   mealPhoto,
-  coachFoodPhoto,
   barcodeGallery,
 }
 
@@ -33,7 +32,7 @@ class BilRecoveredImageIntent {
 /// Only journeys that can safely re-enter without synthesizing user intent
 /// receive an automatic post-startup destination.
 ///
-/// Coach photos, community composition and barcode-gallery scanning return
+/// Community composition and barcode-gallery scanning deliberately return
 /// null: their surrounding draft/scanner state cannot be reconstructed from a
 /// bare image. Their recovered file remains quarantined for the same explicit
 /// journey instead of being delivered to an unrelated screen.
@@ -49,7 +48,6 @@ class BilImagePickerResumePolicy {
     BilImagePickerPurpose.mealPhoto when hasMealPhotoEntitlement =>
       '/daily-log?action=recovered-photo&from=%2Fdashboard',
     BilImagePickerPurpose.mealPhoto ||
-    BilImagePickerPurpose.coachFoodPhoto ||
     BilImagePickerPurpose.communityPost ||
     BilImagePickerPurpose.barcodeGallery => null,
   };

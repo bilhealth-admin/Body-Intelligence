@@ -132,6 +132,38 @@ class _CaloriesField extends StatelessWidget {
   );
 }
 
+class _MacroEditingNotice extends StatelessWidget {
+  const _MacroEditingNotice();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const Key('diet-macro-editing-notice'),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: const Color(0xFFF0F9FF),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFB9E6FE)),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.calculate_outlined, color: Color(0xFF026AA2)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            nutritionText(
+              context,
+              'Calories and macros balanced for you',
+              'تبقى السعرات ثابتة. عدّل الكربوهيدرات أو البروتين أو الدهون وسيوازن BIL القيمتين الأخريين ليبقى 4ك + 4ب + 9د مساويًا لهدفك.',
+            ),
+            style: const TextStyle(height: 1.4, color: Color(0xFF344054)),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _DietDayCard extends StatelessWidget {
   const _DietDayCard({
     required this.weekday,
@@ -139,7 +171,6 @@ class _DietDayCard extends StatelessWidget {
     required this.proteinController,
     required this.fatController,
     required this.target,
-    required this.invalidMacro,
     required this.enabled,
     required this.onCarbsChanged,
     required this.onProteinChanged,
@@ -150,7 +181,6 @@ class _DietDayCard extends StatelessWidget {
   final TextEditingController proteinController;
   final TextEditingController fatController;
   final DietMacroTarget? target;
-  final bool invalidMacro;
   final bool enabled;
   final ValueChanged<String> onCarbsChanged;
   final ValueChanged<String> onProteinChanged;
@@ -169,7 +199,7 @@ class _DietDayCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: target == null || invalidMacro
+          color: target == null
               ? const Color(0xFFFDA29B)
               : const Color(0xFFE4E7EC),
         ),
@@ -247,20 +277,20 @@ class _DietDayCard extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
-          if (target == null || invalidMacro)
+          if (target == null)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Text(
-                key: Key('diet-macro-energy-warning-$weekday'),
                 nutritionText(
                   context,
-                  'These macros exceed the fixed calorie target. Lower the edited value.',
-                  'تتجاوز هذه القيم هدف السعرات الثابت. خفّض القيمة التي أدخلتها.',
+                  'Fixed calories',
+                  'يجب أن تقع قيم الماكروز ضمن هدف السعرات الثابت: 4ك + 4ب + 9د.',
                 ),
                 style: const TextStyle(color: Color(0xFFB42318)),
               ),
-            ),
-          if (target != null) _MacroRail(target: target!),
+            )
+          else
+            _MacroRail(target: target!),
         ],
       ),
     );

@@ -1,10 +1,10 @@
 begin;
 
--- Meal-photo Vision is part of the shared AI Coach token meter. Keep the
+-- Meal-photo Vision is part of the shared AI Coach token meter.  Keep the
 -- historical function name because the Edge Function already calls it, but
 -- delegate to the canonical reservation authority so weekly/included Coach
--- tokens are consumed before non-expiring paid tokens. This preserves the
--- existing idempotency, expiry cleanup, monthly cap, and row-lock rules.
+-- tokens are consumed before non-expiring paid tokens.  This also preserves
+-- the existing idempotency, expiry cleanup, monthly cap, and row-lock rules.
 create or replace function public.bil_reserve_paid_ai_vision_usage(
   p_owner_id uuid,
   p_request_id text

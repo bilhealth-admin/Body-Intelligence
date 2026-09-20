@@ -1,40 +1,17 @@
 part of 'daily_log_page.dart';
 
+const _dailyLogInitialActions = <String>[
+  'barcode',
+  'voice',
+  'photo',
+  'recovered-photo',
+  'water',
+  'notes',
+  'exercise',
+  'quick-macros',
+];
+
 extension _DailyLogNavigationActions on _DailyLogPageState {
-  void _returnFromSelectedFoodToSearch() {
-    if (selectedFood == null) return;
-    _updateState(() {
-      selectedFood = null;
-      mealSearchActive = true;
-    });
-    _openFoodSearchAfterBuild();
-  }
-
-  void _focusMealEntry() {
-    final mealContext = mealEntryKey.currentContext;
-    if (!mounted || mealContext == null) return;
-    mealFocusApplied = true;
-    Scrollable.ensureVisible(
-      mealContext,
-      alignment: 0,
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _leaveMealDetail() {
-    if (widget.focusMealEntry) {
-      context.go(widget.returnPath ?? '/daily-log');
-      return;
-    }
-    _updateState(() {
-      selectedFood = null;
-      mealSearchActive = false;
-    });
-  }
-
   void _openFoodSearchAfterBuild([int attempt = 0]) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -52,6 +29,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     if (!mounted || initialActionApplied) return;
     final action = widget.initialAction;
     if (action == null || initialActionInFlight != null) return;
+    if (!_dailyLogInitialActions.contains(action)) return;
     initialActionApplied = true;
     initialActionInFlight = action;
     try {
@@ -61,7 +39,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
         case 'voice':
           await _captureMealVoice();
         case 'photo':
-          await _analyzeMealImage(directCamera: widget.directPhotoCapture);
+          await _analyzeMealImage();
         case 'recovered-photo':
           await _analyzeMealImage(recoveredOnly: true);
         case 'water':
@@ -76,41 +54,38 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
         case 'exercise':
           await _reveal(exerciseSectionKey);
         case 'quick-macros':
-          await _quickAddMacros();
+          await _quickAddMacrosV2();
       }
     } finally {
+      // Deep-linked capture actions are one-shot. Once the requested flow has
+      // returned (including cancellation), remove only `action` from the
+      // current Daily Log URL so a rebuild/resume cannot launch it again. Keep
+      // the validated `from` destination and every unrelated query parameter.
+      if (mounted && widget.initialAction == action) {
+        _consumeInitialAction(action);
+      }
       if (initialActionInFlight == action) initialActionInFlight = null;
       if (mounted && widget.initialAction != action) {
         initialActionApplied = false;
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => _applyInitialAction(),
         );
-      } else if (mounted &&
-          widget.initialAction == action &&
-          const {
-            'barcode',
-            'voice',
-            'photo',
-            'recovered-photo',
-            'notes',
-            'exercise',
-            'quick-macros',
-          }.contains(action)) {
-        // Consume one-shot Quick Add/deep-link actions after their flow has
-        // closed. Leaving `action=barcode` (or voice/photo) in the location
-        // means selecting the same action again can reuse the same GoRouter
-        // page with an unchanged `initialAction`, so didUpdateWidget has no
-        // change to dispatch and the user sees only Today. Preserve the safe
-        // return destination while clearing the action for the next request.
-        final cleanLocation = Uri(
-          path: '/daily-log',
-          queryParameters: {
-            if (widget.returnPath != null) 'from': widget.returnPath!,
-          },
-        ).toString();
-        context.go(cleanLocation);
       }
     }
+  }
+
+  void _consumeInitialAction(String action) {
+    final uri = GoRouter.of(context).routerDelegate.currentConfiguration.uri;
+    if (uri.path != '/daily-log' || uri.queryParameters['action'] != action) {
+      return;
+    }
+    final query = Map<String, String>.from(uri.queryParameters)
+      ..remove('action');
+    final cleanLocation = Uri(
+      path: '/daily-log',
+      queryParameters: query.isEmpty ? null : query,
+    ).toString();
+    context.go(cleanLocation);
   }
 
   Future<void> _reveal(GlobalKey key) async {
@@ -135,9 +110,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.calendar,
-              ),
+              leading: const Icon(Icons.history_rounded),
               title: Text(_tr('Previous day', 'اليوم السابق')),
               subtitle: Text(
                 _tr('Copy all meals from yesterday.', 'انسخ جميع وجبات الأمس.'),
@@ -145,9 +118,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
               onTap: () => Navigator.pop(sheetContext, 'previous'),
             ),
             ListTile(
-              leading: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.calendar,
-              ),
+              leading: const Icon(Icons.date_range_rounded),
               title: Text(_tr('Choose days', 'اختيار أيام')),
               subtitle: Text(
                 _tr(

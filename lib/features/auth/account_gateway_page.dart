@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,8 +47,7 @@ class _LegacyAccountGatewayPageState
     if (displayName.isNotEmpty) {
       await ref
           .read(preferencesRepositoryProvider)
-          .setMany(DisplayNameSync.localEdit(displayName));
-      unawaited(ref.read(displayNameSyncProvider).synchronize());
+          .set('displayName', displayName);
     }
     await ref
         .read(preferencesRepositoryProvider)

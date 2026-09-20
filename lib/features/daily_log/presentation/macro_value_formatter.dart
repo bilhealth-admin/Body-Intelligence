@@ -1,7 +1,7 @@
-/// Formats diary macro grams as a compact whole-number display.
+/// Formats diary macro grams for the compact diary summary.
 ///
-/// Calculations and persisted values remain doubles; rounding happens only at
-/// the final presentation boundary so summaries never expose noisy decimals.
+/// The underlying nutrition value remains precise; this helper only controls
+/// the displayed whole-gram value so compact rows do not grow fractional text.
 String formatDiaryMacroGrams(double value) {
   if (!value.isFinite || value < 0) return '—';
   return value.round().toString();

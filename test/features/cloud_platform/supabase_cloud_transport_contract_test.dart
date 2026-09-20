@@ -27,9 +27,7 @@ void main() {
       'lib/features/cloud_platform/services/supabase_cloud_transport.dart',
     ).readAsStringSync();
     expect(source, contains('implements CloudTransport'));
-    expect(source, contains('requestTimeout = const Duration(seconds: 20)'));
-    expect(source, contains('.timeout(requestTimeout)'));
-    expect(source, contains("'bil_sync_records'"));
+    expect(source, contains("client.rpc(\n      'bil_sync_records'"));
     expect(source, contains('user.id != ownerId'));
     expect(source, contains('session.deviceId != deviceId'));
     expect(

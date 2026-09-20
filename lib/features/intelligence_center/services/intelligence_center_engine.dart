@@ -2,7 +2,6 @@ import '../../ai_platform/domain/ai_coach_response.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../domain/intelligence_action.dart';
 import '../domain/intelligence_message.dart';
-import '../ai_coach_safety_copy.dart';
 import '../intelligence_locale_copy.dart';
 import 'external_knowledge_provider.dart';
 import 'intelligence_health_context_provider.dart';
@@ -29,8 +28,7 @@ class IntelligenceCenterEngine {
         _isGreeting(normalized) ||
         _looksUrgent(normalized) ||
         _looksLikeDiagnosis(normalized) ||
-        question.length > 500 ||
-        const CoachSpeechPolicy().isSleepQuestion(question);
+        question.length > 500;
   }
 
   bool isGreetingQuestion(String question) =>
@@ -129,46 +127,29 @@ class IntelligenceCenterEngine {
       );
     }
 
-    final sleep = _answerSleepDuration(question, replyLocale);
-    if (sleep != null) return sleep;
-    final weight = _answerRecordedWeight(question, replyLocale, coachContext);
-    if (weight != null) return weight;
-    final target = _answerDailyTarget(normalized, replyLocale, coachContext);
-    if (target != null) return target;
-    // A short voice greeting is fully local. This prevents a transient cloud
-    // outage from turning a simple spoken "كيفك"/"good evening" into a 30s
-    // service error while leaving typed greetings on the consented model path.
-    final local =
-        (inputChannel == CoachInputChannel.voice && _isGreeting(normalized)) ||
-            isTransliteratedArabicGreeting(normalized)
-        ? const LocalCoachResult(actions: [], processedOnDevice: true)
-        : await localApi.understand(
-            LocalCoachRequest(
-              text: question,
-              locale: coachLanguage.languageTag,
-              languageDetected: coachLanguage.detected,
-              channel: inputChannel,
-              conversation: conversation,
-            ),
-          );
-    if (local.serviceStatus != CoachServiceStatus.ready) {
-      if (local.serviceStatus != CoachServiceStatus.safetyBlocked &&
-          _isGreeting(normalized)) {
-        return _reply(
-          tr(
-            'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
-            'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
-          ),
-          serviceStatus: local.serviceStatus,
-          runtime: CoachAnswerRuntime.localFallback,
-        );
-      }
-      return _serviceStatusReply(replyLocale, local.serviceStatus);
+    // Exact local lookups remain available for the deliberately on-device
+    // engine. The model-backed engine must receive personal coaching and
+    // analysis questions first; otherwise these shortcuts can return a local
+    // value before the cloud answer has a chance to explain it.
+    if (localApi is DeterministicLocalCoachApi) {
+      final sleep = _answerSleepDuration(question, replyLocale);
+      if (sleep != null) return sleep;
+      final weight = _answerRecordedWeight(question, replyLocale, coachContext);
+      if (weight != null) return weight;
+      final target = _answerDailyTarget(normalized, replyLocale, coachContext);
+      if (target != null) return target;
     }
+    final local = await localApi.understand(
+      LocalCoachRequest(
+        text: question,
+        locale: coachLanguage.languageTag,
+        languageDetected: coachLanguage.detected,
+        channel: inputChannel,
+        conversation: conversation,
+      ),
+    );
     // A model answer may include an action. Preserve the answer and its
-    // provenance; an action must not replace it with local-command copy. The
-    // service-status gate above ensures rejected provider payloads can never
-    // leak an answer, speech, or action into the conversation.
+    // provenance; an action must not replace it with local-command copy.
     final hasAnswer = local.answer?.trim().isNotEmpty == true;
     if (local.actions.isNotEmpty && !hasAnswer) {
       return _reply(
@@ -201,6 +182,19 @@ class IntelligenceCenterEngine {
         actions: local.actions,
       );
     }
+    if (local.serviceStatus != CoachServiceStatus.ready) {
+      if (_isGreeting(normalized)) {
+        return _reply(
+          tr(
+            'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
+            'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
+          ),
+          serviceStatus: local.serviceStatus,
+          runtime: CoachAnswerRuntime.localFallback,
+        );
+      }
+      return _serviceStatusReply(replyLocale, local.serviceStatus);
+    }
     if (_isGreeting(normalized)) {
       return _plain(
         tr(
@@ -218,13 +212,11 @@ class IntelligenceCenterEngine {
       );
     }
     if (_has(normalized, const ['hydration', 'hydrate', 'dehydration'])) {
-      return _reply(
+      return _plain(
         tr(
           'Sip water regularly across the day and use thirst plus pale-yellow urine as practical hydration cues. Needs vary with heat, exercise, pregnancy, medicines, and health conditions.',
           'اشرب الماء بانتظام خلال اليوم، واستخدم العطش ولون البول الأصفر الفاتح كإشارتين عمليتين للترطيب. تختلف الاحتياجات مع الحرارة والتمرين والحمل والأدوية والحالات الصحية.',
         ),
-        evidence: const ['Dietary Reference Intakes (water)'],
-        confidence: .85,
       );
     }
     if (_isPlanRequest(normalized)) {
@@ -344,10 +336,6 @@ class IntelligenceCenterEngine {
     String locale,
     CoachContextSnapshot? context,
   ) {
-    // Only a direct target lookup is a local shortcut. Mentioning protein in
-    // a meal-choice, remaining-intake or comparison question is not a request
-    // to repeat the full daily target (including the daily brief's CTA).
-    if (!_isDailyTargetLookup(question)) return null;
     final raw = context?.computedHealth['dailyTargets'];
     if (raw is! Map) return null;
     final targets = Map<String, Object?>.from(raw);
@@ -414,36 +402,6 @@ class IntelligenceCenterEngine {
     return null;
   }
 
-  bool _isDailyTargetLookup(String question) {
-    final text = question
-        .replaceAll(RegExp(r'[أإآ]'), 'ا')
-        .replaceAll(RegExp(r'[?؟.!،]'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-    return const {
-          'protein',
-          'calories',
-          'calorie',
-          'kcal',
-          'بروتين',
-          'البروتين',
-          'سعرات',
-          'السعرات',
-          'how much protein do i need',
-          'how many calories do i need',
-          'كم احتاج بروتين',
-          'كم احتاج من البروتين',
-          'كم احتاج سعرات',
-          'كم احتاج من السعرات',
-        }.contains(text) ||
-        RegExp(
-          r"^(?:(?:what is|what's|show me) )?(?:(?:my|the) )?(?:(?:current|saved|daily) )*(?:protein|calorie|calories|kcal) (?:target|goal)(?: today| per day)?$",
-        ).hasMatch(text) ||
-        RegExp(
-          r'^(?:(?:ما هو|ما|كم|اعرض) )?(?:هدف|هدفي|احتياجي)(?: اليومي)?(?: من)? (?:البروتين|بروتين|السعرات|السعرات الحرارية)(?: اليومي| اليوم)?$',
-        ).hasMatch(text);
-  }
-
   IntelligenceCenterReply? _answerRecordedWeight(
     String question,
     String locale,
@@ -494,7 +452,7 @@ class IntelligenceCenterEngine {
     );
     return _reply(
       text,
-      evidence: const ['Recommended sleep duration for adults (PubMed)'],
+      evidence: const ['general adult sleep-duration guidance'],
       confidence: .85,
       spokenText: text,
     );
@@ -554,10 +512,9 @@ class IntelligenceCenterEngine {
         'استهلكت حصة المدرب الذكي لهذه الفترة. لم تُحتسب هذه الرسالة، ولن أدّعي أن الرد صادر من Gemini.',
       ),
       CoachServiceStatus.creditsRequired => tr(
-        'Your available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue.',
-        'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أضف توكنات AI Boost للمتابعة.',
+        'Your available AI tokens are exhausted. No message was charged. Reactivate the smart coach with Premium AI Coach or add AI Boost tokens.',
+        'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أعد تفعيل المدرب الذكي عبر Premium AI Coach أو أضف توكنات AI Boost.',
       ),
-      CoachServiceStatus.safetyBlocked => AiCoachSafetyCopy.resolve(locale),
       CoachServiceStatus.temporarilyUnavailable => tr(
         'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
         'المدرب الذكي المخصص غير متاح مؤقتًا. لم تُحتسب الرسالة؛ حاول مجددًا بعد قليل.',
@@ -571,6 +528,15 @@ class IntelligenceCenterEngine {
       evidence: const ['AI Coach service status'],
       actions: status == CoachServiceStatus.creditsRequired
           ? [
+              IntelligenceAction(
+                id: 'open-ai-coach-subscription',
+                type: IntelligenceActionType.openAiCoachSubscription,
+                // The exhausted-credit message above already names the tier.
+                // Keep the route-wide Premium label budget at one while the
+                // action remains explicit about its destination.
+                label: tr('View membership plans', 'عرض خطط العضوية'),
+                requiresConfirmation: false,
+              ),
               IntelligenceAction(
                 id: 'buy-ai-boost',
                 type: IntelligenceActionType.buyAiBoost,

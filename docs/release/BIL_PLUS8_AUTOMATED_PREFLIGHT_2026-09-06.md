@@ -1,9 +1,8 @@
 # BIL +8 automated preflight — 2026-09-06
 
-## Historical pre-advertising-reopen scope and result
+## Scope and result
 
-The initial local source preflight passed after the corrections and explicit
-reruns below. It does not certify the subsequent advertising corrections.
+Local source preflight passed after the corrections and explicit reruns below.
 This is not a signed-artifact, native-device, store-approval, or zero-defect claim.
 The owner waived further simulator prerequisites, not signing, entitlements,
 production configuration, or artifact verification. Only `1.0.0+8` may be built;
@@ -11,89 +10,6 @@ existing store build 7 must not be promoted.
 
 Host: Windows; Flutter 3.44.6 stable, Dart 3.12.2. Raw logs are retained outside
 the repository at `G:/BIL_Temp/plus8-preflight-20260906/`.
-
-## Latest whole-project run after advertising corrections
-
-The owner requested the entire project, including the existing nonportable
-exclusions. The immutable local run invoked all 895 discovered Flutter test
-files: 866 portable and all 29 historical CI exclusions. Performance ran first
-with one worker under unchanged budgets. No golden was updated, no timeout
-increased, and no new exclusion added. All batches reached a terminal result.
-
-Portable: 4,006 passed, one failed, one skipped. The failure is the correct
-freeze-manifest sentinel: the reopened manifest explicitly still said two
-unresolved items and NO acceptance. It must only pass after genuine renewed
-acceptance; the test/parser is not weakened. The skipped public-video range
-test requires explicit live-network opt-in and is not counted as passed.
-
-Historical local-review exclusions: 274 passed and 83 failed test completions.
-Failures include deliberately excluded artifact prerequisites and real legacy
-golden mismatches; this is NOT an all-green whole-project result. Loading errors
-and the per-file visual classification must be considered separately. Existing
-reviewed exclusions are not silently converted into release passes or removed.
-The overall runner correctly returned exit 1. Subsequent focused corrections
-and the exact-SHA CI result are separate acceptance evidence.
-
-Evidence: `whole-project-post-ads/results.json`, all 17 JSONL logs and
-`inventory.json` in the external evidence root. The final local-review log SHA
-is `85bb606831f9c73e056295a2ec596404be3a06992912f6feb8c8fcbb2ac4dd07`.
-Whole-source analysis before the final deferred-build delta: no issues (126.2 s),
-SHA `e262282379aaadf46755d14c7d605c861bbb71daa937ffaba9d4864f1aee6050`.
-
-Other local suites: Python 72/72, Node 71/71, and Deno 132/132 with an effective
-temporary lock. Canonical Deno frozen-lock preflight exposed two missing JSR
-test dependency entries before execution; the 13-line lock correction pins only
-those already cached test packages. The canonical cached-only frozen rerun then
-passed 132/132 in 6 seconds, without network or lock modification; final lock SHA
-`1232c5c79059d1ccb74772022081a5bb5b55701fde94bf02f4ec936aaa882c15`.
-These mocked/offline suites are not new deployed-backend evidence.
-
-The owner explicitly accepted upload with AdMob deferred and a later update.
-The deferred native helper passed 14/14 tests, and the real runtime disabled
-channel-boundary test passed 2/2 for Android/iOS platform variants. The full
-current ads suite and updated workflow/commerce contracts passed 96/96 after
-deferred configuration integration (`deferred-final-ads-contracts.log`).
-Historical totals below are preserved.
-
-Final signing/platform contracts passed 35/35. The first additional live check
-remained skipped because the opt-in had been supplied as an environment variable
-instead of its required Dart define; no pass was claimed for that attempt.
-The exact compile-time opt-in rerun then passed the real public 32-byte video
-range request plus both disabled-runtime variants (3/3, zero skips).
-Formatting checked 1,978 files with zero changes. Final analysis initially found
-one redundant test-only import; removing it was followed by clean whole-source
-analysis (20.5 s) and the same 3/3 runtime/live result. No production code changed
-to fix the test platform-cleanup or redundant-import issues.
-
-| Final log | SHA-256 |
-| --- | --- |
-| `deferred-final-ads-contracts.log` | `70a15c3e1f8144129ebab20a8a93bc119805111e177f0a1f510dd8f92d56f316` |
-| `deferred-final-signing-live.log` (35 pass, explicit skip) | `c3534f4d4b1ea5bd05c4566b3a535fec8f04b55a107338a7da71d79028f46671` |
-| `deferred-final-format.log` | `0df66ad056425599153a2937723c2632f4d089c99d061365322143563430e2a9` |
-
-All these logs are outside the release source tree; later exact-SHA CI must
-rerun the portable source suite and verify final signed artifacts independently.
-
-### Explicit classification of the 29 historical exclusions
-
-Twelve files passed all cases. Five files contained 69 actual pixel mismatches:
-store screenshots (5), workout reference (2), premium dashboard (4), actual data
-pages (22), and actual production pages (36). Twelve files lacked 14 excluded
-artifact/script/approved-artwork prerequisites. There was no additional runtime
-crash/exception category. The five golden test files and their reference images
-are byte-unchanged from the accepted base, as are all non-advertising production
-pages. Current ad defaults remain closed for these fixtures. Root inspected the
-advertising-page master/current images: the 1.71% difference is the earlier
-approved green semantic shield and spacing replacing the legacy gray glyph;
-labels, inactive-provider state and layout remain intact. No golden was updated.
-
-These mismatches remain legacy regression-baseline review debt, not blanket
-visual acceptance. The existing portable exclusion policy is unchanged and the
-69 cases are not advertised as passes. Eight tracked generated workout failure
-PNGs are preserved locally as diagnostic evidence but excluded from staging;
-their accepted-base blobs remain in the committed source. None of the original
-22 deliberately retired assets was restored. No other original preserve-only
-path entered the new release delta.
 
 ## Complete portable inventory and first execution
 
@@ -189,44 +105,3 @@ Both jobs rerun the portable suite from the immutable candidate, then validate
 their signed artifacts. Store upload, TestFlight, review submission, and public
 availability must each be reported from their own actual results. Apple public
 release remains manual; Google production-access review is a separate decision.
-
-## First clean GitHub execution and bounded correction
-
-The initial clean commit `1888807bd2011f1970f16eee5effdeb882aff639` ran on
-Android `34021076234` and iOS `34021077842`. Both completed unsuccessfully at
-the portable suite: **3,958 passed, one failed, one skipped**. Signing inputs
-and prior configuration gates passed, but signed artifact construction and
-store upload did not start. Do not report these runs as successful builds.
-
-Both failed the same stale assertion at line 62 of
-`test/features/nutrition_plans/nutrition_pathway_access_badge_test.dart`, which
-expected repeated visible Premium text inside each paid card. Existing
-application code deliberately keeps one page-level label and localized access
-labels on semantic icons. The corrected test verifies that intended behavior
-instead of restoring duplicated UI text.
-
-The correction retains free-plan visible text, correct icons, English/Arabic,
-hero and compact layouts, 1.6 text scale, scrolling and exception checks. It
-adds exact icon semantic labels and a single access-label line in the actual
-merged tappable-card semantics. The first local attempt assumed an isolated
-icon semantics node; Flutter correctly merged it with the card description.
-The second attempt exposed a redundant manually-created semantics handle.
-Both harness assumptions were corrected; the final test uses Flutter's own
-`semanticsEnabled: true` lifecycle. Their failed logs remain retained rather
-than represented as passes.
-
-Final command: `flutter test --no-pub` with the access-badge, pathways-contract,
-access-policy, and semantic-icon-spacing test files: **19/19 passed**.
-`dart analyze` on the modified file: **No issues found**. Formatting: one file,
-zero changes. No production source, dependency, CI step, exclusion or budget
-was changed. Both entire CI workflows must be rerun from the follow-up commit.
-
-| Retained log | SHA-256 |
-| --- | --- |
-| candidate-premium-semantic-verified.log | bf13161bd791365776439fe94e086692686f5273f87bf777ff5ce09df960e213 |
-| candidate-premium-semantic-analyze.log | b79d2097625d56e75afcfd49583a3d04232ab4f3ba0433b7804da23d5ecc4837 |
-| ios-run-34021077842-job-101453661896.log | 18be94941e50be7b6c1d4d90fd5cbb4d7445b88ea1f4984d8230a06f6efee17b |
-
-Logs are retained under `G:\BIL_Temp\plus8-preflight-20260906`. The skipped
-opt-in live-network test was already run explicitly and passed in the earlier
-local evidence; its default CI skip is not counted as a pass.

@@ -61,14 +61,11 @@ final registeredAdultFreeAdAudienceProvider = Provider<bool>((ref) {
       ref.watch(adAgeEligibilityProvider) == AdAgeEligibility.adult;
 });
 
-final contextualAdGatewayProvider = Provider<ContextualAdGateway>((ref) {
-  final gateway = AdMobContextualAdGateway(
+final contextualAdGatewayProvider = Provider<ContextualAdGateway>(
+  (ref) => AdMobContextualAdGateway(
     adultConfirmed: () => ref.read(registeredAdultFreeAdAudienceProvider),
-    accountKey: () => ref.read(verifiedEntitlementOwnerProvider).asData?.value,
-  );
-  ref.onDispose(gateway.dispose);
-  return gateway;
-});
+  ),
+);
 
 final adPolicyProvider = Provider<AdPolicy>((ref) => const AdPolicy());
 

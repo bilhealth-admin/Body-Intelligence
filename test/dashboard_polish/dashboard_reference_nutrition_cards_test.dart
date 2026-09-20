@@ -1,7 +1,5 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_community_review.dart';
-import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_preferences_provider.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/premium_dashboard_benchmark.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-Widget _dashboard({bool discoverOnly = false}) => SingleChildScrollView(
+Widget _dashboard() => SingleChildScrollView(
   padding: const EdgeInsets.all(16),
   child: PremiumDashboardBenchmark(
     arabic: false,
@@ -39,76 +37,18 @@ Widget _dashboard({bool discoverOnly = false}) => SingleChildScrollView(
     fatGoal: 70,
     proteinConsumed: 62,
     proteinGoal: 135,
-    visibleSections: discoverOnly
-        ? const {DashboardSectionIds.discover}
-        : const {
-            DashboardSectionIds.aiCoach,
-            DashboardSectionIds.connectedHealth,
-            DashboardSectionIds.calories,
-            DashboardSectionIds.macros,
-          },
+    visibleSections: const {
+      DashboardSectionIds.aiCoach,
+      DashboardSectionIds.connectedHealth,
+      DashboardSectionIds.calories,
+      DashboardSectionIds.macros,
+    },
     premiumUnlocked: true,
   ),
 );
 
 void main() {
   for (final locale in AppLocalizations.supportedLocales) {
-    testWidgets(
-      '${locale.toLanguageTag()} workout tile opens videos and routines at 1.6x',
-      (tester) async {
-        tester.view.physicalSize = const Size(390, 844);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-        final router = GoRouter(
-          routes: [
-            GoRoute(
-              path: '/',
-              builder: (_, _) => Scaffold(body: _dashboard(discoverOnly: true)),
-            ),
-            GoRoute(
-              path: '/wellness/workouts/routines',
-              builder: (_, _) =>
-                  const Scaffold(body: Text('Workout library route reached')),
-            ),
-          ],
-        );
-        addTearDown(router.dispose);
-        await tester.pumpWidget(
-          ProviderScope(
-            child: MaterialApp.router(
-              locale: locale,
-              routerConfig: router,
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              builder: (context, child) => MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(textScaler: const TextScaler.linear(1.6)),
-                child: child!,
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-        final label = CommunityReviewCopy.resolve(
-          'Workout videos',
-          BilLocalePolicy.canonicalTag(locale),
-        )!;
-        final tile = find.text(label);
-        await tester.ensureVisible(tile);
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        await tester.tap(tile);
-        await tester.pumpAndSettle();
-        expect(find.text('Workout library route reached'), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      },
-    );
     testWidgets(
       '${locale.toLanguageTag()} uses reference calorie and macro rows at 1.6x',
       (tester) async {
@@ -200,40 +140,6 @@ void main() {
         expect(remainingValue.textSpan?.toPlainText(), '1460');
         expect(remainingValue.textDirection, TextDirection.ltr);
 
-        final todayAction = find.byKey(
-          const Key('dashboard-reference-calories-edit'),
-        );
-        expect(todayAction, findsOneWidget);
-        expect(
-          find.descendant(of: calories, matching: find.byType(TextButton)),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: calories, matching: find.byType(IconButton)),
-          findsNothing,
-        );
-        if (locale.languageCode == 'en') {
-          expect(find.text('Calories'), findsOneWidget);
-          expect(find.text('Today'), findsOneWidget);
-          final caloriesTitle = tester.widget<Text>(
-            find.descendant(of: calories, matching: find.text('Calories')),
-          );
-          final todayLabel = tester.widget<Text>(
-            find.descendant(of: calories, matching: find.text('Today')),
-          );
-          expect(todayLabel.style?.fontSize, caloriesTitle.style?.fontSize);
-          expect(todayLabel.style?.fontWeight, caloriesTitle.style?.fontWeight);
-          expect(
-            todayLabel.style?.letterSpacing,
-            caloriesTitle.style?.letterSpacing,
-          );
-          await tester.tap(todayAction);
-          await tester.pumpAndSettle();
-          expect(router.routeInformationProvider.value.uri.path, '/daily-log');
-          router.go('/');
-          await tester.pumpAndSettle();
-        }
-
         final carousel = find.byKey(
           const Key('dashboard-calories-macros-horizontal'),
         );
@@ -267,12 +173,9 @@ void main() {
           ),
           findsNothing,
         );
-        expect(find.text('85 g'), findsOneWidget);
-        expect(find.text('28 g'), findsOneWidget);
-        expect(find.text('62 g'), findsOneWidget);
-        expect(find.textContaining('/ 260', findRichText: true), findsNothing);
-        expect(find.textContaining('/ 70', findRichText: true), findsNothing);
-        expect(find.textContaining('/ 135', findRichText: true), findsNothing);
+        expect(find.text('85 g / 260'), findsOneWidget);
+        expect(find.text('28 g / 70'), findsOneWidget);
+        expect(find.text('62 g / 135'), findsOneWidget);
         if (!const {
           'ar',
           'en',

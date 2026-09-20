@@ -13,20 +13,7 @@ void main() {
     final source = files
         .map((path) => File(path).readAsStringSync())
         .join('\n');
-    // The approved compact fitness group emphasizes only its numeric weight
-    // value. All headings, labels and body copy keep the lighter hierarchy.
-    final numericWeightStyle = RegExp(
-      r'Text\(\s*value!,\s*textDirection: TextDirection\.ltr,\s*'
-      r'style: Theme\.of\(context\)\.textTheme\.labelMedium\s*'
-      r'\?\.copyWith\(\s*fontWeight: FontWeight\.w800,\s*'
-      r'fontSize: 14,\s*\),\s*\)',
-    );
-    final dailyReturn = File(files[2]).readAsStringSync();
-    expect(numericWeightStyle.allMatches(dailyReturn), hasLength(1));
-    expect(
-      source.replaceAll(numericWeightStyle, ''),
-      isNot(contains('FontWeight.w800')),
-    );
+    expect(source, isNot(contains('FontWeight.w800')));
     expect(source, isNot(contains('FontWeight.w900')));
     expect(source, contains('FontWeight.w700'));
     expect(source, contains('letterSpacing: -0.15'));

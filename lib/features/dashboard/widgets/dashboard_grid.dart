@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
+import '../../../engine/body_composition_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
@@ -30,7 +31,6 @@ import '../domain/dashboard_intelligence_composer.dart';
 import '../domain/dashboard_decision_explanation.dart';
 import '../domain/dashboard_trusted_body_twin_adapter.dart';
 import '../domain/dashboard_runtime_state.dart';
-import '../domain/dashboard_step_trend.dart';
 import '../domain/nutrient_dashboard.dart';
 import '../presentation/dashboard_intelligence_localizer.dart';
 import '../presentation/dashboard_body_twin_copy.dart';
@@ -41,14 +41,14 @@ import 'dashboard_data_gate.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'dashboard_motion_reveal.dart';
 import 'dashboard_profile_required_card.dart';
+import 'dashboard_summary_factory.dart';
 import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
+import 'personal_health_ai_panel.dart';
 
 part 'dashboard_unprofiled_reference.dart';
 
 part 'dashboard_nutrient_goal_cards.dart';
-
-part 'dashboard_grid_actions.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key, this.hero});
@@ -147,11 +147,8 @@ class DashboardGrid extends ConsumerWidget {
         onRetry: () => DashboardRetry.invalidate(ref),
       );
     }
-    if ((nutrientGoalCardsAsync.isLoading &&
-            !nutrientGoalCardsAsync.hasValue) ||
-        nutrientGoalStates.values.any(
-          (state) => state.isLoading && !state.hasValue,
-        )) {
+    if (nutrientGoalCardsAsync.isLoading ||
+        nutrientGoalStates.values.any((state) => state.isLoading)) {
       return const DashboardLoadingSkeleton();
     }
     if (nutrientGoalCardsAsync.hasError ||
@@ -184,7 +181,7 @@ class DashboardGrid extends ConsumerWidget {
       );
     }
     final planAsync = ref.watch(planSettingProvider(profile.uuid));
-    if (planAsync.isLoading && !planAsync.hasValue) {
+    if (planAsync.isLoading) {
       return const DashboardLoadingSkeleton();
     }
     final weights = weightsAsync.value ?? const [];
@@ -209,7 +206,7 @@ class DashboardGrid extends ConsumerWidget {
         ),
     ];
     double? evidenced(TrackedNutrient nutrient) =>
-        NutrientDashboardEvidence.total(nutrientSamples, nutrient).value;
+        NutrientDashboardEvidence.partialTotal(nutrientSamples, nutrient).value;
     final persistedSodiumGoal = nutrientGoals[DashboardNutrientGoalIds.sodium];
     final persistedFiberGoal = nutrientGoals[DashboardNutrientGoalIds.fiber];
     final persistedPotassiumGoal =
@@ -224,14 +221,6 @@ class DashboardGrid extends ConsumerWidget {
     final dailyLogs = dailyLogsAsync.value ?? const [];
     final allContexts = allContextsAsync.value ?? const [];
     final now = clock();
-    final connectedHealthSnapshot = ref.watch(connectedHealthProvider).value;
-    final stepTrend = DashboardStepTrend.fromEvidence(
-      now: now,
-      connected: connectedHealthSnapshot,
-      localReadings: dailyLogs.map(
-        (entry) => (day: entry.date, steps: entry.steps?.toDouble()),
-      ),
-    );
     final canonicalIntelligence = ref.watch(productIntelligenceOutputProvider);
     final goalSchedule =
         ref.watch(nutritionGoalScheduleProvider).value ??
@@ -259,6 +248,10 @@ class DashboardGrid extends ConsumerWidget {
     final calories = dashboardSnapshot.calories;
     final protein = dashboardSnapshot.protein;
     final fats = dashboardSnapshot.fats;
+    final currentWeight = dashboardSnapshot.currentWeightKg;
+    final fiberEvidence = dashboardSnapshot.fiberEvidence;
+    final bil = dashboardSnapshot.bil;
+    final bodyComposition = dashboardSnapshot.bodyComposition;
     final effectiveTargets = dashboardSnapshot.effectiveTargets;
     final savedMacroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
     final macroGramGoals = scheduledTarget == null
@@ -292,7 +285,7 @@ class DashboardGrid extends ConsumerWidget {
         ref.watch(exerciseCaloriePreferencesProvider).value ??
         const ExerciseCaloriePreferences();
     final exerciseEnergy = authoritativeExerciseEnergyForDay(
-      connectedHealthSnapshot,
+      ref.watch(connectedHealthProvider).value,
       now,
     );
     final exerciseAdjustedTargets = ExerciseCaloriePolicy.calculate(
@@ -313,6 +306,7 @@ class DashboardGrid extends ConsumerWidget {
       ),
       energy: exerciseEnergy,
     );
+    final loggingStreak = dashboardSnapshot.loggingStreak;
     final intelligence = dashboardSnapshot.intelligence;
     final honesty = dashboardSnapshot.honesty;
     final bestAction = dashboardSnapshot.bestAction;
@@ -352,6 +346,10 @@ class DashboardGrid extends ConsumerWidget {
     ).forLocale(BilLocalePolicy.canonicalTag(Localizations.localeOf(context)));
     final firstBodyTwinReading =
         trustedTwin.canExposeBodyTwin && chronologicalWeights.length == 1;
+    String compositionValue(
+      BodyCompositionMetric metric, {
+      required String unit,
+    }) => localizer.compositionValue(metric, unit: unit);
     final canonicalOutput = canonicalIntelligence.value;
     final canonicalAction = canonicalOutput?.brainResult.selectedAction;
     final localizedBestTitle = canonicalOutput == null
@@ -410,6 +408,71 @@ class DashboardGrid extends ConsumerWidget {
       tr: tr,
     );
 
+    Future<void> addWater(int amountMl) async {
+      await hydrationCommand.addWater(amountMl);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(
+                '$amountMl ml added to today.',
+                'تمت إضافة $amountMl مل إلى اليوم.',
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    void openCanonicalAction() {
+      switch (canonicalAction?.id) {
+        case 'continue-plan':
+          context.push('/plan?origin=dashboard');
+        case 'increase-protein':
+        case 'rebalance-electrolytes':
+          context.go('/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard');
+        case 'protect-sleep':
+        case 'increase-activity':
+          context.go('/daily-log?from=%2Fdashboard');
+        case 'audit-plateau-inputs':
+          context.go('/analytics');
+        case null:
+          break;
+        default:
+          context.push('/intelligence-center');
+      }
+    }
+
+    final healthAi = dashboardSnapshot.personalHealthAi;
+    final personalHealthAiPanel = PersonalHealthAiPanel(
+      snapshot: healthAi,
+      arabic: arabic,
+      todayHasMeals: meals.isNotEmpty,
+      decisionCount: memoriesAsync.value?.length ?? 0,
+      compact: MediaQuery.sizeOf(context).width < 600,
+    );
+    final progressSection = DashboardSummaryFactory.build(
+      tr: tr,
+      arabic: arabic,
+      loggingStreak: loggingStreak,
+      mealsEmpty: meals.isEmpty,
+      calories: calories.round(),
+      protein: protein.round(),
+      fats: fats.round(),
+      fiber: fiberEvidence.total,
+      dailyRequirement: bil.tdee.round(),
+      weight: UnitConverter.weightFromKg(
+        currentWeight,
+        system,
+      ).toStringAsFixed(1),
+      weightUnit: UnitConverter.weightUnit(system),
+      bodyFat: compositionValue(bodyComposition.bodyFatPercentage, unit: ''),
+      bodyFatUnit: bodyComposition.bodyFatPercentage.isAvailable ? '%' : '',
+      fatFreeMass: bodyComposition.fatFreeMassKg.isAvailable
+          ? '${UnitConverter.weightFromKg(bodyComposition.fatFreeMassKg.value!, system).toStringAsFixed(1)} '
+                '${UnitConverter.weightUnit(system)}'
+          : '—',
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -438,12 +501,7 @@ class DashboardGrid extends ConsumerWidget {
               extra: decisionExplanation,
             ),
             onAction: canonicalOutput != null
-                ? (canonicalAction == null
-                      ? null
-                      : () => _openDashboardCanonicalAction(
-                          context,
-                          canonicalAction.id,
-                        ))
+                ? (canonicalAction == null ? null : openCanonicalAction)
                 : dailyReturn.hasPrimaryAction
                 ? () {
                     switch (bestAction.type) {
@@ -455,12 +513,7 @@ class DashboardGrid extends ConsumerWidget {
                           '/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard',
                         );
                       case BestActionType.hydration:
-                        _addDashboardWater(
-                          context: context,
-                          command: hydrationCommand,
-                          tr: tr,
-                          amountMl: 250,
-                        );
+                        addWater(250);
                       case BestActionType.holdPlan:
                       case BestActionType.none:
                         break;
@@ -486,17 +539,14 @@ class DashboardGrid extends ConsumerWidget {
               onMealsTap: () => context.go(
                 '/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard',
               ),
-              onWaterTap: () =>
-                  context.go('/daily-log/water?from=%2Fdashboard'),
+              onWaterTap: () => context.go('/daily-log?from=%2Fdashboard'),
             ),
+            progressSection: progressSection,
+            personalHealthAi: personalHealthAiPanel,
             connectedHealth: ConnectedHealthCard(
               languageCode: Localizations.localeOf(context).languageCode,
               compact: MediaQuery.sizeOf(context).width < 600,
               dashboardCompact: MediaQuery.sizeOf(context).width < 600,
-              // These owner-retired body-composition metrics remain available
-              // in Connected Health, but never surface inside Dashboard on
-              // either phone or wide tablet/iPad layouts.
-              hiddenSignalKeys: const <String>{'bodyFat', 'leanMass'},
             ),
             bodyTwinSummary: twinCopy.summary,
             bodyTwinEvidence: twinCopy.evidence,
@@ -591,9 +641,13 @@ class DashboardGrid extends ConsumerWidget {
                 .toList(growable: false)
                 .reversed
                 .toList(growable: false),
-            stepTrendValues: stepTrend.values,
-            todaySteps: stepTrend.today,
-            stepSourceName: stepTrend.source,
+            stepTrendValues: dailyLogs
+                .where((entry) => entry.steps != null)
+                .take(30)
+                .map((entry) => entry.steps!.toDouble())
+                .toList(growable: false)
+                .reversed
+                .toList(growable: false),
             weightUnit: UnitConverter.weightUnit(system),
             visibleSections: visibleSections,
             premiumUnlocked: premiumUnlocked,

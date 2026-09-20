@@ -158,7 +158,7 @@ void main() {
   );
 
   test(
-    'dashboard fitness widget keeps live readings inside the watch and card is the navigation target',
+    'dashboard fitness widget keeps live readings inside the watch and link below',
     () {
       final source = File(
         'lib/features/connected_health/widgets/connected_health_card.dart',
@@ -169,11 +169,10 @@ void main() {
       expect(source, contains('showMetrics: true'));
       expect(source, contains('onStepsTap:'));
       expect(source, contains('onHeartTap:'));
-      expect(source, contains("Key('dashboard-compact-health-hub')"));
+      expect(source, contains("Key('dashboard-fitness-link-action')"));
       final watch = source.indexOf("Key('dashboard-live-fitness-watch-slot')");
-      final hub = source.lastIndexOf("Key('dashboard-compact-health-hub')");
-      expect(watch, greaterThan(hub));
-      expect(source, isNot(contains('Manage fitness sources')));
+      final link = source.lastIndexOf("Key('dashboard-fitness-link-action')");
+      expect(link, greaterThan(watch));
     },
   );
 

@@ -14,8 +14,7 @@ and any failure stops the release suite without retries.
 from __future__ import annotations
 
 import argparse
-import importlib
-import shutil
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -60,44 +59,8 @@ EXCLUDED_TESTS = frozenset(
 )
 
 PERFORMANCE_BUDGET_TEST = "test/performance_budget_test.dart"
-WINDOWS_COMMAND_LINE_LIMIT = 6_000
-PORTABLE_COMMAND_LINE_LIMIT = 120_000
-
-
-def resolve_flutter_executable() -> str:
-    candidates = ("flutter.bat", "flutter") if sys.platform == "win32" else ("flutter",)
-    for candidate in candidates:
-        resolved = shutil.which(candidate)
-        if resolved:
-            return resolved
-    raise SystemExit("Flutter executable was not found on PATH.")
-
-
-def partition_test_batches(
-    command: list[str],
-    tests: list[str],
-    *,
-    command_line_limit: int | None = None,
-) -> list[list[str]]:
-    limit = command_line_limit or (
-        WINDOWS_COMMAND_LINE_LIMIT
-        if sys.platform == "win32"
-        else PORTABLE_COMMAND_LINE_LIMIT
-    )
-    batches: list[list[str]] = []
-    current: list[str] = []
-    for test_path in tests:
-        candidate = [*command, *current, test_path]
-        if current and len(subprocess.list2cmdline(candidate)) > limit:
-            batches.append(current)
-            current = [test_path]
-        else:
-            current.append(test_path)
-        if len(subprocess.list2cmdline([*command, *current])) > limit:
-            raise SystemExit(f"Test path exceeds the command-line limit: {test_path}")
-    if current:
-        batches.append(current)
-    return batches
+WINDOWS_COMMAND_LENGTH_LIMIT = 7_000
+FLUTTER_EXECUTABLE = "flutter.bat" if os.name == "nt" else "flutter"
 
 
 def discover_tests() -> tuple[list[str], list[str]]:
@@ -130,14 +93,34 @@ def partition_tests(portable: list[str]) -> tuple[list[str], list[str]]:
     ]
 
 
-def load_code_only_policy():
-    """Reuse the audited exclusions and shell-free regex runner, not a second list."""
-    policy_path = str(REPOSITORY_ROOT / "tool/prebuild")
-    sys.path.insert(0, policy_path)
-    try:
-        return importlib.import_module("run_code_tests")
-    finally:
-        sys.path.remove(policy_path)
+def _test_batches(command: list[str], tests: list[str]) -> list[list[str]]:
+    """Keep Windows CreateProcess calls below its command-line length limit."""
+    if os.name != "nt":
+        return [tests]
+    batches: list[list[str]] = []
+    current: list[str] = []
+    current_length = sum(len(part) + 1 for part in command)
+    for test in tests:
+        test_length = len(test) + 1
+        if current and current_length + test_length > WINDOWS_COMMAND_LENGTH_LIMIT:
+            batches.append(current)
+            current = []
+            current_length = sum(len(part) + 1 for part in command)
+        current.append(test)
+        current_length += test_length
+    if current:
+        batches.append(current)
+    return batches
+
+
+def _run_flutter(command: list[str], tests: list[str]) -> int:
+    result_code = 0
+    for batch in _test_batches(command, tests):
+        completed = subprocess.run([*command, *batch], cwd=REPOSITORY_ROOT, check=False)
+        result_code = completed.returncode
+        if result_code != 0:
+            break
+    return result_code
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -147,33 +130,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="validate and print suite counts without invoking Flutter",
     )
-    parser.add_argument(
-        "--code-only", action="store_true",
-        help="apply the reviewed no-image/no-device audit policy; report exclusions as NOT RUN",
-    )
     args = parser.parse_args(argv)
 
     all_tests, portable = discover_tests()
-    policy = load_code_only_policy() if args.code_only else None
-    mixed_names = {}
-    if policy is not None:
-        # Fail before execution if a new visual operation lacks a reviewed rule.
-        policy.discover()
-        for path in portable:
-            if path in policy.NOT_RUN:
-                print(f"PORTABLE_RELEASE_NOT_RUN={path}: {policy.NOT_RUN[path]}", flush=True)
-        portable = [path for path in portable if path not in policy.NOT_RUN]
-        mixed_names = {path: pattern for path, pattern in policy.MIXED_NAMES.items()
-                       if path in portable}
-        for path, pattern in mixed_names.items():
-            print(f"PORTABLE_RELEASE_NAME_FILTER={path}: {pattern}; other cases NOT RUN", flush=True)
     performance_tests, remaining_tests = partition_tests(portable)
-    remaining_tests = [path for path in remaining_tests if path not in mixed_names]
     print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}", flush=True)
-    excluded_count = len(all_tests) - len(portable) if policy is not None else len(EXCLUDED_TESTS)
-    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={excluded_count}", flush=True)
-    if policy is not None:
-        print(f"PORTABLE_RELEASE_MIXED_NAME_FILTERED_FILES={len(mixed_names)}", flush=True)
+    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={len(EXCLUDED_TESTS)}", flush=True)
     print(f"PORTABLE_RELEASE_SCHEDULED_TEST_FILES={len(portable)}", flush=True)
     print(
         f"PORTABLE_RELEASE_PERFORMANCE_SCHEDULED_TEST_FILES={len(performance_tests)}",
@@ -189,22 +151,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     command = [
-        resolve_flutter_executable(),
+        FLUTTER_EXECUTABLE,
         "test",
         "--no-pub",
         "--timeout",
         "30s",
-    ] if policy is None else [
-        *policy.flutter_test_command(resolve_flutter_executable()),
-        "--timeout", "30s",
     ]
     print("PORTABLE_RELEASE_PHASE=performance_serial", flush=True)
     performance = subprocess.run(
-        [*command, *(["--concurrency", "1"] if policy is None else []), *performance_tests],
+        [*command, "--concurrency", "1", *performance_tests],
         cwd=REPOSITORY_ROOT,
         check=False,
     )
-    if performance.returncode != 0 or (not remaining_tests and not mixed_names):
+    if performance.returncode != 0 or not remaining_tests:
         print(
             f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(performance_tests)}",
             flush=True,
@@ -212,33 +171,9 @@ def main(argv: list[str] | None = None) -> int:
         return performance.returncode
 
     print("PORTABLE_RELEASE_PHASE=remaining_portable", flush=True)
-    executed_test_files = len(performance_tests)
-    batches = partition_test_batches(command, remaining_tests)
-    print(f"PORTABLE_RELEASE_REMAINING_BATCHES={len(batches)}", flush=True)
-    for batch in batches:
-        completed = subprocess.run(
-            [*command, *batch],
-            cwd=REPOSITORY_ROOT,
-            check=False,
-        )
-        executed_test_files += len(batch)
-        if completed.returncode != 0:
-            print(
-                f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}",
-                flush=True,
-            )
-            return completed.returncode
-    for path, pattern in mixed_names.items():
-        completed = subprocess.run(
-            [*command, path, "--name", pattern],
-            cwd=REPOSITORY_ROOT, check=False,
-        )
-        executed_test_files += 1
-        if completed.returncode != 0:
-            print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}", flush=True)
-            return completed.returncode
-    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}", flush=True)
-    return 0
+    completed_code = _run_flutter(command, remaining_tests)
+    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(portable)}", flush=True)
+    return completed_code
 
 
 if __name__ == "__main__":

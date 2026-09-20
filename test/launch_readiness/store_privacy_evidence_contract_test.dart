@@ -43,9 +43,9 @@ void main() {
     final applePrivacy = read('ios/Runner/PrivacyInfo.xcprivacy');
     final appleBridge = read('ios/Runner/BILGlobalHealthBridge.swift');
 
-    expect(android, isNot(contains('android.permission.health.WRITE_')));
+    expect(android, contains('android.permission.health.WRITE_WEIGHT'));
     expect(android, isNot(contains('WRITE_HYDRATION')));
-    expect(android, isNot(contains('WRITE_NUTRITION')));
+    expect(android, contains('WRITE_NUTRITION'));
     expect(android, contains('ACTION_SHOW_PERMISSIONS_RATIONALE'));
 
     expect(applePrivacy, contains('<key>NSPrivacyTracking</key><false/>'));

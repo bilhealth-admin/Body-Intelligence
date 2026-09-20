@@ -163,7 +163,7 @@ void main() {
         expect(icon.icon, expectedIcon, reason: '${platform.name}:${item.id}');
         expect(
           icon.color,
-          spec.onAccent(Brightness.light),
+          spec.accent(Brightness.light),
           reason: '${platform.name}:${item.id}:accent',
         );
 
@@ -172,11 +172,8 @@ void main() {
         );
         final decoration = container.decoration! as BoxDecoration;
         expect(
-          (decoration.gradient! as LinearGradient).colors,
-          [
-            Color.lerp(spec.accent(Brightness.light), Colors.white, .18)!,
-            spec.accent(Brightness.light),
-          ],
+          decoration.color,
+          spec.container(Brightness.light),
           reason: '${platform.name}:${item.id}:container',
         );
       }

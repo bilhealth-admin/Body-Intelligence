@@ -2,12 +2,10 @@ part of 'bil_workout_routines_page.dart';
 
 class _WorkoutSegmentsList extends StatelessWidget {
   const _WorkoutSegmentsList({
-    required this.item,
     required this.segments,
     required this.mediaCache,
     required this.online,
   });
-  final WellnessContentItem item;
   final List<WellnessWorkoutSegment> segments;
   final WellnessMediaCache mediaCache;
   final bool online;
@@ -17,7 +15,6 @@ class _WorkoutSegmentsList extends StatelessWidget {
     children: [
       for (var index = 0; index < segments.length; index++) ...[
         _WorkoutSegmentTile(
-          item: item,
           index: index,
           segment: segments[index],
           mediaCache: mediaCache,
@@ -31,13 +28,11 @@ class _WorkoutSegmentsList extends StatelessWidget {
 
 class _WorkoutSegmentTile extends StatelessWidget {
   const _WorkoutSegmentTile({
-    required this.item,
     required this.index,
     required this.segment,
     required this.mediaCache,
     required this.online,
   });
-  final WellnessContentItem item;
   final int index;
   final WellnessWorkoutSegment segment;
   final WellnessMediaCache mediaCache;
@@ -61,14 +56,10 @@ class _WorkoutSegmentTile extends StatelessWidget {
         key: ValueKey('workout-segment-${segment.id}'),
         onTap: () => Navigator.of(context).push<void>(
           MaterialPageRoute(
-            builder: (_) => _WorkoutVideoAccessGate(
-              item: item,
-              child: _WorkoutSegmentVideoPage(
-                item: item,
-                segment: segment,
-                mediaCache: mediaCache,
-                online: online,
-              ),
+            builder: (_) => _WorkoutSegmentVideoPage(
+              segment: segment,
+              mediaCache: mediaCache,
+              online: online,
             ),
           ),
         ),
@@ -165,12 +156,10 @@ class _SegmentThumbnail extends StatelessWidget {
 
 class _WorkoutSegmentVideoPage extends StatelessWidget {
   const _WorkoutSegmentVideoPage({
-    required this.item,
     required this.segment,
     required this.mediaCache,
     required this.online,
   });
-  final WellnessContentItem item;
   final WellnessWorkoutSegment segment;
   final WellnessMediaCache mediaCache;
   final bool online;
@@ -182,7 +171,6 @@ class _WorkoutSegmentVideoPage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       children: [
         BilVerifiedWorkoutVideo(
-          accessItem: item,
           asset: segment.videoMedia,
           poster: segment.imageMedia,
           mediaCache: mediaCache,
@@ -280,7 +268,6 @@ class _WorkoutHeroMedia extends StatelessWidget {
   Widget build(BuildContext context) {
     if (item.videoMedia != null) {
       return BilVerifiedWorkoutVideo(
-        accessItem: item,
         asset: item.videoMedia!,
         poster: item.imageMedia,
         mediaCache: mediaCache,
@@ -339,14 +326,12 @@ class _WorkoutHeroMedia extends StatelessWidget {
 class BilVerifiedWorkoutVideo extends StatefulWidget {
   const BilVerifiedWorkoutVideo({
     super.key,
-    required this.accessItem,
     required this.asset,
     this.poster,
     required this.mediaCache,
     required this.online,
     required this.unavailableText,
   });
-  final WellnessContentItem accessItem;
   final WellnessMediaAsset asset;
   final WellnessMediaAsset? poster;
   final WellnessMediaCache mediaCache;
@@ -424,7 +409,6 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
     if (_busy || !_workoutVideoPlaybackSupported) return;
     final generation = _generation;
     final asset = widget.asset;
-    final accessItem = widget.accessItem;
     final cache = widget.mediaCache;
     final online = widget.online;
     var position = Duration.zero;
@@ -437,14 +421,11 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
       await Navigator.of(context, rootNavigator: true).push<void>(
         MaterialPageRoute<void>(
           fullscreenDialog: true,
-          builder: (_) => _WorkoutVideoAccessGate(
-            item: accessItem,
-            child: _FullscreenWorkoutVideoPage(
-              controllerFactory: () =>
-                  _createPlaybackController(asset, cache, online, generation),
-              initialPosition: position,
-              onPositionChanged: (updated) => position = updated,
-            ),
+          builder: (_) => _FullscreenWorkoutVideoPage(
+            controllerFactory: () =>
+                _createPlaybackController(asset, cache, online, generation),
+            initialPosition: position,
+            onPositionChanged: (updated) => position = updated,
           ),
         ),
       );

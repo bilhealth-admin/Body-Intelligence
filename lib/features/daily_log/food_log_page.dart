@@ -1,34 +1,22 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../app/localization/app_localizations.dart';
-import '../../app/localization/bil_locale_policy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
-import '../../app/services/recoverable_image_picker.dart';
-import '../../app/services/runtime_permission_policy.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/food_repository.dart';
 import '../commerce/presentation/premium_barcode_access.dart';
-import '../commerce/providers/commerce_providers.dart';
 import '../foods/providers/food_provider.dart';
 import '../nutrition/presentation/food_barcode_scanner_page.dart';
-import '../nutrition/presentation/meal_image_review_dialog.dart';
-import '../nutrition/presentation/meal_vision_ui_copy.dart';
 import '../nutrition/services/bil_speech_to_text.dart';
 import '../nutrition/services/food_presentation_localizer.dart';
-import '../nutrition/services/meal_image_analysis_service.dart';
 import '../nutrition/services/meal_voice_input_service.dart';
-import '../../shared/widgets/bil_camera_capture_page.dart';
 import 'domain/food_log_meal_selector.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
 import 'providers/daily_log_provider.dart';
-
-part 'food_log_actions.dart';
 
 /// Ranked foods shown by the standalone Food Log browse surface.
 ///
@@ -42,7 +30,7 @@ final foodLogPopularFoodsProvider = FutureProvider.autoDispose<List<Food>>((
   // confirmed selections. The ordinary Food Log search remains owned by the
   // runtime authority below and is not changed by this browse ranking.
   final repository = ref.read(foodRepositoryProvider);
-  return repository.popularFoods(limit: 30);
+  return FoodRepositoryRanking(repository).popularFoods(limit: 30);
 });
 
 /// Standalone Food Log entry surface based on the supplied reference flow.
@@ -51,17 +39,9 @@ final foodLogPopularFoodsProvider = FutureProvider.autoDispose<List<Food>>((
 /// existing Daily Log meal pages remain on their original route and continue
 /// to use their original search and capture flows.
 class FoodLogPage extends ConsumerStatefulWidget {
-  const FoodLogPage({
-    super.key,
-    this.initialMealType,
-    this.initialAction,
-    this.directPhotoCapture = false,
-    this.returnPath,
-  });
+  const FoodLogPage({super.key, this.initialMealType, this.returnPath});
 
   final String? initialMealType;
-  final String? initialAction;
-  final bool directPhotoCapture;
   final String? returnPath;
 
   @override
@@ -74,66 +54,12 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   Timer? _searchDebounce;
   List<Food>? searchResults;
   bool searchLoading = false;
-  bool mealImageBusy = false;
-  bool barcodeBusy = false;
-  bool voiceBusy = false;
-  bool quickAddBusy = false;
-  final Set<int> addingFoodIds = <int>{};
-  bool initialPhotoActionApplied = false;
-  String? initialPhotoActionInFlight;
   int _searchGeneration = 0;
 
   @override
   void initState() {
     super.initState();
     mealType = normalizeFoodLogMealType(widget.initialMealType);
-    _scheduleInitialPhotoAction();
-  }
-
-  @override
-  void didUpdateWidget(covariant FoodLogPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialAction != widget.initialAction ||
-        oldWidget.directPhotoCapture != widget.directPhotoCapture) {
-      initialPhotoActionApplied = false;
-      if (initialPhotoActionInFlight == null) {
-        _scheduleInitialPhotoAction();
-      }
-    }
-  }
-
-  void _scheduleInitialPhotoAction() {
-    final action = widget.initialAction;
-    if (action != 'photo' ||
-        initialPhotoActionApplied ||
-        initialPhotoActionInFlight != null) {
-      return;
-    }
-    initialPhotoActionApplied = true;
-    initialPhotoActionInFlight = action;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || widget.initialAction != action) {
-        initialPhotoActionInFlight = null;
-        if (mounted &&
-            widget.initialAction == 'photo' &&
-            !initialPhotoActionApplied) {
-          _scheduleInitialPhotoAction();
-        }
-        return;
-      }
-      try {
-        await _analyzeMealImage(directCamera: widget.directPhotoCapture);
-      } finally {
-        if (initialPhotoActionInFlight == action) {
-          initialPhotoActionInFlight = null;
-          if (mounted &&
-              widget.initialAction == 'photo' &&
-              !initialPhotoActionApplied) {
-            _scheduleInitialPhotoAction();
-          }
-        }
-      }
-    });
   }
 
   @override
@@ -147,8 +73,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
 
   String _mealTitle(BuildContext context, String type) =>
       _t(context, foodLogMealTitle(type));
-
-  void _updateState(VoidCallback update) => setState(update);
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +148,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     List<Food> foods, {
     List<Food>? rankedFoods,
   }) {
-    final scheme = Theme.of(context).colorScheme;
     final browseFoods = rankedFoods != null && rankedFoods.isNotEmpty
         ? rankedFoods
         : foods;
@@ -248,17 +171,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
           key: const Key('food-log-search'),
           controller: search,
           hintText: _t(context, _searchHintKey()),
-          leading: Icon(Icons.search_rounded, color: scheme.primary),
-          elevation: const WidgetStatePropertyAll(0),
-          backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
-          side: WidgetStatePropertyAll(
-            BorderSide(color: scheme.primary.withValues(alpha: .18)),
-          ),
-          shape: const WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(22)),
-            ),
-          ),
+          leading: const Icon(Icons.search_rounded),
           trailing: [
             if (search.text.isNotEmpty)
               IconButton(
@@ -356,11 +269,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         onTap: _voiceSearch,
       ),
       (
-        icon: Icons.photo_camera_outlined,
-        label: _t(context, 'Analyze meal photo'),
-        onTap: _analyzeMealImage,
-      ),
-      (
         icon: Icons.add_circle_outline_rounded,
         label: _t(context, 'Quick add'),
         onTap: _showQuickAdd,
@@ -422,11 +330,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   }
 
   Widget _buildFoodTile(BuildContext context, Food food) {
-    final scheme = Theme.of(context).colorScheme;
-    final accent = scheme.primary;
-    final locale = BilLocalePolicy.canonicalTag(
-      Localizations.localeOf(context),
-    );
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final name = FoodPresentationLocalizer.foodName(
       name: food.name,
       arabicName: food.arabicName,
@@ -440,25 +344,20 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       elevation: 0,
       child: ListTile(
         contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 6, 8, 6),
-        leading: CircleAvatar(
-          radius: 18,
-          backgroundColor: food.verified
-              ? const Color(0xFFE2F8EC)
-              : accent.withValues(alpha: .10),
-          child: Icon(
-            food.verified
-                ? Icons.verified_rounded
-                : food.isCustom
-                ? Icons.person_rounded
-                : Icons.shield_outlined,
-            color: food.verified ? const Color(0xFF087A43) : accent,
-          ),
-        ),
-        title: Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            if (food.verified) ...[
+              const SizedBox(width: 5),
+              const Icon(
+                Icons.verified_rounded,
+                size: 17,
+                color: Color(0xFF18B875),
+              ),
+            ],
+          ],
         ),
         subtitle: Text(
           '${food.calories.round()} kcal · ${food.servingSize} ${food.servingUnit}',
@@ -498,7 +397,155 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     ),
   );
 
+  Future<void> _addFood(BuildContext context, Food food) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final addedCopy = _t(context, 'Added to diary');
+    final errorCopy = _t(context, 'Could not add food');
+    final controller = TextEditingController(text: food.servingSize.toString());
+    final quantity = await showDialog<double>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_t(dialogContext, 'Choose a serving')),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: '${food.servingUnit} ${_t(dialogContext, 'quantity')}',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(_t(dialogContext, 'Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(
+              dialogContext,
+              double.tryParse(controller.text.replaceAll(',', '.')),
+            ),
+            child: Text(_t(dialogContext, 'Add')),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (!mounted || quantity == null || !quantity.isFinite || quantity <= 0) {
+      return;
+    }
+    try {
+      await ref
+          .read(mealRepositoryProvider)
+          .addReviewedMealItemsAtomically(
+            date: ref.read(selectedLogDateProvider),
+            mealType: mealType,
+            items: [(foodId: food.id, quantity: quantity)],
+          );
+      try {
+        await ref.read(foodRepositoryProvider).recordRecent(food.id);
+      } on Object {
+        // The diary commit already succeeded. Ranking metadata is best effort
+        // and must never make a saved meal look unsuccessful.
+      }
+      ref.invalidate(foodLogPopularFoodsProvider);
+      ref.invalidate(dailyMealsProvider);
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(addedCopy)));
+    } on Object {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(errorCopy)));
+    }
+  }
+
+  Future<void> _scanBarcode() async {
+    if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) return;
+    final barcode = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(builder: (_) => const FoodBarcodeScannerPage()),
+    );
+    if (!mounted || barcode == null || barcode.trim().isEmpty) return;
+    try {
+      final outcome = await ref
+          .read(foodRuntimeSearchAuthorityProvider)
+          .lookupBarcodeJourney(barcode);
+      if (!mounted) return;
+      if (outcome.found) {
+        search.text = outcome.normalizedBarcode;
+        setState(() {
+          searchResults = outcome.foods.take(30).toList(growable: false);
+          searchLoading = false;
+        });
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            outcome.invalid
+                ? _t(context, 'Invalid barcode')
+                : _t(context, 'No verified food matched this barcode'),
+          ),
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_t(context, 'Barcode lookup failed'))),
+      );
+    }
+  }
+
+  Future<void> _voiceSearch() async {
+    final locale = Localizations.localeOf(context);
+    final result = await MealVoiceInputService(SpeechToText()).capture(
+      context: context,
+      localeId: locale.languageCode,
+      arabic: locale.languageCode.toLowerCase() == 'ar',
+    );
+    if (!mounted || result == null || result.foodQuery.trim().isEmpty) return;
+    search.text = result.foodQuery.trim();
+    _scheduleSearch(search.text);
+  }
+
+  Future<void> _showQuickAdd() async {
+    final locale = Localizations.localeOf(context);
+    String copy(String english, String arabic) =>
+        locale.languageCode.toLowerCase() == 'ar' ? arabic : english;
+    final saved = await showQuickMacroEntryDialog(
+      context: context,
+      copy: copy,
+      mealLabel: _mealTitle(context, mealType),
+      onSave: (draft) async {
+        final date = ref.read(selectedLogDateProvider);
+        await ref
+            .read(mealRepositoryProvider)
+            .addQuickMacroEntry(
+              date: date,
+              mealType: mealType,
+              calories: draft.calories,
+              protein: draft.protein,
+              carbohydrates: draft.carbohydrates,
+              fat: draft.fat,
+              caloriesKnown: draft.caloriesKnown,
+              proteinKnown: draft.proteinKnown,
+              carbohydratesKnown: draft.carbohydratesKnown,
+              fatKnown: draft.fatKnown,
+              occurredAt: DateTime(
+                date.year,
+                date.month,
+                date.day,
+                draft.time.hour,
+                draft.time.minute,
+              ),
+            );
+      },
+    );
+    if (!mounted || saved != true) return;
+    ref.invalidate(dailyMealsProvider);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(_t(context, 'Quick Add saved locally.'))),
+    );
+  }
+
   void _close(BuildContext context) {
-    context.go(widget.returnPath ?? '/dashboard');
+    context.go('/dashboard');
   }
 }

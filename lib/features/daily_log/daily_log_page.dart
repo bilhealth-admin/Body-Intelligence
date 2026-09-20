@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,13 +16,11 @@ import '../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
-import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/services/recoverable_image_picker.dart';
 import '../../app/services/store_review_prompt_service.dart';
 import '../../shared/widgets/actionable_error_state.dart';
-import '../../shared/widgets/bil_camera_capture_page.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../foods/providers/food_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -62,6 +59,7 @@ part 'daily_log_capture_actions.dart';
 part 'daily_log_copy.dart';
 part 'daily_log_meal_entry_components.dart';
 part 'daily_log_navigation_actions.dart';
+part 'daily_log_page_skeleton.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
   const DailyLogPage({
@@ -69,14 +67,12 @@ class DailyLogPage extends ConsumerStatefulWidget {
     this.initialMealType,
     this.focusMealEntry = false,
     this.initialAction,
-    this.directPhotoCapture = false,
     this.returnPath,
   });
 
   final String? initialMealType;
   final bool focusMealEntry;
   final String? initialAction;
-  final bool directPhotoCapture;
   final String? returnPath;
 
   @override
@@ -120,6 +116,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       mealSearchActive = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _focusMealEntry();
+        _openFoodSearchAfterBuild();
       });
     }
     if (widget.initialAction != null) {
@@ -138,6 +135,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       mealSearchActive = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _focusMealEntry();
+        _openFoodSearchAfterBuild();
       });
     }
     if (widget.initialAction != null && actionChanged) {
@@ -146,6 +144,31 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         (_) => _applyInitialAction(),
       );
     }
+  }
+
+  void _focusMealEntry() {
+    final mealContext = mealEntryKey.currentContext;
+    if (!mounted || mealContext == null) return;
+    mealFocusApplied = true;
+    Scrollable.ensureVisible(
+      mealContext,
+      alignment: 0,
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _leaveMealDetail() {
+    if (widget.focusMealEntry) {
+      context.go(widget.returnPath ?? '/daily-log');
+      return;
+    }
+    _updateState(() {
+      selectedFood = null;
+      mealSearchActive = false;
+    });
   }
 
   @override
@@ -158,9 +181,17 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     super.dispose();
   }
 
+  bool get _arabic =>
+      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+  String _tr(String en, String ar) {
+    final locale = Localizations.localeOf(context).languageCode.toLowerCase();
+    if (locale == 'ar') return ar;
+    return _dailyLogCopy[en]?[locale] ?? context.strings.text(en);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final foods = ref.watch(foodsProvider);
     final date = ref.watch(selectedLogDateProvider);
     final meals = ref.watch(dailyMealsProvider);
     final waterEntries = ref.watch(dailyWaterProvider);
@@ -168,11 +199,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final goalSchedule =
         ref.watch(nutritionGoalScheduleProvider).value ??
         const NutritionGoalSchedule();
-    final dailyGoal = resolveDailyNutritionGoal(
-      schedule: goalSchedule,
-      date: date,
-      defaultGoal: ref.watch(defaultNutritionGoalTargetProvider),
-    );
     final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
     final premiumMealFeatures =
         verifiedSubscription.value?.grants(
@@ -221,7 +247,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       today.month,
       today.day,
     );
+    final dailyGoal = goalSchedule.targetFor(date);
     final mealRows = meals.value ?? const <MealWithItems>[];
+    final visibleWaterEntries = waterEntries.isLoading
+        ? const AsyncLoading<List<WaterEntry>>()
+        : waterEntries;
     MealWithItems? focusedMeal;
     for (final row in mealRows) {
       if (row.meal.type == mealType) {
@@ -235,7 +265,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || mutationBusy) return;
         if (selectedFood != null) {
-          _returnFromSelectedFoodToSearch();
+          _updateState(() {
+            selectedFood = null;
+          });
           return;
         }
         if (mealSearchActive || widget.focusMealEntry) {
@@ -256,29 +288,14 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
             bottom: false,
             child: Semantics(
               container: true,
-              child: foods.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => ActionableErrorState(
-                  title: context.strings.text(
-                    'Could not load the food catalog.',
-                  ),
-                  onRetry: () => ref.invalidate(foodsProvider),
-                ),
-                data: (items) {
-                  if (mealCalorieState.isLoading || mealMacroState.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (mealCalorieState.hasError || mealMacroState.hasError) {
-                    return ActionableErrorState(
-                      title: context.strings.text(
-                        'Meal display settings could not be loaded.',
-                      ),
-                      onRetry: () {
-                        ref.invalidate(mealCalorieGoalsProvider);
-                        ref.invalidate(mealMacroDisplayProvider);
-                      },
-                    );
-                  }
+              child: Builder(
+                builder: (context) {
+                  // The food catalog and premium display preferences are
+                  // entry-point dependencies, not dependencies of the Today
+                  // shell. Keeping them out of the page-level loading branch
+                  // prevents a date change from replacing the whole surface
+                  // with a spinner. Search handles catalog loading when the
+                  // user opens a meal; the diary remains usable meanwhile.
                   if (widget.focusMealEntry && !mealFocusApplied) {
                     WidgetsBinding.instance.addPostFrameCallback(
                       (_) => _focusMealEntry(),
@@ -302,7 +319,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             child: BackButton(
                               onPressed: mutationBusy
                                   ? null
-                                  : _returnFromSelectedFoodToSearch,
+                                  : () {
+                                      _updateState(() => selectedFood = null);
+                                      _openFoodSearchAfterBuild();
+                                    },
                             ),
                           ),
                         ),
@@ -378,27 +398,13 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           meal: focusedMeal,
                           calorieGoal:
                               goalSchedule.mealTargets[mealType]?.calories ??
-                              mealCalorieGoals[mealType] ??
-                              dailyGoal?.calories,
-                          carbsGoal:
-                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
-                                  ?.carbsGrams,
-                          proteinGoal:
-                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
-                                  ?.proteinGrams,
-                          fatGoal:
-                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
-                                  ?.fatGrams,
-                          macroDisplay: mealMacroDisplay,
+                              mealCalorieGoals[mealType],
                         ),
                         const SizedBox(height: 12),
                         DailyMealDetailItems(
                           meal: focusedMeal,
                           onEdit: _editMealItem,
                           onActions: _showItemActions,
-                          showFoodTimestamps: showFoodTimestamps,
-                          showFoodInsights: showFoodInsights,
-                          useNetCarbs: useNetCarbs,
                         ),
                       ],
                     );
@@ -429,24 +435,35 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 },
                           onPrevious: mutationBusy
                               ? null
-                              : () =>
-                                    ref
-                                        .read(selectedLogDateProvider.notifier)
-                                        .state = date.subtract(
-                                      const Duration(days: 1),
-                                    ),
+                              : () {
+                                  // Read the latest state at tap time. A fast
+                                  // double-tap must advance from the first
+                                  // tap, not from the date captured by the
+                                  // previous build.
+                                  final date = ref.read(
+                                    selectedLogDateProvider,
+                                  );
+                                  ref
+                                      .read(selectedLogDateProvider.notifier)
+                                      .state = date.subtract(
+                                    const Duration(days: 1),
+                                  );
+                                },
                           onNext: date.isBefore(latestPlannableDate)
                               ? mutationBusy
                                     ? null
-                                    : () =>
-                                          ref
-                                              .read(
-                                                selectedLogDateProvider
-                                                    .notifier,
-                                              )
-                                              .state = date.add(
-                                            const Duration(days: 1),
-                                          )
+                                    : () {
+                                        final date = ref.read(
+                                          selectedLogDateProvider,
+                                        );
+                                        ref
+                                            .read(
+                                              selectedLogDateProvider.notifier,
+                                            )
+                                            .state = date.add(
+                                          const Duration(days: 1),
+                                        );
+                                      }
                               : null,
                           onPick: mutationBusy
                               ? null
@@ -471,12 +488,17 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         DailyLogSnapshot(
                           key: const Key('daily-log-today-summary'),
                           arabic: _arabic,
-                          meals: meals.value ?? const [],
-                          water: waterEntries.value ?? const [],
+                          meals: meals.isLoading
+                              ? const []
+                              : meals.value ?? const [],
+                          water: waterEntries.isLoading
+                              ? const []
+                              : waterEntries.value ?? const [],
                           calorieGoal: dailyGoal?.calories,
                           carbsGoal: dailyGoal?.carbsGrams,
                           proteinGoal: dailyGoal?.proteinGrams,
                           fatGoal: dailyGoal?.fatGrams,
+                          loading: meals.isLoading,
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -487,7 +509,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 key: const Key('daily-log-copy-previous-day'),
                                 child: _DiaryActionButton(
                                   key: const Key('daily-log-action-copy'),
-                                  kind: BilSemanticIconKind.calendar,
+                                  icon: Icons.copy_all_rounded,
                                   label: _tr('Copy from', 'نسخ من'),
                                   onPressed: mutationBusy
                                       ? null
@@ -501,7 +523,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 key: const Key('daily-log-edit-settings'),
                                 child: _DiaryActionButton(
                                   key: const Key('daily-log-action-edit'),
-                                  kind: BilSemanticIconKind.preferences,
+                                  icon: Icons.edit_outlined,
                                   label: _tr('Edit', 'تعديل'),
                                   onPressed: mutationBusy
                                       ? null
@@ -537,23 +559,33 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           ),
                         ),
                       DailyMealsList(
+                        arabic: _arabic,
                         meals: meals,
                         showEmptyMealSlots: showAllMeals,
+                        showFoodInsights: showFoodInsights,
+                        showFoodTimestamps: showFoodTimestamps,
+                        useNetCarbs: useNetCarbs,
+                        dailyGoal: dailyGoal,
+                        mealGoals: goalSchedule.mealTargets,
+                        mealCalorieGoals: mealCalorieGoals,
+                        mealMacroDisplay: mealMacroDisplay,
                         onAdd: (type) {
                           _updateState(() {
                             mealType = type;
                             selectedFood = null;
                             mealSearchActive = true;
                           });
-                          // Open this meal's own summary and actions first.
-                          // The user chooses when to open food search.
+                          _openFoodSearchAfterBuild();
                         },
+                        onEdit: _editMealItem,
+                        onActions: _showItemActions,
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
                       if (alwaysShowWater ||
-                          (waterEntries.value?.isNotEmpty ?? false)) ...[
+                          (!waterEntries.isLoading &&
+                              (waterEntries.value?.isNotEmpty ?? false))) ...[
                         DailyWaterShortcut(
-                          entries: waterEntries,
+                          entries: visibleWaterEntries,
                           onTap: () => context.push(
                             '/daily-log/water?from=${Uri.encodeComponent('/daily-log')}',
                           ),
@@ -573,13 +605,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         padding: EdgeInsets.zero,
                         child: ListTile(
                           contentPadding: PremiumDesignTokens.cardPaddingLarge,
-                          horizontalTitleGap: 12,
-                          leading: BilSemanticIconBadge(
-                            kind: BilSemanticIconKind.health,
-                            size: 32,
-                            iconSize: 18,
-                            shape: BoxShape.rectangle,
-                          ),
+                          leading: const Icon(Icons.accessibility_new_rounded),
                           title: Text(_tr('Body context', 'سياق الجسم')),
                           subtitle: Text(
                             _tr(
@@ -595,8 +621,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       PremiumSurface(
                         key: const Key('daily-log-lifecycle-card'),
                         child: ledger.when(
-                          loading: () =>
-                              const Center(child: CircularProgressIndicator()),
+                          skipLoadingOnRefresh: false,
+                          loading: () => const _DailyLedgerSkeleton(),
                           error: (_, _) => ActionableErrorState(
                             title: _tr(
                               'Diary status could not be loaded.',

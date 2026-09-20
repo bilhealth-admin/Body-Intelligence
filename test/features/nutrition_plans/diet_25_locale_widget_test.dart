@@ -18,6 +18,26 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Future<void> _scrollUntilBuilt(
+  WidgetTester tester,
+  Finder target, {
+  int maxSwipes = 12,
+  double swipeDistance = 240,
+}) async {
+  final scrollable = find.byType(Scrollable).first;
+  expect(scrollable, findsOneWidget);
+  for (var attempt = 0; attempt < maxSwipes; attempt++) {
+    if (target.evaluate().isNotEmpty) {
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      return;
+    }
+    await tester.drag(scrollable, Offset(0, -swipeDistance));
+    await tester.pumpAndSettle();
+  }
+  expect(target, findsOneWidget);
+}
+
 void main() {
   test('diet copy and all pathways resolve across 25 locales', () {
     expect(AppLocalizations.supportedLocales, hasLength(25));
@@ -125,7 +145,14 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.byKey(const Key('diet-calories-field')), findsOneWidget);
-      expect(find.byKey(const Key('diet-macro-editing-notice')), findsNothing);
+      await _scrollUntilBuilt(
+        tester,
+        find.byKey(const Key('diet-macro-editing-notice')),
+      );
+      expect(
+        find.byKey(const Key('diet-macro-editing-notice')),
+        findsOneWidget,
+      );
       await tester.scrollUntilVisible(
         find.byKey(const Key('diet-carbs-7')),
         520,
@@ -385,37 +412,6 @@ void main() {
           .onPressed,
       isNotNull,
     );
-
-    // Real keyboards emit a change for each digit, not one full-value edit.
-    for (final input in ['3', '30']) {
-      await tester.enterText(find.byKey(const Key('diet-fat-1')), input);
-      await tester.pump();
-      expect(value('diet-protein-1'), 100);
-    }
-    await tester.pump();
-    expect(value('diet-protein-1'), 100);
-    expect(value('diet-fat-1'), 30);
-    expect(value('diet-carbs-1'), 83);
-
-    await tester.enterText(find.byKey(const Key('diet-carbs-1')), '120');
-    await tester.pump();
-    expect(value('diet-fat-1'), 30);
-    expect(value('diet-carbs-1'), 120);
-    expect(value('diet-protein-1'), 63);
-
-    await tester.enterText(find.byKey(const Key('diet-protein-1')), '300');
-    await tester.pump();
-    expect(
-      find.byKey(const Key('diet-macro-energy-warning-1')),
-      findsOneWidget,
-    );
-    expect(value('diet-carbs-1'), 120);
-    expect(value('diet-fat-1'), 30);
-    expect(value('diet-protein-1'), 300);
-
-    await tester.enterText(find.byKey(const Key('diet-protein-1')), '63');
-    await tester.pump();
-    expect(find.byKey(const Key('diet-macro-energy-warning-1')), findsNothing);
 
     await tester.tap(find.byKey(const Key('diet-plan-activate')));
     await tester.pumpAndSettle();

@@ -175,14 +175,21 @@ void main() {
               (ref) => Future.error(StateError('private database detail')),
             ),
           ],
-          child: const MaterialApp(home: WeeklyReportPage()),
+          child: MaterialApp(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const WeeklyReportPage(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('could not be read'), findsOneWidget);
       expect(find.textContaining('private database detail'), findsNothing);
-      expect(find.byKey(const Key('weekly-report-retry')), findsOneWidget);
-      expect(tester.takeException(), isNull);
     });
 
     for (final locale in const [Locale('en'), Locale('ar')]) {

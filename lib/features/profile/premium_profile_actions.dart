@@ -163,6 +163,18 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           ),
         );
       }
+    } on ProfilePhotoTooLargeException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(
+              'Choose an image smaller than 5 MB.',
+              'اختر صورة أصغر من 5 ميجابايت.',
+            ),
+          ),
+        ),
+      );
     } on ProfilePhotoIdentityChangedException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -195,15 +207,10 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!mounted) return false;
-
     final blocked =
         current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     if (blocked) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
       final openSettings = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog.adaptive(
@@ -211,9 +218,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(
-                MaterialLocalizations.of(dialogContext).closeButtonLabel,
-              ),
+              child: Text(tr('Cancel', 'إلغاء')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
@@ -225,7 +230,6 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
       if (openSettings == true) await policy.openSettings();
       return false;
     }
-
     return await policy.request(BilRuntimeCapability.camera) ==
         BilRuntimePermissionState.granted;
   }
@@ -397,7 +401,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         await ref
             .read(preferencesRepositoryProvider)
             .setManyInCurrentTransaction({
-              ...DisplayNameSync.localEdit(snapshot.name),
+              'displayName': snapshot.name,
               'profileLocation': snapshot.location,
               'profilePostalCode': snapshot.postalCode,
               'profileTimeZone': snapshot.timeZone,
@@ -407,7 +411,6 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
                   snapshot.dateOfBirth?.toIso8601String() ?? '',
             });
       });
-      unawaited(ref.read(displayNameSyncProvider).synchronize());
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       ref.invalidate(latestWeightProvider);

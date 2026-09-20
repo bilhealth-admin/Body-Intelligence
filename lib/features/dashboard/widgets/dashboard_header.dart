@@ -22,17 +22,14 @@ class DashboardHeader extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 680;
-        if (compact) {
-          return _CoachConversationEntry(locale: locale, compact: true);
-        }
 
         return Container(
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 0 : 24,
-            vertical: compact ? 0 : 22,
+            horizontal: compact ? 18 : 24,
+            vertical: compact ? 18 : 22,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
             color: Theme.of(context).colorScheme.surface,
             border: Border.all(
               color: isDark
@@ -56,9 +53,9 @@ class _CoachConversationEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(compact ? 14 : 26),
+      padding: EdgeInsets.all(compact ? 20 : 26),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(compact ? 18 : 26),
+        borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
@@ -78,8 +75,8 @@ class _CoachConversationEntry extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 padding: const EdgeInsets.all(1.5),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -90,7 +87,7 @@ class _CoachConversationEntry extends StatelessWidget {
                   child: const BilCoachPortrait(fit: BoxFit.cover),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,26 +97,21 @@ class _CoachConversationEntry extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
-                        fontSize: compact ? 16 : null,
-                        letterSpacing: .5,
+                        letterSpacing: 1.6,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       _dashboardHeaderText(locale, 'subtitle'),
-                      style: TextStyle(
-                        color: const Color(0xFFBCD0DA),
-                        fontSize: compact ? 12 : null,
-                        height: 1.35,
-                      ),
+                      style: const TextStyle(color: Color(0xFFBCD0DA)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 10),
               Container(
-                width: 30,
-                height: 30,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: .09),
                   borderRadius: BorderRadius.circular(12),
@@ -127,47 +119,31 @@ class _CoachConversationEntry extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.auto_awesome_rounded,
-                  size: 17,
+                  size: 19,
                   color: Color(0xFF7CE8F5),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 18),
           TextField(
             key: const Key('dashboard-ai-coach-entry'),
             readOnly: true,
             maxLines: 1,
-            style: const TextStyle(fontSize: 14),
             onTap: () => context.push('/intelligence-center'),
             decoration: InputDecoration(
               hintText: _dashboardHeaderText(locale, 'hint'),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              hintStyle: const TextStyle(
-                color: Color(0xFF5E6A72),
-                fontSize: 14,
-              ),
-              prefixIcon: const Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 20,
-              ),
-              prefixIconConstraints: const BoxConstraints(
-                minWidth: 40,
-                minHeight: 44,
-              ),
+              hintStyle: const TextStyle(color: Color(0xFF5E6A72)),
+              prefixIcon: const Icon(Icons.chat_bubble_outline_rounded),
               suffixIcon: IconButton(
                 tooltip: _dashboardHeaderText(locale, 'open'),
                 onPressed: () => context.push('/intelligence-center'),
-                icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                icon: const Icon(Icons.arrow_forward_rounded),
               ),
               filled: true,
               fillColor: const Color(0xFFF7F9FA),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide.none,
               ),
             ),

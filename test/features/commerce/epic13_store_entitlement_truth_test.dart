@@ -104,10 +104,6 @@ void main() {
     });
 
     test('Premium grants every free capability plus sync and intelligence', () {
-      expect(
-        PlanPolicyCatalog.policies[CommercePlan.free]!.limits.cloudSync,
-        isTrue,
-      );
       final free = PlanPolicyCatalog.policies[CommercePlan.free]!.entitlements;
       final premium =
           PlanPolicyCatalog.policies[CommercePlan.premium]!.entitlements;
@@ -167,10 +163,9 @@ void main() {
     final backend = File(
       'supabase/functions/verify-store-purchase/store_backend.ts',
     ).readAsStringSync();
-    final client = [
+    final client = File(
       'lib/features/commerce/services/verified_store_purchase_service.dart',
-      'lib/features/commerce/services/verified_store_purchase_processing.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
+    ).readAsStringSync();
     final canonicalMigration = File(
       'supabase/migrations/20260815225624_bil_canonical_consumer_tiers.sql',
     ).readAsStringSync();
@@ -180,21 +175,14 @@ void main() {
     expect(backend, contains('purchases/subscriptionsv2/tokens'));
     expect(backend, contains('signedPayload'));
     expect(backend, contains('apple_chain_untrusted'));
-    expect(backend, contains('await verifiedAppleCertificateChain('));
-    expect(backend, contains('digestBytes(certificateChain[2].der)'));
-    expect(backend, contains('if (!pinnedRoots.has(rootDigest))'));
-    expect(backend, contains('await compactVerify(jws, key'));
+    expect(backend, contains('digestBytes(decodeBase64Bytes'));
     expect(backend, contains('purchases/voidedpurchases'));
     expect(backend, contains('appleServerStatusLifecycle'));
     expect(backend, contains('scheduled_reconciliation_failed'));
     expect(client, contains('purchase.status'));
     expect(
       client,
-      contains('if (verifiedReceipt && purchase.pendingCompletePurchase)'),
-    );
-    expect(
-      client,
-      contains('verification != _StoreReceiptVerificationResult.failed'),
+      contains('if (verified && purchase.pendingCompletePurchase)'),
     );
     expect(client, isNot(contains('SharedPreferences')));
     expect(canonicalMigration, contains("when 'pro' then 'premium'"));

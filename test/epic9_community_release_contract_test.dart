@@ -2,21 +2,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/dart_library_source.dart';
-
 void main() {
-  String source(String path) => path.endsWith('.dart')
-      ? readDartLibrarySource(path)
-      : File(path).readAsStringSync();
+  String source(String path) => File(path).readAsStringSync();
 
   test(
     'community repository exposes the complete authenticated social loop',
     () {
-      final repository = [
+      final repository = source(
         'lib/features/community/data/community_repository.dart',
-        'lib/features/community/data/community_feed_repository_mixin.dart',
-        'lib/features/community/data/community_social_repository_mixin.dart',
-      ].map(source).join('\n');
+      );
       for (final contract in <String>[
         'loadMyProfile',
         'saveMyProfile',

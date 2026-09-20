@@ -7,7 +7,6 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
-import '../../settings/premium_meal_features_page.dart';
 import 'macro_value_formatter.dart';
 
 part 'daily_log_summary_locale_copy.dart';
@@ -43,6 +42,7 @@ class DiaryDateNavigator extends StatelessWidget {
         ? semanticLabel
         : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${(date.year % 100).toString().padLeft(2, '0')}';
     final scheme = Theme.of(context).colorScheme;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
     return SizedBox(
       key: const Key('daily-log-date-bar'),
       height: 64,
@@ -61,12 +61,11 @@ class DiaryDateNavigator extends StatelessWidget {
               const SizedBox(width: 48),
             const Spacer(),
             IconButton(
+              key: const Key('daily-log-previous'),
               tooltip: _summaryText(context, 'previous'),
               onPressed: onPrevious,
               icon: Icon(
-                arabic
-                    ? Icons.chevron_right_rounded
-                    : Icons.chevron_left_rounded,
+                rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
               ),
             ),
             Flexible(
@@ -111,12 +110,11 @@ class DiaryDateNavigator extends StatelessWidget {
               ),
             ),
             IconButton(
+              key: const Key('daily-log-next'),
               tooltip: _summaryText(context, 'next'),
               onPressed: onNext,
               icon: Icon(
-                arabic
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
+                rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
               ),
             ),
             const Spacer(),
@@ -138,6 +136,7 @@ class DailyLogSnapshot extends StatelessWidget {
     this.carbsGoal,
     this.proteinGoal,
     this.fatGoal,
+    this.loading = false,
   });
 
   final bool arabic;
@@ -147,6 +146,7 @@ class DailyLogSnapshot extends StatelessWidget {
   final double? carbsGoal;
   final double? proteinGoal;
   final double? fatGoal;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -161,76 +161,116 @@ class DailyLogSnapshot extends StatelessWidget {
     );
     final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
     final fat = items.fold<double>(0, (total, item) => total + item.fats);
+    final macroEnergy = protein * 4 + carbs * 4 + fat * 9;
+    final carbsPercent = macroEnergy == 0 ? 0.0 : carbs * 400 / macroEnergy;
+    final fatPercent = macroEnergy == 0 ? 0.0 : fat * 900 / macroEnergy;
+    final proteinPercent = macroEnergy == 0 ? 0.0 : protein * 400 / macroEnergy;
     final scheme = Theme.of(context).colorScheme;
+    final hasGoal =
+        calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
+    final remaining = hasGoal ? calorieGoal! - calories : null;
+    double macroProgress(double consumed, double? goal) {
+      if (goal == null || !goal.isFinite || goal <= 0) return 0.0;
+      return (consumed / goal).clamp(0.0, 1.0).toDouble();
+    }
+
     return Container(
       key: const Key('daily-log-compact-summary'),
-      constraints: const BoxConstraints(minHeight: 146),
-      padding: const EdgeInsets.fromLTRB(14, 9, 14, 14),
+      constraints: const BoxConstraints(minHeight: 154),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final ring = DailyLogCalorieMacroRing(
-            calories: calories,
-            calorieGoal: calorieGoal,
-            carbs: carbs,
-            fat: fat,
-            protein: protein,
-            dimension: 108,
-          );
-          final macros = Row(
-            children: [
-              Expanded(
-                child: _MacroMetric(
-                  metricKey: 'carbs',
-                  color: const Color(0xFF0A8F88),
-                  grams: carbs,
-                  goalGrams: carbsGoal,
-                  label: _summaryText(context, 'carbs'),
-                ),
-              ),
-              Expanded(
-                child: _MacroMetric(
-                  metricKey: 'fat',
-                  color: const Color(0xFF6F1096),
-                  grams: fat,
-                  goalGrams: fatGoal,
-                  label: _summaryText(context, 'fat'),
-                ),
-              ),
-              Expanded(
-                child: _MacroMetric(
-                  metricKey: 'protein',
-                  color: const Color(0xFFC56A00),
-                  grams: protein,
-                  goalGrams: proteinGoal,
-                  label: _summaryText(context, 'proteinShort'),
-                ),
-              ),
-            ],
-          );
-          return Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Expanded(
+                child: _CalorieSummary(
+                  calories: calories,
+                  calorieGoal: calorieGoal,
+                  remaining: remaining,
+                  loading: loading,
+                ),
+              ),
+              const SizedBox(width: 10),
               Transform.translate(
                 key: const Key('daily-log-summary-ring-raised'),
                 offset: const Offset(0, -3),
-                child: ring,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: PremiumNutritionGlass(
-                  key: const Key('daily-log-summary-macros-glass'),
-                  compact: true,
-                  borderRadius: 14,
-                  child: macros,
-                ),
+                child: loading
+                    ? _SummaryRingSkeleton(
+                        color: scheme.surfaceContainerHighest,
+                      )
+                    : DailyLogCalorieMacroRing(
+                        calories: calories,
+                        calorieGoal: calorieGoal,
+                        carbs: carbs,
+                        fat: fat,
+                        protein: protein,
+                        dimension: 84,
+                      ),
               ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 12),
+          PremiumNutritionGlass(
+            key: const Key('daily-log-summary-macros-glass'),
+            compact: true,
+            borderRadius: 14,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFF0A8F88),
+                    percent: carbsGoal == null || carbsGoal! <= 0
+                        ? carbsPercent
+                        : (carbs / carbsGoal! * 100).clamp(0, 100),
+                    progress: macroProgress(carbs, carbsGoal),
+                    grams: carbs,
+                    goal: carbsGoal,
+                    label: _summaryText(context, 'carbs'),
+                    percentKey: const Key('daily-summary-carbs-percent'),
+                    gramsKey: const Key('daily-summary-carbs-grams'),
+                    loading: loading,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFF6F1096),
+                    percent: fatGoal == null || fatGoal! <= 0
+                        ? fatPercent
+                        : (fat / fatGoal! * 100).clamp(0, 100),
+                    progress: macroProgress(fat, fatGoal),
+                    grams: fat,
+                    goal: fatGoal,
+                    label: _summaryText(context, 'fat'),
+                    percentKey: const Key('daily-summary-fat-percent'),
+                    gramsKey: const Key('daily-summary-fat-grams'),
+                    loading: loading,
+                  ),
+                ),
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFFC56A00),
+                    percent: proteinGoal == null || proteinGoal! <= 0
+                        ? proteinPercent
+                        : (protein / proteinGoal! * 100).clamp(0, 100),
+                    progress: macroProgress(protein, proteinGoal),
+                    grams: protein,
+                    goal: proteinGoal,
+                    label: _summaryText(context, 'proteinShort'),
+                    percentKey: const Key('daily-summary-protein-percent'),
+                    gramsKey: const Key('daily-summary-protein-grams'),
+                    loading: loading,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -241,18 +281,10 @@ class DailyMealDetailSummary extends StatelessWidget {
     super.key,
     required this.meal,
     this.calorieGoal,
-    this.carbsGoal,
-    this.proteinGoal,
-    this.fatGoal,
-    this.macroDisplay,
   });
 
   final MealWithItems? meal;
   final double? calorieGoal;
-  final double? carbsGoal;
-  final double? proteinGoal;
-  final double? fatGoal;
-  final MealMacroDisplay? macroDisplay;
 
   @override
   Widget build(BuildContext context) {
@@ -267,10 +299,10 @@ class DailyMealDetailSummary extends StatelessWidget {
     );
     final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
     final fat = items.fold<double>(0, (total, item) => total + item.fats);
-    double targetProgress(double consumed, double? goal) =>
-        goal == null || !goal.isFinite || goal <= 0
+    final macroEnergy = protein * 4 + carbs * 4 + fat * 9;
+    double ratio(double energy) => macroEnergy <= 0
         ? 0
-        : (consumed / goal).clamp(0.0, 1.0).toDouble();
+        : (energy / macroEnergy).clamp(0.0, 1.0).toDouble();
     final sodium = knownNutrientTotal(
       items,
       TrackedNutrient.sodium,
@@ -311,10 +343,7 @@ class DailyMealDetailSummary extends StatelessWidget {
                 child: _MealMacroDial(
                   label: _summaryText(context, 'carbs'),
                   grams: carbs,
-                  goalGrams: carbsGoal,
-                  progress: targetProgress(carbs, carbsGoal),
-                  displayPercent:
-                      macroDisplay?.mode == MealMacroDisplayMode.percent,
+                  progress: ratio(carbs * 4),
                   color: const Color(0xFF0A8F88),
                 ),
               ),
@@ -322,10 +351,7 @@ class DailyMealDetailSummary extends StatelessWidget {
                 child: _MealMacroDial(
                   label: _summaryText(context, 'fat'),
                   grams: fat,
-                  goalGrams: fatGoal,
-                  progress: targetProgress(fat, fatGoal),
-                  displayPercent:
-                      macroDisplay?.mode == MealMacroDisplayMode.percent,
+                  progress: ratio(fat * 9),
                   color: const Color(0xFF6F1096),
                 ),
               ),
@@ -333,10 +359,7 @@ class DailyMealDetailSummary extends StatelessWidget {
                 child: _MealMacroDial(
                   label: _summaryText(context, 'proteinShort'),
                   grams: protein,
-                  goalGrams: proteinGoal,
-                  progress: targetProgress(protein, proteinGoal),
-                  displayPercent:
-                      macroDisplay?.mode == MealMacroDisplayMode.percent,
+                  progress: ratio(protein * 4),
                   color: const Color(0xFFC56A00),
                 ),
               ),
@@ -372,13 +395,7 @@ class DailyMealDetailSummary extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
-                children: [
-                  if (macroDisplay?.enabled ?? true) ...[
-                    macroDials,
-                    const SizedBox(height: 14),
-                  ],
-                  minerals,
-                ],
+                children: [macroDials, const SizedBox(height: 14), minerals],
               ),
             ),
           );
@@ -396,155 +413,47 @@ class DailyMealDetailSummary extends StatelessWidget {
   }
 }
 
-class _MealMacroDial extends StatelessWidget {
-  const _MealMacroDial({
+class NutrientMetric extends StatelessWidget {
+  const NutrientMetric({
+    super.key,
     required this.label,
-    required this.grams,
-    required this.goalGrams,
-    required this.progress,
-    required this.color,
-    required this.displayPercent,
+    required this.value,
+    required this.unit,
   });
 
   final String label;
-  final double grams;
-  final double? goalGrams;
-  final double progress;
-  final Color color;
-  final bool displayPercent;
+  final double? value;
+  final String unit;
 
   @override
   Widget build(BuildContext context) {
-    final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
-    final displayValue = displayPercent
-        ? hasGoal
-              ? '${(grams / goalGrams! * 100).round()}%'
-              : '—'
-        : '${formatDiaryMacroGrams(grams)} g';
-    return Semantics(
-      value: displayPercent
-          ? displayValue
-          : hasGoal
-          ? '${formatDiaryMacroGrams(grams)} / ${formatDiaryMacroGrams(goalGrams!)} g'
-          : '${formatDiaryMacroGrams(grams)} g',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-        child: Column(
+    final localizedUnit = _summaryText(context, unit);
+    final scheme = Theme.of(context).colorScheme;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 220),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(99),
+          border: Border.all(color: scheme.outlineVariant),
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox.square(
-              dimension: 62,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 6,
-                    color: color,
-                    backgroundColor: color.withValues(alpha: .13),
-                    strokeCap: StrokeCap.round,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(9),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        displayValue,
-                        maxLines: 1,
-                        textDirection: TextDirection.ltr,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            Icon(
+              Icons.science_outlined,
+              size: 16,
+              color: scheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DailyLogCalorieMacroRing extends StatelessWidget {
-  const DailyLogCalorieMacroRing({
-    super.key,
-    required this.calories,
-    required this.calorieGoal,
-    required this.carbs,
-    required this.fat,
-    required this.protein,
-    this.dimension = 126,
-  });
-
-  final double calories;
-  final double? calorieGoal;
-  final double carbs;
-  final double fat;
-  final double protein;
-  final double dimension;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label:
-          '${calories.round()} ${_summaryText(context, 'kcal')}${calorieGoal == null ? '' : ' / ${calorieGoal!.round()}'}',
-      child: SizedBox.square(
-        dimension: dimension,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            CustomPaint(
-              size: Size.square(dimension),
-              painter: _MacroRingPainter(
-                carbs: carbs,
-                fat: fat,
-                protein: protein,
-                track: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(dimension * 0.17),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      calories.round().toString(),
-                      textDirection: TextDirection.ltr,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
-                          ),
-                    ),
-                    Text(
-                      _summaryText(context, 'kcal'),
-                      textDirection: TextDirection.ltr,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    if (calorieGoal != null)
-                      Text(
-                        '/ ${calorieGoal!.round()}',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                value == null
+                    ? '$label: ${context.strings.text('Unavailable')}'
+                    : '$label ${value!.toStringAsFixed(1)} $localizedUnit',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -552,52 +461,4 @@ class DailyLogCalorieMacroRing extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MacroRingPainter extends CustomPainter {
-  const _MacroRingPainter({
-    required this.carbs,
-    required this.fat,
-    required this.protein,
-    required this.track,
-  });
-
-  final double carbs;
-  final double fat;
-  final double protein;
-  final Color track;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const colors = [Color(0xFF0A8F88), Color(0xFF6F1096), Color(0xFFFFAB32)];
-    final energies = [carbs * 4, fat * 9, protein * 4];
-    final total = energies.fold<double>(0, (sum, value) => sum + value);
-    final center = size.center(Offset.zero);
-    final radius = (size.shortestSide - 12) / 2;
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.butt;
-    canvas.drawCircle(center, radius, paint..color = track);
-    if (total <= 0) return;
-    var start = -1.5707963267948966;
-    for (var i = 0; i < energies.length; i++) {
-      final sweep = 6.283185307179586 * energies[i] / total;
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        start,
-        sweep,
-        false,
-        paint..color = colors[i],
-      );
-      start += sweep;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _MacroRingPainter oldDelegate) =>
-      carbs != oldDelegate.carbs ||
-      fat != oldDelegate.fat ||
-      protein != oldDelegate.protein ||
-      track != oldDelegate.track;
 }

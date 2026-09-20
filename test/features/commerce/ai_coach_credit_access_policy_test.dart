@@ -11,74 +11,6 @@ Map<String, Object?> usage(String plan, Object? totalRemaining) => {
 };
 
 void main() {
-  test(
-    'a server reload signal updates a mounted gate after a Boost grant',
-    () async {
-      Object? serverStatus = usage('free', 0);
-      final container = ProviderContainer(
-        overrides: [
-          verifiedEntitlementOwnerProvider.overrideWith(
-            (_) => Stream.value('qa-owner'),
-          ),
-          aiCoachUsageStatusLoaderProvider.overrideWithValue(
-            () async => serverStatus,
-          ),
-        ],
-      );
-      final listener = container.listen(aiCoachCreditAccessProvider, (_, _) {});
-      addTearDown(() {
-        listener.close();
-        container.dispose();
-      });
-      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
-      serverStatus = usage('free', 2500);
-      container
-          .read(aiCoachUsageRefreshProvider.notifier)
-          .requestAuthoritativeReload();
-      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
-      serverStatus = usage('premium', 0);
-      container
-          .read(aiCoachUsageRefreshProvider.notifier)
-          .requestAuthoritativeReload();
-      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
-    },
-  );
-  test(
-    'verified AI access survives listener detach and route re-entry',
-    () async {
-      var loads = 0;
-      final container = ProviderContainer(
-        overrides: [
-          verifiedEntitlementOwnerProvider.overrideWith(
-            (_) => Stream.value('qa-owner'),
-          ),
-          verifiedEntitlementOwnerSeedProvider.overrideWithValue('qa-owner'),
-          aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
-            loads++;
-            return usage('ai_coach', 1000);
-          }),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      final first = container.listen(aiCoachCreditAccessProvider, (_, _) {});
-      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
-      expect(loads, 1);
-      first.close();
-
-      // Auto-disposed providers are released after their last listener leaves.
-      // The verified access cache must instead survive a route pop/push for the
-      // same authenticated owner.
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
-
-      final second = container.listen(aiCoachCreditAccessProvider, (_, _) {});
-      addTearDown(second.close);
-      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
-      expect(loads, 1);
-    },
-  );
-
   test('zero -> Boost -> consumed zero is reflected exactly', () {
     expect(aiCoachAccessFromUsageStatus(usage('free', 0)), isFalse);
     expect(aiCoachAccessFromUsageStatus(usage('free', 15)), isTrue);
@@ -140,7 +72,6 @@ void main() {
         verifiedEntitlementOwnerProvider.overrideWith(
           (_) => Stream<String?>.value('test-owner'),
         ),
-        verifiedEntitlementOwnerSeedProvider.overrideWithValue('test-owner'),
         aiCoachUsageStatusLoaderProvider.overrideWithValue(
           () => Future<Object?>.error(rpcError),
         ),
@@ -164,6 +95,41 @@ void main() {
       container.read(aiCoachCreditAccessProvider),
       isA<AsyncError<bool>>(),
     );
+  });
+
+  test('verified access snapshot survives a transient refresh for one owner', () async {
+    var calls = 0;
+    final container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        verifiedEntitlementOwnerProvider.overrideWithValue(
+          const AsyncData<String?>('owner-a'),
+        ),
+        aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
+          calls += 1;
+          if (calls == 1) return Future.value(usage('ai_coach', 2500));
+          return Future<Object?>.error(StateError('temporary'));
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+    container.invalidate(aiCoachCreditAccessProvider);
+    expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+  });
+
+  test('owner changes clear the access snapshot and cannot cross accounts', () {
+    final snapshots = AiCoachAccessSnapshotStore();
+    snapshots.activateOwner('owner-a');
+    snapshots.recordServerResult(ownerId: 'owner-a', access: true);
+    expect(snapshots.cachedAccessFor('owner-a'), isTrue);
+
+    snapshots.activateOwner('owner-b');
+    expect(snapshots.cachedAccessFor('owner-a'), isNull);
+    expect(snapshots.cachedAccessFor('owner-b'), isNull);
+    snapshots.recordServerResult(ownerId: 'owner-b', access: false);
+    expect(snapshots.cachedAccessFor('owner-b'), isFalse);
   });
 
   test('AI subscription identity requires a verified live store boundary', () {

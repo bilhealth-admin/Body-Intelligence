@@ -3,70 +3,60 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:body_intelligence_log/features/recipe_import/domain/recipe_ingredient_evidence.dart';
-import '../../support/released_recipe_contract.dart';
-import '../../../tool/recipe_catalog/extract_existing_recipe_seeds.dart'
-    as seed;
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  final historicalCatalog = File(
-    'artifacts/meal_catalog/existing_recipe_canonical_seeds.json',
-  );
-  late List<Map<String, dynamic>> released;
-  setUpAll(() async => released = await releasedRecipeRecords());
+  final catalog =
+      jsonDecode(
+            File(
+              'artifacts/meal_catalog/existing_recipe_canonical_seeds.json',
+            ).readAsStringSync(),
+          )
+          as Map<String, Object?>;
+  final records = (catalog['records'] as List).cast<Map<String, Object?>>();
 
   test('18 existing recipes remain explicit seeds for the release target', () {
-    final originalIds = {...originalRecipeBatchA, ...originalRecipeBatchB};
-    expect(originalIds, hasLength(18));
-    expect(released, hasLength(1500));
-    final ids = released.map((r) => r['canonicalId']).toSet();
-    expect(ids, containsAll(originalIds));
-    expect(ids.difference(originalIds), hasLength(1482));
+    final target =
+        jsonDecode(
+              File(
+                'artifacts/meal_catalog/recipe_catalog_target_manifest.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, Object?>;
+    final releaseTarget = target['bilReleaseTarget'] as Map<String, Object?>;
+    expect(records, hasLength(18));
+    final targetCount = releaseTarget['canonicalRecipeCount'] as int;
+    expect(targetCount, 1500);
+    expect(targetCount - records.length, 1482);
+    expect((catalog['claims'] as Map)['marketedRecipeCount'], 0);
   });
 
-  test(
-    'content and image fingerprints reject all duplicate seeds',
-    () {
-      // Historical image-generation check remains separate from the host-only
-      // release contract. Never restore these old artifacts into runtime assets.
-      final catalog = jsonDecode(historicalCatalog.readAsStringSync()) as Map;
-      final records = (catalog['records'] as List).cast<Map<String, Object?>>();
-      final content = <String>{};
-      final images = <String>{};
-      for (final record in records) {
-        expect(content.add(record['contentFingerprint']! as String), isTrue);
-        final image = record['image'] as Map<String, Object?>;
-        final path = image['assetPath']! as String;
-        final actual = sha256.convert(File(path).readAsBytesSync()).toString();
-        expect(image['sha256'], actual);
-        expect(images.add(actual), isTrue);
-      }
-    },
-    skip: historicalCatalog.existsSync()
-        ? false
-        : 'Requires the host-only historical meal-catalog audit artifacts.',
-  );
+  test('content and image fingerprints reject all duplicate seeds', () {
+    final content = <String>{};
+    final images = <String>{};
+    for (final record in records) {
+      expect(content.add(record['contentFingerprint']! as String), isTrue);
+      final image = record['image'] as Map<String, Object?>;
+      final path = image['assetPath']! as String;
+      final actual = sha256.convert(File(path).readAsBytesSync()).toString();
+      expect(image['sha256'], actual);
+      expect(images.add(actual), isTrue);
+    }
+  });
 
   test('unknown quantities and nutrition remain explicitly pending', () {
-    final unknown = seed.ingredient('red lentils', 0);
-    expect(unknown['quantity'], isNull);
-    expect(unknown['unit'], isNull);
-    expect(unknown.containsKey('grams'), isFalse);
-    expect(seed.ingredient('200 g red lentils', 0)['quantity'], 200);
-    final record =
-        jsonDecode(jsonEncode(released.first)) as Map<String, dynamic>;
-    (record['ingredients'] as List).first['grams'] = null;
-    expect(RecipeIngredientEvidence.recordNeedsReview(record), isTrue);
-    // A pending record cannot acquire calculated nutrition by a status label.
-    final nutrition = record['nutrition'] as Map;
-    nutrition['status'] = 'pending';
-    nutrition['sourceRefs'] = [];
-    nutrition['perServing'] = {
-      for (final k in recipeNutrientColumns.keys) k: null,
-    };
-    expect(RecipeIngredientEvidence.recordNeedsReview(record), isTrue);
-    nutrition['status'] = 'calculated';
-    expect(RecipeIngredientEvidence.recordNeedsReview(record), isTrue);
+    for (final record in records) {
+      final nutrition = record['nutrition'] as Map<String, Object?>;
+      expect(nutrition['status'], 'pending');
+      expect(nutrition['sourceRefs'], isEmpty);
+      expect(nutrition['reviewedAt'], isNull);
+      expect((nutrition['perServing'] as Map).values, everyElement(isNull));
+      final timing = record['timing'] as Map<String, Object?>;
+      expect(timing['totalMinutes'], greaterThan(0));
+      final method = (record['method'] as List).cast<Map<String, Object?>>();
+      expect(
+        method.map((step) => step['order']),
+        orderedEquals(List.generate(method.length, (index) => index + 1)),
+      );
+    }
   });
 }

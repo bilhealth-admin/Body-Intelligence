@@ -46,15 +46,15 @@ void main() {
     ).readAsStringSync();
   });
 
-  test('cloud simulator workflow is manual and fail-closed to +8', () {
+  test('cloud simulator workflow is manual and fail-closed to iOS 26', () {
     expect(workflow, contains('workflow_dispatch:'));
     expect(workflow, isNot(contains('\n  push:')));
-    expect(workflow, contains("[[ \"\$BUILD_NUMBER\" == '8' ]]"));
-    expect(workflow, contains(r'^version:[[:space:]]+1\.0\.0\+8'));
-    expect(workflow, contains('--build-number 8'));
-    expect(workflow, contains('Build 7 must never be built or tested here'));
-    expect(workflow, contains('BIL_PLUS8_AUDITED_SOURCE_SHA'));
-    expect(workflow, contains('BIL_PLUS8_STAGING_MANIFEST_SHA256'));
+    expect(workflow, contains("[[ \"\$BUILD_NUMBER\" == '26' ]]"));
+    expect(workflow, contains(r'^version:[[:space:]]+1\.0\.0\+21'));
+    expect(workflow, contains('--build-number 26'));
+    expect(workflow, contains('This workflow is fail-closed to iOS build 26'));
+    expect(workflow, contains('BIL_RELEASE_AUDITED_SOURCE_SHA'));
+    expect(workflow, contains('BIL_RELEASE_MANIFEST_SHA256'));
     expect(
       workflow,
       contains('dart run tool/release/validate_release_configuration.dart'),
@@ -226,16 +226,10 @@ void main() {
       backendOracle,
       isNot(contains("insertReturning('bil_content_policy_acceptances'")),
     );
-    expect(
-      backendOracle,
-      contains('DISPOSABLE_POLICY_ACCEPTANCE_SEEDED=false'),
-    );
+    expect(backendOracle, contains('DISPOSABLE_POLICY_ACCEPTANCE_SEEDED=false'));
     expect(uiDriver, contains("'bil://community/safety'"));
     expect(uiDriver, contains('verify-disposable-policy-and-post'));
-    expect(
-      backendOracle,
-      contains('disposable_policy_was_not_accepted_in_app'),
-    );
+    expect(backendOracle, contains('disposable_policy_was_not_accepted_in_app'));
   });
 
   test(
@@ -303,7 +297,7 @@ void main() {
     final privacyScan = workflow.indexOf(
       'Scan the upload set for private account data and bearer tokens',
     );
-    final upload = workflow.indexOf('Upload +8 simulator evidence');
+    final upload = workflow.indexOf('Upload iOS 26 simulator evidence');
     expect(cleanup, greaterThan(0));
     expect(privacyScan, greaterThan(cleanup));
     expect(upload, greaterThan(privacyScan));
@@ -472,12 +466,7 @@ void main() {
     expect(workflow, contains('SIGNED_PHYSICAL_OR_TESTFLIGHT_STILL_REQUIRED='));
     expect(workflow, contains('Sign in with Apple credential sheet'));
     expect(workflow, contains('App Attest production assertion'));
-    expect(
-      workflow,
-      contains(
-        'Meta native Facebook authorization and Supabase token exchange',
-      ),
-    );
+    expect(workflow, contains('Facebook provider callback'));
     expect(workflow, contains('StoreKit purchase and restore'));
     expect(workflow, contains('APPLE_REVIEWER_POST_APPROVAL_EXCLUDED='));
     expect(workflow, contains('exhaustive signed UI absence is not claimed'));

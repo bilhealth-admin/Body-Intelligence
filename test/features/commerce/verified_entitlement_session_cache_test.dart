@@ -71,32 +71,4 @@ void main() {
 
     expect(cache.fallbackFor(ownerId: 'owner-a', now: now), isNull);
   });
-
-  for (final terminal in [
-    SubscriptionLifecycle.refunded,
-    SubscriptionLifecycle.revoked,
-    SubscriptionLifecycle.expired,
-  ]) {
-    test(
-      '$terminal clears prior paid continuity even with a future old billing date',
-      () {
-        final cache = VerifiedEntitlementSessionCache();
-        cache.remember(ownerId: 'owner-a', state: paid(), now: now);
-        cache.remember(
-          ownerId: 'owner-a',
-          state: SubscriptionState(
-            plan: CommercePlan.premium,
-            entitlements: const {CommerceEntitlement.adFree},
-            authority: EntitlementAuthority.verifiedServer,
-            lifecycle: terminal,
-            currentPeriodEndsAt: now.add(const Duration(days: 10)),
-            isPurchasable: false,
-            canRestorePurchases: true,
-          ),
-          now: now,
-        );
-        expect(cache.fallbackFor(ownerId: 'owner-a', now: now), isNull);
-      },
-    );
-  }
 }

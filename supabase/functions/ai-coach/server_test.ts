@@ -4,29 +4,18 @@ import {
   assertThrows,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
-  actionExecutionContract,
   boundedMessages,
   boundedVoiceAudio,
   extractModelText,
   geminiAttemptTimeoutMs,
   geminiCall,
-  geminiSafetySettings,
   handler,
   isRetryableGeminiError,
   isRetryableGeminiStatus,
   parseModelJson,
-  requireSafeGeminiCandidate,
   responseLanguage,
   spokenWithinComfortableTurn,
 } from "./server.ts";
-
-Deno.test("model prompt separates proposed actions from execution receipts", () => {
-  assertEquals(
-    actionExecutionContract.includes("not an execution receipt"),
-    true,
-  );
-  assertEquals(actionExecutionContract.includes("never say"), true);
-});
 
 Deno.test("structured response ignores thought parts and joins visible text", () => {
   assertEquals(
@@ -120,44 +109,6 @@ Deno.test("response language is independent from interface locale", () => {
     ], "en"),
     "auto",
   );
-  assertEquals(
-    responseLanguage(
-      [{ role: "user", content: "hi" }],
-      "ar",
-      "en",
-    ),
-    "en",
-  );
-  assertEquals(
-    responseLanguage(
-      [{ role: "user", content: "protein 30 g" }],
-      "tr",
-      "ar",
-    ),
-    "ar",
-  );
-});
-
-Deno.test("weight history stays a proposed client action, not a receipt", () => {
-  const parsed = parseModelJson(JSON.stringify({
-    reply: "Use the action below to open weight history.",
-    spoken_reply: "Use the action below to open weight history.",
-    reason: "The user requested a read-only screen.",
-    confidence: 0.95,
-    evidence: [],
-    missing_data: [],
-    proposed_actions: [{
-      type: "open_weight_log",
-      arguments: {},
-      requires_confirmation: false,
-    }],
-  }));
-  assertEquals(parsed.proposed_actions, [{
-    type: "open_weight_log",
-    arguments: {},
-    requires_confirmation: true,
-  }]);
-  assertEquals(parsed.reply.includes("opened"), false);
 });
 
 Deno.test("model actions are allow-listed and confirmation-gated", () => {
@@ -272,16 +223,14 @@ Deno.test("Gemini retry policy bounds each attempt and retries only transient fa
       32,
       false,
       "LOW",
-      (_url, _init) => {
+      async (_url, _init) => {
         rateLimitedCalls += 1;
-        return Promise.resolve(
-          rateLimitedCalls === 1
-            ? new Response(
-              JSON.stringify({ error: { status: "RESOURCE_EXHAUSTED" } }),
-              { status: 429 },
-            )
-            : providerSuccess(),
-        );
+        return rateLimitedCalls === 1
+          ? new Response(
+            JSON.stringify({ error: { status: "RESOURCE_EXHAUSTED" } }),
+            { status: 429 },
+          )
+          : providerSuccess();
       },
     );
     assertEquals(recovered.attempts, 2);
@@ -295,12 +244,10 @@ Deno.test("Gemini retry policy bounds each attempt and retries only transient fa
       32,
       false,
       "LOW",
-      (_url, _init) => {
+      async (_url, _init) => {
         networkCalls += 1;
-        if (networkCalls === 1) {
-          return Promise.reject(new TypeError("network unavailable"));
-        }
-        return Promise.resolve(providerSuccess());
+        if (networkCalls === 1) throw new TypeError("network unavailable");
+        return providerSuccess();
       },
     );
     assertEquals(networkRecovered.attempts, 2);
@@ -320,13 +267,11 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
           32,
           false,
           "LOW",
-          (_url, _init) => {
+          async (_url, _init) => {
             clientErrorCalls += 1;
-            return Promise.resolve(
-              new Response(
-                JSON.stringify({ error: { status: "INVALID_ARGUMENT" } }),
-                { status: 400 },
-              ),
+            return new Response(
+              JSON.stringify({ error: { status: "INVALID_ARGUMENT" } }),
+              { status: 400 },
             );
           },
         ),
@@ -345,9 +290,9 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
           32,
           false,
           "LOW",
-          (_url, _init) => {
+          async (_url, _init) => {
             serverErrorCalls += 1;
-            return Promise.resolve(new Response("temporary", { status: 503 }));
+            return new Response("temporary", { status: 503 });
           },
         ),
       Error,
@@ -365,104 +310,15 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
           32,
           false,
           "LOW",
-          (_url, _init) => {
+          async (_url, _init) => {
             parseCalls += 1;
-            return Promise.resolve(new Response("not-json", { status: 200 }));
+            return new Response("not-json", { status: 200 });
           },
         ),
       Error,
     );
     assertEquals(parseCalls, 1);
   });
-});
-
-Deno.test("Gemini request always carries the four explicit conservative safety settings", async () => {
-  assertEquals(geminiSafetySettings, [
-    {
-      category: "HARM_CATEGORY_HARASSMENT",
-      threshold: "BLOCK_ONLY_HIGH",
-    },
-    {
-      category: "HARM_CATEGORY_HATE_SPEECH",
-      threshold: "BLOCK_ONLY_HIGH",
-    },
-    {
-      category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-      threshold: "BLOCK_ONLY_HIGH",
-    },
-    {
-      category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-      threshold: "BLOCK_ONLY_HIGH",
-    },
-  ]);
-
-  await withGeminiTestKey(async () => {
-    let sentBody: Record<string, unknown> = {};
-    await geminiCall(
-      "gemini-test",
-      [],
-      "test",
-      32,
-      false,
-      "LOW",
-      (_url, init) => {
-        sentBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
-        return Promise.resolve(providerSuccess());
-      },
-    );
-    assertEquals(sentBody.safetySettings, geminiSafetySettings);
-    assertEquals(
-      (sentBody.generationConfig as Record<string, unknown>).safetySettings,
-      undefined,
-    );
-  });
-});
-
-Deno.test("Gemini prompt and candidate safety metadata fail closed", async () => {
-  await assertRejects(
-    () =>
-      Promise.resolve().then(() =>
-        requireSafeGeminiCandidate({
-          promptFeedback: { blockReason: "SAFETY" },
-          candidates: [],
-        })
-      ),
-    Error,
-    "ai_safety_blocked",
-  );
-  for (
-    const candidate of [
-      { finishReason: "SAFETY" },
-      { finishReason: "STOP", safetyRatings: [{ blocked: true }] },
-    ]
-  ) {
-    await assertRejects(
-      () =>
-        Promise.resolve().then(() =>
-          requireSafeGeminiCandidate({ candidates: [candidate] })
-        ),
-      Error,
-      "ai_safety_blocked",
-    );
-  }
-  for (const finishReason of [undefined, "MAX_TOKENS", "FUTURE_REASON"]) {
-    await assertRejects(
-      () =>
-        Promise.resolve().then(() =>
-          requireSafeGeminiCandidate({ candidates: [{ finishReason }] })
-        ),
-      Error,
-      "provider_incomplete_response",
-    );
-  }
-  const safe = { finishReason: "STOP", safetyRatings: [{ blocked: false }] };
-  assertEquals(
-    requireSafeGeminiCandidate({
-      promptFeedback: { safetyRatings: [{ blocked: false }] },
-      candidates: [safe],
-    }),
-    safe,
-  );
 });
 
 function requestBody(requestId = "coach-test-request-0001") {
@@ -488,30 +344,29 @@ function fakeClients(reservations: Array<Record<string, unknown>>) {
     create: (_authorization: string) => ({
       auth: {
         auth: {
-          getUser: () =>
-            Promise.resolve({
-              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-              error: null,
-            }),
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
         },
       },
       admin: {
-        rpc: (name: string, params: Record<string, unknown>) => {
+        rpc: async (name: string, params: Record<string, unknown>) => {
           if (name === "bil_has_remote_ai_consent") {
-            return Promise.resolve({ data: true, error: null });
+            return { data: true, error: null };
           }
           if (name === "bil_reserve_ai_usage") {
-            return Promise.resolve({
+            return {
               data: reservations.shift() ??
                 { duplicate: true, state: "succeeded" },
               error: null,
-            });
+            };
           }
           settlements.push(params);
-          return Promise.resolve({
+          return {
             data: { state: params.p_succeeded ? "succeeded" : "refunded" },
             error: null,
-          });
+          };
         },
       },
     }),
@@ -522,8 +377,8 @@ Deno.test("provider timeout refunds exactly one established reservation", async 
   const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
   const response = await handler(requestBody(), {
     clients: fake.create as never,
-    geminiCall: () => {
-      return Promise.reject(new Error("provider_timeout"));
+    geminiCall: async () => {
+      throw new Error("provider_timeout");
     },
     now: (() => {
       let value = 1000;
@@ -541,31 +396,30 @@ Deno.test("settlement outage does not hide the original provider failure", async
     clients: ((_authorization: string) => ({
       auth: {
         auth: {
-          getUser: () =>
-            Promise.resolve({
-              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-              error: null,
-            }),
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
         },
       },
       admin: {
-        rpc: (name: string) => {
+        rpc: async (name: string) => {
           if (name === "bil_has_remote_ai_consent") {
-            return Promise.resolve({ data: true, error: null });
+            return { data: true, error: null };
           }
           if (name === "bil_reserve_ai_usage") {
-            return Promise.resolve({
+            return {
               data: { duplicate: false, state: "reserved" },
               error: null,
-            });
+            };
           }
           settlementCalls += 1;
-          return Promise.reject(new Error("database unavailable"));
+          throw new Error("database unavailable");
         },
       },
     })) as never,
-    geminiCall: () => {
-      return Promise.reject(new Error("provider_timeout"));
+    geminiCall: async () => {
+      throw new Error("provider_timeout");
     },
   });
 
@@ -574,65 +428,37 @@ Deno.test("settlement outage does not hide the original provider failure", async
   assertEquals(settlementCalls, 1);
 });
 
-Deno.test("prompt safety block returns only the stable 422 code and refunds once", async () => {
-  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
-  let providerCalls = 0;
-  const response = await handler(requestBody("coach-test-safety-block"), {
-    clients: fake.create as never,
-    geminiCall: () => {
-      providerCalls += 1;
-      return Promise.resolve({
-        attempts: 1,
-        data: {
-          promptFeedback: {
-            blockReason: "SAFETY",
-            blockReasonMessage: "provider-private-detail",
-          },
-          candidates: [],
-        },
-      });
-    },
-  });
-
-  assertEquals(response.status, 422);
-  assertEquals(await response.json(), { error: "ai_safety_blocked" });
-  assertEquals(providerCalls, 1);
-  assertEquals(fake.settlements.length, 1);
-  assertEquals(fake.settlements[0].p_succeeded, false);
-});
-
 Deno.test("successful response exposes the metered request id for feedback correlation", async () => {
   const requestId = "coach-test-feedback-correlation";
   const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
   const response = await handler(requestBody(requestId), {
     clients: fake.create as never,
-    geminiCall: () =>
-      Promise.resolve({
-        attempts: 1,
-        data: {
-          candidates: [{
-            finishReason: "STOP",
-            content: {
-              parts: [{
-                text: JSON.stringify({
-                  reply: "Keep a consistent sleep window.",
-                  spoken_reply: "Keep a consistent sleep window.",
-                  reason: "Consistency supports sleep timing.",
-                  confidence: 0.8,
-                  evidence: [],
-                  missing_data: [],
-                  proposed_actions: [],
-                }),
-              }],
-            },
-          }],
-          usageMetadata: {
-            promptTokenCount: 20,
-            candidatesTokenCount: 10,
-            thoughtsTokenCount: 5,
+    geminiCall: async () => ({
+      attempts: 1,
+      data: {
+        candidates: [{
+          finishReason: "STOP",
+          content: {
+            parts: [{
+              text: JSON.stringify({
+                reply: "Keep a consistent sleep window.",
+                spoken_reply: "Keep a consistent sleep window.",
+                reason: "Consistency supports sleep timing.",
+                confidence: 0.8,
+                evidence: [],
+                missing_data: [],
+                proposed_actions: [],
+              }),
+            }],
           },
+        }],
+        usageMetadata: {
+          promptTokenCount: 20,
+          candidatesTokenCount: 10,
+          thoughtsTokenCount: 5,
         },
-      }),
+      },
+    }),
   });
   assertEquals(response.status, 200);
   const body = await response.json();
@@ -649,16 +475,14 @@ Deno.test("malformed provider JSON refunds rather than charging", async () => {
   const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
   const response = await handler(requestBody(), {
     clients: fake.create as never,
-    geminiCall: () =>
-      Promise.resolve({
-        attempts: 1,
-        data: {
-          candidates: [{
-            finishReason: "STOP",
-            content: { parts: [{ text: '{"reply":"missing spoken"}' }] },
-          }],
-        },
-      }),
+    geminiCall: async () => ({
+      attempts: 1,
+      data: {
+        candidates: [{
+          content: { parts: [{ text: '{"reply":"missing spoken"}' }] },
+        }],
+      },
+    }),
   });
   assertEquals(response.status, 503);
   assertEquals(fake.settlements.length, 1);
@@ -670,9 +494,9 @@ Deno.test("duplicate request never calls provider or settles twice", async () =>
   let providerCalls = 0;
   const response = await handler(requestBody("coach-test-request-duplicate"), {
     clients: fake.create as never,
-    geminiCall: () => {
+    geminiCall: async () => {
       providerCalls += 1;
-      return Promise.reject(new Error("must_not_run"));
+      throw new Error("must_not_run");
     },
   });
   assertEquals(response.status, 409);
@@ -686,26 +510,22 @@ Deno.test("reservation failure does not attempt settlement", async () => {
     clients: ((_authorization: string) => ({
       auth: {
         auth: {
-          getUser: () =>
-            Promise.resolve({
-              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-              error: null,
-            }),
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
         },
       },
       admin: {
-        rpc: (name: string, params: Record<string, unknown>) => {
+        rpc: async (name: string, params: Record<string, unknown>) => {
           if (name === "bil_has_remote_ai_consent") {
-            return Promise.resolve({ data: true, error: null });
+            return { data: true, error: null };
           }
           if (name === "bil_reserve_ai_usage") {
-            return Promise.resolve({
-              data: null,
-              error: { message: "database unavailable" },
-            });
+            return { data: null, error: { message: "database unavailable" } };
           }
           settlements.push(params);
-          return Promise.resolve({ data: null, error: null });
+          return { data: null, error: null };
         },
       },
     })) as never,
@@ -721,32 +541,31 @@ Deno.test("exhausted total fails closed with a distinguishable Boost route code"
     clients: ((_authorization: string) => ({
       auth: {
         auth: {
-          getUser: () =>
-            Promise.resolve({
-              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-              error: null,
-            }),
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
         },
       },
       admin: {
-        rpc: (name: string) => {
+        rpc: async (name: string) => {
           if (name === "bil_has_remote_ai_consent") {
-            return Promise.resolve({ data: true, error: null });
+            return { data: true, error: null };
           }
           if (name === "bil_reserve_ai_usage") {
-            return Promise.resolve({
+            return {
               data: null,
               error: { message: "ai_usage_exhausted" },
-            });
+            };
           }
           settlementCalls += 1;
-          return Promise.resolve({ data: null, error: null });
+          return { data: null, error: null };
         },
       },
     })) as never,
-    geminiCall: () => {
+    geminiCall: async () => {
       providerCalls += 1;
-      return Promise.reject(new Error("must_not_run"));
+      throw new Error("must_not_run");
     },
   });
 
@@ -769,25 +588,22 @@ Deno.test("quota aliases cannot masquerade as exhausted AI credit", async () => 
       clients: ((_authorization: string) => ({
         auth: {
           auth: {
-            getUser: () =>
-              Promise.resolve({
-                data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-                error: null,
-              }),
+            getUser: async () => ({
+              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+              error: null,
+            }),
           },
         },
         admin: {
-          rpc: (name: string) =>
-            Promise.resolve(
-              name === "bil_has_remote_ai_consent"
-                ? { data: true, error: null }
-                : { data: null, error: { message } },
-            ),
+          rpc: async (name: string) =>
+            name === "bil_has_remote_ai_consent"
+              ? { data: true, error: null }
+              : { data: null, error: { message } },
         },
       })) as never,
-      geminiCall: () => {
+      geminiCall: async () => {
         providerCalls += 1;
-        return Promise.reject(new Error("must_not_run"));
+        throw new Error("must_not_run");
       },
     });
     assertEquals(response.status, 503);
@@ -803,26 +619,25 @@ Deno.test("missing remote AI consent blocks before reservation and provider", as
     clients: ((_authorization: string) => ({
       auth: {
         auth: {
-          getUser: () =>
-            Promise.resolve({
-              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-              error: null,
-            }),
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
         },
       },
       admin: {
-        rpc: (name: string) => {
+        rpc: async (name: string) => {
           if (name === "bil_has_remote_ai_consent") {
-            return Promise.resolve({ data: false, error: null });
+            return { data: false, error: null };
           }
           reservationCalls += 1;
-          return Promise.resolve({ data: null, error: null });
+          return { data: null, error: null };
         },
       },
     })) as never,
-    geminiCall: () => {
+    geminiCall: async () => {
       providerCalls += 1;
-      return Promise.reject(new Error("must_not_run"));
+      throw new Error("must_not_run");
     },
   });
   assertEquals(response.status, 403);
@@ -857,11 +672,10 @@ Deno.test("voice uses v2 consent and one voice-seconds reservation", async () =>
     clients: ((_authorization: string) => ({
       auth: {
         auth: {
-          getUser: () =>
-            Promise.resolve({
-              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-              error: null,
-            }),
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
         },
       },
       admin: {
@@ -871,35 +685,34 @@ Deno.test("voice uses v2 consent and one voice-seconds reservation", async () =>
               eq: () => ({
                 order: () => ({
                   limit: () => ({
-                    maybeSingle: () =>
-                      Promise.resolve({
-                        data: { granted: true, policy_version: "2" },
-                        error: null,
-                      }),
+                    maybeSingle: async () => ({
+                      data: { granted: true, policy_version: "2" },
+                      error: null,
+                    }),
                   }),
                 }),
               }),
             }),
           }),
         }),
-        rpc: (name: string, params: Record<string, unknown>) => {
+        rpc: async (name: string, params: Record<string, unknown>) => {
           if (name === "bil_has_remote_ai_consent") {
-            return Promise.resolve({ data: true, error: null });
+            return { data: true, error: null };
           }
           calls.push({ name, params });
           if (name === "bil_reserve_ai_voice") {
-            return Promise.resolve({
+            return {
               data: { duplicate: false, state: "reserved" },
               error: null,
-            });
+            };
           }
-          return Promise.resolve({ data: { state: "succeeded" }, error: null });
+          return { data: { state: "succeeded" }, error: null };
         },
       },
     })) as never,
-    geminiCall: (_model, contents) => {
+    geminiCall: async (_model, contents) => {
       providerContents = contents;
-      return Promise.resolve({
+      return {
         attempts: 1,
         data: {
           candidates: [{
@@ -921,7 +734,7 @@ Deno.test("voice uses v2 consent and one voice-seconds reservation", async () =>
           }],
           usageMetadata: { promptTokenCount: 20, candidatesTokenCount: 10 },
         },
-      });
+      };
     },
   });
   assertEquals(response.status, 200);

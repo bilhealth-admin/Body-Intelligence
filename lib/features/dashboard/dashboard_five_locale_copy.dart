@@ -93,11 +93,6 @@ const _dashboardAuthoredCopy = <String, Map<String, String>>{
     'es': 'Personalizar Hoy',
     'tr': 'Bugünü özelleştir',
   },
-  'Today steps': {
-    'fr': 'Pas du jour',
-    'es': 'Pasos de hoy',
-    'tr': 'Bugünün adımları',
-  },
   'Restore default view': {
     'fr': 'Rétablir l’affichage par défaut',
     'es': 'Restaurar vista predeterminada',

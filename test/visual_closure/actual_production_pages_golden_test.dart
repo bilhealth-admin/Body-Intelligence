@@ -21,7 +21,6 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
-import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
@@ -43,6 +42,7 @@ import 'package:body_intelligence_log/features/wellness/presentation/professiona
 import 'package:body_intelligence_log/features/wellness/presentation/recipe_library_page.dart';
 import 'package:body_intelligence_log/features/wellness/repositories/recipe_release_repository.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_library_page.dart';
+import 'package:body_intelligence_log/features/wellness/presentation/wellness_learn_page.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_tools_pages.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_content_pack_manager.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -65,13 +65,6 @@ const _skipVisualPixelComparison = bool.fromEnvironment(
 );
 
 final _visualNow = DateTime(2026, 8, 14, 9, 41, 12);
-
-final _visualAcceptedCommunityPolicy = CommunityContentPolicy.fromJson({
-  'version': 'community-policy-v1',
-  'locale_code': 'en',
-  'document_url': 'https://www.bilhealth.com/community-guidelines',
-  'effective_at': '2026-09-08T00:00:00Z',
-});
 
 Future<void> _settleRecipeCardFacts(WidgetTester tester) async {
   Finder pendingFacts() => find.byWidgetPredicate(
@@ -182,22 +175,6 @@ final class _VisualCommunityRepository extends CommunityRepository {
   Future<CommunityProfile?> loadMyProfile() async => profile;
 
   @override
-  Future<CommunitySocialIdentity> loadSocialIdentity() async =>
-      const CommunitySocialIdentity(
-        handle: 'bil_qa_member',
-        chosen: true,
-        discoverable: true,
-      );
-
-  @override
-  Future<CommunityPolicyState> loadCommunityPolicyState({
-    required String localeCode,
-  }) async => CommunityPolicyState.accepted(
-    _visualAcceptedCommunityPolicy,
-    acceptedVersion: _visualAcceptedCommunityPolicy.version,
-  );
-
-  @override
   Future<void> saveMyProfile({
     required String displayName,
     required String localeCode,
@@ -248,16 +225,14 @@ final class _VisualCommunityRepository extends CommunityRepository {
     {
       'user_id': otherId,
       'display_name': 'BIL QA Partner',
-      'handle': 'bil_qa_partner',
       'bio': 'Non-personal community search fixture',
       'avatar_url': null,
     },
   ];
 
   @override
-  Future<CommunityFriendRequestStatus> requestFriend(String addresseeId) async {
+  Future<void> requestFriend(String addresseeId) async {
     if (addresseeId != otherId) throw StateError('Unknown visual profile');
-    return CommunityFriendRequestStatus.pending;
   }
 
   @override
@@ -693,9 +668,9 @@ void main() {
       name: 'community_navigation_menu_authenticated_phone',
       captureOverlay: true,
       interact: (tester) async {
-        await tester.tap(find.byKey(const Key('community-settings')));
+        await tester.tap(find.byTooltip('Community actions'));
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('community-nav-account')), findsOneWidget);
+        expect(find.text('Community profile'), findsOneWidget);
         expect(find.text('Friends and requests'), findsOneWidget);
         expect(find.text('Find people'), findsOneWidget);
       },
@@ -1664,6 +1639,7 @@ void main() {
     ('quick_log', 'Quick log'),
     ('discover', 'Discover'),
     ('best_action', 'Personal intelligence'),
+    ('progress', 'Progress'),
     ('connected_health', 'Connected health'),
     ('body_twin', 'Body Twin'),
   ];
@@ -1678,50 +1654,50 @@ void main() {
         interact: (tester) async {
           // Quick log and Personal intelligence are both hidden by default.
           // Turn the peer on so each golden proves one distinct disabled state.
-          final peerId = switch (section.$1) {
-            'quick_log' => 'best_action',
-            'best_action' => 'quick_log',
+          final peerLabel = switch (section.$1) {
+            'quick_log' => 'Personal intelligence',
+            'best_action' => 'Quick log',
             _ => null,
           };
-          if (peerId != null) {
-            final peerTile = find.byKey(Key('dashboard-section-$peerId'));
+          if (peerLabel != null) {
+            final peer = find.text(peerLabel);
             await tester.scrollUntilVisible(
-              peerTile,
+              peer,
               180,
               scrollable: find.byType(Scrollable).first,
             );
-            await tester.ensureVisible(peerTile);
-            final peerWidget = tester.widget<SwitchListTile>(peerTile);
-            if (!peerWidget.value) {
-              peerWidget.onChanged!(true);
+            final peerTile = find.ancestor(
+              of: peer,
+              matching: find.byType(SwitchListTile),
+            );
+            if (!tester.widget<SwitchListTile>(peerTile).value) {
+              await tester.tap(peerTile);
               await tester.pumpAndSettle();
             }
           }
-          final tile = find.byKey(Key('dashboard-section-${section.$1}'));
+          final target = find.text(section.$2);
           await tester.scrollUntilVisible(
-            tile,
+            target,
             180,
             scrollable: find.byType(Scrollable).first,
           );
           await Scrollable.ensureVisible(
-            tester.element(tile),
+            tester.element(target),
             alignment: .35,
             duration: Duration.zero,
           );
           await tester.pumpAndSettle();
-          final tileWidget = tester.widget<SwitchListTile>(tile);
-          if (tileWidget.value) {
-            tileWidget.onChanged!(false);
+          final tile = find.ancestor(
+            of: target,
+            matching: find.byType(SwitchListTile),
+          );
+          if (tester.widget<SwitchListTile>(tile).value) {
+            await tester.tap(tile);
             await tester.pumpAndSettle();
           }
           expect(tester.widget<SwitchListTile>(tile).value, isFalse);
           if (section.$1 == 'quick_log') {
             final restore = find.text('Restore default view');
-            await tester.scrollUntilVisible(
-              restore,
-              180,
-              scrollable: find.byType(Scrollable).first,
-            );
             await Scrollable.ensureVisible(
               tester.element(restore),
               alignment: .72,
@@ -1887,6 +1863,39 @@ void main() {
     );
   });
 
+  for (final state in const [
+    (page: 1, swipes: 0, title: 'How does food affect your sleep?'),
+    (page: 2, swipes: 1, title: "Find out what's keeping you awake"),
+    (page: 3, swipes: 2, title: 'Time your meals for the best rest'),
+  ]) {
+    testWidgets('sleep education production page ${state.page} capture', (
+      tester,
+    ) async {
+      await capture(
+        tester,
+        page: const SleepTrackerPage(),
+        name: state.page == 1
+            ? 'sleep_learn_phone'
+            : 'sleep_learn_phone_${state.page}',
+        interact: (tester) async {
+          await tester.tap(find.text('Learn'));
+          await tester.pumpAndSettle();
+          final carousel = find.byKey(const Key('sleep-education-carousel'));
+          for (var swipe = 0; swipe < state.swipes; swipe++) {
+            await tester.drag(carousel, const Offset(-320, 0));
+            await tester.pumpAndSettle();
+          }
+          expect(
+            find
+                .descendant(of: carousel, matching: find.text(state.title))
+                .hitTestable(),
+            findsOneWidget,
+          );
+        },
+      );
+    });
+  }
+
   testWidgets('fasting production page capture', (tester) async {
     SharedPreferences.setMockInitialValues({});
     await capture(
@@ -1903,6 +1912,99 @@ void main() {
       name: 'wellness_library_phone',
     );
   });
+
+  testWidgets('wellness learn production page capture', (tester) async {
+    await capture(
+      tester,
+      page: const WellnessLearnPage(),
+      name: 'wellness_learn_phone',
+    );
+  });
+
+  testWidgets('wellness learn filtered search capture', (tester) async {
+    await capture(
+      tester,
+      page: const WellnessLearnPage(),
+      name: 'wellness_learn_search_phone',
+      interact: (tester) async {
+        final search = find.byType(SearchBar);
+        expect(search, findsOneWidget);
+        await tester.tap(search);
+        await tester.enterText(search, 'sleep');
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Why one night cannot explain your sleep'),
+          findsOneWidget,
+        );
+        expect(find.text('Educational highlights'), findsNothing);
+      },
+    );
+  });
+
+  for (final topic in const ['Nutrition', 'Movement', 'Sleep', 'Privacy']) {
+    testWidgets('wellness learn $topic topic capture', (tester) async {
+      await capture(
+        tester,
+        page: const WellnessLearnPage(),
+        name: 'wellness_learn_${topic.toLowerCase()}_phone',
+        interact: (tester) async {
+          final target = find.text(topic);
+          await tester.ensureVisible(target);
+          await tester.pumpAndSettle();
+          await tester.tap(target);
+          await tester.pumpAndSettle();
+          final chip = tester.widget<ChoiceChip>(
+            find.widgetWithText(ChoiceChip, topic),
+          );
+          expect(chip.selected, isTrue);
+        },
+      );
+    });
+  }
+
+  const learnArticles = <(String, String)>[
+    ('nutrition', 'How to read your food log without judgment'),
+    ('movement', 'Consistency matters more than a perfect day'),
+    ('sleep', 'Why one night cannot explain your sleep'),
+    ('privacy', 'Your health data stays under your control'),
+  ];
+  for (final article in learnArticles) {
+    testWidgets('wellness learn ${article.$1} article capture', (tester) async {
+      await capture(
+        tester,
+        page: const WellnessLearnPage(),
+        name: 'wellness_learn_article_${article.$1}_phone',
+        captureOverlay: true,
+        interact: (tester) async {
+          final target = find.text(article.$2);
+          await tester.scrollUntilVisible(
+            target,
+            400,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.tap(target.first);
+          await tester.pumpAndSettle();
+          expect(find.byType(BottomSheet), findsOneWidget);
+        },
+      );
+    });
+  }
+
+  for (var page = 2; page <= 4; page++) {
+    testWidgets('wellness learn production page $page capture', (tester) async {
+      await capture(
+        tester,
+        page: const WellnessLearnPage(),
+        name: 'wellness_learn_phone_$page',
+        interact: (tester) async {
+          for (var step = 1; step < page; step++) {
+            await tester.drag(find.byType(ListView), const Offset(0, -420));
+            await tester.pumpAndSettle();
+          }
+        },
+      );
+    });
+  }
 
   testWidgets('notification settings production page capture', (tester) async {
     SharedPreferences.setMockInitialValues({});

@@ -13,8 +13,6 @@ import '../providers/commerce_providers.dart';
 import 'bil_store_copy.dart';
 import 'premium_crown_emblem.dart';
 
-part 'premium_route_glass_gate_components.dart';
-
 enum PremiumGateFeature {
   premium,
   aiCoach,
@@ -35,20 +33,6 @@ enum PremiumGateFeature {
   community,
 }
 
-void _handlePremiumRouteBack(
-  BuildContext context, {
-  required bool returnToDashboard,
-}) {
-  // Preserve the real entry point (Dashboard, More, or another caller) when
-  // the gate was pushed. Direct/deep links have no route to pop, so they use
-  // the safe Dashboard fallback.
-  if (context.canPop()) {
-    context.pop();
-  } else {
-    context.go('/dashboard');
-  }
-}
-
 /// Lets people inspect a paid route while preventing interaction until a
 /// server-verified entitlement is active.
 class PremiumRouteGlassGate extends ConsumerWidget {
@@ -63,129 +47,30 @@ class PremiumRouteGlassGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Keep existing route callers compatible, without consulting billing or
-    // admin state for a Free feature. Community owns sign-in, policy consent,
-    // suspension, relationship permissions and moderation on the server.
-    if (feature == PremiumGateFeature.community) return child;
-    if (feature != PremiumGateFeature.aiCoach) {
-      return _PremiumRouteGateContents(feature: feature, child: child);
-    }
-    return _RetainedAiCoachSurface(
-      // Never retain a previous member's screen across an account change.
-      key: ValueKey(ref.watch(verifiedEntitlementOwnerIdProvider)),
-      child: child,
-    );
-  }
-}
-
-class _RetainedAiCoachSurface extends ConsumerStatefulWidget {
-  const _RetainedAiCoachSurface({required this.child, super.key});
-
-  final Widget child;
-
-  @override
-  ConsumerState<_RetainedAiCoachSurface> createState() =>
-      _RetainedAiCoachSurfaceState();
-}
-
-class _RetainedAiCoachSurfaceState
-    extends ConsumerState<_RetainedAiCoachSurface> {
-  bool _contentMounted = false;
-  bool? _lastVerifiedAccess;
-
-  @override
-  Widget build(BuildContext context) {
-    final credits = ref.watch(aiCoachCreditAccessProvider);
-    final freshAccess = credits.asData?.value;
-    if (freshAccess != null) {
-      _lastVerifiedAccess = freshAccess;
-    }
-
-    // Keep the last server-verified result while the same account silently
-    // revalidates. The parent widget is keyed by verified entitlement owner,
-    // so an auth/account change recreates this state and cannot inherit another
-    // member's cached access.
-    //
-    // This is presentation continuity only. AI reservations/settlement remain
-    // server-authoritative, so stale UI cannot spend unavailable credit.
-    final allowed = (freshAccess ?? _lastVerifiedAccess) == true;
-    final unavailable = credits.hasError && _lastVerifiedAccess == null;
-    if (allowed || unavailable || (!unavailable && !credits.isLoading)) {
-      _contentMounted = true;
-    }
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Keep the same element position even when the gate is shown. Credit
-        // settlement must not discard a draft, scroll position or transcript.
-        if (_contentMounted)
-          KeyedSubtree(
-            key: const ValueKey('ai-coach-retained-content'),
-            child: ExcludeFocus(
-              excluding: !allowed,
-              child: AbsorbPointer(
-                absorbing: !allowed,
-                child: ExcludeSemantics(
-                  excluding: !allowed,
-                  child: widget.child,
-                ),
-              ),
-            ),
-          ),
-        if (!allowed)
-          const _PremiumRouteGateContents(
-            feature: PremiumGateFeature.aiCoach,
-            child: SizedBox.shrink(),
-          ),
-      ],
-    );
-  }
-}
-
-class _PremiumRouteGateContents extends ConsumerWidget {
-  const _PremiumRouteGateContents({required this.feature, required this.child});
-
-  final PremiumGateFeature feature;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isAiCoach = feature == PremiumGateFeature.aiCoach;
-    // Boost belongs to the account, not its membership tier. A subscription
-    // lookup (including its loading/error state) must not block verified credit.
-    final subscription = isAiCoach
-        ? const AsyncValue<SubscriptionState?>.data(null)
-        : ref.watch(verifiedSubscriptionAccessProvider);
-    final storefrontPlan = isAiCoach
-        ? null
-        : ref.watch(storefrontTargetPlanProvider).value;
+    final subscription = ref.watch(verifiedSubscriptionStateProvider);
+    final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
     final state = subscription.asData?.value;
+    final isAiCoach = feature == PremiumGateFeature.aiCoach;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
     final creditAccess = creditSnapshot.asData?.value ?? false;
+    final activeAiSubscription = hasVerifiedAiSubscription(state);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (subscription.isLoading) {
-      return _PremiumRouteAccessChecking(
-        isDark: isDark,
-        returnToDashboard: isAiCoach,
-      );
+      return _PremiumRouteAccessChecking(isDark: isDark, child: child);
     }
     final verificationUnavailable =
         subscription.hasError || (isAiCoach && creditSnapshot.hasError);
     if (verificationUnavailable) {
       return _PremiumRouteAccessUnavailable(
         isDark: isDark,
-        returnToDashboard: isAiCoach,
-        onRetry: () {
-          if (isAiCoach) {
-            ref.invalidate(aiCoachCreditAccessProvider);
-          } else {
-            ref.invalidate(verifiedSubscriptionStateProvider);
-          }
-        },
         child: child,
+        onRetry: () {
+          ref.invalidate(verifiedSubscriptionStateProvider);
+          if (isAiCoach) ref.invalidate(aiCoachCreditAccessProvider);
+        },
       );
     }
     final loading = isAiCoach && creditSnapshot.isLoading;
@@ -193,10 +78,7 @@ class _PremiumRouteGateContents extends ConsumerWidget {
     // member's entitlement. This avoids the brief (and confusing) paywall
     // flash reported when an active AI subscription is opened from More.
     if (loading) {
-      return _PremiumRouteAccessChecking(
-        isDark: isDark,
-        returnToDashboard: isAiCoach,
-      );
+      return _PremiumRouteAccessChecking(isDark: isDark, child: child);
     }
     final hasAccess = isAiCoach
         ? creditAccess
@@ -212,7 +94,9 @@ class _PremiumRouteGateContents extends ConsumerWidget {
     // billing storefront. Unknown storefronts fail closed to Premium; an
     // underpriced AI-inclusive membership is never advertised by locale/IP.
     final tier = isAiCoach
-        ? 'BIL AI BOOST'
+        ? activeAiSubscription
+              ? 'BIL PREMIUM AI COACH · ${context.strings.text('Current')}'
+              : 'BIL PREMIUM AI COACH'
         : storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
@@ -233,12 +117,9 @@ class _PremiumRouteGateContents extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: IconButton(
-                key: const ValueKey('premium-route-back'),
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: () => _handlePremiumRouteBack(
-                  context,
-                  returnToDashboard: isAiCoach,
-                ),
+                onPressed: () =>
+                    context.canPop() ? context.pop() : context.go('/dashboard'),
                 style: IconButton.styleFrom(
                   backgroundColor: isDark
                       ? const Color(0x99141414)
@@ -264,19 +145,27 @@ class _PremiumRouteGateContents extends ConsumerWidget {
                     body: content.body,
                     benefits: content.benefits,
                     action: isAiCoach
-                        ? context.strings.text('Get AI Boost')
+                        ? activeAiSubscription
+                              ? context.strings.text('Get AI Boost')
+                              : BilStoreCopy.text(storeLocale, 'continue')
                         : BilStoreCopy.text(storeLocale, 'plans'),
-                    secondaryAction: null,
+                    secondaryAction: isAiCoach && !activeAiSubscription
+                        ? context.strings.text('Get AI Boost')
+                        : null,
                     loading: loading,
                     compact: compact,
                     isDark: isDark,
                     showCoach: isAiCoach,
                     onPressed: () => context.push(
                       isAiCoach
-                          ? '/plans?focus=boost'
+                          ? activeAiSubscription
+                                ? '/plans?focus=boost'
+                                : '/plans?focus=ai-coach'
                           : '/plans?focus=subscription',
                     ),
-                    onSecondaryPressed: null,
+                    onSecondaryPressed: isAiCoach && !activeAiSubscription
+                        ? () => context.push('/plans?focus=boost')
+                        : null,
                   ),
                 ),
               );
@@ -288,17 +177,64 @@ class _PremiumRouteGateContents extends ConsumerWidget {
   }
 }
 
+class _PremiumRouteAccessChecking extends StatelessWidget {
+  const _PremiumRouteAccessChecking({
+    required this.child,
+    required this.isDark,
+  });
+
+  final Widget child;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    fit: StackFit.expand,
+    children: [
+      AbsorbPointer(child: ExcludeSemantics(child: child)),
+      ColoredBox(
+        color: isDark ? const Color(0x14000000) : const Color(0x08000000),
+        child: const Center(
+          child: SizedBox.square(
+            key: ValueKey('premium-route-access-checking'),
+            dimension: 24,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+        ),
+      ),
+      SafeArea(
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: IconButton(
+              key: const ValueKey('premium-route-loading-back'),
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: () =>
+                  context.canPop() ? context.pop() : context.go('/dashboard'),
+              style: IconButton.styleFrom(
+                backgroundColor: isDark
+                    ? const Color(0x99141414)
+                    : const Color(0xB8FFFFFF),
+                foregroundColor: isDark ? Colors.white : Colors.black87,
+              ),
+              icon: const BackButtonIcon(),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 class _PremiumRouteAccessUnavailable extends StatelessWidget {
   const _PremiumRouteAccessUnavailable({
     required this.child,
     required this.isDark,
-    required this.returnToDashboard,
     required this.onRetry,
   });
 
   final Widget child;
   final bool isDark;
-  final bool returnToDashboard;
   final VoidCallback onRetry;
 
   @override
@@ -323,11 +259,8 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: IconButton(
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: () => _handlePremiumRouteBack(
-                  context,
-                  returnToDashboard: returnToDashboard,
-                ),
-                key: const ValueKey('premium-route-back'),
+                onPressed: () =>
+                    context.canPop() ? context.pop() : context.go('/dashboard'),
                 icon: const BackButtonIcon(),
               ),
             ),
@@ -736,6 +669,113 @@ class _PremiumGateCard extends StatelessWidget {
                 ],
               ],
             ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _BenefitPill extends StatelessWidget {
+  const _BenefitPill({required this.label, required this.isDark});
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+    decoration: BoxDecoration(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x24000000),
+      borderRadius: BorderRadius.circular(99),
+      border: Border.all(color: const Color(0x20FFFFFF)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        const Icon(Icons.check_rounded, size: 15, color: Color(0xFFFFDA77)),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            label,
+            softWrap: true,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: isDark ? const Color(0xFFF1F1F1) : const Color(0xFF272117),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _GoldActionButton extends StatelessWidget {
+  const _GoldActionButton({
+    required this.label,
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool loading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(18),
+      gradient: const LinearGradient(
+        colors: [Color(0xFFFFE89E), Color(0xFFF5C654), Color(0xFFD99B26)],
+      ),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x55E9B33C),
+          blurRadius: 22,
+          offset: Offset(0, 9),
+        ),
+      ],
+    ),
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('premium-route-upgrade-cta'),
+        onTap: loading ? null : onPressed,
+        borderRadius: BorderRadius.circular(18),
+        child: SizedBox(
+          height: 54,
+          child: Center(
+            child: loading
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF07121E),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: const Color(0xFF08131F),
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 20,
+                        color: Color(0xFF08131F),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),

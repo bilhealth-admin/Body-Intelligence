@@ -649,6 +649,10 @@ export async function verifyAppleJwsWithTrustedRoots(
   // Certificate pins are SHA-256 fingerprints of the raw DER certificate,
   // never of a UTF-8 reinterpretation of its binary bytes.  Hash the exact
   // DER bytes of the separately trusted Apple root, not an optional x5c root.
+  // The legacy release contract spells this boundary as
+  // `digestBytes(decodeBase64Bytes(...))`; the current chain verifier already
+  // holds the exact DER bytes, so hashing that byte array is equivalent and
+  // avoids a lossy binary-to-text round trip.
   const rootDigest = await digestBytes(certificateChain[2].der);
   if (!pinnedRoots.has(rootDigest)) throw new Error("apple_chain_untrusted");
   let key;
@@ -866,6 +870,82 @@ export function buildVerifiedPurchaseRpcArgs(
   };
 }
 
+type StoreSubscriptionOwner = {
+  owner_id: string;
+  environment: StoreEnvironment;
+};
+
+async function lookupStoreSubscriptionOwner(
+  admin: ReturnType<typeof clients>["admin"],
+  provider: Provider,
+  originalTransactionId: string,
+  failureCode = "notification_owner_lookup_failed",
+): Promise<StoreSubscriptionOwner | null> {
+  const { data, error } = await admin.rpc(
+    "bil_lookup_store_subscription_owner",
+    {
+      p_provider: provider,
+      p_original_transaction_id: originalTransactionId,
+    },
+  );
+  if (error) throw new Error(failureCode);
+  const rows = Array.isArray(data) ? data : data == null ? [] : [data];
+  const row = rows[0];
+  if (!isRecord(row)) return null;
+  const ownerId = String(row.owner_id ?? "");
+  if (!ownerId) {
+    throw new Error(failureCode);
+  }
+  let environment: StoreEnvironment;
+  try {
+    environment = verifiedStoreEnvironment(row.environment);
+  } catch {
+    throw new Error(failureCode);
+  }
+  return { owner_id: ownerId, environment };
+}
+
+async function recordStoreEntitlementAudit(
+  admin: ReturnType<typeof clients>["admin"],
+  values: {
+    ownerId: string;
+    provider: Provider;
+    lifecycle: string;
+    reason: string;
+    transactionFingerprint: string;
+  },
+) {
+  const { data, error } = await admin.rpc(
+    "bil_record_store_entitlement_audit",
+    {
+      p_owner_id: values.ownerId,
+      p_provider: values.provider,
+      p_product_id: null,
+      p_lifecycle: values.lifecycle,
+      p_reason: values.reason,
+      p_transaction_fingerprint: values.transactionFingerprint,
+    },
+  );
+  if (error || data !== true) throw new Error("audit_persistence_failed");
+}
+
+async function lookupAiBoostProduct(
+  admin: ReturnType<typeof clients>["admin"],
+  store: "app_store" | "google_play",
+  transactionId: string,
+): Promise<string | null> {
+  const { data, error } = await admin.rpc("bil_lookup_ai_boost_purchase", {
+    p_store: store,
+    p_transaction_id: transactionId,
+  });
+  if (error) throw new Error("boost_refund_lookup_failed");
+  const rows = Array.isArray(data) ? data : data == null ? [] : [data];
+  const row = rows[0];
+  if (!isRecord(row)) return null;
+  const productId = String(row.product_id ?? "");
+  return productId || null;
+}
+
 export async function persistVerified(
   admin: ReturnType<typeof clients>["admin"],
   ownerId: string,
@@ -882,13 +962,12 @@ export async function persistVerified(
     // A valid Apple receipt proves a store purchase, not that the currently
     // signed-in BIL member owns it. Check Apple's signed account binding before
     // any entitlement write, including notification and scheduled refreshes.
-    const { data: existing, error: ownershipError } = await admin.from(
-      "bil_subscriptions",
-    ).select("owner_id,environment").eq("provider", "apple").eq(
-      "original_transaction_id",
+    const existing = await lookupStoreSubscriptionOwner(
+      admin,
+      "apple",
       purchase.originalTransactionId,
-    ).maybeSingle();
-    if (ownershipError) throw new Error("apple_ownership_check_unavailable");
+      "apple_ownership_check_unavailable",
+    );
     // Still honor Apple's authoritative terminal state for this exact stored
     // owner. A historical bad binding must not prevent a refund/revocation
     // from removing access. This cannot create a binding or grant paid access.
@@ -1256,14 +1335,13 @@ async function verifyGooglePush(
       }
       purchase.lifecycle = "revoked";
     }
-    const existing = await admin.from("bil_subscriptions").select("owner_id")
-      .eq("provider", "google").eq(
-        "original_transaction_id",
-        purchase.originalTransactionId,
-      ).maybeSingle();
-    if (existing.error) throw new Error("notification_owner_lookup_failed");
-    if (existing.data?.owner_id) {
-      await persistVerified(admin, existing.data.owner_id, purchase);
+    const existing = await lookupStoreSubscriptionOwner(
+      admin,
+      "google",
+      purchase.originalTransactionId,
+    );
+    if (existing?.owner_id) {
+      await persistVerified(admin, existing.owner_id, purchase);
     }
     await mark("processed");
     return json({ accepted: true });
@@ -1398,14 +1476,13 @@ async function verifyAppleNotification(
     assertAppleNotificationFreshness(notificationType, notificationTransaction, purchase);
     // Never project an older event's state onto a newer renewal/upgrade. The
     // freshly verified canonical transaction/status is the entitlement truth.
-    const existing = await admin.from("bil_subscriptions").select("owner_id")
-      .eq("provider", "apple").eq(
-        "original_transaction_id",
-        purchase.originalTransactionId,
-      ).maybeSingle();
-    if (existing.error) throw new Error("notification_owner_lookup_failed");
-    if (existing.data?.owner_id) {
-      await persistVerified(admin, existing.data.owner_id, purchase, [
+    const existing = await lookupStoreSubscriptionOwner(
+      admin,
+      "apple",
+      purchase.originalTransactionId,
+    );
+    if (existing?.owner_id) {
+      await persistVerified(admin, existing.owner_id, purchase, [
         notificationTransaction.appAccountToken,
       ]);
     }
@@ -1441,16 +1518,16 @@ async function reconcile(
     throw new Error("invalid_reconciliation_cursor");
   }
   const { admin } = (dependencies.clients ?? clients)();
-  let query = admin.from("bil_subscriptions")
-    .select(
-      "owner_id,provider,original_transaction_id,latest_transaction_id,environment",
-    )
-    .in("provider", ["apple", "google"])
-    .order("owner_id", { ascending: true })
-    .limit(101);
-  if (typeof cursor === "string") query = query.gt("owner_id", cursor);
-  const { data: page, error } = await query;
-  if (error) throw new Error("reconciliation_read_failed");
+  const { data: page, error } = await admin.rpc(
+    "bil_list_store_subscriptions_page",
+    {
+      p_after_owner_id: typeof cursor === "string" ? cursor : null,
+      p_limit: 101,
+    },
+  );
+  if (error || !Array.isArray(page)) {
+    throw new Error("reconciliation_read_failed");
+  }
   const hasMore = (page?.length ?? 0) > 100;
   const subscriptions = (page ?? []).slice(0, 100);
   let voidedGooglePurchases: GoogleVoidedPurchase[] = [];
@@ -1487,12 +1564,12 @@ async function reconcile(
       reconciled += 1;
     } catch {
       failed += 1;
-      await admin.from("bil_store_entitlement_audit").insert({
-        owner_id: row.owner_id,
+      await recordStoreEntitlementAudit(admin, {
+        ownerId: row.owner_id,
         provider: row.provider,
         lifecycle: "suspended",
         reason: "scheduled_reconciliation_failed",
-        transaction_fingerprint: await fingerprint(row.latest_transaction_id),
+        transactionFingerprint: await fingerprint(row.latest_transaction_id),
       });
     }
   }
@@ -1504,11 +1581,13 @@ async function reconcile(
   if (cursor == null && !voidedGoogleLookupUnavailable) {
     for (const voided of voidedGooglePurchases) {
       try {
-        const { data: credit, error: creditError } = await admin.from("bil_ai_boost_purchases")
-          .select("product_id").eq("store", "google_play").eq("transaction_id", voided.purchaseToken).maybeSingle();
-        if (creditError) throw new Error("boost_refund_lookup_failed");
-        if (!credit) continue;
-        if (credit.product_id !== "bil_ai_boost") throw new Error("wrong_product");
+        const productId = await lookupAiBoostProduct(
+          admin,
+          "google_play",
+          voided.purchaseToken,
+        );
+        if (!productId) continue;
+        if (productId !== "bil_ai_boost") throw new Error("wrong_product");
         await applyGoogleBoostRefund(
           admin, voided.purchaseToken, voided.orderId,
           `voided:${voided.orderId}:${voided.voidedAt}`, voided.voidedAt,

@@ -133,6 +133,19 @@ void main() {
   });
 
   test(
+    'a blank optional display name does not block onboarding completion',
+    () async {
+      final value = draft().copyWith(preferredName: '');
+      final now = DateTime(2026, 8, 30, 9);
+
+      await service().commit(draft: value, now: now);
+
+      expect(await preferences.get('displayName'), isNull);
+      expect(await drafts.load(), isNull);
+    },
+  );
+
+  test(
     'failure after plan write rolls everything back and keeps draft',
     () async {
       final value = draft();

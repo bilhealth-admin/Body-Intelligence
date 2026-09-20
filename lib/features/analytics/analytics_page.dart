@@ -38,14 +38,9 @@ final analyticsClockProvider = Provider<DateTime Function()>(
 );
 
 class AnalyticsPage extends ConsumerStatefulWidget {
-  const AnalyticsPage({
-    super.key,
-    this.showSettingsBack = false,
-    this.showDashboardBack = false,
-  });
+  const AnalyticsPage({super.key, this.showSettingsBack = false});
 
   final bool showSettingsBack;
-  final bool showDashboardBack;
 
   @override
   ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
@@ -88,8 +83,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   }
 
   PreferredSizeWidget? _settingsAppBar(BuildContext context) {
-    if (!widget.showSettingsBack && !widget.showDashboardBack) return null;
-    final dashboardBack = widget.showDashboardBack;
+    if (!widget.showSettingsBack) return null;
     return AppBar(
       title: Text(analyticsText(context, 'Analytics', 'التحليلات')),
       actions: [
@@ -104,21 +98,13 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         ),
       ],
       leading: IconButton(
-        key: Key(
-          dashboardBack
-              ? 'analytics-back-to-dashboard'
-              : 'analytics-back-to-settings',
-        ),
+        key: const Key('analytics-back-to-settings'),
         tooltip: analyticsText(
           context,
-          dashboardBack ? 'Back to dashboard' : 'Back to settings',
-          dashboardBack ? 'العودة إلى لوحة القيادة' : 'العودة إلى الإعدادات',
+          'Back to settings',
+          'العودة إلى الإعدادات',
         ),
         onPressed: () {
-          if (dashboardBack) {
-            context.go('/dashboard');
-            return;
-          }
           if (context.canPop()) {
             context.pop();
           } else {
@@ -144,11 +130,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final weightUnit = UnitConverter.weightUnit(system);
-    if (weightsAsync.isLoading ||
-        mealsAsync.isLoading ||
-        waterAsync.isLoading ||
-        dailyLogsAsync.isLoading ||
-        contextsAsync.isLoading) {
+    // Keep a previously resolved snapshot visible while a provider refreshes.
+    // A full-page skeleton is only appropriate when there is no value to show
+    // yet; replacing valid content during refresh causes a visible flash and
+    // makes the selected analytics range appear to reset.
+    if ((weightsAsync.isLoading && !weightsAsync.hasValue) ||
+        (mealsAsync.isLoading && !mealsAsync.hasValue) ||
+        (waterAsync.isLoading && !waterAsync.hasValue) ||
+        (dailyLogsAsync.isLoading && !dailyLogsAsync.hasValue) ||
+        (contextsAsync.isLoading && !contextsAsync.hasValue)) {
       return Scaffold(
         appBar: _settingsAppBar(context),
         body: Semantics(

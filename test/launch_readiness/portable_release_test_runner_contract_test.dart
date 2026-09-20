@@ -41,7 +41,10 @@ void main() {
       ),
     );
     expect(source, contains('all_tests if path not in EXCLUDED_TESTS'));
-    expect(source, contains('"flutter",'));
+    expect(source, contains('FLUTTER_EXECUTABLE ='));
+    expect(source, contains('"flutter.bat"'));
+    expect(source, contains('def _test_batches('));
+    expect(source, contains('def _run_flutter('));
     expect(source, contains('"test",'));
     expect(exclusions, isNot(contains('test/performance_budget_test.dart')));
   });
@@ -54,21 +57,7 @@ void main() {
     );
     expect(
       source,
-      contains(
-        '[*command, *(["--concurrency", "1"] if policy is None else []), '
-        '*performance_tests]',
-      ),
-    );
-    expect(
-      source,
-      contains('*policy.flutter_test_command(resolve_flutter_executable())'),
-    );
-    expect(
-      File('tool/prebuild/run_code_tests.py').readAsStringSync(),
-      contains("'test', '--no-pub', '--concurrency', '1'"),
-      reason:
-          'Code-only mode inherits the same serial worker limit from the '
-          'shared shell-free command; the default mode adds it explicitly.',
+      contains('[*command, "--concurrency", "1", *performance_tests]'),
     );
     expect(
       source,
@@ -77,16 +66,11 @@ void main() {
     final performanceRun = source.indexOf('performance = subprocess.run(');
     final failureCheck = source.indexOf('if performance.returncode != 0');
     final failureReturn = source.indexOf('return performance.returncode');
-    final remainingRun = source.indexOf('[*command, *batch]');
+    final remainingRun = source.indexOf('_run_flutter(command, remaining_tests)');
     expect(performanceRun, greaterThan(-1));
     expect(failureCheck, greaterThan(performanceRun));
     expect(failureReturn, greaterThan(failureCheck));
     expect(remainingRun, greaterThan(failureReturn));
-    expect(
-      source,
-      contains('partition_test_batches(command, remaining_tests)'),
-    );
-    expect(source, contains('PORTABLE_RELEASE_REMAINING_BATCHES'));
     expect(source, contains('PORTABLE_RELEASE_SCHEDULED_TEST_FILES'));
     expect(
       source,

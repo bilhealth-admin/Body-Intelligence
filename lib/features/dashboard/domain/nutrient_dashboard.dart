@@ -64,6 +64,40 @@ abstract final class NutrientDashboardEvidence {
       complete: true,
     );
   }
+
+  /// Returns the sum of evidenced rows while retaining whether coverage is
+  /// complete. This is used by surfaces that can show a useful partial total
+  /// (for example, 25 g of fiber from the foods that reported fiber) instead
+  /// of hiding an available value because another food has no evidence.
+  static EvidencedNutrientValue partialTotal(
+    Iterable<NutrientDashboardSample> samples,
+    TrackedNutrient nutrient,
+  ) {
+    final rows = samples.toList(growable: false);
+    if (rows.isEmpty) {
+      return const EvidencedNutrientValue(value: null, complete: false);
+    }
+    var knownCount = 0;
+    var total = 0.0;
+    for (final row in rows) {
+      final value = row.values[nutrient];
+      if (!NutrientEvidenceMask.contains(row.evidenceMask, nutrient) ||
+          value == null ||
+          !value.isFinite ||
+          value < 0) {
+        continue;
+      }
+      knownCount++;
+      total += value;
+    }
+    if (knownCount == 0) {
+      return const EvidencedNutrientValue(value: null, complete: false);
+    }
+    return EvidencedNutrientValue(
+      value: total,
+      complete: knownCount == rows.length,
+    );
+  }
 }
 
 class NutrientDashboardGoalSet {

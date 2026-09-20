@@ -1,12 +1,13 @@
-name: BIL Android signed release candidate (build 20)
+name: BIL Android signed release candidate
 
 on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: Exact Google Play build number for this candidate; must be 20
+        description: Exact Android store build number for this frozen candidate
         required: true
         type: string
+        default: '21'
       run_native_crypto_checks:
         description: Run the Android-emulator AES-GCM bridge check for this candidate
         required: false
@@ -40,8 +41,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 20 )) || {
-            echo 'build_number must be exactly 20 for the Android release candidate; build 19 and earlier must never be promoted.' >&2
+          [[ "$BUILD_NUMBER" == '21' ]] || {
+            echo 'build_number must be exactly 21 for this release candidate.' >&2
             exit 1
           }
 
@@ -93,22 +94,19 @@ jobs:
           BIL_FACEBOOK_REQUIRED: true
           BIL_FACEBOOK_LOGIN_ENABLED: true
           BIL_FACEBOOK_LOGIN_READY: true
-          BIL_ADS_ENABLED: false
-          BIL_AD_PROVIDER_READY: false
           BIL_PUSH_ENABLED: false
           BIL_PUSH_PROVIDER_READY: false
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
           BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V20_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V20_FROZEN_SOURCE_MANIFEST_2026-09-19.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V20_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_RELEASE_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS26_ANDROID21_FROZEN_SOURCE_MANIFEST_2026-09-20.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_RELEASE_MANIFEST_SHA256 }}
         run: dart run tool/release/validate_release_configuration.dart
 
       - name: Run portable release tests
-        run: python3 tool/release/run_portable_release_tests.py --code-only
+        run: python3 tool/release/run_portable_release_tests.py
 
       - name: Run explicit system-crypto source gate
         run: >-
@@ -143,15 +141,6 @@ jobs:
 
       - name: Exclude dev-only native plugins from Android release
         run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
-
-      - name: Apply owner-deferred AdMob source configuration
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/test_configure_deferred_admob.py
-          python3 tool/release/configure_deferred_admob.py \
-            --prepare-android-source-manifest android/app/src/main/AndroidManifest.xml \
-            | tee BIL-android-deferred-admob-source.txt
 
       - name: Build signed Android App Bundle
         id: android_aab_build
@@ -213,9 +202,6 @@ jobs:
             --bundle="$AAB" \
             --module=base \
             > "$EVIDENCE_DIR/BIL-android-base-manifest.xml"
-          python3 tool/release/configure_deferred_admob.py \
-            --verify-android-merged-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
-            | tee "$EVIDENCE_DIR/BIL-android-deferred-admob.txt"
           python3 tool/release/verify_android_target_sdk.py \
             --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
             --text-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.txt" \
@@ -241,7 +227,6 @@ jobs:
           path: |
             BIL-android-16k-evidence/BIL-android-bundletool-install.txt
             BIL-android-16k-evidence/BIL-android-base-manifest.xml
-            BIL-android-16k-evidence/BIL-android-deferred-admob.txt
             BIL-android-16k-evidence/BIL-android-target-sdk.txt
             BIL-android-16k-evidence/BIL-android-target-sdk.json
             BIL-android-16k-evidence/BIL-android-optional-hardware.txt
@@ -311,13 +296,10 @@ jobs:
             "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
             'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
             'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
-            'ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED' \
-            'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
-            'ADMOB_ANDROID_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
-            'PHYSICAL_DEVICE_SCOPE=Google Credential Manager sign-in and Meta native Facebook authorization with Supabase token exchange,Play Integrity JIT token/request binding/replay denial,Health Connect,Wear OS via Health Connect,fitness BLE,Play billing' \
+            'PHYSICAL_DEVICE_SCOPE=Facebook OAuth via Supabase Custom Tabs,Play Integrity JIT token/request binding/replay denial,Health Connect,Wear OS via Health Connect,fitness BLE,Play billing' \
             > BIL-android-gate-status.txt
           printf '%s\n' "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
             >> "$GITHUB_STEP_SUMMARY"
@@ -335,7 +317,6 @@ jobs:
             BIL-android-aab.size
             BIL-android-crypto-scan.txt
             BIL-android-upload-certificate.txt
-            BIL-android-deferred-admob-source.txt
             BIL-android-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Render-only transcript text: selection/copy is user initiated, and time
@@ -10,7 +12,6 @@ class CoachMessageText extends StatefulWidget {
     this.style,
     this.alignEnd = false,
     this.animateReveal = false,
-    this.showTime = true,
     super.key,
   });
 
@@ -20,21 +21,15 @@ class CoachMessageText extends StatefulWidget {
   final TextStyle? style;
   final bool alignEnd;
 
-  /// Only fresh BIL replies animate. Restored transcript rows stay complete,
-  /// selectable, and immediately readable.
+  /// Reveals only fresh BIL replies. Restored transcript rows stay immediate.
   final bool animateReveal;
-  final bool showTime;
 
   @override
   State<CoachMessageText> createState() => _CoachMessageTextState();
 }
 
-class _CoachMessageTextState extends State<CoachMessageText>
-    with SingleTickerProviderStateMixin {
-  // Sliver lists recycle off-screen rows. A fresh widget for the same message
-  // must not restart the reveal animation when the user browses history.
-  static final _startedRevealKeys = <Object>{};
-  AnimationController? _revealController;
+class _CoachMessageTextState extends State<CoachMessageText> {
+  Timer? _revealTimer;
   late List<int> _runes;
   late String _visibleText;
 
@@ -54,53 +49,37 @@ class _CoachMessageTextState extends State<CoachMessageText>
   }
 
   void _resetReveal() {
-    _revealController?.dispose();
-    _revealController = null;
+    _revealTimer?.cancel();
     _runes = widget.text.runes.toList(growable: false);
-    final revealKey = widget.key;
-    final animateReveal =
-        widget.animateReveal &&
-        (revealKey == null || _startedRevealKeys.add(revealKey));
-    if (!animateReveal || _runes.length <= 8) {
+    if (!widget.animateReveal || _runes.length <= 8) {
       _visibleText = widget.text;
       return;
     }
-    // Runes keep Arabic and emoji intact. The answer already exists locally;
-    // this is a short visual reveal, not a streamed or delayed response.
-    // A 40ms single-rune cadence is deliberately conversational rather than
-    // the previous near-instant burst, while still keeping a normal reply
-    // readable without a long wait.
-    const initialVisible = 8;
-    final remaining = _runes.length - initialVisible;
-    var visible = initialVisible;
+    // Start visibly and immediately; the timer only finishes the already
+    // received response. Runes avoid splitting Arabic or emoji surrogate pairs.
+    var visible = 8;
     _visibleText = String.fromCharCodes(_runes.take(visible));
-    final controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: remaining * 40),
-    );
-    _revealController = controller;
-    controller.addListener(() {
-      if (!mounted) return;
-      final nextVisible =
-          initialVisible +
-          (controller.value * remaining).floor().clamp(0, remaining);
-      if (nextVisible == visible) return;
-      visible = nextVisible;
+    _revealTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (!mounted) return timer.cancel();
+      visible = visible + 5 > _runes.length ? _runes.length : visible + 5;
       setState(() {
         _visibleText = String.fromCharCodes(_runes.take(visible));
       });
+      if (visible >= _runes.length) timer.cancel();
     });
-    controller.forward();
   }
 
   @override
   void dispose() {
-    _revealController?.dispose();
+    _revealTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final localTime = widget.createdAt.toLocal();
+    final time = TimeOfDay.fromDateTime(localTime).format(context);
+    final date = MaterialLocalizations.of(context).formatFullDate(localTime);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: widget.alignEnd
@@ -111,35 +90,19 @@ class _CoachMessageTextState extends State<CoachMessageText>
           _visibleText,
           textDirection: widget.textDirection,
           style: widget.style,
-          // Screen readers receive the complete answer while the visual layer
-          // reveals it quickly.
+          // Keep VoiceOver/TalkBack semantics complete while the visual layer
+          // reveals the reply quickly.
           semanticsLabel: widget.animateReveal ? widget.text : null,
         ),
-        if (widget.showTime) ...[
-          const SizedBox(height: 4),
-          CoachMessageTime(createdAt: widget.createdAt),
-        ],
+        const SizedBox(height: 4),
+        Text(
+          time,
+          semanticsLabel: '$date, $time',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
       ],
-    );
-  }
-}
-
-class CoachMessageTime extends StatelessWidget {
-  const CoachMessageTime({required this.createdAt, super.key});
-
-  final DateTime createdAt;
-
-  @override
-  Widget build(BuildContext context) {
-    final localTime = createdAt.toLocal();
-    final time = TimeOfDay.fromDateTime(localTime).format(context);
-    final date = MaterialLocalizations.of(context).formatFullDate(localTime);
-    return Text(
-      time,
-      semanticsLabel: '$date, $time',
-      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
     );
   }
 }

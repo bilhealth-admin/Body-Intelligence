@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
-import '../../app/localization/app_localizations.dart';
-
 /// A small, in-app camera surface used by capture journeys that must not
 /// launch the operating-system camera application.  The page returns the
 /// captured [XFile] and keeps the caller's route mounted underneath it.
@@ -182,9 +180,6 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
   Widget build(BuildContext context) {
     final active = _controller;
     final ready = active != null && active.value.isInitialized;
-    final captureLabel = widget.captureLabel == 'Capture'
-        ? context.strings.text('Capture')
-        : widget.captureLabel;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -194,7 +189,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
         actions: [
           if (ready)
             IconButton(
-              tooltip: context.strings.text('Toggle flash'),
+              tooltip: 'Toggle flash',
               onPressed: _toggleFlash,
               icon: Icon(
                 active.value.flashMode == FlashMode.off
@@ -211,6 +206,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
             Center(child: CameraPreview(active))
           else if (_error != null)
             _CameraErrorPanel(
+              error: _error!,
               onRetry: () {
                 unawaited(_initialize());
                 setState(() {});
@@ -227,13 +223,13 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                 child: Column(
                   children: [
                     Text(
-                      captureLabel,
+                      widget.captureLabel,
                       style: const TextStyle(color: Colors.white),
                     ),
                     const SizedBox(height: 12),
                     Semantics(
                       button: true,
-                      label: captureLabel,
+                      label: widget.captureLabel,
                       child: IconButton(
                         onPressed: _capturing ? null : _capture,
                         iconSize: 76,
@@ -254,8 +250,9 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
 }
 
 class _CameraErrorPanel extends StatelessWidget {
-  const _CameraErrorPanel({required this.onRetry});
+  const _CameraErrorPanel({required this.error, required this.onRetry});
 
+  final String error;
   final VoidCallback onRetry;
 
   @override
@@ -272,7 +269,7 @@ class _CameraErrorPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            context.strings.text('Camera unavailable'),
+            'Camera unavailable: $error',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white),
           ),
@@ -280,7 +277,7 @@ class _CameraErrorPanel extends StatelessWidget {
           FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded),
-            label: Text(context.strings.text('Retry')),
+            label: const Text('Retry'),
           ),
         ],
       ),

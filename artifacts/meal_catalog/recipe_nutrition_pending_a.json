@@ -1,0 +1,2476 @@
+{
+  "schemaVersion": 1,
+  "batch": "pending-a",
+  "selection": "first 17 nutrition.status=pending",
+  "sourcePath": "artifacts/meal_catalog/recipe_canonical_100.json",
+  "recordCount": 17,
+  "calculationPolicy": {
+    "formula": "sum(per100g * grams / 100) / servings",
+    "missingMatchPolicy": "blocked-not-zero"
+  },
+  "records": [
+    {
+      "canonicalId": "palestinian-musakhan",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 900.0,
+          "unit": "g",
+          "grams": 900.0,
+          "recordId": "usda:171477",
+          "fdcId": 171477,
+          "sourceRefs": [
+            "usda:171477"
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 165.0,
+            "proteinG": 31.02,
+            "carbohydrateG": 0.0,
+            "fatG": 3.57,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 74.0,
+            "potassiumMg": 256.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        },
+        {
+          "itemId": "olive oil",
+          "quantity": 90.0,
+          "unit": "g",
+          "grams": 90.0,
+          "recordId": "usda:171413",
+          "fdcId": 171413,
+          "sourceRefs": [
+            "usda:171413"
+          ],
+          "sourceDescription": "Oil, olive, salad or cooking",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 884.0,
+            "proteinG": 0.0,
+            "carbohydrateG": 0.0,
+            "fatG": 100.0,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 2.0,
+            "potassiumMg": 1.0
+          }
+        },
+        {
+          "itemId": "pita bread",
+          "quantity": 360.0,
+          "unit": "g",
+          "grams": 360.0,
+          "recordId": "usda:174915",
+          "fdcId": 174915,
+          "sourceRefs": [
+            "usda:174915"
+          ],
+          "sourceDescription": "Bread, pita, white, enriched",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 275.0,
+            "proteinG": 9.1,
+            "carbohydrateG": 55.7,
+            "fatG": 1.2,
+            "fiberG": 2.2,
+            "sugarG": 1.3,
+            "sodiumMg": 536.0,
+            "potassiumMg": 120.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 575.1,
+        "proteinG": 52.68,
+        "carbohydrateG": 40.6,
+        "fatG": 21.12,
+        "fiberG": 2.9,
+        "sugarG": 5.63,
+        "sodiumMg": 433.73,
+        "potassiumMg": 607.82
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 45,
+        "totalMinutes": 70
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "palestinian-musakhan.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "palestinian-musakhan.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "palestinian-musakhan.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "fatta-chicken",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "rice",
+          "quantity": 360.0,
+          "unit": "g",
+          "grams": 360.0,
+          "recordId": "usda:169704",
+          "fdcId": 169704,
+          "sourceRefs": [
+            "usda:169704"
+          ],
+          "sourceDescription": "Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 123.0,
+            "proteinG": 2.74,
+            "carbohydrateG": 25.58,
+            "fatG": 0.97,
+            "fiberG": 1.6,
+            "sugarG": 0.24,
+            "sodiumMg": 4.0,
+            "potassiumMg": 86.0
+          }
+        },
+        {
+          "itemId": "chicken breast",
+          "quantity": 750.0,
+          "unit": "g",
+          "grams": 750.0,
+          "recordId": "usda:171477",
+          "fdcId": 171477,
+          "sourceRefs": [
+            "usda:171477"
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 165.0,
+            "proteinG": 31.02,
+            "carbohydrateG": 0.0,
+            "fatG": 3.57,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 74.0,
+            "potassiumMg": 256.0
+          }
+        },
+        {
+          "itemId": "pita bread",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:174915",
+          "fdcId": 174915,
+          "sourceRefs": [
+            "usda:174915"
+          ],
+          "sourceDescription": "Bread, pita, white, enriched",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 275.0,
+            "proteinG": 9.1,
+            "carbohydrateG": 55.7,
+            "fatG": 1.2,
+            "fiberG": 2.2,
+            "sugarG": 1.3,
+            "sodiumMg": 536.0,
+            "potassiumMg": 120.0
+          }
+        },
+        {
+          "itemId": "yogurt",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:171284",
+          "fdcId": 171284,
+          "sourceRefs": [
+            "usda:171284"
+          ],
+          "sourceDescription": "Yogurt, plain, whole milk",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 61.0,
+            "proteinG": 3.47,
+            "carbohydrateG": 4.66,
+            "fatG": 3.25,
+            "fiberG": 0.0,
+            "sugarG": 4.66,
+            "sodiumMg": 46.0,
+            "potassiumMg": 155.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 448.05,
+        "proteinG": 46.7,
+        "carbohydrateG": 45.53,
+        "fatG": 7.27,
+        "fiberG": 2.06,
+        "sugarG": 3.12,
+        "sodiumMg": 385.9,
+        "potassiumMg": 509.1
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 40,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "fatta-chicken.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "fatta-chicken.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "fatta-chicken.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "levantine-chicken-rice-peas",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "rice",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:169704",
+          "fdcId": 169704,
+          "sourceRefs": [
+            "usda:169704"
+          ],
+          "sourceDescription": "Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 123.0,
+            "proteinG": 2.74,
+            "carbohydrateG": 25.58,
+            "fatG": 0.97,
+            "fiberG": 1.6,
+            "sugarG": 0.24,
+            "sodiumMg": 4.0,
+            "potassiumMg": 86.0
+          }
+        },
+        {
+          "itemId": "chicken breast",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:171477",
+          "fdcId": 171477,
+          "sourceRefs": [
+            "usda:171477"
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 165.0,
+            "proteinG": 31.02,
+            "carbohydrateG": 0.0,
+            "fatG": 3.57,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 74.0,
+            "potassiumMg": 256.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        },
+        {
+          "itemId": "peas",
+          "quantity": 220.0,
+          "unit": "g",
+          "grams": 220.0,
+          "recordId": "usda:170420",
+          "fdcId": 170420,
+          "sourceRefs": [
+            "usda:170420"
+          ],
+          "sourceDescription": "Peas, green, cooked, boiled, drained, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 84.0,
+            "proteinG": 5.36,
+            "carbohydrateG": 15.63,
+            "fatG": 0.22,
+            "fiberG": 5.5,
+            "sugarG": 5.93,
+            "sodiumMg": 3.0,
+            "potassiumMg": 271.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 343.6,
+        "proteinG": 45.4,
+        "carbohydrateG": 25.37,
+        "fatG": 5.5,
+        "fiberG": 3.65,
+        "sugarG": 4.08,
+        "sodiumMg": 102.73,
+        "potassiumMg": 552.63
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 50,
+        "totalMinutes": 70
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "levantine-chicken-rice-peas.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "levantine-chicken-rice-peas.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "levantine-chicken-rice-peas.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "iraqi-tashreeb-chicken",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:171477",
+          "fdcId": 171477,
+          "sourceRefs": [
+            "usda:171477"
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 165.0,
+            "proteinG": 31.02,
+            "carbohydrateG": 0.0,
+            "fatG": 3.57,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 74.0,
+            "potassiumMg": 256.0
+          }
+        },
+        {
+          "itemId": "chickpeas",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:173757",
+          "fdcId": 173757,
+          "sourceRefs": [
+            "usda:173757"
+          ],
+          "sourceDescription": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 164.0,
+            "proteinG": 8.86,
+            "carbohydrateG": 27.42,
+            "fatG": 2.59,
+            "fiberG": 7.6,
+            "sugarG": 4.8,
+            "sodiumMg": 7.0,
+            "potassiumMg": 291.0
+          }
+        },
+        {
+          "itemId": "pita bread",
+          "quantity": 320.0,
+          "unit": "g",
+          "grams": 320.0,
+          "recordId": "usda:174915",
+          "fdcId": 174915,
+          "sourceRefs": [
+            "usda:174915"
+          ],
+          "sourceDescription": "Bread, pita, white, enriched",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 275.0,
+            "proteinG": 9.1,
+            "carbohydrateG": 55.7,
+            "fatG": 1.2,
+            "fiberG": 2.2,
+            "sugarG": 1.3,
+            "sodiumMg": 536.0,
+            "potassiumMg": 120.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 469.97,
+        "proteinG": 51.41,
+        "carbohydrateG": 48.27,
+        "fatG": 6.83,
+        "fiberG": 6.24,
+        "sugarG": 6.37,
+        "sodiumMg": 391.25,
+        "potassiumMg": 743.68
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 55,
+        "totalMinutes": 75
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "iraqi-tashreeb-chicken.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "iraqi-tashreeb-chicken.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "iraqi-tashreeb-chicken.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "moroccan-tagine-fish",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 5.0,
+      "formulation": [
+        {
+          "itemId": "cod",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:171956",
+          "fdcId": 171956,
+          "sourceRefs": [
+            "usda:171956"
+          ],
+          "sourceDescription": "Fish, cod, Atlantic, cooked, dry heat",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 105.0,
+            "proteinG": 22.83,
+            "carbohydrateG": 0.0,
+            "fatG": 0.86,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 244.0
+          }
+        },
+        {
+          "itemId": "potato",
+          "quantity": 450.0,
+          "unit": "g",
+          "grams": 450.0,
+          "recordId": "usda:170440",
+          "fdcId": 170440,
+          "sourceRefs": [
+            "usda:170440"
+          ],
+          "sourceDescription": "Potatoes, boiled, cooked without skin, flesh, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 86.0,
+            "proteinG": 1.71,
+            "carbohydrateG": 20.01,
+            "fatG": 0.1,
+            "fiberG": 1.8,
+            "sugarG": 0.89,
+            "sodiumMg": 5.0,
+            "potassiumMg": 328.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "recordId": "usda:170108",
+          "fdcId": 170108,
+          "sourceRefs": [
+            "usda:170108"
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 26.0,
+            "proteinG": 0.99,
+            "carbohydrateG": 6.03,
+            "fatG": 0.3,
+            "fiberG": 2.1,
+            "sugarG": 4.2,
+            "sodiumMg": 4.0,
+            "potassiumMg": 211.0
+          }
+        },
+        {
+          "itemId": "olive oil",
+          "quantity": 35.0,
+          "unit": "g",
+          "grams": 35.0,
+          "recordId": "usda:171413",
+          "fdcId": 171413,
+          "sourceRefs": [
+            "usda:171413"
+          ],
+          "sourceDescription": "Oil, olive, salad or cooking",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 884.0,
+            "proteinG": 0.0,
+            "carbohydrateG": 0.0,
+            "fatG": 100.0,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 2.0,
+            "potassiumMg": 1.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 332.88,
+        "proteinG": 39.18,
+        "carbohydrateG": 23.75,
+        "fatG": 8.76,
+        "fiberG": 3.51,
+        "sugarG": 4.74,
+        "sodiumMg": 134.94,
+        "potassiumMg": 957.07
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 40,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "moroccan-tagine-fish.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "moroccan-tagine-fish.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "moroccan-tagine-fish.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "turkey-three-bean-chili",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "ground turkey",
+          "quantity": 600.0,
+          "unit": "g",
+          "grams": 600.0,
+          "recordId": "usda:171506",
+          "fdcId": 171506,
+          "sourceRefs": [
+            "usda:171506"
+          ],
+          "sourceDescription": "Turkey, Ground, cooked",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 203.0,
+            "proteinG": 27.37,
+            "carbohydrateG": 0.0,
+            "fatG": 10.4,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 294.0
+          }
+        },
+        {
+          "itemId": "kidney beans",
+          "quantity": 240.0,
+          "unit": "g",
+          "grams": 240.0,
+          "recordId": "usda:175194",
+          "fdcId": 175194,
+          "sourceRefs": [
+            "usda:175194"
+          ],
+          "sourceDescription": "Beans, kidney, red, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 127.0,
+            "proteinG": 8.67,
+            "carbohydrateG": 22.8,
+            "fatG": 0.5,
+            "fiberG": 7.4,
+            "sugarG": 0.32,
+            "sodiumMg": 2.0,
+            "potassiumMg": 403.0
+          }
+        },
+        {
+          "itemId": "black beans",
+          "quantity": 240.0,
+          "unit": "g",
+          "grams": 240.0,
+          "recordId": "usda:173735",
+          "fdcId": 173735,
+          "sourceRefs": [
+            "usda:173735"
+          ],
+          "sourceDescription": "Beans, black, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 132.0,
+            "proteinG": 8.86,
+            "carbohydrateG": 23.71,
+            "fatG": 0.54,
+            "fiberG": 8.7,
+            "sugarG": 0.32,
+            "sodiumMg": 1.0,
+            "potassiumMg": 355.0
+          }
+        },
+        {
+          "itemId": "pinto beans",
+          "quantity": 240.0,
+          "unit": "g",
+          "grams": 240.0,
+          "recordId": "usda:175200",
+          "fdcId": 175200,
+          "sourceRefs": [
+            "usda:175200"
+          ],
+          "sourceDescription": "Beans, pinto, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 143.0,
+            "proteinG": 9.01,
+            "carbohydrateG": 26.22,
+            "fatG": 0.65,
+            "fiberG": 9.0,
+            "sugarG": 0.34,
+            "sodiumMg": 1.0,
+            "potassiumMg": 436.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 378.8,
+        "proteinG": 38.72,
+        "carbohydrateG": 32.33,
+        "fatG": 11.24,
+        "fiberG": 11.04,
+        "sugarG": 2.58,
+        "sodiumMg": 83.77,
+        "potassiumMg": 969.1
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 45,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "turkey-three-bean-chili.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "turkey-three-bean-chili.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "turkey-three-bean-chili.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "ratatouille-haricots-blancs",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "white beans",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:175203",
+          "fdcId": 175203,
+          "sourceRefs": [
+            "usda:175203"
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 139.0,
+            "proteinG": 9.73,
+            "carbohydrateG": 25.09,
+            "fatG": 0.35,
+            "fiberG": 6.3,
+            "sugarG": 0.34,
+            "sodiumMg": 6.0,
+            "potassiumMg": 561.0
+          }
+        },
+        {
+          "itemId": "eggplant",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:169229",
+          "fdcId": 169229,
+          "sourceRefs": [
+            "usda:169229"
+          ],
+          "sourceDescription": "Eggplant, cooked, boiled, drained, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.73,
+            "fatG": 0.23,
+            "fiberG": 2.5,
+            "sugarG": 3.2,
+            "sodiumMg": 1.0,
+            "potassiumMg": 123.0
+          }
+        },
+        {
+          "itemId": "zucchini",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:169291",
+          "fdcId": 169291,
+          "sourceRefs": [
+            "usda:169291"
+          ],
+          "sourceDescription": "Squash, summer, zucchini, includes skin, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 17.0,
+            "proteinG": 1.21,
+            "carbohydrateG": 3.11,
+            "fatG": 0.32,
+            "fiberG": 1.0,
+            "sugarG": 2.5,
+            "sodiumMg": 8.0,
+            "potassiumMg": 261.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 148.8,
+        "proteinG": 8.66,
+        "carbohydrateG": 29.46,
+        "fatG": 0.74,
+        "fiberG": 7.81,
+        "sugarG": 7.49,
+        "sodiumMg": 13.72,
+        "potassiumMg": 850.1
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 40,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "ratatouille-haricots-blancs.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "ratatouille-haricots-blancs.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "ratatouille-haricots-blancs.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "poulet-basquaise",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:171477",
+          "fdcId": 171477,
+          "sourceRefs": [
+            "usda:171477"
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 165.0,
+            "proteinG": 31.02,
+            "carbohydrateG": 0.0,
+            "fatG": 3.57,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 74.0,
+            "potassiumMg": 256.0
+          }
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170108",
+          "fdcId": 170108,
+          "sourceRefs": [
+            "usda:170108"
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 26.0,
+            "proteinG": 0.99,
+            "carbohydrateG": 6.03,
+            "fatG": 0.3,
+            "fiberG": 2.1,
+            "sugarG": 4.2,
+            "sodiumMg": 4.0,
+            "potassiumMg": 211.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        },
+        {
+          "itemId": "olive oil",
+          "quantity": 35.0,
+          "unit": "g",
+          "grams": 35.0,
+          "recordId": "usda:171413",
+          "fdcId": 171413,
+          "sourceRefs": [
+            "usda:171413"
+          ],
+          "sourceDescription": "Oil, olive, salad or cooking",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 884.0,
+            "proteinG": 0.0,
+            "carbohydrateG": 0.0,
+            "fatG": 100.0,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 2.0,
+            "potassiumMg": 1.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 315.9,
+        "proteinG": 43.03,
+        "carbohydrateG": 10.13,
+        "fatG": 10.98,
+        "fiberG": 3.03,
+        "sugarG": 6.93,
+        "sodiumMg": 105.95,
+        "potassiumMg": 740.23
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 45,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "poulet-basquaise.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "poulet-basquaise.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "poulet-basquaise.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "soupe-pois-quebecoise",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "split peas",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:172429",
+          "fdcId": 172429,
+          "sourceRefs": [
+            "usda:172429"
+          ],
+          "sourceDescription": "Peas, split, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 118.0,
+            "proteinG": 8.34,
+            "carbohydrateG": 21.1,
+            "fatG": 0.39,
+            "fiberG": 8.3,
+            "sugarG": 2.9,
+            "sodiumMg": 2.0,
+            "potassiumMg": 362.0
+          }
+        },
+        {
+          "itemId": "turkey breast",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:171496",
+          "fdcId": 171496,
+          "sourceRefs": [
+            "usda:171496"
+          ],
+          "sourceDescription": "Turkey, whole, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 147.0,
+            "proteinG": 30.13,
+            "carbohydrateG": 0.0,
+            "fatG": 2.08,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 99.0,
+            "potassiumMg": 249.0
+          }
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 220.0,
+          "unit": "g",
+          "grams": 220.0,
+          "recordId": "usda:168568",
+          "fdcId": 168568,
+          "sourceRefs": [
+            "usda:168568"
+          ],
+          "sourceDescription": "Carrots, baby, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.64,
+            "carbohydrateG": 8.24,
+            "fatG": 0.13,
+            "fiberG": 2.9,
+            "sugarG": 4.76,
+            "sodiumMg": 78.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "celery",
+          "quantity": 140.0,
+          "unit": "g",
+          "grams": 140.0,
+          "recordId": "usda:169988",
+          "fdcId": 169988,
+          "sourceRefs": [
+            "usda:169988"
+          ],
+          "sourceDescription": "Celery, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 14.0,
+            "proteinG": 0.69,
+            "carbohydrateG": 2.97,
+            "fatG": 0.17,
+            "fiberG": 1.6,
+            "sugarG": 1.34,
+            "sodiumMg": 80.0,
+            "potassiumMg": 260.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 191.32,
+        "proteinG": 23.78,
+        "carbohydrateG": 20.36,
+        "fatG": 1.58,
+        "fiberG": 7.54,
+        "sugarG": 5.74,
+        "sodiumMg": 106.65,
+        "potassiumMg": 588.75
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 80,
+        "totalMinutes": 95
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "soupe-pois-quebecoise.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "soupe-pois-quebecoise.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "soupe-pois-quebecoise.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "pate-chinois-dinde",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "ground turkey",
+          "quantity": 650.0,
+          "unit": "g",
+          "grams": 650.0,
+          "recordId": "usda:171506",
+          "fdcId": 171506,
+          "sourceRefs": [
+            "usda:171506"
+          ],
+          "sourceDescription": "Turkey, Ground, cooked",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 203.0,
+            "proteinG": 27.37,
+            "carbohydrateG": 0.0,
+            "fatG": 10.4,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 294.0
+          }
+        },
+        {
+          "itemId": "potato",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:170440",
+          "fdcId": 170440,
+          "sourceRefs": [
+            "usda:170440"
+          ],
+          "sourceDescription": "Potatoes, boiled, cooked without skin, flesh, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 86.0,
+            "proteinG": 1.71,
+            "carbohydrateG": 20.01,
+            "fatG": 0.1,
+            "fiberG": 1.8,
+            "sugarG": 0.89,
+            "sodiumMg": 5.0,
+            "potassiumMg": 328.0
+          }
+        },
+        {
+          "itemId": "corn",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:169999",
+          "fdcId": 169999,
+          "sourceRefs": [
+            "usda:169999"
+          ],
+          "sourceDescription": "Corn, sweet, yellow, cooked, boiled, drained, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 96.0,
+            "proteinG": 3.41,
+            "carbohydrateG": 20.98,
+            "fatG": 1.5,
+            "fiberG": 2.4,
+            "sugarG": 4.54,
+            "sodiumMg": 1.0,
+            "potassiumMg": 218.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 160.0,
+          "unit": "g",
+          "grams": 160.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 400.18,
+        "proteinG": 34.14,
+        "carbohydrateG": 41.21,
+        "fatG": 12.29,
+        "fiberG": 4.31,
+        "sugarG": 5.39,
+        "sodiumMg": 92.02,
+        "potassiumMg": 931.53
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 40,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "pate-chinois-dinde.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "pate-chinois-dinde.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "pate-chinois-dinde.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "truite-erable-quinoa",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 4.0,
+      "formulation": [
+        {
+          "itemId": "trout",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:173718",
+          "fdcId": 173718,
+          "sourceRefs": [
+            "usda:173718"
+          ],
+          "sourceDescription": "Fish, trout, rainbow, farmed, cooked, dry heat",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 168.0,
+            "proteinG": 23.8,
+            "carbohydrateG": 0.0,
+            "fatG": 7.38,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 61.0,
+            "potassiumMg": 450.0
+          }
+        },
+        {
+          "itemId": "quinoa",
+          "quantity": 280.0,
+          "unit": "g",
+          "grams": 280.0,
+          "recordId": "usda:168917",
+          "fdcId": 168917,
+          "sourceRefs": [
+            "usda:168917"
+          ],
+          "sourceDescription": "Quinoa, cooked",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 120.0,
+            "proteinG": 4.4,
+            "carbohydrateG": 21.3,
+            "fatG": 1.92,
+            "fiberG": 2.8,
+            "sugarG": 0.87,
+            "sodiumMg": 7.0,
+            "potassiumMg": 172.0
+          }
+        },
+        {
+          "itemId": "green beans",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:169141",
+          "fdcId": 169141,
+          "sourceRefs": [
+            "usda:169141"
+          ],
+          "sourceDescription": "Beans, snap, green, cooked, boiled, drained, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 1.89,
+            "carbohydrateG": 7.88,
+            "fatG": 0.28,
+            "fiberG": 3.2,
+            "sugarG": 3.63,
+            "sodiumMg": 1.0,
+            "potassiumMg": 146.0
+          }
+        },
+        {
+          "itemId": "maple syrup",
+          "quantity": 40.0,
+          "unit": "g",
+          "grams": 40.0,
+          "recordId": "usda:169661",
+          "fdcId": 169661,
+          "sourceRefs": [
+            "usda:169661"
+          ],
+          "sourceDescription": "Syrups, maple",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 260.0,
+            "proteinG": 0.04,
+            "carbohydrateG": 67.04,
+            "fatG": 0.06,
+            "fiberG": 0.0,
+            "sugarG": 60.46,
+            "sodiumMg": 12.0,
+            "potassiumMg": 212.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 430.25,
+        "proteinG": 46.15,
+        "carbohydrateG": 27.52,
+        "fatG": 14.48,
+        "fiberG": 4.36,
+        "sugarG": 9.38,
+        "sodiumMg": 113.6,
+        "potassiumMg": 1038.6
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 25,
+        "totalMinutes": 40
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "truite-erable-quinoa.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "truite-erable-quinoa.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "truite-erable-quinoa.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "cassoulet-haricots-dinde",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "white beans",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:175203",
+          "fdcId": 175203,
+          "sourceRefs": [
+            "usda:175203"
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 139.0,
+            "proteinG": 9.73,
+            "carbohydrateG": 25.09,
+            "fatG": 0.35,
+            "fiberG": 6.3,
+            "sugarG": 0.34,
+            "sodiumMg": 6.0,
+            "potassiumMg": 561.0
+          }
+        },
+        {
+          "itemId": "turkey breast",
+          "quantity": 600.0,
+          "unit": "g",
+          "grams": 600.0,
+          "recordId": "usda:171496",
+          "fdcId": 171496,
+          "sourceRefs": [
+            "usda:171496"
+          ],
+          "sourceDescription": "Turkey, whole, breast, meat only, cooked, roasted",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 147.0,
+            "proteinG": 30.13,
+            "carbohydrateG": 0.0,
+            "fatG": 2.08,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 99.0,
+            "potassiumMg": 249.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:168568",
+          "fdcId": 168568,
+          "sourceRefs": [
+            "usda:168568"
+          ],
+          "sourceDescription": "Carrots, baby, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.64,
+            "carbohydrateG": 8.24,
+            "fatG": 0.13,
+            "fiberG": 2.9,
+            "sugarG": 4.76,
+            "sodiumMg": 78.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 295.8,
+        "proteinG": 39.21,
+        "carbohydrateG": 28.51,
+        "fatG": 2.55,
+        "fiberG": 7.49,
+        "sugarG": 5.15,
+        "sodiumMg": 133.22,
+        "potassiumMg": 988.35
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 65,
+        "totalMinutes": 90
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "cassoulet-haricots-dinde.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "cassoulet-haricots-dinde.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "cassoulet-haricots-dinde.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "ragout-boulettes-dinde",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "ground turkey",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:171506",
+          "fdcId": 171506,
+          "sourceRefs": [
+            "usda:171506"
+          ],
+          "sourceDescription": "Turkey, Ground, cooked",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 203.0,
+            "proteinG": 27.37,
+            "carbohydrateG": 0.0,
+            "fatG": 10.4,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 294.0
+          }
+        },
+        {
+          "itemId": "potato",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:170440",
+          "fdcId": 170440,
+          "sourceRefs": [
+            "usda:170440"
+          ],
+          "sourceDescription": "Potatoes, boiled, cooked without skin, flesh, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 86.0,
+            "proteinG": 1.71,
+            "carbohydrateG": 20.01,
+            "fatG": 0.1,
+            "fiberG": 1.8,
+            "sugarG": 0.89,
+            "sodiumMg": 5.0,
+            "potassiumMg": 328.0
+          }
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 220.0,
+          "unit": "g",
+          "grams": 220.0,
+          "recordId": "usda:168568",
+          "fdcId": 168568,
+          "sourceRefs": [
+            "usda:168568"
+          ],
+          "sourceDescription": "Carrots, baby, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.64,
+            "carbohydrateG": 8.24,
+            "fatG": 0.13,
+            "fiberG": 2.9,
+            "sugarG": 4.76,
+            "sodiumMg": 78.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 332.13,
+        "proteinG": 33.84,
+        "carbohydrateG": 22.28,
+        "fatG": 12.28,
+        "fiberG": 3.13,
+        "sugarG": 4.23,
+        "sodiumMg": 124.07,
+        "potassiumMg": 757.83
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 55,
+        "totalMinutes": 80
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "ragout-boulettes-dinde.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "ragout-boulettes-dinde.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "ragout-boulettes-dinde.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "loubia-tomate",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "white beans",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:175203",
+          "fdcId": 175203,
+          "sourceRefs": [
+            "usda:175203"
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 139.0,
+            "proteinG": 9.73,
+            "carbohydrateG": 25.09,
+            "fatG": 0.35,
+            "fiberG": 6.3,
+            "sugarG": 0.34,
+            "sodiumMg": 6.0,
+            "potassiumMg": 561.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:168568",
+          "fdcId": 168568,
+          "sourceRefs": [
+            "usda:168568"
+          ],
+          "sourceDescription": "Carrots, baby, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 35.0,
+            "proteinG": 0.64,
+            "carbohydrateG": 8.24,
+            "fatG": 0.13,
+            "fiberG": 2.9,
+            "sugarG": 4.76,
+            "sodiumMg": 78.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        },
+        {
+          "itemId": "olive oil",
+          "quantity": 30.0,
+          "unit": "g",
+          "grams": 30.0,
+          "recordId": "usda:171413",
+          "fdcId": 171413,
+          "sourceRefs": [
+            "usda:171413"
+          ],
+          "sourceDescription": "Oil, olive, salad or cooking",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 884.0,
+            "proteinG": 0.0,
+            "carbohydrateG": 0.0,
+            "fatG": 100.0,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 2.0,
+            "potassiumMg": 1.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 197.5,
+        "proteinG": 9.3,
+        "carbohydrateG": 29.48,
+        "fatG": 5.52,
+        "fiberG": 7.79,
+        "sugarG": 5.81,
+        "sodiumMg": 35.57,
+        "potassiumMg": 798.65
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 55,
+        "totalMinutes": 75
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "loubia-tomate.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "loubia-tomate.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "loubia-tomate.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "fabada-ligera",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 6.0,
+      "formulation": [
+        {
+          "itemId": "white beans",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:175203",
+          "fdcId": 175203,
+          "sourceRefs": [
+            "usda:175203"
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 139.0,
+            "proteinG": 9.73,
+            "carbohydrateG": 25.09,
+            "fatG": 0.35,
+            "fiberG": 6.3,
+            "sugarG": 0.34,
+            "sodiumMg": 6.0,
+            "potassiumMg": 561.0
+          }
+        },
+        {
+          "itemId": "turkey sausage",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:173871",
+          "fdcId": 173871,
+          "sourceRefs": [
+            "usda:173871"
+          ],
+          "sourceDescription": "Sausage, turkey, fresh, cooked",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 196.0,
+            "proteinG": 23.89,
+            "carbohydrateG": 0.0,
+            "fatG": 10.44,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 665.0,
+            "potassiumMg": 298.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "spinach",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:168462",
+          "fdcId": 168462,
+          "sourceRefs": [
+            "usda:168462"
+          ],
+          "sourceDescription": "Spinach, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 23.0,
+            "proteinG": 2.86,
+            "carbohydrateG": 3.63,
+            "fatG": 0.39,
+            "fiberG": 2.2,
+            "sugarG": 0.42,
+            "sodiumMg": 79.0,
+            "potassiumMg": 558.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 241.3,
+        "proteinG": 21.7,
+        "carbohydrateG": 26.65,
+        "fatG": 5.76,
+        "fiberG": 7.15,
+        "sugarG": 3.48,
+        "sodiumMg": 366.63,
+        "potassiumMg": 975.6
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 75,
+        "totalMinutes": 95
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "fabada-ligera.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "fabada-ligera.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "fabada-ligera.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "bacalao-pisto-espanol",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 4.0,
+      "formulation": [
+        {
+          "itemId": "cod",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:171956",
+          "fdcId": 171956,
+          "sourceRefs": [
+            "usda:171956"
+          ],
+          "sourceDescription": "Fish, cod, Atlantic, cooked, dry heat",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 105.0,
+            "proteinG": 22.83,
+            "carbohydrateG": 0.0,
+            "fatG": 0.86,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 244.0
+          }
+        },
+        {
+          "itemId": "zucchini",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:169291",
+          "fdcId": 169291,
+          "sourceRefs": [
+            "usda:169291"
+          ],
+          "sourceDescription": "Squash, summer, zucchini, includes skin, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 17.0,
+            "proteinG": 1.21,
+            "carbohydrateG": 3.11,
+            "fatG": 0.32,
+            "fiberG": 1.0,
+            "sugarG": 2.5,
+            "sodiumMg": 8.0,
+            "potassiumMg": 261.0
+          }
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:170108",
+          "fdcId": 170108,
+          "sourceRefs": [
+            "usda:170108"
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 26.0,
+            "proteinG": 0.99,
+            "carbohydrateG": 6.03,
+            "fatG": 0.3,
+            "fiberG": 2.1,
+            "sugarG": 4.2,
+            "sodiumMg": 4.0,
+            "potassiumMg": 211.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "onion",
+          "quantity": 160.0,
+          "unit": "g",
+          "grams": 160.0,
+          "recordId": "usda:790646",
+          "fdcId": 790646,
+          "sourceRefs": [
+            "usda:790646"
+          ],
+          "sourceDescription": "Onions, yellow, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 36.0,
+            "proteinG": 0.83,
+            "carbohydrateG": 8.61,
+            "fatG": 0.05,
+            "fiberG": 1.9,
+            "sugarG": 5.82,
+            "sodiumMg": 1.0,
+            "potassiumMg": 182.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 248.4,
+        "proteinG": 42.81,
+        "carbohydrateG": 14.19,
+        "fatG": 2.19,
+        "fiberG": 4.29,
+        "sugarG": 9.98,
+        "sodiumMg": 150.9,
+        "potassiumMg": 1090.8
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 35,
+        "totalMinutes": 55
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "bacalao-pisto-espanol.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "bacalao-pisto-espanol.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "bacalao-pisto-espanol.step3"
+        }
+      ]
+    },
+    {
+      "canonicalId": "tacos-pescado-col",
+      "status": "verified-calculation",
+      "blockedIngredientIds": [],
+      "servings": 4.0,
+      "formulation": [
+        {
+          "itemId": "cod",
+          "quantity": 600.0,
+          "unit": "g",
+          "grams": 600.0,
+          "recordId": "usda:171956",
+          "fdcId": 171956,
+          "sourceRefs": [
+            "usda:171956"
+          ],
+          "sourceDescription": "Fish, cod, Atlantic, cooked, dry heat",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 105.0,
+            "proteinG": 22.83,
+            "carbohydrateG": 0.0,
+            "fatG": 0.86,
+            "fiberG": 0.0,
+            "sugarG": 0.0,
+            "sodiumMg": 78.0,
+            "potassiumMg": 244.0
+          }
+        },
+        {
+          "itemId": "corn tortilla",
+          "quantity": 320.0,
+          "unit": "g",
+          "grams": 320.0,
+          "recordId": "usda:175036",
+          "fdcId": 175036,
+          "sourceRefs": [
+            "usda:175036"
+          ],
+          "sourceDescription": "Tortillas, ready-to-bake or -fry, corn",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 218.0,
+            "proteinG": 5.7,
+            "carbohydrateG": 44.64,
+            "fatG": 2.85,
+            "fiberG": 6.3,
+            "sugarG": 0.88,
+            "sodiumMg": 45.0,
+            "potassiumMg": 186.0
+          }
+        },
+        {
+          "itemId": "cabbage",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:169975",
+          "fdcId": 169975,
+          "sourceRefs": [
+            "usda:169975"
+          ],
+          "sourceDescription": "Cabbage, raw",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 25.0,
+            "proteinG": 1.28,
+            "carbohydrateG": 5.8,
+            "fatG": 0.1,
+            "fiberG": 2.5,
+            "sugarG": 3.2,
+            "sodiumMg": 18.0,
+            "potassiumMg": 170.0
+          }
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:170457",
+          "fdcId": 170457,
+          "sourceRefs": [
+            "usda:170457"
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 18.0,
+            "proteinG": 0.88,
+            "carbohydrateG": 3.89,
+            "fatG": 0.2,
+            "fiberG": 1.2,
+            "sugarG": 2.63,
+            "sodiumMg": 5.0,
+            "potassiumMg": 237.0
+          }
+        },
+        {
+          "itemId": "avocado",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:171705",
+          "fdcId": 171705,
+          "sourceRefs": [
+            "usda:171705"
+          ],
+          "sourceDescription": "Avocados, raw, all commercial varieties",
+          "matchStatus": "selected",
+          "nutrientsPer100g": {
+            "kcal": 160.0,
+            "proteinG": 2.0,
+            "carbohydrateG": 8.53,
+            "fatG": 14.66,
+            "fiberG": 6.7,
+            "sugarG": 0.66,
+            "sodiumMg": 7.0,
+            "potassiumMg": 485.0
+          }
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 431.65,
+        "proteinG": 41.11,
+        "carbohydrateG": 45.85,
+        "fatG": 10.34,
+        "fiberG": 10.53,
+        "sugarG": 4.72,
+        "sodiumMg": 172.15,
+        "potassiumMg": 979.05
+      },
+      "calculationRevision": "bil-usda-local-pending-a-v1",
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 20,
+        "totalMinutes": 45
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "tacos-pescado-col.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "tacos-pescado-col.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "tacos-pescado-col.step3"
+        }
+      ]
+    }
+  ]
+}

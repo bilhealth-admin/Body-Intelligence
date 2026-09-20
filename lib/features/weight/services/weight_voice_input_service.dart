@@ -383,10 +383,6 @@ final class WeightVoiceInputService {
     if (!context.mounted) return false;
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        await policy.openSettings();
-        return false;
-      }
       final open = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog.adaptive(
@@ -409,21 +405,6 @@ final class WeightVoiceInputService {
       if (open == true) await policy.openSettings();
       return false;
     }
-
-    // The voice button is already the user's contextual action on iOS. Ask
-    // Apple's native permission sheet immediately; an in-app rationale in
-    // front of it is treated as a pre-permission prompt during review.
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      final granted =
-          await policy.request(capability) == BilRuntimePermissionState.granted;
-      if (!granted || capability != BilRuntimeCapability.microphone) {
-        return granted;
-      }
-      // iOS requests speech recognition separately after microphone access.
-      if (!context.mounted) return false;
-      return await _ensurePermission(context);
-    }
-
     final proceed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog.adaptive(

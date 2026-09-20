@@ -6,17 +6,11 @@ class DailyMealDetailItems extends StatelessWidget {
     required this.meal,
     required this.onEdit,
     required this.onActions,
-    this.showFoodTimestamps = true,
-    this.showFoodInsights = true,
-    this.useNetCarbs = false,
   });
 
   final MealWithItems? meal;
   final Future<void> Function(MealItem item, Food food) onEdit;
   final Future<void> Function(MealItem item, Food? food) onActions;
-  final bool showFoodTimestamps;
-  final bool showFoodInsights;
-  final bool useNetCarbs;
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +58,7 @@ class DailyMealDetailItems extends StatelessWidget {
                   food: meal?.foodsById[items[index].foodId],
                   onEdit: onEdit,
                   onActions: onActions,
-                  showLoggedTime: showFoodTimestamps,
-                  showFoodInsights: showFoodInsights,
-                  useNetCarbs: useNetCarbs,
+                  showLoggedTime: true,
                 ),
                 if (index != items.length - 1)
                   Divider(height: 1, color: scheme.outlineVariant),
@@ -271,6 +263,29 @@ class _DiaryEmptyMeals extends StatelessWidget {
   }
 }
 
+({
+  double protein,
+  double carbs,
+  double fat,
+  double proteinPercent,
+  double carbsPercent,
+  double fatPercent,
+})
+_macroSummary(List<MealItem> items) {
+  final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
+  final carbs = items.fold<double>(0, (sum, item) => sum + item.carbs);
+  final fat = items.fold<double>(0, (sum, item) => sum + item.fats);
+  final energy = protein * 4 + carbs * 4 + fat * 9;
+  return (
+    protein: protein,
+    carbs: carbs,
+    fat: fat,
+    proteinPercent: energy > 0 ? protein * 400 / energy : 0,
+    carbsPercent: energy > 0 ? carbs * 400 / energy : 0,
+    fatPercent: energy > 0 ? fat * 900 / energy : 0,
+  );
+}
+
 String _mealListText(BuildContext context, String key) {
   final locale = Localizations.localeOf(context).languageCode.toLowerCase();
   final english = _mealListCopy['en']![key]!;
@@ -282,8 +297,8 @@ const _mealListCopy = <String, Map<String, String>>{
     'kcal': 'cal',
     'loggedAt': 'Logged at',
     'mealGoal': 'Meal goal',
-    'itemActions': 'Tap to edit. Touch and hold for more actions.',
     'moreActions': 'More actions',
+    'itemActions': 'Tap to edit. Touch and hold for more actions.',
     'logFood': 'Plan meal',
     'logMore': 'Open meal',
     'foodsInMeal': 'Foods in this meal',
@@ -293,8 +308,8 @@ const _mealListCopy = <String, Map<String, String>>{
     'kcal': 'سعرة',
     'loggedAt': 'سُجّل في',
     'mealGoal': 'هدف الوجبة',
+    'moreActions': 'إجراءات إضافية',
     'itemActions': 'اضغط للتعديل، واضغط مطولًا للمزيد من الإجراءات.',
-    'moreActions': 'مزيد من الإجراءات',
     'logFood': 'خطّط للوجبة',
     'logMore': 'افتح الوجبة',
     'foodsInMeal': 'أطعمة هذه الوجبة',

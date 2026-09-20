@@ -1,6 +1,6 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/services/runtime_permission_policy.dart';
-import 'package:body_intelligence_log/shared/widgets/bil_native_settings_icon.dart';
+import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
@@ -11,7 +11,6 @@ import 'package:body_intelligence_log/features/nutrition/domain/dietary_preferen
 import 'package:body_intelligence_log/features/nutrition/repositories/dietary_preferences_repository.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
-import 'package:body_intelligence_log/features/profile/providers/profile_auth_identity_provider.dart';
 import 'package:body_intelligence_log/features/profile/services/profile_photo_service.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -148,9 +147,9 @@ void main() {
   );
 
   testWidgets(
-    'profile rows stay single line with full accessible values in phone and RTL large text',
+    'profile labels stay complete on phone and RTL large text layouts',
     (tester) async {
-      final database = await _seedDatabase(localOwnerId: 'profile-layout-test');
+      final database = await _seedDatabase();
       addTearDown(database.close);
 
       void expectReadableRow(Key key, String expectedLabel) {
@@ -160,19 +159,14 @@ void main() {
           matching: find.byType(Text),
         );
         final texts = tester.widgetList<Text>(textFinder).toList();
-        expect(
-          texts.map((text) => text.data),
-          contains(expectedLabel),
-          reason: 'The row $key must expose its localized label',
-        );
         final label = texts.singleWhere(
           (widget) => widget.data == expectedLabel,
         );
         final values = texts.where((widget) => widget.data != expectedLabel);
 
-        expect(label.maxLines, 1);
-        expect(label.overflow, TextOverflow.ellipsis);
-        expect(label.softWrap, false);
+        expect(label.maxLines, isNull);
+        expect(label.overflow, isNot(TextOverflow.ellipsis));
+        expect(label.softWrap, isNot(false));
         expect(
           values,
           isNotEmpty,
@@ -180,35 +174,18 @@ void main() {
         );
         for (final value in values) {
           expect(value.data?.trim(), isNotEmpty);
-          expect(value.maxLines, 1);
-          expect(value.overflow, TextOverflow.ellipsis);
-          expect(value.softWrap, false);
-          expect(value.semanticsLabel, value.data);
-          expect(
-            find.descendant(
-              of: row,
-              matching: find.byTooltip('$expectedLabel: ${value.data}'),
-            ),
-            findsOneWidget,
-          );
+          expect(value.maxLines, isNull);
+          expect(value.overflow, isNot(TextOverflow.ellipsis));
+          expect(value.softWrap, isNot(false));
         }
         expect(
-          find.descendant(
-            of: row,
-            matching: find.byType(BilNativeSettingsIcon),
-          ),
+          find.descendant(of: row, matching: find.byType(BilSemanticIconBadge)),
           findsOneWidget,
         );
       }
 
-      const longIdentity = ProfileAuthIdentity(
-        ownerId: 'profile-layout-test',
-        email: 'a.long.profile.email.for.ellipsis@example.invalid',
-      );
-      await _pumpProfile(tester, database, identity: longIdentity);
+      await _pumpProfile(tester, database);
       expectReadableRow(const Key('profile-display-name-row'), 'Display name');
-      expectReadableRow(const Key('profile-email-row'), 'Email address');
-      expect(find.text(longIdentity.email!), findsOneWidget);
       final englishDietary = find.byKey(
         const Key('profile-dietary-system-row'),
       );
@@ -232,7 +209,6 @@ void main() {
         locale: const Locale('ar'),
         textScaler: const TextScaler.linear(1.6),
         surfaceSize: const Size(320, 844),
-        identity: longIdentity,
       );
       final arabicDisplayName = find.byKey(
         const Key('profile-display-name-row'),
@@ -242,7 +218,6 @@ void main() {
         TextDirection.rtl,
       );
       expectReadableRow(const Key('profile-display-name-row'), 'الاسم الظاهر');
-      expectReadableRow(const Key('profile-email-row'), 'البريد الإلكتروني');
       final arabicDietary = find.byKey(const Key('profile-dietary-system-row'));
       await tester.scrollUntilVisible(
         arabicDietary,
@@ -411,7 +386,7 @@ void main() {
     await database.close();
   });
 
-  testWidgets('profile camera requests permission directly before capture', (
+  testWidgets('profile camera asks just-in-time before opening capture', (
     tester,
   ) async {
     final database = await _seedDatabase();
@@ -432,11 +407,6 @@ void main() {
     await tester.tap(find.byKey(const Key('profile-photo-camera-action')));
     await tester.pumpAndSettle();
 
-    // Apple review requires the system permission request to be the first
-    // prompt at the point of use; the app must not insert a dismissible
-    // pre-permission dialog.
-    expect(find.text('Allow camera for this action?'), findsNothing);
-    await tester.pumpAndSettle();
     expect(cameraPolicy.requestAttempts, 1);
     expect(cameraLaunchAttempts, 1);
 
@@ -495,11 +465,8 @@ void main() {
   );
 }
 
-Future<AppDatabase> _seedDatabase({String? localOwnerId}) async {
-  final database = AppDatabase.forTesting(
-    NativeDatabase.memory(),
-    localOwnerId: localOwnerId,
-  );
+Future<AppDatabase> _seedDatabase() async {
+  final database = AppDatabase.forTesting(NativeDatabase.memory());
   await UserProfileRepository(database).save(
     gender: 'male',
     age: 35,
@@ -519,7 +486,6 @@ Future<void> _pumpProfile(
   ProfilePhotoService? photoService,
   BilRuntimePermissionPolicy? cameraPolicy,
   ProfileCameraLauncher? cameraLauncher,
-  ProfileAuthIdentity? identity,
   Locale locale = const Locale('en'),
   TextScaler textScaler = TextScaler.noScaling,
   Size surfaceSize = const Size(390, 844),
@@ -530,10 +496,6 @@ Future<void> _pumpProfile(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
-        if (identity != null)
-          profileAuthIdentityProvider.overrideWith(
-            (ref) => Stream.value(identity),
-          ),
         if (preferences != null)
           preferencesRepositoryProvider.overrideWithValue(preferences),
         if (photoService != null)

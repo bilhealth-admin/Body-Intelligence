@@ -1,0 +1,2078 @@
+{
+  "schemaVersion": 1,
+  "selection": "last 17 nutrition.status=pending from recipe_canonical_100.json",
+  "sourceDatabase": "assets/catalogs/bil_food_core.sqlite",
+  "formula": "sum(per100g * grams / 100) / servings",
+  "summary": {
+    "records": 17,
+    "calculated": 17,
+    "blocked": 0
+  },
+  "records": [
+    {
+      "canonicalId": "gallo-pinto-huevo",
+      "contentFingerprint": "a16b891880644f962545cbc6a08a9f352245a06496c8861e822d0f99d97b7591",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-gallo-pinto-huevo-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "rice",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:168878",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168878",
+              "fdcId": 168878,
+              "description": "Rice, white, long-grain, regular, enriched, cooked"
+            }
+          ],
+          "sourceDescription": "Rice, white, long-grain, regular, enriched, cooked"
+        },
+        {
+          "itemId": "black beans",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:173735",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173735",
+              "fdcId": 173735,
+              "description": "Beans, black, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, black, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "egg",
+          "quantity": 240.0,
+          "unit": "g",
+          "grams": 240.0,
+          "recordId": "usda:173424",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173424",
+              "fdcId": 173424,
+              "description": "Egg, whole, cooked, hard-boiled"
+            }
+          ],
+          "sourceDescription": "Egg, whole, cooked, hard-boiled"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 120.0,
+          "unit": "g",
+          "grams": 120.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 25,
+        "totalMinutes": 40
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "gallo-pinto-huevo.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "gallo-pinto-huevo.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "gallo-pinto-huevo.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 330.3,
+        "proteinG": 18.05,
+        "carbsG": 48.24,
+        "fatG": 7.21,
+        "fiberG": 9.52,
+        "sugarG": 4.61,
+        "sodiumMg": 78.13,
+        "potassiumMg": 566.52
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "sopa-negra-costarricense",
+      "contentFingerprint": "f7cc98eeaf7eb7d6a0848ac6f28ed826fa5d89fadd009ec5dacd287536acae5a",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-sopa-negra-costarricense-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 6,
+      "formulation": [
+        {
+          "itemId": "black beans",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:173735",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173735",
+              "fdcId": 173735,
+              "description": "Beans, black, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, black, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "egg",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:173424",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173424",
+              "fdcId": 173424,
+              "description": "Egg, whole, cooked, hard-boiled"
+            }
+          ],
+          "sourceDescription": "Egg, whole, cooked, hard-boiled"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 160.0,
+          "unit": "g",
+          "grams": 160.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 40,
+        "totalMinutes": 55
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "sopa-negra-costarricense.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "sopa-negra-costarricense.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "sopa-negra-costarricense.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 214.0,
+        "proteinG": 14.59,
+        "carbsG": 26.4,
+        "fatG": 5.95,
+        "fiberG": 8.97,
+        "sugarG": 4.72,
+        "sodiumMg": 66.38,
+        "potassiumMg": 573.42
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "locro-calabaza",
+      "contentFingerprint": "becb48469937c513a4f3940bd833f9bb910b018a5b80ac5c70d4d1040adedeb4",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-locro-calabaza-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "squash",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:168475",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168475",
+              "fdcId": 168475,
+              "description": "Squash, winter, hubbard, raw"
+            }
+          ],
+          "sourceDescription": "Squash, winter, hubbard, raw"
+        },
+        {
+          "itemId": "corn",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:169999",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169999",
+              "fdcId": 169999,
+              "description": "Corn, sweet, yellow, cooked, boiled, drained, without salt"
+            }
+          ],
+          "sourceDescription": "Corn, sweet, yellow, cooked, boiled, drained, without salt"
+        },
+        {
+          "itemId": "white beans",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:175203",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:175203",
+              "fdcId": 175203,
+              "description": "Beans, white, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "potato",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170440",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170440",
+              "fdcId": 170440,
+              "description": "Potatoes, boiled, cooked without skin, flesh, without salt"
+            }
+          ],
+          "sourceDescription": "Potatoes, boiled, cooked without skin, flesh, without salt"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 160.0,
+          "unit": "g",
+          "grams": 160.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 60,
+        "totalMinutes": 80
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "locro-calabaza.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "locro-calabaza.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "locro-calabaza.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 355.68,
+        "proteinG": 16.44,
+        "carbsG": 74.39,
+        "fatG": 2.43,
+        "fiberG": 16.59,
+        "sugarG": 13.7,
+        "sodiumMg": 23.02,
+        "potassiumMg": 1580.17
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "arroz-con-gandules",
+      "contentFingerprint": "7df65e99c8200a7d5a4835f608d1894ceac473fffe7f7a1fdd699a4cd9b39a9d",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-arroz-con-gandules-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "rice",
+          "quantity": 420.0,
+          "unit": "g",
+          "grams": 420.0,
+          "recordId": "usda:168878",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168878",
+              "fdcId": 168878,
+              "description": "Rice, white, long-grain, regular, enriched, cooked"
+            }
+          ],
+          "sourceDescription": "Rice, white, long-grain, regular, enriched, cooked"
+        },
+        {
+          "itemId": "pigeon peas",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170430",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170430",
+              "fdcId": 170430,
+              "description": "Pigeonpeas, immature seeds, cooked, boiled, drained, without salt"
+            }
+          ],
+          "sourceDescription": "Pigeonpeas, immature seeds, cooked, boiled, drained, without salt"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 160.0,
+          "unit": "g",
+          "grams": 160.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 40,
+        "totalMinutes": 60
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "arroz-con-gandules.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "arroz-con-gandules.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "arroz-con-gandules.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 276.93,
+        "proteinG": 9.57,
+        "carbsG": 56.54,
+        "fatG": 1.82,
+        "fiberG": 6.92,
+        "sugarG": 8.6,
+        "sodiumMg": 11.58,
+        "potassiumMg": 797.8
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "pescado-criollo",
+      "contentFingerprint": "6c562913cfd14b139e68266b8306e6918b323bab24b5cc746835630de99042ba",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-pescado-criollo-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "snapper",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:173698",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173698",
+              "fdcId": 173698,
+              "description": "Fish, snapper, mixed species, raw"
+            }
+          ],
+          "sourceDescription": "Fish, snapper, mixed species, raw"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        },
+        {
+          "itemId": "lime juice",
+          "quantity": 45.0,
+          "unit": "g",
+          "grams": 45.0,
+          "recordId": "usda:168156",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168156",
+              "fdcId": 168156,
+              "description": "Lime juice, raw"
+            }
+          ],
+          "sourceDescription": "Lime juice, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 30,
+        "totalMinutes": 50
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "pescado-criollo.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "pescado-criollo.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "pescado-criollo.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 230.96,
+        "proteinG": 37.86,
+        "carbsG": 13.07,
+        "fatG": 2.79,
+        "fiberG": 3.55,
+        "sugarG": 8.04,
+        "sodiumMg": 120.17,
+        "potassiumMg": 1200.44
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "pollo-chilindron",
+      "contentFingerprint": "1e8767ad56ba6dbb5fb1b7b0b27e1df20dd2a4fe8cd5c89695d78dc3914125ec",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-pollo-chilindron-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 450.0,
+          "unit": "g",
+          "grams": 450.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 45,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "pollo-chilindron.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "pollo-chilindron.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "pollo-chilindron.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 397.25,
+        "proteinG": 64.49,
+        "carbsG": 15.37,
+        "fatG": 7.71,
+        "fiberG": 4.55,
+        "sugarG": 10.04,
+        "sodiumMg": 158.13,
+        "potassiumMg": 1088.13
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "enchiladas-frijol-pollo",
+      "contentFingerprint": "d4c5e9d29c3776bcbe2495256bc3706e84e2bd636d2971106574d49cdb511a43",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-enchiladas-frijol-pollo-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 650.0,
+          "unit": "g",
+          "grams": 650.0,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+        },
+        {
+          "itemId": "black beans",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:173735",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173735",
+              "fdcId": 173735,
+              "description": "Beans, black, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, black, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "corn tortilla",
+          "quantity": 480.0,
+          "unit": "g",
+          "grams": 480.0,
+          "recordId": "usda:175036",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:175036",
+              "fdcId": 175036,
+              "description": "Tortillas, ready-to-bake or -fry, corn"
+            }
+          ],
+          "sourceDescription": "Tortillas, ready-to-bake or -fry, corn"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 30,
+        "cookMinutes": 30,
+        "totalMinutes": 60
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "enchiladas-frijol-pollo.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "enchiladas-frijol-pollo.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "enchiladas-frijol-pollo.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 663.23,
+        "proteinG": 65.88,
+        "carbsG": 78.2,
+        "fatG": 9.89,
+        "fiberG": 16.37,
+        "sugarG": 3.97,
+        "sodiumMg": 180.13,
+        "potassiumMg": 1186.83
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "sopa-tortilla-pollo",
+      "contentFingerprint": "fd1e77054818f60339ed857d2f31d33eb36f5a1d880c338ffe761c0648f2c5a0",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-sopa-tortilla-pollo-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 6,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 650.0,
+          "unit": "g",
+          "grams": 650.0,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "corn tortilla",
+          "quantity": 240.0,
+          "unit": "g",
+          "grams": 240.0,
+          "recordId": "usda:175036",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:175036",
+              "fdcId": 175036,
+              "description": "Tortillas, ready-to-bake or -fry, corn"
+            }
+          ],
+          "sourceDescription": "Tortillas, ready-to-bake or -fry, corn"
+        },
+        {
+          "itemId": "avocado",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:171705",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171705",
+              "fdcId": 171705,
+              "description": "Avocados, raw, all commercial varieties"
+            }
+          ],
+          "sourceDescription": "Avocados, raw, all commercial varieties"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 40,
+        "totalMinutes": 60
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "sopa-tortilla-pollo.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "sopa-tortilla-pollo.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "sopa-tortilla-pollo.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 328.95,
+        "proteinG": 37.22,
+        "carbsG": 23.66,
+        "fatG": 9.57,
+        "fiberG": 5.53,
+        "sugarG": 2.74,
+        "sodiumMg": 104.43,
+        "potassiumMg": 694.73
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "pepian-pollo",
+      "contentFingerprint": "a7255eb3b7f30c781e54eee7858ce8885763258bc10c57f63f08879ab5c95fe3",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-pepian-pollo-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 800.0,
+          "unit": "g",
+          "grams": 800.0,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "squash seeds",
+          "quantity": 100.0,
+          "unit": "g",
+          "grams": 100.0,
+          "recordId": "usda:170556",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170556",
+              "fdcId": 170556,
+              "description": "Seeds, pumpkin and squash seed kernels, dried"
+            }
+          ],
+          "sourceDescription": "Seeds, pumpkin and squash seed kernels, dried"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 30,
+        "cookMinutes": 55,
+        "totalMinutes": 85
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "pepian-pollo.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "pepian-pollo.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "pepian-pollo.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 522.9,
+        "proteinG": 71.52,
+        "carbsG": 14.8,
+        "fatG": 19.84,
+        "fiberG": 5.0,
+        "sugarG": 8.2,
+        "sodiumMg": 157.7,
+        "potassiumMg": 1171.78
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "casamiento-hondureno",
+      "contentFingerprint": "f4876f17b5b4d20c18443edba269aecae9dc5c41b161dfb8dbc90a8765b1393c",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-casamiento-hondureno-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "rice",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:168878",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168878",
+              "fdcId": 168878,
+              "description": "Rice, white, long-grain, regular, enriched, cooked"
+            }
+          ],
+          "sourceDescription": "Rice, white, long-grain, regular, enriched, cooked"
+        },
+        {
+          "itemId": "red beans",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:175194",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:175194",
+              "fdcId": 175194,
+              "description": "Beans, kidney, red, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, kidney, red, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 140.0,
+          "unit": "g",
+          "grams": 140.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 15,
+        "cookMinutes": 25,
+        "totalMinutes": 40
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "casamiento-hondureno.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "casamiento-hondureno.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "casamiento-hondureno.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 267.15,
+        "proteinG": 11.8,
+        "carbsG": 53.64,
+        "fatG": 0.92,
+        "fiberG": 9.46,
+        "sugarG": 4.27,
+        "sodiumMg": 5.02,
+        "potassiumMg": 597.53
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "frijoles-negros-calabaza",
+      "contentFingerprint": "271cdc5ff47aaf209be3cadf8d22278247297ab79516e6bc2086fb5528ac040c",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-frijoles-negros-calabaza-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "black beans",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:173735",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173735",
+              "fdcId": 173735,
+              "description": "Beans, black, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, black, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "squash",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:168475",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168475",
+              "fdcId": 168475,
+              "description": "Squash, winter, hubbard, raw"
+            }
+          ],
+          "sourceDescription": "Squash, winter, hubbard, raw"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 200.0,
+          "unit": "g",
+          "grams": 200.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 50,
+        "totalMinutes": 70
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "frijoles-negros-calabaza.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "frijoles-negros-calabaza.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "frijoles-negros-calabaza.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 262.65,
+        "proteinG": 15.26,
+        "carbsG": 51.4,
+        "fatG": 1.67,
+        "fiberG": 18.84,
+        "sugarG": 12.33,
+        "sodiumMg": 16.82,
+        "potassiumMg": 1245.28
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "otlu-borek-yogurt",
+      "contentFingerprint": "a621b52bc5b2b9ee894c8c527a94d651cd85358872d7f9e4541e9398a9c30313",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-otlu-borek-yogurt-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "spinach",
+          "quantity": 450.0,
+          "unit": "g",
+          "grams": 450.0,
+          "recordId": "usda:168462",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168462",
+              "fdcId": 168462,
+              "description": "Spinach, raw"
+            }
+          ],
+          "sourceDescription": "Spinach, raw"
+        },
+        {
+          "itemId": "feta cheese",
+          "quantity": 220.0,
+          "unit": "g",
+          "grams": 220.0,
+          "recordId": "usda:173420",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173420",
+              "fdcId": 173420,
+              "description": "Cheese, feta"
+            }
+          ],
+          "sourceDescription": "Cheese, feta"
+        },
+        {
+          "itemId": "phyllo dough",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:172791",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:172791",
+              "fdcId": 172791,
+              "description": "Phyllo dough"
+            }
+          ],
+          "sourceDescription": "Phyllo dough"
+        },
+        {
+          "itemId": "yogurt",
+          "quantity": 300.0,
+          "unit": "g",
+          "grams": 300.0,
+          "recordId": "usda:170903",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170903",
+              "fdcId": 170903,
+              "description": "Yogurt, Greek, plain, lowfat"
+            }
+          ],
+          "sourceDescription": "Yogurt, Greek, plain, lowfat"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 30,
+        "cookMinutes": 35,
+        "totalMinutes": 65
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "otlu-borek-yogurt.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "otlu-borek-yogurt.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "otlu-borek-yogurt.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 525.38,
+        "proteinG": 25.6,
+        "carbsG": 61.77,
+        "fatG": 19.7,
+        "fiberG": 4.38,
+        "sugarG": 3.32,
+        "sodiumMg": 1223.83,
+        "potassiumMg": 841.6
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "antalya-piyaz",
+      "contentFingerprint": "45690559686553f1be7894d2cf207aebaea554cb235d1d766cbf1a1b94f530b9",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-antalya-piyaz-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "white beans",
+          "quantity": 450.0,
+          "unit": "g",
+          "grams": 450.0,
+          "recordId": "usda:175203",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:175203",
+              "fdcId": 175203,
+              "description": "Beans, white, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "tahini",
+          "quantity": 80.0,
+          "unit": "g",
+          "grams": 80.0,
+          "recordId": "usda:170189",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170189",
+              "fdcId": 170189,
+              "description": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)"
+            }
+          ],
+          "sourceDescription": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)"
+        },
+        {
+          "itemId": "egg",
+          "quantity": 240.0,
+          "unit": "g",
+          "grams": 240.0,
+          "recordId": "usda:173424",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:173424",
+              "fdcId": 173424,
+              "description": "Egg, whole, cooked, hard-boiled"
+            }
+          ],
+          "sourceDescription": "Egg, whole, cooked, hard-boiled"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 120.0,
+          "unit": "g",
+          "grams": 120.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 10,
+        "totalMinutes": 30
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "antalya-piyaz.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "antalya-piyaz.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "antalya-piyaz.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 392.23,
+        "proteinG": 22.73,
+        "carbsG": 38.55,
+        "fatG": 17.67,
+        "fiberG": 10.36,
+        "sugarG": 4.52,
+        "sodiumMg": 107.58,
+        "potassiumMg": 996.75
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "karalahana-fasulye-corbasi",
+      "contentFingerprint": "968632542bc76fd7c087a72b6d20b7730906023944182eea5519a784a1484d24",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-karalahana-fasulye-corbasi-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 6,
+      "formulation": [
+        {
+          "itemId": "kale",
+          "quantity": 500.0,
+          "unit": "g",
+          "grams": 500.0,
+          "recordId": "usda:168421",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168421",
+              "fdcId": 168421,
+              "description": "Kale, raw"
+            }
+          ],
+          "sourceDescription": "Kale, raw"
+        },
+        {
+          "itemId": "white beans",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:175203",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:175203",
+              "fdcId": 175203,
+              "description": "Beans, white, mature seeds, cooked, boiled, without salt"
+            }
+          ],
+          "sourceDescription": "Beans, white, mature seeds, cooked, boiled, without salt"
+        },
+        {
+          "itemId": "corn",
+          "quantity": 220.0,
+          "unit": "g",
+          "grams": 220.0,
+          "recordId": "usda:169999",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:169999",
+              "fdcId": 169999,
+              "description": "Corn, sweet, yellow, cooked, boiled, drained, without salt"
+            }
+          ],
+          "sourceDescription": "Corn, sweet, yellow, cooked, boiled, drained, without salt"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 180.0,
+          "unit": "g",
+          "grams": 180.0,
+          "recordId": "usda:790577",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:790577",
+              "fdcId": 790577,
+              "description": "Onions, red, raw"
+            }
+          ],
+          "sourceDescription": "Onions, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 20,
+        "cookMinutes": 55,
+        "totalMinutes": 75
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "karalahana-fasulye-corbasi.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "karalahana-fasulye-corbasi.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "karalahana-fasulye-corbasi.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 169.63,
+        "proteinG": 10.45,
+        "carbsG": 31.08,
+        "fatG": 2.05,
+        "fiberG": 9.16,
+        "sugarG": 4.44,
+        "sodiumMg": 48.83,
+        "potassiumMg": 803.03
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "iskender-tavuk",
+      "contentFingerprint": "80cdff74918613c05ed5fe20a6a60add239aaae853fb3a3b642a70c854748915",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-iskender-tavuk-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 750.0,
+          "unit": "g",
+          "grams": 750.0,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+        },
+        {
+          "itemId": "pita bread",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:174916",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:174916",
+              "fdcId": 174916,
+              "description": "Bread, pita, whole-wheat"
+            }
+          ],
+          "sourceDescription": "Bread, pita, whole-wheat"
+        },
+        {
+          "itemId": "yogurt",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170903",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170903",
+              "fdcId": 170903,
+              "description": "Yogurt, Greek, plain, lowfat"
+            }
+          ],
+          "sourceDescription": "Yogurt, Greek, plain, lowfat"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 30,
+        "totalMinutes": 55
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "iskender-tavuk.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "iskender-tavuk.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "iskender-tavuk.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 618.25,
+        "proteinG": 76.21,
+        "carbsG": 55.76,
+        "fatG": 10.04,
+        "fiberG": 6.39,
+        "sugarG": 7.93,
+        "sodiumMg": 541.25,
+        "potassiumMg": 959.5
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "izmir-kofte",
+      "contentFingerprint": "95c718bf516ea25f54555b725db32631e33e75d93a401167de8b53ed76df0c90",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-izmir-kofte-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "ground beef",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:171793",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171793",
+              "fdcId": 171793,
+              "description": "Beef, ground, 90% lean meat / 10% fat, patty, cooked, pan-broiled"
+            }
+          ],
+          "sourceDescription": "Beef, ground, 90% lean meat / 10% fat, patty, cooked, pan-broiled"
+        },
+        {
+          "itemId": "potato",
+          "quantity": 650.0,
+          "unit": "g",
+          "grams": 650.0,
+          "recordId": "usda:170440",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170440",
+              "fdcId": 170440,
+              "description": "Potatoes, boiled, cooked without skin, flesh, without salt"
+            }
+          ],
+          "sourceDescription": "Potatoes, boiled, cooked without skin, flesh, without salt"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 400.0,
+          "unit": "g",
+          "grams": 400.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 220.0,
+          "unit": "g",
+          "grams": 220.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 30,
+        "cookMinutes": 45,
+        "totalMinutes": 75
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "izmir-kofte.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "izmir-kofte.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "izmir-kofte.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 529.05,
+        "proteinG": 48.32,
+        "carbsG": 39.72,
+        "fatG": 19.22,
+        "fiberG": 5.28,
+        "sugarG": 6.39,
+        "sodiumMg": 146.57,
+        "potassiumMg": 1521.3
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    },
+    {
+      "canonicalId": "tavuklu-bostana",
+      "contentFingerprint": "c41837a3c647ada07efa5c288c82ec46952f30890fb0c72bb774c93ebb7e914b",
+      "image": {
+        "status": "planned",
+        "assetPath": null,
+        "sha256": null,
+        "width": null,
+        "height": null,
+        "provenance": "Original image not generated; unique prompt slot reserved.",
+        "promptId": "recipe-tavuklu-bostana-v1"
+      },
+      "status": "calculated",
+      "blockedReasons": [],
+      "formulationDisclosure": "Standardized BIL recipe specification; gram quantities are formulation inputs and were not inferred from imagery.",
+      "servings": 4,
+      "formulation": [
+        {
+          "itemId": "chicken breast",
+          "quantity": 700.0,
+          "unit": "g",
+          "grams": 700.0,
+          "recordId": "usda:171477",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:171477",
+              "fdcId": 171477,
+              "description": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+            }
+          ],
+          "sourceDescription": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+        },
+        {
+          "itemId": "tomato",
+          "quantity": 450.0,
+          "unit": "g",
+          "grams": 450.0,
+          "recordId": "usda:170457",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170457",
+              "fdcId": 170457,
+              "description": "Tomatoes, red, ripe, raw, year round average"
+            }
+          ],
+          "sourceDescription": "Tomatoes, red, ripe, raw, year round average"
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": 350.0,
+          "unit": "g",
+          "grams": 350.0,
+          "recordId": "usda:168409",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:168409",
+              "fdcId": 168409,
+              "description": "Cucumber, with peel, raw"
+            }
+          ],
+          "sourceDescription": "Cucumber, with peel, raw"
+        },
+        {
+          "itemId": "bell pepper",
+          "quantity": 250.0,
+          "unit": "g",
+          "grams": 250.0,
+          "recordId": "usda:170108",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170108",
+              "fdcId": 170108,
+              "description": "Peppers, sweet, red, raw"
+            }
+          ],
+          "sourceDescription": "Peppers, sweet, red, raw"
+        },
+        {
+          "itemId": "bulgur",
+          "quantity": 280.0,
+          "unit": "g",
+          "grams": 280.0,
+          "recordId": "usda:170688",
+          "sourceRefs": [
+            {
+              "source": "USDA FoodData Central via BIL local SQLite",
+              "localRecordId": "usda:170688",
+              "fdcId": 170688,
+              "description": "Bulgur, dry"
+            }
+          ],
+          "sourceDescription": "Bulgur, dry"
+        }
+      ],
+      "timing": {
+        "prepMinutes": 25,
+        "cookMinutes": 25,
+        "totalMinutes": 50
+      },
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "tavuklu-bostana.step1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "tavuklu-bostana.step2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "tavuklu-bostana.step3"
+        }
+      ],
+      "nutritionPerServing": {
+        "kcal": 577.77,
+        "proteinG": 65.07,
+        "carbsG": 64.43,
+        "fatG": 7.69,
+        "fiberG": 11.85,
+        "sugarG": 7.33,
+        "sodiumMg": 151.28,
+        "potassiumMg": 1262.13
+      },
+      "calculationRevision": "bil-usda-local-pending-b-v1"
+    }
+  ]
+}

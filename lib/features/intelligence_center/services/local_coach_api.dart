@@ -184,10 +184,9 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
       ),
       'open_weight_log' => IntelligenceAction(
         id: name!,
-        type: IntelligenceActionType.navigate,
+        type: IntelligenceActionType.addWeight,
         label: tr('Open weight log', 'فتح سجل الوزن'),
         requiresConfirmation: false,
-        payload: const {'target': 'weight_history'},
       ),
       'open_meals' => IntelligenceAction(
         id: name!,

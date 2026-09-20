@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,6 +83,12 @@ final class FitnessDeviceController
   final BleFitnessBridge _bridge;
   final GlobalDurableStore? _store;
   final Set<String> _seenSamples = <String>{};
+  Future<void>? _scanTask;
+  Future<void>? _measurementTask;
+  int _measurementGeneration = 0;
+
+  static const _scanDeadline = Duration(seconds: 12);
+  static const _measurementDeadline = Duration(seconds: 25);
 
   Future<void> _restoreLocalRegistry() async {
     final store = _store;
@@ -114,20 +122,40 @@ final class FitnessDeviceController
     }
   }
 
-  Future<void> scan() async {
+  Future<void> scan() {
+    final active = _scanTask;
+    if (active != null) return active;
+    late Future<void> task;
+    task = _scanInternal().whenComplete(() {
+      if (identical(_scanTask, task)) _scanTask = null;
+    });
+    _scanTask = task;
+    return task;
+  }
+
+  Future<void> _scanInternal() async {
     if (!state.supported) return;
     state = FitnessDeviceSnapshot(
       status: FitnessDeviceConnectionStatus.requestingPermission,
       devices: state.devices,
     );
     try {
-      await _bridge.requestPermissions();
+      await _bridge.requestPermissions().timeout(
+        _scanDeadline,
+        onTimeout: () => throw TimeoutException('BLE permission timed out'),
+      );
       state = FitnessDeviceSnapshot(
         status: FitnessDeviceConnectionStatus.scanning,
         devices: state.devices,
       );
       final devices = <BlePeripheral>[
-        for (final device in await _bridge.discover(const Duration(seconds: 6)))
+        for (final device
+            in await _bridge
+                .discover(const Duration(seconds: 6))
+                .timeout(
+                  _scanDeadline,
+                  onTimeout: () => throw TimeoutException('BLE scan timed out'),
+                ))
           if (device.profiles.intersection(bleFitnessProfiles).isNotEmpty)
             BlePeripheral(
               id: device.id,
@@ -183,14 +211,12 @@ final class FitnessDeviceController
       firmwareVersion: peripheral.firmwareVersion,
       manufacturer: peripheral.manufacturer,
     );
+    _measurementGeneration++;
     state = FitnessDeviceSnapshot(
       status: FitnessDeviceConnectionStatus.connecting,
       devices: state.devices,
     );
     try {
-      // Reconnecting a saved device after relaunch/revocation must also use
-      // the native permission flow; a previous scan is not a lasting grant.
-      await _bridge.requestPermissions();
       await _bridge.pair(peripheral.id);
       final bridge = _bridge;
       final managedBridge = bridge is ManagedBleFitnessBridge ? bridge : null;
@@ -202,10 +228,13 @@ final class FitnessDeviceController
       }
       final battery = status['batteryPercent'] as int?;
       final receivedAt = DateTime.now().toUtc();
-      final packets = await _bridge.readMeasurements(
-        peripheral: fitnessPeripheral,
-        asOf: receivedAt,
-      );
+      final packets = await _bridge
+          .readMeasurements(peripheral: fitnessPeripheral, asOf: receivedAt)
+          .timeout(
+            _measurementDeadline,
+            onTimeout: () =>
+                throw TimeoutException('BLE measurement timed out'),
+          );
       final accepted = packets
           .map((packet) => _normalizeDisplayPacket(packet, receivedAt))
           .whereType<Map<String, Object?>>()
@@ -245,7 +274,18 @@ final class FitnessDeviceController
     }
   }
 
-  Future<void> refreshMeasurements([BlePeripheral? peripheral]) async {
+  Future<void> refreshMeasurements([BlePeripheral? peripheral]) {
+    final active = _measurementTask;
+    if (active != null) return active;
+    late Future<void> task;
+    task = _refreshMeasurementsInternal(peripheral).whenComplete(() {
+      if (identical(_measurementTask, task)) _measurementTask = null;
+    });
+    _measurementTask = task;
+    return task;
+  }
+
+  Future<void> _refreshMeasurementsInternal([BlePeripheral? peripheral]) async {
     final id = state.connectedDeviceId;
     var device = peripheral;
     if (device == null) {
@@ -257,16 +297,26 @@ final class FitnessDeviceController
       }
     }
     if (id == null || device == null) return;
+    final generation = _measurementGeneration;
     try {
       final receivedAt = DateTime.now().toUtc();
-      final packets = await _bridge.readMeasurements(
-        peripheral: device,
-        asOf: receivedAt,
-      );
+      final packets = await _bridge
+          .readMeasurements(peripheral: device, asOf: receivedAt)
+          .timeout(
+            _measurementDeadline,
+            onTimeout: () =>
+                throw TimeoutException('BLE measurement timed out'),
+          );
       final accepted = packets
           .map((packet) => _normalizeDisplayPacket(packet, receivedAt))
           .whereType<Map<String, Object?>>()
           .toList(growable: false);
+      // A disconnect/reconnect may have happened while the native read was in
+      // flight. Do not let that stale result resurrect the old connection.
+      if (generation != _measurementGeneration ||
+          state.connectedDeviceId != id) {
+        return;
+      }
       state = FitnessDeviceSnapshot(
         status: FitnessDeviceConnectionStatus.connected,
         devices: state.devices,
@@ -282,6 +332,10 @@ final class FitnessDeviceController
         'measurements': accepted,
       });
     } catch (error) {
+      if (generation != _measurementGeneration ||
+          state.connectedDeviceId != id) {
+        return;
+      }
       final failureCode = _bleFailureCode(error);
       // A failed measurement operation no longer provides evidence of a live
       // GATT connection. Never leave the device green/connected on stale data.
@@ -349,6 +403,7 @@ final class FitnessDeviceController
 
   Future<void> disconnect() async {
     final id = state.connectedDeviceId;
+    _measurementGeneration++;
     if (id != null) await _bridge.disconnect(id);
     if (id != null) {
       await _store?.put('connected_fitness_device_state', id, <String, Object?>{
@@ -363,6 +418,7 @@ final class FitnessDeviceController
   }
 
   Future<void> removeDevice(String peripheralId) async {
+    _measurementGeneration++;
     await _bridge.disconnect(peripheralId);
     final bridge = _bridge;
     final managedBridge = bridge is ManagedBleFitnessBridge ? bridge : null;
@@ -381,6 +437,7 @@ final class FitnessDeviceController
 }
 
 String _bleFailureCode(Object error) => switch (error) {
+  TimeoutException() => 'ble_operation_timed_out',
   PlatformException(code: final code) => code,
   StateError(message: final message) => message,
   _ => error.runtimeType.toString(),

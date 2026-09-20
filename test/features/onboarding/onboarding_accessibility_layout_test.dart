@@ -137,8 +137,8 @@ void main() {
             child: child!,
           ),
           // Each matrix case must start a fresh page state. Without a new key,
-          // pumpWidget reuses the previous draft/page and the next case would
-          // assert against a stale step rather than the requested one.
+          // pumpWidget can reuse the previous draft/page and assert against a
+          // stale step rather than the requested one.
           home: OnboardingPage(key: UniqueKey()),
         ),
       ),
@@ -416,11 +416,6 @@ void main() {
           for (var scaleIndex = 0; scaleIndex < 2; scaleIndex++) {
             final scale = scaleIndex == 0 ? 1.0 : 2.0;
             final dark = (localeIndex + stepIndex + scaleIndex).isOdd;
-            final platform = step == 'name' || step == 'integrations'
-                ? TargetPlatform.android
-                : ((localeIndex + stepIndex).isEven
-                      ? TargetPlatform.iOS
-                      : TargetPlatform.android);
             await render(
               tester,
               draft: valid(
@@ -431,7 +426,11 @@ void main() {
               locale: locale,
               themeMode: dark ? ThemeMode.dark : ThemeMode.light,
               textScale: scale,
-              platform: platform,
+              platform: step == 'name' || step == 'integrations'
+                  ? TargetPlatform.android
+                  : ((localeIndex + stepIndex).isEven
+                        ? TargetPlatform.iOS
+                        : TargetPlatform.android),
             );
             rendered++;
 
@@ -509,7 +508,7 @@ void main() {
       locale: const Locale('en'),
       themeMode: ThemeMode.light,
       textScale: 2,
-      platform: TargetPlatform.android,
+      platform: TargetPlatform.iOS,
       padding: const EdgeInsets.only(top: 24, bottom: 34),
       viewInsets: const EdgeInsets.only(bottom: 250),
     );
@@ -545,7 +544,7 @@ void main() {
     }
     final progress = find.byKey(const Key('onboarding-progress-semantics'));
     expect(tester.getSemantics(progress).label, isNotEmpty);
-    expect(tester.getSemantics(progress).value, '9 / 14');
+    expect(tester.getSemantics(progress).value, '10 / 15');
     expect(tester.takeException(), isNull);
     semantics.dispose();
   });
@@ -560,7 +559,7 @@ void main() {
       locale: const Locale('en'),
       themeMode: ThemeMode.light,
       textScale: 1,
-      platform: TargetPlatform.android,
+      platform: TargetPlatform.iOS,
     );
 
     await tester.tap(find.byKey(const Key('onboarding-name-field')));
@@ -653,7 +652,7 @@ void main() {
       platform: TargetPlatform.iOS,
     );
     progress = find.byKey(const Key('onboarding-progress-semantics'));
-    expect(tester.getSemantics(progress).value, '14 / 14');
+    expect(tester.getSemantics(progress).value, '15 / 15');
     semantics.dispose();
   });
 }

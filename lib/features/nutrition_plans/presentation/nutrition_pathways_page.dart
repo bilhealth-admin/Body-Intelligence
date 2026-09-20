@@ -14,6 +14,11 @@ import '../../nutrition/presentation/nutrition_copy.dart';
 class NutritionPathwaysPage extends ConsumerWidget {
   const NutritionPathwaysPage({super.key});
 
+  static Future<void> _leavePage(BuildContext context) async {
+    final popped = await Navigator.of(context).maybePop();
+    if (!popped && context.mounted) context.go('/dashboard');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localeTag = BilLocalePolicy.canonicalTag(
@@ -25,21 +30,9 @@ class NutritionPathwaysPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
+        leading: BackButton(
           key: const Key('nutrition-pathways-back'),
-          tooltip: nutritionText(
-            context,
-            'Back to dashboard',
-            'العودة للوحة التحكم',
-          ),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/dashboard');
-            }
-          },
-          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => _leavePage(context),
         ),
         title: Text(
           nutritionText(context, 'Nutrition pathways', 'المسارات الغذائية'),

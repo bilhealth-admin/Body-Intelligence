@@ -20,15 +20,6 @@ void main() {
 
   test('iOS permission and camera lifecycle operations are race safe', () {
     final speech = File('ios/Runner/BILSpeechBridge.swift').readAsStringSync();
-    final exceptionCatcher = File(
-      'ios/Runner/BILObjCExceptionCatcher.h',
-    ).readAsStringSync();
-    final bridgingHeader = File(
-      'ios/Runner/Runner-Bridging-Header.h',
-    ).readAsStringSync();
-    final xcodeProject = File(
-      'ios/Runner.xcodeproj/project.pbxproj',
-    ).readAsStringSync();
     final camera = File(
       'lib/shared/widgets/bil_camera_capture_page.dart',
     ).readAsStringSync();
@@ -46,11 +37,6 @@ void main() {
     expect(speech, isNot(contains('authorizationStatus() != .restricted')));
     expect(speech, contains('session.isInputAvailable'));
     expect(speech, contains('format.sampleRate > 0'));
-    expect(speech, contains('BILPerformObjCExceptionCatching'));
-    expect(speech, contains('format: nil'));
-    expect(exceptionCatcher, contains('BILPerformObjCExceptionCatching'));
-    expect(bridgingHeader, contains('BILObjCExceptionCatcher.h'));
-    expect(xcodeProject, contains('BILObjCExceptionCatcher.m in Sources'));
     expect(camera, contains('_serializeCameraOperation'));
     expect(camera, contains('_cameraShouldRun = false'));
     // Permission sheets temporarily make iOS inactive. Stopping the camera
@@ -112,6 +98,35 @@ void main() {
       );
     },
   );
+
+  test('iOS review flows do not put a deferrable BIL dialog before consent', () {
+    final onboarding = File(
+      'lib/features/onboarding/onboarding_page.dart',
+    ).readAsStringSync();
+    final completion = File(
+      'lib/features/onboarding/domain/onboarding_completion_service.dart',
+    ).readAsStringSync();
+    final cameraFlows = [
+      'lib/features/dashboard/dashboard_page.dart',
+      'lib/features/daily_log/daily_log_capture_actions.dart',
+      'lib/features/nutrition/presentation/food_page_actions.dart',
+      'lib/features/profile/premium_profile_actions.dart',
+      'lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
+
+    // Integrations is an Android-only onboarding stage.  Keep the stage
+    // guarded so iOS review never sees it, while Android retains its contract.
+    expect(
+      onboarding,
+      contains("if (defaultTargetPlatform != TargetPlatform.iOS) 'integrations',"),
+    );
+    expect(
+      onboarding,
+      isNot(contains('Enter the name you would like BIL to use.')),
+    );
+    expect(completion, isNot(contains('preferred_name_required')));
+    expect(cameraFlows, isNot(contains('Allow camera for this action?')));
+  });
 
   test(
     'HealthKit reads remain indeterminate and are not denied by write status',

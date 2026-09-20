@@ -5,46 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 String _read(String path) => File(path).readAsStringSync();
 
 void main() {
-  test('manual QA workflow resolves runner paths only inside steps', () {
-    final source = _read(
-      '.github/workflows/bil_ios_plus8_dual_simulator_qa.yml',
-    );
-    expect(source, isNot(contains(r'${{ runner.temp }}')));
-    expect(source, contains('Initialize runner-local QA state path'));
-    expect(source, contains('Initialize runner-local watchdog paths'));
-    expect(source, contains(r'"$RUNNER_TEMP" >> "$GITHUB_ENV"'));
-    expect(source, contains('workflow_dispatch:'));
-    expect(source, isNot(contains('\n  push:')));
-  });
-
-  test('iOS no-pub archive cannot consume a stale native ads Swift graph', () {
-    final ios = _read('.github/workflows/bil_ios_signed_release.yml');
-    final prepare = ios.indexOf('- name: Sanitize retained Swift graph');
-    final signing = ios.indexOf('- name: Configure manual App Store');
-    final archive = ios.indexOf('- name: Build signed archive');
-    final postArchive = ios.indexOf(
-      '- name: Verify regenerated iOS native plugin graph',
-    );
-    expect(prepare, greaterThanOrEqualTo(0));
-    expect(signing, greaterThan(prepare));
-    expect(archive, greaterThan(signing));
-    expect(postArchive, greaterThan(archive));
-    final beforeArchive = ios.substring(prepare, signing);
-    expect(
-      beforeArchive,
-      contains('test_sanitize_ios_deferred_ads_swift_package.py'),
-    );
-    expect(
-      beforeArchive,
-      contains('sanitize_ios_deferred_ads_swift_package.py --project-root .'),
-    );
-    expect(
-      beforeArchive,
-      contains('verify_ios_deferred_ads_plugin_graph.py --project-root .'),
-    );
-    expect(ios, contains('verify_ios_deferred_ads_artifact.py'));
-  });
-
   const workflows = <String>[
     '.github/workflows/bil_android_release_candidate.yml',
     '.github/workflows/bil_ios_signed_release.yml',
@@ -58,19 +18,13 @@ void main() {
         contains('dart run tool/release/validate_release_configuration.dart'),
         reason: path,
       );
+      expect(source, contains('BIL_RELEASE_AUDITED_SOURCE_SHA'), reason: path);
+      expect(
+        source,
+        contains('BIL_RELEASE_MANIFEST_SHA256'),
+        reason: path,
+      );
       expect(source, contains(r'BIL_SOURCE_COMMIT: ${{ github.sha }}'));
-      expect(
-        source,
-        contains(
-          r'BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}',
-        ),
-      );
-      expect(
-        source,
-        contains(
-          'python3 tool/release/run_portable_release_tests.py --code-only',
-        ),
-      );
       expect(source, contains('BIL_FACEBOOK_REQUIRED: true'), reason: path);
       expect(
         source,
@@ -78,15 +32,6 @@ void main() {
         reason: path,
       );
     }
-
-    final android = _read(workflows.first);
-    final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V20_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V20_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V25_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V25_STAGING_MANIFEST_SHA256'));
-    expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
-    expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
 
   test('Android validator consumes the current frozen-source manifest', () {
@@ -95,7 +40,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V20_FROZEN_SOURCE_MANIFEST_2026-09-19.md',
+        'docs/release/BIL_IOS26_ANDROID21_FROZEN_SOURCE_MANIFEST_2026-09-20.md',
       ),
     );
     expect(
@@ -107,28 +52,6 @@ void main() {
         ),
       ),
     );
-  });
-
-  test('iOS validator consumes only the build 25 release manifest', () {
-    final source = _read(workflows.last);
-    expect(
-      source,
-      contains(
-        'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V25_FROZEN_SOURCE_MANIFEST_2026-09-19.md',
-      ),
-    );
-    expect(
-      source,
-      isNot(
-        contains(
-          'BIL_RELEASE_MANIFEST_PATH: '
-          'docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
-        ),
-      ),
-    );
-    expect(source, contains('(( BUILD_NUMBER == 25 ))'));
-    expect(source, isNot(contains('(( BUILD_NUMBER == 24 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {

@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+
+import '../../../app/theme/bil_premium_responsive_layout.dart';
+import 'dashboard_twin_deck_shell.dart';
+
+class DashboardPrimaryCarousel extends StatelessWidget {
+  const DashboardPrimaryCarousel({
+    required this.arabic,
+    required this.bestAction,
+    required this.summary,
+    required this.insights,
+    super.key,
+  });
+
+  final bool arabic;
+  final Widget bestAction;
+  final Widget summary;
+  final Widget insights;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final baseHeight = BilPremiumResponsiveLayout.twinBaseHeight(width);
+    final height = MediaQuery.textScalerOf(context)
+        .scale(baseHeight)
+        .clamp(baseHeight, BilPremiumResponsiveLayout.maximumTwinHeight);
+
+    return SizedBox(
+      key: const Key('dashboard-primary-carousel'),
+      height: height,
+      child: DashboardTwinDeckShell(
+        title: arabic ? 'أفضل خطوة الآن' : 'Best action now',
+        subtitle: arabic
+            ? 'أوضح إجراء مناسب لبياناتك الآن'
+            : 'The clearest action supported by your data',
+        pageTitles: arabic
+            ? const ['أفضل خطوة الآن', 'ملخص اليوم', 'رؤى اليوم']
+            : const ['Best action now', 'Today summary', "Today's insights"],
+        pageSubtitles: arabic
+            ? const [
+                'أوضح إجراء مناسب لبياناتك الآن',
+                'تغذيتك المسجلة ومراجعة يومك النشطة',
+                'ما يراه BIL',
+              ]
+            : const [
+                'The clearest action supported by your data',
+                'Recorded nutrition and active day review',
+                'What BIL sees',
+              ],
+        semanticLabel: arabic
+            ? 'أفضل خطوة وملخص اليوم ورؤى اليوم'
+            : 'Best action, today summary, and insights',
+        compact: true,
+        pages: [
+          DashboardPrimaryEmbeddedScope(child: bestAction),
+          DashboardPrimaryEmbeddedScope(child: summary),
+          DashboardPrimaryEmbeddedScope(child: insights),
+        ],
+      ),
+    );
+  }
+}
+
+class DashboardPrimaryEmbeddedScope extends InheritedWidget {
+  const DashboardPrimaryEmbeddedScope({required super.child, super.key});
+
+  static bool active(BuildContext context) {
+    return context
+            .dependOnInheritedWidgetOfExactType<
+              DashboardPrimaryEmbeddedScope
+            >() !=
+        null;
+  }
+
+  @override
+  bool updateShouldNotify(DashboardPrimaryEmbeddedScope oldWidget) => false;
+}

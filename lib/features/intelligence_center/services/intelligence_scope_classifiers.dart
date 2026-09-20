@@ -2,21 +2,11 @@ part of 'intelligence_center_engine.dart';
 
 // Pure scope classifiers extracted unchanged from the engine coordinator.
 bool _has(String value, List<String> markers) => markers.any(value.contains);
-bool isTransliteratedArabicGreeting(String value) =>
-    _has(value, const ['kefak', 'keefak', 'kifak', 'kefek', 'keefek']);
 bool _isGreeting(String v) => _has(v, const [
   'مرحبا',
   'مرحبًا',
   'أهلا',
   'أهلًا',
-  'كيفك',
-  'kefak',
-  'keefak',
-  'kifak',
-  'kefek',
-  'keefek',
-  'كيف حالك',
-  'شلونك',
   'السلام عليكم',
   'صباح الخير',
   'مساء الخير',
@@ -24,9 +14,6 @@ bool _isGreeting(String v) => _has(v, const [
   'hello',
   'hey',
   'how are you',
-  'good morning',
-  'good afternoon',
-  'good evening',
   'assalamualaikum',
   'assalamu alaikum',
   'as-salamu alaykum',

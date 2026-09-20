@@ -48,12 +48,6 @@ void main() {
       // protected glass veil, and its CTA must remain reviewed together so a
       // transient provider error can never accidentally expose a paywall.
       'lib/features/commerce/presentation/premium_route_glass_gate.dart': 800,
-      // Store purchase verification is one fail-closed transaction boundary:
-      // catalog loading, transaction ownership, replay protection, and
-      // entitlement hand-off stay together so no partial purchase can unlock
-      // access. Keep the narrow reviewed margin until the next service split.
-      'lib/features/commerce/services/verified_store_purchase_service.dart':
-          725,
       // Daily Log already delegates capture, mutation, search, navigation,
       // copy, entry, and component responsibilities to part files. The root
       // retains the single state lifecycle and Today-goal resolution only.
@@ -84,6 +78,15 @@ void main() {
       // coalescing, and platform capability truth share one provider state
       // machine. Native bridges and repositories remain separate.
       'lib/features/connected_health/providers/connected_health_provider.dart':
+          775,
+      // This page owns the guarded AI-coach surface lifecycle and its
+      // navigation-safe presentation composition; cloud, persistence, and
+      // message rendering remain in sibling files.
+      'lib/features/intelligence_center/presentation/intelligence_center_page.dart':
+          725,
+      // Context assembly, consent, and bounded payload projection form one
+      // service boundary; transport and prompt execution are separate.
+      'lib/features/intelligence_center/services/coach_context_provider.dart':
           725,
       // These stateful surfaces each coordinate one guarded form lifecycle;
       // persistence, permission probing, repositories, and locale copy are
@@ -106,14 +109,6 @@ void main() {
       // entitlement, cache, manifests, and content management are separate.
       'lib/features/wellness/presentation/bil_workout_routines_list.dart': 725,
       'lib/features/wellness/presentation/recipe_library_page.dart': 850,
-      // The production router keeps the complete bounded route table in one
-      // place so route ownership and its guarded builders remain reviewable.
-      'lib/app/router/app_router.dart': 725,
-      // This provider is the single native-health synchronization boundary;
-      // HealthKit/Health Connect pagination, anchors, cancellation, and
-      // provenance filtering are intentionally kept together.
-      'lib/features/global_platform/health_data/unified_health_data_integration.dart':
-          725,
     };
 
     final oversized = <String>[];

@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
-import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
@@ -16,13 +15,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-final _acceptedPolicy = CommunityContentPolicy.fromJson({
-  'version': 'community-policy-v1',
-  'locale_code': 'en',
-  'document_url': 'https://www.bilhealth.com/community-guidelines',
-  'effective_at': '2026-09-08T00:00:00Z',
-});
 
 final class _FakePostImagePicker implements CommunityPostImagePickerContract {
   const _FakePostImagePicker(this.image);
@@ -53,14 +45,6 @@ final class _PostImageRepository extends CommunityRepository {
 
   @override
   String get currentUserId => userId;
-
-  @override
-  Future<CommunityPolicyState> loadCommunityPolicyState({
-    required String localeCode,
-  }) async => CommunityPolicyState.accepted(
-    _acceptedPolicy,
-    acceptedVersion: _acceptedPolicy.version,
-  );
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
@@ -159,15 +143,15 @@ void main() {
     });
 
     test(
-      're-encodes a large valid selection before it reaches the upload',
+      'automatically compresses an oversized phone image below the storage limit',
       () async {
-        // A valid image followed by excess transport bytes represents the same
-        // client boundary as a camera original over the Storage limit. The
-        // decoder reads the image and the new preparation path owns the size
-        // reduction instead of making the member convert it manually.
-        final original = _testImage().bytes;
-        final oversized = Uint8List(communityPostImageMaxBytes + 1)
-          ..setRange(0, original.length, original);
+        final source = img.Image(width: 640, height: 480)
+          ..clear(img.ColorRgb8(80, 170, 70));
+        final jpeg = Uint8List.fromList(img.encodeJpg(source, quality: 90));
+        final oversized = Uint8List.fromList([
+          ...jpeg,
+          ...Uint8List(communityPostImageMaxBytes - jpeg.lengthInBytes + 1),
+        ]);
 
         final prepared = await prepareCommunityPostImageAsync(oversized);
 

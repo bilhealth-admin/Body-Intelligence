@@ -46,7 +46,6 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   String? _purchaseFeedbackKey;
   bool _purchaseFeedbackIsError = false;
   VerifiedStoreState? _lastStoreState;
-  String? _lastStoreMessage;
 
   @override
   void initState() {
@@ -79,25 +78,12 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   void _onStoreChanged() {
     final store = widget.store ?? _ownedStore;
     if (store == null || !mounted) return;
-    final verifiedTransition =
-        store.state == VerifiedStoreState.verified &&
-        _lastStoreState != VerifiedStoreState.verified;
-    final settledRestore =
-        store.messageCode == 'no_restorable_purchases' &&
-        _lastStoreMessage != 'no_restorable_purchases';
-    // An authentic inactive receipt is settled without a paid grant. Refresh
-    // mounted surfaces immediately, not only after an active purchase. Empty
-    // store history also uses this message: it triggers a read, never a local
-    // revocation of an independently verified account entitlement.
-    if (verifiedTransition || settledRestore) {
+    if (store.state == VerifiedStoreState.verified &&
+        _lastStoreState != VerifiedStoreState.verified) {
       ref.invalidate(verifiedSubscriptionStateProvider);
       ref.invalidate(aiCoachCreditAccessProvider);
-      ref
-          .read(aiCoachUsageRefreshProvider.notifier)
-          .requestAuthoritativeReload();
     }
     _lastStoreState = store.state;
-    _lastStoreMessage = store.messageCode;
     final feedback = _purchaseFeedbackFor(store);
     setState(() {
       _purchaseFeedbackKey = feedback.$1;
@@ -105,64 +91,26 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     });
   }
 
-  void _onOfferSelected(BilStoreOfferMetadata _) {
-    // Choosing another term is not a new purchase attempt. Clear only
-    // retryable launch/cancellation feedback so an old bottom-banner error
-    // cannot follow the member between monthly and annual offers. A pending
-    // operation and a receipt verification failure deliberately remain visible
-    // and fail-closed until the native transaction is resolved or restored.
-    final feedback = _purchaseFeedbackKey;
-    if (!mounted ||
-        feedback == null ||
-        feedback == 'purchase_awaiting_approval' ||
-        feedback == 'purchase_in_progress' ||
-        feedback == 'purchase_verification_unavailable' ||
-        feedback == 'purchase_reconciliation_pending' ||
-        feedback == 'purchase_reconciliation_failed' ||
-        feedback == 'restore_verification_failed') {
-      return;
-    }
-    setState(() {
-      _purchaseFeedbackKey = null;
-      _purchaseFeedbackIsError = false;
-    });
-  }
-
   (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
     final code = store.messageCode;
     final key = switch (code) {
-      'purchase_pending' => 'purchase_awaiting_approval',
-      'restore_pending' => 'restore_checking',
-      'reconciliation_pending' => 'purchase_reconciliation_pending',
-      // Cancelling the native sheet is an intentional choice, not an error.
-      // Keep the catalog actionable so another term can be selected at once.
-      'purchase_cancelled' => null,
+      'purchase_pending' => 'purchase_in_progress',
+      'purchase_cancelled' => 'purchase_error',
       'purchase_not_started' => 'purchase_error',
-      'store_catalog_changed' => 'purchase_catalog_changed',
-      'store_catalog_refresh_failed' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
-      'verification_failed' => 'purchase_verification_unavailable',
-      'restore_verification_failed' => 'restore_verification_failed',
-      'reconciliation_verification_failed' => 'purchase_reconciliation_failed',
+      'verification_failed' => 'purchase_error',
       'purchase_failed' || 'store_stream_failed' => 'purchase_error',
       'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
       _ => switch (store.state) {
         VerifiedStoreState.purchasePending => 'purchase_in_progress',
-        VerifiedStoreState.cancelled => null,
+        VerifiedStoreState.cancelled => 'purchase_error',
         VerifiedStoreState.failed => 'purchase_error',
         _ => null,
       },
     };
-    final isError = const {
-      'purchase_error',
-      'restore_verification_failed',
-      'purchase_reconciliation_failed',
-    }.contains(key);
+    final isError = const {'purchase_error'}.contains(key);
     return (key, isError);
   }
-
-  bool get _purchaseInProgress =>
-      _purchaseRequestInFlight || (widget.store ?? _ownedStore)?.busy == true;
 
   Future<void> _load() async {
     if (_loadInFlight) return;
@@ -217,10 +165,6 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         'no_restorable_purchases' => 'restore_none',
         'authentication_required' => 'restore_sign_in',
         'restore_failed' => 'restore_failed',
-        'restore_verification_failed' ||
-        'verification_failed' ||
-        'reconciliation_verification_failed' => 'restore_verification_failed',
-        _ when store?.state == VerifiedStoreState.failed => 'restore_failed',
         _ => 'restore_checked',
       };
     } on TimeoutException {
@@ -254,14 +198,11 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     } on Object {
       if (mounted) {
         setState(() {
-          _purchaseFeedbackKey = 'purchase_error';
+          _purchaseFeedbackKey = 'purchase_failed';
           _purchaseFeedbackIsError = true;
         });
       }
     } finally {
-      if (mounted && store?.messageCode == 'store_catalog_changed') {
-        await _load();
-      }
       if (mounted) {
         setState(() {
           _purchaseRequestInFlight = false;
@@ -298,7 +239,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     var currentPlan = CommercePlan.free;
     try {
       currentPlan =
-          ref.watch(verifiedSubscriptionAccessProvider).value?.plan ??
+          ref.watch(verifiedSubscriptionStateProvider).value?.plan ??
           CommercePlan.free;
     } on StateError {
       currentPlan = CommercePlan.free;
@@ -331,8 +272,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         locale: locale,
         offers: _offers,
         loading: _loading,
-        purchaseInProgress: _purchaseInProgress,
         restoreInProgress: _restoring,
+        purchaseInProgress: _purchaseRequestInFlight || (store?.busy ?? false),
         purchaseEnabled: store?.canStartPurchase ?? true,
         purchaseStatusMessage: purchaseFeedbackKey == null
             ? null
@@ -341,7 +282,6 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
         onPurchaseRequested: _requestPurchase,
-        onOfferSelected: _onOfferSelected,
         onRestore: _catalog == null ? null : _restorePurchases,
         onManage: _catalog == null
             ? null

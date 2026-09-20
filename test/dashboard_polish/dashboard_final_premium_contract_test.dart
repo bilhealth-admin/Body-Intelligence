@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('P8 keeps approved components but omits retired production cards', () {
+  test('P8 approved Arabic copy and compact values are present', () {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
@@ -30,14 +30,12 @@ void main() {
       contains("tr('Daily Summary', 'ملخص اليوم')"),
       reason: 'Today Summary must use the approved Arabic title.',
     );
-    expect(current, isNot(contains("Key('dashboard-mobile-summary-card')")));
-    expect(grid, isNot(contains('DashboardSummaryFactory.build(')));
-    expect(grid, isNot(contains('PersonalHealthAiPanel(')));
-    expect(grid, isNot(contains('progressSection:')));
-    expect(grid, isNot(contains('personalHealthAi:')));
+    expect(current, contains("Key('dashboard-mobile-summary-card')"));
 
     expect(profile, contains("tr('Daily energy plan', 'خطة الطاقة اليومية')"));
     expect(profile, contains("tr('Daily metabolism', 'معدل الأيض اليومي')"));
+    expect(grid, contains('dailyRequirement: bil.tdee.round()'));
+    expect(grid, contains('calories: calories.round()'));
     expect(summary, contains("tr('Daily Requirement', 'الاحتياج اليومي')"));
     expect(grid, isNot(contains("arabic ? 'سعرة/يوم' : 'kcal/day'")));
 

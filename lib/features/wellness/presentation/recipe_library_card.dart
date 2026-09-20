@@ -216,7 +216,7 @@ class _RecipeCardFacts extends StatelessWidget {
                       : _RecipeFactCell(
                           icon: Icons.local_fire_department_outlined,
                           label: context.strings.get('calories'),
-                          value: value == null || value.nutritionNeedsReview
+                          value: value == null
                               ? '—'
                               : '${context.strings.number(value.kcalPerServing.round())} kcal',
                         ),
@@ -228,7 +228,7 @@ class _RecipeCardFacts extends StatelessWidget {
                       : _RecipeFactCell(
                           icon: Icons.fitness_center_rounded,
                           label: context.strings.get('protein'),
-                          value: value == null || value.nutritionNeedsReview
+                          value: value == null
                               ? '—'
                               : '${context.strings.number(value.proteinGramsPerServing, decimalDigits: value.proteinGramsPerServing == value.proteinGramsPerServing.roundToDouble() ? 0 : 1)} g',
                         ),
@@ -365,12 +365,12 @@ class _RecipeDetailFacts extends StatelessWidget {
             _RecipeDetailFact(
               icon: Icons.local_fire_department_outlined,
               label: context.strings.get('calories'),
-              value: facts.nutritionNeedsReview ? '—' : '$calories kcal',
+              value: '$calories kcal',
             ),
             _RecipeDetailFact(
               icon: Icons.fitness_center_rounded,
               label: context.strings.get('protein'),
-              value: facts.nutritionNeedsReview ? '—' : '$protein g',
+              value: '$protein g',
             ),
           ],
         ),

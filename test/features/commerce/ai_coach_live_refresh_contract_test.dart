@@ -25,20 +25,12 @@ void main() {
 
     expect(
       providers,
-      contains('aiCoachCreditAccessProvider = FutureProvider<bool>'),
-    );
-    expect(
-      providers,
-      isNot(
-        contains(
-          'aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>',
-        ),
+      contains(
+        'aiCoachCreditAccessProvider = FutureProvider<bool>',
       ),
     );
-    expect(
-      providers,
-      contains('ref.watch(verifiedEntitlementOwnerIdProvider);'),
-    );
+    expect(providers, contains('AiCoachAccessSnapshotStore'));
+    expect(providers, contains('snapshots.activateOwner(ownerId)'));
     expect(providers, contains("credits['total_remaining']"));
     expect(query, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
     expect(plans, contains('store.state == VerifiedStoreState.verified'));
@@ -63,14 +55,8 @@ void main() {
       'lib/features/commerce/presentation/bil_dynamic_store_offers.dart',
     ).readAsStringSync();
 
-    expect(
-      actions,
-      contains("_openCoachRoute('/plans?focus=ai-coach', push: true)"),
-    );
-    expect(
-      actions,
-      contains("_openCoachRoute('/plans?focus=boost', push: true)"),
-    );
+    expect(actions, contains("context.push('/plans?focus=ai-coach')"));
+    expect(actions, contains("context.push('/plans?focus=boost')"));
     expect(offers, contains("widget.initialFocus == 'ai-coach'"));
     expect(offers, contains("widget.initialFocus == 'boost'"));
     expect(offers, contains('do not silently select ordinary Premium'));

@@ -9,7 +9,7 @@ void main() {
     ).readAsStringSync();
 
     expect(shell, contains('extendBody: false'));
-    expect(shell, contains('final dockHeight = 76.0 +'));
+    expect(shell, contains('final dockHeight = 90.0 +'));
     expect(shell, contains('height: dockHeight'));
     expect(shell, contains("key: const Key('shell-quick-add')"));
     expect(shell, contains('quickAdd: quickButton'));

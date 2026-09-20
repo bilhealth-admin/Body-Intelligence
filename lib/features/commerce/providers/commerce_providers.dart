@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../domain/commerce_plan.dart';
-import '../domain/free_plan.dart';
 import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
@@ -40,6 +37,12 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   yield previousOwnerId;
 
   await for (final state in auth.onAuthStateChange) {
+    // Some platforms can emit a transient null session while refresh/storage
+    // settles. Only the explicit signed-out event is authoritative for
+    // clearing the owner; otherwise keep the last verified owner identity.
+    if (state.session == null && state.event != AuthChangeEvent.signedOut) {
+      continue;
+    }
     final ownerId = state.session?.user.id;
     if (ownerId == previousOwnerId) continue;
     previousOwnerId = ownerId;
@@ -47,123 +50,14 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   }
 });
 
-/// Synchronous owner seed used only until the auth stream publishes its first
-/// value. This prevents an AsyncLoading -> AsyncData transition for the same
-/// signed-in member from looking like an account change to access providers.
-final verifiedEntitlementOwnerSeedProvider = Provider<String?>((_) {
-  if (!AppEnvironment.supabaseRuntimeReady) return null;
-  return Supabase.instance.client.auth.currentUser?.id;
-});
-
-/// Stable scalar owner identity. Once the stream has emitted, including an
-/// authoritative signed-out null, that stream value always wins over the
-/// startup seed.
-final verifiedEntitlementOwnerIdProvider = Provider<String?>((ref) {
-  final owner = ref.watch(verifiedEntitlementOwnerProvider);
-  if (owner.hasValue) return owner.asData?.value;
-  return ref.watch(verifiedEntitlementOwnerSeedProvider);
-});
-
-final verifiedEntitlementLoaderProvider =
-    Provider<Future<SubscriptionState> Function()>(
-      (_) => const ServerEntitlementRepository().current,
-    );
-
-/// Starts a non-overlapping refresh after a load finishes and only while its
-/// provider is observed. Credit access must refresh independently of Premium.
-void Function() _observedAuthorityReload(Ref ref, void Function() reload) {
-  Timer? refresh;
-  var disposed = false;
-  var observed = true;
-  var loaded = false;
-  void schedule() {
-    refresh?.cancel();
-    refresh = Timer(const Duration(seconds: 30), reload);
-  }
-
-  ref.onCancel(() {
-    observed = false;
-    refresh?.cancel();
-  });
-  ref.onResume(() {
-    observed = true;
-    if (loaded) schedule();
-  });
-  ref.onDispose(() {
-    disposed = true;
-    refresh?.cancel();
-  });
-  return () {
-    loaded = true;
-    if (!disposed && observed) schedule();
-  };
-}
-
 final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   ref,
 ) async {
-  ref.watch(verifiedEntitlementOwnerIdProvider);
-  final loaded = _observedAuthorityReload(ref, ref.invalidateSelf);
-  try {
-    return await ref.watch(verifiedEntitlementLoaderProvider)();
-  } finally {
-    loaded();
-  }
+  ref.watch(verifiedEntitlementOwnerProvider);
+  return const ServerEntitlementRepository().current().timeout(
+    const Duration(seconds: 8),
+  );
 });
-
-/// Injectable only for deterministic expiry tests; the device clock never
-/// creates an entitlement, it can only shorten an already verified grant.
-final verifiedEntitlementClockProvider = Provider<DateTime Function()>(
-  (_) =>
-      () => DateTime.now().toUtc(),
-);
-
-/// Presentation view of the server snapshot with an exact local access cutoff.
-/// The upstream repository still owns verification and its bounded continuity
-/// cache. A slow refresh must not keep a cached paid plan alive past its period.
-final verifiedSubscriptionAccessProvider =
-    Provider.autoDispose<AsyncValue<SubscriptionState>>((ref) {
-      final snapshot = ref.watch(verifiedSubscriptionStateProvider);
-      // A dependency reload includes an account change. Never reuse another
-      // owner's previous AsyncValue; only an explicit same-owner refresh may
-      // retain its previously verified value while the server is answering.
-      if (snapshot.isLoading && !snapshot.isRefreshing) {
-        return const AsyncValue.loading();
-      }
-      if (snapshot.hasError) return snapshot;
-      final state = snapshot.value;
-      if (state == null || state.plan == CommercePlan.free) return snapshot;
-      final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
-      final boundary = switch (state.lifecycle) {
-        SubscriptionLifecycle.trial => state.trialEndsAt,
-        SubscriptionLifecycle.active ||
-        SubscriptionLifecycle.cancelled => state.currentPeriodEndsAt,
-        SubscriptionLifecycle.gracePeriod => state.gracePeriodEndsAt,
-        _ => null,
-      };
-      if (state.authority != EntitlementAuthority.verifiedServer ||
-          boundary == null ||
-          !boundary.toUtc().isAfter(now) ||
-          (state.startedAt?.toUtc().isAfter(now) ?? false)) {
-        return AsyncValue.data(
-          SubscriptionState(
-            plan: CommercePlan.free,
-            entitlements: FreePlan.entitlements,
-            authority: state.authority,
-            lifecycle: SubscriptionLifecycle.expired,
-            provider: state.provider,
-            isPurchasable: false,
-            canRestorePurchases: state.canRestorePurchases,
-          ),
-        );
-      }
-      final expiry = Timer(
-        boundary.toUtc().difference(now),
-        ref.invalidateSelf,
-      );
-      ref.onDispose(expiry.cancel);
-      return AsyncValue.data(state);
-    });
 
 double _positiveFiniteNumber(Object? value) {
   if (value is! num) return 0;
@@ -241,28 +135,84 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
   },
 );
 
+/// In-memory, owner-scoped snapshot of the last server-authoritative Coach
+/// access result. It is only a UI continuity cache: it never grants access
+/// before a successful usage-status RPC, and it is cleared on owner changes so
+/// one account can never inherit another account's access.
+final class AiCoachAccessSnapshotStore {
+  String? _activeOwnerId;
+  bool? _verifiedAccess;
+
+  String? get activeOwnerId => _activeOwnerId;
+
+  void activateOwner(String? ownerId) {
+    final normalized = ownerId?.trim();
+    final next = normalized == null || normalized.isEmpty ? null : normalized;
+    if (next == _activeOwnerId) return;
+    _activeOwnerId = next;
+    _verifiedAccess = null;
+  }
+
+  bool? cachedAccessFor(String ownerId) =>
+      ownerId == _activeOwnerId ? _verifiedAccess : null;
+
+  void recordServerResult({required String ownerId, required bool access}) {
+    if (ownerId == _activeOwnerId) _verifiedAccess = access;
+  }
+}
+
+final aiCoachAccessSnapshotStoreProvider =
+    Provider<AiCoachAccessSnapshotStore>((_) => AiCoachAccessSnapshotStore());
+
+String? _safeCurrentAuthenticatedOwnerId() {
+  try {
+    return Supabase.instance.client.auth.currentUser?.id.trim();
+  } on Object {
+    return null;
+  }
+}
+
 /// Server-owned AI access truth for token markets.
 ///
 /// A local purchase callback is never enough to unlock the coach. The gate
 /// opens only after Supabase reports a positive reserved-aware total from an
 /// AI subscription allowance and/or verified Boost balance. An active plan at
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
-final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
-  ref.watch(verifiedEntitlementOwnerIdProvider);
-  ref.watch(aiCoachUsageRefreshProvider);
-  final loaded = _observedAuthorityReload(ref, () {
-    ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
-  });
-  // A signed-out or malformed response is a verified no-access result. An
-  // RPC exception is deliberately allowed through so Riverpod exposes
-  // AsyncError and the route shows retry instead of a purchase offer.
+final aiCoachCreditAccessProvider = FutureProvider<bool>((
+  ref,
+) async {
+  final ownerState = ref.watch(verifiedEntitlementOwnerProvider);
+  String? ownerId;
+  if (ownerState.hasValue) {
+    ownerId = ownerState.asData?.value;
+  } else {
+    try {
+      ownerId = await ref
+          .watch(verifiedEntitlementOwnerProvider.future)
+          .timeout(const Duration(seconds: 2));
+    } on Object {
+      ownerId = _safeCurrentAuthenticatedOwnerId();
+    }
+  }
+  final snapshots = ref.read(aiCoachAccessSnapshotStoreProvider);
+  snapshots.activateOwner(ownerId);
+  if (ownerId == null) return false;
+
   try {
     final value = await ref
         .read(aiCoachUsageStatusLoaderProvider)()
-        .timeout(const Duration(seconds: 10));
-    return aiCoachAccessFromUsageStatus(value);
-  } finally {
-    loaded();
+        .timeout(const Duration(seconds: 8));
+    // A signed-in server response is the only source allowed to update this
+    // snapshot. Zero balance therefore records false and closes access.
+    final access = aiCoachAccessFromUsageStatus(value);
+    snapshots.recordServerResult(ownerId: ownerId, access: access);
+    return access;
+  } on Object {
+    final cached = snapshots.cachedAccessFor(ownerId);
+    if (cached != null) return cached;
+    // No prior verified answer exists: surface the real failure so the route
+    // can render its retry state instead of fabricating access.
+    rethrow;
   }
 }, retry: (_, _) => null);
 
@@ -271,7 +221,6 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
 /// request from a stale local purchase callback or a plan label alone.
 final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
   ref.watch(verifiedEntitlementOwnerProvider);
-  ref.watch(aiCoachUsageRefreshProvider);
   final client = Supabase.instance.client;
   if (client.auth.currentSession == null) return false;
   try {

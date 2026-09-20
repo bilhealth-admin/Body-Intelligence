@@ -5,6 +5,8 @@ class ReleaseManifestMetadata {
     required this.unresolvedReviewCount,
     required this.releaseVersion,
     required this.releaseBuildNumber,
+    required this.releaseBuildNumberIos,
+    required this.releaseBuildNumberAndroid,
   });
 
   factory ReleaseManifestMetadata.parse(String source) {
@@ -28,6 +30,12 @@ class ReleaseManifestMetadata {
       ),
       releaseVersion: marker('RELEASE_VERSION') ?? '',
       releaseBuildNumber: int.tryParse(marker('RELEASE_BUILD_NUMBER') ?? ''),
+      releaseBuildNumberIos: int.tryParse(
+        marker('RELEASE_BUILD_NUMBER_IOS') ?? '',
+      ),
+      releaseBuildNumberAndroid: int.tryParse(
+        marker('RELEASE_BUILD_NUMBER_ANDROID') ?? '',
+      ),
     );
   }
 
@@ -36,4 +44,6 @@ class ReleaseManifestMetadata {
   final int? unresolvedReviewCount;
   final String releaseVersion;
   final int? releaseBuildNumber;
+  final int? releaseBuildNumberIos;
+  final int? releaseBuildNumberAndroid;
 }

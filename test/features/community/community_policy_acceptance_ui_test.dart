@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
@@ -9,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 CommunityContentPolicy _policy(String version) =>
@@ -21,48 +18,26 @@ CommunityContentPolicy _policy(String version) =>
     });
 
 final class _PolicyRepository extends CommunityRepository {
-  _PolicyRepository(
-    this.state, {
-    this.stateAfterAcceptance,
-    this.postAcceptLoadBarrier,
-    this.postAcceptLoadError,
-  }) : super(
-         SupabaseClient(
-           'https://community-policy-test.invalid',
-           'community-policy-test-key',
-           authOptions: const AuthClientOptions(autoRefreshToken: false),
-         ),
-       );
+  _PolicyRepository(this.state)
+    : super(
+        SupabaseClient(
+          'https://community-policy-test.invalid',
+          'community-policy-test-key',
+          authOptions: const AuthClientOptions(autoRefreshToken: false),
+        ),
+      );
 
   CommunityPolicyState state;
-  final CommunityPolicyState? stateAfterAcceptance;
-  final Future<void>? postAcceptLoadBarrier;
-  final Object? postAcceptLoadError;
   final List<String> acceptedVersions = [];
-  int loadCalls = 0;
 
   @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
     required String localeCode,
-  }) async {
-    loadCalls += 1;
-    if (acceptedVersions.isNotEmpty) {
-      final barrier = postAcceptLoadBarrier;
-      if (barrier != null) await barrier;
-      final error = postAcceptLoadError;
-      if (error != null) throw error;
-    }
-    return state;
-  }
+  }) async => state;
 
   @override
   Future<void> acceptContentPolicy(String version) async {
     acceptedVersions.add(version);
-    final replacement = stateAfterAcceptance;
-    if (replacement != null) {
-      state = replacement;
-      return;
-    }
     final policy = state.policy;
     if (policy != null && policy.version == version) {
       state = CommunityPolicyState.accepted(policy, acceptedVersion: version);
@@ -91,14 +66,6 @@ final class _PublishGuardRepository extends CommunityRepository {
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async => const [];
-
-  @override
-  Future<CommunityPolicyState> loadCommunityPolicyState({
-    required String localeCode,
-  }) async => CommunityPolicyState.accepted(
-    _policy('community-policy-v1'),
-    acceptedVersion: 'community-policy-v1',
-  );
 
   @override
   Future<void> publishPost(String body) async {
@@ -159,53 +126,11 @@ void main() {
     expect(find.byKey(const Key('accept-community-policy')), findsNothing);
   });
 
-  testWidgets(
-    'canonical policy launcher preserves English and requests Arabic',
-    (tester) async {
-      for (final locale in const [Locale('en'), Locale('ar')]) {
-        final repository = _PolicyRepository(
-          CommunityPolicyState.acceptanceRequired(
-            _policy('community-policy-v1'),
-          ),
-        );
-        Uri? launched;
-        await tester.pumpWidget(
-          _app(
-            CommunitySafetyPage(
-              key: ValueKey(locale.languageCode),
-              repository: repository,
-              policyUrlLauncher: (uri) async {
-                launched = uri;
-                return true;
-              },
-            ),
-            locale: locale,
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key('open-community-policy')));
-        await tester.pumpAndSettle();
-
-        expect(launched?.scheme, 'https');
-        expect(launched?.host, 'www.bilhealth.com');
-        expect(launched?.path, '/community-guidelines');
-        expect(
-          launched?.queryParameters['lang'],
-          locale.languageCode == 'ar' ? 'ar' : isNull,
-        );
-        expect(repository.acceptedVersions, isEmpty);
-      }
-    },
-  );
-
   testWidgets('unaccepted policy stays locked until the user confirms', (
     tester,
   ) async {
-    final postAcceptRead = Completer<void>();
     final repository = _PolicyRepository(
       CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-      postAcceptLoadBarrier: postAcceptRead.future,
     );
     await tester.pumpWidget(_app(CommunitySafetyPage(repository: repository)));
     await tester.pumpAndSettle();
@@ -219,73 +144,10 @@ void main() {
     await tester.pump();
     expect(tester.widget<FilledButton>(accept).onPressed, isNotNull);
     await tester.tap(accept);
-    await tester.pump();
-
-    expect(repository.acceptedVersions, ['community-policy-v1']);
-    expect(repository.loadCalls, 2);
-    expect(find.text('Accepted'), findsNothing);
-
-    postAcceptRead.complete();
     await tester.pumpAndSettle();
 
+    expect(repository.acceptedVersions, ['community-policy-v1']);
     expect(find.text('Accepted'), findsOneWidget);
-  });
-
-  testWidgets('failed server re-read never creates optimistic acceptance', (
-    tester,
-  ) async {
-    final repository = _PolicyRepository(
-      CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-      postAcceptLoadError: StateError('policy receipt read failed'),
-    );
-    await tester.pumpWidget(_app(CommunitySafetyPage(repository: repository)));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('confirm-community-policy')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('accept-community-policy')));
-    await tester.pumpAndSettle();
-
-    expect(repository.acceptedVersions, ['community-policy-v1']);
-    expect(repository.loadCalls, 2);
-    expect(find.text('Accepted'), findsNothing);
-    expect(
-      find.text('Consent could not be saved. Publishing remains locked.'),
-      findsOneWidget,
-    );
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.byKey(const Key('accept-community-policy')),
-          )
-          .onPressed,
-      isNotNull,
-    );
-  });
-
-  testWidgets('server must confirm acceptance for the exact policy version', (
-    tester,
-  ) async {
-    final repository = _PolicyRepository(
-      CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-      stateAfterAcceptance: CommunityPolicyState.accepted(
-        _policy('community-policy-v2'),
-        acceptedVersion: 'community-policy-v2',
-      ),
-    );
-    await tester.pumpWidget(_app(CommunitySafetyPage(repository: repository)));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('confirm-community-policy')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('accept-community-policy')));
-    await tester.pumpAndSettle();
-
-    expect(repository.acceptedVersions, ['community-policy-v1']);
-    expect(repository.loadCalls, 2);
-    expect(find.text('Accepted'), findsNothing);
-    expect(find.textContaining('community-policy-v1'), findsOneWidget);
-    expect(find.textContaining('community-policy-v2'), findsNothing);
   });
 
   testWidgets('a newly active version requires a new real acceptance', (
@@ -332,142 +194,6 @@ void main() {
       isNull,
     );
     expect(v2.acceptedVersions, isEmpty);
-  });
-
-  testWidgets('replacing the repository reloads policy state immediately', (
-    tester,
-  ) async {
-    final first = _PolicyRepository(
-      CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-    );
-    final replacement = _PolicyRepository(
-      CommunityPolicyState.accepted(
-        _policy('community-policy-v2'),
-        acceptedVersion: 'community-policy-v2',
-      ),
-    );
-
-    await tester.pumpWidget(_app(CommunitySafetyPage(repository: first)));
-    await tester.pumpAndSettle();
-    expect(first.loadCalls, 1);
-    expect(find.textContaining('community-policy-v1'), findsOneWidget);
-
-    await tester.pumpWidget(_app(CommunitySafetyPage(repository: replacement)));
-    await tester.pumpAndSettle();
-
-    expect(replacement.loadCalls, 1);
-    expect(find.textContaining('community-policy-v1'), findsNothing);
-    expect(find.textContaining('community-policy-v2'), findsOneWidget);
-    expect(find.text('Accepted'), findsOneWidget);
-  });
-
-  testWidgets('Not now invokes the optional decline callback only', (
-    tester,
-  ) async {
-    final repository = _PolicyRepository(
-      CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-    );
-    var declineCalls = 0;
-    await tester.pumpWidget(
-      _app(
-        CommunitySafetyPage(
-          repository: repository,
-          onDecline: () => declineCalls += 1,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('community-policy-not-now')));
-    await tester.pump();
-
-    expect(declineCalls, 1);
-    expect(repository.acceptedVersions, isEmpty);
-    expect(find.byType(CommunitySafetyPage), findsOneWidget);
-  });
-
-  testWidgets('Not now pops false when policy was pushed', (tester) async {
-    final repository = _PolicyRepository(
-      CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-    );
-    bool? declineResult;
-    await tester.pumpWidget(
-      _app(
-        Builder(
-          builder: (context) => Scaffold(
-            body: FilledButton(
-              key: const Key('open-community-policy-test'),
-              onPressed: () async {
-                declineResult = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => CommunitySafetyPage(repository: repository),
-                  ),
-                );
-              },
-              child: const Text('Open policy'),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(const Key('open-community-policy-test')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-policy-not-now')));
-    await tester.pumpAndSettle();
-
-    expect(declineResult, isFalse);
-    expect(repository.acceptedVersions, isEmpty);
-    expect(find.text('Open policy'), findsOneWidget);
-  });
-
-  testWidgets('root Not now redirects to Community without acceptance', (
-    tester,
-  ) async {
-    final repository = _PolicyRepository(
-      CommunityPolicyState.acceptanceRequired(_policy('community-policy-v1')),
-    );
-    final router = GoRouter(
-      initialLocation: '/community/safety',
-      routes: [
-        GoRoute(
-          path: '/community',
-          builder: (_, _) => const Scaffold(
-            body: Text(
-              'Community destination',
-              key: Key('community-decline-destination'),
-            ),
-          ),
-        ),
-        GoRoute(
-          path: '/community/safety',
-          builder: (_, _) => CommunitySafetyPage(repository: repository),
-        ),
-      ],
-    );
-    addTearDown(router.dispose);
-    await tester.pumpWidget(
-      MaterialApp.router(
-        routerConfig: router,
-        supportedLocales: const [Locale('en'), Locale('ar')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key('community-policy-not-now')));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.byKey(const Key('community-decline-destination')),
-      findsOneWidget,
-    );
-    expect(router.routeInformationProvider.value.uri.path, '/community');
-    expect(repository.acceptedVersions, isEmpty);
   });
 
   testWidgets('policy screen remains clear on Android and iOS', (tester) async {

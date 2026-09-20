@@ -8,32 +8,12 @@ import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_post_cloud_store.dart';
-import 'community_feed_repository_mixin.dart';
-import 'community_social_repository_mixin.dart';
 
-class CommunityRepository
-    with CommunitySocialRepositoryMixin, CommunityFeedRepositoryMixin {
-  CommunityRepository(this._client, {CommunityPostStoreContract? postStore})
-    // Keep the public injection seam named `postStore` while its field stays private.
-    // ignore: prefer_initializing_formals
-    : _postStore = postStore;
+class CommunityRepository {
+  CommunityRepository(this._client, {this._postStore});
 
   final SupabaseClient _client;
   final CommunityPostStoreContract? _postStore;
-
-  @override
-  SupabaseClient get communitySocialClient => _client;
-
-  @override
-  CommunityPostStoreContract get communityPostStore => _posts;
-
-  @override
-  Future<T> runCommunitySocialMutation<T>(Future<T> Function() mutation) =>
-      _runCommunityMutation(mutation);
-
-  @override
-  Future<void> requireAcceptedCommunityPolicy() =>
-      _requireAcceptedContentPolicy();
 
   static final RegExp _uuid = RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
@@ -41,6 +21,40 @@ class CommunityRepository
   static final RegExp _unsafeText = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]');
 
   String get currentUserId => _user.id;
+
+  Future<List<Map<String, dynamic>>> searchProfiles(String query) async {
+    final text = query.trim();
+    final response = await _client.rpc(
+      'bil_search_community_profiles',
+      params: {'p_query': text, 'p_limit': 30},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid community profile search result');
+    }
+    final rows = response.whereType<Map>().map(Map<String, dynamic>.from);
+    return rows
+        .where((row) {
+          final id = row['user_id'];
+          final name = row['display_name'];
+          final avatar = row['avatar_url'];
+          return id is String &&
+              _uuid.hasMatch(id) &&
+              name is String &&
+              name.trim().length >= 2 &&
+              name.trim().length <= 60 &&
+              !_unsafeText.hasMatch(name) &&
+              (avatar == null || avatar is String) &&
+              row.keys.every(
+                const {
+                  'user_id',
+                  'display_name',
+                  'avatar_url',
+                  'locale_code',
+                }.contains,
+              );
+        })
+        .toList(growable: false);
+  }
 
   User get _user {
     final user = _client.auth.currentUser;
@@ -103,6 +117,9 @@ class CommunityRepository
     }, onConflict: 'user_id');
   }
 
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) =>
+      _posts.loadFeed(limit: limit);
+
   Future<bool> isCommunityModerator() async {
     if (_client.auth.currentUser == null) return false;
     final response = await _client.rpc('bil_is_community_moderator');
@@ -134,7 +151,7 @@ class CommunityRepository
   }
 
   Future<void> publishPost(String body) async {
-    await assertCommunityPublishReady();
+    await _requireAcceptedContentPolicy();
     await _runCommunityMutation(() => _posts.publishText(body));
   }
 
@@ -142,16 +159,8 @@ class CommunityRepository
     String body,
     CommunityPostImageDraft image,
   ) async {
-    // Run the server guard before CommunityPostCloudStore sends image bytes.
-    // Storage and the post INSERT keep their own server guards for race
-    // protection. If Storage hides an RLS reason behind its generic error,
-    // re-read the authoritative guard so the UI can explain the current block.
-    await assertCommunityPublishReady();
-    try {
-      await _runCommunityMutation(() => _posts.publishWithImage(body, image));
-    } on StorageException catch (error, stackTrace) {
-      await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
-    }
+    await _requireAcceptedContentPolicy();
+    await _runCommunityMutation(() => _posts.publishWithImage(body, image));
   }
 
   Future<List<Map<String, dynamic>>> loadFriendships() async {
@@ -206,6 +215,13 @@ class CommunityRepository
         .toList(growable: false);
   }
 
+  Future<void> requestFriend(String addresseeId) async {
+    await _client.rpc(
+      'bil_request_friendship',
+      params: {'p_addressee_id': addresseeId},
+    );
+  }
+
   Future<void> follow(String userId) =>
       _client.rpc('bil_follow_member', params: {'p_followed_id': userId});
 
@@ -257,19 +273,10 @@ class CommunityRepository
         .or(
           'and(sender_id.eq.$userId,recipient_id.eq.$otherUserId),and(sender_id.eq.$otherUserId,recipient_id.eq.$userId)',
         )
-        .order('created_at')
-        .order('id');
-    final messages = rows
+        .order('created_at');
+    return rows
         .map((row) => CommunityMessage.fromJson(row))
-        .toList(growable: true);
-    // Keep the conversation transcript chronological even if an edge/cache
-    // returns rows outside the requested order. The chat viewport is reversed
-    // so this places the newest message at the latest (bottom) end.
-    messages.sort((left, right) {
-      final byTime = left.createdAt.compareTo(right.createdAt);
-      return byTime == 0 ? left.id.compareTo(right.id) : byTime;
-    });
-    return List<CommunityMessage>.unmodifiable(messages);
+        .toList(growable: false);
   }
 
   Stream<void> watchConversationChanges(String otherUserId) {
@@ -283,7 +290,6 @@ class CommunityRepository
         .stream(primaryKey: const ['id'])
         .eq(column, otherUserId)
         .order('created_at')
-        .order('id')
         .limit(1)
         .map<void>((_) {});
 
@@ -321,7 +327,6 @@ class CommunityRepository
         .select('id,sender_id,recipient_id,body,created_at,read_at')
         .eq('recipient_id', _user.id)
         .order('created_at', ascending: false)
-        .order('id', ascending: false)
         .limit(100);
     return _enrichMessageRows(rows, profileKey: 'sender_id');
   }
@@ -340,7 +345,6 @@ class CommunityRepository
         .select('id,sender_id,recipient_id,body,created_at,read_at')
         .eq('sender_id', _user.id)
         .order('created_at', ascending: false)
-        .order('id', ascending: false)
         .limit(100);
     return _enrichMessageRows(rows, profileKey: 'recipient_id');
   }
@@ -446,19 +450,47 @@ class CommunityRepository
       .from('bil_content_policy_acceptances')
       .upsert({'user_id': _user.id, 'policy_version': version});
 
+  Future<Map<String, dynamic>?> loadActiveContentPolicy({
+    required String localeCode,
+  }) async {
+    final effectiveNow = DateTime.now().toUtc().toIso8601String();
+    final preferred = await _client
+        .from('bil_content_policies')
+        .select('version,locale_code,document_url,effective_at')
+        .eq('active', true)
+        .lte('effective_at', effectiveNow)
+        .eq('locale_code', localeCode)
+        .order('effective_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    if (preferred != null) return preferred;
+    return _client
+        .from('bil_content_policies')
+        .select('version,locale_code,document_url,effective_at')
+        .eq('active', true)
+        .lte('effective_at', effectiveNow)
+        .eq('locale_code', 'en')
+        .order('effective_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+  }
+
   Future<CommunityPolicyState> loadCommunityPolicyState({
     required String localeCode,
   }) async {
-    if (localeCode.trim().isEmpty) {
-      throw ArgumentError.value(localeCode, 'localeCode');
-    }
-    final response = await _client.rpc('bil_current_community_policy_status');
-    if (response is! Map) {
-      throw const FormatException('Invalid Community policy status payload');
-    }
-    return CommunityPolicyState.fromServerSnapshot(
-      Map<String, dynamic>.from(response),
+    final row = await loadActiveContentPolicy(localeCode: localeCode);
+    if (row == null) return const CommunityPolicyState.unavailable();
+    final policy = CommunityContentPolicy.fromJson(row);
+    final accepted = await hasAcceptedContentPolicy(
+      policy.version,
+      acceptedNotBefore: policy.effectiveAt,
     );
+    return accepted
+        ? CommunityPolicyState.accepted(
+            policy,
+            acceptedVersion: policy.version,
+          )
+        : CommunityPolicyState.acceptanceRequired(policy);
   }
 
   Future<void> _requireAcceptedContentPolicy() async {
@@ -493,32 +525,20 @@ class CommunityRepository
     }
   }
 
-  /// Performs the server-side membership and exact-policy-receipt assertion.
-  ///
-  /// This deliberately runs before an image store can send any bytes. The
-  /// database INSERT guards repeat the checks to cover a state change between
-  /// this preflight and the eventual post mutation.
-  Future<void> assertCommunityPublishReady() => _runCommunityMutation(() async {
-    await _client.rpc('bil_assert_community_publish_ready');
-  });
-
-  Future<Never> _rethrowPolicyStateAfterStorageFailure(
-    StorageException error,
-    StackTrace stackTrace,
-  ) async {
-    try {
-      await assertCommunityPublishReady();
-    } on CommunityPolicyAccessException catch (policyError, policyStackTrace) {
-      Error.throwWithStackTrace(policyError, policyStackTrace);
-    } on CommunityMembershipAccessException catch (
-      membershipError,
-      membershipStackTrace
-    ) {
-      Error.throwWithStackTrace(membershipError, membershipStackTrace);
-    } on Object {
-      // A diagnostic read failure must not replace the original Storage error.
-    }
-    Error.throwWithStackTrace(error, stackTrace);
+  Future<bool> hasAcceptedContentPolicy(
+    String version, {
+    DateTime? acceptedNotBefore,
+  }) async {
+    final row = await _client
+        .from('bil_content_policy_acceptances')
+        .select('policy_version,accepted_at')
+        .eq('user_id', _user.id)
+        .eq('policy_version', version)
+        .maybeSingle();
+    if (row == null) return false;
+    if (acceptedNotBefore == null) return true;
+    final acceptedAt = DateTime.tryParse('${row['accepted_at']}')?.toUtc();
+    return acceptedAt != null && !acceptedAt.isBefore(acceptedNotBefore.toUtc());
   }
 
   Future<T> _runCommunityMutation<T>(Future<T> Function() mutation) async {
@@ -586,7 +606,8 @@ class CommunityRepository
     );
   }
 
-  Future<void> deletePost(String postId) => _posts.delete(postId);
+  Future<void> deletePost(String postId) =>
+      _posts.delete(postId);
 
   Future<List<Map<String, dynamic>>> loadReviewableFoods() async {
     final response = await _client.rpc('bil_list_reviewable_products');
@@ -621,18 +642,6 @@ class CommunityRepository
   }
 
   Future<void> submitFood(CommunityFoodDraft draft) async {
-    if (!draft.servingGrams.isFinite ||
-        draft.servingGrams <= 0 ||
-        !draft.calories.isFinite ||
-        draft.calories < 0 ||
-        !draft.protein.isFinite ||
-        draft.protein < 0 ||
-        !draft.carbohydrate.isFinite ||
-        draft.carbohydrate < 0 ||
-        !draft.fat.isFinite ||
-        draft.fat < 0) {
-      throw const FormatException('Invalid community food values');
-    }
     CommunityTextPolicy.enforce(
       draft.name,
       surface: CommunityTextSurface.foodName,

@@ -44,7 +44,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
     final goalState = ref.watch(activeGoalProvider);
     if ((profileState.isLoading && !profileState.hasValue) ||
         (goalState.isLoading && !goalState.hasValue)) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return _NutritionAnalyticsLoadingShell(initialTab: initialTab);
     }
     if (profileState.hasError || goalState.hasError) {
       return _NutritionDependencyError(
@@ -73,7 +73,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
     };
     if ((presetState.isLoading && !presetState.hasValue) ||
         goalStates.values.any((state) => state.isLoading && !state.hasValue)) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return _NutritionAnalyticsLoadingShell(initialTab: initialTab);
     }
     if (presetState.hasError ||
         goalStates.values.any((state) => state.hasError)) {
@@ -112,7 +112,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
         ? const AsyncValue<PlanSetting?>.data(null)
         : ref.watch(planSettingProvider(profile.uuid));
     if (planState.isLoading && !planState.hasValue) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return _NutritionAnalyticsLoadingShell(initialTab: initialTab);
     }
     if (planState.hasError) {
       return _NutritionDependencyError(
@@ -293,6 +293,69 @@ class _NutritionEmptyDay extends StatelessWidget {
   );
 }
 
+/// Keeps the nutrition route's navigation shell stable while its prerequisite
+/// providers resolve for the first time. Refreshes with an existing value do
+/// not enter this branch because the caller checks `!hasValue`.
+class _NutritionAnalyticsLoadingShell extends StatelessWidget {
+  const _NutritionAnalyticsLoadingShell({required this.initialTab});
+
+  final int initialTab;
+
+  @override
+  Widget build(BuildContext context) => DefaultTabController(
+    length: 4,
+    initialIndex: initialTab.clamp(0, 3),
+    child: Scaffold(
+      appBar: SecondaryPageAppBar(title: Text(_t(context, 'Nutrition'))),
+      body: Column(
+        children: [
+          TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            dividerHeight: 1,
+            tabs: [
+              Tab(text: _t(context, 'Calories')),
+              Tab(text: _t(context, 'Nutrients')),
+              Tab(text: _t(context, 'Macros')),
+              Tab(text: _t(context, 'Food analysis')),
+            ],
+          ),
+          Expanded(
+            child: Semantics(
+              liveRegion: true,
+              label: _t(context, 'Loading nutrition'),
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  for (final height in [112.0, 84.0, 168.0, 128.0]) ...[
+                    _NutritionLoadingBlock(height: height),
+                    const SizedBox(height: 12),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _NutritionLoadingBlock extends StatelessWidget {
+  const _NutritionLoadingBlock({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: SizedBox(height: height),
+  );
+}
+
 class _NutritionDependencyError extends StatelessWidget {
   const _NutritionDependencyError({required this.onRetry});
 
@@ -336,6 +399,7 @@ Map<TrackedNutrient, EvidencedNutrientValue> _dashboardEvidence(
         values: {
           TrackedNutrient.sodium: item.sodium,
           TrackedNutrient.fiber: item.fiber,
+          TrackedNutrient.potassium: item.potassium,
           TrackedNutrient.carbohydrates: item.carbs,
           TrackedNutrient.sugar: item.sugar,
         },
@@ -345,9 +409,10 @@ Map<TrackedNutrient, EvidencedNutrientValue> _dashboardEvidence(
     for (final nutrient in const [
       TrackedNutrient.sodium,
       TrackedNutrient.fiber,
+      TrackedNutrient.potassium,
       TrackedNutrient.carbohydrates,
       TrackedNutrient.sugar,
     ])
-      nutrient: NutrientDashboardEvidence.total(samples, nutrient),
+      nutrient: NutrientDashboardEvidence.partialTotal(samples, nutrient),
   };
 }

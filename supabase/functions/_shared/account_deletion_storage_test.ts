@@ -17,7 +17,7 @@ class FakeBucket implements BilStorageBucket {
     private readonly retainAfterRemove = false,
   ) {}
 
-  list(path: string, options: { limit: number; offset: number }) {
+  async list(path: string, options: { limit: number; offset: number }) {
     const prefix = `${path}/`;
     const children = new Map<string, boolean>();
     for (const object of this.objects) {
@@ -35,17 +35,17 @@ class FakeBucket implements BilStorageBucket {
         id: file ? `id:${name}` : null,
         metadata: file ? { size: 1 } : null,
       }));
-    return Promise.resolve({ data: entries, error: null });
+    return { data: entries, error: null };
   }
 
-  remove(paths: string[]) {
+  async remove(paths: string[]) {
     if (this.removeFails) {
-      return Promise.resolve({ data: null, error: { message: "simulated" } });
+      return { data: null, error: { message: "simulated" } };
     }
     if (!this.retainAfterRemove) {
       for (const path of paths) this.objects.delete(path);
     }
-    return Promise.resolve({ data: paths, error: null });
+    return { data: paths, error: null };
   }
 }
 
@@ -96,12 +96,11 @@ test("post-delete verification rejects a lingering object", async () => {
 
 test("unsafe child names are rejected before deletion", async () => {
   const bucket: BilStorageBucket = {
-    list: () =>
-      Promise.resolve({
-        data: [{ name: "../someone-else", id: "bad", metadata: {} }],
-        error: null,
-      }),
-    remove: () => Promise.resolve({ data: null, error: null }),
+    list: async () => ({
+      data: [{ name: "../someone-else", id: "bad", metadata: {} }],
+      error: null,
+    }),
+    remove: async () => ({ data: null, error: null }),
   };
   await assert.rejects(
     () => listBilUserObjectPaths(bucket, owner),

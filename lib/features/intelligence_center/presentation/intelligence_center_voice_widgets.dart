@@ -66,27 +66,28 @@ class _LiveVoiceTranscript extends StatelessWidget {
   }
 }
 
-class _CoachReplyFailure extends StatelessWidget {
-  const _CoachReplyFailure({
-    required this.onDismiss,
+class _CoachReplyProgress extends StatelessWidget {
+  const _CoachReplyProgress({
+    required this.phase,
+    required this.onCancel,
     required this.onRetry,
-    this.labelOverride,
   });
 
-  final VoidCallback onDismiss;
+  final _CoachReplyPhase phase;
+  final VoidCallback onCancel;
   final VoidCallback? onRetry;
-  final String? labelOverride;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final label =
-        labelOverride ??
-        intelligenceText(
-          context,
-          'The reply did not complete. Try again.',
-          'لم يكتمل الرد. حاول مرة أخرى.',
-        );
+    final failed = phase == _CoachReplyPhase.failed;
+    final label = failed
+        ? intelligenceText(
+            context,
+            'The reply did not complete. Try again.',
+            'لم يكتمل الرد. حاول مرة أخرى.',
+          )
+        : intelligenceText(context, 'Preparing your answer…', 'أجهز إجابتك…');
     return Semantics(
       liveRegion: true,
       label: label,
@@ -97,13 +98,27 @@ class _CoachReplyFailure extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 6, 8),
           decoration: BoxDecoration(
-            color: scheme.errorContainer.withValues(alpha: .42),
+            color: failed
+                ? scheme.errorContainer.withValues(alpha: .42)
+                : scheme.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(18),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline_rounded, color: scheme.error, size: 19),
+              if (!failed)
+                SizedBox.square(
+                  dimension: 17,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.8,
+                  ),
+                )
+              else
+                Icon(
+                  Icons.error_outline_rounded,
+                  color: scheme.error,
+                  size: 19,
+                ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -111,11 +126,11 @@ class _CoachReplyFailure extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: failed ? FontWeight.w800 : FontWeight.w600,
                   ),
                 ),
               ),
-              if (onRetry != null)
+              if (failed && onRetry != null)
                 TextButton(
                   key: const Key('ai-coach-retry'),
                   onPressed: onRetry,
@@ -126,8 +141,12 @@ class _CoachReplyFailure extends StatelessWidget {
               else
                 IconButton(
                   key: const Key('ai-coach-cancel-request'),
-                  tooltip: intelligenceText(context, 'Dismiss', 'إخفاء'),
-                  onPressed: onDismiss,
+                  tooltip: intelligenceText(
+                    context,
+                    'Cancel waiting',
+                    'إلغاء الانتظار',
+                  ),
+                  onPressed: onCancel,
                   icon: const Icon(Icons.close_rounded, size: 18),
                   visualDensity: VisualDensity.compact,
                 ),

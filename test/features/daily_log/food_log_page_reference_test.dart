@@ -82,10 +82,6 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('food-log-action-Voice log')), findsOneWidget);
-    expect(
-      find.byKey(const Key('food-log-action-Analyze meal photo')),
-      findsOneWidget,
-    );
     expect(find.byKey(const Key('food-log-action-Quick add')), findsOneWidget);
     expect(find.text('Meal scan'), findsNothing);
     expect(find.text('Boiled Eggs'), findsOneWidget);

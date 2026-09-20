@@ -135,10 +135,10 @@ class _NutritionGoalSchedulePageState
           ? _text(context, NutritionGoalScheduleRuntimeCopy.useDefaultGoal)
           : NutritionGoalScheduleRuntimeCopy.formatGoalSummary(
               locale: Localizations.localeOf(context),
-              calories: target.calories,
-              carbs: target.carbsGrams,
-              protein: target.proteinGrams,
-              fat: target.fatGrams,
+              calories: target.calories.toStringAsFixed(0),
+              carbs: target.carbsGrams.toStringAsFixed(1),
+              protein: target.proteinGrams.toStringAsFixed(1),
+              fat: target.fatGrams.toStringAsFixed(1),
             ),
     ),
     trailing: isSaving
@@ -155,18 +155,10 @@ class _NutritionGoalSchedulePageState
     NutritionGoalTarget? initial,
   ) async {
     final values = [
-      TextEditingController(
-        text: _editableGoalNumber(context, initial?.calories ?? 2000),
-      ),
-      TextEditingController(
-        text: _editableGoalNumber(context, initial?.carbsGrams ?? 225),
-      ),
-      TextEditingController(
-        text: _editableGoalNumber(context, initial?.proteinGrams ?? 150),
-      ),
-      TextEditingController(
-        text: _editableGoalNumber(context, initial?.fatGrams ?? 55.56),
-      ),
+      TextEditingController(text: '${initial?.calories ?? 2000}'),
+      TextEditingController(text: '${initial?.carbsGrams ?? 225}'),
+      TextEditingController(text: '${initial?.proteinGrams ?? 150}'),
+      TextEditingController(text: '${initial?.fatGrams ?? 55.56}'),
     ];
     final result = await showDialog<(bool, NutritionGoalTarget?)>(
       context: context,
@@ -218,8 +210,7 @@ class _NutritionGoalSchedulePageState
                 onPressed: () {
                   final numbers = values
                       .map(
-                        (controller) =>
-                            _parseGoalNumber(context, controller.text),
+                        (controller) => double.tryParse(controller.text.trim()),
                       )
                       .toList();
                   if (numbers.any((number) => number == null)) {
@@ -278,18 +269,3 @@ String _text(BuildContext context, String source) =>
       source,
       Localizations.localeOf(context),
     );
-
-String _editableGoalNumber(BuildContext context, num value) =>
-    NumberFormat.decimalPatternDigits(
-      locale: Localizations.localeOf(context).toLanguageTag(),
-      decimalDigits: (value - value.round()).abs() < 0.005 ? 0 : 2,
-    ).format(value);
-
-double? _parseGoalNumber(BuildContext context, String source) {
-  final value = source.trim();
-  if (value.isEmpty) return null;
-  final localized = NumberFormat.decimalPattern(
-    Localizations.localeOf(context).toLanguageTag(),
-  ).tryParse(value);
-  return localized?.toDouble() ?? double.tryParse(value);
-}

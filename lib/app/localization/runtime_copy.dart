@@ -26,15 +26,8 @@ import 'runtime_copy_fitness_watch.dart';
 import 'runtime_copy_connected_health.dart';
 import 'runtime_copy_platform_conversation.dart';
 import 'runtime_copy_community_moderation.dart';
-import 'runtime_copy_community_social.dart';
 import 'runtime_copy_admin_notifications.dart';
 import 'runtime_copy_meal_voice.dart';
-import 'runtime_copy_sleep_schedule.dart';
-import 'runtime_copy_coach_review.dart';
-import 'runtime_copy_health_devices_review.dart';
-import 'runtime_copy_health_device_status.dart';
-import 'runtime_copy_community_review.dart';
-import 'runtime_copy_recipe_editor.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -62,24 +55,7 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
-    final recipeEditor = RecipeEditorRuntimeCopy.resolve(english, localeTag);
-    if (recipeEditor != null) return recipeEditor;
-    final communityReview = CommunityReviewCopy.resolve(english, localeTag);
-    if (communityReview != null) return communityReview;
-    final healthStatus = HealthDeviceStatusCopy.resolve(english, localeTag);
-    if (healthStatus != null) return healthStatus;
-    final healthDevices = HealthDevicesReviewCopy.resolve(english, localeTag);
-    if (healthDevices != null) return healthDevices;
-    final coachReview = CoachReviewRuntimeCopy.resolve(english, localeTag);
-    if (coachReview != null) return coachReview;
     final normalized = localeTag.replaceAll('_', '-').toLowerCase();
-    final sleepSchedule = SleepScheduleRuntimeCopy.resolve(english, localeTag);
-    if (sleepSchedule != null) return sleepSchedule;
-    final communitySocial = CommunitySocialRuntimeCopy.resolve(
-      english,
-      localeTag,
-    );
-    if (communitySocial != null) return communitySocial;
     final communityModeration = CommunityModerationRuntimeCopy.resolve(
       english,
       localeTag,
@@ -208,14 +184,9 @@ abstract final class RuntimeCopy {
         DailyLogActionRuntimeCopy.balanced &&
         FitnessWatchRuntimeCopy.balanced &&
         PlatformConversationRuntimeCopy.balanced &&
-        CommunitySocialRuntimeCopy.balanced &&
         CommunityModerationRuntimeCopy.balanced &&
         AdminNotificationRuntimeCopy.balanced &&
         MealVoiceRuntimeCopy.balanced &&
-        CoachReviewRuntimeCopy.balanced &&
-        HealthDevicesReviewCopy.balanced &&
-        HealthDeviceStatusCopy.balanced &&
-        SleepScheduleRuntimeCopy.balanced &&
         ReleaseClosureRuntimeCopy.balanced &&
         ProfileRuntimeCopy.balanced &&
         ExtendedRuntimeCopy.values.values.every(

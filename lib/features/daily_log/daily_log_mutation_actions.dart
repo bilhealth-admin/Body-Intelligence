@@ -258,19 +258,13 @@ extension _DailyLogMutationActions on _DailyLogPageState {
         child: Wrap(
           children: [
             ListTile(
-              leading: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.notes,
-              ),
+              leading: const Icon(Icons.edit_outlined),
               enabled: activeFood,
               title: Text(_tr('Edit quantity', 'تعديل الكمية')),
               onTap: () => Navigator.pop(sheetContext, 'edit'),
             ),
             ListTile(
-              leading: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.notes,
-                iconOverride: Icons.copy_outlined,
-                appleIconOverride: Icons.copy_outlined,
-              ),
+              leading: const Icon(Icons.copy_outlined),
               title: Text(_tr('Duplicate item', 'تكرار العنصر')),
               subtitle: Text(
                 _tr(

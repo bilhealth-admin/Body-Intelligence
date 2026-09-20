@@ -1,4 +1,4 @@
-name: BIL iOS signed release candidate (build 25)
+name: BIL iOS signed release candidate
 
 on:
   workflow_dispatch:
@@ -6,11 +6,12 @@ on:
       upload_to_testflight:
         description: Upload the validated build to TestFlight
         required: true
-        default: true
+        default: false
         type: boolean
       build_number:
-        description: Exact App Store build number for this candidate; must be 25
+        description: Exact iOS App Store build number for this frozen candidate
         required: true
+        default: '26'
         type: string
       run_native_crypto_checks:
         description: Run the optional iOS Simulator AES-GCM runtime check
@@ -61,7 +62,6 @@ jobs:
         shell: bash
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
-          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload_to_testflight }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
@@ -69,12 +69,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 25 )) || {
-            echo 'build_number must be exactly 25 for the iOS release candidate; build 24 and earlier must never be selected.' >&2
-            exit 1
-          }
-          [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' ]] || {
-            echo 'upload_to_testflight must remain true for the iOS release candidate.' >&2
+          [[ "$BUILD_NUMBER" == '26' ]] || {
+            echo 'build_number must be exactly 26 for this release candidate.' >&2
             exit 1
           }
           test -n "${APPLE_TEAM_ID:-}" || {
@@ -214,22 +210,19 @@ jobs:
           BIL_FACEBOOK_REQUIRED: true
           BIL_FACEBOOK_LOGIN_ENABLED: true
           BIL_FACEBOOK_LOGIN_READY: true
-          BIL_ADS_ENABLED: false
-          BIL_AD_PROVIDER_READY: false
           BIL_PUSH_ENABLED: false
           BIL_PUSH_PROVIDER_READY: false
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V25_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V25_FROZEN_SOURCE_MANIFEST_2026-09-19.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V25_STAGING_MANIFEST_SHA256 }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_RELEASE_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS26_ANDROID21_FROZEN_SOURCE_MANIFEST_2026-09-20.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_RELEASE_MANIFEST_SHA256 }}
         run: |
           flutter pub get
           flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
-          python3 tool/release/run_portable_release_tests.py --code-only
+          python3 tool/release/run_portable_release_tests.py
           flutter test --no-pub \
             test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
             --timeout 2m
@@ -290,28 +283,8 @@ jobs:
               'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=EXPLICIT_WORKFLOW_INPUT'
           fi | tee BIL-ios-native-crypto-gate.txt
 
-      - name: Exclude dev-only and owner-deferred ads native plugins from iOS release
-        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --defer-ios-google-mobile-ads
-
-      - name: Apply owner-deferred AdMob source configuration
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/test_configure_deferred_admob.py
-          python3 tool/release/test_verify_ios_deferred_ads_artifact.py
-          python3 tool/release/test_verify_ios_deferred_ads_plugin_graph.py
-          python3 tool/release/configure_deferred_admob.py \
-            --prepare-ios-source-plist ios/Runner/Info.plist \
-            | tee BIL-ios-deferred-admob-source.txt
-
-      - name: Sanitize retained Swift graph before Xcode dependency resolution
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/test_sanitize_ios_deferred_ads_swift_package.py
-          python3 tool/release/sanitize_ios_deferred_ads_swift_package.py --project-root .
-          python3 tool/release/verify_ios_deferred_ads_plugin_graph.py --project-root . \
-            | tee BIL-ios-deferred-admob-plugin-graph-before-archive.txt
+      - name: Exclude dev-only native plugins from iOS release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
 
       - name: Configure manual App Store distribution signing
         shell: bash
@@ -405,13 +378,6 @@ jobs:
             --dart-define=BIL_AD_PROVIDER_READY=false \
             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
 
-      - name: Verify regenerated iOS native plugin graph
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/verify_ios_deferred_ads_plugin_graph.py \
-            --project-root . | tee BIL-ios-deferred-admob-plugin-graph.txt
-
       - name: Capture signed IPA evidence
         shell: bash
         env:
@@ -433,13 +399,6 @@ jobs:
           SIGNED_APP="$(find "$SIGNED_IPA_DIR/Payload" \
             -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
           test -d "$SIGNED_APP"
-
-          python3 tool/release/configure_deferred_admob.py \
-            --verify-ios-final-plist "$SIGNED_APP/Info.plist" \
-            | tee BIL-ios-deferred-admob.txt
-          python3 tool/release/verify_ios_deferred_ads_artifact.py \
-            --ipa "$IPA" --expected-build "$BUILD_NUMBER" \
-            | tee BIL-ios-deferred-admob-native-artifact.txt
 
           codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
             2>&1 | tee BIL-ios-codesign-verify.txt
@@ -494,15 +453,10 @@ jobs:
             'CODE_GATE=PASS' \
             'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
             'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
-            'ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED' \
-            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
-            'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
-            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=ABSENT_VERIFIED' \
-            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_TESTFLIGHT_UPLOAD' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
-            'PHYSICAL_DEVICE_SCOPE=Meta native Facebook authorization and Supabase token exchange,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
+            'PHYSICAL_DEVICE_SCOPE=Facebook OAuth via Supabase SFSafariViewController,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
@@ -563,21 +517,15 @@ jobs:
             BIL-ios-ipa.size
             BIL-ios-crypto-scan.txt
             BIL-ios-native-crypto-gate.txt
-            BIL-ios-deferred-admob-source.txt
-            BIL-ios-deferred-admob.txt
-            BIL-ios-deferred-admob-native-artifact.txt
-            BIL-ios-deferred-admob-plugin-graph.txt
-            BIL-ios-deferred-admob-plugin-graph-before-archive.txt
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt
             BIL-apple-release-toolchain.txt
             BIL-apple-release-toolchain.json
 
-      - name: Remove ephemeral release inputs
+      - name: Remove App Store Connect private key
         if: always()
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-        run: |
-          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+        run: rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"

@@ -1,15 +1,10 @@
 part of 'premium_dashboard_benchmark.dart';
 
 class _OverviewCardsCarousel extends StatefulWidget {
-  const _OverviewCardsCarousel({
-    required this.cards,
-    this.initialPage = 0,
-    this.hasBurnPolicyNote = false,
-  });
+  const _OverviewCardsCarousel({required this.cards, this.initialPage = 0});
 
   final List<Widget> cards;
   final int initialPage;
-  final bool hasBurnPolicyNote;
 
   @override
   State<_OverviewCardsCarousel> createState() => _OverviewCardsCarouselState();
@@ -62,10 +57,7 @@ class _OverviewCardsCarouselState extends State<_OverviewCardsCarousel> {
                               ) *
                               120)
                       .clamp(224.0, 330.0)
-                      .toDouble() +
-                  // Keep the existing burned-calorie explanation readable;
-                  // its presence must not squeeze the values or progress bar.
-                  (widget.hasBurnPolicyNote ? 24 : 0),
+                      .toDouble(),
               child: PageView.builder(
                 key: const Key('dashboard-calories-macros-horizontal'),
                 physics: const PageScrollPhysics(),
@@ -101,53 +93,32 @@ class _OverviewCardsCarouselState extends State<_OverviewCardsCarousel> {
         );
 }
 
-class _ReferenceTrendRail extends StatefulWidget {
+class _ReferenceTrendRail extends StatelessWidget {
   const _ReferenceTrendRail({
     required this.weightValues,
     required this.stepValues,
-    required this.todaySteps,
-    required this.stepSourceName,
     required this.weightUnit,
   });
 
   final List<double> weightValues;
   final List<double> stepValues;
-  final double? todaySteps;
-  final String? stepSourceName;
   final String weightUnit;
-
-  @override
-  State<_ReferenceTrendRail> createState() => _ReferenceTrendRailState();
-}
-
-class _ReferenceTrendRailState extends State<_ReferenceTrendRail> {
-  final _controller = PageController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     String tr(String en, String ar) => _referenceText(context, en, ar);
     return SizedBox(
       key: const Key('dashboard-reference-trend-rail'),
-      height:
-          130 +
-          (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(0.0, 2.0) * 90,
+      height: 224,
       child: PageView(
-        // Refreshing the data must not reset the selected trend page.
-        controller: _controller,
+        controller: PageController(viewportFraction: 1),
         padEnds: true,
         children: [
           _ReferenceTrendCard(
-            key: const Key('dashboard-weight-trend-card'),
             title: tr('Weight', 'الوزن'),
             period: tr('Last 90 days', 'آخر 90 يومًا'),
-            values: widget.weightValues,
-            unit: widget.weightUnit,
+            values: weightValues,
+            unit: weightUnit,
             colors: const [AppColors.protein, AppColors.carbs, AppColors.fats],
             emptyLabel: tr(
               'Add weight to see your trend',
@@ -156,22 +127,16 @@ class _ReferenceTrendRailState extends State<_ReferenceTrendRail> {
             onTap: () => context.push('/weight-history'),
           ),
           _ReferenceTrendCard(
-            key: const Key('dashboard-step-trend-card'),
-            title: tr('Today steps', 'خطوات اليوم'),
-            period: [
-              tr('Last 30 days', 'آخر 30 يومًا'),
-              ?widget.stepSourceName,
-            ].join(' · '),
-            values: widget.stepValues,
-            explicitValue: widget.todaySteps,
-            useExplicitValue: true,
+            title: tr('Steps', 'الخطوات'),
+            period: tr('Last 30 days', 'آخر 30 يومًا'),
+            values: stepValues,
             unit: tr('steps', 'خطوة'),
             colors: const [AppColors.protein, AppColors.carbs, AppColors.fats],
             emptyLabel: tr(
               'Connect or log steps to see your trend',
               'اربط مصدرًا أو سجل خطواتك لعرض الاتجاه',
             ),
-            onTap: () => context.push('/connected-health'),
+            onTap: () => context.push('/history'),
           ),
         ],
       ),
@@ -181,7 +146,6 @@ class _ReferenceTrendRailState extends State<_ReferenceTrendRail> {
 
 class _ReferenceTrendCard extends StatelessWidget {
   const _ReferenceTrendCard({
-    super.key,
     required this.title,
     required this.period,
     required this.values,
@@ -189,8 +153,6 @@ class _ReferenceTrendCard extends StatelessWidget {
     required this.colors,
     required this.emptyLabel,
     required this.onTap,
-    this.explicitValue,
-    this.useExplicitValue = false,
   });
 
   final String title;
@@ -200,14 +162,12 @@ class _ReferenceTrendCard extends StatelessWidget {
   final List<Color> colors;
   final String emptyLabel;
   final VoidCallback onTap;
-  final double? explicitValue;
-  final bool useExplicitValue;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsetsDirectional.only(end: 10),
       child: Material(
         color: theme.colorScheme.surface,
         elevation: theme.brightness == Brightness.light ? 1 : 0,
@@ -227,25 +187,25 @@ class _ReferenceTrendCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            period,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        period,
-                        textAlign: TextAlign.end,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, size: 18),
+                    const Icon(Icons.add_rounded),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -260,45 +220,25 @@ class _ReferenceTrendCard extends StatelessWidget {
                             ),
                           ),
                         )
-                      : Row(
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    '${(useExplicitValue ? explicitValue : values.last)?.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0) ?? '—'} $unit',
-                                    textDirection: TextDirection.ltr,
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.w800),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              flex: 6,
-                              child: SizedBox.expand(
-                                child: CustomPaint(
-                                  key: Key(
-                                    useExplicitValue
-                                        ? 'dashboard-step-bars'
-                                        : 'dashboard-weight-bars',
-                                  ),
-                                  painter: _ReferenceTrendPainter(
-                                    values: values,
-                                    colors: colors,
-                                    gridColor: theme.colorScheme.outlineVariant,
-                                    zeroBased: useExplicitValue,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                      : CustomPaint(
+                          painter: _ReferenceTrendPainter(
+                            values: values,
+                            colors: colors,
+                            gridColor: theme.colorScheme.outlineVariant,
+                          ),
                         ),
                 ),
+                if (values.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '${values.last.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0)} $unit',
+                    textDirection: TextDirection.ltr,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colors.last,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -313,13 +253,11 @@ class _ReferenceTrendPainter extends CustomPainter {
     required this.values,
     required this.colors,
     required this.gridColor,
-    this.zeroBased = false,
   });
 
   final List<double> values;
   final List<Color> colors;
   final Color gridColor;
-  final bool zeroBased;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -341,58 +279,16 @@ class _ReferenceTrendPainter extends CustomPainter {
     );
     canvas.drawLine(const Offset(0, 0), Offset(0, chartBottom), axis);
 
-    final populatedValues = values
-        .where((value) => value.isFinite && value > 0)
-        .toList(growable: false);
-    if (populatedValues.isEmpty) return;
-    final minValue = populatedValues.reduce((a, b) => a < b ? a : b);
-    final maxValue = populatedValues.reduce((a, b) => a > b ? a : b);
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
     final spread = (maxValue - minValue).abs();
-    if (!zeroBased) {
-      // A single measurement is one point, never an invented trend. Draw a
-      // line only between actual recorded weights; leave missing data gaps.
-      final line = Paint()
-        ..color = colors.first
-        ..strokeWidth = 2
-        ..style = PaintingStyle.stroke;
-      Offset? previous;
-      for (var i = 0; i < values.length; i++) {
-        final value = values[i];
-        if (!value.isFinite || value <= 0) {
-          previous = null;
-          continue;
-        }
-        final point = Offset(
-          values.length == 1
-              ? size.width / 2
-              : 6 + (size.width - 12) * i / (values.length - 1),
-          spread == 0
-              ? size.height / 2
-              : 6 + (size.height - 12) * (1 - (value - minValue) / spread),
-        );
-        if (previous != null) canvas.drawLine(previous, point, line);
-        canvas.drawCircle(
-          point,
-          values.length == 1 ? 4 : 2.5,
-          Paint()..color = colors.first,
-        );
-        previous = point;
-      }
-      return;
-    }
     final slotWidth = size.width / values.length;
     final barWidth = (slotWidth * .62).clamp(3.0, 14.0);
-    final stepFractions = zeroBased ? dashboardStepBarFractions(values) : null;
     for (var index = 0; index < values.length; index++) {
-      // An absent day remains visually absent; the card reports the actual
-      // latest-day value rather than an invented baseline.
-      if (!values[index].isFinite || values[index] <= 0) continue;
       final normalized = spread == 0
           ? .52
           : (values[index] - minValue) / spread;
-      final height =
-          size.height *
-          (zeroBased ? stepFractions![index] * .92 : .16 + normalized * .76);
+      final height = size.height * (.16 + normalized * .76);
       final left = index * slotWidth + (slotWidth - barWidth) / 2;
       final rect = Rect.fromLTWH(left, chartBottom - height, barWidth, height);
       final third = ((index * 3) ~/ values.length).clamp(0, 2);
@@ -429,7 +325,6 @@ class _ReferenceTrendPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ReferenceTrendPainter oldDelegate) =>
       oldDelegate.values != values ||
-      oldDelegate.zeroBased != zeroBased ||
       oldDelegate.colors != colors ||
       oldDelegate.gridColor != gridColor;
 }
@@ -450,7 +345,7 @@ class _BodyTwinImageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final cardHeight = (108 + (textScale - 1).clamp(0, 2) * 108).toDouble();
+    final cardHeight = (188 + (textScale - 1).clamp(0, 2) * 96).toDouble();
     return Material(
       borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
@@ -458,64 +353,58 @@ class _BodyTwinImageCard extends StatelessWidget {
         image: const AssetImage(
           'assets/images/brand/generated/bil_dashboard_body_twin_hero_v1.png',
         ),
+        height: cardHeight,
         fit: BoxFit.cover,
         alignment: Alignment.centerRight,
-        child: ConstrainedBox(
-          // Longer summaries and accessibility text can grow beyond the
-          // compact artwork height without cropping any existing content.
-          constraints: BoxConstraints(minHeight: cardHeight),
-          child: InkWell(
-            onTap: onTap,
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xE8031026), Color(0x52031026)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
+        child: InkWell(
+          onTap: onTap,
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xE8031026), Color(0x52031026)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 210),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.accessibility_new_rounded,
-                              color: Color(0xFF75E5FF),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                              ),
-                            ),
-                          ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 210),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.accessibility_new_rounded,
+                        color: Color(0xFF75E5FF),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          summary,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: const Color(0xFFD9ECF7),
-                                height: 1.35,
-                              ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        summary,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFFD9ECF7),
+                          height: 1.35,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ],
                   ),
                 ),
               ),

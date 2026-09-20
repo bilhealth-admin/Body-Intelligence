@@ -354,7 +354,7 @@ abstract final class BilFlagshipTheme {
       listTileTheme: ListTileThemeData(
         minTileHeight: 56,
         contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-        horizontalTitleGap: 12,
+        horizontalTitleGap: 0,
         minLeadingWidth: 0,
         minVerticalPadding: 14,
         iconColor: scheme.onSurfaceVariant,

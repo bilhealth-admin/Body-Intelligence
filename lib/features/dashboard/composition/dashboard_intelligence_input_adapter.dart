@@ -30,21 +30,12 @@ final class DashboardIntelligenceInputAdapter {
     BodyMeasurementEntry? latestBodyMeasurement,
     NutritionGoalTarget? dailyNutritionTarget,
   }) {
-    final todayKey = dayKeyFor(now);
-    // Dashboard streams normally query the active local day. Keep this
-    // composition boundary defensive as well: during a midnight rollover or
-    // provider refresh, Riverpod can briefly retain the previous stream value.
-    // Old rows must remain available to history engines, but they must never be
-    // presented to One Best Action as today's recorded evidence.
-    final currentDayMeals = todayMeals.where(
-      (row) => row.meal.dayKey == todayKey,
-    );
-    final currentDayWater = todayWater.where((row) => row.dayKey == todayKey);
     final bridgedContexts = <DashboardContextInput>[
       for (final row in dailyLogs)
         for (final type in DailyBodyContextCodec.engineTypes(row.notes))
           DashboardContextInput(dayKey: row.dayKey, type: type),
     ];
+    final todayKey = dayKeyFor(now);
     return DashboardIntelligenceInput(
       now: now,
       profile: DashboardProfileInput(
@@ -62,8 +53,8 @@ final class DashboardIntelligenceInputAdapter {
         hipsCm: latestBodyMeasurement?.hipsCm,
       ),
       weights: [..._adaptWeights(weights)],
-      todayMeals: [..._adaptMeals(currentDayMeals.toList(growable: false))],
-      todayWater: [..._adaptWater(currentDayWater.toList(growable: false))],
+      todayMeals: [..._adaptMeals(todayMeals)],
+      todayWater: [..._adaptWater(todayWater)],
       allMeals: [..._adaptMeals(allMeals)],
       allWater: [..._adaptWater(allWater)],
       insightContexts: _dedupeContexts([

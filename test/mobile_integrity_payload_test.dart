@@ -101,8 +101,9 @@ void main() {
       );
       expect(
         play,
-        anyOf(contains("platform: 'android'"), contains('platform: "android"')),
+        contains("BIL_PLAY_INTEGRITY_PACKAGE_NAME"),
       );
+      expect(play, contains('com.bilhealth.bodyintelligencelog'));
       expect(play, contains('bil_mobile_integrity_grants'));
       expect(grantGuard, contains('bil_consume_mobile_integrity_grant'));
       expect(grantGuard, contains('delete protectedBody._integrity'));

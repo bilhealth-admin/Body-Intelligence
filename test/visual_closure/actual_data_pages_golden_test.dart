@@ -39,10 +39,7 @@ import 'package:body_intelligence_log/features/history/progress_page.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/profile/profile_summary_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
-import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
-import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/settings/settings_page.dart';
 import 'package:body_intelligence_log/features/settings/local_export_range_page.dart';
@@ -63,15 +60,6 @@ import 'visual_evidence_font.dart';
 
 const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
-);
-
-final _visualVerifiedFreeSubscription = SubscriptionState(
-  plan: CommercePlan.free,
-  entitlements: FreePlan.entitlements,
-  authority: EntitlementAuthority.verifiedServer,
-  lifecycle: SubscriptionLifecycle.inactive,
-  isPurchasable: true,
-  canRestorePurchases: true,
 );
 
 final class _UnavailableHealthGateway implements ConnectedHealthGateway {
@@ -140,9 +128,6 @@ void main() {
         activityLevel: 'light',
         exercises: true,
       );
-      await PreferencesRepository(
-        db,
-      ).set('timezoneName', 'Egypt Daylight Time');
     }
     return db;
   }
@@ -234,21 +219,11 @@ void main() {
           dashboardClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
-          premiumProfileClockProvider.overrideWithValue(
-            () => DateTime.utc(2026, 8, 30, 9, 41, 12),
-          ),
           connectedHealthGatewayProvider.overrideWithValue(
             const _UnavailableHealthGateway(),
           ),
           mealVisionUsageProvider.overrideWithValue(
             const AsyncData(MealVisionUsageSnapshot.unavailable()),
-          ),
-          // Golden captures must describe a deterministic, server-verified
-          // Free account. Falling through to the live verifier turns every
-          // protected preview into a transient Retry state and records an
-          // infrastructure failure as the product's intended UI.
-          verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(_visualVerifiedFreeSubscription),
           ),
           liveHealthNowProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
@@ -420,11 +395,6 @@ void main() {
         await tester.tap(logFood);
         await tester.pumpAndSettle();
         final searchBar = find.byType(SearchBar).last;
-        // Opening the meal entry reveals its search field; opening the field
-        // itself presents SearchAnchor's result view, just as a user does.
-        await tester.ensureVisible(searchBar);
-        await tester.tap(searchBar);
-        await tester.pumpAndSettle();
         await tester.enterText(searchBar, 'Plain Greek');
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 1500));
@@ -637,7 +607,7 @@ void main() {
         await tester.drag(pages, const Offset(-320, 0));
         await tester.pumpAndSettle();
         expect(
-          find.byKey(const Key('dashboard-step-trend-card')).hitTestable(),
+          find.descendant(of: rail, matching: find.text('Steps')).hitTestable(),
           findsOneWidget,
         );
       },

@@ -23,6 +23,7 @@ class CommunityDeepLink {
     'advertising-privacy': '/advertising-privacy',
     'notification-settings': '/notification-settings',
     'intelligence-center': '/intelligence-center',
+    'wellness/learn': '/wellness/learn',
     'wellness/sleep': '/wellness/sleep',
     'wellness/workouts': '/wellness/workouts',
     'workouts': '/wellness/workouts',
@@ -89,11 +90,6 @@ class CommunityDeepLink {
       }
       if (segments.length == 2 && segments[1] == 'moderation') {
         return '/community/moderation';
-      }
-      if (segments.length == 3 && segments[1] == 'member') {
-        final code = segments[2].toLowerCase();
-        if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(code)) return null;
-        return '/community/member/$code';
       }
       if (segments.length == 3 &&
           segments[1] == 'messages' &&

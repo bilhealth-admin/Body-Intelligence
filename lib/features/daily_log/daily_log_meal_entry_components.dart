@@ -3,12 +3,12 @@ part of 'daily_log_page.dart';
 class _DiaryActionButton extends StatelessWidget {
   const _DiaryActionButton({
     super.key,
-    required this.kind,
+    required this.icon,
     required this.label,
     required this.onPressed,
   });
 
-  final BilSemanticIconKind kind;
+  final IconData icon;
   final String label;
   final VoidCallback? onPressed;
 
@@ -22,24 +22,22 @@ class _DiaryActionButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(20),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
+          constraints: const BoxConstraints(minHeight: 58),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                BilSemanticIconBadge(kind: kind, size: 28, iconSize: 17),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontSize: 14,
-                      color: scheme.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
+                Icon(icon, color: scheme.primary, size: 23),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontSize: 16,
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
@@ -68,7 +66,7 @@ class _FoodMacroValue extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '${value.round()} g',
+          '${value.toStringAsFixed(1)} g',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(

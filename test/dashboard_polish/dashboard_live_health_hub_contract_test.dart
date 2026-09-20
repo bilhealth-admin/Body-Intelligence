@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/dart_library_source.dart';
-
 void main() {
   test('P9-R9 live Health Hub and paired deck contracts are present', () {
-    final watch = readDartLibrarySource(
+    final watch = File(
       'lib/features/connected_health/widgets/live_health_watch.dart',
-    );
+    ).readAsStringSync();
     final emptyState = File(
       'lib/features/connected_health/widgets/health_hub_empty_state.dart',
     ).readAsStringSync();
@@ -17,9 +15,6 @@ void main() {
     ).readAsStringSync();
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
-    ).readAsStringSync();
-    final gridActions = File(
-      'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
     ).readAsStringSync();
     final mobileTwin = File(
       'lib/features/dashboard/widgets/dashboard_mobile_body_twin_snapshot.dart',
@@ -51,7 +46,7 @@ void main() {
     expect(shell, contains('viewportFraction: widget.compact ? .94 : .96'));
 
     expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
-    expect(gridActions, contains("context.go('/analytics')"));
+    expect(grid, contains("context.go('/analytics')"));
     expect(grid, contains('bodyTwinSummary: twinCopy.summary'));
     expect(mobileTwin, contains("Key('dashboard-mobile-body-twin-snapshot')"));
     expect(

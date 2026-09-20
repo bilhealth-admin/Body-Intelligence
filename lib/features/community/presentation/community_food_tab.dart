@@ -38,9 +38,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
         useSafeArea: true,
         isDismissible: false,
         enableDrag: false,
-        builder: (_) => CommunityFoodSubmissionSheet(
-          onSubmit: widget.repository.submitFood,
-        ),
+        builder: (_) => CommunityFoodSubmissionSheet(onSubmit: widget.repository.submitFood),
       );
       if (!mounted) return;
       setState(() {
@@ -54,20 +52,14 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => FutureBuilder<List<Map<String, dynamic>>>(
+  Widget build(BuildContext context) => FutureBuilder<List<Map<String, dynamic>>>(
     future: _submissions,
     builder: (context, snapshot) => ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          communityText(
-            context,
-            'Arabic and Gulf foods are reviewed before approval, and your contribution remains attributed to you.',
-            'الأغذية العربية والخليجية تمر بمراجعة قبل اعتمادها، وتظل مساهمتك منسوبة لك.',
-          ),
-        ),
+        Text(communityText(context,
+          'Arabic and Gulf foods are reviewed before approval, and your contribution remains attributed to you.',
+          'الأغذية العربية والخليجية تمر بمراجعة قبل اعتمادها، وتظل مساهمتك منسوبة لك.')),
         const SizedBox(height: 12),
         FilledButton.icon(
           onPressed: _formOpen ? null : _openForm,
@@ -76,42 +68,22 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
         ),
         if (_submitted) ...[
           const SizedBox(height: 12),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              communityText(
-                context,
-                'Food submitted for review. It will not appear as verified before validation.',
-                'أُرسل الغذاء للمراجعة. لن يظهر كموثّق قبل التحقق.',
-              ),
-            ),
-          ),
+          Semantics(liveRegion: true, child: Text(communityText(context,
+            'Food submitted for review. It will not appear as verified before validation.',
+            'أُرسل الغذاء للمراجعة. لن يظهر كموثّق قبل التحقق.'))),
         ],
         const SizedBox(height: 16),
-        if (snapshot.connectionState != ConnectionState.done &&
-            !snapshot.hasData)
+        if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData)
           const Center(child: CircularProgressIndicator()),
-        if (snapshot.hasError) _InlineError(onRetry: () => setState(_reload)),
+        if (snapshot.hasError)
+          _InlineError(onRetry: () => setState(_reload)),
         for (final row in snapshot.data ?? const <Map<String, dynamic>>[])
-          Card(
-            child: ListTile(
-              title: Text(row['canonical_name'] as String),
-              subtitle: Text(switch (row['status']) {
-                'approved' => communityText(context, 'Approved', 'معتمد'),
-                'rejected' => communityText(context, 'Rejected', 'مرفوض'),
-                _ => communityText(
-                  context,
-                  'Pending review',
-                  'بانتظار المراجعة',
-                ),
-              }),
-              trailing: Icon(
-                row['status'] == 'approved'
-                    ? Icons.verified_outlined
-                    : Icons.hourglass_top_rounded,
-              ),
-            ),
-          ),
+          Card(child: ListTile(
+            title: Text(row['canonical_name'] as String),
+            subtitle: Text(row['status'] as String),
+            trailing: Icon(row['status'] == 'approved'
+                ? Icons.verified_outlined : Icons.hourglass_top_rounded),
+          )),
       ],
     ),
   );

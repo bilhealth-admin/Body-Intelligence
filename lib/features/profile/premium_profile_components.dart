@@ -49,8 +49,6 @@ class ProfileHero extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -99,11 +97,14 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final bodyFontSize = theme.textTheme.bodyLarge?.fontSize ?? 16;
+    final scaledBodyFontSize = MediaQuery.textScalerOf(
+      context,
+    ).scale(bodyFontSize);
+
     Widget labelText() => Text(
       label,
-      maxLines: 1,
-      softWrap: false,
-      overflow: TextOverflow.ellipsis,
+      softWrap: true,
       style: theme.textTheme.bodyLarge?.copyWith(
         color: colors.onSurface,
         fontWeight: FontWeight.w400,
@@ -111,19 +112,10 @@ class _Row extends StatelessWidget {
       ),
     );
 
-    Widget valueText() => Text(
+    Widget valueText({required bool stacked}) => Text(
       value,
-      maxLines: 1,
-      softWrap: false,
-      overflow: TextOverflow.ellipsis,
-      // Screen readers and a long press still expose the complete value.
-      semanticsLabel: value,
-      textAlign: Directionality.of(context) == TextDirection.rtl
-          ? TextAlign.left
-          : TextAlign.right,
-      textDirection: icon == Icons.alternate_email_rounded
-          ? TextDirection.ltr
-          : null,
+      softWrap: true,
+      textAlign: stacked ? TextAlign.start : TextAlign.end,
       style: theme.textTheme.bodyLarge?.copyWith(
         color: colors.primary,
         fontWeight: FontWeight.w400,
@@ -131,39 +123,58 @@ class _Row extends StatelessWidget {
       ),
     );
 
-    final textContent = Row(
-      children: [
-        Expanded(flex: 5, child: labelText()),
-        const SizedBox(width: 12),
-        Expanded(flex: 7, child: valueText()),
-      ],
-    );
-    return Material(
-      color: colors.surface,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 56),
-          padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 16, 8),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: colors.outlineVariant, width: .8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stackText = constraints.maxWidth < 360 || scaledBodyFontSize > 19;
+        final textContent = stackText
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  labelText(),
+                  const SizedBox(height: 2),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: valueText(stacked: true),
+                  ),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(flex: 5, child: labelText()),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 7, child: valueText(stacked: false)),
+                ],
+              );
+
+        return Material(
+          color: colors.surface,
+          child: InkWell(
+            onTap: onTap,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 56),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 16, 8),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: colors.outlineVariant, width: .8),
+                ),
+              ),
+              child: Row(
+                children: [
+                  BilSemanticIconBadge(
+                    kind: _profileRowIconKind(icon),
+                    iconOverride: icon,
+                    appleIconOverride: icon,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(child: textContent),
+                ],
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              BilNativeSettingsIcon(
-                kind: _profileRowIconKind(icon),
-                symbol: _profileRowSymbol(icon),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Tooltip(message: '$label: $value', child: textContent),
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -196,17 +207,5 @@ class _Row extends StatelessWidget {
     }
     if (icon == Icons.tune_rounded) return BilSemanticIconKind.preferences;
     return BilSemanticIconKind.profile;
-  }
-
-  static BilSettingsSymbol _profileRowSymbol(IconData icon) {
-    if (icon == Icons.photo_camera_outlined) return BilSettingsSymbol.camera;
-    if (icon == Icons.alternate_email_rounded) return BilSettingsSymbol.email;
-    if (icon == Icons.height_rounded) return BilSettingsSymbol.height;
-    if (icon == Icons.wc_rounded) return BilSettingsSymbol.people;
-    if (icon == Icons.cake_outlined) return BilSettingsSymbol.calendar;
-    if (icon == Icons.markunread_mailbox_outlined) {
-      return BilSettingsSymbol.postal;
-    }
-    return BilNativeSettingsIcon.symbolFor(_profileRowIconKind(icon));
   }
 }

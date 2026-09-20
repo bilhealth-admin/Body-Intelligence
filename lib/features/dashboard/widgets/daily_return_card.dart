@@ -7,21 +7,6 @@ import '../../../engine/data_honesty_engine.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import '../dashboard_five_locale_copy.dart';
 
-/// Presentation-only placement supplied by the compact fitness group.
-class DashboardDailyReturnLayout extends InheritedWidget {
-  const DashboardDailyReturnLayout({
-    super.key,
-    required super.child,
-    this.weightValue,
-  });
-  final String? weightValue;
-  static DashboardDailyReturnLayout? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<DashboardDailyReturnLayout>();
-  @override
-  bool updateShouldNotify(DashboardDailyReturnLayout oldWidget) =>
-      weightValue != oldWidget.weightValue;
-}
-
 class DailyReturnCard extends StatelessWidget {
   const DailyReturnCard({
     super.key,
@@ -59,12 +44,8 @@ class DailyReturnCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
-    final compactLayout = DashboardDailyReturnLayout.of(context);
     final items = [
       _FollowDayCard(
-        key: const Key('dashboard-summary-weight'),
-        compact: compactLayout != null,
-        value: report.hasWeight ? compactLayout?.weightValue : null,
         icon: Icons.monitor_weight_outlined,
         label: tr('Weight', 'الوزن'),
         recorded: report.hasWeight,
@@ -76,8 +57,6 @@ class DailyReturnCard extends StatelessWidget {
         onTap: onWeightTap,
       ),
       _FollowDayCard(
-        key: const Key('dashboard-summary-meals'),
-        compact: compactLayout != null,
         icon: Icons.restaurant_outlined,
         label: tr('Meals', 'الوجبات'),
         recorded: report.hasMeals,
@@ -92,8 +71,6 @@ class DailyReturnCard extends StatelessWidget {
         onTap: onMealsTap,
       ),
       _FollowDayCard(
-        key: const Key('dashboard-summary-water'),
-        compact: compactLayout != null,
         icon: Icons.water_drop_outlined,
         label: tr('Water', 'الماء'),
         recorded: report.hasWater,
@@ -112,37 +89,21 @@ class DailyReturnCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: tr('Your Path Today', 'مسارك اليوم'),
-      child: compactLayout != null
-          ? Align(
-              alignment: Alignment.centerRight,
-              child: IntrinsicWidth(
-                child: Column(
-                  key: const Key('dashboard-fitness-summary-column'),
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < items.length; i++) ...[
-                      items[i],
-                      if (i != items.length - 1) const SizedBox(height: 6),
-                    ],
-                  ],
-                ),
-              ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (var index = 0; index < items.length; index++) ...[
-                      Expanded(child: items[index]),
-                      if (index != items.length - 1)
-                        const SizedBox(width: PremiumDesignTokens.spaceXs),
-                    ],
-                  ],
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var index = 0; index < items.length; index++) ...[
+                Expanded(child: items[index]),
+                if (index != items.length - 1)
+                  const SizedBox(width: PremiumDesignTokens.spaceXs),
               ],
-            ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -165,15 +126,12 @@ class DailyReturnCard extends StatelessWidget {
 
 class _FollowDayCard extends StatelessWidget {
   const _FollowDayCard({
-    super.key,
     required this.icon,
     required this.label,
     required this.recorded,
     required this.recordedText,
     required this.missingText,
     this.onTap,
-    this.compact = false,
-    this.value,
   });
 
   final IconData icon;
@@ -182,76 +140,10 @@ class _FollowDayCard extends StatelessWidget {
   final String recordedText;
   final String missingText;
   final VoidCallback? onTap;
-  final bool compact;
-  final String? value;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    if (compact) {
-      return Semantics(
-        label: '$label. ${recorded ? recordedText : missingText}',
-        button: onTap != null,
-        child: Material(
-          color: scheme.surfaceContainerHighest.withValues(alpha: .65),
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(14),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
-              child: Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: scheme.primary.withValues(alpha: .1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, size: 18, color: scheme.primary),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.labelSmall?.copyWith(fontSize: 12),
-                        ),
-                        if (value != null)
-                          Text(
-                            value!,
-                            textDirection: TextDirection.ltr,
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                ),
-                          )
-                        else
-                          Icon(
-                            recorded
-                                ? Icons.check_circle_rounded
-                                : Icons.cancel_rounded,
-                            size: 16,
-                            color: recorded
-                                ? const Color(0xFF24B989)
-                                : const Color(0xFFE05A67),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
     return Semantics(
       label: '$label. ${recorded ? recordedText : missingText}',
       button: onTap != null,
@@ -261,13 +153,13 @@ class _FollowDayCard extends StatelessWidget {
         child: PremiumSurface(
           emphasized: recorded,
           dashboardGlass: true,
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: scheme.primary.withValues(alpha: .13),

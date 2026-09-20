@@ -4,20 +4,20 @@
   "verification_scope": "PUBLIC_ENDPOINT_AVAILABILITY_AND_DEPLOYED_STATIC_ASSET_BYTE_IDENTITY",
   "legal_approval": "NOT_CLAIMED",
   "method": "GET_ONLY_NO_STORE_OR_SITE_MUTATION",
-  "verified_at_utc": "2026-09-09T00:39:15Z",
+  "verified_at_utc": "2026-09-08T11:55:22Z",
   "domain": "bilhealth.com",
   "local_asset": {
     "path": "public_site/app.js",
-    "bytes": 86324,
-    "sha256": "3cf6a9c0fd621628d6b43be5a17da1526893875c3a2b0700d1628549d279332a"
+    "bytes": 84060,
+    "sha256": "789906d464aa9c3329116a9a09821a4b22443e29dd14b6229f182b15f08ca00a"
   },
   "remote_asset": {
     "url": "https://www.bilhealth.com/app.js",
     "final_url": "https://www.bilhealth.com/app.js",
     "http_status": 200,
     "content_type": "text/javascript",
-    "bytes": 86324,
-    "sha256": "3cf6a9c0fd621628d6b43be5a17da1526893875c3a2b0700d1628549d279332a",
+    "bytes": 84060,
+    "sha256": "789906d464aa9c3329116a9a09821a4b22443e29dd14b6229f182b15f08ca00a",
     "byte_identical_to_local": true
   },
   "routes": [

@@ -97,14 +97,17 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
     if (notification is ScrollStartNotification &&
         notification.dragDetails != null) {
       _interactionGeneration++;
+      // A keyboard/safe-area metric notification can arrive in the same frame
+      // as a drag begins. Stop following immediately so it cannot pull the
+      // conversation back to the newest turn before the drag update arrives.
       _userScrollActive = true;
       _followingLatest = false;
     }
-    // A slow drag is still within the latest-end threshold for its first few
-    // frames. Re-enabling following there lets a metrics notification queue a
-    // jumpTo, which cancels the active drag and leaves the transcript stuck.
-    // Hand scrolling back to auto-follow only after the gesture and momentum
-    // have ended, never during a user's scroll update.
+    // A slow drag can remain within the latest-end threshold for its first few
+    // frames. Never re-enable auto-follow during the gesture; doing so lets a
+    // keyboard/safe-area metric notification queue a jumpTo and cancel the
+    // user's history read. Re-enable it only after the gesture and momentum
+    // have ended.
     if (notification is ScrollEndNotification) {
       _userScrollActive = false;
       _followingLatest = _nearLatest;

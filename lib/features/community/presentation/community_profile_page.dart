@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
@@ -17,8 +14,6 @@ import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import 'community_copy.dart';
 
-part 'community_profile_copy.dart';
-
 class CommunityProfilePage extends ConsumerStatefulWidget {
   const CommunityProfilePage({this.repository, super.key});
 
@@ -32,7 +27,6 @@ class CommunityProfilePage extends ConsumerStatefulWidget {
 class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   CommunityRepository? _repository;
   final _name = TextEditingController();
-  final _handle = TextEditingController();
   final _bio = TextEditingController();
   late Future<void> _loading;
   bool _discoverable = true;
@@ -43,8 +37,6 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   bool _saving = false;
   bool _photoBusy = false;
   String? _avatarUrl;
-  CommunitySocialIdentity? _identity;
-  bool _profileSaved = false;
 
   @override
   void initState() {
@@ -69,32 +61,25 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
 
   Future<void> _load() async {
     final profile = await _repository!.loadMyProfile();
-    _profileSaved = profile != null;
     String? myProfileDisplayName;
-    String? pendingName;
-    if (widget.repository == null) {
+    if (widget.repository == null &&
+        (profile == null || profile.displayName.trim().isEmpty)) {
       try {
-        final preferences = ref.read(preferencesRepositoryProvider);
-        myProfileDisplayName = await preferences.get('displayName');
-        pendingName = await preferences.get(DisplayNameSync.pendingKey);
-        if (pendingName != null) {
-          unawaited(ref.read(displayNameSyncProvider).synchronize());
-        }
+        myProfileDisplayName = await ref
+            .read(preferencesRepositoryProvider)
+            .get('displayName');
       } on Object {
         // Community remains usable with the privacy-safe BIL alias when the
         // device-local profile store is temporarily unavailable.
       }
     }
     _name.text = CommunityIdentityProjection.resolveDisplayName(
-      communityDisplayName: pendingName ?? profile?.displayName,
+      communityDisplayName: profile?.displayName,
       myProfileDisplayName: myProfileDisplayName,
     );
     if (profile == null) {
       return;
     }
-    final identity = await _repository!.loadSocialIdentity();
-    _identity = identity;
-    _handle.text = identity.chosen ? identity.handle : '';
     _bio.text = profile.bio ?? '';
     _avatarUrl = profile.avatarUrl;
     _discoverable = profile.discoverable;
@@ -111,26 +96,16 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     });
   }
 
-  Future<bool> _save() async {
-    if (_saving) return false;
+  Future<void> _save() async {
+    if (_saving) return;
     final copy = _CommunityProfileCopy.of(context);
     if (_name.text.trim().length < 2) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.invalidName)));
-      return false;
-    }
-    final requestedHandle = _handle.text.trim();
-    if (_identity?.chosen != true &&
-        requestedHandle.isNotEmpty &&
-        !CommunitySocialIdentity.isValidCandidate(requestedHandle)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(copy.invalidUsername)));
-      return false;
+      return;
     }
     setState(() => _saving = true);
-    var saved = false;
     try {
       final localeCode = BilLocalePolicy.canonicalTag(
         Localizations.localeOf(context),
@@ -145,16 +120,10 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         allowFollows: _allowFollows,
         allowMessagesFrom: _messages,
       );
-      final identity = _identity?.chosen == true
-          ? _identity!
-          : requestedHandle.isEmpty
-          ? await _repository!.loadSocialIdentity()
-          : await _repository!.claimSocialHandle(requestedHandle);
       if (widget.repository == null) {
         await ref
             .read(preferencesRepositoryProvider)
-            .setMany(DisplayNameSync.localEdit(_name.text));
-        unawaited(ref.read(displayNameSyncProvider).synchronize());
+            .mutate(set: {'displayName': _name.text.trim()});
         final photoResult = await ref
             .read(profilePhotoServiceProvider)
             .syncStoredPhotoToCommunity();
@@ -162,18 +131,12 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
           _avatarUrl = photoResult!.publicUrl;
         }
       }
-      if (!mounted) return false;
-      setState(() {
-        _identity = identity;
-        _profileSaved = true;
-        if (identity.chosen) _handle.text = identity.handle;
-      });
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saved)));
-      saved = true;
     } on CommunityTextPolicyException catch (error) {
-      if (!mounted) return false;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -184,19 +147,13 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         ),
       );
     } catch (_) {
-      if (!mounted) return false;
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saveFailed)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-    return saved;
-  }
-
-  Future<void> _saveAndOpenBilCode() async {
-    if (!await _save() || !mounted) return;
-    context.push('/community/code');
   }
 
   Future<void> _pickPhoto() async {
@@ -221,6 +178,15 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
           ),
         );
       }
+    } on ProfilePhotoTooLargeException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text('Choose an image smaller than 5 MB.'),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _photoBusy = false);
     }
@@ -229,7 +195,6 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   @override
   void dispose() {
     _name.dispose();
-    _handle.dispose();
     _bio.dispose();
     super.dispose();
   }
@@ -330,43 +295,6 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
                           labelText: copy.displayName,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        key: const Key('community-profile-username'),
-                        enabled: !_saving && _identity?.chosen != true,
-                        controller: _handle,
-                        maxLength: 30,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        textCapitalization: TextCapitalization.none,
-                        textDirection: TextDirection.ltr,
-                        decoration: InputDecoration(
-                          labelText: copy.username,
-                          prefixText: '@',
-                          helperText: _identity?.chosen == true
-                              ? copy.usernameLocked
-                              : copy.usernameHelp,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        copy.bilCodeHelp,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      OutlinedButton.icon(
-                        key: const Key('community-profile-bil-code'),
-                        onPressed: _saving
-                            ? null
-                            : _profileSaved
-                            ? () => context.push('/community/code')
-                            : _saveAndOpenBilCode,
-                        icon: const Icon(Icons.qr_code_2_rounded),
-                        label: Text(
-                          _profileSaved
-                              ? copy.myBilCode
-                              : copy.saveProfileAndCreateBilCode,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -553,4 +481,152 @@ class _CommunityProfileUnavailable extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _CommunityProfileCopy {
+  const _CommunityProfileCopy({
+    required this.languageCode,
+    required this.title,
+    required this.displayName,
+    required this.bio,
+    required this.discoverable,
+    required this.discoverableHelp,
+    required this.save,
+    required this.saved,
+    required this.invalidName,
+    required this.loadFailed,
+    required this.saveFailed,
+    required this.privacy,
+  });
+
+  factory _CommunityProfileCopy.of(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    return switch (language) {
+      'ar' => const _CommunityProfileCopy(
+        languageCode: 'ar',
+        title: 'ملف المجتمع',
+        displayName: 'الاسم الظاهر',
+        bio: 'نبذة',
+        discoverable: 'السماح بالعثور عليّ',
+        discoverableHelp: 'يمكن للأعضاء العثور عليك وإرسال طلب صداقة.',
+        save: 'حفظ الملف',
+        saved: 'تم حفظ ملف المجتمع.',
+        invalidName: 'اكتب اسمًا من حرفين على الأقل.',
+        loadFailed: 'تعذر تحميل ملف المجتمع بأمان.',
+        saveFailed: 'تعذر حفظ الملف الآن. حاول مجددًا.',
+        privacy: 'لا تظهر قياساتك أو يومياتك الصحية في ملف المجتمع.',
+      ),
+      'fr' => const _CommunityProfileCopy(
+        languageCode: 'fr',
+        title: 'Profil communautaire',
+        displayName: 'Nom affiché',
+        bio: 'Bio',
+        discoverable: 'Autoriser la découverte',
+        discoverableHelp: 'Les membres peuvent vous trouver et vous inviter.',
+        save: 'Enregistrer',
+        saved: 'Profil enregistré.',
+        invalidName: 'Saisissez au moins deux caractères.',
+        loadFailed: 'Impossible de charger le profil.',
+        saveFailed: 'Impossible d’enregistrer maintenant.',
+        privacy: 'Vos mesures et journaux de santé restent privés.',
+      ),
+      'es' => const _CommunityProfileCopy(
+        languageCode: 'es',
+        title: 'Perfil de comunidad',
+        displayName: 'Nombre visible',
+        bio: 'Biografía',
+        discoverable: 'Permitir que me encuentren',
+        discoverableHelp:
+            'Los miembros pueden encontrarte y enviarte solicitudes.',
+        save: 'Guardar',
+        saved: 'Perfil guardado.',
+        invalidName: 'Escribe al menos dos caracteres.',
+        loadFailed: 'No se pudo cargar el perfil.',
+        saveFailed: 'No se pudo guardar ahora.',
+        privacy: 'Tus medidas y registros de salud siguen siendo privados.',
+      ),
+      'tr' => const _CommunityProfileCopy(
+        languageCode: 'tr',
+        title: 'Topluluk profili',
+        displayName: 'Görünen ad',
+        bio: 'Hakkında',
+        discoverable: 'Bulunmama izin ver',
+        discoverableHelp: 'Üyeler sizi bulabilir ve istek gönderebilir.',
+        save: 'Kaydet',
+        saved: 'Profil kaydedildi.',
+        invalidName: 'En az iki karakter yazın.',
+        loadFailed: 'Profil yüklenemedi.',
+        saveFailed: 'Profil şu anda kaydedilemedi.',
+        privacy: 'Sağlık ölçümleriniz ve günlükleriniz gizli kalır.',
+      ),
+      _ => _CommunityProfileCopy.extended(context),
+    };
+  }
+
+  factory _CommunityProfileCopy.extended(BuildContext context) {
+    String t(String value) => AppLocalizations.of(context).text(value);
+    return _CommunityProfileCopy(
+      languageCode: BilLocalePolicy.canonicalTag(
+        Localizations.localeOf(context),
+      ),
+      title: t('Community profile'),
+      displayName: t('Display name'),
+      bio: t('Bio'),
+      discoverable: t('Let people find me'),
+      discoverableHelp: t('Members can find you and send a friend request.'),
+      save: t('Save profile'),
+      saved: t('Community profile saved.'),
+      invalidName: t('Enter at least two characters.'),
+      loadFailed: t('Could not load your community profile safely.'),
+      saveFailed: t('Could not save your profile now. Try again.'),
+      privacy: t('Your measurements and health logs stay private.'),
+    );
+  }
+
+  final String languageCode,
+      title,
+      displayName,
+      bio,
+      discoverable,
+      discoverableHelp;
+  final String save, saved, invalidName, loadFailed, saveFailed, privacy;
+}
+
+extension _CommunityPrivacyCopy on _CommunityProfileCopy {
+  String _t(String en, String ar) =>
+      communityTextForLanguage(languageCode, en, ar);
+  String get profileVisibility =>
+      _t('Who can see my profile', 'من يمكنه رؤية ملفي');
+  String get allowFriendRequests =>
+      _t('Allow friend requests', 'السماح بطلبات الصداقة');
+  String get allowFollows => _t('Allow follows', 'السماح بالمتابعة');
+  String get messagePermission => _t('Who can message me', 'من يمكنه مراسلتي');
+  String get deleteAccount =>
+      _t('Delete account and data', 'حذف الحساب والبيانات');
+  String get deleteAccountHelp => _t(
+    'Push is disabled immediately and a secure request is queued to permanently delete all account data. This cannot be undone after processing. Deleting BIL does not cancel an App Store or Google Play subscription; cancel it in the device store when needed.',
+    'سيتم تعطيل الإشعارات ووضع طلب حذف نهائي وآمن لكل بيانات الحساب. لا يمكن التراجع بعد تنفيذ الطلب. حذف حساب BIL لا يلغي اشتراك App Store أو Google Play؛ ألغِه من متجر الجهاز عند الحاجة.',
+  );
+  String get cancel => _t('Cancel', 'إلغاء');
+  String get requestDeletion => _t('Request deletion', 'طلب الحذف');
+  String get deletionQueued =>
+      _t('Deletion request queued securely.', 'تم تسجيل طلب الحذف بأمان.');
+  String get deletionFailed => _t(
+    'Could not request account deletion. Try again.',
+    'تعذر طلب حذف الحساب. حاول مجددًا.',
+  );
+  String get retry => _t('Retry', 'إعادة المحاولة');
+  String get signInRequired => _t(
+    'Sign in to manage your community profile.',
+    'سجّل الدخول لإدارة ملف المجتمع.',
+  );
+  String visibilityLabel(CommunityProfileVisibility value) => switch (value) {
+    CommunityProfileVisibility.public => _t('Public', 'عام'),
+    CommunityProfileVisibility.friends => _t('Friends only', 'الأصدقاء فقط'),
+    CommunityProfileVisibility.private => _t('Private', 'خاص'),
+  };
+  String messageLabel(CommunityMessagePermission value) => switch (value) {
+    CommunityMessagePermission.friends => _t('Friends only', 'الأصدقاء فقط'),
+    CommunityMessagePermission.nobody => _t('Nobody', 'لا أحد'),
+  };
 }

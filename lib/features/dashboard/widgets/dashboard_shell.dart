@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'dashboard_layout_metrics.dart';
@@ -9,32 +7,15 @@ import 'dashboard_layout_metrics.dart';
 ///
 /// This widget deliberately knows nothing about weight, nutrition, hydration,
 /// providers, routes, or scientific calculations.
-class DashboardShell extends StatefulWidget {
+class DashboardShell extends StatelessWidget {
   const DashboardShell({
     super.key,
     required this.child,
     required this.onRefresh,
-    this.leading,
-    this.edgeHeader,
   });
 
   final Widget child;
   final RefreshCallback onRefresh;
-  final Widget? leading;
-  final Widget? edgeHeader;
-
-  @override
-  State<DashboardShell> createState() => _DashboardShellState();
-}
-
-class _DashboardShellState extends State<DashboardShell> {
-  final _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,10 +99,9 @@ class _DashboardShellState extends State<DashboardShell> {
             // Keep the familiar pull gesture without covering cached Today
             // content with loading chrome. The provider refresh continues in
             // the background and reports its final outcome from DashboardPage.
-            child: _ElasticDashboardRefresh(
+            child: RefreshIndicator.noSpinner(
               key: const Key('dashboard-background-refresh'),
-              controller: _scrollController,
-              onRefresh: widget.onRefresh,
+              onRefresh: onRefresh,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final metrics = DashboardLayoutMetrics.resolve(
@@ -134,33 +114,15 @@ class _DashboardShellState extends State<DashboardShell> {
 
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
-                    controller: _scrollController,
                     physics: const DashboardScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
-                      0,
+                      metrics.horizontalPadding,
                       16,
-                      0,
-                      // The app shell already reserves the navigation dock.
-                      // Only leave the same small gap as between cards.
-                      16,
+                      metrics.horizontalPadding,
+                      constraints.maxWidth < 600 ? 176 : 132,
                     ),
                     child: Center(
-                      child: Column(
-                        children: [
-                          if (widget.leading != null)
-                            SizedBox(
-                              width: contentWidth,
-                              child: widget.leading,
-                            ),
-                          if (widget.edgeHeader != null)
-                            SizedBox(
-                              width:
-                                  contentWidth + metrics.horizontalPadding * 2,
-                              child: widget.edgeHeader,
-                            ),
-                          SizedBox(width: contentWidth, child: widget.child),
-                        ],
-                      ),
+                      child: SizedBox(width: contentWidth, child: child),
                     ),
                   );
                 },
@@ -173,10 +135,10 @@ class _DashboardShellState extends State<DashboardShell> {
   }
 }
 
-/// Keeps the dashboard directly finger-controlled while retaining the native
-/// post-release momentum used by the More surface. An actual overscroll is
-/// still returned smoothly to its nearest edge. Quick Add has its own modal
-/// drag physics and is intentionally unaffected by this class.
+/// Keeps the dashboard directly finger-controlled without a post-release
+/// fling.  Clamping avoids the elastic overscroll that made the page appear
+/// to keep moving after the user's finger left the screen, while the
+/// always-accepting offset preserves pull-to-refresh and short-content use.
 class DashboardScrollPhysics extends ClampingScrollPhysics {
   const DashboardScrollPhysics({super.parent});
 
@@ -193,105 +155,8 @@ class DashboardScrollPhysics extends ClampingScrollPhysics {
     ScrollMetrics position,
     double velocity,
   ) {
-    final edge = position.pixels < position.minScrollExtent
-        ? position.minScrollExtent
-        : position.pixels > position.maxScrollExtent
-        ? position.maxScrollExtent
-        : null;
-    if (edge != null) {
-      return ScrollSpringSimulation(
-        const SpringDescription(mass: .8, stiffness: 320, damping: 28),
-        position.pixels,
-        edge,
-        velocity,
-        tolerance: toleranceFor(position),
-      );
-    }
-    // Preserve the native platform simulation so a short upward/downward
-    // swipe continues smoothly after the finger leaves the screen.
+    if (velocity.abs() > toleranceFor(position).velocity) return null;
     return super.createBallisticSimulation(position, velocity);
-  }
-}
-
-/// Starts refresh after an elastic top pull without holding the scroll view at
-/// RefreshIndicator's armed displacement while provider work is in flight.
-class _ElasticDashboardRefresh extends StatefulWidget {
-  const _ElasticDashboardRefresh({
-    super.key,
-    required this.controller,
-    required this.onRefresh,
-    required this.child,
-  });
-
-  static const triggerExtent = 72.0;
-
-  final ScrollController controller;
-  final RefreshCallback onRefresh;
-  final Widget child;
-
-  @override
-  State<_ElasticDashboardRefresh> createState() =>
-      _ElasticDashboardRefreshState();
-}
-
-class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
-  double _pullExtent = 0;
-  bool _refreshing = false;
-
-  bool _trackScroll(ScrollNotification notification) {
-    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
-      return false;
-    }
-    if (notification is ScrollStartNotification &&
-        notification.dragDetails != null) {
-      _pullExtent = 0;
-    }
-    if (notification is ScrollUpdateNotification &&
-        notification.dragDetails != null) {
-      _pullExtent =
-          (notification.metrics.minScrollExtent - notification.metrics.pixels)
-              .clamp(0.0, double.infinity);
-    }
-    if (notification is OverscrollNotification &&
-        notification.dragDetails != null &&
-        notification.metrics.extentBefore == 0 &&
-        notification.overscroll < 0) {
-      _pullExtent += -notification.overscroll;
-    }
-    return false;
-  }
-
-  void _finishPull() {
-    final shouldRefresh =
-        _pullExtent >= _ElasticDashboardRefresh.triggerExtent && !_refreshing;
-    _pullExtent = 0;
-    if (!shouldRefresh) return;
-    _refreshing = true;
-    unawaited(_runRefresh());
-  }
-
-  Future<void> _runRefresh() async {
-    try {
-      await widget.onRefresh();
-    } on Object {
-      // DashboardPage owns the user-facing result. The gesture layer only
-      // guarantees that an implementation error cannot leave refresh armed.
-    } finally {
-      _refreshing = false;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerUp: (_) => _finishPull(),
-      onPointerCancel: (_) => _pullExtent = 0,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _trackScroll,
-        child: widget.child,
-      ),
-    );
   }
 }
 

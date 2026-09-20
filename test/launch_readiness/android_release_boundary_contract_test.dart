@@ -64,6 +64,19 @@ void main() {
       'android.permission.health.READ_STEPS',
       'android.permission.health.READ_DISTANCE',
       'android.permission.health.READ_ACTIVE_CALORIES_BURNED',
+      'android.permission.health.READ_EXERCISE',
+      'android.permission.health.READ_SLEEP',
+      'android.permission.health.READ_HEART_RATE',
+      'android.permission.health.READ_RESTING_HEART_RATE',
+      'android.permission.health.READ_HEART_RATE_VARIABILITY',
+      'android.permission.health.READ_WEIGHT',
+      'android.permission.health.WRITE_WEIGHT',
+      'android.permission.health.READ_BODY_FAT',
+      'android.permission.health.READ_LEAN_BODY_MASS',
+      'android.permission.health.READ_HYDRATION',
+      'android.permission.health.READ_NUTRITION',
+      'android.permission.health.WRITE_NUTRITION',
+      'android.permission.health.READ_HEALTH_DATA_HISTORY',
     ]) {
       expect(manifest, contains(permission), reason: 'Missing: $permission');
     }
@@ -78,11 +91,6 @@ void main() {
       expect(manifest, isNot(contains(excludedPermission)));
     }
     for (final excludedRecord in <String>[
-      'SleepSessionRecord',
-      'BodyFatRecord',
-      'RestingHeartRateRecord',
-      'NutritionRecord',
-      'WeightRecord',
       'OxygenSaturationRecord',
       'BloodGlucoseRecord',
       'BloodPressureRecord',
@@ -92,11 +100,14 @@ void main() {
       expect(bridge, isNot(contains(excludedRecord)));
     }
     expect(bridge, isNot(contains('"oxygen"')));
-    expect(bridge, contains('"health_connect_write_not_available"'));
+    expect(bridge, contains('"weight" -> WeightRecord('));
     for (final logicalType in <String>[
       '"distance"',
-      '"steps"',
-      '"activeEnergy"',
+      '"bodyFat"',
+      '"leanMass"',
+      '"water"',
+      '"nutritionProtein"',
+      '"nutritionPotassium"',
     ]) {
       expect(bridge, contains(logicalType), reason: 'Missing: $logicalType');
     }

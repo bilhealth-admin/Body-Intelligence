@@ -13,9 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/runtime_permission_policy.dart';
-import '../../../app/services/recoverable_image_picker.dart';
 import '../../../app/localization/bil_locale_policy.dart';
-import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../data/database/database_provider.dart';
 import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
@@ -42,38 +40,28 @@ import '../services/coach_speech_policy.dart';
 import '../services/coach_voice_turn_policy.dart';
 import '../services/coach_daily_brief.dart';
 import '../services/coach_memory_repository.dart';
-import '../services/coach_voice_transcript_normalizer.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
 import '../services/local_coach_api.dart';
-
 import '../services/local_model_gateway.dart';
 import '../services/coach_catalog_grounding.dart';
-import '../services/coach_action_presentation_policy.dart';
 import '../services/ai_coach_feedback_service.dart';
 import '../../nutrition/domain/barcode_identity.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
-import '../../nutrition/presentation/meal_vision_ui_copy.dart';
 import '../intelligence_locale_copy.dart';
-import '../ai_coach_chat_copy.dart';
 import 'coach_message_text.dart';
-import 'coach_anchored_history.dart';
 
-part 'intelligence_center_page_message.dart';
 part 'intelligence_center_widgets.dart';
-part 'intelligence_coach_menu.dart';
 part 'intelligence_center_message_widgets.dart';
 part 'intelligence_center_voice_widgets.dart';
 part 'intelligence_conversation_persistence.dart';
 part 'intelligence_conversation_history.dart';
-part 'intelligence_conversation_viewport.dart';
 part 'intelligence_conversation_voice.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_query_flow.dart';
 part 'intelligence_action_flow.dart';
-part 'intelligence_action_runtime.dart';
 
 /// Single injectable wall clock for conversation copy and seeded messages.
 ///
@@ -91,6 +79,10 @@ final intelligenceConversationClockProvider = Provider<DateTime Function()>(
 final intelligenceCenterModelGatewayProvider = Provider<LocalModelGateway>(
   (ref) => createLocalModelGateway(),
 );
+
+enum _CoachVoiceMode { idle, dictation, liveCall }
+
+enum _CoachReplyPhase { idle, preparing, searching, failed }
 
 class IntelligenceCenterPage extends ConsumerStatefulWidget {
   const IntelligenceCenterPage({
@@ -115,8 +107,6 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final catalogGrounding = CoachCatalogGrounding();
   final messages = <IntelligenceMessage>[];
   final executingActionKeys = <String>{};
-  final actionExecutionPhases = <String, _CoachActionExecutionPhase>{};
-  String? lastClearWritingLanguageTag;
   Timer? voiceSilenceTimer;
   Timer? replyDelayTimer;
   String? voiceLanguageHint;
@@ -135,21 +125,14 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   bool sending = false;
   bool listening = false;
   bool voiceSubmitPending = false;
-  bool voiceCaptureStarting = false;
-  bool coachInBackground = false;
-  int voiceCaptureGeneration = 0;
   int liveCallNoSpeechRestarts = 0;
   int voiceTransientRestarts = 0;
   bool analyzingFoodImage = false;
-  bool foodImageFlowOpening = false;
   bool consentPromptVisible = false;
-  IntelligenceMessage? sessionWelcomeMessage;
+  bool welcomeSeeded = false;
   bool introVisible = true;
   bool conversationReady = false;
-  bool conversationLoadFailed = false;
   CoachContextSnapshot? lastCoachContextSnapshot;
-  bool conversationHistoryOpening = false;
-  bool coachMenuOpening = false;
   String? activeConversationId;
   Future<void> conversationPersistenceTail = Future<void>.value();
   int conversationPersistenceEpoch = 0;
@@ -163,8 +146,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final messageRuntimes = <String, CoachAnswerRuntime>{};
   final messageFeedback = <String, bool>{};
   final reportedMessages = <String>{};
-  // Keep the typing treatment limited to BIL replies created in this mounted
-  // session. Previously saved messages must remain immediate for browsing.
+  // Only the latest failed turn owns a retry affordance. The failure remains
+  // part of the transcript, while the transient progress row is not rendered
+  // as a second error surface.
+  final retryableErrorMessageIds = <String>{};
+  // Only replies created during this mounted session animate. Restored
+  // transcript rows remain immediately readable and selectable.
   final animatedResponseIds = <String>{};
   static const _speechPolicy = CoachSpeechPolicy();
   static const _voiceTurnPolicy = CoachVoiceTurnPolicy();
@@ -196,19 +183,18 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Keep one stable, non-persistent introduction visible while local
-    // storage is being read. The restored transcript replaces only the
-    // session object after the read; it never merges a provisional turn into
-    // the user-owned history.
-    if (sessionWelcomeMessage != null) return;
+    if (welcomeSeeded) return;
+    welcomeSeeded = true;
     final now = ref.read(intelligenceConversationClockProvider)();
-    sessionWelcomeMessage = IntelligenceMessage(
-      id: 'welcome-loading-${now.microsecondsSinceEpoch}',
-      role: IntelligenceMessageRole.bil,
-      kind: IntelligenceMessageKind.coach,
-      text: _sessionWelcome(null, at: now),
-      createdAt: now,
-      modality: IntelligenceMessageModality.system,
+    messages.add(
+      IntelligenceMessage(
+        id: 'welcome-immediate-${now.microsecondsSinceEpoch}',
+        role: IntelligenceMessageRole.bil,
+        kind: IntelligenceMessageKind.coach,
+        text: _sessionWelcome(null, at: now),
+        createdAt: now,
+        modality: IntelligenceMessageModality.system,
+      ),
     );
   }
 
@@ -216,7 +202,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     await CoachMemoryRepository(
       preferences: ref.read(preferencesRepositoryProvider),
     ).mergeFromCloud();
-    if (mounted) ref.invalidate(coachContextSnapshotProvider);
+    ref.invalidate(coachContextSnapshotProvider);
   }
 
   @override
@@ -234,15 +220,6 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) coachInBackground = false;
-    if (state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      coachInBackground = true;
-      voiceCaptureGeneration++;
-      if (voiceMode == _CoachVoiceMode.liveCall) liveCallPaused = true;
-      unawaited(const BilTextToSpeech().stop());
-    }
     if (conversationReady &&
         (state == AppLifecycleState.hidden ||
             state == AppLifecycleState.paused ||
@@ -320,32 +297,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     _scrollToLatest();
   }
 
-  @override
-  void didChangeMetrics() {
-    // Opening or closing the keyboard changes the conversation viewport after
-    // the current frame. Only re-pin during an active turn; otherwise the
-    // first metrics notification while opening a restored chat would move the
-    // user away from the session introduction.
-    if (!conversationReady || (!sending && !listening)) return;
-    _scrollToLatest();
-  }
-
   Future<void> _openCoachMenuSheet() async {
-    if (!mounted ||
-        !conversationReady ||
-        coachMenuOpening ||
-        foodImageFlowOpening) {
-      return;
-    }
-    coachMenuOpening = true;
-    try {
-      await _showCoachMenuSheet();
-    } finally {
-      coachMenuOpening = false;
-    }
-  }
-
-  Future<void> _showCoachMenuSheet() async {
     final action = await showModalBottomSheet<String>(
       context: context,
       useSafeArea: true,
@@ -362,13 +314,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     } else if (action == 'settings') {
       await _openAiCoachSettings();
     } else if (action == 'clear') {
-      await _openConversationHistory(deleteMode: true);
+      await _clearConversation();
     }
   }
 
   @override
   void dispose() {
-    voiceCaptureGeneration++;
     if (conversationReady) unawaited(_saveConversation());
     WidgetsBinding.instance.removeObserver(this);
     voiceSilenceTimer?.cancel();
@@ -388,9 +339,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     if (currentCoachContext != null) {
       lastCoachContextSnapshot = currentCoachContext;
     }
-    // A background context refresh must not temporarily erase the brief or
-    // make the conversation appear to reload. Keep the last valid snapshot
-    // until the updated one arrives.
+    // Keep the previous context visible while a background invalidation is
+    // loading. Messages and the scroll viewport must not blink or lose their
+    // supporting brief just because the data provider is refreshing.
     final snapshot = currentCoachContext ?? lastCoachContextSnapshot;
     final dailyBrief = snapshot == null
         ? null
@@ -401,19 +352,18 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
               Localizations.localeOf(context),
             ),
           );
-    final visibleMessages = messages.isEmpty && sessionWelcomeMessage != null
-        ? <IntelligenceMessage>[sessionWelcomeMessage!]
-        : messages.toList(growable: false);
+    final visibleMessages = messages.toList(growable: false);
     final showLiveVoiceDraft =
         listening && pendingVoiceTranscript.trim().isNotEmpty;
-    // The compact header already signals an active answer. Do not add a
-    // second, technical-looking "context search" row beneath the latest
-    // message; reserve this space for a real failure with a retry action.
-    final showReplyProgress = replyPhase == _CoachReplyPhase.failed;
+    // A sent turn is already visible at the newest end of the conversation.
+    // Failures are rendered once as a transcript message with its Retry
+    // action; retain the progress row only as a defensive fallback if a
+    // failure has no persisted message yet.
+    final showReplyProgress =
+        replyPhase == _CoachReplyPhase.failed &&
+        retryableErrorMessageIds.isEmpty;
     final showIntroBrief = introVisible && dailyBrief != null;
-    final coachStatus = conversationLoadFailed
-        ? tr('Unavailable', 'غير متاح')
-        : !conversationReady
+    final coachStatus = !conversationReady
         ? tr('Restoring conversation', 'جارٍ استعادة المحادثة')
         : voiceMode == _CoachVoiceMode.liveCall && liveCallPaused
         ? tr('Live call paused', 'المكالمة المباشرة متوقفة مؤقتًا')
@@ -463,11 +413,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                       onStop: _stopLiveCall,
                       liveCallActive: voiceMode == _CoachVoiceMode.liveCall,
                       liveCallPaused: liveCallPaused,
-                      active: listening,
-                      waiting:
-                          sending ||
-                          (!conversationReady && !conversationLoadFailed),
-                      restoring: !conversationReady && !conversationLoadFailed,
+                      active: listening || sending,
                       status: coachStatus,
                       onBack: () {
                         if (context.canPop()) {
@@ -479,14 +425,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                       onHistory: () => unawaited(_openConversationHistory()),
                       onMenu: () => unawaited(_openCoachMenuSheet()),
                     ),
-                    if (conversationLoadFailed)
-                      _CoachReplyFailure(
-                        labelOverride: tr(
-                          'Conversation history',
-                          'سجل المحادثات',
-                        ),
-                        onDismiss: () {},
-                        onRetry: () => unawaited(_loadConversation()),
+                    if (!conversationReady)
+                      const LinearProgressIndicator(
+                        key: ValueKey('ai-coach-conversation-restoring'),
+                        minHeight: 2,
                       ),
                     Expanded(
                       child: ChatHistoryViewport(
@@ -501,13 +443,81 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                   onVoice: _toggleLiveCall,
                                   onCamera: _analyzeFoodImageInChat,
                                 )
-                              : _buildConversationHistory(
-                                  visibleMessages,
-                                  dailyBrief: showIntroBrief
-                                      ? dailyBrief
-                                      : null,
-                                  showLiveVoiceDraft: showLiveVoiceDraft,
-                                  showReplyFailure: showReplyProgress,
+                              : ListView.builder(
+                                  controller: conversationScroll,
+                                  reverse: true,
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior.onDrag,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    18,
+                                    16,
+                                    12,
+                                  ),
+                                  itemCount:
+                                      visibleMessages.length +
+                                      (showLiveVoiceDraft ? 1 : 0) +
+                                      (showReplyProgress ? 1 : 0) +
+                                      (showIntroBrief ? 1 : 0),
+                                  itemBuilder: (context, index) {
+                                    if (showReplyProgress && index == 0) {
+                                      return _CoachReplyProgress(
+                                        phase: replyPhase,
+                                        onCancel: _cancelCurrentCoachRequest,
+                                        onRetry: failedRequest == null
+                                            ? null
+                                            : _retryFailedCoachRequest,
+                                      );
+                                    }
+                                    final progressOffset = showReplyProgress
+                                        ? 1
+                                        : 0;
+                                    if (showLiveVoiceDraft &&
+                                        index == progressOffset) {
+                                      return _LiveVoiceTranscript(
+                                        text: pendingVoiceTranscript.trim(),
+                                        liveCall:
+                                            voiceMode ==
+                                            _CoachVoiceMode.liveCall,
+                                      );
+                                    }
+                                    var cursor =
+                                        index -
+                                        progressOffset -
+                                        (showLiveVoiceDraft ? 1 : 0);
+                                    if (cursor == 0 &&
+                                        visibleMessages.isNotEmpty) {
+                                      return _buildMessage(
+                                        visibleMessages.last,
+                                        messageFeedback,
+                                      );
+                                    }
+                                    cursor -= 1;
+                                    if (showIntroBrief && cursor == 0) {
+                                      return _InlineCoachDecision(
+                                        brief: dailyBrief,
+                                        onAction: () {
+                                          if (dailyBrief.kind ==
+                                              CoachDailyBriefKind.experiment) {
+                                            context.push('/experiments');
+                                          } else {
+                                            usePrompt(
+                                              dailyBrief.suggestedPrompt,
+                                            );
+                                          }
+                                        },
+                                      );
+                                    }
+                                    if (showIntroBrief) cursor -= 1;
+                                    final messageIndex =
+                                        visibleMessages.length - 2 - cursor;
+                                    final message =
+                                        visibleMessages[messageIndex];
+                                    return _buildMessage(
+                                      message,
+                                      messageFeedback,
+                                    );
+                                  },
                                 ),
                         ),
                       ),
@@ -543,7 +553,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                               tooltip: tr('Open camera', 'افتح الكاميرا'),
                               onPressed:
                                   !conversationReady ||
-                                      foodImageFlowOpening ||
+                                      analyzingFoodImage ||
                                       sending
                                   ? null
                                   : _analyzeFoodImageInChat,
@@ -573,17 +583,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                       controller: question,
                                       enabled: conversationReady,
                                       minLines: 1,
-                                      maxLines:
-                                          MediaQuery.viewInsetsOf(
-                                                    context,
-                                                  ).bottom >
-                                                  0 &&
-                                              MediaQuery.sizeOf(
-                                                    context,
-                                                  ).height <
-                                                  740
-                                          ? 2
-                                          : 4,
+                                      maxLines: 1,
                                       textAlignVertical:
                                           TextAlignVertical.center,
                                       textInputAction: TextInputAction.send,
@@ -592,9 +592,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                       scrollPadding: const EdgeInsets.symmetric(
                                         vertical: 8,
                                       ),
-                                      onChanged: (_) => setState(() {}),
                                       decoration: InputDecoration(
-                                        hintMaxLines: 1,
                                         hintText: tr(
                                           'Ask BIL anything about your day…',
                                           'اسأل BIL أي شيء عن يومك…',
@@ -612,51 +610,52 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                     ),
                             ),
                             const SizedBox(width: 4),
-                            if (sending)
-                              IconButton.filled(
-                                key: const Key('ai-coach-cancel-request'),
-                                tooltip: tr('Cancel waiting', 'إلغاء الانتظار'),
-                                onPressed: conversationReady
-                                    ? _cancelCurrentCoachRequest
-                                    : null,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: scheme.errorContainer,
-                                  foregroundColor: scheme.onErrorContainer,
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: const Icon(Icons.close_rounded),
-                              )
-                            else if (question.text.trim().isEmpty || listening)
-                              IconButton.filled(
-                                key: const Key('ai-coach-voice-button'),
-                                tooltip: listening
-                                    ? tr('Stop listening', 'إيقاف الاستماع')
-                                    : tr('Talk to BIL', 'تحدث مع BIL'),
-                                onPressed: !conversationReady
-                                    ? null
-                                    : _toggleDictation,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: listening
-                                    ? const _VoiceListeningWave(
-                                        color: Color(0xFFC8F3FF),
-                                        compact: true,
-                                      )
-                                    : const Icon(Icons.graphic_eq_rounded),
-                              )
-                            else
-                              IconButton.filled(
-                                key: const Key('ai-coach-send-button'),
-                                tooltip: tr('Send', 'إرسال'),
-                                onPressed: !conversationReady ? null : ask,
-                                style: IconButton.styleFrom(
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: const Icon(Icons.arrow_upward_rounded),
-                              ),
+                            ValueListenableBuilder<TextEditingValue>(
+                              valueListenable: question,
+                              builder: (context, value, _) {
+                                if (value.text.trim().isEmpty || listening) {
+                                  return IconButton.filled(
+                                    key: const Key('ai-coach-voice-button'),
+                                    tooltip: listening
+                                        ? tr('Stop listening', 'إيقاف الاستماع')
+                                        : tr('Talk to BIL', 'تحدث مع BIL'),
+                                    onPressed: !conversationReady || sending
+                                        ? null
+                                        : _toggleDictation,
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: const Color(0xFF12394E),
+                                      foregroundColor: const Color(0xFFC8F3FF),
+                                      minimumSize: const Size.square(46),
+                                    ),
+                                    icon: listening
+                                        ? const _VoiceListeningWave(
+                                            color: Color(0xFFC8F3FF),
+                                            compact: true,
+                                          )
+                                        : const Icon(Icons.graphic_eq_rounded),
+                                  );
+                                }
+                                return IconButton.filled(
+                                  key: const Key('ai-coach-send-button'),
+                                  tooltip: tr('Send', 'إرسال'),
+                                  onPressed: !conversationReady || sending
+                                      ? null
+                                      : ask,
+                                  style: IconButton.styleFrom(
+                                    minimumSize: const Size.square(46),
+                                  ),
+                                  icon: sending
+                                      ? const SizedBox.square(
+                                          dimension: 19,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.arrow_upward_rounded),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -668,6 +667,47 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMessage(
+    IntelligenceMessage message,
+    Map<String, bool> feedback,
+  ) {
+    final canRate =
+        message.role == IntelligenceMessageRole.bil &&
+        !message.id.startsWith('welcome') &&
+        !message.id.startsWith('tool-');
+    return _MessageBubble(
+      message: message,
+      feedbackValue: feedback[message.id],
+      reported: reportedMessages.contains(message.id),
+      onSpeak:
+          message.role == IntelligenceMessageRole.bil &&
+              message.modality == IntelligenceMessageModality.voice
+          ? () {
+              final language = const CoachLanguageResolver()
+                  .resolve(
+                    input: message.text,
+                    uiLocale: Localizations.localeOf(context).toLanguageTag(),
+                  )
+                  .languageTag;
+              unawaited(
+                _speakCoachText(message.text, language, showFailure: true),
+              );
+            }
+          : null,
+      onFeedback: canRate
+          ? (helpful) => _recordFeedback(message, helpful)
+          : null,
+      onReport: canRate
+          ? (reason) => _recordFeedback(message, false, reason: reason)
+          : null,
+      onRetry: retryableErrorMessageIds.contains(message.id)
+          ? _retryFailedCoachRequest
+          : null,
+      onAction: (action) => unawaited(_executeAction(action)),
+      animateReveal: animatedResponseIds.contains(message.id),
     );
   }
 }

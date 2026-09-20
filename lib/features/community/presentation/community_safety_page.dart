@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,13 +18,11 @@ class CommunitySafetyPage extends StatefulWidget {
   const CommunitySafetyPage({
     this.repository,
     this.policyUrlLauncher,
-    this.onDecline,
     super.key,
   });
 
   final CommunityRepository? repository;
   final CommunityPolicyUrlLauncher? policyUrlLauncher;
-  final VoidCallback? onDecline;
 
   @override
   State<CommunitySafetyPage> createState() => _CommunitySafetyPageState();
@@ -63,15 +60,10 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
   void didUpdateWidget(covariant CommunitySafetyPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.repository, widget.repository)) {
-      final repository = widget.repository ?? _productionRepository();
-      final languageCode = _languageCode;
-      _repository = repository;
-      _loadedLanguageCode = languageCode;
+      _repository = widget.repository ?? _productionRepository();
+      _policyState = null;
+      _loadedLanguageCode = null;
       _readAndAgree = false;
-      _saving = false;
-      _policyState = repository?.loadCommunityPolicyState(
-        localeCode: languageCode,
-      );
     }
   }
 
@@ -108,7 +100,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
     var opened = false;
     try {
       opened = await (widget.policyUrlLauncher ?? _launchCommunityPolicyUrl)(
-        _localizedPolicyDocumentUrl(policy.documentUrl),
+        policy.documentUrl,
       );
     } on Object {
       opened = false;
@@ -129,50 +121,23 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
     }
   }
 
-  Uri _localizedPolicyDocumentUrl(Uri documentUrl) {
-    if (_languageCode != 'ar' ||
-        documentUrl.scheme != 'https' ||
-        documentUrl.host.toLowerCase() != 'www.bilhealth.com' ||
-        documentUrl.path != '/community-guidelines') {
-      return documentUrl;
-    }
-    return documentUrl.replace(
-      queryParameters: {...documentUrl.queryParameters, 'lang': 'ar'},
-    );
-  }
-
   Future<void> _accept(CommunityContentPolicy policy) async {
     if (_saving || !_readAndAgree) return;
-    final repository = _repository;
-    if (repository == null) return;
-    final languageCode = _languageCode;
     setState(() => _saving = true);
     try {
-      await repository.acceptContentPolicy(policy.version);
-      final verifiedState = await repository.loadCommunityPolicyState(
-        localeCode: languageCode,
-      );
-      final verifiedPolicy = verifiedState.policy;
-      if (verifiedState.status != CommunityPolicyStatus.accepted ||
-          verifiedPolicy == null ||
-          verifiedPolicy.version != policy.version ||
-          verifiedState.acceptedVersion != policy.version) {
-        throw StateError('Community policy acceptance was not verified');
+      await _repository!.acceptContentPolicy(policy.version);
+      if (mounted) {
+        setState(() {
+          _policyState = Future.value(
+            CommunityPolicyState.accepted(
+              policy,
+              acceptedVersion: policy.version,
+            ),
+          );
+        });
       }
-      if (!mounted ||
-          !identical(_repository, repository) ||
-          _loadedLanguageCode != languageCode) {
-        return;
-      }
-      setState(() {
-        _policyState = Future.value(verifiedState);
-      });
     } on Object {
-      if (!mounted ||
-          !identical(_repository, repository) ||
-          _loadedLanguageCode != languageCode) {
-        return;
-      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -184,24 +149,13 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
         ),
       );
     } finally {
-      if (mounted && identical(_repository, repository)) {
-        setState(() => _saving = false);
-      }
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   void _notNow() {
-    final onDecline = widget.onDecline;
-    if (onDecline != null) {
-      onDecline();
-      return;
-    }
     final navigator = Navigator.of(context);
-    if (navigator.canPop()) {
-      navigator.pop(false);
-      return;
-    }
-    context.go('/community');
+    if (navigator.canPop()) navigator.pop();
   }
 
   @override
@@ -210,7 +164,10 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
       title: Text(_t('Safety & community policy', 'الأمان وسياسة المجتمع')),
     ),
     body: _policyState == null
-        ? _PolicyLoadError(languageCode: _languageCode, onRetry: _retry)
+        ? _PolicyLoadError(
+            languageCode: _languageCode,
+            onRetry: _retry,
+          )
         : FutureBuilder<CommunityPolicyState>(
             future: _policyState,
             builder: (context, snapshot) {
@@ -283,7 +240,9 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                                       ),
                                     )
                                   : const Icon(Icons.open_in_new_rounded),
-                              label: Text(_t('Read policy', 'قراءة السياسة')),
+                              label: Text(
+                                _t('Read policy', 'قراءة السياسة'),
+                              ),
                             ),
                           ),
                         ),
@@ -319,21 +278,26 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                           child: SizedBox(
                             width: double.infinity,
                             child: FilledButton.icon(
-                              key: const Key('accept-community-policy'),
-                              onPressed: accepted || _saving || !_readAndAgree
-                                  ? null
-                                  : () => _accept(policy),
-                              icon: Icon(
-                                accepted
-                                    ? Icons.verified_user_outlined
-                                    : Icons.check_circle_outline,
+                                key: const Key('accept-community-policy'),
+                                onPressed: accepted ||
+                                      _saving ||
+                                      !_readAndAgree
+                                    ? null
+                                    : () => _accept(policy),
+                                icon: Icon(
+                                  accepted
+                                      ? Icons.verified_user_outlined
+                                      : Icons.check_circle_outline,
+                                ),
+                                label: Text(
+                                  accepted
+                                      ? _t('Accepted', 'تمت الموافقة')
+                                      : _t(
+                                          'Accept policy',
+                                          'أوافق على السياسة',
+                                        ),
+                                ),
                               ),
-                              label: Text(
-                                accepted
-                                    ? _t('Accepted', 'تمت الموافقة')
-                                    : _t('Accept policy', 'أوافق على السياسة'),
-                              ),
-                            ),
                           ),
                         ),
                         if (!accepted)
@@ -425,7 +389,10 @@ class _PolicyLoading extends StatelessWidget {
 }
 
 class _PolicyLoadError extends StatelessWidget {
-  const _PolicyLoadError({required this.languageCode, required this.onRetry});
+  const _PolicyLoadError({
+    required this.languageCode,
+    required this.onRetry,
+  });
 
   final String languageCode;
   final VoidCallback onRetry;
@@ -454,7 +421,10 @@ class _PolicyLoadError extends StatelessWidget {
 }
 
 class _NoActivePolicy extends StatelessWidget {
-  const _NoActivePolicy({required this.languageCode, required this.onRetry});
+  const _NoActivePolicy({
+    required this.languageCode,
+    required this.onRetry,
+  });
 
   final String languageCode;
   final VoidCallback onRetry;

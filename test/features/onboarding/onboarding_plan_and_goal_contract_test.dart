@@ -73,34 +73,6 @@ void main() {
     );
   });
 
-  test('one kilogram remains selectable below 100 kg and affects the plan', () {
-    final draft = valid(pace: 1);
-    expect(OnboardingPlanCalculator.paceOptions(draft), [.25, .5, .75, 1]);
-    expect(OnboardingPlanCalculator.validate(draft).isValid, isTrue);
-    final plan = OnboardingPlanCalculator.calculate(draft);
-    expect(plan.weeklyPaceKg, -1);
-    expect(plan.targets.calories, greaterThanOrEqualTo(1200));
-    expect(plan.targets.calories, (plan.model.tdeeKcal - 1100).round());
-  });
-
-  test('loss paces that breach the calorie floor are not selectable', () {
-    final draft = valid(
-      pace: 1,
-    ).copyWith(currentWeightKg: 55, targetWeightKg: 50, activity: 'sedentary');
-    expect(OnboardingPlanCalculator.paceOptions(draft), isNot(contains(1)));
-    expect(OnboardingPlanCalculator.validate(draft).code, 'pace_out_of_range');
-    expect(
-      () => OnboardingPlanCalculator.calculate(draft),
-      throwsA(
-        isA<StateError>().having(
-          (error) => error.message,
-          'code',
-          'pace_out_of_range',
-        ),
-      ),
-    );
-  });
-
   test('corrupt drafts with conflicting weight directions fail closed', () {
     final corrupt = valid(
       goals: const {OnboardingGoal.loseWeight, OnboardingGoal.gainWeight},

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 String read(String path) => File(path).readAsStringSync();
 
 void main() {
-  test('platform build identity is exact while candidate is not accepted', () {
+  test('iOS 26 and Android 21 identity is exact', () {
     final pubspec = read('pubspec.yaml');
     final android = read('android/app/build.gradle.kts');
     final apple = read('ios/Runner.xcodeproj/project.pbxproj');
@@ -15,7 +15,7 @@ void main() {
     );
     final iosWorkflow = read('.github/workflows/bil_ios_signed_release.yml');
 
-    expect(pubspec, contains('version: 1.0.0+8'));
+    expect(pubspec, contains('version: 1.0.0+21'));
     expect(
       android,
       contains('applicationId = "com.bilhealth.bodyintelligencelog"'),
@@ -28,27 +28,20 @@ void main() {
         'PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog;',
       ),
     );
-    expect(gate, contains('CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE'));
-    expect(gate, isNot(contains('## Accepted parent')));
-    expect(androidWorkflow, contains('(( BUILD_NUMBER == 20 ))'));
-    expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 18 ))')));
-    expect(iosWorkflow, contains('(( BUILD_NUMBER == 25 ))'));
-    expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 24 ))')));
+    expect(gate, contains('1.0.0+26'));
+    expect(gate, contains('1.0.0+21'));
+    expect(androidWorkflow, contains(r'''[[ "$BUILD_NUMBER" == '21' ]]'''));
+    expect(iosWorkflow, contains(r'''[[ "$BUILD_NUMBER" == '26' ]]'''));
     expect(
       androidWorkflow,
-      contains('build 19 and earlier must never be promoted'),
+      contains('build_number must be exactly 21 for this release candidate.'),
     );
     expect(
       iosWorkflow,
-      contains(r'--build-number "$BUILD_NUMBER"'),
-      reason: 'iOS must override pubspec +8 with the signed release build 25.',
+      contains(
+        'build_number must be exactly 26 for this release candidate.',
+      ),
     );
-    expect(
-      iosWorkflow,
-      contains('BIL_IOS_V25_FROZEN_SOURCE_MANIFEST_2026-09-19.md'),
-    );
-    expect(iosWorkflow, contains('BIL_IOS_V25_AUDITED_SOURCE_SHA'));
-    expect(iosWorkflow, contains('BIL_IOS_V25_STAGING_MANIFEST_SHA256'));
   });
 
   test('all accepted launch boundaries remain present', () {

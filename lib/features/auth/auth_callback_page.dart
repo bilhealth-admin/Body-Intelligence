@@ -64,13 +64,13 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
     final auth = Supabase.instance.client.auth;
 
     if (auth.currentSession != null) {
-      _finish();
+      _finish(auth.currentSession);
       return;
     }
 
     _subscription = auth.onAuthStateChange.listen(
       (state) {
-        if (state.session != null) _finish();
+        if (state.session != null) _finish(state.session);
       },
       onError: (Object _, StackTrace _) {
         if (!mounted || _completed) return;
@@ -83,7 +83,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
     // listener above.
     await Future<void>.delayed(Duration.zero);
     if (auth.currentSession != null) {
-      _finish();
+      _finish(auth.currentSession);
       return;
     }
 
@@ -93,12 +93,16 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
     });
   }
 
-  void _finish() {
+  void _finish([Session? session]) {
     if (!mounted || _completed) return;
     _completed = true;
     _timer?.cancel();
     unawaited(_subscription?.cancel());
-    context.go('/startup');
+    // Carry the session observed at the callback boundary into Startup. The
+    // auth stream can publish a transient null event while Supabase finishes
+    // persisting the session (especially on Android); Startup must not turn a
+    // successful provider sign-in back into Guest during that handoff.
+    context.go('/startup', extra: session);
   }
 
   Future<void> _retry() async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/theme/bil_premium_responsive_layout.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../core/theme/app_colors.dart';
@@ -11,18 +12,13 @@ import '../../ads/presentation/safe_free_ad_anchor.dart';
 import '../../commerce/presentation/premium_label_badge.dart';
 import '../providers/dashboard_preferences_provider.dart';
 import '../dashboard_five_locale_copy.dart';
-import '../domain/dashboard_heart_health_policy.dart';
-import '../domain/dashboard_step_trend.dart';
 import 'premium_dashboard_card_lock.dart';
-import '../../connected_health/widgets/connected_health_card.dart';
-import 'daily_return_card.dart';
 
 part 'premium_dashboard_command_center.dart';
 part 'premium_dashboard_evidence.dart';
 part 'dashboard_reference_phone.dart';
 part 'dashboard_reference_phone_components.dart';
 part 'dashboard_reference_goal_components.dart';
-part 'dashboard_reference_progress_components.dart';
 part 'dashboard_reference_phone_sections.dart';
 
 /// Presentation-only benchmark for the premium dashboard hierarchy.
@@ -84,8 +80,6 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     this.nutrientDashboardPreset = 'Calories and macros',
     this.weightTrendValues = const [],
     this.stepTrendValues = const [],
-    this.stepSourceName,
-    this.todaySteps,
     this.weightUnit = 'kg',
     this.visibleSections = const {
       DashboardSectionIds.aiCoach,
@@ -154,8 +148,6 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String nutrientDashboardPreset;
   final List<double> weightTrendValues;
   final List<double> stepTrendValues;
-  final String? stepSourceName;
-  final double? todaySteps;
   final String weightUnit;
   final Set<String> visibleSections;
   final bool premiumUnlocked;
@@ -195,15 +187,13 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       nutrientDashboardPreset: nutrientDashboardPreset,
       weightTrendValues: weightTrendValues,
       stepTrendValues: stepTrendValues,
-      stepSourceName: stepSourceName,
-      todaySteps: todaySteps,
       weightUnit: weightUnit,
       loggingItems: loggingItems,
       hero: hero,
       aiCoach: aiCoach,
       dailyIntelligence: dailyIntelligence,
-      // Owner-retired cards are intentionally not forwarded to the active
-      // dashboard tree, even when supplied for compatibility.
+      progressSection: progressSection,
+      personalHealthAi: personalHealthAi,
       connectedHealth: connectedHealth,
       bodyTwinSummary: bodyTwinSummary,
       actionTitle: actionTitle,

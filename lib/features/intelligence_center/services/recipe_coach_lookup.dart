@@ -1,6 +1,5 @@
 import '../domain/intelligence_message.dart';
 import '../../wellness/repositories/recipe_release_repository.dart';
-import '../../recipe_import/domain/recipe_ingredient_evidence.dart';
 
 final class RecipeCoachAnswer {
   const RecipeCoachAnswer({
@@ -139,11 +138,9 @@ final class RecipeCoachLookup {
     for (var index = 0; index < steps.length; index++) {
       buffer.writeln('${index + 1}. ${steps[index]}');
     }
-    if (!RecipeIngredientEvidence.recordNeedsReview(detail.record)) {
-      buffer
-        ..writeln()
-        ..write("${label('Per serving')}: $kcal ${label('kcal')}");
-    }
+    buffer
+      ..writeln()
+      ..write("${label('Per serving')}: $kcal ${label('kcal')}");
     return RecipeCoachAnswer(
       recipeIds: <String>[summary.id],
       text: buffer.toString().trim(),

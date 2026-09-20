@@ -45,6 +45,7 @@ const _settingsSources = <String>{
   'Workout Routines',
   'Apps & Devices',
   'Steps',
+  'Learn',
   'Community',
   'Friends',
   'Messages',

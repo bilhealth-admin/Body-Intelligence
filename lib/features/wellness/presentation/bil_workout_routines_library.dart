@@ -6,7 +6,7 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
     GymSixMonthPlan gymPlan,
   ) {
     final subscription = _usableVerifiedSubscription(
-      ref.watch(verifiedSubscriptionAccessProvider),
+      ref.watch(verifiedSubscriptionStateProvider),
     );
     final premiumUnlocked =
         subscription != null && subscription.plan != CommercePlan.free;

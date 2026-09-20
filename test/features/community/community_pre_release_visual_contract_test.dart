@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
-import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
@@ -48,16 +47,18 @@ final class _PreReleaseCommunityRepository extends CommunityRepository {
       connections.future;
 
   @override
-  Future<CommunityPolicyState> loadCommunityPolicyState({
+  Future<Map<String, dynamic>?> loadActiveContentPolicy({
     required String localeCode,
-  }) async => CommunityPolicyState.acceptanceRequired(
-    CommunityContentPolicy.fromJson({
-      'version': 'qa-community-policy-v1',
-      'locale_code': 'en',
-      'document_url': 'https://www.bilhealth.com/community-guidelines',
-      'effective_at': '2026-09-08T00:00:00Z',
-    }),
-  );
+  }) async => {
+    'version': 'qa-community-policy-v1',
+    'document_url': 'https://www.bilhealth.com/community-guidelines',
+  };
+
+  @override
+  Future<bool> hasAcceptedContentPolicy(
+    String version, {
+    DateTime? acceptedNotBefore,
+  }) async => false;
 }
 
 final _verifiedPremium = SubscriptionState(
@@ -108,143 +109,27 @@ void main() {
     },
   );
 
-  test('all long Community Safety copy is native in every supported locale', () {
-    const safetyStateKeys = <String>{
-      'The policy could not be opened. Try again before accepting.',
-      'Publishing, comments, and messages stay locked until you review and accept this version.',
-      'I have read and agree to this policy version.',
-      'Checking Community policy…',
-      'Publishing, comments, and messages stay locked until verification finishes.',
-      'Community policy could not be verified',
-      'Publishing, comments, and messages remain locked. Check your connection and retry.',
-      'No active Community policy is available',
-      'Publishing, comments, and messages are locked until BIL publishes a production policy. No acceptance has been recorded.',
-    };
-    const noticeKeys = <String>{
-      'Posting and messages stay locked until verification finishes.',
-      'Posting and messages remain locked. Check your connection and retry.',
-      'Community publishing is unavailable',
-      'No active production policy could be verified. No acceptance has been recorded.',
-      'Review safety',
-      'Review the active Community policy',
-      'Posting and messages stay locked until you accept the active version.',
-      'Posting and messages stay locked until you accept {version}.',
-    };
-    final exceptionKeys = <String>{
-      for (final failure in CommunityPolicyAccessFailure.values)
-        for (final action in CommunityPolicyProtectedAction.values)
-          CommunityPolicyAccessException(
-            failure: failure,
-          ).englishMessage(action),
-      for (final failure in CommunityMembershipAccessFailure.values)
-        for (final action in CommunityPolicyProtectedAction.values)
-          CommunityMembershipAccessException(
-            failure: failure,
-          ).englishMessage(action),
-    };
-    final expectedPolicyKeys = <String>{
-      ...safetyStateKeys,
-      ...exceptionKeys,
-      ...noticeKeys,
-    };
-    final expectedExtendedLocales =
-        AppLocalizations.supportedLocales
-            .map(BilLocalePolicy.canonicalTag)
-            .toSet()
-          ..removeAll(const {'ar', 'en', 'fr', 'es', 'tr'});
-
-    expect(exceptionKeys.length, 10);
-    expect(
-      communitySafetyEnglishKeys.toSet().length,
-      communitySafetyEnglishKeys.length,
-    );
-    expect(communityPolicyEnglishKeys.toSet(), expectedPolicyKeys);
-    expect(
-      communityPolicyEnglishKeys.toSet().length,
-      communityPolicyEnglishKeys.length,
-    );
-    expect(
-      <String>{
-        ...communitySafetyEnglishKeys,
-        ...communityPolicyEnglishKeys,
-      }.length,
-      communitySafetyEnglishKeys.length + communityPolicyEnglishKeys.length,
-    );
-    expect(communitySafetyLocaleCopy.keys.toSet(), expectedExtendedLocales);
-    expect(communityPolicyLocaleCopy.keys.toSet(), expectedExtendedLocales);
-
-    for (final locale in AppLocalizations.supportedLocales) {
-      final tag = BilLocalePolicy.canonicalTag(locale);
-      for (final english in <String>[
-        ...communitySafetyEnglishKeys,
-        ...communityPolicyEnglishKeys,
-      ]) {
-        final value = communityTextForLanguage(tag, english, 'نص أمان عربي');
-        expect(value.trim(), isNotEmpty, reason: '$tag: $english');
-        if (tag != 'en') {
-          expect(value, isNot(english), reason: '$tag: $english');
-        }
-      }
-    }
-    for (final entry in communitySafetyLocaleCopy.entries) {
-      expect(
-        entry.value.length,
-        communitySafetyEnglishKeys.length,
-        reason: entry.key,
-      );
-      expect(entry.value.every((value) => value.trim().isNotEmpty), isTrue);
-    }
-    for (final entry in communityPolicyLocaleCopy.entries) {
-      expect(
-        entry.value.length,
-        communityPolicyEnglishKeys.length,
-        reason: entry.key,
-      );
-      expect(entry.value.every((value) => value.trim().isNotEmpty), isTrue);
-    }
-  });
-
   test(
-    'Community policy shared labels and version token close all locales',
+    'all long Community Safety copy is native in every supported locale',
     () {
-      const sharedLabels = <String>[
-        'Not now',
-        'Retry',
-        'Review policy',
-        'Read policy',
-        'Check again',
-      ];
-      const versionTemplate =
-          'Posting and messages stay locked until you accept {version}.';
-      const arabicVersionTemplate =
-          'يبقى النشر والرسائل مقفلين حتى توافق على {version}.';
-
+      expect(communitySafetyLocaleCopy.length, 20);
       for (final locale in AppLocalizations.supportedLocales) {
         final tag = BilLocalePolicy.canonicalTag(locale);
-        for (final english in sharedLabels) {
-          final value = communityTextForLanguage(tag, english, 'نص عربي أصلي');
+        for (final english in communitySafetyEnglishKeys) {
+          final value = communityTextForLanguage(tag, english, 'نص أمان عربي');
           expect(value.trim(), isNotEmpty, reason: '$tag: $english');
           if (tag != 'en') {
             expect(value, isNot(english), reason: '$tag: $english');
           }
         }
-
-        final template = communityTextForLanguage(
-          tag,
-          versionTemplate,
-          arabicVersionTemplate,
-        );
+      }
+      for (final entry in communitySafetyLocaleCopy.entries) {
         expect(
-          RegExp(r'\{version\}').allMatches(template).length,
-          1,
-          reason: tag,
+          entry.value.length,
+          communitySafetyEnglishKeys.length,
+          reason: entry.key,
         );
-        final rendered = template.replaceAll(
-          '{version}',
-          'community-policy-v2',
-        );
-        expect(rendered, contains('community-policy-v2'), reason: tag);
-        expect(rendered, isNot(contains('{version}')), reason: tag);
+        expect(entry.value.every((value) => value.trim().isNotEmpty), isTrue);
       }
     },
   );
@@ -324,70 +209,26 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetViewInsets);
-    tester.view.viewInsets = const FakeViewPadding(bottom: 260);
 
     for (final locale in AppLocalizations.supportedLocales) {
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
       final repository = _PreReleaseCommunityRepository();
-      final localeTag = BilLocalePolicy.canonicalTag(locale);
       await tester.pumpWidget(
         _app(
           locale: locale,
-          home: NewCommunityMessagePage(
-            key: ValueKey(localeTag),
-            repository: repository,
-          ),
+          home: NewCommunityMessagePage(repository: repository),
         ),
       );
       await tester.pumpAndSettle();
 
       final field = find.byKey(const Key('community-message-recipient-search'));
-      expect(field, findsOneWidget, reason: localeTag);
+      expect(field, findsOneWidget, reason: locale.toLanguageTag());
       final appBar = find.byType(AppBar);
       expect(
         tester.getTopLeft(field).dy,
         greaterThanOrEqualTo(tester.getBottomLeft(appBar).dy),
-        reason: localeTag,
+        reason: locale.toLanguageTag(),
       );
-      expect(
-        find.byKey(const Key('community-message-send')).hitTestable(),
-        findsOneWidget,
-        reason: localeTag,
-      );
-
-      expect(
-        find.byKey(const Key('community-new-message-scroll')),
-        findsOneWidget,
-        reason: localeTag,
-      );
-      final outerScroll = find
-          .descendant(
-            of: find.byKey(const Key('community-new-message-scroll')),
-            matching: find.byType(Scrollable),
-          )
-          .first;
-      final subject = find.byKey(const Key('community-message-subject'));
-      await tester.scrollUntilVisible(subject, 120, scrollable: outerScroll);
-      await tester.ensureVisible(subject);
-      await tester.pumpAndSettle();
-      expect(subject.hitTestable(), findsOneWidget, reason: localeTag);
-
-      final body = find.byKey(const Key('community-message-body'));
-      await tester.scrollUntilVisible(body, 120, scrollable: outerScroll);
-      await tester.ensureVisible(body);
-      await tester.pumpAndSettle();
-      expect(body.hitTestable(), findsOneWidget, reason: localeTag);
-      final keyboardTop =
-          tester.view.physicalSize.height / tester.view.devicePixelRatio -
-          tester.view.viewInsets.bottom;
-      expect(
-        tester.getTopLeft(body).dy,
-        lessThan(keyboardTop),
-        reason: localeTag,
-      );
-      expect(tester.takeException(), isNull, reason: localeTag);
+      expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
     }
   });
 

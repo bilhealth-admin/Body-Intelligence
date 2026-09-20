@@ -11,17 +11,22 @@ void main() {
       'READ_STEPS',
       'READ_DISTANCE',
       'READ_ACTIVE_CALORIES_BURNED',
+      'READ_EXERCISE',
+      'READ_SLEEP',
+      'READ_HEART_RATE',
+      'READ_RESTING_HEART_RATE',
+      'READ_HEART_RATE_VARIABILITY',
+      'READ_WEIGHT',
+      'WRITE_WEIGHT',
+      'READ_BODY_FAT',
+      'READ_LEAN_BODY_MASS',
+      'READ_HYDRATION',
+      'READ_NUTRITION',
+      'WRITE_NUTRITION',
+      'READ_HEALTH_DATA_HISTORY',
     ]) {
       expect(manifest, contains('android.permission.health.$permission'));
     }
-    final healthPermissions = RegExp(
-      r'android:name="android\.permission\.health\.([^"]+)"',
-    ).allMatches(manifest).map((match) => match.group(1)).toSet();
-    expect(healthPermissions, {
-      'READ_STEPS',
-      'READ_DISTANCE',
-      'READ_ACTIVE_CALORIES_BURNED',
-    });
     for (final excludedPermission in <String>[
       'READ_BLOOD_GLUCOSE',
       'READ_BLOOD_PRESSURE',
@@ -59,6 +64,16 @@ void main() {
       );
       expect(android, contains('Device.TYPE_WATCH'));
       expect(android, contains('"wearableKind"] = "wear_os_watch"'));
+      expect(
+        android,
+        contains('private val readChangesInFlight = AtomicBoolean(false)'),
+      );
+      expect(
+        android,
+        contains('readChangesInFlight.compareAndSet(false, true)'),
+      );
+      expect(android, contains('readChangesInFlight.set(false)'));
+      expect(android, contains('"cancelReadChanges"'));
       for (final excludedRecord in <String>[
         'BloodGlucoseRecord',
         'BloodPressureRecord',
@@ -77,6 +92,8 @@ void main() {
       expect(plist, contains('NSHealthShareUsageDescription'));
       expect(plist, contains('NSHealthUpdateUsageDescription'));
       expect(entitlements, contains('com.apple.developer.healthkit'));
+      expect(ios, contains('case "cancelReadChanges"'));
+      expect(ios, contains('store.stop(query)'));
     },
   );
 
@@ -97,10 +114,6 @@ void main() {
       expect(readChanges, contains('limit: Self.readPageLimit'));
       expect(readChanges, contains('nextAnchors[name] = newAnchor'));
       expect(readChanges, contains('"hasMore": pageHasMore'));
-      expect(readChanges, contains('healthQueryQueue.async'));
-      expect(readChanges, contains('func executeNext()'));
-      expect(ios, contains('case "cancelReadChanges"'));
-      expect(ios, contains('store.stop(query)'));
       expect(readChanges, isNot(contains('withStart: nil')));
       expect(readChanges, isNot(contains('HKObjectQueryNoLimit')));
     },
@@ -111,37 +124,36 @@ void main() {
       'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
     ).readAsStringSync();
     final initialStart = android.indexOf(
-      'suspend fun <T : Record> readInitialPage',
+      'suspend fun <T : Record> readInitial',
     );
     final initialEnd = android.indexOf(
-      '// Once the bounded history is complete',
+      'for (name in supportedRequestedNames)',
       initialStart,
     );
     final initialRead = android.substring(initialStart, initialEnd);
 
-    expect(android, contains('asOf.minusSeconds(30L * 24L * 60L * 60L)'));
-    expect(android, isNot(contains('PERMISSION_READ_HEALTH_DATA_HISTORY')));
-    expect(android, isNot(contains('HISTORY_PERMISSION_SCOPE_MARKER')));
+    expect(android, contains(') 365L else 30L'));
+    expect(
+      android,
+      contains('HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY'),
+    );
+    expect(
+      android,
+      contains('HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY'),
+    );
+    expect(android, contains('HISTORY_PERMISSION_SCOPE_MARKER'));
     expect(android, contains('TimeRangeFilter.between('));
     expect(android, contains('val asOf = call.argument<String>("asOf")'));
     expect(
       android.indexOf('getChangesToken(ChangesTokenRequest(classes))'),
-      lessThan(android.indexOf('suspend fun <T : Record> readInitialPage')),
+      lessThan(android.indexOf('suspend fun <T : Record> readInitial')),
       reason:
           'The incremental boundary must be created before history is read.',
     );
     expect(android, isNot(contains('366L')));
     expect(initialRead, contains('pageToken = pageToken'));
-    expect(
-      initialRead,
-      contains('return page.pageToken?.trim()?.takeIf(String::isNotEmpty)'),
-    );
-    expect(
-      initialRead,
-      contains('pageToken = null'),
-      reason:
-          'The page cursor must reset when advancing to the next record family.',
-    );
+    expect(initialRead, contains('pageToken = page.pageToken'));
+    expect(initialRead, contains('while (!pageToken.isNullOrEmpty())'));
     expect(
       android,
       contains('"changesTokenExpired" to response.changesTokenExpired'),
@@ -149,23 +161,16 @@ void main() {
           'Expired Health Connect tokens must be surfaced instead of saving '
           'their unusable next token.',
     );
-    expect(android, isNot(contains('HeartRateRecord')));
-    expect(android, contains('"health_connect_write_not_available"'));
-    expect(android, contains('.filter(supportedNames::contains)'));
-    expect(android, contains('if (recordPermissions.isEmpty())'));
-    expect(android, contains('if (supportedRequestedNames.isEmpty())'));
-    // Status inspection needs a default scope; mutation/read requests do not.
     expect(
       android,
-      contains(
-        'permissionSnapshot(call.argument<List<String>>("types") ?: supportedNames)',
-      ),
+      contains('record.samples.mapIndexed'),
+      reason: 'Every sample in a HeartRateRecord series must be imported.',
     );
+    expect(android, contains('"parentRecordId" to metadata.id'));
     expect(
       android,
-      contains(
-        'val names = call.argument<List<String>>("types") ?: emptyList()',
-      ),
+      contains(r'#heartRate#${sample.time.toEpochMilli()}#$index'),
+      reason: 'Heart-rate child identities must be stable across retries.',
     );
   });
 }

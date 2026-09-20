@@ -14,16 +14,15 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   // cached device is never presented as nearby merely because it was found in
   // a previous scan.
   private var currentDiscoveryIds = Set<UUID>()
+  private var seenPackets = Set<String>()
   private var pendingPairResults: [UUID: FlutterResult] = [:]
   private var permissionResult: FlutterResult?
   private var permissionTimeout: DispatchWorkItem?
   private var permissionProbeActive = false
-  private var pendingDiscovery: (result: FlutterResult, timeoutMs: Int)?
 
   private final class ReadSession {
     let result: FlutterResult
     var packets = [[String: Any]]()
-    var seenPackets = Set<String>()
     var expectedCharacteristics = Set<String>()
     var completedCharacteristics = Set<String>()
     var pendingServiceDiscoveries = 0
@@ -64,34 +63,28 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       return
     }
     let central = ensureCentralManager()
-    if call.method == "discover" {
-      let requestedTimeoutMs = (args["timeoutMs"] as? NSNumber)?.intValue ?? 3000
-      let timeoutMs = min(max(requestedTimeoutMs, 500), 30000)
-      guard discoveryResult == nil, pendingDiscovery == nil else {
-        result(FlutterError(code:"operation_in_progress",message:nil,details:nil))
-        return
-      }
-      // CBCentralManager reports `.unknown` for a short window immediately
-      // after lazy initialization. Bluetooth can already be enabled during
-      // that window; fail-closed as disabled here made the first scan show a
-      // false red error on iPhone. Queue only this user-initiated scan until
-      // CoreBluetooth reports its real adapter state.
-      if central.state == .unknown {
-        pendingDiscovery = (result: result, timeoutMs: timeoutMs)
-        return
-      }
-      guard central.state == .poweredOn else {
-        result(FlutterError(code:"bluetooth_disabled", message:"Bluetooth unavailable", details:nil))
-        return
-      }
-      startDiscovery(central, result: result, timeoutMs: timeoutMs)
-      return
-    }
     guard central.state == .poweredOn else {
       result(FlutterError(code:"bluetooth_disabled", message:"Bluetooth unavailable", details:nil))
       return
     }
     switch call.method {
+    case "discover":
+      guard discoveryResult == nil else { result(FlutterError(code:"operation_in_progress",message:nil,details:nil)); return }
+      let requestedTimeoutMs = (args["timeoutMs"] as? NSNumber)?.intValue ?? 3000
+      let timeoutMs = min(max(requestedTimeoutMs, 500), 30000)
+      currentDiscoveryIds.removeAll()
+      discoveryResult = result; central.scanForPeripherals(withServices: supportedServices, options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
+      DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeoutMs)) {
+        self.central.stopScan()
+        let callback = self.discoveryResult
+        self.discoveryResult = nil
+        let discovered = self.currentDiscoveryIds
+          .compactMap { self.peripherals[$0] }
+          .sorted { $0.identifier.uuidString < $1.identifier.uuidString }
+          .map(self.describe)
+        self.currentDiscoveryIds.removeAll()
+        callback?(discovered)
+      }
     case "pair":
       guard let p=peripheral(args) else { result(FlutterError(code:"not_found",message:nil,details:nil)); return }
       if p.state == .connected { result(nil); return }
@@ -120,30 +113,6 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       DispatchQueue.main.asyncAfter(deadline:.now()+20,execute:timeout)
       if p.state == .connected { p.discoverServices(supportedServices) } else { central.connect(p) }
     default: result(FlutterMethodNotImplemented)
-    }
-  }
-
-  private func startDiscovery(
-    _ central: CBCentralManager,
-    result: @escaping FlutterResult,
-    timeoutMs: Int
-  ) {
-    currentDiscoveryIds.removeAll()
-    discoveryResult = result
-    central.scanForPeripherals(
-      withServices: supportedServices,
-      options: [CBCentralManagerScanOptionAllowDuplicatesKey:false]
-    )
-    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(timeoutMs)) {
-      self.central.stopScan()
-      let callback = self.discoveryResult
-      self.discoveryResult = nil
-      let discovered = self.currentDiscoveryIds
-        .compactMap { self.peripherals[$0] }
-        .sorted { $0.identifier.uuidString < $1.identifier.uuidString }
-        .map(self.describe)
-      self.currentDiscoveryIds.removeAll()
-      callback?(discovered)
     }
   }
 
@@ -216,15 +185,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     }
   }
 
-  private func peripheral(_ args:[String:Any])->CBPeripheral? {
-    guard let id = args["peripheralId"] as? String, let uuid = UUID(uuidString:id) else { return nil }
-    if let cached = peripherals[uuid] { return cached }
-    // A saved BIL device survives app restarts; this process's scan cache does
-    // not. Retrieve the OS-known peripheral for an explicit reconnect only.
-    guard let known = central.retrievePeripherals(withIdentifiers: [uuid]).first else { return nil }
-    peripherals[uuid] = known
-    return known
-  }
+  private func peripheral(_ args:[String:Any])->CBPeripheral? { guard let id=args["peripheralId"] as? String, let uuid=UUID(uuidString:id) else{return nil}; return peripherals[uuid] }
   // Bluetooth SIG fitness profiles only: Weight Scale, Body Composition and
   // Heart Rate. Clinical sensor profiles are intentionally not scanned or
   // parsed.
@@ -232,19 +193,6 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   private var supportedCharacteristics:Set<String>{["2A9D","2A9C","2A37"]}
   func centralManagerDidUpdateState(_ central:CBCentralManager) {
     resolvePermissionRequestIfPossible()
-    guard let pending = pendingDiscovery, central.state != .unknown else { return }
-    pendingDiscovery = nil
-    guard central.state == .poweredOn else {
-      pending.result(
-        FlutterError(
-          code:"bluetooth_disabled",
-          message:"Bluetooth unavailable",
-          details:nil
-        )
-      )
-      return
-    }
-    startDiscovery(central, result: pending.result, timeoutMs: pending.timeoutMs)
   }
   func centralManager(_ central:CBCentralManager,didDiscover peripheral:CBPeripheral,advertisementData:[String:Any],rssi RSSI:NSNumber){
     let supported = Set(supportedServices.map { $0.uuidString })
@@ -297,7 +245,7 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     session.completedCharacteristics.insert(identity)
     if error == nil, let data=characteristic.value {
       let key="\(peripheral.identifier)-\(characteristic.uuid)-\(data.base64EncodedString())"
-      if session.seenPackets.insert(key).inserted { session.packets.append(["peripheralId":peripheral.identifier.uuidString,"service":characteristic.service?.uuid.uuidString ?? "","characteristic":characteristic.uuid.uuidString,"packet":data.base64EncodedString(),"receivedAt":ISO8601DateFormatter().string(from:Date())]) }
+      if seenPackets.insert(key).inserted { session.packets.append(["peripheralId":peripheral.identifier.uuidString,"service":characteristic.service?.uuid.uuidString ?? "","characteristic":characteristic.uuid.uuidString,"packet":data.base64EncodedString(),"receivedAt":ISO8601DateFormatter().string(from:Date())]) }
     }
     completeIfReady(peripheral.identifier)
   }
@@ -306,15 +254,6 @@ final class BILFitnessBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     guard let session=sessions.removeValue(forKey:id),!session.completed else{return}
     session.completed=true
     session.timeout?.cancel()
-    // A manual read is finished. Do not leave notification traffic running
-    // while the user is elsewhere in the app.
-    if let peripheral = peripherals[id], peripheral.state == .connected {
-      for service in peripheral.services ?? [] {
-        for characteristic in service.characteristics ?? [] where characteristic.isNotifying {
-          peripheral.setNotifyValue(false, for: characteristic)
-        }
-      }
-    }
     if let error=error {
       if let peripheral=peripherals[id], peripheral.state != .disconnected {
         central.cancelPeripheralConnection(peripheral)

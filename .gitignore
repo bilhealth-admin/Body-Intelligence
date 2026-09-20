@@ -3,8 +3,6 @@
 *.log
 *.pyc
 *.swp
-*.before_card_height
-*.before-whitespace-repair-*.bak
 .DS_Store
 .atom/
 .build/
@@ -115,7 +113,6 @@ public_site/.well-known/assetlinks.json
 
 # Generated golden-test failure diagnostics are not release evidence.
 test/visual_closure/failures/
-test/features/wellness/failures/
 
 # Historical/raw audit captures stay local. Only curated release evidence,
 # approved references, and final proof packs are eligible for review.
@@ -136,7 +133,6 @@ tool/workout_media/
 # Local Cloudflare Worker dependencies and dry-run bundles.
 cloudflare/workout-runtime/node_modules/
 cloudflare/workout-runtime/dist/
-supabase/tests/node_modules/
 
 # Local Codex upload staging and emulator credential captures.
 .codex_upload_tmp/

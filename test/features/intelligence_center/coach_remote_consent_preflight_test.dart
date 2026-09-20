@@ -67,32 +67,9 @@ void main() {
 
       expect(result.status, CoachServiceStatus.temporarilyUnavailable);
       expect(result.diagnosticCode, 'remote_ai_consent_preflight_failed');
-      expect(events, ['session', 'consent', 'consent']);
+      expect(events, ['session', 'consent']);
       expect(cloud.lastBody, isNull);
     });
-
-    test(
-      'one transient consent preflight failure is retried before any invoke',
-      () async {
-        final events = <String>[];
-        final cloud = _RecordingCloudAccess(
-          events: events,
-          consentFailuresRemaining: 1,
-          consent: _grantedConsent,
-        );
-        final projector = _RecordingProjector(events);
-
-        final result = await _gateway(cloud, projector).answer(
-          question: 'Review my meals',
-          locale: 'en',
-          context: _context(),
-        );
-
-        expect(result.status, CoachServiceStatus.ready);
-        expect(events, ['session', 'consent', 'consent', 'project', 'invoke']);
-        expect(cloud.lastBody, isNotNull);
-      },
-    );
 
     test(
       'current consent projects context then invokes and keeps tool action',
@@ -182,7 +159,6 @@ final class _RecordingCloudAccess implements CoachCloudAccess {
     this.hasSession = true,
     this.consent,
     this.throwConsentRead = false,
-    this.consentFailuresRemaining = 0,
     this.response = const CoachCloudFunctionResponse(
       status: 200,
       data: <String, Object?>{'reply': 'ok'},
@@ -193,7 +169,6 @@ final class _RecordingCloudAccess implements CoachCloudAccess {
   final bool hasSession;
   final Object? consent;
   final bool throwConsentRead;
-  int consentFailuresRemaining;
   final CoachCloudFunctionResponse response;
   Map<String, Object?>? lastBody;
 
@@ -206,10 +181,7 @@ final class _RecordingCloudAccess implements CoachCloudAccess {
   @override
   Future<Object?> readRemoteAiConsent() async {
     events.add('consent');
-    if (throwConsentRead || consentFailuresRemaining > 0) {
-      if (consentFailuresRemaining > 0) consentFailuresRemaining--;
-      throw StateError('offline');
-    }
+    if (throwConsentRead) throw StateError('offline');
     return consent;
   }
 

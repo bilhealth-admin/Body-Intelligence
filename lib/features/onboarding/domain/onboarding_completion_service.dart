@@ -9,7 +9,6 @@ import '../../../data/repositories/user_profile_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../intelligence_center/domain/coach_context_preferences.dart';
 import '../../nutrition/repositories/dietary_preferences_repository.dart';
-import '../../profile/services/display_name_sync.dart';
 import '../models/onboarding_draft.dart';
 import 'adult_eligibility.dart';
 import 'onboarding_goal_bindings.dart';
@@ -52,8 +51,11 @@ final class OnboardingCompletionService {
   final OnboardingDraftRepository drafts;
   final Future<void> Function(OnboardingCommitPhase phase)? phaseHook;
 
-  Future<void> commit({required OnboardingDraft draft, DateTime? now}) async {
-    final preferredName = draft.preferredName.trim();
+  Future<void> commit({
+    required OnboardingDraft draft,
+    DateTime? now,
+    bool reviewMode = false,
+  }) async {
     if (draft.remoteAiConsent == OnboardingRemoteAiConsent.unknown) {
       throw StateError('remote_ai_choice_required');
     }
@@ -71,6 +73,7 @@ final class OnboardingCompletionService {
     final plan = OnboardingPlanCalculator.calculate(draft, now: committedAt);
     final age = BilAdultEligibility.ageOn(draft.birthDate!, on: committedAt);
     final existingProfile = await profiles.getProfile();
+    final existingWeights = await weights.getAll();
     final existingMeasurement = await measurements.getLatest();
     final existingGoal = await goals.getActive();
     final dietary = await dietaryPreferences.read();
@@ -100,11 +103,19 @@ final class OnboardingCompletionService {
       );
       await phaseHook?.call(OnboardingCommitPhase.profile);
 
-      await weights.addWeight(
-        draft.currentWeightKg!,
-        date: committedAt,
-        measurementContext: 'unspecified',
-      );
+      final latestWeight = existingWeights.isEmpty
+          ? null
+          : existingWeights.first;
+      final weightChanged =
+          latestWeight == null ||
+          (latestWeight.weight - draft.currentWeightKg!).abs() > .0001;
+      if (!reviewMode || weightChanged) {
+        await weights.addWeight(
+          draft.currentWeightKg!,
+          date: committedAt,
+          measurementContext: 'unspecified',
+        );
+      }
       await phaseHook?.call(OnboardingCommitPhase.weight);
 
       final profile = await profiles.getProfile();
@@ -118,16 +129,26 @@ final class OnboardingCompletionService {
       );
       await phaseHook?.call(OnboardingCommitPhase.goal);
 
-      await measurements.saveForDay(
-        date: committedAt,
-        waistCm: waist,
-        neckCm: neck,
-        hipsCm: hips,
-        chestCm: existingMeasurement?.chestCm,
-        armCm: existingMeasurement?.armCm,
-        thighCm: existingMeasurement?.thighCm,
-        allowEmptySnapshot: true,
-      );
+      final baselineMeasurement = existingMeasurement;
+      final measurementChanged = baselineMeasurement == null
+          ? (existingProfile?.waist != waist ||
+                existingProfile?.neck != neck ||
+                hips != null)
+          : baselineMeasurement.waistCm != waist ||
+                baselineMeasurement.neckCm != neck ||
+                baselineMeasurement.hipsCm != hips;
+      if (!reviewMode || measurementChanged) {
+        await measurements.saveForDay(
+          date: committedAt,
+          waistCm: waist,
+          neckCm: neck,
+          hipsCm: hips,
+          chestCm: existingMeasurement?.chestCm,
+          armCm: existingMeasurement?.armCm,
+          thighCm: existingMeasurement?.thighCm,
+          allowEmptySnapshot: true,
+        );
+      }
       await phaseHook?.call(OnboardingCommitPhase.measurements);
 
       final existingPlan = await plans.getForProfile(profile.uuid);
@@ -147,8 +168,8 @@ final class OnboardingCompletionService {
         focuses: Set.unmodifiable(draft.aiFocuses),
       );
       await preferences.setManyInCurrentTransaction({
-        if (preferredName.isNotEmpty)
-          ...DisplayNameSync.localEdit(preferredName),
+        if (draft.preferredName.trim().isNotEmpty)
+          'displayName': draft.preferredName.trim(),
         'units': draft.system.name,
         'countryRegion': draft.countryRegion.trim(),
         'locale': draft.localeTag,

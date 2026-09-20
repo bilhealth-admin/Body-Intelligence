@@ -6,7 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const exhaustionKeys = <String>[
-    'Your available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue.',
+    'Your available AI tokens are exhausted. No message was charged. Reactivate the smart coach with Premium AI Coach or add AI Boost tokens.',
+    'Your Premium AI Coach subscription is active, but its available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue now.',
     'Get AI Boost',
   ];
 
@@ -40,7 +41,7 @@ void main() {
     ).readAsStringSync();
 
     expect(engine, contains(exhaustionKeys[0]));
-    expect(engine, contains(exhaustionKeys[1]));
-    expect(queryFlow, isNot(contains('activeAiSubscription')));
+    expect(engine, contains(exhaustionKeys[2]));
+    expect(queryFlow, contains(exhaustionKeys[1]));
   });
 }

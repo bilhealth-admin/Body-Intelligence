@@ -10,14 +10,13 @@ import 'wellness_content_pack.dart';
 /// boundary; local flags and cached selections cannot unlock it.
 bool wellnessContentAccessGranted(
   WellnessContentAccess minimumAccess,
-  SubscriptionState? subscription, {
-  DateTime? now,
-}) {
+  SubscriptionState? subscription,
+) {
   if (minimumAccess == WellnessContentAccess.free) return true;
   if (subscription == null ||
       subscription.authority != EntitlementAuthority.verifiedServer ||
       subscription.plan == CommercePlan.free ||
-      !_paidWindowIsCurrent(subscription, (now ?? DateTime.now()).toUtc())) {
+      !_paidWindowIsCurrent(subscription, DateTime.now().toUtc())) {
     return false;
   }
 
@@ -61,5 +60,5 @@ bool _paidWindowIsCurrent(SubscriptionState subscription, DateTime now) {
     SubscriptionLifecycle.refunded ||
     SubscriptionLifecycle.revoked => null,
   };
-  return boundary != null && boundary.toUtc().isAfter(now);
+  return boundary != null && !now.isAfter(boundary.toUtc());
 }

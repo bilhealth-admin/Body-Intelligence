@@ -13,7 +13,6 @@ import 'package:body_intelligence_log/features/intelligence_center/presentation/
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
-import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:drift/native.dart';
@@ -29,7 +28,6 @@ Widget _app(
   EdgeInsets viewInsets = EdgeInsets.zero,
   PreferencesRepository? preferences,
   WeightRepository? weightRepository,
-  LocalModelGateway? gateway,
 }) {
   return ProviderScope(
     overrides: [
@@ -38,8 +36,6 @@ Widget _app(
         preferencesRepositoryProvider.overrideWithValue(preferences),
       if (weightRepository != null)
         weightRepositoryProvider.overrideWithValue(weightRepository),
-      if (gateway != null)
-        intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
       coachContextSnapshotProvider.overrideWith(
         (ref) async => CoachContextSnapshot.empty(),
       ),
@@ -82,8 +78,6 @@ Widget _app(
 void main() {
   Future<void> revealOlderMessage(WidgetTester tester, Finder target) async {
     for (var attempt = 0; attempt < 6 && target.evaluate().isEmpty; attempt++) {
-      // The transcript is reversed so offset zero stays at the newest turn.
-      // Dragging down moves toward lazily built, older messages.
       await tester.drag(find.byType(ListView).last, const Offset(0, 320));
       await tester.pumpAndSettle();
     }
@@ -113,41 +107,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('hello'), findsOneWidget);
-    expect(find.textContaining('I am ready').hitTestable(), findsOneWidget);
+    expect(
+      find.textContaining('ready for your next useful decision').hitTestable(),
+      findsOneWidget,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
-  });
-
-  testWidgets('a slow reply stays cancelable without a context-search banner', (
-    tester,
-  ) async {
-    final db = await database(tester);
-    final gateway = _BlockingGateway();
-    await tester.pumpWidget(_app(db, gateway: gateway));
-    await tester.pumpAndSettle();
-
-    final field = find.byKey(const Key('ai-coach-question-field'));
-    await tester.enterText(field, 'Help me plan tomorrow');
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    for (
-      var attempt = 0;
-      attempt < 20 && !gateway.entered.isCompleted;
-      attempt++
-    ) {
-      await tester.pump(const Duration(milliseconds: 20));
-    }
-    expect(gateway.entered.isCompleted, isTrue);
-    await tester.pump(const Duration(milliseconds: 1200));
-
-    expect(find.text('Searching your BIL context…'), findsNothing);
-    final cancel = tester.widget<IconButton>(
-      find.byKey(const Key('ai-coach-cancel-request')),
-    );
-    expect(cancel.onPressed, isNotNull);
-    await tester.tap(find.byKey(const Key('ai-coach-cancel-request')));
-    gateway.release();
-    await tester.pump(const Duration(milliseconds: 80));
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -274,7 +239,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('compact hero and bounded composer remain above the keyboard', (
+  testWidgets('compact hero and one-line composer remain above the keyboard', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -289,14 +254,8 @@ void main() {
     final fieldFinder = find.byKey(const Key('ai-coach-question-field'));
     final field = tester.widget<TextField>(fieldFinder);
     expect(field.minLines, 1);
-    expect(field.maxLines, 2);
-    // The second title belongs to the explicit menu sheet, not this closed-menu
-    // conversation. Preserve the owner's single hero instead of restoring a duplicate.
+    expect(field.maxLines, 1);
     expect(find.text('Your BIL Coach'), findsOneWidget);
-    expect(
-      find.text('Memory and preferences stay one tap away.'),
-      findsNothing,
-    );
     expect(find.text('Speak your language'), findsOneWidget);
     expect(find.byKey(const Key('ai-coach-hero-start')), findsOneWidget);
     expect(tester.getBottomLeft(fieldFinder).dy, lessThanOrEqualTo(544));
@@ -307,60 +266,54 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets(
-    'restored technical failure is sanitized without adding a welcome',
-    (tester) async {
-      final db = await database(tester);
-      final stored = <Map<String, Object?>>[
-        for (var index = 0; index < 18; index++)
-          {
-            'id': 'old-$index',
-            'role': 'user',
-            'kind': 'freeQuestion',
-            'text': 'رسالة $index',
-            'createdAt': DateTime(2026, 8, 9, 12, index).toIso8601String(),
-            'evidence': <String>[],
-            'missingData': <String>[],
-          },
-        {
-          'id': 'technical-error',
-          'role': 'bil',
-          'kind': 'safety',
-          'text':
-              'BIL did not expose an action because the safety boundary did not approve one. AI Context is not accepted.',
-          'createdAt': DateTime(2026, 8, 9, 13).toIso8601String(),
-          'evidence': <String>['local-coach-runtime'],
-          'missingData': <String>[],
-        },
-      ];
-      await PreferencesRepository(
-        db,
-      ).set('intelligenceConversationV1', jsonEncode(stored));
-
-      await tester.pumpWidget(_app(db, locale: const Locale('ar')));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('BIL did not expose'), findsNothing);
-      expect(find.textContaining('AI Context is not accepted'), findsNothing);
-      expect(find.textContaining('جاهز لقرارك المفيد التالي'), findsNothing);
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpAndSettle();
-    },
-  );
-
-  testWidgets('only an empty chat gets one non-persistent session welcome', (
+  testWidgets('restored technical failure is sanitized behind latest welcome', (
     tester,
   ) async {
     final db = await database(tester);
-    final repository = PreferencesRepository(db);
-    await tester.pumpWidget(_app(db));
+    final stored = <Map<String, Object?>>[
+      for (var index = 0; index < 18; index++)
+        {
+          'id': 'old-$index',
+          'role': 'user',
+          'kind': 'freeQuestion',
+          'text': 'رسالة $index',
+          'createdAt': DateTime(2026, 8, 9, 12, index).toIso8601String(),
+          'evidence': <String>[],
+          'missingData': <String>[],
+        },
+      {
+        'id': 'technical-error',
+        'role': 'bil',
+        'kind': 'safety',
+        'text':
+            'BIL did not expose an action because the safety boundary did not approve one. AI Context is not accepted.',
+        'createdAt': DateTime(2026, 8, 9, 13).toIso8601String(),
+        'evidence': <String>['local-coach-runtime'],
+        'missingData': <String>[],
+      },
+    ];
+    await PreferencesRepository(
+      db,
+    ).set('intelligenceConversationV1', jsonEncode(stored));
+
+    await tester.pumpWidget(_app(db, locale: const Locale('ar')));
     await tester.pumpAndSettle();
+
+    expect(find.textContaining('BIL did not expose'), findsNothing);
+    expect(find.textContaining('AI Context is not accepted'), findsNothing);
     expect(
-      find.textContaining('ready for your next useful decision'),
+      find.textContaining('جاهز لقرارك المفيد التالي').hitTestable(),
       findsOneWidget,
     );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('every opened chat gets one non-persistent session welcome', (
+    tester,
+  ) async {
+    final db = await database(tester);
+    final repository = PreferencesRepository(db);
     await repository.set(
       'intelligenceConversationV1',
       jsonEncode([
@@ -377,11 +330,16 @@ void main() {
     );
 
     await tester.pumpWidget(_app(db));
+    await tester.pump();
+    expect(
+      find.textContaining('ready for your next useful decision'),
+      findsOneWidget,
+    );
     await tester.pumpAndSettle();
 
     expect(
       find.textContaining('ready for your next useful decision'),
-      findsNothing,
+      findsOneWidget,
     );
     expect(
       await repository.get('intelligenceConversationV1'),
@@ -395,7 +353,7 @@ void main() {
 
     expect(
       find.textContaining('ready for your next useful decision'),
-      findsNothing,
+      findsOneWidget,
     );
     expect(
       await repository.get('intelligenceConversationV1'),
@@ -455,7 +413,7 @@ void main() {
     },
   );
 
-  testWidgets('latest real turn stays visible after a tall restored history', (
+  testWidgets('session welcome stays visible after a tall restored history', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));
@@ -482,12 +440,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('Historic conversation turn 23').hitTestable(),
+      find.textContaining('ready for your next useful decision').hitTestable(),
       findsOneWidget,
-    );
-    expect(
-      find.textContaining('ready for your next useful decision'),
-      findsNothing,
     );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
@@ -722,38 +676,13 @@ final class _DelayedWeightRepository extends WeightRepository {
   }
 
   @override
-  Future<({int count, DateTime? updatedAt, String? firstDay, String? lastDay})>
-  revisionSummary() async {
+  Future<List<WeightEntry>> getAll() async {
     final gate = _nextRead;
     _nextRead = null;
     if (gate != null) {
       _activeRead = gate;
       await gate.future;
     }
-    return super.revisionSummary();
-  }
-}
-
-final class _BlockingGateway implements LocalModelGateway {
-  final entered = Completer<void>();
-  final _release = Completer<void>();
-
-  void release() {
-    if (!_release.isCompleted) _release.complete();
-  }
-
-  @override
-  Future<LocalModelResult> answer({
-    required String question,
-    required String locale,
-    required CoachContextSnapshot context,
-    bool languageDetected = false,
-    List<CoachConversationTurn> conversation = const [],
-  }) async {
-    if (!entered.isCompleted) entered.complete();
-    await _release.future;
-    return const LocalModelResult.answer(
-      LocalModelAnswer(text: 'Delayed fixture reply.', action: null),
-    );
+    return super.getAll();
   }
 }

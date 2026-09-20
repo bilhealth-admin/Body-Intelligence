@@ -506,7 +506,7 @@ class OnboardingStatusCard extends StatelessWidget {
               body,
               style: TextStyle(color: scheme.onSurfaceVariant, height: 1.4),
             ),
-            if (actionLabel != null) ...[
+            if (action != null && actionLabel != null) ...[
               const SizedBox(height: 14),
               OutlinedButton(onPressed: action, child: Text(actionLabel!)),
             ],

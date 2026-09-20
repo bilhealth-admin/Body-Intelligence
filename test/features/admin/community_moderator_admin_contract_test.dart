@@ -58,42 +58,27 @@ void main() {
     ).readAsStringSync();
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     expect(gateway, contains("'ai-coach-global-reset'"));
-    expect(gateway, contains('BilMobileIntegrityService.instance'));
-    expect(gateway, contains('.protect('));
+    expect(gateway, contains('BilMobileIntegrityService.instance.protect'));
     expect(gateway, isNot(contains("_client.rpc('bil_list_community")));
     expect(gateway, isNot(contains('.whereType<Map>()')));
     expect(gateway, contains('if (row is! Map)'));
     expect(edge, contains('operation === "moderator_list"'));
     expect(edge, contains('operation === "moderator_add"'));
     expect(edge, contains('operation === "moderator_remove"'));
-    // Assert the actual route boundary, not the position of its explanation.
-    // A presentation-only wrapper must not turn a moderator role into a purchase.
-    final moderationRoute = RegExp(
-      r"GoRoute\(\s*path: '/community/moderation',([\s\S]*?)\n      \),",
-    ).firstMatch(router)?.group(1);
-    expect(moderationRoute, isNotNull);
-    expect(moderationRoute, contains('CommunityPostModerationPage()'));
-    expect(moderationRoute, contains('CommunitySurface('));
-    expect(moderationRoute, isNot(contains('PremiumRouteGlassGate')));
-  });
-
-  test('owner-approved second administrator is enrolled by auth identity', () {
-    final sql = File(
-      'supabase/migrations/20260906120000_owner_approved_second_administrator.sql',
-    ).readAsStringSync();
-
-    expect(sql, contains("lower('bilhealth.app@gmail.com')"));
     expect(
-      sql,
+      router,
       contains(
-        'drop index if exists private.bil_ai_coach_single_active_admin_uidx',
+        "path: '/community/moderation',\n        // Moderation is a server-verified role",
       ),
     );
-    expect(sql, contains('insert into private.bil_ai_coach_admins'));
-    expect(sql, contains('insert into public.bil_community_moderators'));
-    expect(sql, contains('owner_approved_secondary_administrator'));
-    expect(sql, contains('v_owner_id'));
-    expect(sql, contains('v_secondary_id'));
+    expect(
+      router,
+      isNot(
+        contains(
+          "path: '/community/moderation',\n        builder: (_, _) => const PremiumRouteGlassGate",
+        ),
+      ),
+    );
   });
 
   testWidgets('administrator can add and remove roster entries by account', (

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_profile.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_polish.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_actions.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_food_actions.dart';
@@ -11,15 +10,8 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_fitness_watc
 import 'package:body_intelligence_log/app/localization/runtime_copy_connected_health.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_coach_review.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_health_device_status.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_health_devices_review.dart';
-import 'package:body_intelligence_log/app/localization/runtime_copy_community_review.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_form_copy.dart';
-import 'package:body_intelligence_log/features/community/presentation/community_safety_locale_copy.dart';
 
 const extendedLocaleTags = <String>{
   'de',
@@ -52,7 +44,7 @@ const _androidQualifiers = <String, String>{
   'ur': 'values-ur',
   'fa': 'values-fa',
   'hi': 'values-hi',
-  'id': 'values-in',
+  'id': 'values-id',
   'ms': 'values-ms',
   'ja': 'values-ja',
   'ko': 'values-ko',
@@ -120,7 +112,6 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...RegExp(r"^    '((?:\\.|[^'])*)': \{$", multiLine: true)
         .allMatches(catalogSource)
         .map((match) => _unescapeDartSingle(match.group(1)!)),
-    ...ProfileRuntimeCopy.values.keys,
     ...ReleaseClosureRuntimeCopy.sources,
     ...ReleasePolishRuntimeCopy.sources,
     ...ReleaseActionRuntimeCopy.sources,
@@ -130,20 +121,8 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...ConnectedHealthRuntimeCopy.sources,
     ...PlatformConversationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.sources,
-    ...CommunitySocialRuntimeCopy.sources,
     ...AdminNotificationRuntimeCopy.values.keys,
-    ...SleepScheduleRuntimeCopy.sources,
-    ...CoachReviewRuntimeCopy.keys,
-    CoachReviewRuntimeCopy.deleteSelection,
-    CoachReviewRuntimeCopy.cameraRationale,
-    CoachReviewRuntimeCopy.settingsRecovery,
-    ...HealthDeviceStatusCopy.sources,
-    ...HealthDevicesReviewCopy.sources,
-    ...CommunityReviewCopy.keys,
-    ...CommunityReviewCopy.statusKeys,
     ...CommunityFormCopy.catalogSources,
-    ...communitySafetyEnglishKeys,
-    ...communityPolicyEnglishKeys,
   };
   final required = await _requiredRuntimeSources();
   final missing =
@@ -154,6 +133,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     'lib/features/analytics/analytics_locale_copy.dart',
     'lib/features/commerce/presentation/commerce_paywall.dart',
     'lib/features/wellness/presentation/professional_content_library_page.dart',
+    'lib/features/wellness/presentation/wellness_learn_page.dart',
     'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
   ]) {
     final source = await File(path).readAsString();
@@ -286,6 +266,10 @@ Future<Set<String>> _requiredRuntimeSources() async {
       r"_localized\(\s*context,\s*'(?:\\.|[^'])*',\s*'((?:\\.|[^'])*)'",
       multiLine: true,
     ),
+  );
+  addMatches(
+    await read('lib/features/wellness/presentation/wellness_learn_page.dart'),
+    RegExp(r"_learnText\(\s*context,\s*'((?:\\.|[^'])*)'", multiLine: true),
   );
   addMatches(
     await read(

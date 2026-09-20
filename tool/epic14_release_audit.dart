@@ -25,17 +25,6 @@ String _releaseVersion(String pubspec) {
   return match.group(1)!;
 }
 
-bool debugPushEnvironmentIsValid(String entitlements) {
-  final key = RegExp(r'<key>\s*aps-environment\s*</key>');
-  if (!key.hasMatch(entitlements)) return true;
-  final entries = RegExp(
-    r'<key>\s*aps-environment\s*</key>\s*<string>\s*([^<]+?)\s*</string>',
-  ).allMatches(entitlements).toList();
-  return key.allMatches(entitlements).length == 1 &&
-      entries.length == 1 &&
-      entries.single.group(1)?.trim() == 'development';
-}
-
 void main() {
   final pubspec = _read('pubspec.yaml');
   final releaseVersion = _releaseVersion(pubspec);
@@ -69,7 +58,7 @@ void main() {
     (appGradle, 'proguard-rules.pro'),
     (appGradle, 'abiFilters += listOf("arm64-v8a", "x86_64")'),
     (appGradle, 'excludes += setOf("**/armeabi-v7a/**")'),
-    (settings, 'com.android.application") version "9.0.1"'),
+    (settings, 'com.android.application") version "9.2.1"'),
     (properties, 'android.builtInKotlin=false'),
     (manifest, 'android:allowBackup="false"'),
     (manifest, 'android:usesCleartextTraffic="false"'),
@@ -90,8 +79,8 @@ void main() {
       _fail('Missing release contract: ${pair.$2}');
     }
   }
-  if (!debugPushEnvironmentIsValid(debugEntitlements)) {
-    _fail('Debug APNs must be absent or use the development environment.');
+  if (debugEntitlements.contains('aps-environment')) {
+    _fail('Production APNs entitlement leaked into Debug signing.');
   }
 
   for (final secretPattern in <String>[
@@ -150,24 +139,33 @@ void main() {
     _requires(signedIos, value, 'signed iOS workflow');
   }
 
-  const allowedHealthPermissions = <String>{
+  for (final fitnessPermission in const <String>[
     'READ_STEPS',
-    'READ_DISTANCE',
     'READ_ACTIVE_CALORIES_BURNED',
-  };
-  for (final fitnessPermission in allowedHealthPermissions) {
+    'READ_EXERCISE',
+    'READ_SLEEP',
+    'READ_HEART_RATE',
+    'READ_RESTING_HEART_RATE',
+    'READ_HEART_RATE_VARIABILITY',
+    'READ_WEIGHT',
+    'WRITE_WEIGHT',
+    'READ_NUTRITION',
+    'WRITE_NUTRITION',
+  ]) {
     _requires(
       manifest,
       'android.permission.health.$fitnessPermission',
       'Android fitness permission contract',
     );
   }
-  final declaredHealthPermissions = RegExp(
-    r'android:name="android\.permission\.health\.([^"]+)"',
-  ).allMatches(manifest).map((match) => match.group(1)!);
-  for (final permission in declaredHealthPermissions) {
-    if (!allowedHealthPermissions.contains(permission)) {
-      _fail('Android requests out-of-scope Health Connect data: $permission');
+  for (final medicalPermission in const <String>[
+    'READ_BLOOD_PRESSURE',
+    'READ_OXYGEN_SATURATION',
+    'READ_BLOOD_GLUCOSE',
+    'READ_BODY_TEMPERATURE',
+  ]) {
+    if (manifest.contains('android.permission.health.$medicalPermission')) {
+      _fail('Android requests forbidden medical data: $medicalPermission');
     }
   }
   if (appGradle.contains('signingConfigs.getByName("debug")')) {

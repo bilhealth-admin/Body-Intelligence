@@ -6,9 +6,7 @@ void main() {
   final page =
       [
             'intelligence_center_page.dart',
-            'intelligence_center_page_message.dart',
             'intelligence_center_widgets.dart',
-            'intelligence_coach_menu.dart',
             'intelligence_center_message_widgets.dart',
             'intelligence_center_voice_widgets.dart',
             'intelligence_conversation_persistence.dart',
@@ -17,7 +15,6 @@ void main() {
             'intelligence_vision_flow.dart',
             'intelligence_query_flow.dart',
             'intelligence_action_flow.dart',
-            'intelligence_action_runtime.dart',
           ]
           .map(
             (name) => File(
@@ -47,10 +44,7 @@ void main() {
     expect(page, contains("String pendingVoiceTranscript = ''"));
     expect(page, contains('pendingVoiceTranscript = transcript'));
     expect(page, contains('question.value = TextEditingValue('));
-    expect(
-      page,
-      contains('if (await _startNativeVoiceCapture(generation)) return;'),
-    );
+    expect(page, contains('if (await _startNativeVoiceCapture()) return;'));
     expect(page, contains('_LiveVoiceTranscript'));
     expect(page, contains('Writing your words'));
     expect(page, contains('Live call transcript'));
@@ -82,7 +76,7 @@ void main() {
     expect(page, contains("'Speak your language'"));
     expect(page, contains('final coachName = intelligenceText'));
     expect(page, contains('final voiceTagline = intelligenceText'));
-    expect(page, contains('size: 48'));
+    expect(page, contains('size: 32'));
     expect(page, contains("Key('ai-coach-hero-start')"));
     expect(page, contains('Icons.mic_none_rounded'));
     expect(page, contains('minLines: 1'));
@@ -100,13 +94,11 @@ void main() {
     expect(page, contains('Ending voice never depends'));
   });
 
-  test('slow and failed replies remain visible and actionable', () {
+  test('failed replies remain visible and actionable without a search row', () {
     expect(page, contains('enum _CoachReplyPhase'));
     expect(page, contains("Key('ai-coach-reply-progress')"));
     expect(page, contains("Key('ai-coach-cancel-request')"));
     expect(page, contains("Key('ai-coach-retry')"));
-    // The transient "Searching your BIL context" banner was removed from the
-    // Coach surface so a provider delay cannot freeze or clutter the chat.
     expect(page, isNot(contains('Searching your BIL context')));
     expect(page, contains('timeout(const Duration(seconds: 30))'));
   });
@@ -151,14 +143,12 @@ void main() {
     );
   });
 
-  test('AI Coach stays pinned to the newest message', () {
+  test('AI Coach pins new turns without overriding manual history reading', () {
     expect(page, contains('with WidgetsBindingObserver'));
-    expect(page, contains('void didChangeMetrics()'));
-    expect(page, contains('_scrollToLatest();'));
+    expect(page, contains('ChatHistoryViewport('));
+    expect(page, isNot(contains('void didChangeMetrics()')));
     expect(page, contains('reverse: true'));
     expect(page, contains('conversationScroll.position.minScrollExtent'));
-    expect(page, contains("'ai-coach-conversation-restoring'"));
-    expect(page, contains('sessionWelcomeMessage'));
   });
 
   test('technical runtime diagnostics are not presented as chat copy', () {
@@ -189,8 +179,10 @@ void main() {
       shell,
       contains('floatingActionButton: isDashboard ? quickButton : null'),
     );
-    expect(shell, contains("currentPath == '/intelligence-center'"));
-    expect(shell, contains("currentPath.startsWith('/intelligence-center/')"));
+    expect(
+      shell,
+      contains("final immersiveCoach = currentPath == '/intelligence-center'"),
+    );
     expect(shell, contains('bottomNavigationBar: immersiveCoach'));
   });
 

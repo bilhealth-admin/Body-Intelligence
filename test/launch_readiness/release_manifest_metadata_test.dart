@@ -2,20 +2,22 @@ import 'package:body_intelligence_log/app/environment/release_manifest_metadata.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('parses an exact accepted +8 freeze contract', () {
+  test('parses exact platform release build markers', () {
     final metadata = ReleaseManifestMetadata.parse('''
 `STAGING_MANIFEST_COMPLETE: YES`
 `CANDIDATE_FROZEN_OR_ACCEPTED: YES`
 `UNRESOLVED_REVIEW_COUNT: 0`
 `RELEASE_VERSION: 1.0.0`
-`RELEASE_BUILD_NUMBER: 8`
+`RELEASE_BUILD_NUMBER_IOS: 26`
+`RELEASE_BUILD_NUMBER_ANDROID: 21`
 ''');
 
     expect(metadata.stagingManifestComplete, isTrue);
     expect(metadata.candidateFrozenOrAccepted, isTrue);
     expect(metadata.unresolvedReviewCount, 0);
     expect(metadata.releaseVersion, '1.0.0');
-    expect(metadata.releaseBuildNumber, 8);
+    expect(metadata.releaseBuildNumberIos, 26);
+    expect(metadata.releaseBuildNumberAndroid, 21);
   });
 
   test('missing, negative, or duplicate markers fail closed', () {

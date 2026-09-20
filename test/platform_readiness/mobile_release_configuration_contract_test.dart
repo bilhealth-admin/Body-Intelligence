@@ -57,9 +57,22 @@ void main() {
 
       expect(manifest, contains('android:resizeableActivity="true"'));
       expect(
-        RegExp(r'android:screenOrientation="portrait"').allMatches(manifest),
-        hasLength(2),
-        reason: 'Both the rationale and main activities must stay portrait.',
+        manifest,
+        matches(
+          RegExp(
+            r'android:name="\.PermissionsRationaleActivity"[\s\S]*?'
+            r'android:screenOrientation="portrait"',
+          ),
+        ),
+      );
+      expect(
+        manifest,
+        matches(
+          RegExp(
+            r'android:name="\.MainActivity"[\s\S]*?'
+            r'android:screenOrientation="portrait"',
+          ),
+        ),
       );
       expect(manifest, isNot(contains('android:required="true"')));
     },
@@ -99,50 +112,30 @@ void main() {
       'ios/Runner/RunnerDebug.entitlements',
     ).readAsStringSync();
     final pubspec = File('pubspec.yaml').readAsStringSync();
+    final main = File('lib/main.dart').readAsStringSync();
 
     expect(project, contains('TARGETED_DEVICE_FAMILY = "1,2"'));
     expect(project, contains('com.apple.InAppPurchase'));
     expect(project, contains('com.apple.HealthKit'));
     expect(project, contains('com.apple.SignInWithApple'));
-    final phoneOrientations = RegExp(
-      r'<key>UISupportedInterfaceOrientations</key>\s*'
-      r'<array>([\s\S]*?)</array>',
-    ).firstMatch(info)?.group(1);
-    final ipadOrientations = RegExp(
-      r'<key>UISupportedInterfaceOrientations~ipad</key>\s*'
-      r'<array>([\s\S]*?)</array>',
-    ).firstMatch(info)?.group(1);
-
-    expect(phoneOrientations, isNotNull);
-    expect(phoneOrientations, contains('UIInterfaceOrientationPortrait'));
+    expect(info, contains('UISupportedInterfaceOrientations~ipad'));
+    expect(info, contains('<string>UIInterfaceOrientationPortrait</string>'));
     expect(
-      phoneOrientations,
-      isNot(contains('UIInterfaceOrientationPortraitUpsideDown')),
+      info,
+      isNot(contains('<string>UIInterfaceOrientationPortraitUpsideDown</string>')),
     );
     expect(
-      phoneOrientations,
-      isNot(contains('UIInterfaceOrientationLandscapeLeft')),
+      info,
+      isNot(contains('<string>UIInterfaceOrientationLandscapeLeft</string>')),
     );
     expect(
-      phoneOrientations,
-      isNot(contains('UIInterfaceOrientationLandscapeRight')),
+      info,
+      isNot(contains('<string>UIInterfaceOrientationLandscapeRight</string>')),
     );
-
-    expect(ipadOrientations, isNotNull);
-    for (final orientation in <String>[
-      'UIInterfaceOrientationPortrait',
-      'UIInterfaceOrientationPortraitUpsideDown',
-      'UIInterfaceOrientationLandscapeLeft',
-      'UIInterfaceOrientationLandscapeRight',
-    ]) {
-      expect(
-        ipadOrientations,
-        contains(orientation),
-        reason:
-            'iPad must support $orientation for App Store multitasking validation.',
-      );
-    }
-
+    expect(main, contains('SystemChrome.setPreferredOrientations('));
+    expect(main, contains('DeviceOrientation.portraitUp'));
+    expect(main, isNot(contains('DeviceOrientation.landscapeLeft')));
+    expect(main, isNot(contains('DeviceOrientation.landscapeRight')));
     expect(info, isNot(contains('<key>UIRequiredDeviceCapabilities</key>')));
 
     for (final key in <String>[

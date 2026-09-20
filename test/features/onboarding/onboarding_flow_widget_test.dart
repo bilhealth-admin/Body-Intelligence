@@ -147,47 +147,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 80));
   }
 
-  testWidgets('one kilogram option is visible and saved below 100 kilograms', (
-    tester,
-  ) async {
-    await pump(tester, valid(step: 'pace'));
-    final choice = find.text('1 kg / 7d');
-    await tester.ensureVisible(choice);
-    await tester.tap(choice);
-    await tester.tap(find.byKey(const Key('onboarding-next')));
-    await tester.pumpAndSettle();
-    expect((await drafts.load())!.weeklyPaceKg, 1);
-    expect((await drafts.load())!.stepId, 'waist');
-  });
-
-  testWidgets('iOS onboarding omits the optional health permission stage', (
-    tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    await pump(tester, valid(step: 'integrations'));
-    expect(find.byKey(const Key('onboarding-health-permission')), findsNothing);
-    expect(find.text('Apple Health'), findsNothing);
-    expect(find.byKey(const Key('onboarding-step-title')), findsOneWidget);
-    expect(tester.takeException(), isNull);
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('one kilogram is hidden when it would breach the calorie floor', (
-    tester,
-  ) async {
-    await pump(
-      tester,
-      valid(step: 'pace').copyWith(
-        currentWeightKg: 55,
-        targetWeightKg: 50,
-        activity: 'sedentary',
-      ),
-    );
-    expect(find.text('1 kg / 7d'), findsNothing);
-    expect(find.text('BIL could not calculate a safe plan.'), findsNothing);
-    expect((await drafts.load())!.stepId, 'pace');
-  });
-
   testWidgets(
     'waist and neck are separate optional pages and female receives hip page',
     (tester) async {
@@ -564,7 +523,7 @@ void main() {
         result: OnboardingRemoteAiResult.authenticationRequired,
       ),
     );
-    final enable = find.byKey(const Key('onboarding-cloud-ai-toggle'));
+    final enable = find.byKey(const Key('onboarding-enable-ai'));
     await tester.ensureVisible(enable);
     await tester.pumpAndSettle();
     await tester.tap(enable);
@@ -585,21 +544,9 @@ void main() {
   testWidgets('explicit cloud AI opt-out is visible and selected', (
     tester,
   ) async {
-    await pump(
-      tester,
-      valid(
-        step: 'ai',
-      ).copyWith(remoteAiConsent: OnboardingRemoteAiConsent.granted),
-      remote: const _RemoteAiGateway(
-        readResult: OnboardingRemoteAiResult.granted,
-        setResult: OnboardingRemoteAiResult.declined,
-      ),
-    );
-    final decline = find.byKey(const Key('onboarding-cloud-ai-toggle'));
+    await pump(tester, valid(step: 'ai'));
+    final decline = find.byKey(const Key('onboarding-decline-ai'));
     await tester.ensureVisible(decline);
-    final topBefore = tester.getRect(decline).top;
-    expect(find.byKey(const Key('onboarding-enable-ai')), findsNothing);
-    expect(find.byKey(const Key('onboarding-decline-ai')), findsNothing);
     await tester.tap(decline);
     await tester.pumpAndSettle();
 
@@ -608,8 +555,7 @@ void main() {
       (await drafts.load())!.remoteAiConsent,
       OnboardingRemoteAiConsent.declined,
     );
-    expect(find.text('Cloud AI is off.'), findsOneWidget);
-    expect(tester.getRect(decline).top, closeTo(topBefore, 0.1));
+    expect(find.byIcon(Icons.check_circle_outline_rounded), findsOneWidget);
   });
 
   testWidgets('cloud AI opt-out stays local when consent RPC fails', (
@@ -617,15 +563,10 @@ void main() {
   ) async {
     await pump(
       tester,
-      valid(
-        step: 'ai',
-      ).copyWith(remoteAiConsent: OnboardingRemoteAiConsent.granted),
-      remote: const _RemoteAiGateway(
-        readResult: OnboardingRemoteAiResult.granted,
-        setResult: OnboardingRemoteAiResult.failed,
-      ),
+      valid(step: 'ai'),
+      remote: const _RemoteAiGateway(result: OnboardingRemoteAiResult.failed),
     );
-    final decline = find.byKey(const Key('onboarding-cloud-ai-toggle'));
+    final decline = find.byKey(const Key('onboarding-decline-ai'));
     await tester.ensureVisible(decline);
     await tester.tap(decline);
     await tester.pumpAndSettle();
@@ -673,21 +614,14 @@ void main() {
 }
 
 final class _RemoteAiGateway implements OnboardingRemoteAiGateway {
-  const _RemoteAiGateway({
-    this.result = OnboardingRemoteAiResult.declined,
-    this.readResult,
-    this.setResult,
-  });
+  const _RemoteAiGateway({this.result = OnboardingRemoteAiResult.declined});
   final OnboardingRemoteAiResult result;
-  final OnboardingRemoteAiResult? readResult;
-  final OnboardingRemoteAiResult? setResult;
 
   @override
-  Future<OnboardingRemoteAiResult> read() async => readResult ?? result;
+  Future<OnboardingRemoteAiResult> read() async => result;
 
   @override
-  Future<OnboardingRemoteAiResult> setGranted(bool granted) async =>
-      setResult ?? result;
+  Future<OnboardingRemoteAiResult> setGranted(bool granted) async => result;
 }
 
 final class _NotificationGateway implements OnboardingNotificationGateway {

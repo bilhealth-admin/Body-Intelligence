@@ -399,12 +399,10 @@ async function verifyCertificateSignature(
 
     // Hash EXACTLY once using the certificate's declared hash, not the
     // default hash of the signing curve. The OID and DER checks above remain.
-    const digest = new Uint8Array(
-      await crypto.subtle.digest(
-        signatureHash,
-        tbs.encoded as BufferSource,
-      ),
-    );
+    const digest = new Uint8Array(await crypto.subtle.digest(
+      signatureHash,
+      tbs.encoded as BufferSource,
+    ));
     let valid = false;
     try {
       valid = verifier.verify(rawSignature, digest, issuerPoint, {
@@ -418,15 +416,13 @@ async function verifyCertificateSignature(
     }
     try {
       // Public algorithm metadata only. No certificates, keys or requests.
-      console.info(
-        "BIL_APP_ATTEST_CERT_FALLBACK " + JSON.stringify({
-          patch: "cert-runtime-v1",
-          verifier: "noble-curves-1.9.7",
-          curve,
-          hash: signatureHash,
-          signature_valid: valid,
-        }),
-      );
+      console.info("BIL_APP_ATTEST_CERT_FALLBACK " + JSON.stringify({
+        patch: "cert-runtime-v1",
+        verifier: "noble-curves-1.9.7",
+        curve,
+        hash: signatureHash,
+        signature_valid: valid,
+      }));
     } catch {
       // Logging must not change the verification result.
     }
@@ -500,20 +496,16 @@ function logAuthDataShape(
   error: unknown,
 ): void {
   try {
-    console.error(
-      "BIL_APP_ATTEST_AUTHDATA_DETAIL " + JSON.stringify({
-        patch: "authdata-compat-v1",
-        operation,
-        stage,
-        length: authData.length,
-        flags: authData.length > 32 ? authData[32] : null,
-        offset,
-        bytes_remaining: Math.max(0, authData.length - offset),
-        code: error instanceof AppAttestFailure
-          ? error.code
-          : "parse_exception",
-      }),
-    );
+    console.error("BIL_APP_ATTEST_AUTHDATA_DETAIL " + JSON.stringify({
+      patch: "authdata-compat-v1",
+      operation,
+      stage,
+      length: authData.length,
+      flags: authData.length > 32 ? authData[32] : null,
+      offset,
+      bytes_remaining: Math.max(0, authData.length - offset),
+      code: error instanceof AppAttestFailure ? error.code : "parse_exception",
+    }));
   } catch { /* Logging must never change validation. */ }
 }
 
@@ -531,9 +523,7 @@ function readAuthenticatorExtensions(
   operation: "register" | "assert",
 ): Map<CborValue, CborValue> | null {
   try {
-    if (
-      !Number.isSafeInteger(offset) || offset < 37 || offset > authData.length
-    ) {
+    if (!Number.isSafeInteger(offset) || offset < 37 || offset > authData.length) {
       throw new AppAttestFailure("invalid_authenticator_extensions", 403);
     }
     if (offset === authData.length) {
@@ -543,10 +533,8 @@ function readAuthenticatorExtensions(
       return null;
     }
     const extensions = decodeCbor(authData.slice(offset));
-    if (
-      !(extensions instanceof Map) || extensions.size === 0 ||
-      [...extensions.keys()].some((key) => typeof key !== "string")
-    ) {
+    if (!(extensions instanceof Map) || extensions.size === 0 ||
+        [...extensions.keys()].some((key) => typeof key !== "string")) {
       throw new AppAttestFailure("invalid_authenticator_extensions", 403);
     }
     return extensions;
@@ -579,24 +567,17 @@ function verifyAppExtensions(
   }
   const value = extensions.get("apple_validation_category_01");
   const category = value instanceof Uint8Array && value.length === 4
-    ? new DataView(value.buffer, value.byteOffset, value.byteLength).getUint32(
-      0,
-      true,
-    )
+    ? new DataView(value.buffer, value.byteOffset, value.byteLength).getUint32(0, true)
     : value;
   const allowedCategories = environment === "production" ? [2, 4] : [3];
-  if (
-    typeof category !== "number" || !Number.isInteger(category) ||
-    !allowedCategories.includes(category)
-  ) {
+  if (typeof category !== "number" || !Number.isInteger(category) ||
+      !allowedCategories.includes(category)) {
     throw new AppAttestFailure("invalid_validation_category", 403);
   }
   const bundleVersion = extensions.get("apple_bundle_version_01");
-  if (
-    typeof bundleVersion !== "string" || bundleVersion.length === 0 ||
-    bundleVersion === LEGACY_BUNDLE_VERSION ||
-    !allowedBundleVersions.has(bundleVersion)
-  ) {
+  if (typeof bundleVersion !== "string" || bundleVersion.length === 0 ||
+      bundleVersion === LEGACY_BUNDLE_VERSION ||
+      !allowedBundleVersions.has(bundleVersion)) {
     throw new AppAttestFailure("bundle_version_mismatch", 403);
   }
   return { bundleVersion, validationCategory: category };
@@ -607,15 +588,13 @@ function logVerifiedAuthData(
   legacy: boolean,
 ): void {
   try {
-    console.info(
-      "BIL_APP_ATTEST_AUTHDATA_VERIFIED " + JSON.stringify({
-        patch: "authdata-compat-v1",
-        operation,
-        format: legacy ? "legacy_without_extensions" : "with_extensions",
-        // This describes the proof, not a supplied version or a successful DB write.
-        extension_checks_available: !legacy,
-      }),
-    );
+    console.info("BIL_APP_ATTEST_AUTHDATA_VERIFIED " + JSON.stringify({
+      patch: "authdata-compat-v1",
+      operation,
+      format: legacy ? "legacy_without_extensions" : "with_extensions",
+      // This describes the proof, not a supplied version or a successful DB write.
+      extension_checks_available: !legacy,
+    }));
   } catch { /* Never alter a verification result for logging. */ }
 }
 
@@ -641,69 +620,39 @@ function configuration() {
     throw new AppAttestFailure("app_attest_server_not_configured", 503);
   }
   const legacySetting = env("BIL_APP_ATTEST_ALLOW_LEGACY");
-  if (
-    legacySetting !== "" && legacySetting !== "true" &&
-    legacySetting !== "false"
-  ) {
+  if (legacySetting !== "" && legacySetting !== "true" && legacySetting !== "false") {
     throw new AppAttestFailure("invalid_legacy_attestation_configuration", 503);
   }
-  return {
-    appId,
-    environments,
-    bundleVersions,
-    allowLegacy: legacySetting === "true",
-  };
+  return { appId, environments, bundleVersions, allowLegacy: legacySetting === "true" };
 }
 
 // Diagnostic v2: bounded, allow-listed metadata only. Never log a raw error,
 // certificate, public/private key, request, header, token, user ID, or secret.
 function logCertificateDiagnostic(stage: string, error: unknown): void {
   try {
-    const value = error as
-      | { name?: unknown; code?: unknown; message?: unknown }
-      | null;
+    const value = error as { name?: unknown; code?: unknown; message?: unknown } | null;
     const allowedNames = new Set([
-      "Error",
-      "TypeError",
-      "RangeError",
-      "SyntaxError",
-      "DataError",
-      "InvalidAccessError",
-      "NotSupportedError",
-      "OperationError",
-      "InvalidCharacterError",
-      "NotImplemented",
+      "Error", "TypeError", "RangeError", "SyntaxError", "DataError",
+      "InvalidAccessError", "NotSupportedError", "OperationError",
+      "InvalidCharacterError", "NotImplemented",
     ]);
     const allowedCodes = new Set([
-      "ERR_NOT_IMPLEMENTED",
-      "ERR_METHOD_NOT_IMPLEMENTED",
-      "ERR_INVALID_ARG_TYPE",
-      "ERR_INVALID_ARG_VALUE",
-      "ERR_CRYPTO_INVALID_JWK",
-      "ERR_CRYPTO_UNSUPPORTED_OPERATION",
-      "ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE",
-      "ERR_CRYPTO_INVALID_KEYTYPE",
-      "ERR_OSSL_UNSUPPORTED",
-      "ERR_OSSL_EVP_UNSUPPORTED",
-      "ERR_OSSL_ASN1_TOO_LONG",
-      "ERR_OSSL_ASN1_HEADER_TOO_LONG",
-      "ERR_OSSL_ASN1_NESTED_ASN1_ERROR",
-      "ERR_OSSL_ASN1_WRONG_TAG",
-      "ERR_OSSL_ASN1_NOT_ENOUGH_DATA",
-      "ERR_OSSL_PEM_NO_START_LINE",
-      "invalid_certificate",
-      "invalid_der",
-      "invalid_certificate_signature",
-      "unsupported_certificate_signature",
-      "invalid_certificate_issuer_key",
+      "ERR_NOT_IMPLEMENTED", "ERR_METHOD_NOT_IMPLEMENTED",
+      "ERR_INVALID_ARG_TYPE", "ERR_INVALID_ARG_VALUE",
+      "ERR_CRYPTO_INVALID_JWK", "ERR_CRYPTO_UNSUPPORTED_OPERATION",
+      "ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE", "ERR_CRYPTO_INVALID_KEYTYPE",
+      "ERR_OSSL_UNSUPPORTED", "ERR_OSSL_EVP_UNSUPPORTED",
+      "ERR_OSSL_ASN1_TOO_LONG", "ERR_OSSL_ASN1_HEADER_TOO_LONG",
+      "ERR_OSSL_ASN1_NESTED_ASN1_ERROR", "ERR_OSSL_ASN1_WRONG_TAG",
+      "ERR_OSSL_ASN1_NOT_ENOUGH_DATA", "ERR_OSSL_PEM_NO_START_LINE",
+      "invalid_certificate", "invalid_der", "invalid_certificate_signature",
+      "unsupported_certificate_signature", "invalid_certificate_issuer_key",
       "certificate_signature_algorithm_mismatch",
     ]);
     const name = typeof value?.name === "string" ? value.name : "";
     const nativeCode = typeof value?.code === "string" ? value.code : "";
     // Read the message only to classify it. Never emit the message itself.
-    const message = typeof value?.message === "string"
-      ? value.message.toLowerCase()
-      : "";
+    const message = typeof value?.message === "string" ? value.message.toLowerCase() : "";
     let reason = "unclassified_exception";
     if (error instanceof AppAttestFailure) {
       reason = "verification_rule_rejected";
@@ -711,11 +660,7 @@ function logCertificateDiagnostic(stage: string, error: unknown): void {
       reason = "runtime_unsupported_operation";
     } else if (/jwk|key_ops|extractable|invalid key/.test(message)) {
       reason = "key_format_or_usage_error";
-    } else if (
-      /asn1|asn\.1|pem|der|x509|x\.509|certificate|parsing|parse|decode/.test(
-        message,
-      )
-    ) {
+    } else if (/asn1|asn\.1|pem|der|x509|x\.509|certificate|parsing|parse|decode/.test(message)) {
       reason = "certificate_or_encoding_error";
     } else if (/curve|elliptic|ecdsa/.test(message)) {
       reason = "elliptic_curve_error";
@@ -725,16 +670,14 @@ function logCertificateDiagnostic(stage: string, error: unknown): void {
         /^[0-9A-Za-z.+-]{1,40}$/.test(Deno.version.deno)
       ? Deno.version.deno
       : "unknown";
-    console.error(
-      "BIL_APP_ATTEST_CERT_DETAIL " + JSON.stringify({
-        diagnostic_version: 2,
-        stage,
-        error_name: allowedNames.has(name) ? name : "Other",
-        native_code: allowedCodes.has(nativeCode) ? nativeCode : "unlisted",
-        reason,
-        deno_version: runtimeVersion,
-      }),
-    );
+    console.error("BIL_APP_ATTEST_CERT_DETAIL " + JSON.stringify({
+      diagnostic_version: 2,
+      stage,
+      error_name: allowedNames.has(name) ? name : "Other",
+      native_code: allowedCodes.has(nativeCode) ? nativeCode : "unlisted",
+      reason,
+      deno_version: runtimeVersion,
+    }));
   } catch {
     // A logging error must never change the original verification outcome.
   }
@@ -809,10 +752,7 @@ export async function verifyAttestation({
       format: "jwk",
     }) as JsonObject;
     certificateStage = "verify_leaf_signature";
-    certificateChainValid = await verifyCertificateSignature(
-      leafBytes,
-      leafIssuer,
-    );
+    certificateChainValid = await verifyCertificateSignature(leafBytes, leafIssuer);
     // Preserve the original short-circuit: do not verify the intermediate if
     // the leaf signature is false.
     if (certificateChainValid) {
@@ -895,19 +835,11 @@ export async function verifyAttestation({
       throw new AppAttestFailure("invalid_credential_public_key", 403);
     }
   } catch (error) {
-    logAuthDataShape(
-      "register",
-      "credential_key",
-      authData,
-      credentialEnd,
-      error,
-    );
+    logAuthDataShape("register", "credential_key", authData, credentialEnd, error);
     throw error;
   }
   const extensions = readAuthenticatorExtensions(
-    authData,
-    credentialDecoder.position,
-    "register",
+    authData, credentialDecoder.position, "register",
   );
   if (
     mapValue(credentialKey, 1) !== 2 || mapValue(credentialKey, 3) !== -7 ||
@@ -921,10 +853,7 @@ export async function verifyAttestation({
     throw new AppAttestFailure("invalid_credential_public_key", 403);
   }
   const { bundleVersion } = verifyAppExtensions(
-    extensions,
-    environment,
-    allowedBundleVersions,
-    allowLegacy,
+    extensions, environment, allowedBundleVersions, allowLegacy,
   );
 
   const expectedNonce = await sha256(concatBytes(authData, clientDataHash));
@@ -1007,11 +936,7 @@ export async function verifyAssertion({
   // the signature covers the complete ORIGINAL bytes, including the flags.
   const extensions = readAuthenticatorExtensions(authData, 37, "assert");
   verifyAppExtensions(
-    extensions,
-    environment,
-    allowedBundleVersions,
-    allowLegacy,
-    requireExtensions,
+    extensions, environment, allowedBundleVersions, allowLegacy, requireExtensions,
   );
   if (!equalBytes(authData.slice(0, 32), await sha256(encoder.encode(appId)))) {
     throw new AppAttestFailure("app_id_mismatch", 403);
@@ -1050,15 +975,13 @@ export async function verifyAssertion({
   try {
     // Proof verification only, not a database-commit or AI-provider success log.
     // Structural metadata only; no request, key, signature, token or user ID.
-    console.info(
-      "BIL_APP_ATTEST_ASSERTION_VERIFIED " + JSON.stringify({
-        patch: "assertion-compat-v2",
-        auth_data_bytes: authData.length,
-        flags: authData[32],
-        extensions_present: extensions !== null,
-        signed_message: "nonce",
-      }),
-    );
+    console.info("BIL_APP_ATTEST_ASSERTION_VERIFIED " + JSON.stringify({
+      patch: "assertion-compat-v2",
+      auth_data_bytes: authData.length,
+      flags: authData[32],
+      extensions_present: extensions !== null,
+      signed_message: "nonce",
+    }));
   } catch { /* Logging must not change the verification outcome. */ }
   return counter;
 }
@@ -1305,10 +1228,8 @@ async function assertionOperation(
   if (keyError) throw new AppAttestFailure("app_attest_key_lookup_failed", 503);
   if (!key) throw new AppAttestFailure("app_attest_key_not_registered", 403);
   const keyEnvironment = key.environment;
-  if (
-    (keyEnvironment !== "production" && keyEnvironment !== "development") ||
-    !config.environments.has(keyEnvironment)
-  ) {
+  if ((keyEnvironment !== "production" && keyEnvironment !== "development") ||
+      !config.environments.has(keyEnvironment)) {
     throw new AppAttestFailure("app_attest_environment_mismatch", 403);
   }
   // Only a key explicitly recorded as legacy may issue extension-less assertions.
@@ -1361,11 +1282,10 @@ export async function handler(
   try {
     const body = await request.json() as JsonObject;
     const operation = text(body.operation);
-    diagnosticOperation =
-      operation === "challenge" || operation === "register" ||
+    diagnosticOperation = operation === "challenge" || operation === "register" ||
         operation === "assert"
-        ? operation
-        : "invalid";
+      ? operation
+      : "invalid";
     const authenticate = dependencies.authenticate ?? authenticated;
     if (operation === "challenge") {
       return await challengeOperation(body, request, authenticate);
@@ -1384,13 +1304,11 @@ export async function handler(
     // Diagnostic only: log static error codes and an allow-listed operation.
     // Never log request bodies, headers, tokens, keys, or raw exceptions.
     try {
-      console.error(
-        "BIL_APP_ATTEST_FAILURE " + JSON.stringify({
-          operation: diagnosticOperation,
-          code: failure.code,
-          status: failure.status,
-        }),
-      );
+      console.error("BIL_APP_ATTEST_FAILURE " + JSON.stringify({
+        operation: diagnosticOperation,
+        code: failure.code,
+        status: failure.status,
+      }));
     } catch {
       // A logging failure must not change the original verification response.
     }

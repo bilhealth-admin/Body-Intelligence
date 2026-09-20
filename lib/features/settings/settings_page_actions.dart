@@ -38,10 +38,7 @@ extension _SettingsPageActions on SettingsPage {
 
     if (confirmed != true || !context.mounted) return;
     try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set('forceOnboarding', 'true');
-      if (context.mounted) context.go('/onboarding');
+      if (context.mounted) context.go('/onboarding?mode=review');
     } on Object {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

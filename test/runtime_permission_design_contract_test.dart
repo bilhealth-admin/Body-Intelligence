@@ -101,12 +101,7 @@ void main() {
     expect(coach, contains('_ensureCoachRuntimePermission'));
     expect(coach, contains('Open system settings'));
     expect(weightVoice, contains('BilRuntimeCapability.microphone'));
-    expect(
-      dashboard,
-      contains(
-        'Enable camera access in system settings to take a profile photo.',
-      ),
-    );
+    expect(dashboard, contains('await _ensureCameraPermission(context)'));
     expect(foodPage, contains('Manual barcode entry remains available'));
   });
 }

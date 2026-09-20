@@ -19,7 +19,7 @@ void main() {
 
       expect(
         shell,
-        contains('final action = await showBilModalBottomSheet<String>('),
+        contains('final action = await showModalBottomSheet<String>('),
       );
       expect(
         shell,
@@ -27,27 +27,13 @@ void main() {
       );
       expect(shell, contains('switch (action)'));
 
-      for (final action in const ['barcode', 'voice']) {
+      for (final action in const ['barcode', 'voice', 'photo']) {
         expect(shell, contains('action=$action'));
         expect(diary, contains("case '$action':"));
       }
-      // Photo Quick Add opens the meal-vision camera directly. It must never
-      // route through the AI Coach conversation.
-      expect(
-        shell,
-        contains(
-          "'/daily-log?foodLog=1&action=photo&source=camera&from=\$origin'",
-        ),
-      );
-      expect(shell, isNot(contains('vision=capture&from=\$origin')));
-      expect(diary, contains("case 'photo':"));
 
-      // Log food is pushed after dismissing Quick Add so the shell does not
-      // briefly rebuild with a blank child while the standalone page mounts.
-      expect(shell, contains("context.push('/daily-log?foodLog=1&from="));
-      // Quick Add's Log food action is a standalone surface. It exposes the
-      // meal selector there while leaving the legacy Daily Log pages intact.
-      expect(shell, isNot(contains("focus=meal&meal=dinner")));
+      expect(shell, contains("context.go('/daily-log?focus=meal&from="));
+      expect(shell, contains('&foodLog=1'));
       final router = File('lib/app/router/app_router.dart').readAsStringSync();
       expect(
         router,
@@ -56,14 +42,10 @@ void main() {
         ),
       );
       expect(router, contains('return FoodLogPage('));
-      expect(
-        router,
-        contains('initialAction: state.uri.queryParameters[\'action\']'),
-      );
-      expect(
-        router,
-        contains("state.uri.queryParameters['source'] == 'camera'"),
-      );
+      // Quick Add's general food flow must not smuggle a Dinner context into
+      // the route. The focused page exposes the meal selector after a food is
+      // chosen, so the user can deliberately keep or change the context.
+      expect(shell, isNot(contains("focus=meal&meal=dinner")));
       expect(
         File('lib/features/daily_log/daily_log_page.dart').readAsStringSync(),
         contains("String mealType = 'breakfast';"),

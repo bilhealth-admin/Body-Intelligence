@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
-import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_text_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
@@ -11,7 +10,9 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_profile_page.dart';
-import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,13 +20,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-final _acceptedPolicy = CommunityContentPolicy.fromJson({
-  'version': 'community-policy-v1',
-  'locale_code': 'en',
-  'document_url': 'https://www.bilhealth.com/community-guidelines',
-  'effective_at': '2026-09-08T00:00:00Z',
-});
 
 final class _CommunityInteractionRepository extends CommunityRepository {
   _CommunityInteractionRepository()
@@ -73,22 +67,9 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   int reportCalls = 0;
   String? reportedTargetKind;
   String? reportedTargetId;
-  int foodSubmissionCalls = 0;
-  CommunityFoodDraft? submittedFood;
-  bool failFoodSubmission = false;
-  int sentMessageCalls = 0;
-  String? sentMessageBody;
 
   @override
   String get currentUserId => currentId;
-
-  @override
-  Future<CommunityPolicyState> loadCommunityPolicyState({
-    required String localeCode,
-  }) async => CommunityPolicyState.accepted(
-    _acceptedPolicy,
-    acceptedVersion: _acceptedPolicy.version,
-  );
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
@@ -131,14 +112,6 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   }
 
   @override
-  Future<CommunitySocialIdentity> loadSocialIdentity() async =>
-      const CommunitySocialIdentity(
-        handle: 'bil_qa_member',
-        chosen: true,
-        discoverable: true,
-      );
-
-  @override
   Future<void> saveMyProfile({
     required String displayName,
     required String localeCode,
@@ -171,18 +144,17 @@ final class _CommunityInteractionRepository extends CommunityRepository {
     return [
       {
         'user_id': otherId,
-        'handle': 'bil_qa_partner',
         'display_name': 'BIL QA Partner',
+        'bio': 'Non-personal search result',
         'avatar_url': null,
       },
     ];
   }
 
   @override
-  Future<CommunityFriendRequestStatus> requestFriend(String addresseeId) async {
+  Future<void> requestFriend(String addresseeId) async {
     expect(addresseeId, otherId);
     friendRequests++;
-    return CommunityFriendRequestStatus.pending;
   }
 
   @override
@@ -222,18 +194,6 @@ final class _CommunityInteractionRepository extends CommunityRepository {
     reportCalls++;
     reportedTargetKind = targetKind;
     reportedTargetId = targetId;
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> loadMyFoodSubmissions() async => const [];
-
-  @override
-  Future<void> submitFood(CommunityFoodDraft draft) async {
-    foodSubmissionCalls++;
-    submittedFood = draft;
-    if (failFoodSubmission) {
-      throw StateError('injected food submission failure');
-    }
   }
 
   Map<String, dynamic> _message(bool incoming) => {
@@ -300,13 +260,6 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   }
 
   @override
-  Future<void> sendMessage(String recipientId, String body) async {
-    expect(recipientId, otherId);
-    sentMessageCalls++;
-    sentMessageBody = body;
-  }
-
-  @override
   Stream<void> watchConversationChanges(String otherUserId) {
     expect(otherUserId, otherId);
     return conversationChanges.stream;
@@ -318,10 +271,18 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   ];
 }
 
+final _verifiedPremium = SubscriptionState(
+  plan: CommercePlan.premium,
+  entitlements: PaidPlanCatalog.composedEntitlementsFor(CommercePlan.premium),
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
+
 Widget _app(Widget home) => ProviderScope(
   overrides: [
     verifiedSubscriptionStateProvider.overrideWithValue(
-      AsyncData(FreePlan.createState()),
+      AsyncData(_verifiedPremium),
     ),
   ],
   child: MaterialApp(
@@ -338,25 +299,24 @@ Widget _app(Widget home) => ProviderScope(
 );
 
 void main() {
-  testWidgets(
-    'Free member accepts a request and reloads the authoritative All tab',
-    (tester) async {
-      final repository = _CommunityInteractionRepository();
-      await tester.pumpWidget(
-        _app(CommunityConnectionsPage(repository: repository)),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Requests'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Accept'));
-      await tester.pumpAndSettle();
-      expect(repository.responseCalls, 1);
-      expect(repository.friendshipStatus, 'accepted');
-      await tester.tap(find.text('All'));
-      await tester.pumpAndSettle();
-      expect(find.text('Friend'), findsOneWidget);
-    },
-  );
+  testWidgets('incoming friendship accept reloads the authoritative All tab', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository();
+    await tester.pumpWidget(
+      _app(CommunityConnectionsPage(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Requests'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Accept'));
+    await tester.pumpAndSettle();
+    expect(repository.responseCalls, 1);
+    expect(repository.friendshipStatus, 'accepted');
+    await tester.tap(find.text('All'));
+    await tester.pumpAndSettle();
+    expect(find.text('Friend'), findsOneWidget);
+  });
 
   testWidgets('accepted connection exposes a working report-user action', (
     tester,
@@ -513,9 +473,7 @@ void main() {
     expect(repository.conversationSubscriptionCancelled, isTrue);
   });
 
-  testWidgets('Free member search dispatches one friend request', (
-    tester,
-  ) async {
+  testWidgets('people search dispatches one friend request', (tester) async {
     final repository = _CommunityInteractionRepository();
     await tester.pumpWidget(_app(CommunityPeoplePage(repository: repository)));
     await tester.pumpAndSettle();
@@ -524,10 +482,6 @@ void main() {
       'BIL QA',
     );
     await tester.pumpAndSettle();
-    final handle = tester.widget<Text>(find.text('@bil_qa_partner'));
-    expect(handle.softWrap, isFalse);
-    expect(handle.maxLines, 1);
-    expect(handle.overflow, TextOverflow.ellipsis);
     await tester.tap(find.byTooltip('Send request'));
     await tester.pumpAndSettle();
     expect(repository.friendRequests, 1);
@@ -615,168 +569,30 @@ void main() {
     expect(find.text('No community updates'), findsOneWidget);
   });
 
-  testWidgets(
-    'community settings opens the member page and its profile edit route',
-    (tester) async {
-      final repository = _CommunityInteractionRepository();
-      final router = GoRouter(
-        initialLocation: '/community',
-        routes: [
-          GoRoute(
-            path: '/community',
-            builder: (_, _) => CommunityHubPage(repository: repository),
-          ),
-          GoRoute(
-            path: '/community/profile',
-            builder: (_, _) =>
-                const Scaffold(body: Text('Profile destination')),
-          ),
-        ],
-      );
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('community-settings')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('community-nav-account')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('community-edit-profile')));
-      await tester.pumpAndSettle();
-      expect(find.text('Profile destination'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'empty community composer blocks publish with inline validation',
-    (tester) async {
-      final repository = _CommunityInteractionRepository();
-      await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('community-create-post')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('community-post-publish')));
-      await tester.pumpAndSettle();
-
-      expect(repository.publishCalls, 0);
-      expect(find.text('Write your post before publishing.'), findsOneWidget);
-      expect(find.text('Complete all required values.'), findsNothing);
-      expect(find.text('أكمل القيم المطلوبة.'), findsNothing);
-    },
-  );
-
-  testWidgets('community food submission accepts Arabic digits and succeeds', (
+  testWidgets('community action menu navigates to the selected route', (
     tester,
   ) async {
     final repository = _CommunityInteractionRepository();
-    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-settings')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-nav-foods')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Submit food'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-name')),
-      'خبز',
-    );
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-serving')),
-      '١٠٠',
-    );
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-calories')),
-      '٢٥٠',
-    );
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-protein')),
-      '١٠',
-    );
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-carbohydrate')),
-      '٤٠',
-    );
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-fat')),
-      '٥',
-    );
-    await tester.ensureVisible(find.byKey(const Key('community-food-submit')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-food-submit')));
-    await tester.pumpAndSettle();
-
-    expect(repository.foodSubmissionCalls, 1);
-    expect(repository.submittedFood?.servingGrams, 100);
-    expect(repository.submittedFood?.calories, 250);
-    expect(find.textContaining('Food submitted for review.'), findsOneWidget);
-  });
-
-  testWidgets('community food submission failure keeps the form open', (
-    tester,
-  ) async {
-    final repository = _CommunityInteractionRepository()
-      ..failFoodSubmission = true;
-    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-settings')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-nav-foods')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Submit food'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.byKey(const Key('community-food-input-name')),
-      'خبز',
-    );
-    for (final entry in const {
-      'community-food-input-serving': '100',
-      'community-food-input-calories': '250',
-      'community-food-input-protein': '10',
-      'community-food-input-carbohydrate': '40',
-      'community-food-input-fat': '5',
-    }.entries) {
-      await tester.enterText(find.byKey(Key(entry.key)), entry.value);
-    }
-    await tester.ensureVisible(find.byKey(const Key('community-food-submit')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-food-submit')));
-    await tester.pumpAndSettle();
-
-    expect(repository.foodSubmissionCalls, 1);
-    expect(find.byKey(const Key('community-food-submit')), findsOneWidget);
-    expect(
-      find.byKey(const Key('community-food-submit-error')),
-      findsOneWidget,
-    );
-    expect(
-      find.text(
-        'Submission could not be confirmed. Your values are kept. '
-        'Check your submissions before retrying.',
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('خبز'), findsOneWidget);
-  });
-
-  testWidgets('friend chat sends the visible composer text', (tester) async {
-    final repository = _CommunityInteractionRepository();
-    await tester.pumpWidget(
-      _app(
-        CommunityChatPage(
-          userId: _CommunityInteractionRepository.otherId,
-          displayName: 'BIL QA Partner',
-          repository: repository,
+    final router = GoRouter(
+      initialLocation: '/community',
+      routes: [
+        GoRoute(
+          path: '/community',
+          builder: (_, _) => CommunityHubPage(repository: repository),
         ),
-      ),
+        GoRoute(
+          path: '/community/profile',
+          builder: (_, _) => const Scaffold(body: Text('Profile destination')),
+        ),
+      ],
     );
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'رسالة واضحة');
-    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.tap(find.byTooltip('Community actions'));
     await tester.pumpAndSettle();
-
-    expect(repository.sentMessageCalls, 1);
-    expect(repository.sentMessageBody, 'رسالة واضحة');
+    await tester.tap(find.text('Community profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Profile destination'), findsOneWidget);
   });
 
   testWidgets('feed publish failure retains draft for retry', (tester) async {

@@ -17,21 +17,22 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   late final SleepScheduleStore sleepScheduleStore;
   bool scheduleLoading = true;
   bool scheduleSaving = false;
-  bool? pendingScheduleEnabled;
-  String? scheduleError;
   bool saving = false;
   bool recordLoading = true;
   Object? recordError;
+  int educationPage = 0;
   int insightsRevision = 0;
   late final DateTime recordDate;
   late final TabController tabController;
   late Stream<List<DailyLog>> insightsStream;
 
+  void _updateState(VoidCallback update) => setState(update);
+
   @override
   void initState() {
     super.initState();
     recordDate = ref.read(sleepNowProvider)();
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 3, vsync: this);
     insightsStream = ref.read(dailyLogRepositoryProvider).watchAll();
     sleepScheduleStore = SleepScheduleStore();
     Future<void>.microtask(_loadRecord);
@@ -70,7 +71,11 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
               if (saving) tabController.index = 0;
             },
             tabs: [
-              for (final label in [tr('Log', 'تسجيل'), tr('Insights', 'الرؤى')])
+              for (final label in [
+                tr('Log', 'تسجيل'),
+                tr('Insights', 'الرؤى'),
+                tr('Learn', 'تعلّم'),
+              ])
                 Tab(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -83,7 +88,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         body: TabBarView(
           controller: tabController,
           physics: saving ? const NeverScrollableScrollPhysics() : null,
-          children: [_recordTab(today), _insightsTab()],
+          children: [_recordTab(today), _insightsTab(), _educationTab()],
         ),
       ),
     );
@@ -304,6 +309,118 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       ),
     ),
   );
+
+  Widget _sleepScheduleCard() {
+    final material = MaterialLocalizations.of(context);
+    final scheduleLabels = bilSleepScheduleLabels(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
+    String formatTime(int hour, int minute) =>
+        material.formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
+    final goalHours = sleepSchedule.goalMinutes / 60;
+    return Card(
+      key: const Key('sleep-schedule-card'),
+      child: Column(
+        children: [
+          SwitchListTile.adaptive(
+            key: const Key('sleep-schedule-toggle'),
+            horizontalTitleGap: 12,
+            secondary: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.notifications,
+            ),
+            title: Text(
+              '${tr('Sleep', 'النوم')} · ${tr('Daily reminders', 'التذكيرات اليومية')}',
+            ),
+            value: sleepSchedule.enabled,
+            onChanged: scheduleLoading || scheduleSaving
+                ? null
+                : _setSleepScheduleEnabled,
+          ),
+          const Divider(height: 1),
+          ListTile(
+            enabled: !scheduleLoading && !scheduleSaving,
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.sleep,
+            ),
+            title: Text(scheduleLabels.$1),
+            trailing: Text(
+              formatTime(sleepSchedule.bedHour, sleepSchedule.bedMinute),
+            ),
+            onTap: () => _chooseSleepTime(wake: false),
+          ),
+          ListTile(
+            enabled: !scheduleLoading && !scheduleSaving,
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.time),
+            title: Text(scheduleLabels.$2),
+            trailing: Text(
+              formatTime(sleepSchedule.wakeHour, sleepSchedule.wakeMinute),
+            ),
+            onTap: () => _chooseSleepTime(wake: true),
+          ),
+          ListTile(
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.goals,
+            ),
+            title: Text('${tr('Sleep', 'النوم')} · ${tr('Goal', 'الهدف')}'),
+            subtitle: Text(
+              '${goalHours.toStringAsFixed(goalHours % 1 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
+            ),
+            trailing: PopupMenuButton<int>(
+              enabled: !scheduleLoading && !scheduleSaving,
+              tooltip: tr('Goal', 'الهدف'),
+              onSelected: (minutes) => _saveSleepSchedule(
+                sleepSchedule.copyWith(goalMinutes: minutes),
+              ),
+              itemBuilder: (_) => [
+                for (final minutes in const [360, 420, 450, 480, 540])
+                  PopupMenuItem(
+                    value: minutes,
+                    child: Text(
+                      '${(minutes / 60).toStringAsFixed(minutes % 60 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          ListTile(
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.notifications,
+            ),
+            title: Text('${tr('Sleep', 'النوم')} · ${tr('Reminder', 'تذكير')}'),
+            subtitle: Text(
+              tr(
+                '${sleepSchedule.windDownMinutes} min',
+                '${sleepSchedule.windDownMinutes} د',
+              ),
+            ),
+            trailing: PopupMenuButton<int>(
+              enabled: !scheduleLoading && !scheduleSaving,
+              tooltip: tr('Time', 'الوقت'),
+              onSelected: (minutes) => _saveSleepSchedule(
+                sleepSchedule.copyWith(windDownMinutes: minutes),
+              ),
+              itemBuilder: (_) => [
+                for (final minutes in const [15, 30, 45, 60])
+                  PopupMenuItem(
+                    value: minutes,
+                    child: Text(tr('$minutes min', '$minutes د')),
+                  ),
+              ],
+            ),
+          ),
+          if (scheduleSaving)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: LinearProgressIndicator(),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _insightsTab() => StreamBuilder<List<DailyLog>>(
     key: ValueKey(insightsRevision),
@@ -529,8 +646,46 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   }
 
   Future<void> _setSleepScheduleEnabled(bool enabled) async {
-    if (scheduleLoading || scheduleSaving || enabled == sleepSchedule.enabled) {
-      return;
+    if (scheduleSaving) return;
+    if (enabled) {
+      try {
+        final allowed = await ref
+            .read(fastingNotificationServiceProvider)
+            .requestPermission();
+        if (!mounted) return;
+        if (!allowed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                tr(
+                  'Notification permission is off. You can enable it in phone settings.',
+                  'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
+                ),
+              ),
+              action: SnackBarAction(
+                label: tr('Settings', 'الإعدادات'),
+                onPressed: () => ref
+                    .read(fastingNotificationServiceProvider)
+                    .openSystemSettings(),
+              ),
+            ),
+          );
+          return;
+        }
+      } on Object {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(
+                'Notification permission is off. You can enable it in phone settings.',
+                'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
+              ),
+            ),
+          ),
+        );
+        return;
+      }
     }
     await _saveSleepSchedule(sleepSchedule.copyWith(enabled: enabled));
   }
@@ -559,101 +714,27 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   }
 
   Future<void> _saveSleepSchedule(SleepSchedule value) async {
-    if (scheduleLoading || scheduleSaving) return;
-    // A legacy goal may need correction before enabling, never before opting
-    // out. Preserve the user's stored clock/goal values when cancelling.
-    final issue = value.enabled ? value.issue : null;
-    if (issue != null) {
-      setState(
-        () => scheduleError = switch (issue) {
-          SleepScheduleIssue.goalExceedsWindow => tr(
-            'The scheduled window must be at least as long as the sleep goal. Adjust bedtime, wake time, or the goal.',
-            'يجب ألا تقل نافذة النوم المجدولة عن هدف النوم. عدّل وقت النوم أو الاستيقاظ أو الهدف.',
-          ),
-          SleepScheduleIssue.emptyWindow => tr(
-            'Bedtime and wake time cannot be the same.',
-            'لا يمكن أن يتطابق وقت النوم ووقت الاستيقاظ.',
-          ),
-          SleepScheduleIssue.invalidGoal => tr(
-            'Choose an adult sleep goal from 7 to 12 hours.',
-            'اختر هدف نوم للبالغين من 7 إلى 12 ساعة.',
-          ),
-          SleepScheduleIssue.invalidClock ||
-          SleepScheduleIssue.invalidWindDown => tr(
-            'Check the schedule values and try again.',
-            'راجع قيم الجدول وحاول مجددًا.',
-          ),
-        },
-      );
-      return;
-    }
+    if (scheduleSaving) return;
     final languageCode = Localizations.localeOf(context).languageCode;
-    final notifications = ref.read(fastingNotificationServiceProvider);
-    final previous = sleepSchedule;
-    Future<void> applyNotifications(SleepSchedule schedule) async {
-      if (schedule.enabled) {
+    setState(() => scheduleSaving = true);
+    try {
+      await sleepScheduleStore.save(value);
+      final notifications = ref.read(fastingNotificationServiceProvider);
+      if (value.enabled) {
         await notifications.scheduleSleepSchedule(
-          bedHour: schedule.bedHour,
-          bedMinute: schedule.bedMinute,
-          wakeHour: schedule.wakeHour,
-          wakeMinute: schedule.wakeMinute,
-          windDownMinutes: schedule.windDownMinutes,
+          bedHour: value.bedHour,
+          bedMinute: value.bedMinute,
+          wakeHour: value.wakeHour,
+          wakeMinute: value.wakeMinute,
+          windDownMinutes: value.windDownMinutes,
           languageCode: languageCode,
         );
       } else {
         await notifications.cancelSleepSchedule();
       }
-    }
-
-    setState(() {
-      scheduleError = null;
-      scheduleSaving = true;
-      // Acknowledge the gesture immediately; the disabled switch stays in
-      // this pending position until the single permission/save attempt ends.
-      pendingScheduleEnabled = value.enabled;
-    });
-    var notificationChangeAttempted = false;
-    try {
-      if (value.enabled && !previous.enabled) {
-        final allowed = await notifications.requestPermission();
-        if (!mounted) return;
-        if (!allowed) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                tr(
-                  'Notification permission is off. You can enable it in phone settings.',
-                  'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
-                ),
-              ),
-              action: SnackBarAction(
-                label: tr('Settings', 'الإعدادات'),
-                onPressed: notifications.openSystemSettings,
-              ),
-            ),
-          );
-          return;
-        }
-      }
-      notificationChangeAttempted = true;
-      await applyNotifications(value);
-      // Do not persist success before the native operation succeeds. A failed
-      // schedule/cancellation must not disagree with the switch after reopen.
-      await sleepScheduleStore.save(value);
       if (!mounted) return;
-      setState(() {
-        sleepSchedule = value;
-        scheduleError = null;
-      });
+      setState(() => sleepSchedule = value);
     } on Object {
-      if (notificationChangeAttempted) {
-        try {
-          await applyNotifications(previous);
-        } on Object {
-          // Keep the last persisted preference and report the failed update
-          // below, including when native rollback cannot complete.
-        }
-      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -666,12 +747,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          pendingScheduleEnabled = null;
-          scheduleSaving = false;
-        });
-      }
+      if (mounted) setState(() => scheduleSaving = false);
     }
   }
 
@@ -742,35 +818,6 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       if (mounted) setState(() => saving = false);
     }
   }
-
-  Widget _sleepState(
-    IconData icon,
-    String title,
-    String body, {
-    VoidCallback? onRetry,
-  }) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 48),
-          const SizedBox(height: 14),
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(body, textAlign: TextAlign.center),
-          if (onRetry != null) ...[
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(tr('Retry', 'إعادة المحاولة')),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
 }
 
 final class _ConnectedSleepEvidence {

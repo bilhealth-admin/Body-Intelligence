@@ -78,40 +78,6 @@ final class CommunityPolicyState {
     );
   }
 
-  factory CommunityPolicyState.fromServerSnapshot(Map<String, dynamic> json) {
-    final serverNow = DateTime.tryParse('${json['server_now']}')?.toUtc();
-    final rawStatus = json['status'];
-    if (serverNow == null || rawStatus is! String) {
-      throw const FormatException('Invalid Community policy status payload');
-    }
-    if (rawStatus == 'unavailable') {
-      return const CommunityPolicyState.unavailable();
-    }
-    if (rawStatus != 'accepted' && rawStatus != 'acceptance_required') {
-      throw const FormatException('Invalid Community policy status payload');
-    }
-
-    final policy = CommunityContentPolicy.fromJson(json);
-    final effectiveAt = policy.effectiveAt;
-    final accepted = json['accepted'];
-    if (effectiveAt == null ||
-        effectiveAt.isAfter(serverNow) ||
-        accepted is! bool ||
-        accepted != (rawStatus == 'accepted')) {
-      throw const FormatException('Invalid Community policy status payload');
-    }
-
-    if (!accepted) return CommunityPolicyState.acceptanceRequired(policy);
-    final acceptedAt = DateTime.tryParse('${json['accepted_at']}')?.toUtc();
-    if (acceptedAt == null || acceptedAt.isBefore(effectiveAt)) {
-      throw const FormatException('Invalid Community policy status payload');
-    }
-    return CommunityPolicyState.accepted(
-      policy,
-      acceptedVersion: policy.version,
-    );
-  }
-
   final CommunityPolicyStatus status;
   final CommunityContentPolicy? policy;
   final String? acceptedVersion;

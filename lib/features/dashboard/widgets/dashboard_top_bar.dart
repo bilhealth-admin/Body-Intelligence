@@ -22,14 +22,10 @@ class DashboardTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final language = Localizations.localeOf(context).languageCode.toLowerCase();
-    final localizations = Localizations.of<AppLocalizations>(
-      context,
-      AppLocalizations,
-    );
     final copy =
         _dashboardTopBarCopy[language] ??
         _dashboardTopBarCopy['en']!.map(
-          (key, value) => MapEntry(key, localizations?.text(value) ?? value),
+          (key, value) => MapEntry(key, context.strings.text(value)),
         );
 
     final profile = _RoundProfileButton(
@@ -42,15 +38,6 @@ class DashboardTopBar extends StatelessWidget {
       key: const Key('dashboard-notifications'),
       tooltip: copy['notifications']!,
       onPressed: () => context.push('/notification-settings'),
-      iconSize: 19,
-      constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-      padding: EdgeInsets.zero,
-      style: IconButton.styleFrom(
-        minimumSize: const Size.square(44),
-        maximumSize: const Size.square(44),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: EdgeInsets.zero,
-      ),
       icon: const Icon(Icons.notifications_none_rounded),
     );
     final edit = _DashboardEditButton(tooltip: copy['edit']!);
@@ -58,7 +45,7 @@ class DashboardTopBar extends StatelessWidget {
       textDirection: TextDirection.ltr,
       child: BilFullWordmark(
         key: Key('dashboard-wordmark'),
-        height: 36,
+        height: 38,
         alignment: Alignment.center,
       ),
     );
@@ -67,41 +54,17 @@ class DashboardTopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact =
-              constraints.maxWidth < 330 ||
-              MediaQuery.textScalerOf(context).scale(1) > 1.35;
-          if (compact) {
-            // Only narrow screens and accessibility text need a second row;
-            // ordinary phones use the compact, centred reference layout.
-            return SizedBox(
-              key: const Key('dashboard-identity-header'),
-              height: 78,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: brand,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 48,
-                    child: Row(
-                      textDirection: TextDirection.ltr,
-                      children: [profile, const Spacer(), notifications, edit],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Keep the mark at the physical centre, independently of the three
-          // controls. Equal rails reserve only the two 44-wide right actions
-          // plus a 2-point gap; the shell gives this header the full safe width.
-          const sideRailWidth = 90.0;
+          // Keep equal physical rails around the wordmark. Centering the mark
+          // in the space left by a Row would shift it toward Profile because
+          // the notifications/edit cluster is wider. The symmetric rails
+          // make the identity's centre equal the viewport/content centre on
+          // phones, tablets and both text directions.
+          // The right controls occupy 96dp. The extra 2dp per rail keeps the
+          // rendered lockup from visually touching them on 320dp devices.
+          const sideRailWidth = 98.0;
+          final brandWidth = (constraints.maxWidth - sideRailWidth * 2)
+              .clamp(0.0, double.infinity)
+              .toDouble();
           return SizedBox(
             key: const Key('dashboard-identity-header'),
             height: 48,
@@ -110,17 +73,16 @@ class DashboardTopBar extends StatelessWidget {
               children: [
                 Align(alignment: Alignment.centerLeft, child: profile),
                 Center(
-                  child: SizedBox(
-                    width: constraints.maxWidth - sideRailWidth * 2,
-                    child: brand,
-                  ),
+                  child: SizedBox(width: brandWidth, child: brand),
                 ),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Row(
+                  child: Directionality(
                     textDirection: TextDirection.ltr,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [notifications, edit],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [notifications, edit],
+                    ),
                   ),
                 ),
               ],
@@ -139,50 +101,35 @@ class _DashboardEditButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 44,
-      height: 44,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned(
-            top: 8,
-            bottom: 8,
-            left: 8,
-            right: 8,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF12394E), Color(0xFF2563EB)],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF12394E).withValues(alpha: .18),
-                    blurRadius: 16,
-                    offset: const Offset(0, 7),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          IconButton(
-            key: const Key('dashboard-edit-today'),
-            tooltip: tooltip,
-            onPressed: () => context.push('/dashboard/preferences'),
-            style: IconButton.styleFrom(
-              foregroundColor: Colors.white,
-              minimumSize: const Size(44, 44),
-              maximumSize: const Size(44, 44),
-              padding: EdgeInsets.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: const CircleBorder(),
-            ),
-            icon: const Icon(Icons.settings_outlined, size: 18),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF12394E), Color(0xFF2563EB)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF12394E).withValues(alpha: .18),
+            blurRadius: 16,
+            offset: const Offset(0, 7),
           ),
         ],
+      ),
+      child: IconButton(
+        key: const Key('dashboard-edit-today'),
+        tooltip: tooltip,
+        onPressed: () => context.push('/dashboard/preferences'),
+        style: IconButton.styleFrom(
+          minimumSize: const Size.square(48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: const Icon(
+          Icons.dashboard_customize_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
       ),
     );
   }
@@ -196,7 +143,7 @@ class DashboardBrand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BilFullWordmark(
-      height: compact ? 42 : 50,
+      height: compact ? 38 : 46,
       alignment: Alignment.center,
     );
   }
@@ -207,36 +154,26 @@ const _dashboardTopBarCopy = <String, Map<String, String>>{
     'profile': 'الملف الشخصي',
     'notifications': 'الإشعارات',
     'edit': 'تخصيص الداشبورد',
-    'action': 'تعديل',
-    'today': 'اليوم',
   },
   'en': {
     'profile': 'Profile',
     'notifications': 'Notifications',
     'edit': 'Customize dashboard',
-    'action': 'Edit',
-    'today': 'Today',
   },
   'fr': {
     'profile': 'Profil',
     'notifications': 'Notifications',
     'edit': 'Personnaliser le tableau de bord',
-    'action': 'Modifier',
-    'today': "Aujourd’hui",
   },
   'es': {
     'profile': 'Perfil',
     'notifications': 'Notificaciones',
     'edit': 'Personalizar el panel',
-    'action': 'Editar',
-    'today': 'Hoy',
   },
   'tr': {
     'profile': 'Profil',
     'notifications': 'Bildirimler',
     'edit': 'Paneli özelleştir',
-    'action': 'Düzenle',
-    'today': 'Bugün',
   },
 };
 
@@ -281,8 +218,8 @@ class _RoundProfileButtonState extends State<_RoundProfileButton> {
               child: Center(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  width: 32,
-                  height: 32,
+                  width: 42,
+                  height: 42,
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -309,7 +246,7 @@ class _RoundProfileButtonState extends State<_RoundProfileButton> {
                             (widget.imageUrl?.trim().isEmpty ?? true)
                         ? const Key('dashboard-default-profile-avatar')
                         : const Key('dashboard-user-profile-avatar'),
-                    radius: 14,
+                    radius: 19,
                     photoBytes: widget.imageBytes,
                     networkUrl: widget.imageUrl,
                     backgroundColor: const Color(0xFF12394E),

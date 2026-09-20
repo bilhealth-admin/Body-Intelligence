@@ -11,6 +11,11 @@ final class AppleHealthRuntime {
          bridges: <NativeHealthBridge>[bridge],
          store: store,
          audit: audit,
+         // HealthKit can contain years of high-frequency heart-rate samples.
+         // One anchored page per explicit Sync keeps the UI responsive; the
+         // persisted anchor means a later sync resumes rather than discards
+         // the remaining history.
+         pageLimit: 1,
        );
 
   factory AppleHealthRuntime.methodChannel({

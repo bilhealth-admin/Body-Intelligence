@@ -40,7 +40,10 @@ void main() {
     );
     expect(more, contains("copy('Sharing & Privacy')"));
     expect(more, contains("label: copy('Sync now')"));
-    expect(more, isNot(contains("copy('Delete account')")));
+    expect(
+      more.indexOf("label: copy('Sync now')"),
+      greaterThan(more.indexOf("copy('Delete account')")),
+    );
 
     expect(providers, contains('cloudManualSyncServiceProvider'));
     expect(

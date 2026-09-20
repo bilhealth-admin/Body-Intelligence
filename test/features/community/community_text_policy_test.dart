@@ -208,8 +208,7 @@ void main() {
       // Submission and localized policy errors now live inside the modal.
       'lib/features/community/presentation/community_food_submission_sheet.dart',
       'lib/features/community/presentation/community_chat_page.dart',
-      // New-message submission is a part of the messages library.
-      'lib/features/community/presentation/new_community_message_page.dart',
+      'lib/features/community/presentation/community_messages_page.dart',
       'lib/features/community/presentation/community_profile_page.dart',
       'lib/features/community/presentation/product_review_submission_dialog.dart',
     ]) {

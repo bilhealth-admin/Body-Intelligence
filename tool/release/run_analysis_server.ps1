@@ -100,13 +100,13 @@ try {
 
   $allErrors = @()
   foreach ($event in $errors) {
-    foreach ($diagnostic in $event.params.errors) {
+    foreach ($error in $event.params.errors) {
       $allErrors += [pscustomobject]@{
         File = $event.params.file
-        Line = $diagnostic.location.startLine
-        Severity = $diagnostic.severity
-        Type = $diagnostic.type
-        Message = $diagnostic.message
+        Line = $error.location.startLine
+        Severity = $error.severity
+        Type = $error.type
+        Message = $error.message
       }
     }
   }

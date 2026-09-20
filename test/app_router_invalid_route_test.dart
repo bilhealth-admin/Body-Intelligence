@@ -34,16 +34,9 @@ void main() {
     );
     expect(
       RegExp(
-        r'final returnPath = ResponsiveAppShell\.safeQuickAddReturnPath\(',
-      ).allMatches(source).length,
-      1,
-    );
-    expect(RegExp(r'returnPath:\s*returnPath').allMatches(source).length, 2);
-    expect(
-      RegExp(
         r'returnPath:\s*ResponsiveAppShell\.safeQuickAddReturnPath\(',
       ).allMatches(source).length,
-      2,
+      4,
     );
   });
 

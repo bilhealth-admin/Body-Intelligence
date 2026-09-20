@@ -2,7 +2,6 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
-import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
@@ -199,7 +198,6 @@ void main() {
       activityLevel: 'light',
       exercises: true,
     );
-    await PreferencesRepository(db).set('timezoneName', 'Egypt Daylight Time');
     if (trends) {
       final weights = WeightRepository(db);
       final now = DateTime(2026, 8, 5);
@@ -252,7 +250,7 @@ void main() {
             (ref) => DateTime(2026, 8, 30, 9, 41, 12),
           ),
           premiumProfileClockProvider.overrideWithValue(
-            () => DateTime.utc(2026, 8, 30, 9, 41, 12),
+            () => DateTime(2026, 8, 30, 9, 41, 12),
           ),
           liveHealthNowProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),

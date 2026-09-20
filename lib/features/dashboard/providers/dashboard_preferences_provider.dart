@@ -13,9 +13,6 @@ abstract final class DashboardSectionIds {
   static const quickLog = 'quick_log';
   static const discover = 'discover';
   static const bestAction = 'best_action';
-  // Retained only so older saved presets and isolated component previews can
-  // still be decoded. The Daily Summary card is no longer part of the
-  // production Dashboard and this id is intentionally absent from [all].
   static const progress = 'progress';
   static const connectedHealth = 'connected_health';
   static const bodyTwin = 'body_twin';
@@ -28,6 +25,7 @@ abstract final class DashboardSectionIds {
     quickLog,
     discover,
     bestAction,
+    progress,
     connectedHealth,
     bodyTwin,
     aiCoach,
@@ -49,12 +47,6 @@ final dashboardSectionVisibleProvider = StreamProvider.family<bool, String>((
             ? DashboardSectionIds.defaultVisible(section)
             : value == 'true',
       );
-});
-
-// Keep the subscription stable while the editor saves or rebuilds. Creating
-// repository.watch() in build briefly unmounts the horizontal preset list.
-final dashboardSelectedPresetProvider = StreamProvider<String?>((ref) {
-  return ref.watch(preferencesRepositoryProvider).watch('dashboard.preset');
 });
 
 abstract final class DashboardNutrientGoalIds {

@@ -26,7 +26,8 @@ class ReleaseConfiguration {
     this.unresolvedReviewCount,
     this.manifestReleaseVersion = '',
     this.manifestReleaseBuildNumber,
-    this.expectedReleaseBuildNumber,
+    this.manifestReleaseBuildNumberIos,
+    this.manifestReleaseBuildNumberAndroid,
   });
 
   final bool production;
@@ -55,7 +56,8 @@ class ReleaseConfiguration {
   final int? unresolvedReviewCount;
   final String manifestReleaseVersion;
   final int? manifestReleaseBuildNumber;
-  final int? expectedReleaseBuildNumber;
+  final int? manifestReleaseBuildNumberIos;
+  final int? manifestReleaseBuildNumberAndroid;
 }
 
 class ReleaseConfigurationIssue {
@@ -69,9 +71,6 @@ class ReleaseConfigurationValidator {
   const ReleaseConfigurationValidator._();
 
   static const approvedApplicationId = 'com.bilhealth.bodyintelligencelog';
-  static const approvedReleaseVersion = '1.0.0';
-  static const androidReleaseBuildNumber = 11;
-  static const iosReleaseBuildNumber = 12;
 
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,
@@ -263,25 +262,20 @@ class ReleaseConfigurationValidator {
       );
     }
 
-    final expectedManifestBuildNumber =
-        configuration.expectedReleaseBuildNumber ??
-        switch (platform) {
-          'android' => androidReleaseBuildNumber,
-          'ios' => iosReleaseBuildNumber,
-          _ => null,
-        };
+    final expectedBuild = platform == 'ios'
+        ? configuration.manifestReleaseBuildNumberIos
+        : platform == 'android'
+        ? configuration.manifestReleaseBuildNumberAndroid
+        : null;
     if (configuration.production &&
-        (configuration.manifestReleaseVersion != approvedReleaseVersion ||
-            configuration.manifestReleaseBuildNumber !=
-                expectedManifestBuildNumber)) {
+        (configuration.manifestReleaseVersion != '1.0.0' ||
+            expectedBuild == null ||
+            (platform == 'ios' && expectedBuild != 26) ||
+            (platform == 'android' && expectedBuild != 21))) {
       issues.add(
-        ReleaseConfigurationIssue(
+        const ReleaseConfigurationIssue(
           'wrong_frozen_release_version',
-          expectedManifestBuildNumber == null
-              ? 'The accepted manifest must bind an approved platform build.'
-              : 'The accepted manifest must bind exactly version '
-                    '$approvedReleaseVersion build $expectedManifestBuildNumber '
-                    'for $platform.',
+          'The accepted manifest must bind version 1.0.0 to iOS build 26 or Android build 21.',
         ),
       );
     }

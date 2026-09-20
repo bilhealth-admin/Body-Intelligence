@@ -125,15 +125,14 @@ class ZipEncoder {
     DateTime? modified,
     bool autoClose = false,
     ArchiveCallback? callback,
-  }) =>
-      encodeBytes(
-        archive,
-        level: level,
-        output: output,
-        modified: modified,
-        autoClose: autoClose,
-        callback: callback,
-      );
+  }) => encodeBytes(
+    archive,
+    level: level,
+    output: output,
+    modified: modified,
+    autoClose: autoClose,
+    callback: callback,
+  );
 
   void startEncode(
     OutputStream? output, {
@@ -254,8 +253,9 @@ class ZipEncoder {
     }
 
     final encodedFilename = filenameEncoding.encode(entry.name);
-    final comment =
-        entry.comment != null ? filenameEncoding.encode(entry.comment!) : null;
+    final comment = entry.comment != null
+        ? filenameEncoding.encode(entry.comment!)
+        : null;
 
     final dataLen = compressedData?.length ?? 0;
 
@@ -315,7 +315,8 @@ class ZipEncoder {
 
     output.writeUint32(ZipFile.zipSignature);
 
-    final needsZip64 = fileData.compressedSize > 0xFFFFFFFF ||
+    final needsZip64 =
+        fileData.compressedSize > 0xFFFFFFFF ||
         fileData.uncompressedSize > 0xFFFFFFFF;
 
     var flags = 0;
@@ -325,14 +326,15 @@ class ZipEncoder {
     final compressionMethod = fileData.compression == CompressionType.deflate
         ? ZipFile.zipCompressionDeflate
         : fileData.compression == CompressionType.bzip2
-            ? ZipFile.zipCompressionBZip2
-            : ZipFile.zipCompressionStore;
+        ? ZipFile.zipCompressionBZip2
+        : ZipFile.zipCompressionStore;
     final lastModFileTime = fileData.time;
     final lastModFileDate = fileData.date;
     final crc32 = fileData.crc32;
     final compressedSize = needsZip64 ? 0xFFFFFFFF : fileData.compressedSize;
-    final uncompressedSize =
-        needsZip64 ? 0xFFFFFFFF : fileData.uncompressedSize;
+    final uncompressedSize = needsZip64
+        ? 0xFFFFFFFF
+        : fileData.uncompressedSize;
 
     final extra = <int>[];
     if (needsZip64) {
@@ -392,7 +394,8 @@ class ZipEncoder {
     var zipNeedsZip64 = false;
 
     for (final fileData in files) {
-      final needsZip64 = fileData.compressedSize > 0xFFFFFFFF ||
+      final needsZip64 =
+          fileData.compressedSize > 0xFFFFFFFF ||
           fileData.uncompressedSize > 0xFFFFFFFF ||
           fileData.position > 0xFFFFFFFF;
       zipNeedsZip64 |= needsZip64;
@@ -403,14 +406,15 @@ class ZipEncoder {
       final compressionMethod = fileData.compression == CompressionType.deflate
           ? ZipFile.zipCompressionDeflate
           : fileData.compression == CompressionType.bzip2
-              ? ZipFile.zipCompressionBZip2
-              : ZipFile.zipCompressionStore;
+          ? ZipFile.zipCompressionBZip2
+          : ZipFile.zipCompressionStore;
       final lastModifiedFileTime = fileData.time;
       final lastModifiedFileDate = fileData.date;
       final crc32 = fileData.crc32;
       final compressedSize = needsZip64 ? 0xFFFFFFFF : fileData.compressedSize;
-      final uncompressedSize =
-          needsZip64 ? 0xFFFFFFFF : fileData.uncompressedSize;
+      final uncompressedSize = needsZip64
+          ? 0xFFFFFFFF
+          : fileData.uncompressedSize;
       final diskNumberStart = 0;
       final internalFileAttributes = 0;
       final externalFileAttributes = fileData.mode << 16;
@@ -458,7 +462,8 @@ class ZipEncoder {
     final centralDirectorySize = output.length - centralDirPosition;
     final centralDirectoryOffset = centralDirPosition;
 
-    final needsZip64 = zipNeedsZip64 ||
+    final needsZip64 =
+        zipNeedsZip64 ||
         totalCentralDirectoryEntriesOnThisDisk > 0xffff ||
         totalCentralDirectoryEntries > 0xffff ||
         centralDirectorySize > 0xffffffff ||

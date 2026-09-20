@@ -28,7 +28,10 @@ class CommunityFormCopy {
     'Write a caption before publishing your photo.',
   ];
 
-  static const catalogSources = <String>{...englishKeys, 'Review policy'};
+  static const catalogSources = <String>{
+    ...englishKeys,
+    'Review policy',
+  };
 
   static const reviewPolicyTranslations = <String, String>{
     'ar': 'مراجعة السياسة',

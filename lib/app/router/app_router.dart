@@ -18,7 +18,6 @@ import '../../features/auth/auth_callback_page.dart';
 import '../../features/auth/bil_auth_callback_controller.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
-import '../../features/daily_log/food_log_page.dart';
 import '../../features/daily_log/daily_body_context_page.dart';
 import '../../features/daily_log/daily_water_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
@@ -41,8 +40,6 @@ import '../../features/commerce/presentation/bil_store_plans_page.dart';
 import '../../features/commerce/presentation/premium_route_glass_gate.dart';
 import '../../features/commerce/presentation/premium_logging_intro_page.dart';
 import '../../features/community/presentation/community_hub_page.dart';
-import '../../features/community/presentation/community_surface.dart';
-import '../../features/community/presentation/community_bil_code_page.dart';
 import '../../features/community/presentation/community_people_page.dart';
 import '../../features/community/presentation/community_connections_page.dart';
 import '../../features/community/presentation/community_food_review_page.dart';
@@ -57,6 +54,7 @@ import '../../features/nutrition/food_page.dart';
 import '../../features/nutrition/presentation/catalog_packs_page.dart';
 import '../../features/nutrition/presentation/meal_image_guide_page.dart';
 import '../../features/nutrition/presentation/meals_recipes_foods_page.dart';
+import '../../features/daily_log/food_log_page.dart';
 import '../../features/recipe_import/presentation/trusted_recipe_import_page.dart';
 import '../../features/nutrition_plans/presentation/nutrition_pathways_page.dart';
 import '../../features/nutrition_plans/presentation/diet_plan_editor_page.dart';
@@ -65,6 +63,7 @@ import '../../features/meal_planner/presentation/meal_planner_page.dart';
 import '../../features/notifications/presentation/notification_settings_page.dart';
 import '../../features/notifications/domain/community_deep_link.dart';
 import '../../features/wellness/presentation/wellness_library_page.dart';
+import '../../features/wellness/presentation/wellness_learn_page.dart';
 import '../../features/wellness/presentation/wellness_content_packs_page.dart';
 import '../../features/wellness/presentation/bil_workout_routines_page.dart';
 import '../../features/wellness/presentation/wellness_tools_pages.dart';
@@ -97,37 +96,36 @@ import '../../features/startup/startup_page.dart';
 import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
 
-part 'app_route_redirect.dart';
-
 class AppRouter {
   static Future<bool> Function()? nativeAuthCallbackRetry;
-
-  /// A billing surface is an overlay journey, not a destination that should
-  /// grow the back stack. StoreKit may return control to Flutter more than
-  /// once for a single cancelled transaction, so a second request for the
-  /// already-visible Plans route must be ignored.
-  static bool blocksDuplicatePlansNavigation(Uri current, Uri next) =>
-      current.path == '/plans' && next.path == '/plans';
 
   static final router = GoRouter(
     initialLocation: '/startup',
     errorBuilder: (_, _) => const InvalidRoutePage(),
-    onEnter: (_, currentState, nextState, _) {
-      if (blocksDuplicatePlansNavigation(currentState.uri, nextState.uri)) {
-        return const Block.stop();
+    redirect: (_, state) {
+      if (BilAuthCallbackController.isSupportedCallbackLocation(state.uri)) {
+        if (!AppEnvironment.cloudConfigured) return '/login';
+        final isPasswordRecovery =
+            BilAuthCallbackController.isPasswordRecoveryLocation(state.uri);
+        return isPasswordRecovery ? '/reset-password' : '/auth-callback';
       }
-      return const Allow();
+      final launchLink = BilLaunchDeepLink.parse(state.uri);
+      if (launchLink != null) return launchLink.route;
+      final deepLinkRoute = CommunityDeepLink.routeFor(state.uri);
+      if (deepLinkRoute == null) return null;
+      if (deepLinkRoute.startsWith('/community') &&
+          !AppEnvironment.communityConfigured) {
+        return '/settings';
+      }
+      return deepLinkRoute;
     },
-    redirect: (_, state) => _redirectAppRoute(state.uri),
     routes: [
       GoRoute(
         path: '/startup',
-        pageBuilder: (_, state) => NoTransitionPage(
-          child: StartupPage(
-            initialAuthSession: state.extra is Session
-                ? state.extra! as Session
-                : null,
-          ),
+        builder: (_, state) => StartupPage(
+          initialAuthSession: state.extra is Session
+              ? state.extra! as Session
+              : null,
         ),
       ),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
@@ -165,7 +163,12 @@ class AppRouter {
         path: '/account-data-conflict',
         builder: (_, _) => const AccountDataConflictPage(),
       ),
-      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, state) => OnboardingPage(
+          reviewMode: state.uri.queryParameters['mode'] == 'review',
+        ),
+      ),
       GoRoute(
         path: '/daily-check-in',
         builder: (_, _) => const DailyCheckInPage(),
@@ -294,85 +297,60 @@ class AppRouter {
         path: '/community/people',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityPeoplePage()),
-        ),
-      ),
-      GoRoute(
-        path: '/community/code',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityBilCodePage()),
-        ),
-      ),
-      GoRoute(
-        path: '/community/code/scan',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityCodeScannerPage()),
-        ),
-      ),
-      GoRoute(
-        path: '/community/member/:code',
-        builder: (_, state) => PremiumRouteGlassGate(
-          feature: PremiumGateFeature.community,
-          child: CommunitySurface(
-            child: CommunityMemberCodePage(code: state.pathParameters['code']!),
-          ),
+          child: CommunityPeoplePage(),
         ),
       ),
       GoRoute(
         path: '/community/notifications',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityNotificationsPage()),
+          child: CommunityNotificationsPage(),
         ),
       ),
-      // Moderation uses a server-verified role, not a customer purchase.
-      // Its RPCs fail closed; a moderator need not own Premium.
       GoRoute(
         path: '/community/moderation',
-        builder: (_, _) =>
-            const CommunitySurface(child: CommunityPostModerationPage()),
+        // Moderation is a server-verified role, not a customer purchase.
+        // Its RPCs fail closed for non-moderators, so a legitimate moderator
+        // must not be blocked merely because they do not own Premium.
+        builder: (_, _) => const CommunityPostModerationPage(),
       ),
       GoRoute(
         path: '/community/connections',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityConnectionsPage()),
+          child: CommunityConnectionsPage(),
         ),
       ),
       GoRoute(
         path: '/community/food-review',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityFoodReviewPage()),
+          child: CommunityFoodReviewPage(),
         ),
       ),
       GoRoute(
         path: '/community/profile',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityProfilePage()),
+          child: CommunityProfilePage(),
         ),
       ),
       GoRoute(
         path: '/community/safety',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunitySafetyPage()),
+          child: CommunitySafetyPage(),
         ),
       ),
       GoRoute(
         path: '/community/chat/:userId',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(
-            child: CommunityChatPage(
-              userId: state.pathParameters['userId']!,
-              displayName: state.extra is String
-                  ? state.extra! as String
-                  : state.uri.queryParameters['name'] ?? 'BIL',
-            ),
+          child: CommunityChatPage(
+            userId: state.pathParameters['userId']!,
+            displayName: state.extra is String
+                ? state.extra! as String
+                : state.uri.queryParameters['name'] ?? 'BIL',
           ),
         ),
       ),
@@ -380,14 +358,14 @@ class AppRouter {
         path: '/community/messages',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityMessagesPage()),
+          child: CommunityMessagesPage(),
         ),
       ),
       GoRoute(
         path: '/community/messages/new',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: NewCommunityMessagePage()),
+          child: NewCommunityMessagePage(),
         ),
       ),
       GoRoute(
@@ -428,6 +406,10 @@ class AppRouter {
       GoRoute(
         path: '/wellness-library',
         builder: (_, _) => const WellnessLibraryPage(),
+      ),
+      GoRoute(
+        path: '/wellness/learn',
+        builder: (_, _) => const WellnessLearnPage(),
       ),
       GoRoute(
         path: '/wellness/sleep',
@@ -616,18 +598,9 @@ class AppRouter {
         builder: (_, _) => const AiCoachAdminPage(),
       ),
       ShellRoute(
-        // Startup is a full-screen gate. Entering the product must replace it
-        // atomically; a platform page transition would expose the blue splash
-        // beside the dashboard for a frame, especially in RTL on iOS.
-        pageBuilder: (_, state, child) => NoTransitionPage(
-          child: ResponsiveAppShell(currentUri: state.uri, child: child),
-        ),
+        builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
-          GoRoute(
-            path: '/dashboard',
-            pageBuilder: (_, _) =>
-                const NoTransitionPage(child: DashboardPage()),
-          ),
+          GoRoute(path: '/dashboard', builder: (_, _) => const DashboardPage()),
           GoRoute(
             path: '/dashboard/decision-explanation',
             builder: (_, state) => DashboardDecisionExplanationPage(
@@ -640,25 +613,21 @@ class AppRouter {
             path: '/daily-log',
             builder: (_, state) {
               final foodLogMode = state.uri.queryParameters['foodLog'] == '1';
-              final returnPath = ResponsiveAppShell.safeQuickAddReturnPath(
-                state.uri.queryParameters['from'],
-              );
               if (foodLogMode) {
                 return FoodLogPage(
                   initialMealType: state.uri.queryParameters['meal'],
-                  initialAction: state.uri.queryParameters['action'],
-                  directPhotoCapture:
-                      state.uri.queryParameters['source'] == 'camera',
-                  returnPath: returnPath,
+                  returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
+                    state.uri.queryParameters['from'],
+                  ),
                 );
               }
               return DailyLogPage(
                 initialMealType: state.uri.queryParameters['meal'],
                 focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
                 initialAction: state.uri.queryParameters['action'],
-                directPhotoCapture:
-                    state.uri.queryParameters['source'] == 'camera',
-                returnPath: returnPath,
+                returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
+                  state.uri.queryParameters['from'],
+                ),
               );
             },
           ),
@@ -703,10 +672,7 @@ class AppRouter {
             path: '/weight-history',
             builder: (_, _) => const HistoryPage(),
           ),
-          GoRoute(
-            path: '/analytics',
-            builder: (_, _) => const AnalyticsPage(showDashboardBack: true),
-          ),
+          GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsPage()),
           GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
         ],
       ),
