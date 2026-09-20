@@ -2,7 +2,7 @@ import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.t
 
 const backendUrl = new URL("./store_backend.ts", import.meta.url);
 const migrationUrl = new URL(
-  "../../migrations/20260920120000_store_server_rpc_boundaries.sql",
+  "../../migrations/20260920034051_store_server_rpc_boundaries.sql",
   import.meta.url,
 );
 

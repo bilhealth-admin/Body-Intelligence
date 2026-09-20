@@ -872,7 +872,7 @@ export function buildVerifiedPurchaseRpcArgs(
 
 type StoreSubscriptionOwner = {
   owner_id: string;
-  environment: string;
+  environment: StoreEnvironment;
 };
 
 async function lookupStoreSubscriptionOwner(
@@ -893,8 +893,13 @@ async function lookupStoreSubscriptionOwner(
   const row = rows[0];
   if (!isRecord(row)) return null;
   const ownerId = String(row.owner_id ?? "");
-  const environment = String(row.environment ?? "");
-  if (!ownerId || !["sandbox", "production"].includes(environment)) {
+  if (!ownerId) {
+    throw new Error(failureCode);
+  }
+  let environment: StoreEnvironment;
+  try {
+    environment = verifiedStoreEnvironment(row.environment);
+  } catch {
     throw new Error(failureCode);
   }
   return { owner_id: ownerId, environment };

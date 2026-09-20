@@ -437,6 +437,7 @@ Deno.test("successful response exposes the metered request id for feedback corre
       attempts: 1,
       data: {
         candidates: [{
+          finishReason: "STOP",
           content: {
             parts: [{
               text: JSON.stringify({
@@ -715,6 +716,7 @@ Deno.test("voice uses v2 consent and one voice-seconds reservation", async () =>
         attempts: 1,
         data: {
           candidates: [{
+            finishReason: "STOP",
             content: {
               parts: [{
                 text: JSON.stringify({
