@@ -175,7 +175,16 @@ void main() {
               (ref) => Future.error(StateError('private database detail')),
             ),
           ],
-          child: const MaterialApp(home: WeeklyReportPage()),
+          child: MaterialApp(
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const WeeklyReportPage(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
