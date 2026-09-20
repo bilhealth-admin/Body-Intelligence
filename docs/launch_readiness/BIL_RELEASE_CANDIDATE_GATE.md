@@ -19,6 +19,18 @@
 
 ## Repository release-candidate gate
 
+## Local validation evidence (2026-09-20)
+
+- Validated candidate HEAD: `6b4b9ee55e85ce64f87cce33543601b1ddcbd1f1`.
+- Full Master Run: `4608` unique tests, `4607` passed, `0` failed, `1` skipped.
+- Flutter: `4455` passed, `0` failed, `1` skipped.
+- Portable release suite: `887/887` scheduled files passed.
+- Deno AI Coach: `20/20` passed; Deno Store: `132/132` passed; Deno type-check: pass.
+- Production release configuration validator: pass for Android build `21` and
+  iOS build `26` using the approved application identifier and frozen manifest.
+- Signing credentials, store-console access, device validation, and Mobile
+  Integrity production binding remain external gates and are not claimed here.
+
 A repository release candidate is accepted only when all of these checks pass
 against the same immutable source commit in one package run:
 
