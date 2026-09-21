@@ -122,15 +122,15 @@ void main() {
     expect(info, contains('<string>UIInterfaceOrientationPortrait</string>'));
     expect(
       info,
-      isNot(contains('<string>UIInterfaceOrientationPortraitUpsideDown</string>')),
+      contains('<string>UIInterfaceOrientationPortraitUpsideDown</string>'),
     );
     expect(
       info,
-      isNot(contains('<string>UIInterfaceOrientationLandscapeLeft</string>')),
+      contains('<string>UIInterfaceOrientationLandscapeLeft</string>'),
     );
     expect(
       info,
-      isNot(contains('<string>UIInterfaceOrientationLandscapeRight</string>')),
+      contains('<string>UIInterfaceOrientationLandscapeRight</string>'),
     );
     expect(main, contains('SystemChrome.setPreferredOrientations('));
     expect(main, contains('DeviceOrientation.portraitUp'));
