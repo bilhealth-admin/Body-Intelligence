@@ -2,66 +2,84 @@ part of 'daily_log_summary_widgets.dart';
 
 class _MacroMetric extends StatelessWidget {
   const _MacroMetric({
-    required this.metricKey,
     required this.color,
+    required this.percent,
+    required this.progress,
     required this.grams,
-    required this.goalGrams,
+    required this.goal,
     required this.label,
+    this.percentKey,
+    this.gramsKey,
+    this.loading = false,
   });
 
-  final String metricKey;
   final Color color;
+  final double? percent;
+  final double progress;
   final double grams;
-  final double? goalGrams;
+  final double? goal;
   final String label;
+  final Key? percentKey;
+  final Key? gramsKey;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
-    final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
-    final percent = hasGoal ? grams / goalGrams! * 100 : null;
-    // The Today summary's primary macro value is consumption, not a compact
-    // consumed/target fraction. Progress remains available in the secondary
-    // percentage immediately above it, so the goal is not lost or allowed to
-    // compete with the owner's requested `3 g`-style reading hierarchy.
-    final gramsText = '${formatDiaryMacroGrams(grams)} g';
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        KeyedSubtree(
-          key: Key('daily-summary-$metricKey-percent'),
-          child: Text(
-            percent == null ? '—' : '${percent.round()}%',
-            textDirection: TextDirection.ltr,
+    return Semantics(
+      key: percentKey,
+      value: loading || percent == null ? '—' : '${percent!.round()}%',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontSize: 13,
-              color: color,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
           ),
-        ),
-        const SizedBox(height: 3),
-        FittedBox(
-          key: Key('daily-summary-$metricKey-grams'),
-          fit: BoxFit.scaleDown,
-          child: Text(
-            gramsText,
-            maxLines: 1,
-            textDirection: TextDirection.ltr,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textDirection: TextDirection.ltr,
+              children: [
+                Text(
+                  loading ? '—' : '${formatDiaryMacroGrams(grams)} g',
+                  key: gramsKey,
+                  maxLines: 1,
+                  textDirection: TextDirection.ltr,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (goal != null && goal!.isFinite && goal! > 0)
+                  Text(
+                    ' / ${formatDiaryMacroGrams(goal!)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12),
-        ),
-      ],
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              minHeight: 6,
+              value: loading ? 0 : progress,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

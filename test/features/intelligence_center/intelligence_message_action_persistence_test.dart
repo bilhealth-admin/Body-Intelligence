@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_action.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
+import 'package:body_intelligence_log/core/health_evidence/health_evidence_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -49,6 +50,31 @@ void main() {
 
     expect(restored.text, 'A retained answer');
     expect(restored.actionLinks, isEmpty);
+    expect(restored.citationIds, isEmpty);
+  });
+
+  test('only approved citation IDs survive conversation persistence', () {
+    final raw =
+        messageWith(
+          IntelligenceMessageAction.fromAction(
+            const IntelligenceAction(
+              id: 'open-goals',
+              type: IntelligenceActionType.openPlan,
+              label: 'Open plan',
+              requiresConfirmation: false,
+            ),
+          )!,
+        ).copyWith(
+          citationIds: const <String>[
+            HealthEvidenceIds.cdcAdultBmi,
+            'https://untrusted.example/fake',
+            'invented_study',
+          ],
+        );
+
+    final restored = IntelligenceMessage.fromJson(raw.toJson());
+
+    expect(restored.citationIds, const <String>[HealthEvidenceIds.cdcAdultBmi]);
   });
 
   test('damaged action-link metadata does not discard the saved message', () {

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../core/health_evidence/health_evidence_catalog.dart';
+
 enum BodyCompositionIssue {
   missingGender,
   unsupportedGender,
@@ -27,17 +29,20 @@ class BodyCompositionMetric {
     this.value, {
     this.method,
     this.uncertainty = EstimateUncertainty.lower,
+    this.sourceIds = const <String>[],
   }) : issue = null;
 
   const BodyCompositionMetric.unavailable(this.issue)
     : value = null,
       method = null,
+      sourceIds = const <String>[],
       uncertainty = EstimateUncertainty.higher;
 
   final double? value;
   final BodyCompositionIssue? issue;
   final BodyFatEstimateMethod? method;
   final EstimateUncertainty uncertainty;
+  final List<String> sourceIds;
 
   bool get isAvailable => value != null;
 }
@@ -125,7 +130,10 @@ class BodyCompositionEngine {
         BodyCompositionIssue.invalidWaist,
       );
     }
-    return BodyCompositionMetric.available(waistCm / heightCm);
+    return BodyCompositionMetric.available(
+      waistCm / heightCm,
+      sourceIds: const [HealthEvidenceIds.niceWaistToHeight],
+    );
   }
 
   static BodyCompositionMetric _bodyMassIndex({
@@ -155,6 +163,7 @@ class BodyCompositionEngine {
     final heightM = heightCm / 100;
     return BodyCompositionMetric.available(
       currentWeightKg / (heightM * heightM),
+      sourceIds: const [HealthEvidenceIds.cdcAdultBmi],
     );
   }
 
@@ -220,6 +229,7 @@ class BodyCompositionEngine {
       return BodyCompositionMetric.available(
         estimate,
         method: BodyFatEstimateMethod.circumferenceHodgdonBeckett,
+        sourceIds: const [HealthEvidenceIds.hodgdonBeckett],
       );
     }
 
@@ -274,6 +284,7 @@ class BodyCompositionEngine {
         return BodyCompositionMetric.available(
           estimate,
           method: BodyFatEstimateMethod.circumferenceHodgdonBeckett,
+          sourceIds: const [HealthEvidenceIds.hodgdonBeckett],
         );
       }
     }
@@ -306,6 +317,7 @@ class BodyCompositionEngine {
       estimate,
       method: BodyFatEstimateMethod.bmiAgeFallback,
       uncertainty: EstimateUncertainty.higher,
+      sourceIds: const [HealthEvidenceIds.deurenbergBodyFat],
     );
   }
 
@@ -330,6 +342,7 @@ class BodyCompositionEngine {
     }
     return BodyCompositionMetric.available(
       currentWeightKg * (1 - bodyFat.value! / 100),
+      sourceIds: bodyFat.sourceIds,
     );
   }
 }

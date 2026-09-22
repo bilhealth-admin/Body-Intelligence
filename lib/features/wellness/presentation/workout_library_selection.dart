@@ -280,6 +280,17 @@ extension _WorkoutLibrarySelection on _WorkoutLibraryPageState {
                           'تقدير MET · لا يغيّر ميزانية سعرات اليوم',
                         ),
                       ),
+                      trailing: IconButton(
+                        key: const Key('exercise-met-health-sources'),
+                        tooltip: tr(
+                          'MET sources & methodology',
+                          'مصادر ومنهجية MET',
+                        ),
+                        onPressed: () => context.push(
+                          '/health-information-sources?topic=exercise-met',
+                        ),
+                        icon: const Icon(Icons.menu_book_outlined),
+                      ),
                     );
                   },
                 ),

@@ -65,6 +65,7 @@ class BodyModelEngine {
         sodium: targets.sodium,
         fiber: targets.fiber,
         water: HydrationEngine.calculate(profile),
+        sourceIds: targets.sourceIds,
       ),
     );
   }

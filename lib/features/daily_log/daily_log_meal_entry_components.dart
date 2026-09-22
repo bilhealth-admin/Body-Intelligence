@@ -16,7 +16,7 @@ class _DiaryActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Material(
-      color: scheme.surface,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onPressed,
@@ -28,7 +28,11 @@ class _DiaryActionButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                BilSemanticIconBadge(kind: kind, size: 28, iconSize: 17),
+                Icon(
+                  BilSemanticIcons.spec(kind).icon,
+                  size: 20,
+                  color: scheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(

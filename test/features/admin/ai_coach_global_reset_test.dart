@@ -288,6 +288,46 @@ void main() {
     expect(find.byKey(const Key('ai-coach-reset-root-notice')), findsNothing);
   });
 
+  testWidgets('reset gift is centered and the acknowledgement dismisses once', (
+    tester,
+  ) async {
+    final gateway = _FakeNoticeGateway();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          aiCoachResetNoticeGatewayProvider.overrideWithValue(gateway),
+        ],
+        child: _localizedApp(
+          home: const AiCoachResetNoticeCoordinator(
+            child: Scaffold(body: SizedBox.expand()),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final notice = find.byKey(const Key('ai-coach-reset-root-notice'));
+    expect(notice, findsOneWidget);
+    expect(
+      find.byKey(const Key('bil-premium-notice-modal-barrier')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getCenter(notice).dx,
+      closeTo(
+        tester.view.physicalSize.width / tester.view.devicePixelRatio / 2,
+        1,
+      ),
+    );
+
+    await tester.tap(
+      find.byKey(const Key('ai-coach-reset-root-notice-acknowledge')),
+    );
+    await tester.pumpAndSettle();
+    expect(gateway.dismissCalls, 1);
+    expect(find.byKey(const Key('ai-coach-reset-root-notice')), findsNothing);
+  });
+
   testWidgets(
     'opening a reset notice refreshes server balance and credit access',
     (tester) async {

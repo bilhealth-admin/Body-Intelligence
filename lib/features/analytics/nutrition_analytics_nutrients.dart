@@ -102,6 +102,27 @@ class _PremiumNutrientDashboard extends StatelessWidget {
               ),
               if (row != rows.last) const SizedBox(height: 12),
             ],
+            if (preset == NutrientDashboardPreset.heartHealthy) ...[
+              const SizedBox(height: 10),
+              Text(
+                _t(
+                  context,
+                  'Displayed goals may be your saved BIL targets. WHO adult population references are shown separately in Sources.',
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  key: const Key('heart-health-sources'),
+                  onPressed: () => context.push(
+                    '/health-information-sources?topic=heart-health',
+                  ),
+                  icon: const Icon(Icons.menu_book_outlined, size: 17),
+                  label: Text(_t(context, 'WHO population reference')),
+                ),
+              ),
+            ],
           ],
         ),
       ),

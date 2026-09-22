@@ -98,6 +98,7 @@ import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
 
 part 'app_route_redirect.dart';
+part 'app_wellness_routes.dart';
 
 class AppRouter {
   static Future<bool> Function()? nativeAuthCallbackRetry;
@@ -165,7 +166,12 @@ class AppRouter {
         path: '/account-data-conflict',
         builder: (_, _) => const AccountDataConflictPage(),
       ),
-      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (_, state) => OnboardingPage(
+          reviewMode: state.uri.queryParameters['mode'] == 'review',
+        ),
+      ),
       GoRoute(
         path: '/daily-check-in',
         builder: (_, _) => const DailyCheckInPage(),
@@ -425,71 +431,7 @@ class AppRouter {
           document: BilLegalDocument.healthDisclaimer,
         ),
       ),
-      GoRoute(
-        path: '/wellness-library',
-        builder: (_, _) => const WellnessLibraryPage(),
-      ),
-      GoRoute(
-        path: '/wellness/sleep',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.sleep,
-          child: SleepTrackerPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/wellness/workouts',
-        builder: (_, state) => BilWorkoutRoutinesPage(
-          initialItemId: state.uri.queryParameters['item'],
-        ),
-      ),
-      GoRoute(
-        path: '/wellness/workouts/routines',
-        builder: (_, state) => BilWorkoutRoutinesPage(
-          initialItemId: state.uri.queryParameters['item'],
-        ),
-      ),
-      GoRoute(
-        path: '/wellness/workouts/log',
-        builder: (_, state) => WorkoutLibraryPage(
-          initialCategory: state.uri.queryParameters['category'],
-        ),
-      ),
-      GoRoute(
-        path: '/wellness/fasting',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.fasting,
-          child: FastingTimerPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/wellness/recipes',
-        builder: (_, state) => RecipeLibraryPage(
-          initialRecipeId: state.uri.queryParameters['recipe'],
-        ),
-      ),
-      GoRoute(
-        path: '/nutrition/recipes/import',
-        builder: (_, state) => PremiumRouteGlassGate(
-          feature: PremiumGateFeature.recipeImport,
-          child: TrustedRecipeImportPage(
-            recipeId: state.uri.queryParameters['recipeId'],
-          ),
-        ),
-      ),
-      GoRoute(
-        path: '/meal-planner',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.mealPlanner,
-          child: MealPlannerPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/wellness/content-packs',
-        builder: (_, _) => const PremiumRouteGlassGate(
-          feature: PremiumGateFeature.contentPacks,
-          child: WellnessContentPacksPage(),
-        ),
-      ),
+      ..._wellnessRoutes(),
       GoRoute(
         path: '/location-settings',
         builder: (_, _) => const LocationSettingsPage(),
@@ -500,7 +442,15 @@ class AppRouter {
       ),
       GoRoute(
         path: '/health-information-sources',
-        builder: (_, _) => const HealthInformationSourcesPage(),
+        builder: (_, state) => HealthInformationSourcesPage(
+          initialTopic: state.uri.queryParameters['topic'],
+          sourceIds:
+              state.uri.queryParameters['sources']
+                  ?.split(',')
+                  .where((value) => value.isNotEmpty)
+                  .toList(growable: false) ??
+              const <String>[],
+        ),
       ),
       GoRoute(path: '/help', builder: (_, _) => const HelpCenterPage()),
       GoRoute(path: '/help/faq', builder: (_, _) => const HelpFaqPage()),

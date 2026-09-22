@@ -52,6 +52,7 @@ import 'providers/daily_log_provider.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_meals_list.dart';
+import 'presentation/daily_log_today_sections.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
 
 part 'daily_log_page_actions.dart';
@@ -62,6 +63,8 @@ part 'daily_log_capture_actions.dart';
 part 'daily_log_copy.dart';
 part 'daily_log_meal_entry_components.dart';
 part 'daily_log_navigation_actions.dart';
+part 'daily_log_loading.dart';
+part 'daily_log_diary_status.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
   const DailyLogPage({
@@ -160,7 +163,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
 
   @override
   Widget build(BuildContext context) {
-    final foods = ref.watch(foodsProvider);
     final date = ref.watch(selectedLogDateProvider);
     final meals = ref.watch(dailyMealsProvider);
     final waterEntries = ref.watch(dailyWaterProvider);
@@ -222,6 +224,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       today.day,
     );
     final mealRows = meals.value ?? const <MealWithItems>[];
+    final visibleWaterEntries = waterEntries.isLoading
+        ? const AsyncLoading<List<WaterEntry>>()
+        : waterEntries;
     MealWithItems? focusedMeal;
     for (final row in mealRows) {
       if (row.meal.type == mealType) {
@@ -251,423 +256,406 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           statusBarBrightness: Brightness.light,
         ),
         child: Scaffold(
+          // Keep focused meal/search pages on the established neutral canvas.
+          // The Today-only reference treatment is painted by
+          // DailyLogTodayBackground when that surface is active.
           backgroundColor: const Color(0xFFF5F5F8),
-          body: SafeArea(
-            bottom: false,
-            child: Semantics(
-              container: true,
-              child: foods.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => ActionableErrorState(
-                  title: context.strings.text(
-                    'Could not load the food catalog.',
-                  ),
-                  onRetry: () => ref.invalidate(foodsProvider),
-                ),
-                data: (items) {
-                  if (mealCalorieState.isLoading || mealMacroState.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (mealCalorieState.hasError || mealMacroState.hasError) {
-                    return ActionableErrorState(
-                      title: context.strings.text(
-                        'Meal display settings could not be loaded.',
-                      ),
-                      onRetry: () {
-                        ref.invalidate(mealCalorieGoalsProvider);
-                        ref.invalidate(mealMacroDisplayProvider);
-                      },
-                    );
-                  }
-                  if (widget.focusMealEntry && !mealFocusApplied) {
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      (_) => _focusMealEntry(),
-                    );
-                  }
-                  if (selectedFood != null) {
-                    return ListView(
-                      key: const Key('daily-log-focused-food-detail'),
-                      controller: scrollController,
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        16,
-                        0,
-                        16,
-                        48,
-                      ),
-                      children: [
-                        SizedBox(
-                          height: 56,
-                          child: Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: BackButton(
-                              onPressed: mutationBusy
-                                  ? null
-                                  : _returnFromSelectedFoodToSearch,
-                            ),
-                          ),
+          body: DailyLogTodayBackground(
+            enabled:
+                selectedFood == null &&
+                !mealSearchActive &&
+                !widget.focusMealEntry,
+            child: SafeArea(
+              bottom: false,
+              child: Semantics(
+                container: true,
+                child: Builder(
+                  builder: (context) {
+                    // The food catalog and premium display preferences are
+                    // entry-point dependencies, not dependencies of the Today
+                    // shell. Keeping them out of the page-level loading branch
+                    // prevents a date change from replacing the whole surface
+                    // with a spinner. Search handles catalog loading when the
+                    // user opens a meal; the diary remains usable meanwhile.
+                    if (widget.focusMealEntry && !mealFocusApplied) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => _focusMealEntry(),
+                      );
+                    }
+                    if (selectedFood != null) {
+                      return ListView(
+                        key: const Key('daily-log-focused-food-detail'),
+                        controller: scrollController,
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          16,
+                          0,
+                          16,
+                          48,
                         ),
-                        _buildMealEntry(),
-                      ],
-                    );
-                  }
-                  if (mealSearchActive || widget.focusMealEntry) {
-                    return ListView(
-                      key: const Key('daily-log-focused-meal-page'),
-                      controller: scrollController,
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        16,
-                        0,
-                        16,
-                        48,
-                      ),
-                      children: [
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(minHeight: 64),
-                          child: Row(
-                            children: [
-                              BackButton(
-                                key: const Key('daily-meal-detail-back'),
+                        children: [
+                          SizedBox(
+                            height: 56,
+                            child: Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: BackButton(
                                 onPressed: mutationBusy
                                     ? null
-                                    : _leaveMealDetail,
+                                    : _returnFromSelectedFoodToSearch,
                               ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      key: const Key('daily-meal-detail-title'),
-                                      context.strings.text(
-                                        '${mealType[0].toUpperCase()}${mealType.substring(1)}',
+                            ),
+                          ),
+                          _buildMealEntry(),
+                        ],
+                      );
+                    }
+                    if (mealSearchActive || widget.focusMealEntry) {
+                      return ListView(
+                        key: const Key('daily-log-focused-meal-page'),
+                        controller: scrollController,
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          16,
+                          0,
+                          16,
+                          48,
+                        ),
+                        children: [
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 64),
+                            child: Row(
+                              children: [
+                                BackButton(
+                                  key: const Key('daily-meal-detail-back'),
+                                  onPressed: mutationBusy
+                                      ? null
+                                      : _leaveMealDetail,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        key: const Key(
+                                          'daily-meal-detail-title',
+                                        ),
+                                        context.strings.text(
+                                          '${mealType[0].toUpperCase()}${mealType.substring(1)}',
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: -0.5,
+                                            ),
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: -0.5,
+                                      Text(
+                                        intl.DateFormat.yMMMd(
+                                          _mealLocale,
+                                        ).format(date),
+                                        maxLines: 1,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          _buildMealEntry(),
+                          const SizedBox(height: 12),
+                          DailyMealDetailSummary(
+                            meal: focusedMeal,
+                            calorieGoal:
+                                goalSchedule.mealTargets[mealType]?.calories ??
+                                mealCalorieGoals[mealType] ??
+                                dailyGoal?.calories,
+                            carbsGoal:
+                                (goalSchedule.mealTargets[mealType] ??
+                                        dailyGoal)
+                                    ?.carbsGrams,
+                            proteinGoal:
+                                (goalSchedule.mealTargets[mealType] ??
+                                        dailyGoal)
+                                    ?.proteinGrams,
+                            fatGoal:
+                                (goalSchedule.mealTargets[mealType] ??
+                                        dailyGoal)
+                                    ?.fatGrams,
+                            macroDisplay: mealMacroDisplay,
+                          ),
+                          const SizedBox(height: 12),
+                          DailyMealDetailItems(
+                            meal: focusedMeal,
+                            onEdit: _editMealItem,
+                            onActions: _showItemActions,
+                            showFoodTimestamps: showFoodTimestamps,
+                            showFoodInsights: showFoodInsights,
+                            useNetCarbs: useNetCarbs,
+                          ),
+                        ],
+                      );
+                    }
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: _buildDateNavigator(
+                            date,
+                            mutationBusy,
+                            latestPlannableDate,
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView(
+                            controller: scrollController,
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                              16,
+                              0,
+                              16,
+                              196,
+                            ),
+                            children: [
+                              if (!widget.focusMealEntry) ...[
+                                DailyLogWeekStrip(
+                                  date: date,
+                                  firstDate: DateTime(2000),
+                                  lastDate: latestPlannableDate,
+                                  onSelected: mutationBusy
+                                      ? null
+                                      : (selected) {
+                                          ref
+                                                  .read(
+                                                    selectedLogDateProvider
+                                                        .notifier,
+                                                  )
+                                                  .state =
+                                              selected;
+                                        },
+                                ),
+                                const SizedBox(height: 8),
+                                DailyLogSnapshot(
+                                  key: const Key('daily-log-today-summary'),
+                                  arabic: _arabic,
+                                  meals: meals.isLoading
+                                      ? const []
+                                      : meals.value ?? const [],
+                                  water: waterEntries.isLoading
+                                      ? const []
+                                      : waterEntries.value ?? const [],
+                                  calorieGoal: dailyGoal?.calories,
+                                  carbsGoal: dailyGoal?.carbsGrams,
+                                  proteinGoal: dailyGoal?.proteinGrams,
+                                  fatGoal: dailyGoal?.fatGrams,
+                                  loading: meals.isLoading,
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  key: const Key('daily-log-action-row'),
+                                  children: [
+                                    Expanded(
+                                      child: KeyedSubtree(
+                                        key: const Key(
+                                          'daily-log-copy-previous-day',
+                                        ),
+                                        child: _DiaryActionButton(
+                                          key: const Key(
+                                            'daily-log-action-copy',
                                           ),
+                                          kind: BilSemanticIconKind.calendar,
+                                          label: _tr('Copy from', 'نسخ من'),
+                                          onPressed: mutationBusy
+                                              ? null
+                                              : _showDiaryCopyOptions,
+                                        ),
+                                      ),
                                     ),
-                                    Text(
-                                      intl.DateFormat.yMMMd(
-                                        _mealLocale,
-                                      ).format(date),
-                                      maxLines: 1,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurfaceVariant,
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: KeyedSubtree(
+                                        key: const Key(
+                                          'daily-log-edit-settings',
+                                        ),
+                                        child: _DiaryActionButton(
+                                          key: const Key(
+                                            'daily-log-action-edit',
                                           ),
+                                          kind: BilSemanticIconKind.preferences,
+                                          label: _tr('Edit', 'تعديل'),
+                                          onPressed: mutationBusy
+                                              ? null
+                                              : () => context.push(
+                                                  '/settings/diary',
+                                                ),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
+                                const SafeFreeAdAnchor(
+                                  key: Key('daily-log-free-ad-slot'),
+                                  surface: SafeFreeAdSurface.dailyLog,
+                                ),
+                                const SizedBox(height: 12),
+                              ] else
+                                SizedBox(
+                                  height: 56,
+                                  child: Align(
+                                    alignment: AlignmentDirectional.centerStart,
+                                    child: BackButton(
+                                      onPressed: mutationBusy
+                                          ? null
+                                          : () {
+                                              if (context.canPop()) {
+                                                context.pop();
+                                              } else {
+                                                context.go(
+                                                  widget.returnPath ??
+                                                      '/dashboard',
+                                                );
+                                              }
+                                            },
+                                    ),
+                                  ),
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Text(
+                                  context.strings.text('Meals'),
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
+                              DailyMealsList(
+                                arabic: _arabic,
+                                meals: meals,
+                                showEmptyMealSlots: showAllMeals,
+                                showFoodInsights: showFoodInsights,
+                                showFoodTimestamps: showFoodTimestamps,
+                                useNetCarbs: useNetCarbs,
+                                dailyGoal: dailyGoal,
+                                mealGoals: goalSchedule.mealTargets,
+                                mealCalorieGoals: mealCalorieGoals,
+                                mealMacroDisplay: mealMacroDisplay,
+                                onAdd: (type) {
+                                  _updateState(() {
+                                    mealType = type;
+                                    selectedFood = null;
+                                    mealSearchActive = true;
+                                  });
+                                  // Open this meal's own summary and actions first.
+                                  // The user chooses when to open food search.
+                                },
+                                onEdit: _editMealItem,
+                                onActions: _showItemActions,
+                              ),
+                              const SizedBox(
+                                height: PremiumDesignTokens.spaceSm,
+                              ),
+                              Text(
+                                dailyLogHabitsTitle(context),
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: 10),
+                              DailyLogTodayCard(
+                                child: Column(
+                                  children: [
+                                    if (alwaysShowWater ||
+                                        (!waterEntries.isLoading &&
+                                            (waterEntries.value?.isNotEmpty ??
+                                                false))) ...[
+                                      DailyWaterShortcut(
+                                        embedded: true,
+                                        entries: visibleWaterEntries,
+                                        onTap: () => context.push(
+                                          '/daily-log/water?from=${Uri.encodeComponent('/daily-log')}',
+                                        ),
+                                      ),
+                                      const Divider(height: 1),
+                                    ],
+                                    DailyExerciseSection(
+                                      key: exerciseSectionKey,
+                                      arabic: _arabic,
+                                      controller: exerciseNotes,
+                                      compact: true,
+                                      onBrowseWorkouts: () =>
+                                          context.push('/wellness/workouts'),
+                                    ),
+                                    const Divider(height: 1),
+                                    DailyLogStepsShortcut(date: date),
+                                  ],
+                                ),
+                              ),
+                              DailyLogWeightShortcut(date: date),
+                              DailyLogNotesShortcut(
+                                title: dailyLogPrivateNoteLabel(),
+                              ),
+                              const SizedBox(
+                                height: PremiumDesignTokens.spaceSm,
+                              ),
+                              PremiumSurface(
+                                key: const Key('daily-log-body-context-link'),
+                                padding: EdgeInsets.zero,
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.all(16),
+                                  horizontalTitleGap: 12,
+                                  leading: BilSemanticIconBadge(
+                                    kind: BilSemanticIconKind.health,
+                                    size: 32,
+                                    iconSize: 18,
+                                    shape: BoxShape.rectangle,
+                                  ),
+                                  title: Text(
+                                    _tr('Body context', 'سياق الجسم'),
+                                  ),
+                                  subtitle: Text(
+                                    _tr(
+                                      'Add sleep, travel, stress, hydration, and other context on a focused page.',
+                                      'أضف النوم والسفر والإجهاد والترطيب والسياقات الأخرى في صفحة مخصصة.',
+                                    ),
+                                  ),
+                                  trailing: const Icon(
+                                    Icons.chevron_right_rounded,
+                                  ),
+                                  onTap: () =>
+                                      context.push('/daily-log/body-context'),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: PremiumDesignTokens.spaceSm,
+                              ),
+                              _diaryStatus(ledger),
+                              const SizedBox(
+                                height: PremiumDesignTokens.spaceLg,
+                              ),
+                              Semantics(
+                                button: true,
+                                label: context.strings.text('Save log'),
+                                child: FilledButton(
+                                  key: const Key(
+                                    'daily_log_save_primary_action',
+                                  ),
+                                  onPressed: _save,
+                                  child: Text(context.strings.text('Save log')),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        _buildMealEntry(),
-                        const SizedBox(height: 12),
-                        DailyMealDetailSummary(
-                          meal: focusedMeal,
-                          calorieGoal:
-                              goalSchedule.mealTargets[mealType]?.calories ??
-                              mealCalorieGoals[mealType] ??
-                              dailyGoal?.calories,
-                          carbsGoal:
-                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
-                                  ?.carbsGrams,
-                          proteinGoal:
-                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
-                                  ?.proteinGrams,
-                          fatGoal:
-                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
-                                  ?.fatGrams,
-                          macroDisplay: mealMacroDisplay,
-                        ),
-                        const SizedBox(height: 12),
-                        DailyMealDetailItems(
-                          meal: focusedMeal,
-                          onEdit: _editMealItem,
-                          onActions: _showItemActions,
-                          showFoodTimestamps: showFoodTimestamps,
-                          showFoodInsights: showFoodInsights,
-                          useNetCarbs: useNetCarbs,
                         ),
                       ],
                     );
-                  }
-                  return ListView(
-                    controller: scrollController,
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      16,
-                      0,
-                      16,
-                      196,
-                    ),
-                    children: [
-                      if (!widget.focusMealEntry) ...[
-                        DiaryDateNavigator(
-                          date: date,
-                          arabic: _arabic,
-                          onBack: mutationBusy
-                              ? null
-                              : () {
-                                  if (context.canPop()) {
-                                    context.pop();
-                                  } else {
-                                    context.go(
-                                      widget.returnPath ?? '/dashboard',
-                                    );
-                                  }
-                                },
-                          onPrevious: mutationBusy
-                              ? null
-                              : () =>
-                                    ref
-                                        .read(selectedLogDateProvider.notifier)
-                                        .state = date.subtract(
-                                      const Duration(days: 1),
-                                    ),
-                          onNext: date.isBefore(latestPlannableDate)
-                              ? mutationBusy
-                                    ? null
-                                    : () =>
-                                          ref
-                                              .read(
-                                                selectedLogDateProvider
-                                                    .notifier,
-                                              )
-                                              .state = date.add(
-                                            const Duration(days: 1),
-                                          )
-                              : null,
-                          onPick: mutationBusy
-                              ? null
-                              : () async {
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: date,
-                                    firstDate: DateTime(2000),
-                                    lastDate: latestPlannableDate,
-                                  );
-                                  if (picked != null) {
-                                    ref
-                                            .read(
-                                              selectedLogDateProvider.notifier,
-                                            )
-                                            .state =
-                                        picked;
-                                  }
-                                },
-                        ),
-                        const SizedBox(height: 8),
-                        DailyLogSnapshot(
-                          key: const Key('daily-log-today-summary'),
-                          arabic: _arabic,
-                          meals: meals.value ?? const [],
-                          water: waterEntries.value ?? const [],
-                          calorieGoal: dailyGoal?.calories,
-                          carbsGoal: dailyGoal?.carbsGrams,
-                          proteinGoal: dailyGoal?.proteinGrams,
-                          fatGoal: dailyGoal?.fatGrams,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          key: const Key('daily-log-action-row'),
-                          children: [
-                            Expanded(
-                              child: KeyedSubtree(
-                                key: const Key('daily-log-copy-previous-day'),
-                                child: _DiaryActionButton(
-                                  key: const Key('daily-log-action-copy'),
-                                  kind: BilSemanticIconKind.calendar,
-                                  label: _tr('Copy from', 'نسخ من'),
-                                  onPressed: mutationBusy
-                                      ? null
-                                      : _showDiaryCopyOptions,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: KeyedSubtree(
-                                key: const Key('daily-log-edit-settings'),
-                                child: _DiaryActionButton(
-                                  key: const Key('daily-log-action-edit'),
-                                  kind: BilSemanticIconKind.preferences,
-                                  label: _tr('Edit', 'تعديل'),
-                                  onPressed: mutationBusy
-                                      ? null
-                                      : () => context.push('/settings/diary'),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SafeFreeAdAnchor(
-                          key: Key('daily-log-free-ad-slot'),
-                          surface: SafeFreeAdSurface.dailyLog,
-                        ),
-                        const SizedBox(height: 12),
-                      ] else
-                        SizedBox(
-                          height: 56,
-                          child: Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: BackButton(
-                              onPressed: mutationBusy
-                                  ? null
-                                  : () {
-                                      if (context.canPop()) {
-                                        context.pop();
-                                      } else {
-                                        context.go(
-                                          widget.returnPath ?? '/dashboard',
-                                        );
-                                      }
-                                    },
-                            ),
-                          ),
-                        ),
-                      DailyMealsList(
-                        meals: meals,
-                        showEmptyMealSlots: showAllMeals,
-                        onAdd: (type) {
-                          _updateState(() {
-                            mealType = type;
-                            selectedFood = null;
-                            mealSearchActive = true;
-                          });
-                          // Open this meal's own summary and actions first.
-                          // The user chooses when to open food search.
-                        },
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      if (alwaysShowWater ||
-                          (waterEntries.value?.isNotEmpty ?? false)) ...[
-                        DailyWaterShortcut(
-                          entries: waterEntries,
-                          onTap: () => context.push(
-                            '/daily-log/water?from=${Uri.encodeComponent('/daily-log')}',
-                          ),
-                        ),
-                        const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      ],
-                      DailyExerciseSection(
-                        key: exerciseSectionKey,
-                        arabic: _arabic,
-                        controller: exerciseNotes,
-                        onBrowseWorkouts: () =>
-                            context.push('/wellness/workouts'),
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceLg),
-                      PremiumSurface(
-                        key: const Key('daily-log-body-context-link'),
-                        padding: EdgeInsets.zero,
-                        child: ListTile(
-                          contentPadding: PremiumDesignTokens.cardPaddingLarge,
-                          horizontalTitleGap: 12,
-                          leading: BilSemanticIconBadge(
-                            kind: BilSemanticIconKind.health,
-                            size: 32,
-                            iconSize: 18,
-                            shape: BoxShape.rectangle,
-                          ),
-                          title: Text(_tr('Body context', 'سياق الجسم')),
-                          subtitle: Text(
-                            _tr(
-                              'Add sleep, travel, stress, hydration, and other context on a focused page.',
-                              'أضف النوم والسفر والإجهاد والترطيب والسياقات الأخرى في صفحة مخصصة.',
-                            ),
-                          ),
-                          trailing: const Icon(Icons.chevron_right_rounded),
-                          onTap: () => context.push('/daily-log/body-context'),
-                        ),
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceLg),
-                      PremiumSurface(
-                        key: const Key('daily-log-lifecycle-card'),
-                        child: ledger.when(
-                          loading: () =>
-                              const Center(child: CircularProgressIndicator()),
-                          error: (_, _) => ActionableErrorState(
-                            title: _tr(
-                              'Diary status could not be loaded.',
-                              'تعذر تحميل حالة اليوميات.',
-                            ),
-                            onRetry: () =>
-                                ref.invalidate(selectedDailyLedgerProvider),
-                          ),
-                          data: (snapshot) => Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                snapshot.state == DayLifecycleState.closed
-                                    ? _tr('Diary completed', 'اكتملت اليوميات')
-                                    : _tr('Complete diary', 'إكمال اليوميات'),
-                                style: PremiumDesignTokens.cardHeading(context),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                snapshot.state == DayLifecycleState.closed
-                                    ? _tr(
-                                        'This day is frozen as a reviewed nutrition snapshot. Reopen it before making changes.',
-                                        'تم تثبيت هذا اليوم كلقطة تغذية تمت مراجعتها. أعد فتحه قبل إجراء تغييرات.',
-                                      )
-                                    : _tr(
-                                        'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
-                                        'راجع مدخلات اليوم، ثم أكمل اليوميات لحفظ لقطة موثوقة.',
-                                      ),
-                              ),
-                              const SizedBox(height: 12),
-                              FilledButton.tonalIcon(
-                                key: Key(
-                                  snapshot.state == DayLifecycleState.closed
-                                      ? 'daily-log-reopen-day'
-                                      : 'daily-log-complete-day',
-                                ),
-                                onPressed:
-                                    snapshot.state == DayLifecycleState.closed
-                                    ? _reopenDiary
-                                    : _completeDiary,
-                                icon: Icon(
-                                  snapshot.state == DayLifecycleState.closed
-                                      ? Icons.lock_open_rounded
-                                      : Icons.task_alt_rounded,
-                                ),
-                                label: Text(
-                                  snapshot.state == DayLifecycleState.closed
-                                      ? _tr(
-                                          'Reopen diary',
-                                          'إعادة فتح اليوميات',
-                                        )
-                                      : _tr('Complete diary', 'إكمال اليوميات'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceLg),
-                      Semantics(
-                        button: true,
-                        label: context.strings.text('Save log'),
-                        child: FilledButton(
-                          key: const Key('daily_log_save_primary_action'),
-                          onPressed: _save,
-                          child: Text(context.strings.text('Save log')),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                  },
+                ),
               ),
             ),
           ),

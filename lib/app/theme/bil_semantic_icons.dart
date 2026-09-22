@@ -517,6 +517,7 @@ abstract final class BilSemanticIcons {
     '/wellness/workouts/log' => BilSemanticIconKind.exercise,
     '/connected-health' => BilSemanticIconKind.devices,
     '/connected-health/steps' => BilSemanticIconKind.steps,
+    '/health-information-sources' => BilSemanticIconKind.health,
     '/wellness/learn' || '/wellness-library' => BilSemanticIconKind.learn,
     '/community' => BilSemanticIconKind.community,
     '/community/people' ||

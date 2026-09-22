@@ -14,16 +14,14 @@ void main() {
       'lib/features/daily_log/daily_body_context_page.dart',
     ).readAsStringSync();
 
-    final summary = page.indexOf("Key('daily-log-today-summary')");
-    final copyAction = page.indexOf("Key('daily-log-copy-previous-day')");
-    final adSlot = page.indexOf("Key('daily-log-free-ad-slot')", copyAction);
+    // Dart formatting may wrap Key constructors without changing layout.
+    final summary = page.indexOf("'daily-log-today-summary'");
+    final copyAction = page.indexOf("'daily-log-copy-previous-day'");
+    final adSlot = page.indexOf("'daily-log-free-ad-slot'", copyAction);
     final meals = page.indexOf('DailyMealsList(', summary);
     final water = page.indexOf('DailyWaterShortcut(', meals);
     final exercise = page.indexOf('DailyExerciseSection(', water);
-    final bodyContext = page.indexOf(
-      "Key('daily-log-body-context-link')",
-      exercise,
-    );
+    final bodyContext = page.indexOf("'daily-log-body-context-link'", exercise);
 
     expect(summary, greaterThan(0));
     expect(copyAction, greaterThan(summary));
@@ -178,7 +176,9 @@ void main() {
       expect('$search\n$detail', isNot(contains("'myFoods'")));
       expect('$search\n$detail', isNot(contains("'all'")));
 
-      expect(meals, isNot(contains("Key('daily-meal-macros-\$type')")));
+      // The compact reference row may summarize macros; full nutrition facts
+      // remain exclusively on the selected-food detail page below.
+      expect(meals, contains("Key('daily-meal-macros-\$type')"));
       expect(meals, contains("Key('daily-food-row-\${item.id}')"));
       expect(row, contains('item.calories.round().toString()'));
       expect(row, contains('FoodPresentationLocalizer.servingText('));

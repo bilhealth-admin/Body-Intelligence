@@ -205,6 +205,11 @@ class SettingsPage extends ConsumerWidget {
           _MoreSection(
             title: copy('Help'),
             children: [
+              _MoreRow(
+                context.strings.text('Health sources & methodology'),
+                '/health-information-sources',
+                key: const Key('settings-health-sources-entry'),
+              ),
               _MoreRow(copy('Help'), '/help'),
               _CloudSyncRow(label: copy('Sync now'), status: cloudSyncStatus),
             ],

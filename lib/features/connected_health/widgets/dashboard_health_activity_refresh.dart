@@ -42,6 +42,8 @@ class _DashboardHealthActivityRefreshState
 
   Future<void> _refresh() async {
     final controller = ref.read(connectedHealthProvider.notifier);
+    await controller.restoreCachedSnapshot();
+    if (!mounted) return;
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       await controller.requestStartupPermissions();
     }

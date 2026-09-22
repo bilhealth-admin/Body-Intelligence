@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/security/bil_mobile_integrity_service.dart';
+import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../domain/coach_context_snapshot.dart';
 import 'coach_cloud_privacy_boundary.dart';
 import 'local_model_gateway.dart';
@@ -218,6 +219,11 @@ class LlamaCppLocalGateway implements LocalModelGateway {
           text: answer,
           action: action is Map ? Map<String, Object?>.from(action) : null,
           spokenText: decoded['spoken_reply']?.toString().trim(),
+          citationIds: HealthEvidenceCatalog.validateIds(
+            decoded['citations'] is List
+                ? decoded['citations'] as List
+                : const <Object?>[],
+          ),
         ),
       );
     } on Object {
@@ -253,7 +259,9 @@ class LlamaCppLocalGateway implements LocalModelGateway {
 
     Object? consent;
     try {
-      consent = await _readRemoteAiConsentWithSafeRetry(access);
+      consent = await access.readRemoteAiConsent().timeout(
+        const Duration(seconds: 8),
+      );
     } on Object {
       return const LocalModelResult(
         status: CoachServiceStatus.temporarilyUnavailable,
@@ -340,6 +348,11 @@ class LlamaCppLocalGateway implements LocalModelGateway {
           reason: data['reason']?.toString().trim(),
           confidence: (data['confidence'] as num?)?.toDouble(),
           evidence: _stringList(data['evidence']),
+          citationIds: HealthEvidenceCatalog.validateIds(
+            data['citations'] is List
+                ? data['citations'] as List
+                : const <Object?>[],
+          ),
           missingData: _stringList(data['missing_data']),
           responseId: data['response_id']?.toString().trim() ?? requestId,
           transcript: data['transcript']?.toString().trim(),
@@ -357,33 +370,6 @@ class LlamaCppLocalGateway implements LocalModelGateway {
         diagnosticCode: 'cloud_request_failed',
       );
     }
-  }
-
-  /// The consent RPC is a read-only preflight. A single transient failure on
-  /// the first Coach turn is safe to retry because no context is projected,
-  /// Edge Function is invoked, or AI unit is reserved until this completes.
-  /// Keep this retry strictly before [invokeCoach]; retrying an in-flight
-  /// model request could duplicate a successful reservation when a response
-  /// is lost after the server has processed it.
-  Future<Object?> _readRemoteAiConsentWithSafeRetry(
-    CoachCloudAccess access,
-  ) async {
-    Object? firstError;
-    StackTrace? firstStack;
-    for (var attempt = 0; attempt < 2; attempt++) {
-      try {
-        return await access.readRemoteAiConsent().timeout(
-          const Duration(seconds: 8),
-        );
-      } catch (error, stack) {
-        firstError = error;
-        firstStack = stack;
-        if (attempt == 1) {
-          Error.throwWithStackTrace(firstError, firstStack);
-        }
-      }
-    }
-    throw StateError('remote_ai_consent_preflight_failed');
   }
 
   List<Map<String, String>> _conversationMessages({
@@ -455,9 +441,13 @@ meal, recipe, shopping, or ingredient suggestion. Never propose an excluded
 allergen/ingredient or incompatible dietary requirement. These preferences do
 not by themselves change calorie or macro requirements.
 Return one JSON object only:
-{"answer":"concise helpful answer","action":null}
+{"answer":"concise helpful answer","citations":[],"action":null}
 or
-{"answer":"answer","action":{"name":"allowed_action","arguments":{}}}
+{"answer":"answer","citations":["approved_id"],"action":{"name":"allowed_action","arguments":{}}}
+For substantive health or nutrition guidance, return only supporting IDs from
+this approved in-app catalog: ${HealthEvidenceCatalog.all.map((source) => source.id).join(', ')}.
+Never invent a citation or URL. Greetings, navigation help, and repetition of
+the user's own recorded measurements use an empty citations array.
 Allowed actions: open_weight_log, open_meals, open_meals_yesterday,
 open_workouts, open_plan, open_report, log_water, log_weight,
 set_theme_mode, set_language, update_goal, save_measurements,

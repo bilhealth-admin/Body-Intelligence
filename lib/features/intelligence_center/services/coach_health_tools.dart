@@ -1,3 +1,4 @@
+import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../../../engine/body_model_engine.dart';
 import '../../../engine/body_profile.dart';
 
@@ -31,6 +32,13 @@ class CoachHealthTools {
     final model = BodyModelEngine.calculate(profile);
     final composition = model.composition;
     final bodyFat = composition.bodyFatPercentage;
+    final healthCitationIds = HealthEvidenceCatalog.validateIds(<String>{
+      ...model.targets.sourceIds,
+      ...composition.bodyMassIndex.sourceIds,
+      ...composition.waistToHeightRatio.sourceIds,
+      ...composition.bodyFatPercentage.sourceIds,
+      ...composition.fatFreeMassKg.sourceIds,
+    });
     double? rounded(double? value, int fractionDigits) => value == null
         ? null
         : double.parse(value.toStringAsFixed(fractionDigits));
@@ -61,6 +69,7 @@ class CoachHealthTools {
           ? 'increased_bmi_screening_signal'
           : 'no_elevated_bmi_screening_signal',
       'notice': 'Screening estimates only; not a diagnosis.',
+      'healthCitationIds': healthCitationIds,
     };
   }
 }

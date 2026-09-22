@@ -11,8 +11,8 @@ void main() {
       'lib/features/settings/settings_page_actions.dart',
     ).readAsStringSync();
 
-    expect(actions, contains("set('forceOnboarding', 'true')"));
-    expect(actions, contains("context.go('/onboarding')"));
+    expect(actions, contains("context.go('/onboarding?mode=review')"));
+    expect(actions, isNot(contains("set('forceOnboarding', 'true')")));
     expect(
       settingsPage,
       contains("key: const Key('settings-review-onboarding')"),

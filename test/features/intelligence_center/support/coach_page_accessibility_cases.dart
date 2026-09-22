@@ -1,6 +1,85 @@
 part of '../coach_page_lifecycle_regression_test.dart';
 
 void registerCoachAccessibilityCases() {
+  testWidgets('pending or failed context keeps one welcome and no request', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final gateway = _HeldGateway();
+    final pending = Completer<CoachContextSnapshot>();
+    await _mount(
+      tester,
+      database: database,
+      gateway: gateway,
+      contextLoader: () => pending.future,
+    );
+    void expectWelcomeOnly() {
+      final history = tester.widget<CoachAnchoredHistory>(
+        find.byType(CoachAnchoredHistory),
+      );
+      expect(history.rowIds, hasLength(1));
+      expect(history.rowIds.single, startsWith('welcome'));
+      expect(find.byKey(const Key('ai-coach-retry')), findsNothing);
+      expect(gateway.calls, 0);
+      expect(tester.takeException(), isNull);
+    }
+
+    expectWelcomeOnly();
+    pending.completeError(StateError('context unavailable'));
+    await tester.pumpAndSettle();
+    expectWelcomeOnly();
+    await _unmount(tester);
+  });
+
+  for (final arabic in [false, true]) {
+    testWidgets(
+      'one introduction through refresh and re-entry Arabic=$arabic',
+      (tester) async {
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(database.close);
+        final gateway = _HeldGateway();
+        final pending = Completer<CoachContextSnapshot>();
+        var holdContext = false;
+        final router = await _mount(
+          tester,
+          database: database,
+          gateway: gateway,
+          arabic: arabic,
+          contextLoader: () async =>
+              holdContext ? pending.future : CoachContextSnapshot.empty(),
+        );
+        void expectSingleIntroduction() {
+          final history = tester.widget<CoachAnchoredHistory>(
+            find.byType(CoachAnchoredHistory),
+          );
+          expect(history.rowIds, ['coach-session-brief']);
+          expect(find.byKey(const Key('ai-coach-retry')), findsNothing);
+          expect(gateway.calls, 0);
+          expect(tester.takeException(), isNull);
+        }
+
+        expectSingleIntroduction();
+        holdContext = true;
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(IntelligenceCenterPage)),
+        );
+        container.invalidate(coachContextSnapshotProvider);
+        await tester.pump();
+        expectSingleIntroduction();
+        pending.complete(CoachContextSnapshot.empty());
+        await tester.pumpAndSettle();
+        expectSingleIntroduction();
+        router.go('/dashboard');
+        await tester.pumpAndSettle();
+        router.go('/intelligence-center');
+        await tester.pumpAndSettle();
+        expectSingleIntroduction();
+        await _unmount(tester);
+      },
+    );
+  }
+
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     for (final arabic in [false, true]) {
       testWidgets(

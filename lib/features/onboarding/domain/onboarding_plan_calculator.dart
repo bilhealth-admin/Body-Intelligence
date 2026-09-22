@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../../../engine/body_model_engine.dart';
 import '../../../engine/body_profile.dart';
 import '../../../engine/daily_targets.dart';
@@ -239,6 +240,10 @@ final class OnboardingPlanCalculator {
       sodium: model.targets.sodium,
       fiber: model.targets.fiber,
       water: model.targets.water,
+      sourceIds: HealthEvidenceCatalog.validateIds([
+        ...model.targets.sourceIds,
+        HealthEvidenceIds.weightEnergyApproximation,
+      ]),
     );
 
     final difference = (draft.targetWeightKg! - draft.currentWeightKg!).abs();

@@ -39,12 +39,15 @@ import 'package:body_intelligence_log/features/history/progress_page.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/profile/profile_summary_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/settings/settings_page.dart';
+import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
 import 'package:body_intelligence_log/features/settings/local_export_range_page.dart';
 import 'package:body_intelligence_log/features/settings/reference_goals_page.dart';
 import 'package:body_intelligence_log/features/settings/reference_preferences_pages.dart';
@@ -221,6 +224,8 @@ void main() {
     Future<void> Function(WidgetTester tester)? prepare,
     Food? foodOverride,
     bool stableDailyLog = false,
+    SubscriptionState? subscriptionOverride,
+    NutritionGoalTarget? dailyGoalOverride,
     List<MealWithItems>? dailyMealsOverride,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -243,13 +248,18 @@ void main() {
           mealVisionUsageProvider.overrideWithValue(
             const AsyncData(MealVisionUsageSnapshot.unavailable()),
           ),
-          // Golden captures must describe a deterministic, server-verified
-          // Free account. Falling through to the live verifier turns every
+          // Golden captures default to a deterministic, server-verified
+          // Free fixture (Premium cases supply their own dated fixture).
+          // Falling through to the live verifier turns every
           // protected preview into a transient Retry state and records an
           // infrastructure failure as the product's intended UI.
           verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(_visualVerifiedFreeSubscription),
+            AsyncData(subscriptionOverride ?? _visualVerifiedFreeSubscription),
           ),
+          if (subscriptionOverride != null)
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => DateTime.utc(2026, 8, 14),
+            ),
           liveHealthNowProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
@@ -268,6 +278,16 @@ void main() {
               ),
             ),
           if (stableDailyLog) ...[
+            mealCalorieGoalsProvider.overrideWithValue(const AsyncData({})),
+            mealMacroDisplayProvider.overrideWithValue(
+              const AsyncData(
+                MealMacroDisplay(
+                  enabled: false,
+                  mode: MealMacroDisplayMode.grams,
+                ),
+              ),
+            ),
+            weightHistoryProvider.overrideWithValue(const AsyncData([])),
             selectedLogDateProvider.overrideWith(
               (ref) => DateTime(2026, 8, 14),
             ),
@@ -316,6 +336,10 @@ void main() {
             dailyMealsProvider.overrideWithValue(AsyncData(dailyMealsOverride)),
             userProfileProvider.overrideWithValue(const AsyncData(null)),
           ],
+          if (dailyGoalOverride != null)
+            defaultNutritionGoalTargetProvider.overrideWithValue(
+              dailyGoalOverride,
+            ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -701,6 +725,46 @@ void main() {
       db: db,
       name: 'daily_log_empty_phone',
       stableDailyLog: true,
+    );
+  });
+
+  testWidgets('daily log reference premium goal capture', (tester) async {
+    final db = await database(tester);
+    await capture(
+      tester,
+      page: const DailyLogPage(),
+      db: db,
+      name: 'daily_log_reference_premium_phone',
+      stableDailyLog: true,
+      subscriptionOverride: SubscriptionState(
+        plan: CommercePlan.premium,
+        entitlements: const {CommerceEntitlement.advancedIntelligence},
+        authority: EntitlementAuthority.verifiedServer,
+        isPurchasable: false,
+        canRestorePurchases: true,
+        currentPeriodEndsAt: DateTime.utc(2026, 9, 14),
+      ),
+      dailyGoalOverride: const NutritionGoalTarget(
+        calories: 1980,
+        carbsPercent: 50,
+        proteinPercent: 20,
+        fatPercent: 30,
+      ),
+      prepare: (tester) async {
+        expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
+        expect(
+          find.byKey(const Key('daily-summary-carbs-grams')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('daily-summary-fat-grams')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('daily-summary-protein-grams')),
+          findsOneWidget,
+        );
+      },
     );
   });
 

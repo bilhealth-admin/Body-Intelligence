@@ -1,4 +1,5 @@
 import '../../ai_platform/domain/ai_coach_response.dart';
+import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../domain/intelligence_action.dart';
 import '../domain/intelligence_message.dart';
@@ -152,14 +153,17 @@ class IntelligenceCenterEngine {
             ),
           );
     if (local.serviceStatus != CoachServiceStatus.ready) {
-      if (local.serviceStatus != CoachServiceStatus.safetyBlocked &&
+      if (local.serviceStatus == CoachServiceStatus.temporarilyUnavailable &&
           _isGreeting(normalized)) {
         return _reply(
           tr(
             'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
             'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
           ),
-          serviceStatus: local.serviceStatus,
+          // This simple greeting has completed locally, not via the failed
+          // provider. Do not attach an incomplete-response retry to it. Auth,
+          // consent, credit and safety rejections still use the status path.
+          serviceStatus: CoachServiceStatus.ready,
           runtime: CoachAnswerRuntime.localFallback,
         );
       }
@@ -191,6 +195,7 @@ class IntelligenceCenterEngine {
         evidence: local.evidence.isEmpty
             ? const ['BIL user context']
             : local.evidence,
+        citationIds: local.citationIds,
         confidence: local.confidence ?? .75,
         reason: local.reason,
         missingData: local.missingData,
@@ -224,6 +229,7 @@ class IntelligenceCenterEngine {
           'اشرب الماء بانتظام خلال اليوم، واستخدم العطش ولون البول الأصفر الفاتح كإشارتين عمليتين للترطيب. تختلف الاحتياجات مع الحرارة والتمرين والحمل والأدوية والحالات الصحية.',
         ),
         evidence: const ['Dietary Reference Intakes (water)'],
+        citationIds: const [HealthEvidenceIds.dietaryReferenceIntakes],
         confidence: .85,
       );
     }
@@ -323,6 +329,11 @@ class IntelligenceCenterEngine {
             ),
       kind: IntelligenceMessageKind.action,
       evidence: context?.evidence ?? const [],
+      citationIds: const [
+        HealthEvidenceIds.mifflinStJeor,
+        HealthEvidenceIds.dietaryReferenceIntakes,
+        HealthEvidenceIds.proteinExercise,
+      ],
       confidence: context?.confidence,
       reason: context == null || context.explanation.isEmpty
           ? null
@@ -396,6 +407,10 @@ class IntelligenceCenterEngine {
             .replaceAll('{value}', value.toString())
             .replaceAll('{source}', sourceCopy),
         evidence: ['dailyTargets.proteinG', ?source],
+        citationIds: const [
+          HealthEvidenceIds.proteinExercise,
+          HealthEvidenceIds.dietaryReferenceIntakes,
+        ],
         confidence: 1,
       );
     }
@@ -404,11 +419,15 @@ class IntelligenceCenterEngine {
             question.contains('سعرات')) &&
         targets['caloriesKcal'] is num) {
       final value = (targets['caloriesKcal']! as num).round();
-      return _plain(
+      return _reply(
         tr(
           'Your current daily target is {value} kcal. This is the target saved in your BIL plan, not a generic estimate.',
           'هدفك اليومي الحالي هو {value} سعرة حرارية. هذا هو الهدف المحفوظ في خطتك وليس تقديرًا عامًا.',
         ).replaceAll('{value}', value.toString()),
+        citationIds: const [
+          HealthEvidenceIds.mifflinStJeor,
+          HealthEvidenceIds.dietaryReferenceIntakes,
+        ],
       );
     }
     return null;
@@ -495,6 +514,7 @@ class IntelligenceCenterEngine {
     return _reply(
       text,
       evidence: const ['Recommended sleep duration for adults (PubMed)'],
+      citationIds: const [HealthEvidenceIds.adultSleep],
       confidence: .85,
       spokenText: text,
     );
@@ -505,6 +525,7 @@ class IntelligenceCenterEngine {
     String text, {
     IntelligenceMessageKind kind = IntelligenceMessageKind.freeQuestion,
     List<String> evidence = const [],
+    List<String> citationIds = const [],
     double? confidence,
     String? reason,
     List<String> missingData = const [],
@@ -523,6 +544,7 @@ class IntelligenceCenterEngine {
       text: text,
       createdAt: DateTime.now(),
       evidence: evidence,
+      citationIds: HealthEvidenceCatalog.validateIds(citationIds),
       confidence: confidence,
       reason: reason,
       missingData: missingData,

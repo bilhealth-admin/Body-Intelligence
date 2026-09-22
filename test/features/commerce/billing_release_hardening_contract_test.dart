@@ -159,7 +159,7 @@ void main() {
     );
     expect(
       stableOwner,
-      contains('if (owner.hasValue) return owner.asData?.value;'),
+      contains('if (owner.hasValue) return owner.value;'),
     );
   });
 

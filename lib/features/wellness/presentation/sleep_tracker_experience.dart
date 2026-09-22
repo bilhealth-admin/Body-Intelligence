@@ -514,6 +514,18 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
               ),
             ),
           ],
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const Key('sleep-health-sources'),
+              onPressed: () =>
+                  context.push('/health-information-sources?topic=sleep'),
+              icon: const Icon(Icons.menu_book_outlined),
+              label: Text(
+                tr('Sleep sources & methodology', 'مصادر ومنهجية النوم'),
+              ),
+            ),
+          ),
         ],
       );
     },

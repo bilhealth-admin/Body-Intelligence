@@ -70,28 +70,15 @@ function serializedArgs(purchase: Purchase) {
 function mockExistingOwnerRpc(active: boolean) {
   const writes: { name: string; args: Record<string, unknown> }[] = [];
   const reads: unknown[] = [];
-  const query = {
-    select(fields: string) {
-      reads.push(["select", fields]);
-      return query;
-    },
-    eq(field: string, value: string) {
-      reads.push([field, value]);
-      return query;
-    },
-    maybeSingle() {
-      return Promise.resolve({
-        data: { owner_id: ownerId, environment: "sandbox" },
-        error: null,
-      });
-    },
-  };
   const admin = {
-    from(table: string) {
-      reads.push(["from", table]);
-      return query;
-    },
     rpc(name: string, args: Record<string, unknown>) {
+      if (name === "bil_lookup_store_subscription_owner") {
+        reads.push([name, args]);
+        return Promise.resolve({
+          data: [{ owner_id: ownerId, environment: "sandbox" }],
+          error: null,
+        });
+      }
       writes.push({ name, args: JSON.parse(JSON.stringify(args)) });
       return Promise.resolve({
         data: {

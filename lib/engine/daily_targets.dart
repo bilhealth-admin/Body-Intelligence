@@ -15,6 +15,8 @@ class DailyTargets {
 
   final int water;
 
+  final List<String> sourceIds;
+
   const DailyTargets({
     required this.calories,
     required this.protein,
@@ -24,5 +26,6 @@ class DailyTargets {
     required this.sodium,
     required this.fiber,
     required this.water,
+    this.sourceIds = const <String>[],
   });
 }

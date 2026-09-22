@@ -515,6 +515,19 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                       'الصيام اختياري وليس نصيحة طبية. لا تصم إذا تعارض مع الحمل أو الدواء أو تاريخ اضطراب الأكل أو رعاية السكري أو إرشادات طبيبك.',
                     ),
                   ),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('fasting-health-sources'),
+                      onPressed: () => context.push(
+                        '/health-information-sources?topic=fasting',
+                      ),
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: Text(
+                        tr('Fasting sources & safety', 'مصادر الصيام والسلامة'),
+                      ),
+                    ),
+                  ),
                 ],
               ),
       ),

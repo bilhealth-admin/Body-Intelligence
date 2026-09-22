@@ -21,6 +21,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   final productResponse = Completer<ProductDetailsResponse>();
   final purchaseLaunch = Completer<bool>();
   PurchaseDetails? restoreReceipt;
+  List<PurchaseDetails>? restoreBatch;
   Duration? restoreCallbackDelay;
   Future<void> Function()? appleSync;
   bool failCompletion = false;
@@ -53,7 +54,7 @@ class _NativeStore extends Fake implements InAppPurchase {
     final receipt = restoreReceipt ?? _receipt();
     final delay = restoreCallbackDelay;
     if (delay == null) {
-      updates.add([receipt]);
+      updates.add(restoreBatch ?? [receipt]);
       return;
     }
     unawaited(
@@ -165,6 +166,7 @@ void main() {
   late Completer<void> verificationStarted;
   late int verificationCalls;
   late List<Map<String, Object?>> subscriptionRows;
+  http.Response Function(http.Request)? verificationResponse;
 
   setUp(() async {
     VerifiedStorePurchaseService.resetTransactionReplayProtectionForTesting();
@@ -173,6 +175,7 @@ void main() {
     verification = Completer<http.Response>();
     verificationStarted = Completer<void>();
     verificationCalls = 0;
+    verificationResponse = null;
     subscriptionRows = <Map<String, Object?>>[];
     await Supabase.initialize(
       url: 'https://billing-fixture.invalid',
@@ -195,7 +198,7 @@ void main() {
         if (request.url.path == '/functions/v1/verify-store-purchase') {
           verificationCalls++;
           if (!verificationStarted.isCompleted) verificationStarted.complete();
-          return verification.future;
+          return verificationResponse?.call(request) ?? verification.future;
         }
         throw StateError(
           'Unexpected test-only HTTP request: ${request.url.path}',
@@ -234,9 +237,87 @@ void main() {
     expect(store.canStartPurchase, isTrue);
   }
 
+  for (final product in [
+    StoreCatalogConfiguration.premiumMonthly,
+    StoreCatalogConfiguration.aiBoost,
+  ]) {
+    for (final status in [200, 400]) {
+      test(
+        'restore preserves ownership rejection for $product HTTP $status',
+        () async {
+          await ready();
+          native.restoreReceipt = _receipt(
+            productId: product,
+            status: PurchaseStatus.restored,
+          );
+          final restore = store.restore();
+          await verificationStarted.future;
+          verification.complete(
+            http.Response(
+              '{"verified":false,"error":"purchase_owned_by_another_account"}',
+              status,
+              headers: {'content-type': 'application/json'},
+            ),
+          );
+          await restore;
+          expect(store.messageCode, 'purchase_owned_by_another_account');
+          expect(store.state, VerifiedStoreState.failed);
+          expect(store.canStartPurchase, isFalse);
+          expect(store.entitlement, isNull);
+          expect(native.completionCalls, 0);
+          expect(verificationCalls, 1);
+        },
+      );
+    }
+  }
+
+  test(
+    'later inactive receipt cannot hide an earlier restore ownership rejection',
+    () async {
+      await ready();
+      native.restoreBatch = [
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'other-owner',
+        ),
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumAnnual,
+          purchaseId: 'expired-own',
+        ),
+      ];
+      verificationResponse = (request) {
+        final body = jsonDecode(request.body) as Map;
+        final conflict = body['purchase_id'] == 'other-owner';
+        return http.Response(
+          conflict
+              ? '{"verified":false,"error":"purchase_owned_by_another_account"}'
+              : '{"verified":true,"entitlement_active":false}',
+          conflict ? 400 : 200,
+          headers: {'content-type': 'application/json'},
+        );
+      };
+      await store.restore();
+      expect(verificationCalls, 2);
+      expect(native.completionCalls, 1);
+      expect(store.messageCode, 'purchase_owned_by_another_account');
+      expect(store.canStartPurchase, isFalse);
+      expect(store.entitlement, isNull);
+    },
+  );
+
   Future<void> drain() async {
     for (var i = 0; i < 15; i++) {
       await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  Future<void> waitForStoreIdle() async {
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (store.busy) {
+      if (DateTime.now().isAfter(deadline)) {
+        fail('Store purchase queue did not become idle.');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 1));
     }
   }
 
@@ -440,7 +521,7 @@ void main() {
           headers: {'content-type': 'application/json'},
         ),
       );
-      await drain();
+      await waitForStoreIdle();
       native.finishPrices();
       await initialization;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
 import 'domain/goal_timeline_estimator.dart';
@@ -139,6 +140,27 @@ class GoalTimelineCard extends StatelessWidget {
                     key: const Key('estimated-time-to-goal-caveat'),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                  TextButton.icon(
+                    key: const Key('goal-timeline-methodology'),
+                    onPressed: () => context.push(
+                      '/health-information-sources?topic=weight-planning',
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.menu_book_outlined, size: 17),
+                    label: Text(
+                      profileLocaleText(
+                            context,
+                            'Method',
+                            'منهجية التخطيط ومصدرها',
+                          ) +
+                          (Localizations.localeOf(context).languageCode == 'ar'
+                              ? ''
+                              : ' · ${context.strings.text('Source')}'),
                     ),
                   ),
                 ],

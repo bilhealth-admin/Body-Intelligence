@@ -348,7 +348,7 @@ void main() {
     },
   );
 
-  testWidgets('only an empty chat gets one non-persistent session welcome', (
+  testWidgets('the daily brief replaces the redundant session welcome', (
     tester,
   ) async {
     final db = await database(tester);
@@ -357,6 +357,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.textContaining('ready for your next useful decision'),
+      findsNothing,
+    );
+    expect(
+      find.textContaining('Let’s make the first decision'),
       findsOneWidget,
     );
     await tester.pumpWidget(const SizedBox.shrink());
@@ -616,6 +620,7 @@ void main() {
           break;
         }
       }
+      await tester.pumpAndSettle();
 
       expect((await UserProfileRepository(db).getProfile())?.targetWeight, 79);
       expect((await GoalRepository(db).getActive())?.targetWeight, 79);

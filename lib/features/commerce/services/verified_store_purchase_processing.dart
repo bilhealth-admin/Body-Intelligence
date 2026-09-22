@@ -110,14 +110,13 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       if (ownerId == null) return;
       final verification = boost
           ? await _verifyBoostOnServer(purchase)
-                ? _StoreReceiptVerificationResult.verifiedActive
-                : _StoreReceiptVerificationResult.failed
           : await _verifyOnServer(purchase, ownerId: ownerId);
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       final verifiedActive =
           verification == _StoreReceiptVerificationResult.verifiedActive;
       final verifiedReceipt =
-          verification != _StoreReceiptVerificationResult.failed;
+          verification == _StoreReceiptVerificationResult.verifiedActive ||
+          verification == _StoreReceiptVerificationResult.verifiedInactive;
       if (!boost && verifiedActive && purchase is GooglePlayPurchaseDetails) {
         _activeGooglePurchase = purchase;
       }
@@ -151,6 +150,12 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       // account's receipt result into a newer signed-in member's Plans state.
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       switch (verification) {
+        case _StoreReceiptVerificationResult.ownershipConflict:
+          // Do not acknowledge, transfer, or retry billing for another owner.
+          // Keep this result through the rest of a multi-receipt restore.
+          if (_restoring) _restoreOwnershipConflict = true;
+          state = VerifiedStoreState.failed;
+          messageCode = 'purchase_owned_by_another_account';
         case _StoreReceiptVerificationResult.verifiedActive:
           state = VerifiedStoreState.verified;
           messageCode = boost ? 'ai_boost_verified' : 'subscription_verified';
@@ -497,7 +502,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           response.status != 200 ||
           data is! Map ||
           data['verified'] != true) {
-        return _StoreReceiptVerificationResult.failed;
+        return _verificationFailure(data);
       }
       final entitlementActive = data['entitlement_active'];
       if (entitlementActive == true) {
@@ -549,13 +554,19 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
             : _StoreReceiptVerificationResult.verifiedInactive;
       }
       return _StoreReceiptVerificationResult.failed;
+    } on FunctionException catch (error) {
+      return _verificationFailure(error.details);
     } on Object {
       return _StoreReceiptVerificationResult.failed;
     }
   }
 
-  Future<bool> _verifyBoostOnServer(PurchaseDetails purchase) async {
-    if (purchase.productID != StoreCatalogConfiguration.aiBoost) return false;
+  Future<_StoreReceiptVerificationResult> _verifyBoostOnServer(
+    PurchaseDetails purchase,
+  ) async {
+    if (purchase.productID != StoreCatalogConfiguration.aiBoost) {
+      return _StoreReceiptVerificationResult.failed;
+    }
     try {
       final body = <String, Object?>{
         'action': 'verify_ai_boost',
@@ -570,10 +581,22 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           .invoke('verify-store-purchase', body: protectedBody)
           .timeout(const Duration(seconds: 30));
       final data = response.data;
-      return response.status == 200 && data is Map && data['verified'] == true;
+      return response.status == 200 && data is Map && data['verified'] == true
+          ? _StoreReceiptVerificationResult.verifiedActive
+          : _verificationFailure(data);
+    } on FunctionException catch (error) {
+      return _verificationFailure(error.details);
     } on Object {
-      return false;
+      return _StoreReceiptVerificationResult.failed;
     }
+  }
+
+  _StoreReceiptVerificationResult _verificationFailure(Object? data) {
+    // Allowlist the server's public code; never render raw error/receipt data
+    // or the identity of the other account in the storefront.
+    return data is Map && data['error'] == 'purchase_owned_by_another_account'
+        ? _StoreReceiptVerificationResult.ownershipConflict
+        : _StoreReceiptVerificationResult.failed;
   }
 
   _StorePurchaseEventOrigin _purchaseEventOriginFor(PurchaseDetails purchase) {
@@ -613,6 +636,7 @@ enum _StorePurchaseEventOrigin { purchase, restore, reconciliation }
 
 enum _StoreReceiptVerificationResult {
   failed,
+  ownershipConflict,
   verifiedInactive,
   verifiedActive,
 }

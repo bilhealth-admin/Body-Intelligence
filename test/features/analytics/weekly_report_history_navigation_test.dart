@@ -92,6 +92,122 @@ void main() {
     );
   });
 
+  testWidgets('weekly report arrows use RTL direction without changing dates', (
+    tester,
+  ) async {
+    final today = DateTime(2026, 8, 11);
+    final report = const WeeklyReportEngine().build(
+      asOf: today,
+      nutrition: const [],
+      water: const [],
+      weights: const [],
+      mealCount: 0,
+    );
+
+    Future<ProviderContainer> pump(Locale locale) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final container = ProviderContainer(
+        overrides: [
+          weeklyReportClockProvider.overrideWithValue(() => today),
+          weeklyReportProvider.overrideWith((ref) async => report),
+          accountCreatedAtProvider.overrideWithValue(null),
+          preferencesRepositoryProvider.overrideWithValue(
+            PreferencesRepository(database),
+          ),
+          dietaryPreferencesProvider.overrideWith(
+            (ref) => Stream.value(const DietaryPreferences()),
+          ),
+          userProfileProvider.overrideWith((ref) => Stream.value(null)),
+          verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(FreePlan.createState()),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: const WeeklyReportPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    final ltr = await pump(const Locale('en'));
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byKey(const Key('weekly-report-previous')),
+              matching: find.byType(Icon),
+            ),
+          )
+          .icon,
+      Icons.chevron_left_rounded,
+    );
+    await tester.tap(find.byKey(const Key('weekly-report-previous')));
+    expect(ltr.read(selectedWeeklyReportDateProvider), DateTime(2026, 8, 4));
+    await tester.pump();
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byKey(const Key('weekly-report-next')),
+              matching: find.byType(Icon),
+            ),
+          )
+          .icon,
+      Icons.chevron_right_rounded,
+    );
+    await tester.tap(find.byKey(const Key('weekly-report-next')));
+    expect(ltr.read(selectedWeeklyReportDateProvider), today);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+
+    final rtl = await pump(const Locale('ar'));
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byKey(const Key('weekly-report-previous')),
+              matching: find.byType(Icon),
+            ),
+          )
+          .icon,
+      Icons.chevron_right_rounded,
+    );
+    await tester.tap(find.byKey(const Key('weekly-report-previous')));
+    expect(rtl.read(selectedWeeklyReportDateProvider), DateTime(2026, 8, 4));
+    await tester.pump();
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byKey(const Key('weekly-report-next')),
+              matching: find.byType(Icon),
+            ),
+          )
+          .icon,
+      Icons.chevron_left_rounded,
+    );
+    await tester.tap(find.byKey(const Key('weekly-report-next')));
+    expect(rtl.read(selectedWeeklyReportDateProvider), today);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('first opening moves from loading to the digest without reopen', (
     tester,
   ) async {

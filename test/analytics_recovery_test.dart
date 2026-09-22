@@ -71,4 +71,57 @@ void main() {
       expect(find.textContaining('private analytics'), findsNothing);
     },
   );
+
+  testWidgets(
+    'AnalyticsPage keeps its resolved shell visible while a provider refreshes',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          measurementSystemProvider.overrideWith(
+            (ref) => Stream.value(MeasurementSystem.metric),
+          ),
+          userProfileProvider.overrideWith((ref) => Stream.value(null)),
+          weightHistoryProvider.overrideWith((ref) => Stream.value(const [])),
+          allMealsProvider.overrideWith((ref) => Stream.value(const [])),
+          allWaterProvider.overrideWith((ref) => Stream.value(const [])),
+          dashboardDailyLogsProvider.overrideWith(
+            (ref) => Stream.value(const []),
+          ),
+          insightLifeContextProvider.overrideWith(
+            (ref) => Stream.value(const []),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: AnalyticsPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(AppBar), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+
+      container.invalidate(weightHistoryProvider);
+      await tester.pump();
+      expect(find.byType(AppBar), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    },
+  );
 }

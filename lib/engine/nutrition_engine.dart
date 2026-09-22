@@ -1,5 +1,6 @@
 import 'body_profile.dart';
 import 'daily_targets.dart';
+import '../core/health_evidence/health_evidence_catalog.dart';
 
 class FoodPortionTotals {
   final double calories;
@@ -51,6 +52,12 @@ class NutritionEngine {
       sodium: 2300,
       fiber: 35,
       water: water,
+      sourceIds: const [
+        HealthEvidenceIds.mifflinStJeor,
+        HealthEvidenceIds.cdcWeightLoss,
+        HealthEvidenceIds.dietaryReferenceIntakes,
+        HealthEvidenceIds.proteinExercise,
+      ],
     );
   }
 

@@ -119,6 +119,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         feedback == 'purchase_verification_unavailable' ||
         feedback == 'purchase_reconciliation_pending' ||
         feedback == 'purchase_reconciliation_failed' ||
+        feedback == 'purchase_owned_by_another_account' ||
         feedback == 'restore_verification_failed') {
       return;
     }
@@ -143,6 +144,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
       'verification_failed' => 'purchase_verification_unavailable',
       'restore_verification_failed' => 'restore_verification_failed',
+      'purchase_owned_by_another_account' =>
+        'purchase_owned_by_another_account',
       'reconciliation_verification_failed' => 'purchase_reconciliation_failed',
       'purchase_failed' || 'store_stream_failed' => 'purchase_error',
       'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
@@ -155,6 +158,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     };
     final isError = const {
       'purchase_error',
+      'purchase_owned_by_another_account',
       'restore_verification_failed',
       'purchase_reconciliation_failed',
     }.contains(key);
@@ -217,6 +221,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         'no_restorable_purchases' => 'restore_none',
         'authentication_required' => 'restore_sign_in',
         'restore_failed' => 'restore_failed',
+        'purchase_owned_by_another_account' =>
+          'purchase_owned_by_another_account',
         'restore_verification_failed' ||
         'verification_failed' ||
         'reconciliation_verification_failed' => 'restore_verification_failed',

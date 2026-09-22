@@ -144,6 +144,9 @@ Set<CoachCloudContextCategory> _coachCloudCategoriesInText(String source) {
   if (has(
     RegExp(
       r'\b(weights?|weigh|goal weight|target weight|waist|hip|hips|neck|chest|arm|thigh|bmi|measurements?|body fat|kilograms?|kgs?)\b|'
+      // Age already belongs to this approved profile category. Recognize an
+      // explicit question about the member's age, not generic mentions of age.
+      r'\b(my age|how old am i)\b|(?:^|[\s،؟?!:])عمري(?:$|[\s،؟?!:.])|'
       r'peso|poids|gewicht|waga|ağırlık|berat|cân nặng|вес|вага|وزن|वज़न|ওজন|น้ำหนัก|体重|體重|체중|'
       r'هدف الوزن|وزني المستهدف|الوزن المستهدف|خصر|ورك|أرداف|ارداف|رقبة|صدر|ذراع|فخذ|قياس|كتلة الجسم|كيلو',
       unicode: true,
@@ -351,6 +354,7 @@ const Set<String> _weightComputedHealthKeys = <String>{
   'healthyWaistScreeningUpperCm',
   'obesityRiskScreening',
   'notice',
+  'healthCitationIds',
 };
 
 Map<String, Object?> _projectComputedHealth(

@@ -1,9 +1,49 @@
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/core/health_evidence/health_evidence_catalog.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway_io.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'real projection sends permitted profile facts in one Cloud request',
+    () async {
+      final events = <String>[];
+      final cloud = _RecordingCloudAccess(
+        events: events,
+        consent: _grantedConsent,
+      );
+      final context = CoachContextSnapshot(
+        generatedAt: DateTime.utc(2026, 9, 21),
+        profile: const {
+          'age': 35,
+          'currentWeightKg': 87.0,
+          'targetWeightKg': 79.0,
+          'email': 'must-not-be-sent@example.com',
+        },
+        weights: const [],
+        nutritionDays: const [],
+        waterHistory: const [],
+        computedHealth: const {},
+      );
+      final result = await LlamaCppLocalGateway(
+        cloudAccess: cloud,
+      ).answer(question: 'كم عمري؟', locale: 'ar', context: context);
+      expect(result.status, CoachServiceStatus.ready);
+      expect(events, ['session', 'consent', 'invoke']);
+      final payload = cloud.lastBody!['context']! as Map;
+      expect(payload['profile'], {
+        'age': 35,
+        'currentWeightKg': 87.0,
+        'targetWeightKg': 79.0,
+      });
+      expect(
+        cloud.lastBody!['context_disclosure'],
+        containsPair('categories', ['weight_measurements_goal']),
+      );
+    },
+  );
+
   group('remote AI consent preflight', () {
     test(
       'signed-out request builds no context and invokes no Edge function',
@@ -67,12 +107,12 @@ void main() {
 
       expect(result.status, CoachServiceStatus.temporarilyUnavailable);
       expect(result.diagnosticCode, 'remote_ai_consent_preflight_failed');
-      expect(events, ['session', 'consent', 'consent']);
+      expect(events, ['session', 'consent']);
       expect(cloud.lastBody, isNull);
     });
 
     test(
-      'one transient consent preflight failure is retried before any invoke',
+      'transient consent failure waits for explicit retry before any invoke',
       () async {
         final events = <String>[];
         final cloud = _RecordingCloudAccess(
@@ -88,8 +128,24 @@ void main() {
           context: _context(),
         );
 
-        expect(result.status, CoachServiceStatus.ready);
-        expect(events, ['session', 'consent', 'consent', 'project', 'invoke']);
+        expect(result.status, CoachServiceStatus.temporarilyUnavailable);
+        expect(events, ['session', 'consent']);
+        expect(cloud.lastBody, isNull);
+
+        final retry = await _gateway(cloud, projector).answer(
+          question: 'Review my meals',
+          locale: 'en',
+          context: _context(),
+        );
+        expect(retry.status, CoachServiceStatus.ready);
+        expect(events, [
+          'session',
+          'consent',
+          'session',
+          'consent',
+          'project',
+          'invoke',
+        ]);
         expect(cloud.lastBody, isNotNull);
       },
     );
@@ -138,6 +194,38 @@ void main() {
           'included_prior_turn_count': 0,
           'sent_message_count': 1,
         });
+      },
+    );
+
+    test(
+      'cloud response keeps only allow-listed health citation IDs',
+      () async {
+        final cloud = _RecordingCloudAccess(
+          events: <String>[],
+          consent: _grantedConsent,
+          response: const CoachCloudFunctionResponse(
+            status: 200,
+            data: <String, Object?>{
+              'reply': 'General BMI screening guidance.',
+              'citations': <Object?>[
+                HealthEvidenceIds.cdcAdultBmi,
+                'https://untrusted.example/fake',
+                'invented_study',
+                HealthEvidenceIds.cdcAdultBmi,
+              ],
+            },
+          ),
+        );
+
+        final result = await _gateway(
+          cloud,
+          _RecordingProjector(cloud.events),
+        ).answer(question: 'Explain BMI', locale: 'en', context: _context());
+
+        expect(result.status, CoachServiceStatus.ready);
+        expect(result.answer?.citationIds, const <String>[
+          HealthEvidenceIds.cdcAdultBmi,
+        ]);
       },
     );
   });

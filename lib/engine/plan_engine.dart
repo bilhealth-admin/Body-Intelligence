@@ -70,5 +70,6 @@ class PlanEngine {
     sodium: recommended.sodium,
     fiber: overrides?.fiber ?? recommended.fiber,
     water: overrides?.water ?? recommended.water,
+    sourceIds: recommended.sourceIds,
   );
 }

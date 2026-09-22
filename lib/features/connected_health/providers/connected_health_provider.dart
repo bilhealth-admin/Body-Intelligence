@@ -33,6 +33,11 @@ abstract interface class ConnectedHealthDailyActivityGateway {
   Future<ConnectedHealthSnapshot> loadDailyActivity();
 }
 
+/// Local, consented native evidence only; never waits for OS status or reads.
+abstract interface class ConnectedHealthCachedSnapshotGateway {
+  Future<ConnectedHealthSnapshot> loadCachedSnapshot();
+}
+
 /// An initial native sheet is permitted after the user's setup completes.
 /// No repeat sheet, settings redirect, or silent grant is inferred here.
 abstract interface class ConnectedHealthStartupPermissionGateway {
@@ -60,6 +65,7 @@ final class DeferredConnectedHealthGateway
     implements
         ConnectedHealthGateway,
         ConnectedHealthDailyActivityGateway,
+        ConnectedHealthCachedSnapshotGateway,
         ConnectedHealthStartupPermissionGateway,
         ConnectedHealthCancellableSyncGateway {
   Future<NativeConnectedHealthGateway> _native() async {
@@ -79,6 +85,10 @@ final class DeferredConnectedHealthGateway
     // connected-health provider when its page is opened.
     return (await _native()).load();
   }
+
+  @override
+  Future<ConnectedHealthSnapshot> loadCachedSnapshot() async =>
+      (await _native()).loadCachedSnapshot();
 
   @override
   Future<ConnectedHealthSnapshot> synchronize() async =>
@@ -165,8 +175,36 @@ final class ConnectedHealthController
   _HealthMutation? _mutationKind;
   Future<void>? _refreshTask;
   Future<ConnectedHealthSnapshot>? _nativeSyncTask;
+  Future<ConnectedHealthSnapshot>? _nativeLoadTask;
+  Future<ConnectedHealthSnapshot>? _nativeActivityTask;
+  Future<void>? _cachedSnapshotTask;
   Future<void>? _startupPermissionTask;
   DateTime? _activityRefreshedAt;
+  int _readGeneration = 0;
+  bool _readsSuspended = false;
+
+  Future<void> restoreCachedSnapshot() =>
+      _cachedSnapshotTask ??= _restoreCachedSnapshot();
+
+  Future<void> _restoreCachedSnapshot() async {
+    final gateway = _gateway;
+    if (!mounted || gateway is! ConnectedHealthCachedSnapshotGateway) return;
+    final generation = _readGeneration;
+    try {
+      final cached = await (gateway as ConnectedHealthCachedSnapshotGateway)
+          .loadCachedSnapshot()
+          .timeout(_synchronizationTimeout);
+      if (!mounted || generation != _readGeneration) return;
+      final current = state.value;
+      if (cached.deviceVerified &&
+          current?.deviceVerified != true &&
+          current?.isBusy != true) {
+        state = AsyncValue.data(cached.copyWith(isBusy: false));
+      }
+    } on Object {
+      // Optional cache failure must not prevent the normal status/read path.
+    }
+  }
 
   // Retain the completed future too: switching tabs, returning from the native
   // sheet, and rebuilding the dashboard cannot schedule another startup sheet.
@@ -201,7 +239,11 @@ final class ConnectedHealthController
     await _runMutation(
       _HealthMutation.dailyActivity,
       () =>
-          (gateway as ConnectedHealthDailyActivityGateway).loadDailyActivity(),
+          (_nativeActivityTask ??=
+                  (gateway as ConnectedHealthDailyActivityGateway)
+                      .loadDailyActivity()
+                      .whenComplete(() => _nativeActivityTask = null))
+              .timeout(_synchronizationTimeout),
     );
     if (mounted && state.asData?.value.failureCode == null && !state.hasError) {
       _activityRefreshedAt = now;
@@ -263,6 +305,11 @@ final class ConnectedHealthController
     if (previousRefresh != null) await previousRefresh;
     if (!mounted) return;
 
+    final generation = _readGeneration;
+    final isRead =
+        kind == _HealthMutation.synchronize ||
+        kind == _HealthMutation.dailyActivity;
+    if (isRead && _readsSuspended) return;
     final current = state.value;
     if (current != null) {
       final transitioned = transition?.call(current) ?? current;
@@ -278,10 +325,18 @@ final class ConnectedHealthController
       if (!mounted) return;
     }
     final result = await AsyncValue.guard(operation);
-    if (!mounted) return;
+    if (!mounted || (isRead && generation != _readGeneration)) return;
     state = result.when(
       data: (snapshot) => AsyncValue.data(snapshot.copyWith(isBusy: false)),
-      error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
+      error: (error, stackTrace) => current?.deviceVerified == true
+          ? AsyncValue.data(
+              current!.copyWith(
+                status: ConnectedHealthStatus.degraded,
+                failureCode: 'health_refresh_failed_offline_cache_preserved',
+                isBusy: false,
+              ),
+            )
+          : AsyncValue.error(error, stackTrace),
       loading: () => current == null
           ? const AsyncValue.loading()
           : AsyncValue.data(current.copyWith(isBusy: false)),
@@ -304,7 +359,14 @@ final class ConnectedHealthController
       // operation is lost.
       final activeMutation = _mutationTask;
       if (activeMutation != null) await activeMutation;
+      if (!mounted || _readsSuspended) return;
+
+      if (_gateway is ConnectedHealthCachedSnapshotGateway &&
+          _cachedSnapshotTask == null) {
+        await restoreCachedSnapshot();
+      }
       if (!mounted) return;
+      final generation = _readGeneration;
 
       final previous = state.value;
       if (previous == null) {
@@ -321,11 +383,13 @@ final class ConnectedHealthController
         // enumerate a large native history and was blocking unrelated routes.
         // `synchronize` remains an explicit action from Apps & Devices (or
         // immediately after a user grants permission).
-        final loaded = await _gateway.load();
-        if (!mounted) return;
+        final loaded = await (_nativeLoadTask ??= _gateway.load().whenComplete(
+          () => _nativeLoadTask = null,
+        )).timeout(_synchronizationTimeout);
+        if (!mounted || generation != _readGeneration) return;
         state = AsyncValue.data(loaded.copyWith(isBusy: false));
       } catch (error, stackTrace) {
-        if (!mounted) return;
+        if (!mounted || generation != _readGeneration) return;
         // A lifecycle notification must not replace useful cached content with
         // a transient blank/error screen.
         // An empty initial state is not useful cached content. Preserve a real
@@ -413,8 +477,25 @@ final class ConnectedHealthController
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _readsSuspended = false;
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
+      _readsSuspended = true;
+      _readGeneration++;
+      final current = this.state.value;
+      if (current != null &&
+          current.isBusy &&
+          (_mutationKind == _HealthMutation.synchronize ||
+              _mutationKind == _HealthMutation.dailyActivity ||
+              _refreshTask != null)) {
+        this.state = AsyncValue.data(
+          current.copyWith(
+            status: ConnectedHealthStatus.degraded,
+            failureCode: 'health_refresh_failed_offline_cache_preserved',
+            isBusy: false,
+          ),
+        );
+      }
       _cancelIosNativeSynchronization();
     }
   }
@@ -442,6 +523,7 @@ final class ConnectedHealthController
   }
 
   Future<void> revokePermissions() async {
+    _readGeneration++;
     await _runMutation(_HealthMutation.revoke, _gateway.revokePermissions);
   }
 

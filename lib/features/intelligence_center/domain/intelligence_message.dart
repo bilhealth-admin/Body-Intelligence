@@ -1,3 +1,4 @@
+import '../../../core/health_evidence/health_evidence_catalog.dart';
 import 'bil_navigation_registry.dart';
 import 'intelligence_action.dart';
 
@@ -375,6 +376,7 @@ class IntelligenceMessage {
     required this.text,
     required this.createdAt,
     this.evidence = const <String>[],
+    this.citationIds = const <String>[],
     this.confidence,
     this.actionId,
     this.memoryCandidate,
@@ -391,6 +393,7 @@ class IntelligenceMessage {
   final String text;
   final DateTime createdAt;
   final List<String> evidence;
+  final List<String> citationIds;
   final double? confidence;
   final String? actionId;
   final String? memoryCandidate;
@@ -406,6 +409,7 @@ class IntelligenceMessage {
     String? text,
     DateTime? createdAt,
     List<String>? evidence,
+    List<String>? citationIds,
     double? confidence,
     String? actionId,
     String? memoryCandidate,
@@ -421,6 +425,7 @@ class IntelligenceMessage {
     text: text ?? this.text,
     createdAt: createdAt ?? this.createdAt,
     evidence: evidence ?? this.evidence,
+    citationIds: citationIds ?? this.citationIds,
     confidence: confidence ?? this.confidence,
     actionId: actionId ?? this.actionId,
     memoryCandidate: memoryCandidate ?? this.memoryCandidate,
@@ -438,6 +443,7 @@ class IntelligenceMessage {
     'text': text,
     'createdAt': createdAt.toIso8601String(),
     'evidence': evidence,
+    'citationIds': citationIds,
     'confidence': confidence,
     'actionId': actionId,
     'memoryCandidate': memoryCandidate,
@@ -461,6 +467,11 @@ class IntelligenceMessage {
         evidence: (json['evidence'] as List<Object?>? ?? const [])
             .whereType<String>()
             .toList(growable: false),
+        citationIds: HealthEvidenceCatalog.validateIds(
+          json['citationIds'] is List
+              ? json['citationIds']! as List
+              : const <Object?>[],
+        ),
         confidence: (json['confidence'] as num?)?.toDouble(),
         actionId: json['actionId'] as String?,
         memoryCandidate: json['memoryCandidate'] as String?,

@@ -264,9 +264,10 @@ void main() {
     final partner = File(
       'lib/features/connected_health/partner_capabilities_page.dart',
     ).readAsStringSync();
-    final dailySummary = File(
+    final dailySummary = [
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-    ).readAsStringSync();
+      'lib/features/daily_log/presentation/daily_log_meal_summary.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final quickMacro = File(
       'lib/features/daily_log/presentation/quick_macro_entry_dialog.dart',
     ).readAsStringSync();

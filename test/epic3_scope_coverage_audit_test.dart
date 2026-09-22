@@ -176,7 +176,10 @@ void main() {
   test(
     'every active application route is classified with existing evidence',
     () {
-      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final router = [
+        File('lib/app/router/app_router.dart').readAsStringSync(),
+        File('lib/app/router/app_wellness_routes.dart').readAsStringSync(),
+      ].join('\n');
       final discovered = RegExp(
         r"path:\s*'([^']+)'",
       ).allMatches(router).map((match) => match.group(1)!).toSet();

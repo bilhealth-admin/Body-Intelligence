@@ -949,7 +949,7 @@ Future<Set<String>> _additionalSources() async {
   );
   values.addAll(
     await _authoredMapKeys(
-      'lib/features/daily_log/presentation/daily_log_input_sections.dart',
+      'lib/features/daily_log/presentation/daily_log_input_copy.dart',
       'const _dailyInputCopy',
     ),
   );

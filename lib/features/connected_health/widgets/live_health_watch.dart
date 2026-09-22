@@ -32,7 +32,13 @@ bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
   final cachePreservedAfterNativeFailure =
       snapshot.status == ConnectedHealthStatus.degraded &&
       snapshot.lastSyncAt != null &&
-      (snapshot.failureCode == 'health_sync_failed_offline_cache_preserved' ||
+      (snapshot.failureCode == 'health_sync_timed_out' ||
+          snapshot.failureCode == 'health_cached_snapshot_pending_refresh' ||
+          snapshot.failureCode == 'native_health_status_unavailable' ||
+          snapshot.failureCode ==
+              'daily_activity_refresh_failed_cache_preserved' ||
+          snapshot.failureCode ==
+              'health_sync_failed_offline_cache_preserved' ||
           snapshot.failureCode == 'health_sync_empty_result_cache_preserved' ||
           snapshot.failureCode ==
               'health_refresh_failed_offline_cache_preserved');

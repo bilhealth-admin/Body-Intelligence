@@ -157,6 +157,8 @@ Future<void> _selectAndSave(
     500,
     scrollable: find.byType(Scrollable).first,
   );
+  await tester.ensureVisible(save);
+  await tester.pumpAndSettle();
   await tester.tap(save);
   await tester.pumpAndSettle();
 }

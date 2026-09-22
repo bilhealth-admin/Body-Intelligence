@@ -80,7 +80,14 @@ void main() {
       );
       expect(source, contains('because BIL presents the confirmation UI'));
     }
-    expect(cloudPrompt, contains(r'${toolArgumentContract} ${systemCore}'));
+    expect(
+      cloudPrompt,
+      contains(
+        r'${toolArgumentContract} ${healthCitationContract} ${systemCore}',
+      ),
+    );
+    expect(cloudPrompt, contains('Only make numeric health claims supported'));
+    expect(cloudPrompt, contains('must never be used as a substitute'));
   });
 
   test('stale conversation saves cannot replace a selected chat', () {

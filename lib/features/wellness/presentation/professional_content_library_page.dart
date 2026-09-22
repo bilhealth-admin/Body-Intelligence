@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/feature_strings.dart';
@@ -485,14 +486,47 @@ class _ContentDetailsPage extends StatelessWidget {
         ],
         const Divider(height: 32),
         ListTile(
+          key: const Key('professional-content-source-link'),
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.verified_rounded),
           title: Text(item.publisher),
           subtitle: Text('${item.licenseName}\n${item.sourceUrl}'),
+          trailing: const Icon(Icons.open_in_new_rounded),
+          onTap: item.sourceUrl.scheme == 'https'
+              ? () => _openOriginalSource(context)
+              : null,
         ),
       ],
     ),
   );
+
+  Future<void> _openOriginalSource(BuildContext context) async {
+    try {
+      if (await launchUrl(
+        item.sourceUrl,
+        mode: LaunchMode.externalApplication,
+      )) {
+        return;
+      }
+    } on Object {
+      // Keep an unavailable external browser non-fatal.
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _localized(
+            context,
+            'تعذر فتح المصدر الأصلي الآن.',
+            'This link cannot be opened safely. Return to the dashboard and try again.',
+            'La source originale ne peut pas être ouverte pour le moment.',
+            'No se pudo abrir la fuente original en este momento.',
+            'Orijinal kaynak şu anda açılamadı.',
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 String _localized(

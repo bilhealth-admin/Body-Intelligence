@@ -128,6 +128,20 @@ class HelpCenterPage extends StatelessWidget {
             action: () => context.push('/help/faq'),
           ),
           (
+            id: 'health-sources',
+            title: t(
+              'Health sources & methodology',
+              'مصادر الصحة والمنهجية',
+              'Sources de santé et méthodologie',
+              'Fuentes de salud y metodología',
+              'Sağlık kaynakları ve yöntem',
+            ),
+            kind: BilSemanticIconKind.health,
+            iconOverride: Icons.menu_book_outlined,
+            appleIconOverride: CupertinoIcons.book,
+            action: () => context.push('/health-information-sources'),
+          ),
+          (
             id: 'contact-support',
             title: t(
               'Contact Support',
@@ -240,6 +254,10 @@ class HelpCenterPage extends StatelessWidget {
         title: Text(t('Help', 'المساعدة', 'Aide', 'Ayuda', 'Yardım')),
       ),
       body: ListView.separated(
+        // Keep this route at its own top position. It must not inherit a
+        // PrimaryScrollController offset from the settings/help stack and
+        // hide About or FAQ when the reviewer opens Help.
+        primary: false,
         itemCount: rows.length,
         separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {

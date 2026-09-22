@@ -1,3 +1,5 @@
+import '../../../core/health_evidence/health_evidence_catalog.dart';
+
 enum NutritionPathwaySafety { standard, clinicianReview, medicalSupervision }
 
 /// Commercial access for a nutrition pathway.
@@ -38,4 +40,8 @@ class NutritionPathway {
   final List<String> enTracking;
   final NutritionPathwaySafety safety;
   final NutritionPathwayAccess access;
+
+  /// Trusted, app-owned evidence attached to this pathway. The catalog owns
+  /// all metadata and URLs so a pathway can never introduce an arbitrary link.
+  List<String> get sourceIds => HealthEvidenceCatalog.forPathway(id);
 }

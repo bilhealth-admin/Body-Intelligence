@@ -20,6 +20,7 @@ const Set<String> _coachHealthAnalyticsKeys = <String>{
   'healthyWaistScreeningUpperCm',
   'obesityRiskScreening',
   'notice',
+  'healthCitationIds',
 };
 
 /// Applies the user's independent Coach-context category choices to health.

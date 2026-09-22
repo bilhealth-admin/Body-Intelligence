@@ -4,9 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('diary exposes explicit complete and reopen lifecycle actions', () {
-    final page = File(
+    final page = [
       'lib/features/daily_log/daily_log_page.dart',
-    ).readAsStringSync();
+      'lib/features/daily_log/daily_log_diary_status.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final actions = File(
       'lib/features/daily_log/daily_log_page_actions.dart',
     ).readAsStringSync();

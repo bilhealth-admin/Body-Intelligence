@@ -430,6 +430,16 @@ class _SourceAndSafety extends StatelessWidget {
           // Legal provenance remains on the verified item, but internal
           // license/author strings are not consumer-facing workout copy.
           Text(item.publisher),
+          if (item.sourceUrl.scheme == 'https')
+            TextButton.icon(
+              key: const Key('workout-original-source-link'),
+              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              onPressed: () => _openOriginalSource(context),
+              icon: const Icon(Icons.open_in_new_rounded, size: 17),
+              label: Text(
+                _copy(context, 'Open original source', 'فتح المصدر الأصلي'),
+              ),
+            ),
           const SizedBox(height: 8),
           Text(
             _copy(
@@ -442,4 +452,29 @@ class _SourceAndSafety extends StatelessWidget {
       ),
     ),
   );
+
+  Future<void> _openOriginalSource(BuildContext context) async {
+    try {
+      if (await launchUrl(
+        item.sourceUrl,
+        mode: LaunchMode.externalApplication,
+      )) {
+        return;
+      }
+    } on Object {
+      // Keep an unavailable external browser non-fatal.
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _copy(
+            context,
+            'This link cannot be opened safely. Return to the dashboard and try again.',
+            'تعذر فتح المصدر الأصلي الآن.',
+          ),
+        ),
+      ),
+    );
+  }
 }

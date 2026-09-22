@@ -40,6 +40,11 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   yield previousOwnerId;
 
   await for (final state in auth.onAuthStateChange) {
+    // Native session persistence can emit a transient null. An explicit
+    // sign-out remains authoritative and clears all owner-scoped state.
+    if (state.session == null && state.event != AuthChangeEvent.signedOut) {
+      continue;
+    }
     final ownerId = state.session?.user.id;
     if (ownerId == previousOwnerId) continue;
     previousOwnerId = ownerId;
@@ -60,7 +65,7 @@ final verifiedEntitlementOwnerSeedProvider = Provider<String?>((_) {
 /// startup seed.
 final verifiedEntitlementOwnerIdProvider = Provider<String?>((ref) {
   final owner = ref.watch(verifiedEntitlementOwnerProvider);
-  if (owner.hasValue) return owner.asData?.value;
+  if (owner.hasValue) return owner.value;
   return ref.watch(verifiedEntitlementOwnerSeedProvider);
 });
 
@@ -247,20 +252,40 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// opens only after Supabase reports a positive reserved-aware total from an
 /// AI subscription allowance and/or verified Boost balance. An active plan at
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
+final class AiCoachAccessSnapshotStore {
+  bool? verifiedAccess;
+}
+
+/// A new store for every owner transition, including sign-out. Pending work
+/// from an earlier session cannot populate the new session's continuity cache.
+final aiCoachAccessSnapshotStoreProvider = Provider<AiCoachAccessSnapshotStore>(
+  (ref) {
+    ref.watch(verifiedEntitlementOwnerIdProvider);
+    return AiCoachAccessSnapshotStore();
+  },
+);
+
 final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
-  ref.watch(verifiedEntitlementOwnerIdProvider);
+  final ownerId = ref.watch(verifiedEntitlementOwnerIdProvider);
+  final snapshot = ref.watch(aiCoachAccessSnapshotStoreProvider);
   ref.watch(aiCoachUsageRefreshProvider);
+  if (ownerId == null) return false;
   final loaded = _observedAuthorityReload(ref, () {
     ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
   });
-  // A signed-out or malformed response is a verified no-access result. An
-  // RPC exception is deliberately allowed through so Riverpod exposes
-  // AsyncError and the route shows retry instead of a purchase offer.
+  // Only a successful server response creates access. Retain the same owner's
+  // last verified result on transient failure; zero/malformed results revoke it.
   try {
     final value = await ref
         .read(aiCoachUsageStatusLoaderProvider)()
         .timeout(const Duration(seconds: 10));
-    return aiCoachAccessFromUsageStatus(value);
+    final access = aiCoachAccessFromUsageStatus(value);
+    snapshot.verifiedAccess = access;
+    return access;
+  } on Object {
+    final retained = snapshot.verifiedAccess;
+    if (retained != null) return retained;
+    rethrow;
   } finally {
     loaded();
   }

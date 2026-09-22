@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
@@ -181,6 +182,16 @@ class DashboardBodyProfileSnapshot extends StatelessWidget {
                 onPressed: onEditPlan,
                 icon: const Icon(Icons.tune_rounded),
                 label: Text(tr('Edit plan', 'تعديل الخطة')),
+              ),
+              TextButton.icon(
+                key: const Key('body-composition-methodology'),
+                onPressed: () => context.push(
+                  '/health-information-sources?topic=body-composition',
+                ),
+                icon: const Icon(Icons.menu_book_outlined),
+                label: Text(
+                  tr('Methods & sources', 'المنهجية والمصادر'),
+                ),
               ),
             ],
           ),

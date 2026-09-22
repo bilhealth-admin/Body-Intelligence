@@ -6,6 +6,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/units/measurement_units.dart';
+import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../../engine/data_honesty_engine.dart';
@@ -383,6 +384,22 @@ class DashboardGrid extends ConsumerWidget {
             DataReliability.useful => tr('Useful', 'مفيدة'),
             DataReliability.strong => tr('Strong', 'قوية'),
           };
+    final decisionHealthSourceIds = HealthEvidenceCatalog.validateIds([
+      if (bestAction.type == BestActionType.protein ||
+          primaryInsight.title == 'Protein below target') ...[
+        HealthEvidenceIds.dietaryReferenceIntakes,
+        HealthEvidenceIds.proteinExercise,
+      ],
+      if (bestAction.type == BestActionType.hydration ||
+          primaryInsight.title == 'Hydration opportunity')
+        HealthEvidenceIds.dietaryReferenceIntakes,
+      if (bestAction.type == BestActionType.holdPlan ||
+          primaryInsight.title == 'Possible plateau' ||
+          primaryInsight.title == 'Possible short-term water retention') ...[
+        HealthEvidenceIds.cdcWeightLoss,
+        HealthEvidenceIds.weightEnergyApproximation,
+      ],
+    ]);
     final decisionExplanation = DashboardDecisionExplanation(
       actionType: localizedBestTitle,
       title: localizedBestTitle,
@@ -402,6 +419,7 @@ class DashboardGrid extends ConsumerWidget {
           : [localizer.evidenceGap()],
       engineVersion: 'BIL',
       inputSources: [localizer.evidenceSummary()],
+      healthSourceIds: decisionHealthSourceIds,
     );
     final twinCopy = DashboardBodyTwinCopy.compose(
       trusted: trustedTwin,

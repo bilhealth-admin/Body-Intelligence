@@ -64,21 +64,23 @@ class DailyNutritionIntelligenceEngine {
     } else {
       if (targets.calories > 0 && calories < targets.calories * 0.8) {
         insights.add(
-          const DailyNutritionInsight(
+          DailyNutritionInsight(
             kind: DailyNutritionInsightKind.caloriesBelowTarget,
             explanation: 'Recorded calories are below 80% of the daily target.',
             action:
                 'Review whether the day is incomplete before changing intake.',
+            sourceIds: targets.sourceIds,
           ),
         );
       } else if (targets.calories > 0 && calories > targets.calories * 1.1) {
         insights.add(
-          const DailyNutritionInsight(
+          DailyNutritionInsight(
             kind: DailyNutritionInsightKind.caloriesAboveTarget,
             explanation:
                 'Recorded calories are above 110% of the daily target.',
             action:
                 'Review portions and logging accuracy without compensatory restriction.',
+            sourceIds: targets.sourceIds,
           ),
         );
       }
@@ -90,6 +92,7 @@ class DailyNutritionIntelligenceEngine {
             action: dietaryPreferences.hasFoodSelectionConstraints
                 ? 'Consider a protein source compatible with your saved dietary preferences if the day is still open.'
                 : 'Consider an appropriate protein source if the day is still open.',
+            sourceIds: targets.sourceIds,
           ),
         );
       }
@@ -103,6 +106,7 @@ class DailyNutritionIntelligenceEngine {
             action: dietaryPreferences.hasFoodSelectionConstraints
                 ? 'Consider a fiber-containing food compatible with your saved dietary preferences if appropriate.'
                 : 'Consider a suitable fiber-containing food if appropriate.',
+            sourceIds: targets.sourceIds,
           ),
         );
       }
@@ -110,11 +114,12 @@ class DailyNutritionIntelligenceEngine {
           targets.sodium > 0 &&
           sodium > targets.sodium * 1.1) {
         insights.add(
-          const DailyNutritionInsight(
+          DailyNutritionInsight(
             kind: DailyNutritionInsightKind.sodiumAboveTarget,
             explanation: 'Known sodium is above 110% of the configured target.',
             action:
                 'Review sodium-dense foods and the completeness of the data.',
+            sourceIds: targets.sourceIds,
           ),
         );
       }
@@ -122,12 +127,13 @@ class DailyNutritionIntelligenceEngine {
           targets.potassium > 0 &&
           potassium < targets.potassium * 0.8) {
         insights.add(
-          const DailyNutritionInsight(
+          DailyNutritionInsight(
             kind: DailyNutritionInsightKind.potassiumBelowTarget,
             explanation:
                 'Known potassium is below 80% of the configured target.',
             action:
                 'Review food choices only if potassium data is complete and relevant.',
+            sourceIds: targets.sourceIds,
           ),
         );
       }
@@ -145,11 +151,12 @@ class DailyNutritionIntelligenceEngine {
 
     if (targets.waterMl > 0 && waterMl < targets.waterMl * 0.8) {
       insights.add(
-        const DailyNutritionInsight(
+        DailyNutritionInsight(
           kind: DailyNutritionInsightKind.hydrationBelowTarget,
           explanation: 'Recorded water is below 80% of the daily target.',
           action:
               'Review hydration logging and drink according to individual needs.',
+          sourceIds: targets.sourceIds,
         ),
       );
     }

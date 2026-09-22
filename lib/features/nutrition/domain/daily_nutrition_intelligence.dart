@@ -7,6 +7,7 @@ class DailyNutritionTargets {
   final double sodium;
   final double potassium;
   final double waterMl;
+  final List<String> sourceIds;
 
   const DailyNutritionTargets({
     required this.calories,
@@ -17,6 +18,7 @@ class DailyNutritionTargets {
     required this.sodium,
     required this.potassium,
     required this.waterMl,
+    this.sourceIds = const <String>[],
   });
 }
 
@@ -62,11 +64,13 @@ class DailyNutritionInsight {
   final DailyNutritionInsightKind kind;
   final String explanation;
   final String action;
+  final List<String> sourceIds;
 
   const DailyNutritionInsight({
     required this.kind,
     required this.explanation,
     required this.action,
+    this.sourceIds = const <String>[],
   });
 }
 

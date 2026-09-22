@@ -78,6 +78,50 @@ Widget _subject(
 );
 
 void main() {
+  for (final failure in const [
+    'health_sync_timed_out',
+    'health_cached_snapshot_pending_refresh',
+    'native_health_status_unavailable',
+    'daily_activity_refresh_failed_cache_preserved',
+  ]) {
+    testWidgets('$failure retains readings, not revoked access', (
+      tester,
+    ) async {
+      final cached = _snapshot(
+        status: ConnectedHealthStatus.synchronized,
+        verified: true,
+        signals: [_signal('steps', 4321, 'count')],
+      );
+      await tester.pumpWidget(_subject(cached));
+      await tester.pumpWidget(
+        _subject(
+          cached.copyWith(status: ConnectedHealthStatus.syncing, isBusy: true),
+        ),
+      );
+      expect(find.text('4321'), findsOneWidget);
+      await tester.pumpWidget(
+        _subject(
+          cached.copyWith(
+            status: ConnectedHealthStatus.degraded,
+            failureCode: failure,
+          ),
+        ),
+      );
+      expect(find.text('4321'), findsOneWidget);
+      expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+      await tester.pumpWidget(
+        _subject(
+          cached.copyWith(
+            status: ConnectedHealthStatus.permissionDenied,
+            failureCode: failure,
+          ),
+        ),
+      );
+      expect(find.text('4321'), findsNothing);
+      expect(find.byKey(const Key('watch-metric-steps')), findsNothing);
+    });
+  }
+
   testWidgets('connected watch renders only actual supported readings', (
     tester,
   ) async {

@@ -180,11 +180,11 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     );
   }
   final dailyInput = await File(
-    'lib/features/daily_log/presentation/daily_log_input_sections.dart',
+    'lib/features/daily_log/presentation/daily_log_input_copy.dart',
   ).readAsString();
   if (!dailyInput.contains("RuntimeCopy.resolve('{count} selected', tag)")) {
     directFallbackFiles.add(
-      'lib/features/daily_log/presentation/daily_log_input_sections.dart',
+      'lib/features/daily_log/presentation/daily_log_input_copy.dart',
     );
   }
 

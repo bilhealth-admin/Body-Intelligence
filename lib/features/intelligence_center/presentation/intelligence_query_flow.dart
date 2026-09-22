@@ -45,6 +45,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       sending = true;
       replyPhase = _CoachReplyPhase.preparing;
       failedRequest = null;
+      retryableErrorMessageIds.clear();
       introVisible = false;
       if (addUserMessage) {
         messages.add(
@@ -350,6 +351,18 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             autoSpeak: autoSpeakReply,
             channel: inputChannel,
           );
+          if (!repeatedServiceNotice) {
+            retryableErrorMessageIds.add(presented.id);
+          } else {
+            // The transcript intentionally deduplicates identical service
+            // notices. Attach retry to that notice, not a second failure row.
+            final existing = messages.lastWhere(
+              (message) =>
+                  message.role == IntelligenceMessageRole.bil &&
+                  message.text == presented.text,
+            );
+            retryableErrorMessageIds.add(existing.id);
+          }
         }
         if (!repeatedServiceNotice) {
           messageRuntimes[presented.id] = reply.runtime;
@@ -414,6 +427,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         );
         messages.add(errorMessage);
         animatedResponseIds.add(errorMessage.id);
+        retryableErrorMessageIds.add(errorMessage.id);
       });
       _scrollToLatest();
       unawaited(_saveConversation());

@@ -66,9 +66,10 @@ void main() {
   });
 
   test('diary input summary and meal widgets own five-locale contracts', () {
-    final input = File(
+    final input = [
       'lib/features/daily_log/presentation/daily_log_input_sections.dart',
-    ).readAsStringSync();
+      'lib/features/daily_log/presentation/daily_log_input_copy.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final summary = _librarySource(
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
     );

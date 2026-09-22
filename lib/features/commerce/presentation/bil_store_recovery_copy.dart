@@ -7,12 +7,68 @@ abstract final class BilStoreRecoveryCopy {
   ];
 
   static String? text(String locale, String key) {
+    if (key == 'purchase_owned_by_another_account') {
+      return _ownershipConflict[locale] ??
+          _ownershipConflict[locale.split('-').first] ??
+          _ownershipConflict['en']!;
+    }
     final index = keys.indexOf(key);
     if (index < 0) return null;
     final copy =
         _copy[locale] ?? _copy[locale.split('-').first] ?? _copy['en']!;
     return copy[index];
   }
+
+  static const _ownershipConflict = <String, String>{
+    'en':
+        'This purchase is linked to another BIL account. Sign in to the original account or contact support. Do not purchase again to restore access.',
+    'ar':
+        'هذا الشراء مرتبط بحساب BIL آخر. سجّل الدخول بالحساب الأصلي أو تواصل مع الدعم. لا تشترِ مرة أخرى لاستعادة الوصول.',
+    'fr':
+        'Cet achat est lié à un autre compte BIL. Connectez-vous au compte d’origine ou contactez l’assistance. Ne rachetez pas pour rétablir l’accès.',
+    'es':
+        'Esta compra está vinculada a otra cuenta BIL. Inicia sesión en la cuenta original o contacta con soporte. No vuelvas a comprar para recuperar el acceso.',
+    'tr':
+        'Bu satın alım başka bir BIL hesabına bağlı. İlk hesapla oturum açın veya destekle iletişime geçin. Erişimi geri almak için tekrar satın almayın.',
+    'de':
+        'Dieser Kauf ist mit einem anderen BIL-Konto verknüpft. Melde dich beim ursprünglichen Konto an oder kontaktiere den Support. Kaufe nicht erneut, um den Zugriff wiederherzustellen.',
+    'it':
+        'Questo acquisto è collegato a un altro account BIL. Accedi all’account originale o contatta l’assistenza. Non acquistare di nuovo per ripristinare l’accesso.',
+    'pt-br':
+        'Esta compra está vinculada a outra conta BIL. Entre na conta original ou contate o suporte. Não compre novamente para recuperar o acesso.',
+    'pt-pt':
+        'Esta compra está associada a outra conta BIL. Inicie sessão na conta original ou contacte o suporte. Não volte a comprar para recuperar o acesso.',
+    'ur':
+        'یہ خریداری دوسرے BIL اکاؤنٹ سے منسلک ہے۔ اصل اکاؤنٹ میں سائن ان کریں یا سپورٹ سے رابطہ کریں۔ رسائی بحال کرنے کے لیے دوبارہ خریداری نہ کریں۔',
+    'fa':
+        'این خرید به حساب BIL دیگری متصل است. وارد حساب اصلی شوید یا با پشتیبانی تماس بگیرید. برای بازیابی دسترسی دوباره خرید نکنید.',
+    'hi':
+        'यह खरीद दूसरे BIL खाते से जुड़ी है। मूल खाते में साइन इन करें या सहायता से संपर्क करें। पहुँच बहाल करने के लिए दोबारा खरीद न करें।',
+    'id':
+        'Pembelian ini terhubung ke akun BIL lain. Masuk ke akun asal atau hubungi dukungan. Jangan membeli lagi untuk memulihkan akses.',
+    'ms':
+        'Pembelian ini dipautkan kepada akaun BIL lain. Log masuk ke akaun asal atau hubungi sokongan. Jangan beli lagi untuk memulihkan akses.',
+    'ja':
+        'この購入は別のBILアカウントに紐付いています。元のアカウントにサインインするか、サポートにお問い合わせください。アクセスを復元するために再購入しないでください。',
+    'ko':
+        '이 구매는 다른 BIL 계정에 연결되어 있습니다. 원래 계정으로 로그인하거나 지원팀에 문의하세요. 이용 권한을 복원하기 위해 다시 구매하지 마세요.',
+    'zh-hans': '此购买关联了另一个 BIL 账户。请登录原账户或联系支持。请勿为了恢复访问权限而再次购买。',
+    'zh-hant': '此購買項目連結至另一個 BIL 帳戶。請登入原帳戶或聯絡支援。請勿為了恢復存取權而再次購買。',
+    'ru':
+        'Эта покупка привязана к другому аккаунту BIL. Войдите в исходный аккаунт или обратитесь в поддержку. Не покупайте повторно для восстановления доступа.',
+    'bn':
+        'এই কেনাকাটা অন্য BIL অ্যাকাউন্টের সঙ্গে যুক্ত। মূল অ্যাকাউন্টে সাইন ইন করুন বা সহায়তায় যোগাযোগ করুন। অ্যাক্সেস ফিরে পেতে আবার কিনবেন না।',
+    'vi':
+        'Giao dịch mua này được liên kết với tài khoản BIL khác. Đăng nhập vào tài khoản gốc hoặc liên hệ hỗ trợ. Không mua lại để khôi phục quyền truy cập.',
+    'th':
+        'การซื้อนี้เชื่อมกับบัญชี BIL อื่น โปรดเข้าสู่ระบบด้วยบัญชีเดิมหรือติดต่อฝ่ายสนับสนุน อย่าซื้อซ้ำเพื่อกู้คืนสิทธิ์การเข้าถึง',
+    'pl':
+        'Ten zakup jest powiązany z innym kontem BIL. Zaloguj się na pierwotne konto lub skontaktuj się z pomocą. Nie kupuj ponownie, aby odzyskać dostęp.',
+    'nl':
+        'Deze aankoop is gekoppeld aan een ander BIL-account. Log in op het oorspronkelijke account of neem contact op met de ondersteuning. Koop niet opnieuw om toegang te herstellen.',
+    'uk':
+        'Ця покупка прив’язана до іншого облікового запису BIL. Увійдіть у початковий обліковий запис або зверніться до підтримки. Не купуйте повторно для відновлення доступу.',
+  };
 
   static const _copy = <String, List<String>>{
     'en': [

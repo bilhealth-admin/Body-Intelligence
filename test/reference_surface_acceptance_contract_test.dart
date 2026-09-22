@@ -61,8 +61,8 @@ void main() {
       );
 
       expect(page, contains("Key('daily-log-today-summary')"));
-      expect(page, contains("Key('daily-log-action-copy')"));
-      expect(page, contains("Key('daily-log-action-edit')"));
+      expect(page, contains("'daily-log-action-copy'"));
+      expect(page, contains("'daily-log-action-edit'"));
       expect(row, contains('final serving = _servingText('));
       expect(row, contains('item.calories.round().toString()'));
       expect(row, isNot(contains('food.source')));

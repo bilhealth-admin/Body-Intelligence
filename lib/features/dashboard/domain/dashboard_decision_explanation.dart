@@ -1,5 +1,7 @@
 import 'dart:collection';
 
+import '../../../core/health_evidence/health_evidence_catalog.dart';
+
 final class DashboardDecisionExplanation {
   DashboardDecisionExplanation({
     required this.actionType,
@@ -10,13 +12,17 @@ final class DashboardDecisionExplanation {
     required Iterable<String> missingEvidence,
     required this.engineVersion,
     required Iterable<String> inputSources,
+    Iterable<String> healthSourceIds = const <String>[],
   }) : evidence = UnmodifiableListView<String>(
          _normalized(evidence, fallback: 'No evidence was exposed.'),
        ),
        missingEvidence = UnmodifiableListView<String>(
          _normalized(missingEvidence),
        ),
-       inputSources = UnmodifiableListView<String>(_normalized(inputSources)) {
+       inputSources = UnmodifiableListView<String>(_normalized(inputSources)),
+       healthSourceIds = UnmodifiableListView<String>(
+         HealthEvidenceCatalog.validateIds(healthSourceIds),
+       ) {
     _requireText(actionType, 'actionType');
     _requireText(title, 'title');
     _requireText(reason, 'reason');
@@ -32,6 +38,7 @@ final class DashboardDecisionExplanation {
   final List<String> missingEvidence;
   final String engineVersion;
   final List<String> inputSources;
+  final List<String> healthSourceIds;
 
   bool get hasEvidenceGap => missingEvidence.isNotEmpty;
 

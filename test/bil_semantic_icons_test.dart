@@ -285,12 +285,19 @@ void main() {
 
     for (final path in paths) {
       expect(File(path).existsSync(), isTrue, reason: path);
-      final source = File(path).readAsStringSync();
+      final source = <String>[
+        File(path).readAsStringSync(),
+        if (path.endsWith('daily_log_meals_list.dart'))
+          File(
+            'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
+          ).readAsStringSync(),
+      ].join('\n');
       expect(
         source,
         anyOf(
           contains('BilSemanticIconBadge'),
           contains('BilNativeSettingsIcon'),
+          contains('BilSemanticIcons.spec'),
         ),
         reason: path,
       );

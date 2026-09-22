@@ -4,6 +4,7 @@ final class NativeConnectedHealthGateway
     implements
         ConnectedHealthGateway,
         ConnectedHealthDailyActivityGateway,
+        ConnectedHealthCachedSnapshotGateway,
         ConnectedHealthStartupPermissionGateway,
         ConnectedHealthCancellableSyncGateway {
   NativeConnectedHealthGateway(this._flows);
@@ -119,7 +120,15 @@ final class NativeConnectedHealthGateway
       : null;
 
   @override
-  Future<ConnectedHealthSnapshot> load() async {
+  Future<ConnectedHealthSnapshot> load() => _loadSnapshot(cachedOnly: false);
+
+  @override
+  Future<ConnectedHealthSnapshot> loadCachedSnapshot() =>
+      _loadSnapshot(cachedOnly: true);
+
+  Future<ConnectedHealthSnapshot> _loadSnapshot({
+    required bool cachedOnly,
+  }) async {
     final source = _source;
     final capability = _capability;
     if (source == null || capability?.available != true) {
@@ -127,8 +136,11 @@ final class NativeConnectedHealthGateway
     }
 
     try {
-      final availability = _bridge is NativeHealthCapabilityBridge
-          ? await (_bridge as NativeHealthCapabilityBridge).availability()
+      final availability =
+          !cachedOnly && _bridge is NativeHealthCapabilityBridge
+          ? await (_bridge as NativeHealthCapabilityBridge)
+                .availability()
+                .timeout(const Duration(seconds: 8))
           : const <String, Object?>{'available': true};
       if (availability['available'] != true) {
         final status = availability['status']?.toString();
@@ -145,11 +157,16 @@ final class NativeConnectedHealthGateway
           availabilityStatus: status,
         );
       }
-      final permissions = await _bridge.permissions();
+      final permissions = cachedOnly
+          ? const <String, bool>{}
+          : await _bridge.permissions().timeout(const Duration(seconds: 8));
       final consentState = await _flows.store.get(
         'connected_health_consent',
         source,
       );
+      if (cachedOnly && consentState?['readRequested'] != true) {
+        return const ConnectedHealthSnapshot.unavailable();
+      }
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
       final signals = <ConnectedHealthSignalView>[];
       final stepHistory = <ConnectedHealthSignalView>[];
@@ -167,7 +184,9 @@ final class NativeConnectedHealthGateway
         // Old preview/foreign-provider cache rows are not HealthKit evidence.
         // Ignore them for this source without deleting the underlying history.
         if (!_isEvidenceFromNativeBridge(signal)) continue;
-        if (!readTypes.contains(signal.key) || await _isTombstoned(signal)) {
+        if (signal.deleted ||
+            !readTypes.contains(signal.key) ||
+            await _isTombstoned(signal)) {
           removedOutOfScopeSignal = true;
           continue;
         }
@@ -198,7 +217,7 @@ final class NativeConnectedHealthGateway
       if (stepHistory.isEmpty) {
         stepHistory.addAll(signals.where((signal) => signal.key == 'steps'));
       }
-      if (removedOutOfScopeSignal && stored != null) {
+      if (!cachedOnly && removedOutOfScopeSignal && stored != null) {
         await _flows.store
             .put('connected_health_ui', 'snapshot', <String, Object?>{
               ...stored,
@@ -218,7 +237,9 @@ final class NativeConnectedHealthGateway
           permissions.values.any((value) => value);
       final lastSyncRaw = stored?['lastSyncAt'] as String?;
       return ConnectedHealthSnapshot(
-        status: _isIos && explicitlyRequested
+        status: cachedOnly && hasVerifiedNativeEvidence
+            ? ConnectedHealthStatus.degraded
+            : _isIos && explicitlyRequested
             ? (signals.isNotEmpty || stepHistory.isNotEmpty
                   ? ConnectedHealthStatus.synchronized
                   : ConnectedHealthStatus.authorizationRequested)
@@ -236,12 +257,20 @@ final class NativeConnectedHealthGateway
         lastSyncAt: lastSyncRaw == null
             ? null
             : DateTime.parse(lastSyncRaw).toLocal(),
-        failureCode: null,
+        failureCode: cachedOnly && hasVerifiedNativeEvidence
+            ? 'health_cached_snapshot_pending_refresh'
+            : null,
         availabilityStatus: availability['status']?.toString(),
         deviceVerified: hasVerifiedNativeEvidence,
         stepHistory: List<ConnectedHealthSignalView>.unmodifiable(stepHistory),
       );
     } catch (_) {
+      if (!cachedOnly) {
+        return (await loadCachedSnapshot()).copyWith(
+          status: ConnectedHealthStatus.degraded,
+          failureCode: 'native_health_status_unavailable',
+        );
+      }
       return ConnectedHealthSnapshot(
         status: ConnectedHealthStatus.degraded,
         platformSource: source,
@@ -305,13 +334,8 @@ final class NativeConnectedHealthGateway
             )
           : loaded;
     } catch (_) {
-      return ConnectedHealthSnapshot(
+      return (await loadCachedSnapshot()).copyWith(
         status: ConnectedHealthStatus.degraded,
-        platformSource: source,
-        availableSources: <String>[source],
-        signals: const <ConnectedHealthSignalView>[],
-        importedCount: 0,
-        lastSyncAt: null,
         failureCode: 'health_permission_request_failed',
       );
     }
@@ -513,22 +537,30 @@ final class NativeConnectedHealthGateway
           nativeTotals = null;
         }
       }
+      final nativeTotalKeys =
+          nativeTotals?.map((signal) => signal.key).toSet() ?? const <String>{};
       final selected = _selectRepresentativeSignals([
+        // Re-read after import so explicit tombstones are honored. A missing
+        // aggregate is not a deletion and must not roll a verified OS total
+        // back to an older raw-record projection.
+        for (final signal in await _retainedProjection('signals'))
+          if (!nativeTotalKeys.contains(signal.key)) signal,
         for (final signal in ordered)
-          if (nativeTotals == null ||
-              !const {'steps', 'distance', 'activeEnergy'}.contains(signal.key))
-            signal,
+          if (!nativeTotalKeys.contains(signal.key)) signal,
         ...?nativeTotals,
       ]);
-      final stepHistorySignals = nativeTotals == null
-          ? aggregateConnectedStepSignals(graph.selectedSignals)
-          : nativeTotals.where((signal) => signal.key == 'steps').toList();
+      final stepHistorySignals = nativeTotalKeys.contains('steps')
+          ? nativeTotals!.where((signal) => signal.key == 'steps').toList()
+          : preserveTrustedConnectedStepTotals(
+              await _retainedProjection('stepHistory'),
+              aggregateConnectedStepSignals(graph.selectedSignals),
+            );
       final hasVerifiedNativeEvidence = selected.any(
         _isEvidenceFromNativeBridge,
       );
       if (selected.isEmpty &&
           (cached.signals.isNotEmpty || cached.stepHistory.isNotEmpty)) {
-        return cached.copyWith(
+        return (await loadCachedSnapshot()).copyWith(
           status: ConnectedHealthStatus.degraded,
           failureCode: 'health_sync_empty_result_cache_preserved',
         );

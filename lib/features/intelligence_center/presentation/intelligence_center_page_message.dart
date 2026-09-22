@@ -35,6 +35,9 @@ extension on _IntelligenceCenterPageState {
           ? (reason) => _recordFeedback(message, false, reason: reason)
           : null,
       actionPhases: actionExecutionPhases,
+      onRetry: retryableErrorMessageIds.contains(message.id)
+          ? () => unawaited(_retryFailedCoachRequest())
+          : null,
       animateReveal: animatedResponseIds.contains(message.id),
       onAction: (action) {
         unawaited(_executeAction(action).then<void>((_) {}));

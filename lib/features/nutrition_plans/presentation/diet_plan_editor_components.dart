@@ -77,6 +77,7 @@ class _EvidenceNotice extends StatelessWidget {
             'A practical editable starting point using recognized adult macro ranges. It is not a diagnosis or prescription.',
             'نقطة بداية عملية قابلة للتعديل ضمن نطاقات المغذيات المعترف بها للبالغين، وليست تشخيصًا أو وصفة علاجية.',
           );
+    final sourceTopic = 'pathway:${Uri.encodeComponent(pathwayId)}';
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -84,15 +85,31 @@ class _EvidenceNotice extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFB9E7EC)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.fact_check_outlined, color: Color(0xFF087F8C)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(height: 1.4, color: Color(0xFF344054)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.fact_check_outlined, color: Color(0xFF087F8C)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(height: 1.4, color: Color(0xFF344054)),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: Key('diet-evidence-sources-$pathwayId'),
+              onPressed: () => context.push(
+                '/health-information-sources?topic=$sourceTopic',
+              ),
+              icon: const Icon(Icons.menu_book_outlined, size: 18),
+              label: Text(nutritionText(context, 'Source', 'المصدر')),
             ),
           ),
         ],
@@ -623,6 +640,18 @@ class _PregnancyNutrientGuide extends StatelessWidget {
             style: const TextStyle(
               color: Color(0xFF9A3412),
               fontWeight: FontWeight.w700,
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const Key('pregnancy-nutrition-references'),
+              onPressed: () =>
+                  context.push('/health-information-sources?topic=pregnancy'),
+              icon: const Icon(Icons.menu_book_outlined, size: 18),
+              label: Text(
+                '${nutritionText(context, 'Source', 'المصدر')} · WHO',
+              ),
             ),
           ),
         ],

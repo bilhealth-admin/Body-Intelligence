@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/features/dashboard/domain/dashboard_decision_explanation.dart';
 import 'package:body_intelligence_log/features/dashboard/presentation/dashboard_decision_explanation_page.dart';
+import 'package:body_intelligence_log/core/health_evidence/health_evidence_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,6 +14,10 @@ void main() {
     missingEvidence: const ['meal completeness'],
     engineVersion: 'dashboard-truth-adapter-v1',
     inputSources: const ['protein', 'proteinTarget'],
+    healthSourceIds: const [
+      HealthEvidenceIds.dietaryReferenceIntakes,
+      HealthEvidenceIds.proteinExercise,
+    ],
   );
 
   testWidgets('renders explanation, uncertainty, provenance, and safety', (
@@ -40,6 +45,7 @@ void main() {
       find.byKey(const Key('decision-explanation-safety-note')),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('decision-health-sources')), findsOneWidget);
   });
 
   testWidgets('renders an honest unavailable state without route payload', (

@@ -191,122 +191,245 @@ class _AiCoachResetNoticeCoordinatorState
     final hasVisibleNotice =
         (adminNotice != null || resetNotice != null) && !_handedToSettings;
     final presentation = _presentationFor(context, adminNotice?.kind);
+    final noticeTitle = adminNotice?.title ?? _resetGiftTitle(context);
+    final noticeBody =
+        adminNotice?.body ??
+        resetNotice?.message ??
+        context.strings.text(_resetGiftCopy);
+    final rootKey = adminNotice == null
+        ? 'ai-coach-reset-root-notice'
+        : 'bil-admin-root-notice';
+    final dismissKey = adminNotice == null
+        ? 'ai-coach-reset-root-notice-dismiss'
+        : 'bil-admin-root-notice-dismiss';
     return Stack(
       children: [
         widget.child,
         if (hasVisibleNotice)
-          PositionedDirectional(
-            top: 0,
-            start: 0,
-            end: 0,
-            child: SafeArea(
-              minimum: const EdgeInsets.all(12),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 680),
-                  child: Material(
-                    key: Key(
-                      adminNotice == null
-                          ? 'ai-coach-reset-root-notice'
-                          : 'bil-admin-root-notice',
-                    ),
-                    elevation: 8,
-                    color: presentation.background,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                      side: BorderSide(color: presentation.border),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        16,
-                        12,
-                        6,
-                        12,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            presentation.icon,
-                            color: presentation.foreground,
-                          ),
-                          const SizedBox(width: 11),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (adminNotice != null) ...[
-                                  Text(
-                                    adminNotice.title,
-                                    key: const Key('bil-admin-notice-title'),
-                                    style: TextStyle(
-                                      color: presentation.foreground,
-                                      fontWeight: FontWeight.w800,
+          Positioned.fill(
+            child: Stack(
+              children: [
+                const ModalBarrier(
+                  key: Key('bil-premium-notice-modal-barrier'),
+                  color: Color(0x99030F17),
+                  dismissible: false,
+                ),
+                SafeArea(
+                  minimum: const EdgeInsets.all(20),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Semantics(
+                          namesRoute: true,
+                          label: noticeTitle,
+                          child: Material(
+                            key: Key(rootKey),
+                            elevation: 28,
+                            shadowColor: const Color(0x99000000),
+                            color: Colors.transparent,
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: BorderSide(
+                                color: presentation.border,
+                                width: 1.25,
+                              ),
+                            ),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    presentation.background,
+                                    Color.alphaBlend(
+                                      presentation.foreground.withValues(
+                                        alpha: 0.055,
+                                      ),
+                                      presentation.background,
                                     ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                ],
-                                Text(
-                                  adminNotice?.body ??
-                                      resetNotice?.message ??
-                                      context.strings.text(_resetGiftCopy),
-                                  key: Key(
-                                    adminNotice == null
-                                        ? 'ai-coach-reset-notice-body'
-                                        : 'bil-admin-notice-body',
-                                  ),
-                                  style: TextStyle(
-                                    color: presentation.foreground,
-                                    height: 1.35,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  ],
                                 ),
-                                if (resetNotice != null ||
-                                    (adminNotice != null &&
-                                        adminNotice.kind !=
-                                            BilAdminNoticeKind.custom)) ...[
-                                  const SizedBox(height: 5),
-                                  TextButton(
-                                    key: const Key(
-                                      'ai-coach-reset-root-notice-open',
+                              ),
+                              child: Stack(
+                                children: [
+                                  PositionedDirectional(
+                                    top: 8,
+                                    end: 8,
+                                    child: IconButton.filledTonal(
+                                      key: Key(dismissKey),
+                                      onPressed: _dismissing ? null : _dismiss,
+                                      tooltip: MaterialLocalizations.of(
+                                        context,
+                                      ).closeButtonTooltip,
+                                      icon: _dismissing
+                                          ? const SizedBox.square(
+                                              dimension: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : const Icon(Icons.close_rounded),
                                     ),
-                                    onPressed: _openAiCoach,
-                                    child: Text(
-                                      context.strings.text('Open AI Coach'),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                          28,
+                                          34,
+                                          28,
+                                          28,
+                                        ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 76,
+                                          height: 76,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: [
+                                                presentation.foreground,
+                                                presentation.foreground
+                                                    .withValues(alpha: 0.72),
+                                              ],
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: presentation.foreground
+                                                    .withValues(alpha: 0.24),
+                                                blurRadius: 24,
+                                                offset: const Offset(0, 10),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            presentation.icon,
+                                            color: Colors.white,
+                                            size: 36,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 22),
+                                        Text(
+                                          noticeTitle,
+                                          key: adminNotice == null
+                                              ? const Key(
+                                                  'ai-coach-reset-notice-title',
+                                                )
+                                              : const Key(
+                                                  'bil-admin-notice-title',
+                                                ),
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall
+                                              ?.copyWith(
+                                                color: presentation.foreground,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: -0.35,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          noticeBody,
+                                          key: Key(
+                                            adminNotice == null
+                                                ? 'ai-coach-reset-notice-body'
+                                                : 'bil-admin-notice-body',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.copyWith(
+                                                color: presentation.foreground,
+                                                height: 1.5,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: FilledButton(
+                                            key: Key('$rootKey-acknowledge'),
+                                            onPressed: _dismissing
+                                                ? null
+                                                : _dismiss,
+                                            style: FilledButton.styleFrom(
+                                              backgroundColor:
+                                                  presentation.foreground,
+                                              foregroundColor: Colors.white,
+                                              minimumSize: const Size(
+                                                double.infinity,
+                                                54,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(17),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              MaterialLocalizations.of(
+                                                context,
+                                              ).okButtonLabel,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        if (resetNotice != null ||
+                                            (adminNotice != null &&
+                                                adminNotice.kind !=
+                                                    BilAdminNoticeKind
+                                                        .custom)) ...[
+                                          const SizedBox(height: 8),
+                                          TextButton.icon(
+                                            key: const Key(
+                                              'ai-coach-reset-root-notice-open',
+                                            ),
+                                            onPressed: _openAiCoach,
+                                            icon: const Icon(
+                                              Icons.auto_awesome_rounded,
+                                            ),
+                                            label: Text(
+                                              context.strings.text(
+                                                'Open AI Coach',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ],
+                              ),
                             ),
                           ),
-                          IconButton(
-                            key: Key(
-                              adminNotice == null
-                                  ? 'ai-coach-reset-root-notice-dismiss'
-                                  : 'bil-admin-root-notice-dismiss',
-                            ),
-                            onPressed: _dismissing ? null : _dismiss,
-                            tooltip: MaterialLocalizations.of(
-                              context,
-                            ).closeButtonTooltip,
-                            icon: _dismissing
-                                ? const SizedBox.square(
-                                    dimension: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.close_rounded),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
       ],
     );
+  }
+
+  String _resetGiftTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'ar' => 'هدية لك من BIL',
+      'fr' => 'Un cadeau de BIL',
+      'es' => 'Un regalo de BIL',
+      'tr' => "BIL'den bir hediye",
+      _ => 'A gift from BIL',
+    };
   }
 
   _NoticePresentation _presentationFor(

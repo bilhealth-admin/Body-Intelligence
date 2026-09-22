@@ -1,5 +1,24 @@
 part of 'connected_health_provider.dart';
 
+/// One total per calendar day, never add the same projection twice. Keep the
+/// trusted total until newer native evidence exists for that day.
+List<GlobalHealthSignal> preserveTrustedConnectedStepTotals(
+  List<GlobalHealthSignal> retained,
+  List<GlobalHealthSignal> current,
+) {
+  final byDay = <DateTime, GlobalHealthSignal>{};
+  for (final signal in [...retained, ...current]) {
+    final at = signal.provenance.observedAt.toLocal();
+    final day = DateTime(at.year, at.month, at.day);
+    byDay.update(
+      day,
+      (previous) => HealthSignalConflictResolver.prefer(previous, signal),
+      ifAbsent: () => signal,
+    );
+  }
+  return byDay.values.toList();
+}
+
 /// This projection replaces (never adds to) raw activity samples. An empty
 /// native result is unknown/no permitted data, not a fabricated zero.
 @visibleForTesting

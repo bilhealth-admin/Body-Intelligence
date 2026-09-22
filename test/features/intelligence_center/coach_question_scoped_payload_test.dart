@@ -6,6 +6,34 @@ import 'package:body_intelligence_log/features/intelligence_center/services/loca
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final question in ['How old am I?', 'What is my age?', 'كم عمري؟']) {
+    test('saved age reaches Cloud for: $question', () {
+      final projection = _project(question);
+      expect(projection.context['profile'], containsPair('age', 35));
+      expect(jsonEncode(projection.context), isNot(contains('private-marker')));
+      expect(projection.context, isNot(contains('nutritionHistory')));
+      expect(projection.context, isNot(contains('activityHistory')));
+      _expectDisclosureMatches(projection, const ['weight_measurements_goal']);
+    });
+    test('missing or withheld age is not invented for: $question', () {
+      final projection = projectCoachCloudContext(
+        question: question,
+        context: CoachContextSnapshot.empty(),
+      );
+      expect(projection.context, isNot(contains('profile')));
+    });
+  }
+
+  test('general age wording does not attach a personal profile', () {
+    for (final question in [
+      'What is the age of the universe?',
+      'A message',
+      'ما معنى الفئات العمرية؟',
+    ]) {
+      expect(_project(question).context, isNot(contains('profile')));
+    }
+  });
+
   test('general question sends no personal category', () {
     final projection = _project('Tell me something encouraging');
     expect(projection.context.keys, <String>{'schema', 'generatedAt'});

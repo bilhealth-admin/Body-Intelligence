@@ -163,8 +163,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final messageRuntimes = <String, CoachAnswerRuntime>{};
   final messageFeedback = <String, bool>{};
   final reportedMessages = <String>{};
+  // Only the latest failed turn owns a retry affordance. The failure remains
+  // part of the transcript, while the transient progress row is not rendered
+  // as a second error surface.
+  final retryableErrorMessageIds = <String>{};
   // Keep the typing treatment limited to BIL replies created in this mounted
-  // session. Previously saved messages must remain immediate for browsing.
+  // session. Previously saved messages remain immediate for browsing.
   final animatedResponseIds = <String>{};
   static const _speechPolicy = CoachSpeechPolicy();
   static const _voiceTurnPolicy = CoachVoiceTurnPolicy();
@@ -406,10 +410,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
         : messages.toList(growable: false);
     final showLiveVoiceDraft =
         listening && pendingVoiceTranscript.trim().isNotEmpty;
-    // The compact header already signals an active answer. Do not add a
-    // second, technical-looking "context search" row beneath the latest
-    // message; reserve this space for a real failure with a retry action.
-    final showReplyProgress = replyPhase == _CoachReplyPhase.failed;
+    // A sent turn is already visible at the newest end of the conversation.
+    // Failures are rendered once as a transcript message with its Retry
+    // action; retain the progress row only as a defensive fallback if a
+    // failure has no persisted message yet.
+    final showReplyProgress =
+        replyPhase == _CoachReplyPhase.failed &&
+        retryableErrorMessageIds.isEmpty;
     final showIntroBrief = introVisible && dailyBrief != null;
     final coachStatus = conversationLoadFailed
         ? tr('Unavailable', 'غير متاح')

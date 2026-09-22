@@ -54,19 +54,14 @@ function fixture(options: {
   let lease: string | null = null;
   let status = "new";
   const admin = {
-    from: (_table: string) => {
-      const query = {
-        select: (_columns: string) => query,
-        eq: (_column: string, _value: unknown) => query,
-        maybeSingle: () => Promise.resolve({
-          data: options.ownerLookupFailure ? null : { owner_id: ownerId, environment: "sandbox" },
-          error: options.ownerLookupFailure ? { message: "database unavailable" } : null,
-        }),
-      };
-      return query;
-    },
     rpc: (name: string, args: Record<string, unknown>) => {
       calls.push({ name, args });
+      if (name === "bil_lookup_store_subscription_owner") {
+        return Promise.resolve({
+          data: options.ownerLookupFailure ? null : [{ owner_id: ownerId, environment: "sandbox" }],
+          error: options.ownerLookupFailure ? { message: "database unavailable" } : null,
+        });
+      }
       if (name === "bil_claim_store_notification") {
         if (options.claimError) return Promise.resolve({ data: null, error: { message: options.claimError } });
         if (status === "processed") return Promise.resolve({ data: false, error: null });
@@ -322,17 +317,25 @@ Deno.test("reconciliation uses stable 100-owner pages and explicitly reports per
   let cursor: string | null = null;
   let appleLookups = 0;
   const admin = {
-    from: (table: string) => {
-      const query = {
-        select: () => query,
-        in: (column: string, value: unknown) => { filters.push([column, value]); return query; },
-        order: (column: string, value: unknown) => { filters.push([column, value]); return query; },
-        limit: (value: number) => { filters.push(["limit", value]); return query; },
-        gt: (column: string, value: string) => { filters.push([column, value]); cursor = value; return query; },
-        insert: (value: unknown) => { assertEquals(table, "bil_store_entitlement_audit"); audited.push(value); return Promise.resolve({ error: null }); },
-        then: (resolve: (value: unknown) => unknown) => Promise.resolve({ data: cursor ? rows.filter((row) => row.owner_id > cursor!) : rows, error: null }).then(resolve),
-      };
-      return query;
+    rpc: (name: string, args: Record<string, unknown>) => {
+      if (name === "bil_list_store_subscriptions_page") {
+        filters.push(["provider", ["apple", "google"]]);
+        filters.push(["cursor", args.p_after_owner_id ?? null]);
+        filters.push(["limit", args.p_limit]);
+        cursor = typeof args.p_after_owner_id === "string" ? args.p_after_owner_id : null;
+        return Promise.resolve({ data: cursor ? rows.filter((row) => row.owner_id > cursor!) : rows, error: null });
+      }
+      if (name === "bil_record_store_entitlement_audit") {
+        audited.push(args);
+        return Promise.resolve({ data: true, error: null });
+      }
+      if (name === "bil_persist_verified_store_purchase") {
+        return Promise.resolve({ data: { active: false, lifecycle: args.p_lifecycle, verified_at: args.p_verified_at }, error: null });
+      }
+      if (name === "bil_lookup_store_subscription_owner") {
+        return Promise.resolve({ data: null, error: null });
+      }
+      throw new Error(`Unexpected RPC ${name}`);
     },
   };
   const dependencies: StoreBackendHandlerDependencies = {

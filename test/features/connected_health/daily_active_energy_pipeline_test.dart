@@ -22,6 +22,8 @@ void main() {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       var failRead = false;
       var emptyRead = false;
+      var partialRead = false;
+      var failStatus = false;
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
       Map<String, Object?> daily(String key, double value, DateTime at) => {
@@ -35,13 +37,17 @@ void main() {
         'attributes': {'aggregation': 'native_daily'},
       };
       messenger.setMockMethodCallHandler(channel, (call) async {
-        if (call.method == 'availability') return {'available': true};
+        if (call.method == 'availability') {
+          if (failStatus) throw PlatformException(code: 'status_unavailable');
+          return {'available': true};
+        }
         if (call.method == 'permissions') {
           return {'steps': true, 'distance': true, 'activeEnergy': true};
         }
         if (call.method == 'readDailyTotals') {
           if (failRead) throw PlatformException(code: 'daily_totals_failed');
           if (emptyRead) return const <Object?>[];
+          if (partialRead) return [daily('activeEnergy', 444, now)];
           return [
             daily('activeEnergy', 900, yesterday),
             daily('activeEnergy', 321, now),
@@ -49,6 +55,14 @@ void main() {
             daily('steps', 4321, now),
           ];
         }
+        if (call.method == 'readChanges') {
+          return {
+            'records': <Object?>[],
+            'hasMore': false,
+            'nextAnchor': 'kept',
+          };
+        }
+        if (call.method == 'enableBackgroundDelivery') return null;
         throw StateError('Unexpected native operation: ${call.method}');
       });
       addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
@@ -158,6 +172,36 @@ void main() {
         await flows.store.get('health_signals', 'preserved-raw-sample'),
         original,
       );
+
+      failRead = false;
+      emptyRead = false;
+      partialRead = true;
+      final partial = await gateway.loadDailyActivity();
+      expect(partial.stepHistory.single.value, 4321);
+      expect(
+        partial.signals.singleWhere((s) => s.key == 'activeEnergy').value,
+        444,
+      );
+      failStatus = true;
+      final offlineStatus = await gateway.load();
+      expect(offlineStatus.deviceVerified, isTrue);
+      expect(offlineStatus.stepHistory.single.value, 4321);
+      expect(offlineStatus.failureCode, 'native_health_status_unavailable');
+
+      failStatus = false;
+      emptyRead = true;
+      // Full synchronization used to drop canonical activity evidence when
+      // native daily totals returned an empty list alongside other metrics.
+      for (final row in otherSignals) {
+        final signal = GlobalHealthSignal.fromMap(row);
+        await flows.store.put('health_signals', signal.identity, row);
+      }
+      final synced = await gateway.synchronize();
+      expect(
+        synced.signals.singleWhere((s) => s.key == 'activeEnergy').value,
+        444,
+      );
+      expect(synced.failureCode, isNull);
     });
   }
 }

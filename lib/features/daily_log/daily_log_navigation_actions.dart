@@ -1,6 +1,60 @@
 part of 'daily_log_page.dart';
 
 extension _DailyLogNavigationActions on _DailyLogPageState {
+  Widget _buildDateNavigator(
+    DateTime date,
+    bool mutationBusy,
+    DateTime latestPlannableDate,
+  ) => DiaryDateNavigator(
+    date: date,
+    arabic: _arabic,
+    todayHeader: true,
+    onBack: mutationBusy
+        ? null
+        : () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(widget.returnPath ?? '/dashboard');
+            }
+          },
+    onPrevious: mutationBusy
+        ? null
+        : () {
+            // Read the latest state at tap time. A fast
+            // double-tap must advance from the first
+            // tap, not from the date captured by the
+            // previous build.
+            final date = ref.read(selectedLogDateProvider);
+            ref.read(selectedLogDateProvider.notifier).state = date.subtract(
+              const Duration(days: 1),
+            );
+          },
+    onNext: date.isBefore(latestPlannableDate)
+        ? mutationBusy
+              ? null
+              : () {
+                  final date = ref.read(selectedLogDateProvider);
+                  ref.read(selectedLogDateProvider.notifier).state = date.add(
+                    const Duration(days: 1),
+                  );
+                }
+        : null,
+    onPick: mutationBusy
+        ? null
+        : () async {
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: date,
+              firstDate: DateTime(2000),
+              lastDate: latestPlannableDate,
+            );
+            if (picked != null) {
+              ref.read(selectedLogDateProvider.notifier).state = picked;
+            }
+          },
+  );
+
   void _returnFromSelectedFoodToSearch() {
     if (selectedFood == null) return;
     _updateState(() {

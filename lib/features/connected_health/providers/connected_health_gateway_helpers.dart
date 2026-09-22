@@ -1,6 +1,36 @@
 part of 'connected_health_provider.dart';
 
 extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
+  Future<List<GlobalHealthSignal>> _retainedProjection(String field) async {
+    final consent = await _flows.store.get(
+      'connected_health_consent',
+      _source!,
+    );
+    if (consent?['readRequested'] != true) return const [];
+    final stored = await _flows.store.get('connected_health_ui', 'snapshot');
+    final allowed = connectedHealthReadTypesForPlatform(
+      defaultTargetPlatform,
+    ).map((type) => type.name).toSet();
+    final result = <GlobalHealthSignal>[];
+    for (final raw in stored?[field] as List<Object?>? ?? const []) {
+      if (raw is! Map) continue;
+      try {
+        final signal = GlobalHealthSignal.fromMap(
+          Map<String, Object?>.from(raw),
+        );
+        if (!signal.deleted &&
+            allowed.contains(signal.key) &&
+            _isEvidenceFromNativeBridge(signal) &&
+            !await _isTombstoned(signal)) {
+          result.add(signal);
+        }
+      } on Object {
+        // A malformed cache row is not permission to invent a reading.
+      }
+    }
+    return result;
+  }
+
   NativeHealthBridge get _bridge =>
       _isIos ? _flows.appleHealth.bridge : _flows.healthConnect.bridge;
 

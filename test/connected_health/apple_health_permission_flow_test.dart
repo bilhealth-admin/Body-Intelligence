@@ -194,6 +194,27 @@ void main() {
         expect(historyOnly.stepHistory.single.value, 654);
         expect(historyOnly.deviceVerified, isTrue);
         expect(historyOnly.status, ConnectedHealthStatus.synchronized);
+
+        calls.clear();
+        final cached = await gateway.loadCachedSnapshot();
+        expect(calls, isEmpty, reason: 'cache must not wait for native status');
+        expect(cached.stepHistory.single.value, 654);
+        expect(cached.deviceVerified, isTrue);
+        expect(cached.status, ConnectedHealthStatus.degraded);
+
+        await store.put(
+          'health_tombstones',
+          'bil/apple_health:bil/apple_health',
+          {'deleted': true},
+        );
+        final deleted = await gateway.loadCachedSnapshot();
+        expect(deleted.stepHistory, isEmpty);
+        expect(deleted.deviceVerified, isFalse);
+
+        await store.put('connected_health_consent', 'Apple Health', {
+          'readRequested': false,
+        });
+        expect((await gateway.loadCachedSnapshot()).signals, isEmpty);
       },
     );
   });

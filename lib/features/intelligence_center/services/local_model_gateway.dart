@@ -59,6 +59,7 @@ class LocalModelAnswer {
     this.reason,
     this.confidence,
     this.evidence = const [],
+    this.citationIds = const [],
     this.missingData = const [],
     this.responseId,
     this.transcript,
@@ -71,6 +72,7 @@ class LocalModelAnswer {
   final String? reason;
   final double? confidence;
   final List<String> evidence;
+  final List<String> citationIds;
   final List<String> missingData;
   final String? responseId;
   final String? transcript;

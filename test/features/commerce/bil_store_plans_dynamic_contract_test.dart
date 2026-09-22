@@ -220,6 +220,46 @@ void main() {
       expect(catalog.requested, isEmpty);
     },
   );
+  testWidgets('restore ownership rejection is not shown as an empty history', (
+    tester,
+  ) async {
+    final store = _CancellationReadyStore();
+    final catalog = _RestoreVerificationFailureCatalog(
+      store,
+      code: 'purchase_owned_by_another_account',
+    );
+    addTearDown(store.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilStorePlansPage(
+          store: store,
+          catalog: catalog,
+          productIds: const {'premium.monthly'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final restore = find.text(BilStoreCopy.text('en', 'restore'));
+    await tester.ensureVisible(restore);
+    await tester.pumpAndSettle();
+    await tester.tap(restore);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(BilStoreCopy.text('en', 'purchase_owned_by_another_account')),
+      findsWidgets,
+    );
+    for (final key in [
+      'restore_none',
+      'restore_checked',
+      'purchase_error',
+      'restore_verification_failed',
+    ]) {
+      expect(find.text(BilStoreCopy.text('en', key)), findsNothing);
+    }
+    expect(catalog.requested, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('plan route is fail-closed when owner store IDs are absent', (
     tester,
   ) async {
@@ -666,16 +706,17 @@ final class _ChangedOfferCatalog extends _RecordingCatalog {
 }
 
 final class _RestoreVerificationFailureCatalog extends _RecordingCatalog {
-  _RestoreVerificationFailureCatalog(this.store) : super(const [_monthlyOffer]);
+  _RestoreVerificationFailureCatalog(
+    this.store, {
+    this.code = 'restore_verification_failed',
+  }) : super(const [_monthlyOffer]);
 
   final _CancellationReadyStore store;
+  final String code;
 
   @override
   Future<void> restorePurchases() async {
-    store.reportFeedback(
-      VerifiedStoreState.failed,
-      'restore_verification_failed',
-    );
+    store.reportFeedback(VerifiedStoreState.failed, code);
   }
 }
 

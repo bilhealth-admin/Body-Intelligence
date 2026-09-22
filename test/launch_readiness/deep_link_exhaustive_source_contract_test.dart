@@ -5,9 +5,10 @@ import 'package:body_intelligence_log/features/notifications/domain/community_de
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final routerSource = File(
+  final routerSource = <String>[
     'lib/app/router/app_router.dart',
-  ).readAsStringSync();
+    'lib/app/router/app_wellness_routes.dart',
+  ].map((path) => File(path).readAsStringSync()).join('\n');
   final linkSource = File(
     'lib/features/notifications/domain/community_deep_link.dart',
   ).readAsStringSync();

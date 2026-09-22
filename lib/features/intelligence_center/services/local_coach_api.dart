@@ -35,6 +35,7 @@ class LocalCoachResult {
     this.reason,
     this.confidence,
     this.evidence = const [],
+    this.citationIds = const [],
     this.missingData = const [],
     this.responseId,
     this.transcript,
@@ -50,6 +51,7 @@ class LocalCoachResult {
   final String? reason;
   final double? confidence;
   final List<String> evidence;
+  final List<String> citationIds;
   final List<String> missingData;
   final String? responseId;
   final String? transcript;
@@ -146,6 +148,7 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
       reason: model.reason,
       confidence: model.confidence,
       evidence: model.evidence,
+      citationIds: model.citationIds,
       missingData: model.missingData,
       responseId: model.responseId,
       transcript: model.transcript,

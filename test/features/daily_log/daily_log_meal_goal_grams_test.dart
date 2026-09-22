@@ -15,10 +15,10 @@ void main() {
       'lib/features/daily_log/daily_log_page.dart',
     ).readAsStringSync();
     expect(
-      source,
+      source.replaceAll(RegExp(r'\s+'), ' '),
       contains(
-        'goalSchedule.mealTargets[mealType]?.calories ??\n'
-        '                              mealCalorieGoals[mealType]',
+        'goalSchedule.mealTargets[mealType]?.calories ?? '
+        'mealCalorieGoals[mealType]',
       ),
     );
   });
@@ -45,8 +45,11 @@ void main() {
           home: Scaffold(
             body: SingleChildScrollView(
               child: DailyMealsList(
+                arabic: false,
                 meals: const AsyncData(<MealWithItems>[]),
                 onAdd: (_) {},
+                onEdit: (_, _) async {},
+                onActions: (_, _) async {},
               ),
             ),
           ),
@@ -59,7 +62,7 @@ void main() {
       find.byKey(const Key('daily-meal-macro-goal-breakfast')),
       findsNothing,
     );
-    expect(find.text('Plan meal'), findsNWidgets(4));
+    expect(find.text('Open meal'), findsNWidgets(4));
     expect(find.textContaining('%'), findsNothing);
     expect(tester.takeException(), isNull);
   });

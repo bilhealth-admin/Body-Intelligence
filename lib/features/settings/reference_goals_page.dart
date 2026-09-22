@@ -587,6 +587,21 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                       ],
                     ),
                   ),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('goals-methodology-sources'),
+                      onPressed: () => context.push(
+                        '/health-information-sources?topic=weight-planning',
+                      ),
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'منهجية التخطيط ومصدرها'
+                            : '${c('Method')} · ${c('Source')}',
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   _Section(c('Nutrition Goals')),
                   Card(

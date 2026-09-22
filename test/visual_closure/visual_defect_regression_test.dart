@@ -604,9 +604,10 @@ void main() {
     final mealEntry = source(
       'lib/features/daily_log/daily_log_meal_entry.dart',
     );
-    final mealSummary = source(
+    final mealSummary = [
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-    );
+      'lib/features/daily_log/presentation/daily_log_meal_summary.dart',
+    ].map(source).join('\n');
     final mealList = source(
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
     );
@@ -729,9 +730,13 @@ void main() {
       isNot(contains("Key('daily-log-nutrition-facts-glass')")),
     );
     expect(mealSummary, contains("Key('daily-meal-detail-premium-group')"));
-    expect(mealList, isNot(contains("Key('daily-meal-macros-\$type')")));
+    expect(mealList, contains("'daily-meal-macros-\$type'"));
+    expect(mealList, contains('showLabel: false'));
     expect(mealList, isNot(contains('_DiaryFoodRow(')));
-    expect(mealList, isNot(contains('PremiumNutritionGlass(')));
+    expect(
+      RegExp('PremiumNutritionGlass\\(').allMatches(mealList).length,
+      1,
+    );
     expect(dashboard, isNot(contains("tr('Premium nutrient goals'")));
     expect(dashboard, isNot(contains("tr('Premium heart health'")));
     expect(dashboard, contains("Key('dashboard-premium-page-label')"));

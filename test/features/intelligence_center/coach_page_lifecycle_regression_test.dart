@@ -15,6 +15,7 @@ import 'package:body_intelligence_log/features/commerce/providers/commerce_provi
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_anchored_history.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
@@ -88,6 +89,7 @@ Future<GoRouter> _mount(
   TargetPlatform platform = TargetPlatform.iOS,
   double textScale = 1,
   Stream<String?>? owners,
+  Future<CoachContextSnapshot> Function()? contextLoader,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
@@ -145,7 +147,9 @@ Future<GoRouter> _mount(
           () => DateTime(2026, 9, 9, 10),
         ),
         coachContextSnapshotProvider.overrideWith(
-          (ref) async => CoachContextSnapshot.empty(),
+          (ref) async => contextLoader == null
+              ? CoachContextSnapshot.empty()
+              : await contextLoader(),
         ),
         intelligenceHealthContextProvider.overrideWith(
           (ref) async => const IntelligenceHealthContext(
@@ -217,10 +221,14 @@ Future<GoRouter> _mount(
   return router;
 }
 
-Future<void> _send(WidgetTester tester, _HeldGateway gateway) async {
+Future<void> _send(
+  WidgetTester tester,
+  _HeldGateway gateway, {
+  String question = 'hi',
+}) async {
   await tester.enterText(
     find.byKey(const Key('ai-coach-question-field')),
-    'hi',
+    question,
   );
   await tester.pump();
   await tester.tap(find.byKey(const Key('ai-coach-send-button')));

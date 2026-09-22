@@ -131,6 +131,16 @@ class _PlanPageState extends ConsumerState<PlanPage> {
           dashboardPath: widget.origin.returnLocation,
           showDashboardAction: false,
           onBack: leave,
+          actions: [
+            IconButton(
+              key: const Key('plan-health-sources'),
+              tooltip: t('Health sources & methodology'),
+              onPressed: () => context.push(
+                '/health-information-sources?topic=nutrition-targets',
+              ),
+              icon: const Icon(Icons.menu_book_outlined),
+            ),
+          ],
         ),
         body: profileAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -464,8 +474,24 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          t(
-                            'Confidence starts formula-based. Consistent weight and complete meal records are required before observed estimates become useful.',
+                          '${profileLocaleText(context, 'Confidence starts formula-based. Consistent weight and complete meal records are required before observed estimates become useful.', 'تبدأ الثقة من معادلة تقديرية. نحتاج سجلات وزن وطعام مكتملة قبل الاستفادة من التقديرات الملحوظة.')}\n'
+                          '${profileLocaleText(context, 'A practical editable starting point using recognized adult macro ranges. It is not a diagnosis or prescription.', 'نقطة بداية عملية قابلة للتعديل تستخدم نطاقات المغذيات الكبرى المعترف بها للبالغين. وليست تشخيصًا أو وصفة علاجية.')}',
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton.icon(
+                            key: const Key('recommended-targets-sources'),
+                            onPressed: () => context.push(
+                              '/health-information-sources?topic=nutrition-targets&sources='
+                              '${recommendation.targets.sourceIds.join(',')}',
+                            ),
+                            icon: const Icon(
+                              Icons.menu_book_outlined,
+                              size: 18,
+                            ),
+                            label: Text(
+                              t('References for these recommended targets'),
+                            ),
                           ),
                         ),
                       ],

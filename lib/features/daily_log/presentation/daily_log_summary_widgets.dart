@@ -12,6 +12,7 @@ import 'macro_value_formatter.dart';
 
 part 'daily_log_summary_locale_copy.dart';
 part 'daily_log_summary_metrics.dart';
+part 'daily_log_meal_summary.dart';
 
 class DiaryDateNavigator extends StatelessWidget {
   const DiaryDateNavigator({
@@ -22,6 +23,7 @@ class DiaryDateNavigator extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onPick,
+    this.todayHeader = false,
   });
 
   final DateTime date;
@@ -30,6 +32,7 @@ class DiaryDateNavigator extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
   final VoidCallback? onPick;
+  final bool todayHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +46,70 @@ class DiaryDateNavigator extends StatelessWidget {
         ? semanticLabel
         : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${(date.year % 100).toString().padLeft(2, '0')}';
     final scheme = Theme.of(context).colorScheme;
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final dateButton = Flexible(
+      flex: 3,
+      child: TextButton(
+        onPressed: onPick,
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.onSurface,
+          minimumSize: const Size(92, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Directionality(
+                textDirection: today
+                    ? Directionality.of(context)
+                    : TextDirection.ltr,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    visualLabel,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: todayHeader ? (today ? 30 : 24) : 19,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.25,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down_rounded, size: 24),
+          ],
+        ),
+      ),
+    );
+    final back = onBack != null
+        ? IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back_rounded),
+          )
+        : const SizedBox(width: 48);
+    final previous = IconButton(
+      key: const Key('daily-log-previous'),
+      tooltip: _summaryText(context, 'previous'),
+      onPressed: onPrevious,
+      icon: Icon(
+        rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+      ),
+    );
+    final next = IconButton(
+      key: const Key('daily-log-next'),
+      tooltip: _summaryText(context, 'next'),
+      onPressed: onNext,
+      icon: Icon(
+        rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+      ),
+    );
     return SizedBox(
       key: const Key('daily-log-date-bar'),
       height: 64,
@@ -50,78 +117,23 @@ class DiaryDateNavigator extends StatelessWidget {
         container: true,
         label: semanticLabel,
         child: Row(
-          children: [
-            if (onBack != null)
-              IconButton(
-                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: onBack,
-                icon: const Icon(Icons.arrow_back_rounded),
-              )
-            else
-              const SizedBox(width: 48),
-            const Spacer(),
-            IconButton(
-              tooltip: _summaryText(context, 'previous'),
-              onPressed: onPrevious,
-              icon: Icon(
-                arabic
-                    ? Icons.chevron_right_rounded
-                    : Icons.chevron_left_rounded,
-              ),
-            ),
-            Flexible(
-              flex: 3,
-              child: TextButton(
-                onPressed: onPick,
-                style: TextButton.styleFrom(
-                  foregroundColor: scheme.onSurface,
-                  minimumSize: const Size(92, 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Directionality(
-                        textDirection: today
-                            ? Directionality.of(context)
-                            : TextDirection.ltr,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            visualLabel,
-                            maxLines: 1,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.25,
-                                ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Icon(Icons.arrow_drop_down_rounded, size: 24),
-                  ],
-                ),
-              ),
-            ),
-            IconButton(
-              tooltip: _summaryText(context, 'next'),
-              onPressed: onNext,
-              icon: Icon(
-                arabic
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-              ),
-            ),
-            const Spacer(),
-            const SizedBox(width: 48),
-          ],
+          children: todayHeader
+              ? [
+                  dateButton,
+                  const Spacer(),
+                  if (onBack != null) back,
+                  previous,
+                  next,
+                ]
+              : [
+                  back,
+                  const Spacer(),
+                  previous,
+                  dateButton,
+                  next,
+                  const Spacer(),
+                  const SizedBox(width: 48),
+                ],
         ),
       ),
     );
@@ -138,6 +150,7 @@ class DailyLogSnapshot extends StatelessWidget {
     this.carbsGoal,
     this.proteinGoal,
     this.fatGoal,
+    this.loading = false,
   });
 
   final bool arabic;
@@ -147,6 +160,7 @@ class DailyLogSnapshot extends StatelessWidget {
   final double? carbsGoal;
   final double? proteinGoal;
   final double? fatGoal;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
@@ -162,318 +176,252 @@ class DailyLogSnapshot extends StatelessWidget {
     final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
     final fat = items.fold<double>(0, (total, item) => total + item.fats);
     final scheme = Theme.of(context).colorScheme;
-    return Container(
+    final hasGoal =
+        calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
+    final remaining = hasGoal ? calorieGoal! - calories : null;
+    double macroProgress(double consumed, double? goal) {
+      if (goal == null || !goal.isFinite || goal <= 0) return 0.0;
+      return (consumed / goal).clamp(0.0, 1.0).toDouble();
+    }
+
+    Widget surface(Widget child) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: child,
+    );
+    return Column(
       key: const Key('daily-log-compact-summary'),
-      constraints: const BoxConstraints(minHeight: 146),
-      padding: const EdgeInsets.fromLTRB(14, 9, 14, 14),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final ring = DailyLogCalorieMacroRing(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        surface(
+          _CalorieSummary(
             calories: calories,
             calorieGoal: calorieGoal,
-            carbs: carbs,
-            fat: fat,
-            protein: protein,
-            dimension: 108,
-          );
-          final macros = Row(
-            children: [
-              Expanded(
-                child: _MacroMetric(
-                  metricKey: 'carbs',
-                  color: const Color(0xFF0A8F88),
-                  grams: carbs,
-                  goalGrams: carbsGoal,
-                  label: _summaryText(context, 'carbs'),
-                ),
-              ),
-              Expanded(
-                child: _MacroMetric(
-                  metricKey: 'fat',
-                  color: const Color(0xFF6F1096),
-                  grams: fat,
-                  goalGrams: fatGoal,
-                  label: _summaryText(context, 'fat'),
-                ),
-              ),
-              Expanded(
-                child: _MacroMetric(
-                  metricKey: 'protein',
-                  color: const Color(0xFFC56A00),
-                  grams: protein,
-                  goalGrams: proteinGoal,
-                  label: _summaryText(context, 'proteinShort'),
-                ),
-              ),
-            ],
-          );
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Transform.translate(
-                key: const Key('daily-log-summary-ring-raised'),
-                offset: const Offset(0, -3),
-                child: ring,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: PremiumNutritionGlass(
-                  key: const Key('daily-log-summary-macros-glass'),
-                  compact: true,
-                  borderRadius: 14,
-                  child: macros,
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class DailyMealDetailSummary extends StatelessWidget {
-  const DailyMealDetailSummary({
-    super.key,
-    required this.meal,
-    this.calorieGoal,
-    this.carbsGoal,
-    this.proteinGoal,
-    this.fatGoal,
-    this.macroDisplay,
-  });
-
-  final MealWithItems? meal;
-  final double? calorieGoal;
-  final double? carbsGoal;
-  final double? proteinGoal;
-  final double? fatGoal;
-  final MealMacroDisplay? macroDisplay;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = meal?.items ?? const <MealItem>[];
-    final calories = items.fold<double>(
-      0,
-      (total, item) => total + item.calories,
-    );
-    final protein = items.fold<double>(
-      0,
-      (total, item) => total + item.protein,
-    );
-    final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
-    final fat = items.fold<double>(0, (total, item) => total + item.fats);
-    double targetProgress(double consumed, double? goal) =>
-        goal == null || !goal.isFinite || goal <= 0
-        ? 0
-        : (consumed / goal).clamp(0.0, 1.0).toDouble();
-    final sodium = knownNutrientTotal(
-      items,
-      TrackedNutrient.sodium,
-      (item) => item.sodium,
-    );
-    final potassium = knownNutrientTotal(
-      items,
-      TrackedNutrient.potassium,
-      (item) => item.potassium,
-    );
-    final magnesium = knownNutrientTotal(
-      items,
-      TrackedNutrient.magnesium,
-      (item) => item.magnesium,
-    );
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      key: const Key('daily-meal-detail-summary'),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(26),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final calorieRing = DailyLogCalorieMacroRing(
-            calories: calories,
-            calorieGoal: calorieGoal,
-            carbs: carbs,
-            fat: fat,
-            protein: protein,
-            dimension: 116,
-          );
-          final macroDials = Row(
-            key: const Key('daily-meal-detail-macros'),
-            children: [
-              Expanded(
-                child: _MealMacroDial(
-                  label: _summaryText(context, 'carbs'),
-                  grams: carbs,
-                  goalGrams: carbsGoal,
-                  progress: targetProgress(carbs, carbsGoal),
-                  displayPercent:
-                      macroDisplay?.mode == MealMacroDisplayMode.percent,
-                  color: const Color(0xFF0A8F88),
-                ),
-              ),
-              Expanded(
-                child: _MealMacroDial(
-                  label: _summaryText(context, 'fat'),
-                  grams: fat,
-                  goalGrams: fatGoal,
-                  progress: targetProgress(fat, fatGoal),
-                  displayPercent:
-                      macroDisplay?.mode == MealMacroDisplayMode.percent,
-                  color: const Color(0xFF6F1096),
-                ),
-              ),
-              Expanded(
-                child: _MealMacroDial(
-                  label: _summaryText(context, 'proteinShort'),
-                  grams: protein,
-                  goalGrams: proteinGoal,
-                  progress: targetProgress(protein, proteinGoal),
-                  displayPercent:
-                      macroDisplay?.mode == MealMacroDisplayMode.percent,
-                  color: const Color(0xFFC56A00),
-                ),
-              ),
-            ],
-          );
-          final minerals = Wrap(
-            key: const Key('daily-meal-detail-minerals'),
-            alignment: WrapAlignment.center,
-            spacing: 7,
-            runSpacing: 7,
-            children: [
-              NutrientMetric(
-                label: context.strings.text('Sodium'),
-                value: sodium,
-                unit: 'mg',
-              ),
-              NutrientMetric(
-                label: context.strings.text('Potassium'),
-                value: potassium,
-                unit: 'mg',
-              ),
-              NutrientMetric(
-                label: context.strings.text('Magnesium'),
-                value: magnesium,
-                unit: 'mg',
-              ),
-            ],
-          );
-          final premiumNutrition = PremiumNutritionGlass(
-            key: const Key('daily-meal-detail-premium-group'),
+            remaining: remaining,
+            loading: loading,
+          ),
+        ),
+        const SizedBox(height: 10),
+        surface(
+          PremiumNutritionGlass(
+            key: const Key('daily-log-summary-macros-glass'),
             compact: true,
-            borderRadius: 18,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Column(
-                children: [
-                  if (macroDisplay?.enabled ?? true) ...[
-                    macroDials,
-                    const SizedBox(height: 14),
-                  ],
-                  minerals,
-                ],
-              ),
+            borderRadius: 14,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFF0A8F88),
+                    percent:
+                        carbsGoal == null ||
+                            !carbsGoal!.isFinite ||
+                            carbsGoal! <= 0
+                        ? null
+                        : carbs / carbsGoal! * 100,
+                    progress: macroProgress(carbs, carbsGoal),
+                    grams: carbs,
+                    goal: carbsGoal,
+                    label: _summaryText(context, 'carbs'),
+                    percentKey: const Key('daily-summary-carbs-percent'),
+                    gramsKey: const Key('daily-summary-carbs-grams'),
+                    loading: loading,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFF6F1096),
+                    percent:
+                        fatGoal == null || !fatGoal!.isFinite || fatGoal! <= 0
+                        ? null
+                        : fat / fatGoal! * 100,
+                    progress: macroProgress(fat, fatGoal),
+                    grams: fat,
+                    goal: fatGoal,
+                    label: _summaryText(context, 'fat'),
+                    percentKey: const Key('daily-summary-fat-percent'),
+                    gramsKey: const Key('daily-summary-fat-grams'),
+                    loading: loading,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: _MacroMetric(
+                    color: const Color(0xFFC56A00),
+                    percent:
+                        proteinGoal == null ||
+                            !proteinGoal!.isFinite ||
+                            proteinGoal! <= 0
+                        ? null
+                        : protein / proteinGoal! * 100,
+                    progress: macroProgress(protein, proteinGoal),
+                    grams: protein,
+                    goal: proteinGoal,
+                    label: _summaryText(context, 'proteinShort'),
+                    percentKey: const Key('daily-summary-protein-percent'),
+                    gramsKey: const Key('daily-summary-protein-grams'),
+                    loading: loading,
+                  ),
+                ),
+              ],
             ),
-          );
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(child: calorieRing),
-              const SizedBox(height: 14),
-              premiumNutrition,
-            ],
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _MealMacroDial extends StatelessWidget {
-  const _MealMacroDial({
-    required this.label,
-    required this.grams,
-    required this.goalGrams,
-    required this.progress,
-    required this.color,
-    required this.displayPercent,
+class _CalorieSummary extends StatelessWidget {
+  const _CalorieSummary({
+    required this.calories,
+    required this.calorieGoal,
+    required this.remaining,
+    required this.loading,
   });
 
-  final String label;
-  final double grams;
-  final double? goalGrams;
-  final double progress;
-  final Color color;
-  final bool displayPercent;
+  final double calories;
+  final double? calorieGoal;
+  final double? remaining;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
-    final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
-    final displayValue = displayPercent
-        ? hasGoal
-              ? '${(grams / goalGrams! * 100).round()}%'
-              : '—'
-        : '${formatDiaryMacroGrams(grams)} g';
-    return Semantics(
-      value: displayPercent
-          ? displayValue
-          : hasGoal
-          ? '${formatDiaryMacroGrams(grams)} / ${formatDiaryMacroGrams(goalGrams!)} g'
-          : '${formatDiaryMacroGrams(grams)} g',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox.square(
-              dimension: 62,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 6,
-                    color: color,
-                    backgroundColor: color.withValues(alpha: .13),
-                    strokeCap: StrokeCap.round,
+    final scheme = Theme.of(context).colorScheme;
+    final goal =
+        calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
+    final status = !goal
+        ? _summaryText(context, 'noGoal')
+        : remaining! >= 0
+        ? '${remaining!.round()} ${_summaryText(context, 'kcal')} ${_summaryText(context, 'remaining')}'
+        : '${(-remaining!).round()} ${_summaryText(context, 'kcal')} ${_summaryText(context, 'over')}';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _summaryText(context, 'calories'),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: scheme.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final values = <Widget>[
+              if (loading)
+                Container(
+                  key: const Key('daily-summary-calories-loading'),
+                  width: 150,
+                  height: 27,
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(9),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        displayValue,
-                        maxLines: 1,
-                        textDirection: TextDirection.ltr,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
+                )
+              else
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text:
+                            '${calories.round()} ${_summaryText(context, 'kcal')}',
+                      ),
+                      if (goal)
+                        TextSpan(
+                          text: ' / ${calorieGoal!.round()}',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                    ],
+                  ),
+                  key: const Key('daily-summary-calories-value'),
+                  textDirection: TextDirection.ltr,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    if (!loading && goal) ...[
+                      TextSpan(
+                        text: '${remaining!.abs().round()} ',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: remaining! < 0
+                              ? scheme.error
+                              : scheme.onSurface,
                         ),
                       ),
-                    ),
-                  ),
-                ],
+                      TextSpan(
+                        text: _summaryText(
+                          context,
+                          remaining! >= 0 ? 'remaining' : 'over',
+                        ),
+                      ),
+                    ] else
+                      TextSpan(text: loading ? '…' : status),
+                  ],
+                ),
+                key: const Key('daily-summary-calories-status'),
+                semanticsLabel: loading ? '…' : status,
+                maxLines: 2,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: goal && remaining! < 0
+                      ? scheme.error
+                      : scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ],
+            ];
+            if (constraints.maxWidth < 300 ||
+                MediaQuery.textScalerOf(context).scale(1) > 1.3) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  values.first,
+                  const SizedBox(height: 4),
+                  values.last,
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: values.first),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: values.last,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-      ),
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: LinearProgressIndicator(
+            key: const Key('daily-summary-calories-progress'),
+            minHeight: 7,
+            value: loading || !goal
+                ? 0
+                : (calories / calorieGoal!).clamp(0.0, 1.0).toDouble(),
+            backgroundColor: scheme.surfaceContainerHighest,
+            color: goal && remaining! < 0 ? scheme.error : scheme.primary,
+          ),
+        ),
+      ],
     );
   }
 }

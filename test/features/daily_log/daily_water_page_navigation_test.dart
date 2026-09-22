@@ -79,7 +79,12 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('daily-log-water-shortcut')), findsOneWidget);
-    expect(find.text('Today: 250 ml'), findsOneWidget);
+    expect(find.text('250 ml'), findsOneWidget);
+    expect(
+      find.text('Today: 250 ml'),
+      findsNothing,
+      reason: 'A historical selected day must not be labelled Today',
+    );
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

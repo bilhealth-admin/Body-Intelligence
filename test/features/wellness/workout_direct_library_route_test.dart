@@ -6,7 +6,10 @@ void main() {
   test(
     'workout shortcut opens video routines and keeps logging in-library',
     () {
-      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final router = <String>[
+        'lib/app/router/app_router.dart',
+        'lib/app/router/app_wellness_routes.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final routeStart = router.indexOf("path: '/wellness/workouts',");
       final nextRoute = router.indexOf(
         "path: '/wellness/workouts/routines',",

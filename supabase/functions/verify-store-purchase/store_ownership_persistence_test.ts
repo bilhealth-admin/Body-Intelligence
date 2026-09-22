@@ -39,11 +39,11 @@ function mockAdmin(
     },
   };
   const admin = {
-    from(table: string) {
-      reads.push(["from", table]);
-      return query;
-    },
     rpc(name: string, args: Record<string, unknown>) {
+      if (name === "bil_lookup_store_subscription_owner") {
+        reads.push([name, args]);
+        return Promise.resolve({ data: existing, error: lookupError });
+      }
       writes.push([name, args]);
       return Promise.resolve({
         data: rpcResult === undefined
@@ -69,10 +69,10 @@ Deno.test("new Apple claim without signed owner token cannot write any entitleme
   );
   assertEquals(fixture.writes, []);
   assertEquals(fixture.reads, [
-    ["from", "bil_subscriptions"],
-    ["select", "owner_id,environment"],
-    ["provider", "apple"],
-    ["original_transaction_id", applePurchase.originalTransactionId],
+    ["bil_lookup_store_subscription_owner", {
+      p_provider: "apple",
+      p_original_transaction_id: applePurchase.originalTransactionId,
+    }],
   ]);
 });
 

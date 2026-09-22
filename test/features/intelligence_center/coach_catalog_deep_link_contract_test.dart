@@ -8,7 +8,10 @@ void main() {
       'lib/features/intelligence_center/presentation/'
       'intelligence_center_message_widgets.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_wellness_routes.dart').readAsStringSync(),
+    ].join('\n');
     final linkDomain = File(
       'lib/features/intelligence_center/domain/intelligence_message.dart',
     ).readAsStringSync();

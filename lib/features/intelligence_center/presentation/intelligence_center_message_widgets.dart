@@ -8,6 +8,7 @@ class _MessageBubble extends StatelessWidget {
     this.onFeedback,
     this.onReport,
     this.onSpeak,
+    this.onRetry,
     this.onAction,
     this.actionPhases = const <String, _CoachActionExecutionPhase>{},
     this.animateReveal = false,
@@ -18,6 +19,7 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<bool>? onFeedback;
   final ValueChanged<String>? onReport;
   final VoidCallback? onSpeak;
+  final VoidCallback? onRetry;
   final ValueChanged<IntelligenceAction>? onAction;
   final Map<String, _CoachActionExecutionPhase> actionPhases;
   final bool animateReveal;
@@ -143,22 +145,41 @@ class _MessageBubble extends StatelessWidget {
                       ),
                   ],
                 ),
-                TextButton.icon(
-                  key: Key('ai-coach-health-sources'),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => context.push('/health-information-sources'),
-                  icon: const Icon(Icons.menu_book_outlined, size: 17),
-                  label: Text(
-                    intelligenceText(
-                      context,
-                      'Health sources & methodology',
-                      'المصادر والمنهجية الصحية',
+                if (message.citationIds.isNotEmpty)
+                  TextButton.icon(
+                    key: Key('ai-coach-health-sources-${message.id}'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    onPressed: () => context.push(
+                      Uri(
+                        path: '/health-information-sources',
+                        queryParameters: {
+                          'sources': message.citationIds.join(','),
+                        },
+                      ).toString(),
+                    ),
+                    icon: const Icon(Icons.menu_book_outlined, size: 17),
+                    label: Text(
+                      '${intelligenceText(context, 'Source', 'المصدر')} '
+                      '(${message.citationIds.length})',
                     ),
                   ),
-                ),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('ai-coach-retry'),
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                      label: Text(
+                        intelligenceText(context, 'Retry', 'إعادة المحاولة'),
+                      ),
+                    ),
+                  ),
+                ],
                 if (trustedLinks.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Wrap(

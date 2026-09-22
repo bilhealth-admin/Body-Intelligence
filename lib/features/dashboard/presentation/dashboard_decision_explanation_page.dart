@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../dashboard_five_locale_copy.dart';
@@ -89,6 +90,28 @@ class DashboardDecisionExplanationPage extends StatelessWidget {
                       '${tr('Local input sources', 'مصادر المدخلات المحلية')}: ${value.inputSources.join(' · ')}',
                     ],
                   ),
+                  if (value.healthSourceIds.isNotEmpty)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        key: const Key('decision-health-sources'),
+                        onPressed: () => context.push(
+                          Uri(
+                            path: '/health-information-sources',
+                            queryParameters: {
+                              'sources': value.healthSourceIds.join(','),
+                            },
+                          ).toString(),
+                        ),
+                        icon: const Icon(Icons.menu_book_outlined, size: 18),
+                        label: Text(
+                          tr(
+                            'Health sources & methodology',
+                            'مصادر ومنهجية الصحة',
+                          ),
+                        ),
+                      ),
+                    ),
                   Text(
                     tr(
                       'BIL explains local deterministic evidence. It does not diagnose disease or claim medical certainty.',

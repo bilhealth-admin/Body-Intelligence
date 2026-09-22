@@ -1,6 +1,119 @@
 part of '../coach_page_lifecycle_regression_test.dart';
 
 void registerCoachRequestCases() {
+  testWidgets(
+    'Arabic greeting completes locally without an incomplete reply card',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final gateway = _HeldGateway();
+      await _mount(tester, database: database, gateway: gateway);
+      await _send(tester, gateway, question: 'كيفك');
+      gateway.reply.complete(
+        const LocalModelResult(
+          status: CoachServiceStatus.temporarilyUnavailable,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('أنا جاهز معك'), findsOneWidget);
+      expect(find.byKey(const Key('ai-coach-retry')), findsNothing);
+      expect(find.byKey(const Key('ai-coach-reply-progress')), findsNothing);
+      expect(find.textContaining('The reply did not complete'), findsNothing);
+      await tester.pump(const Duration(seconds: 35));
+      expect(gateway.calls, 1);
+      final raw = await PreferencesRepository(
+        database,
+      ).get('intelligenceConversationV1');
+      final turns = (jsonDecode(raw!) as List).cast<Map>();
+      expect(turns.where((turn) => turn['role'] == 'user'), hasLength(1));
+      expect(
+        turns.where(
+          (turn) => (turn['text'] as String).contains('أنا جاهز معك'),
+        ),
+        hasLength(1),
+      );
+      await _unmount(tester);
+    },
+  );
+  testWidgets('repeated service failure keeps one transcript retry surface', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final gateway = _HeldGateway();
+    await _mount(tester, database: database, gateway: gateway);
+    await _send(tester, gateway, question: 'Explain balanced nutrition');
+    const failure = LocalModelResult(
+      status: CoachServiceStatus.temporarilyUnavailable,
+    );
+    gateway.reply.complete(failure);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ai-coach-reply-progress')), findsNothing);
+    await tester.tap(find.byKey(const Key('ai-coach-retry')));
+    for (var i = 0; i < 60 && gateway.calls < 2; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(gateway.calls, 2);
+    gateway.replies[1].complete(failure);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ai-coach-retry')), findsOneWidget);
+    expect(find.byKey(const Key('ai-coach-reply-progress')), findsNothing);
+    await tester.pump(const Duration(seconds: 35));
+    expect(gateway.calls, 2);
+    final raw = await PreferencesRepository(
+      database,
+    ).get('intelligenceConversationV1');
+    final turns = (jsonDecode(raw!) as List).cast<Map>();
+    expect(turns.where((turn) => turn['role'] == 'user'), hasLength(1));
+    expect(tester.takeException(), isNull);
+    await _unmount(tester);
+  });
+  for (final failure in ['service', 'exception', 'timeout']) {
+    testWidgets('one first-message failure surface: $failure', (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final gateway = _HeldGateway();
+      await _mount(tester, database: database, gateway: gateway);
+      await _send(tester, gateway, question: 'Explain balanced nutrition');
+      if (failure == 'service') {
+        gateway.reply.complete(
+          const LocalModelResult(
+            status: CoachServiceStatus.temporarilyUnavailable,
+          ),
+        );
+      } else if (failure == 'exception') {
+        gateway.reply.completeError(StateError('controlled API failure'));
+      } else {
+        await tester.pump(const Duration(seconds: 31));
+      }
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-coach-retry')), findsOneWidget);
+      expect(find.byKey(const Key('ai-coach-reply-progress')), findsNothing);
+      expect(gateway.calls, 1);
+      await tester.pump(const Duration(seconds: 35));
+      expect(gateway.calls, 1, reason: 'Failure must not automatically resend');
+      if (failure == 'timeout') {
+        gateway.finish(text: 'Late response must be ignored');
+        await tester.pumpAndSettle();
+        expect(find.text('Late response must be ignored'), findsNothing);
+      }
+      final raw = await PreferencesRepository(
+        database,
+      ).get('intelligenceConversationV1');
+      final turns = (jsonDecode(raw!) as List).cast<Map>();
+      expect(
+        turns.where(
+          (turn) =>
+              turn['role'] == 'user' &&
+              turn['text'] == 'Explain balanced nutrition',
+        ),
+        hasLength(1),
+      );
+      expect(find.byKey(const Key('ai-coach-retry')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    });
+  }
   testWidgets('a different entitlement owner gets a fresh UI state', (
     tester,
   ) async {
@@ -199,7 +312,7 @@ void registerCoachRequestCases() {
     addTearDown(database.close);
     final gateway = _HeldGateway();
     await _mount(tester, database: database, gateway: gateway);
-    await _send(tester, gateway);
+    await _send(tester, gateway, question: 'Explain balanced nutrition');
     gateway.reply.complete(
       const LocalModelResult(status: CoachServiceStatus.temporarilyUnavailable),
     );
@@ -216,7 +329,11 @@ void registerCoachRequestCases() {
     ).get('intelligenceConversationV1');
     final turns = (jsonDecode(raw!) as List).cast<Map>();
     expect(
-      turns.where((turn) => turn['role'] == 'user' && turn['text'] == 'hi'),
+      turns.where(
+        (turn) =>
+            turn['role'] == 'user' &&
+            turn['text'] == 'Explain balanced nutrition',
+      ),
       hasLength(1),
     );
     expect(tester.takeException(), isNull);

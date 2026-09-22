@@ -17,9 +17,7 @@ String _librarySource(String path) {
 
 void main() {
   test('diary permits future planning and keeps both date directions', () {
-    final source = File(
-      'lib/features/daily_log/daily_log_page.dart',
-    ).readAsStringSync();
+    final source = _librarySource('lib/features/daily_log/daily_log_page.dart');
 
     expect(source, contains('today.year + 1'));
     expect(source, contains('date.subtract('));
@@ -55,15 +53,19 @@ void main() {
     );
   });
 
-  test('Today summary uses the real calorie target and raised ring layout', () {
-    final source = File(
-      'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-    ).readAsStringSync();
+  test(
+    'Today summary uses the real calorie target without duplicate totals',
+    () {
+      final source = File(
+        'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
+      ).readAsStringSync();
 
-    expect(source, contains('calorieGoal: calorieGoal'));
-    expect(source, contains("Key('daily-log-summary-ring-raised')"));
-    expect(source, contains('offset: const Offset(0, -3)'));
-  });
+      expect(source, contains('calorieGoal: calorieGoal'));
+      expect(source, contains("Key('daily-summary-calories-progress')"));
+      expect(source, contains("Key('daily-summary-calories-value')"));
+      expect(source, isNot(contains("Key('daily-log-summary-ring-raised')")));
+    },
+  );
 
   test(
     'meal logging opens a focused meal page without duplicate capture UI',
@@ -76,7 +78,10 @@ void main() {
       ).readAsStringSync();
 
       expect(page, contains("Key('daily-log-focused-meal-page')"));
-      expect(page, contains("Key('daily-meal-detail-title')"));
+      expect(
+        page,
+        matches(RegExp(r"Key\(\s*'daily-meal-detail-title'\s*,?\s*\)")),
+      );
       expect(entry, contains('SearchAnchor('));
       expect(entry, isNot(contains("Key('daily-search-barcode')")));
       expect(entry, isNot(contains("Key('daily-search-voice')")));

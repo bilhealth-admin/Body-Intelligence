@@ -498,6 +498,16 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
         surfaceTintColor: Colors.transparent,
         actions: [
           IconButton(
+            key: const Key('diet-plan-health-sources'),
+            onPressed: () => context.push('/health-information-sources'),
+            tooltip: nutritionText(
+              context,
+              'Health sources & methodology',
+              'مصادر الصحة والمنهجية',
+            ),
+            icon: const Icon(Icons.menu_book_outlined),
+          ),
+          IconButton(
             key: const Key('diet-plan-reset-recommended'),
             onPressed: _loading || _saving || medicallyLocked
                 ? null
@@ -552,11 +562,10 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
               padding: const EdgeInsets.only(bottom: 28),
               children: [
                 _DietHero(pathway: pathway, localeTag: localeTag),
-                if (restricted)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                    child: _EvidenceNotice(pathwayId: pathway.id),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+                  child: _EvidenceNotice(pathwayId: pathway.id),
+                ),
                 if (_isPregnancy)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),

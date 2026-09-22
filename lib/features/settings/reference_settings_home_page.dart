@@ -118,6 +118,10 @@ class _ReferenceSettingsHomePageState
               title: copy('Health preferences'),
               kind: BilSemanticIconKind.health,
               children: [
+                _SettingsRow(
+                  context.strings.text('Health sources & methodology'),
+                  '/health-information-sources',
+                ),
                 _SettingsRow(copy('My Exercises'), '/wellness/workouts/log'),
                 _SettingsRow(
                   copy('Weekly Nutrition Settings'),

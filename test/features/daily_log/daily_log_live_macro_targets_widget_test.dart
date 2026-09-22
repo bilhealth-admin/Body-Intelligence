@@ -104,7 +104,7 @@ void main() {
       expect(find.text('Evidence yogurt'), findsNothing);
       expect(
         find.byKey(const Key('daily-meal-totals-breakfast')),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.byKey(const Key('daily-meal-macros-breakfast')),
@@ -181,12 +181,13 @@ void main() {
     );
     await tester.pump();
 
-    expect(_textBelow(tester, const Key('daily-summary-carbs-percent')), '50%');
-    expect(
-      _textBelow(tester, const Key('daily-summary-protein-percent')),
-      '50%',
-    );
-    expect(_textBelow(tester, const Key('daily-summary-fat-percent')), '40%');
+    String progress(String nutrient) => tester
+        .widget<Semantics>(find.byKey(Key('daily-summary-$nutrient-percent')))
+        .properties
+        .value!;
+    expect(progress('carbs'), '50%');
+    expect(progress('protein'), '50%');
+    expect(progress('fat'), '40%');
     expect(_textBelow(tester, const Key('daily-summary-carbs-grams')), '40 g');
     expect(
       _textBelow(tester, const Key('daily-summary-protein-grams')),
@@ -216,9 +217,12 @@ Future<void> _pumpMealList(
         Scaffold(
           body: SingleChildScrollView(
             child: DailyMealsList(
+              arabic: false,
               meals: AsyncData(<MealWithItems>[meal]),
               showEmptyMealSlots: false,
               onAdd: onAdd,
+              onEdit: (_, _) async {},
+              onActions: (_, _) async {},
             ),
           ),
         ),

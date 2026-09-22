@@ -7,9 +7,17 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
     required bool showLiveVoiceDraft,
     required bool showReplyFailure,
   }) {
+    // The daily brief is already the opening Coach surface. Do not stack the
+    // synthetic welcome beneath it; retain it as the fallback when context is
+    // unavailable. This is presentation-only: user turns/history are untouched.
+    final presentedMessages = dailyBrief == null
+        ? visibleMessages
+        : visibleMessages
+              .where((message) => !message.id.startsWith('welcome'))
+              .toList(growable: false);
     final ids = <String>[
       if (dailyBrief != null) 'coach-session-brief',
-      ...visibleMessages.map((message) => message.id),
+      ...presentedMessages.map((message) => message.id),
       if (showLiveVoiceDraft) 'coach-live-draft',
       if (showReplyFailure) 'coach-reply-failure',
     ];
@@ -44,7 +52,7 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
           );
         }
         return _buildMessage(
-          visibleMessages[index - (dailyBrief == null ? 0 : 1)],
+          presentedMessages[index - (dailyBrief == null ? 0 : 1)],
           messageFeedback,
         );
       },

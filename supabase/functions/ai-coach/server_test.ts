@@ -5,6 +5,7 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   actionExecutionContract,
+  answerNeedsHealthCitation,
   boundedMessages,
   boundedVoiceAudio,
   extractModelText,
@@ -194,6 +195,56 @@ Deno.test("model actions are allow-listed and confirmation-gated", () => {
       spoken_reply: "* not a spoken sentence",
       proposed_actions: [],
     }))
+  );
+});
+
+Deno.test("health citations keep only trusted registry identifiers", () => {
+  const parsed = parseModelJson(JSON.stringify({
+    reply: "CDC uses BMI as an adult screening measure.",
+    spoken_reply: "CDC uses BMI as an adult screening measure.",
+    reason: "General screening education.",
+    confidence: 0.9,
+    evidence: [],
+    citations: [
+      "cdc_adult_bmi",
+      "https://untrusted.example/fake-study",
+      "invented_study",
+      "cdc_adult_bmi",
+    ],
+    missing_data: [],
+    proposed_actions: [],
+  }));
+
+  assertEquals(parsed.citations, ["cdc_adult_bmi"]);
+});
+
+Deno.test("uncited health recommendations fail closed", () => {
+  assertEquals(
+    answerNeedsHealthCitation("Your latest weight is 87 kg."),
+    false,
+  );
+  assertEquals(
+    answerNeedsHealthCitation("Your recorded total is 1,500 calories."),
+    false,
+  );
+  assertEquals(
+    answerNeedsHealthCitation("Most adults need 7 to 9 hours."),
+    true,
+  );
+  assertThrows(
+    () =>
+      parseModelJson(JSON.stringify({
+        reply: "Most adults need 7 to 9 hours of sleep.",
+        spoken_reply: "Most adults need 7 to 9 hours of sleep.",
+        reason: "General guidance.",
+        confidence: 0.9,
+        evidence: [],
+        citations: [],
+        missing_data: [],
+        proposed_actions: [],
+      })),
+    Error,
+    "missing_health_citation",
   );
 });
 
@@ -620,6 +671,7 @@ Deno.test("successful response exposes the metered request id for feedback corre
                   reason: "Consistency supports sleep timing.",
                   confidence: 0.8,
                   evidence: [],
+                  citations: ["sleep_foundation_adult_duration"],
                   missing_data: [],
                   proposed_actions: [],
                 }),

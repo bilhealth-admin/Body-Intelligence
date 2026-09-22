@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
@@ -11,6 +13,138 @@ Map<String, Object?> usage(String plan, Object? totalRemaining) => {
 };
 
 void main() {
+  test(
+    'owner refresh keeps prior identity and authoritative sign-out clears it',
+    () async {
+      final initial = StreamController<String?>();
+      final refreshed = StreamController<String?>();
+      var stream = initial.stream;
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerProvider.overrideWith((_) => stream),
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue('owner-a'),
+        ],
+      );
+      final listener = container.listen(
+        verifiedEntitlementOwnerIdProvider,
+        (_, _) {},
+      );
+      addTearDown(() async {
+        listener.close();
+        container.dispose();
+        await initial.close();
+        await refreshed.close();
+      });
+      initial.add('owner-a');
+      await container.read(verifiedEntitlementOwnerProvider.future);
+      expect(container.read(verifiedEntitlementOwnerIdProvider), 'owner-a');
+      stream = refreshed.stream;
+      container.invalidate(verifiedEntitlementOwnerProvider);
+      expect(container.read(verifiedEntitlementOwnerIdProvider), 'owner-a');
+      expect(
+        container.read(verifiedEntitlementOwnerProvider).isLoading,
+        isTrue,
+      );
+      refreshed.add(null);
+      await container.read(verifiedEntitlementOwnerProvider.future);
+      expect(container.read(verifiedEntitlementOwnerIdProvider), isNull);
+    },
+  );
+
+  test(
+    'same-owner refresh failure retains verified access, then zero revokes it',
+    () async {
+      Future<Object?> response = Future.value(usage('ai_coach', 1000));
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue('owner-a'),
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => const Stream<String?>.empty(),
+          ),
+          aiCoachUsageStatusLoaderProvider.overrideWithValue(() => response),
+        ],
+      );
+      addTearDown(container.dispose);
+      final listener = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+      addTearDown(listener.close);
+      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+
+      final pending = Completer<Object?>();
+      response = pending.future;
+      container.invalidate(aiCoachCreditAccessProvider);
+      final refresh = container.read(aiCoachCreditAccessProvider.future);
+      expect(container.read(aiCoachCreditAccessProvider).value, isTrue);
+      pending.completeError(StateError('temporary RPC outage'));
+      expect(await refresh, isTrue);
+      listener.close();
+      await Future<void>.delayed(Duration.zero);
+      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+
+      response = Future.value(usage('ai_coach', 0));
+      container
+          .read(aiCoachUsageRefreshProvider.notifier)
+          .requestAuthoritativeReload();
+      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
+      final failed = Completer<Object?>();
+      response = failed.future;
+      container.invalidate(aiCoachCreditAccessProvider);
+      final retry = container.read(aiCoachCreditAccessProvider.future);
+      failed.completeError(StateError('temporary RPC outage'));
+      expect(await retry, isFalse);
+    },
+  );
+
+  test(
+    'sign-out and owner switch cannot inherit an old access snapshot',
+    () async {
+      final owners = StreamController<String?>();
+      final pendingOld = Completer<Object?>();
+      var ownerLoads = 0;
+      Future<Object?> response = Future.value(usage('ai_coach', 100));
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue('owner-a'),
+          verifiedEntitlementOwnerProvider.overrideWith((_) => owners.stream),
+          aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
+            ownerLoads++;
+            return response;
+          }),
+        ],
+      );
+      final listener = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+      addTearDown(() async {
+        listener.close();
+        container.dispose();
+        await owners.close();
+      });
+      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+      response = pendingOld.future;
+      container.invalidate(aiCoachCreditAccessProvider);
+      final oldRequest = container.read(aiCoachCreditAccessProvider.future);
+      owners.add(null);
+      await Future<void>.delayed(Duration.zero);
+      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
+      final loadsAfterSignOut = ownerLoads;
+      pendingOld.complete(usage('ai_coach', 999));
+      await oldRequest;
+      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
+      expect(ownerLoads, loadsAfterSignOut);
+
+      final nextOwner = Completer<Object?>();
+      response = nextOwner.future;
+      owners.add('owner-b');
+      await Future<void>.delayed(Duration.zero);
+      final nextRequest = container.read(aiCoachCreditAccessProvider.future);
+      nextOwner.completeError(StateError('owner B has no verified result'));
+      await expectLater(nextRequest, throwsStateError);
+      expect(container.read(aiCoachCreditAccessProvider).hasError, isTrue);
+      expect(
+        container.read(aiCoachAccessSnapshotStoreProvider).verifiedAccess,
+        isNull,
+      );
+    },
+  );
+
   test(
     'a server reload signal updates a mounted gate after a Boost grant',
     () async {

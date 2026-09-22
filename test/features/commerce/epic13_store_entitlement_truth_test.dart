@@ -194,7 +194,19 @@ void main() {
     );
     expect(
       client,
-      contains('verification != _StoreReceiptVerificationResult.failed'),
+      contains(
+        'verification == _StoreReceiptVerificationResult.verifiedActive ||',
+      ),
+    );
+    expect(
+      client,
+      contains(
+        'verification == _StoreReceiptVerificationResult.verifiedInactive',
+      ),
+    );
+    expect(
+      client,
+      isNot(contains('verification != _StoreReceiptVerificationResult.failed')),
     );
     expect(client, isNot(contains('SharedPreferences')));
     expect(canonicalMigration, contains("when 'pro' then 'premium'"));
