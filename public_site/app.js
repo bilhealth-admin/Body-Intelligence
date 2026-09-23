@@ -112,7 +112,7 @@ const legal = {
     '/account-deletion': {
       eyebrow: 'YOUR CONTROL', title: 'Delete your BIL account', intro: 'You can initiate deletion inside BIL or request it online. Deleting the app alone does not delete a cloud account.',
       sections: [
-        ['in-app', 'Fastest: request deletion in the app', '<ol><li>Sign in to the BIL account you want to delete.</li><li>Open <b>More → Delete account</b>.</li><li>Review the consequences, type <b>DELETE</b>, and submit.</li><li>Keep the request reference shown by BIL.</li></ol>'],
+        ['in-app', 'Fastest: request deletion in the app', '<ol><li>Sign in to the BIL account you want to delete.</li><li>Open <b>More → Help → Delete Account</b>.</li><li>Review the consequences, type <b>DELETE</b>, and submit.</li><li>Keep the request reference shown by BIL.</li></ol>'],
         ['web', 'If you cannot access the app', `<p>Email <a href="mailto:${PRIVACY_EMAIL}?subject=BIL%20account%20deletion%20request">${PRIVACY_EMAIL}</a> from the email address linked to the account. State “Delete my BIL account.” Do not send passwords, access tokens, receipts, identity documents, or health exports. BIL will ask only for the minimum information needed to verify control.</p>`],
         ['scope', 'What deletion covers', '<p>After verification, BIL deletes or de-identifies eligible account profile, cloud-synchronized health and wellness records, AI conversation records retained by BIL, community content where legally and technically applicable, notification registrations, and active server entitlements. Local data must be cleared on each device or by removing app data.</p>'],
         ['not-covered', 'What is not controlled by BIL', '<p>Deleting BIL does not delete source records in HealthKit, Health Connect, another health app, a paired device, your email provider, or Apple/Google purchase history. Revoke those permissions or manage those records with the relevant provider.</p>'],
@@ -224,7 +224,7 @@ legal.ar = {
     ['termination','إنهاء الاستخدام والتواصل',`<p>يمكنك التوقف أو إلغاء الاشتراك أو مسح البيانات أو حذف الحساب. قد يقيد BIL الحساب المخالف جوهريًا مع الحقوق القانونية المناسبة. للاستفسار: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>`],
   ]},
   '/account-deletion': { eyebrow: 'تحكمك', title: 'حذف حساب BIL', intro: 'يمكنك بدء الحذف من داخل BIL أو عبر طلب إلكتروني. حذف التطبيق وحده لا يحذف الحساب السحابي.', sections: [
-    ['in-app','الأسرع: من داخل التطبيق','<ol><li>سجل الدخول للحساب المطلوب.</li><li>افتح <b>المزيد ← حذف الحساب</b>.</li><li>راجع النتائج واكتب <b>DELETE</b> ثم أرسل.</li><li>احتفظ برقم مرجع الطلب.</li></ol>'],
+    ['in-app','الأسرع: من داخل التطبيق','<ol><li>سجل الدخول للحساب المطلوب.</li><li>افتح <b>المزيد ← المساعدة ← حذف الحساب</b>.</li><li>راجع النتائج واكتب <b>DELETE</b> ثم أرسل.</li><li>احتفظ برقم مرجع الطلب.</li></ol>'],
     ['web','إذا تعذر فتح التطبيق',`<p>أرسل من بريد الحساب إلى <a href="mailto:${PRIVACY_EMAIL}?subject=BIL%20account%20deletion%20request">${PRIVACY_EMAIL}</a> واكتب أنك تريد حذف حساب BIL. لا ترسل كلمة مرور أو رمز دخول أو إيصالًا كاملًا أو وثيقة هوية أو ملفًا صحيًا.</p>`],
     ['scope','ما الذي يشمله الحذف','<p>بعد التحقق، نحذف أو نزيل هوية الملف والسجلات الصحية المتزامنة ومحادثات الذكاء التي يحتفظ بها BIL والمحتوى المجتمعي المؤهل وتسجيلات الإشعارات والاستحقاقات النشطة. امسح البيانات المحلية من كل جهاز.</p>'],
     ['not-covered','ما لا يملكه BIL','<p>لا يحذف الطلب سجلات HealthKit أو Health Connect أو جهاز أو تطبيق آخر أو بريدك أو سجل شراء Apple/Google. أدر تلك السجلات والأذونات لدى مزودها.</p>'],
