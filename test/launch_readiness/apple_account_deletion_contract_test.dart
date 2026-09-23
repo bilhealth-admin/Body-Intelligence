@@ -106,6 +106,10 @@ void main() {
       final site = source('public_site/app.js');
       expect(site, contains('retries the queued request within 15 minutes'));
       expect(site, contains('https://apps.apple.com/account/subscriptions'));
+      expect(site, contains('More → Help → Delete Account'));
+      expect(site, contains('المزيد ← المساعدة ← حذف الحساب'));
+      expect(site, isNot(contains('More → Delete account')));
+      expect(site, isNot(contains('المزيد ← حذف الحساب')));
       expect(
         site,
         contains('https://play.google.com/store/account/subscriptions'),
