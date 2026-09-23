@@ -32,10 +32,10 @@ const home = {
       ['◎', 'Body trends', 'See calories, nutrients, weight, and wellness signals with honest empty, offline, and confidence states.'],
       ['✦', 'BIL AI Coach', 'Ask naturally in the language you speak. Remote AI is used only after consent and never executes actions without approval.'],
       ['⌁', 'Connected health', 'Import supported records only after platform permission, with clear source and connection status.'],
-      ['◇', 'Free Community, friends and messages', 'Coming with the next BIL app update: Community, friends and private messages are included in BIL Free for signed-in adults. Privacy controls and Community Guidelines still apply.'],
+      ['◇', 'Free Community, friends and messages', 'Community, friends and private messages are included in BIL Free for signed-in adults. Privacy controls and Community Guidelines still apply.'],
     ],
     trustTitle: 'Intelligence deserves restraint.',
-    trust: ['Health data is never sold.', 'Free-tier ads never use health context.', 'AI answers are guidance, not diagnosis.', 'Cloud features remain off until consent.', 'Store prices come from Apple or Google.', 'Account deletion is available in-app and online.'],
+    trust: ['Health data is never sold.', 'Free-tier ads never use health context.', 'AI answers are guidance, not diagnosis.', 'Optional encrypted cloud sync and remote AI stay off until you opt in.', 'Store prices come from Apple or Google.', 'Account deletion is available in-app and online.'],
     docsEyebrow: 'TRUST CENTER', docsTitle: 'Clear answers before you share anything.',
   },
   ar: {
@@ -54,10 +54,10 @@ const home = {
       ['◎', 'اتجاهات الجسم', 'شاهد السعرات والمغذيات والوزن وإشارات العافية مع حالات صادقة للثقة وعدم الاتصال ونقص البيانات.'],
       ['✦', 'مدرب BIL الذكي', 'اسأل بطبيعتك وباللغة التي تتحدثها. لا يُستخدم الذكاء البعيد إلا بعد الموافقة ولا ينفذ إجراءً دون إذنك.'],
       ['⌁', 'الصحة المتصلة', 'استورد السجلات المدعومة فقط بعد إذن النظام، مع إظهار المصدر وحالة الاتصال بوضوح.'],
-      ['◇', 'المجتمع والأصدقاء والرسائل مجانًا', 'مع تحديث تطبيق BIL القادم: المجتمع والأصدقاء والرسائل الخاصة ضمن BIL Free للبالغين المسجلين. تبقى ضوابط الخصوصية وإرشادات المجتمع سارية.'],
+      ['◇', 'المجتمع والأصدقاء والرسائل مجانًا', 'المجتمع والأصدقاء والرسائل الخاصة ضمن BIL Free للبالغين المسجلين. تبقى ضوابط الخصوصية وإرشادات المجتمع سارية.'],
     ],
     trustTitle: 'الذكاء الحقيقي يعرف حدوده.',
-    trust: ['لا نبيع البيانات الصحية.', 'إعلانات الخطة المجانية لا تستخدم السياق الصحي.', 'إجابات الذكاء إرشاد وليست تشخيصًا.', 'تبقى السحابة متوقفة حتى توافق.', 'الأسعار مصدرها Apple أو Google.', 'حذف الحساب متاح داخل التطبيق وعبر الويب.'],
+    trust: ['لا نبيع البيانات الصحية.', 'إعلانات الخطة المجانية لا تستخدم السياق الصحي.', 'إجابات الذكاء إرشاد وليست تشخيصًا.', 'تبقى المزامنة السحابية المشفّرة والذكاء البعيد الاختياريان متوقفين حتى تختارهما.', 'الأسعار مصدرها Apple أو Google.', 'حذف الحساب متاح داخل التطبيق وعبر الويب.'],
     docsEyebrow: 'مركز الثقة', docsTitle: 'إجابات واضحة قبل أن تشارك أي شيء.',
   },
 };
@@ -110,7 +110,7 @@ const legal = {
       ],
     },
     '/account-deletion': {
-      eyebrow: 'YOUR CONTROL', title: 'Delete your BIL account', intro: 'You can initiate deletion inside BIL or request it online. Deleting the app alone does not delete a cloud account.',
+      eyebrow: 'YOUR CONTROL', title: 'Delete your BIL account', intro: 'You can initiate deletion inside BIL or request it online. Deleting the app alone does not delete a cloud account.', updated: '23 September 2026',
       sections: [
         ['in-app', 'Fastest: request deletion in the app', '<ol><li>Sign in to the BIL account you want to delete.</li><li>Open <b>More → Help → Delete Account</b>.</li><li>Review the consequences, type <b>DELETE</b>, and submit.</li><li>Keep the request reference shown by BIL.</li></ol>'],
         ['web', 'If you cannot access the app', `<p>Email <a href="mailto:${PRIVACY_EMAIL}?subject=BIL%20account%20deletion%20request">${PRIVACY_EMAIL}</a> from the email address linked to the account. State “Delete my BIL account.” Do not send passwords, access tokens, receipts, identity documents, or health exports. BIL will ask only for the minimum information needed to verify control.</p>`],
@@ -121,10 +121,10 @@ const legal = {
       ],
     },
     '/data-deletion': {
-      eyebrow: 'YOUR DATA', title: 'Data deletion and privacy choices', intro: 'Choose the narrowest action that matches what you want: clear local records, disconnect a source, delete cloud data, or delete the full account.',
+      eyebrow: 'YOUR DATA', title: 'Data deletion and privacy choices', intro: 'Choose the narrowest action that matches what you want: clear local records, disconnect a source, delete cloud data, or delete the full account.', updated: '23 September 2026',
       sections: [
-        ['local', 'Local device data', '<p>Use BIL Settings and diary controls to remove entries or clear local app data. Removing the app or clearing its storage removes local records from that device, subject to operating-system backups you control.</p>'],
-        ['cloud', 'Cloud-synchronized data', '<p>Turn off cloud synchronization to stop future sync. Request deletion of eligible synced records through the in-app privacy controls. A full account deletion request covers associated cloud data as described on the Account deletion page.</p>'],
+        ['local', 'Local device data', '<p>Use BIL diary controls to remove individual entries. To clear the remaining local BIL data from a device, remove the app or clear its app storage using the operating system, subject to backups you control.</p>'],
+        ['cloud', 'Cloud-synchronized data', `<p>Use <b>More → Settings → Sharing & Privacy</b> to turn encrypted cloud sync off. For full account and associated cloud-data deletion, use <b>More → Help → Delete Account</b>. For a narrower verified privacy request, email <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a> from the account address.</p>`],
         ['health', 'HealthKit, Health Connect, and devices', '<p>Disconnect the integration in BIL and revoke permission in system settings. Source records remain in the source platform unless you delete them there. BIL cannot delete data owned by another app or hardware provider.</p>'],
         ['ai', 'AI, voice, and photos', '<p>Disable remote AI consent to stop new requests. Delete supported conversation history in BIL. Voice and meal-photo processing occurs only after your action; provider retention is governed by BIL configuration and the processor agreement.</p>'],
         ['ads', 'Advertising choices', '<p>Paid plans do not display ads. Free-tier ads, when production configuration and required consent are present, are contextual/non-personalized and must not receive health records, diary content, AI prompts, or body measurements.</p>'],
@@ -133,10 +133,10 @@ const legal = {
     },
     '/subscription-terms': {
       eyebrow: 'COMMERCE', title: 'Subscription terms', intro: 'BIL displays only plans and prices returned by the user’s verified Apple or Google storefront. Website text does not override the store checkout screen.',
-      updated: '10 September 2026',
+      updated: '23 September 2026',
       sections: [
         ['plans', 'Plans and regional availability', '<p>BIL may offer Free, BIL Premium, BIL Premium AI Coach, and BIL AI Boost. Availability differs by country and storefront economics. In some regions AI usage is offered through token-based Boost rather than an AI-inclusive subscription.</p>'],
-        ['community', 'Community is part of BIL Free', '<p>With the next BIL app update, Community, friends and private messages are included in BIL Free for signed-in adults. No Premium subscription or AI Boost purchase is required for these features. Community Guidelines, consent, privacy controls, blocking, reporting, and moderation continue to apply. Older app builds may still show a Premium prompt until they are updated. This change does not cancel or reprice an existing subscription, change other paid features, or alter AI token balances.</p>'],
+        ['community', 'Community is part of BIL Free', '<p>Community, friends and private messages are included in BIL Free for signed-in adults. No Premium subscription or AI Boost purchase is required for these features. Community Guidelines, consent, privacy controls, blocking, reporting, and moderation continue to apply. This does not cancel or reprice an existing subscription, change other paid features, or alter AI token balances.</p>'],
         ['billing', 'Billing and renewal', '<p>The store shows the final localized price, currency, tax, billing interval, and any introductory offer before confirmation. Auto-renewable subscriptions renew unless cancelled at least as required by the store. BIL does not independently charge a card.</p>'],
         ['ai', 'AI allowances and Boost', '<p>AI-inclusive plans may have documented weekly and monthly token allowances. AI Boost is a separate consumable or non-expiring balance only where the store and server verify it. An unanswered or rejected request must not be represented as a paid AI response.</p>'],
         ['cancel', 'Cancellation and refunds', '<p>Manage or cancel through Apple App Store or Google Play using the same store account used to purchase. Cancellation normally stops future renewal while access continues through the paid period. Refund eligibility and processing follow store policy and applicable law.</p>'],
@@ -159,24 +159,24 @@ const legal = {
       ],
     },
     '/support': {
-      eyebrow: 'WE ARE HERE', title: 'Support', intro: 'Get help with account access, privacy, food logging, subscriptions, connected health, AI Coach, and accessibility.',
+      eyebrow: 'WE ARE HERE', title: 'Support', intro: 'Get help with account access, privacy, food logging, subscriptions, connected health, AI Coach, and accessibility.', updated: '23 September 2026',
       sections: [
         ['contact', 'Contact support', `<p>Email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>. Include your platform, app version, language, and a concise description. Never send a password, one-time code, access token, full purchase token, identity document, or raw health export.</p>`],
         ['account', 'Account and sign-in', '<p>Use the in-app password reset flow and the same verified email used to create the account. If a reset link is expired, request a new one and use only the newest message.</p>'],
         ['purchase', 'Purchases and restore', '<p>Confirm you are signed into the same Apple or Google store account, then open BIL Plans and choose Restore Purchases. Store product prices are unavailable on emulators that do not provide real storefront metadata.</p>'],
         ['health', 'Connected health and devices', '<p>Check system permission, Bluetooth state, device compatibility, and the source shown in BIL. BIL never claims a device is connected when the platform has not verified it.</p>'],
-        ['privacy', 'Privacy, export, and deletion', `<p>Use in-app privacy controls for consent, synchronization, export, and deletion. For a verified request, email <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a> from the account address.</p>`],
+        ['privacy', 'Privacy, export, and deletion', `<p>Use <b>More → Settings → Sharing & Privacy</b> for consent, encrypted cloud sync, and data export. Use <b>More → Help → Delete Account</b> for full account deletion. For a verified privacy request, email <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a> from the account address.</p>`],
         ['safety', 'Security and community safety', `<p>Report suspected account compromise, harmful content, or a security issue to <a href="mailto:${ADMIN_EMAIL}">${ADMIN_EMAIL}</a>. Do not test against other users or include real health data in a vulnerability report.</p>`],
       ],
     },
     '/community-guidelines': {
       eyebrow: 'COMMUNITY SAFETY', title: 'Community guidelines', intro: 'BIL community spaces are for respectful, adult health and fitness support. This policy explains the rules for every community interaction, how to report harm, and how BIL uses human moderation.',
-      version: 'community-policy-v1', effective: '8 September 2026', updated: '8 September 2026',
+      version: 'community-policy-v1', effective: '8 September 2026', updated: '23 September 2026',
       sections: [
-        ['scope', 'Scope and acceptance', '<p>These rules apply to profiles, posts, comments, replies, likes and other reactions, friend and follow requests, friendships, private messages, reports, and community food contributions. Accepting <b>community-policy-v1</b> records your agreement to this version. If you do not accept, you may still use available account, privacy, reporting, and blocking controls, but you cannot publish or interact on surfaces that require acceptance. A new policy version requires a new acceptance.</p>'],
+        ['scope', 'Scope and acceptance', '<p>These rules apply to profiles, posts, comments, replies, likes and other reactions, friend requests, friendships, private messages, reports, and community food contributions. Accepting <b>community-policy-v1</b> records your agreement to this version. If you do not accept, you may still use available account, privacy, reporting, and blocking controls, but you cannot publish or interact on surfaces that require acceptance. A new policy version requires a new acceptance.</p>'],
         ['adults', 'Adults only', '<p>BIL and its community features are for people aged 18 or older. Do not create an account for a minor, solicit contact with minors, or post content that depicts or sexualizes minors.</p>'],
         ['respect', 'Respect and safety', '<p>Do not harass, threaten, shame, stalk, discriminate, impersonate, exploit, sexually solicit, or disclose another person’s private information. Never encourage self-harm, eating-disorder behavior, dangerous restriction, unsafe exercise, violence, or illegal activity. Do not evade a block or suspension by using another account.</p>'],
-        ['interactions', 'Likes, replies, and connections', '<p>Use comments, replies, and likes to support honest, relevant discussion. Do not coordinate harassment, manipulate reactions or engagement, create fake support, or use likes as pressure. Send friend or follow requests only for genuine BIL wellness interaction, respect an ignored or declined request, and never repeatedly contact or pursue someone who has not welcomed it.</p>'],
+        ['interactions', 'Likes, replies, and connections', '<p>Use comments, replies, and likes to support honest, relevant discussion. Do not coordinate harassment, manipulate reactions or engagement, create fake support, or use likes as pressure. Send friend requests only for genuine BIL wellness interaction, respect an ignored or declined request, and never repeatedly contact or pursue someone who has not welcomed it.</p>'],
         ['wellness', 'Wellness—not medical treatment', '<p>Community content reflects personal experiences and must not be presented as diagnosis or treatment. Do not claim guaranteed cures, prescribe or direct medication use, market unapproved medical products, encourage extreme dieting or unsafe training, or tell someone to ignore qualified care or emergency services.</p>'],
         ['content', 'Content you may share', '<p>Share only content you created or have permission to use. Do not post spam, scams, deceptive promotions, malware, explicit sexual content, graphic violence, hateful content, copyrighted material without authorization, or health records and identifiers belonging to another person.</p>'],
         ['contact-exchange', 'Keep contact inside BIL', '<p>Do not share or request email addresses, phone numbers, URLs or domains, social-media handles, or other contact details, and do not ask anyone to move a conversation outside BIL. BIL may automatically reject content containing those details or an off-platform invitation. Obscuring or spacing contact details to evade this protection is also prohibited.</p>'],
@@ -223,7 +223,7 @@ legal.ar = {
     ['liability','المسؤولية','<p>يُقدم BIL كما هو ضمن ما يسمح به القانون دون ضمان نتيجة صحية أو توفر بلا انقطاع. لا تستبعد هذه الشروط حقًا لا يمكن استبعاده قانونًا. أنت مسؤول عن قراراتك ونسخ بياناتك المهمة.</p>'],
     ['termination','إنهاء الاستخدام والتواصل',`<p>يمكنك التوقف أو إلغاء الاشتراك أو مسح البيانات أو حذف الحساب. قد يقيد BIL الحساب المخالف جوهريًا مع الحقوق القانونية المناسبة. للاستفسار: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>`],
   ]},
-  '/account-deletion': { eyebrow: 'تحكمك', title: 'حذف حساب BIL', intro: 'يمكنك بدء الحذف من داخل BIL أو عبر طلب إلكتروني. حذف التطبيق وحده لا يحذف الحساب السحابي.', sections: [
+  '/account-deletion': { eyebrow: 'تحكمك', title: 'حذف حساب BIL', intro: 'يمكنك بدء الحذف من داخل BIL أو عبر طلب إلكتروني. حذف التطبيق وحده لا يحذف الحساب السحابي.', updated: '23 سبتمبر 2026', sections: [
     ['in-app','الأسرع: من داخل التطبيق','<ol><li>سجل الدخول للحساب المطلوب.</li><li>افتح <b>المزيد ← المساعدة ← حذف الحساب</b>.</li><li>راجع النتائج واكتب <b>DELETE</b> ثم أرسل.</li><li>احتفظ برقم مرجع الطلب.</li></ol>'],
     ['web','إذا تعذر فتح التطبيق',`<p>أرسل من بريد الحساب إلى <a href="mailto:${PRIVACY_EMAIL}?subject=BIL%20account%20deletion%20request">${PRIVACY_EMAIL}</a> واكتب أنك تريد حذف حساب BIL. لا ترسل كلمة مرور أو رمز دخول أو إيصالًا كاملًا أو وثيقة هوية أو ملفًا صحيًا.</p>`],
     ['scope','ما الذي يشمله الحذف','<p>بعد التحقق، نحذف أو نزيل هوية الملف والسجلات الصحية المتزامنة ومحادثات الذكاء التي يحتفظ بها BIL والمحتوى المجتمعي المؤهل وتسجيلات الإشعارات والاستحقاقات النشطة. امسح البيانات المحلية من كل جهاز.</p>'],
@@ -231,17 +231,17 @@ legal.ar = {
     ['retention','التحقق والاحتفاظ والحالة','<p>يُنفذ الحذف فورًا عندما يكون العامل الآمن متاحًا؛ وإلا يحتفظ BIL برقم مرجع الطلب ويعيد محاولة الطلب في قائمة الانتظار خلال 15 دقيقة. يؤكد التطبيق حالة الاكتمال، ويمكن للدعم فحص أي طلب يبقى معلّقًا. قد نحتفظ بالحد الأدنى اللازم للأمان أو الاحتيال أو نزاع الشراء أو القانون ثم نحذفه عند انتهاء الالتزام.</p>'],
     ['subscriptions','ألغِ الفوترة بشكل منفصل','<p>حذف الحساب لا يلغي تلقائيًا اشتراكًا تديره Apple أو Google، لذلك قد تستمر الفوترة بعد حذف حساب BIL. ألغِه أولًا عبر <a href="https://apps.apple.com/account/subscriptions">إدارة اشتراكات Apple</a> أو <a href="https://play.google.com/store/account/subscriptions">إدارة اشتراكات Google Play</a>.</p>'],
   ]},
-  '/data-deletion': { eyebrow: 'بياناتك', title: 'حذف البيانات وخيارات الخصوصية', intro: 'اختر الإجراء المناسب: مسح المحلي، فصل المصدر، حذف السحابي، أو حذف الحساب كاملًا.', sections: [
-    ['local','البيانات المحلية','<p>استخدم إعدادات BIL واليوميات لحذف السجلات أو امسح بيانات التطبيق من النظام. تتحكم أنت في نسخ نظام التشغيل الاحتياطية.</p>'],
-    ['cloud','البيانات السحابية','<p>أوقف المزامنة لمنع رفع جديد، واستخدم أدوات الخصوصية لحذف السجلات المؤهلة. يشمل حذف الحساب البيانات السحابية المرتبطة كما هو موضح في صفحته.</p>'],
+  '/data-deletion': { eyebrow: 'بياناتك', title: 'حذف البيانات وخيارات الخصوصية', intro: 'اختر الإجراء المناسب: مسح المحلي، فصل المصدر، حذف السحابي، أو حذف الحساب كاملًا.', updated: '23 سبتمبر 2026', sections: [
+    ['local','البيانات المحلية','<p>استخدم أدوات اليوميات في BIL لحذف السجلات الفردية. ولمسح بقية بيانات BIL المحلية من جهاز، احذف التطبيق أو امسح بياناته من نظام التشغيل، مع مراعاة النسخ الاحتياطية التي تتحكم بها.</p>'],
+    ['cloud','البيانات السحابية',`<p>استخدم <b>المزيد ← الإعدادات ← المشاركة والخصوصية</b> لإيقاف المزامنة السحابية المشفّرة. ولحذف الحساب كاملًا والبيانات السحابية المرتبطة به استخدم <b>المزيد ← المساعدة ← حذف الحساب</b>. ولطلب خصوصية أضيق بعد التحقق، راسل <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a> من بريد الحساب.</p>`],
     ['health','المنصات والأجهزة الصحية','<p>افصل التكامل من BIL وألغِ الإذن من إعدادات النظام. تبقى السجلات الأصلية عند المزود حتى تحذفها هناك.</p>'],
     ['ai','الذكاء والصوت والصور','<p>أوقف موافقة الذكاء البعيد لمنع طلبات جديدة، واحذف سجل المحادثة المدعوم. لا يبدأ الصوت أو تحليل الصور إلا باختيارك.</p>'],
     ['ads','اختيارات الإعلانات','<p>لا تعرض الخطط المدفوعة إعلانات. إعلانات المجاني عند تفعيلها سياقية وغير مخصصة، ولا تستلم الصحة أو اليوميات أو أسئلة الذكاء أو قياسات الجسم.</p>'],
     ['request','اطلب المساعدة',`<p>راسل <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a> من بريد الحساب وحدد الفئة دون إرفاق بيانات حساسة.</p>`],
   ]},
-  '/subscription-terms': { eyebrow: 'التجارة', title: 'شروط الاشتراكات', intro: 'يعرض BIL الخطط والأسعار التي يعيدها متجر Apple أو Google الموثق للمستخدم. شاشة المتجر هي المرجع النهائي.', updated: '10 سبتمبر 2026', sections: [
+  '/subscription-terms': { eyebrow: 'التجارة', title: 'شروط الاشتراكات', intro: 'يعرض BIL الخطط والأسعار التي يعيدها متجر Apple أو Google الموثق للمستخدم. شاشة المتجر هي المرجع النهائي.', updated: '23 سبتمبر 2026', sections: [
     ['plans','الخطط والتوفر الإقليمي','<p>قد تتوفر Free وBIL Premium وBIL Premium AI Coach وBIL AI Boost. يختلف التوفر حسب البلد واقتصاد المتجر، وقد يتوفر الذكاء بنظام التوكينات بدل اشتراك شامل.</p>'],
-    ['community','المجتمع ضمن BIL Free','<p>مع تحديث تطبيق BIL القادم، يصبح المجتمع والأصدقاء والرسائل الخاصة ضمن BIL Free للبالغين المسجلين. لا تتطلب هذه الميزات اشتراك Premium أو شراء AI Boost. تبقى إرشادات المجتمع والموافقة وضوابط الخصوصية والحظر والإبلاغ والإشراف سارية. قد تعرض الإصدارات الأقدم طلب Premium حتى تحديثها. لا يلغي هذا التغيير أي اشتراك قائم أو يغير سعره، ولا يغير الميزات المدفوعة الأخرى أو أرصدة توكينات الذكاء الاصطناعي.</p>'],
+    ['community','المجتمع ضمن BIL Free','<p>المجتمع والأصدقاء والرسائل الخاصة ضمن BIL Free للبالغين المسجلين. لا تتطلب هذه الميزات اشتراك Premium أو شراء AI Boost. تبقى إرشادات المجتمع والموافقة وضوابط الخصوصية والحظر والإبلاغ والإشراف سارية. لا يلغي ذلك أي اشتراك قائم أو يغير سعره، ولا يغير الميزات المدفوعة الأخرى أو أرصدة توكينات الذكاء الاصطناعي.</p>'],
     ['billing','الفوترة والتجديد','<p>يعرض المتجر السعر النهائي والعملة والضريبة والفترة والعرض قبل التأكيد. تتجدد الاشتراكات تلقائيًا ما لم تُلغَ وفق مهلة المتجر. لا يخصم BIL من البطاقة مباشرة.</p>'],
     ['ai','حصص الذكاء وBoost','<p>قد تتضمن الخطط حصة أسبوعية وشهرية موضحة. لا يضاف Boost إلا بعد تحقق المتجر والخادم، ولا يُحسب طلب مرفوض أو بلا جواب كإجابة مدفوعة.</p>'],
     ['cancel','الإلغاء والاسترداد','<p>أدر أو ألغِ من Apple أو Google بالحساب نفسه. يوقف الإلغاء التجديد عادة مع بقاء الوصول حتى نهاية الفترة. يخضع الاسترداد للمتجر والقانون.</p>'],
@@ -258,19 +258,19 @@ legal.ar = {
     ['ai','حدود المدرب الذكي','<p>يعمل حارس محلي للأعراض العاجلة قبل الذكاء البعيد. قد يسيء الذكاء فهم اللغة أو السياق أو الأدلة. قد تحجب فلاتر أمان Gemini سؤالًا أو إجابة مرشحة؛ وعند الحجب لا تظهر إجابة من المزود ولا تُنطق، ولا تُحتسب الرسالة، ويطلب التطبيق إعادة الصياغة من دون إخفاء أعراض مهمة. الحجب ليس تقييمًا طبيًا. يساعد الذكاء في التثقيف والتنظيم لكنه ليس طبيبًا ولا ينفذ إجراءً دون موافقتك. عند وجود خطر فوري أو أعراض شديدة أو احتمال لإيذاء النفس، اتصل بخدمات الطوارئ المحلية الآن.</p>'],
     ['professional','متى تطلب مختصًا','<p>اطلب رعاية مؤهلة للأعراض والتشخيص والعلاج والصحة النفسية واضطرابات الأكل أو عند الشك في الأمان. اعرض القياسات الأصلية لا ملخص BIL وحده.</p>'],
   ]},
-  '/support': { eyebrow: 'نحن هنا', title: 'الدعم', intro: 'مساعدة للحساب والخصوصية وتسجيل الطعام والاشتراكات والصحة المتصلة والمدرب الذكي وإمكانية الوصول.', sections: [
+  '/support': { eyebrow: 'نحن هنا', title: 'الدعم', intro: 'مساعدة للحساب والخصوصية وتسجيل الطعام والاشتراكات والصحة المتصلة والمدرب الذكي وإمكانية الوصول.', updated: '23 سبتمبر 2026', sections: [
     ['contact','تواصل مع الدعم',`<p>راسل <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> واذكر المنصة وإصدار التطبيق واللغة ووصفًا مختصرًا. لا ترسل كلمة مرور أو رمز تحقق أو توكن أو إيصالًا كاملًا أو وثيقة هوية أو تصديرًا صحيًا.</p>`],
     ['account','الحساب والدخول','<p>استخدم استعادة كلمة المرور داخل التطبيق والبريد الموثق نفسه. إذا انتهت صلاحية الرابط اطلب رابطًا جديدًا واستخدم آخر رسالة فقط.</p>'],
     ['purchase','المشتريات والاستعادة','<p>تأكد من حساب Apple أو Google نفسه ثم افتح الخطط واختر «استعادة المشتريات». قد لا يعرض المحاكي أسعارًا لأنه لا يقدم بيانات متجر حقيقية.</p>'],
     ['health','الصحة المتصلة والأجهزة','<p>راجع إذن النظام وBluetooth والتوافق والمصدر الظاهر. لا يدعي BIL اتصال جهاز لم توثقه المنصة.</p>'],
-    ['privacy','الخصوصية والتصدير والحذف',`<p>استخدم إعدادات الخصوصية للموافقة والمزامنة والتصدير والحذف. للطلب الموثق راسل <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a>.</p>`],
+    ['privacy','الخصوصية والتصدير والحذف',`<p>استخدم <b>المزيد ← الإعدادات ← المشاركة والخصوصية</b> للموافقة والمزامنة السحابية المشفّرة وتصدير البيانات. واستخدم <b>المزيد ← المساعدة ← حذف الحساب</b> لحذف الحساب كاملًا. ولطلب خصوصية موثّق راسل <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a>.</p>`],
     ['safety','الأمان وسلامة المجتمع',`<p>بلّغ عن اختراق أو محتوى ضار أو ثغرة إلى <a href="mailto:${ADMIN_EMAIL}">${ADMIN_EMAIL}</a> من دون اختبار حسابات الآخرين أو تضمين بيانات صحية حقيقية.</p>`],
   ]},
-  '/community-guidelines': { eyebrow: 'سلامة المجتمع', title: 'إرشادات المجتمع', intro: 'مساحات مجتمع BIL مخصصة لدعم الصحة واللياقة باحترام بين البالغين. توضح هذه السياسة قواعد كل تفاعل مجتمعي، وكيفية الإبلاغ عن الضرر، وكيف يستخدم BIL الإشراف البشري.', version: 'community-policy-v1', effective: '8 سبتمبر 2026', updated: '8 سبتمبر 2026', sections: [
-    ['scope','النطاق والموافقة','<p>تنطبق هذه القواعد على الملفات الشخصية والمنشورات والتعليقات والردود والإعجابات والتفاعلات الأخرى وطلبات الصداقة والمتابعة والصداقات والرسائل الخاصة والبلاغات ومساهمات أغذية المجتمع. تسجّل الموافقة على <b>community-policy-v1</b> قبولك لهذه النسخة. إذا لم توافق، يمكنك الاستمرار في استخدام عناصر التحكم المتاحة للحساب والخصوصية والإبلاغ والحظر، لكن لا يمكنك النشر أو التفاعل في الأسطح التي تشترط الموافقة. يتطلب كل إصدار جديد موافقة جديدة.</p>'],
+  '/community-guidelines': { eyebrow: 'سلامة المجتمع', title: 'إرشادات المجتمع', intro: 'مساحات مجتمع BIL مخصصة لدعم الصحة واللياقة باحترام بين البالغين. توضح هذه السياسة قواعد كل تفاعل مجتمعي، وكيفية الإبلاغ عن الضرر، وكيف يستخدم BIL الإشراف البشري.', version: 'community-policy-v1', effective: '8 سبتمبر 2026', updated: '23 سبتمبر 2026', sections: [
+    ['scope','النطاق والموافقة','<p>تنطبق هذه القواعد على الملفات الشخصية والمنشورات والتعليقات والردود والإعجابات والتفاعلات الأخرى وطلبات الصداقة والصداقات والرسائل الخاصة والبلاغات ومساهمات أغذية المجتمع. تسجّل الموافقة على <b>community-policy-v1</b> قبولك لهذه النسخة. إذا لم توافق، يمكنك الاستمرار في استخدام عناصر التحكم المتاحة للحساب والخصوصية والإبلاغ والحظر، لكن لا يمكنك النشر أو التفاعل في الأسطح التي تشترط الموافقة. يتطلب كل إصدار جديد موافقة جديدة.</p>'],
     ['adults','للبالغين فقط','<p>تطبيق BIL وميزات المجتمع مخصصة لمن يبلغ 18 عامًا أو أكثر. لا تنشئ حسابًا لقاصر، ولا تطلب التواصل مع القاصرين، ولا تنشر محتوى يصور القاصرين أو يستغلهم.</p>'],
     ['respect','الاحترام والسلامة','<p>يُمنع التحرش والتهديد والتنمر والملاحقة والتمييز والانتحال والاستغلال والاستدراج الجنسي وكشف معلومات الآخرين الخاصة. لا تشجع إيذاء النفس أو اضطرابات الأكل أو التقييد الخطر أو التمرين غير الآمن أو العنف أو النشاط غير القانوني. لا تتحايل على الحظر أو الإيقاف باستخدام حساب آخر.</p>'],
-    ['interactions','الإعجابات والردود والعلاقات','<p>استخدم التعليقات والردود والإعجابات لدعم نقاش صادق ومرتبط بالموضوع. لا تنسّق التحرش، ولا تتلاعب بالتفاعلات أو الانتشار، ولا تنشئ دعمًا زائفًا، ولا تستخدم الإعجاب للضغط. أرسل طلبات الصداقة أو المتابعة فقط لتفاعل عافية حقيقي داخل BIL، واحترم الطلب المتجاهل أو المرفوض، ولا تكرر التواصل أو الملاحقة إذا لم يرحب الشخص بذلك.</p>'],
+    ['interactions','الإعجابات والردود والعلاقات','<p>استخدم التعليقات والردود والإعجابات لدعم نقاش صادق ومرتبط بالموضوع. لا تنسّق التحرش، ولا تتلاعب بالتفاعلات أو الانتشار، ولا تنشئ دعمًا زائفًا، ولا تستخدم الإعجاب للضغط. أرسل طلبات الصداقة فقط لتفاعل عافية حقيقي داخل BIL، واحترم الطلب المتجاهل أو المرفوض، ولا تكرر التواصل أو الملاحقة إذا لم يرحب الشخص بذلك.</p>'],
     ['wellness','العافية وليست علاجًا طبيًا','<p>يعكس محتوى المجتمع تجارب شخصية ولا يجوز تقديمه كتشخيص أو علاج. لا تدّعِ علاجًا مضمونًا، ولا تصف أو توجه استخدام دواء، ولا تسوّق منتجات طبية غير معتمدة، ولا تشجع الحمية القاسية أو التدريب غير الآمن، ولا تطلب من شخص تجاهل الرعاية المؤهلة أو خدمات الطوارئ.</p>'],
     ['content','المحتوى الذي يمكنك مشاركته','<p>شارك فقط ما أنشأته أو تملك إذنًا لاستخدامه. يُمنع السبام والاحتيال والترويج المضلل والبرمجيات الضارة والمحتوى الجنسي الصريح والعنف المصور وخطاب الكراهية والمواد المحمية دون إذن والسجلات الصحية أو المعرّفات الخاصة بشخص آخر.</p>'],
     ['contact-exchange','أبقِ التواصل داخل BIL','<p>لا تشارك أو تطلب عناوين البريد الإلكتروني أو أرقام الهاتف أو الروابط أو أسماء النطاقات أو معرّفات شبكات التواصل أو أي بيانات اتصال أخرى، ولا تطلب من أحد نقل المحادثة خارج BIL. قد يرفض BIL تلقائيًا المحتوى الذي يتضمن هذه البيانات أو دعوة للتواصل خارج المنصة. كما يُمنع تمويه بيانات الاتصال أو تفريق حروفها للتحايل على هذه الحماية.</p>'],
