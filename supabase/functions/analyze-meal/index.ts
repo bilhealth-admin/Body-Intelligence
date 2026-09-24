@@ -2,6 +2,7 @@
 // not unless the Deno VS Code extension is active.
 // @ts-ignore Deno URL import
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { mealVisionConsentIsCurrent } from "./consent.ts";
 import { buildProviderRequest } from "./providers/builders.ts";
 import { loadProviderConfig } from "./providers/config.ts";
 import { normalizeProviderResponse } from "./providers/normalize.ts";
@@ -103,6 +104,18 @@ deno.serve(async (request: Request) => {
   const admin = createClient(url, serviceKey);
   const { data, error } = await auth.auth.getUser();
   if (error || !data.user) return reply({ error: "invalid_session" }, 401);
+  const { data: consent, error: consentError } = await admin
+    .from("bil_consent_receipts")
+    .select("granted,policy_version")
+    .eq("user_id", data.user.id)
+    .eq("purpose", "meal_vision_ai")
+    .order("recorded_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (consentError) return reply({ error: "consent_check_failed" }, 503);
+  if (!mealVisionConsentIsCurrent(consent)) {
+    return reply({ error: "meal_vision_ai_consent_required" }, 403);
+  }
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (Number.isFinite(contentLength) && contentLength > 17 * 1024 * 1024) {
     return reply({ error: "image_size_out_of_range" }, 413);

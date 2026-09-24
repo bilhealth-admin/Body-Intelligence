@@ -171,7 +171,7 @@ const _privacySectionsAr = <(String, String)>[
   ),
   (
     '3. الصور والصوت والخدمات المتصلة',
-    'عند تفعيل «الذكاء المخصص» وطرح سؤال على مدرب الذكاء الاصطناعي، قد يرسل BIL أقل قدر من السياق ذي الصلة، مثل بيانات محددة من الملف واليوميات والصحة المتصلة، عبر بوابة BIL الآمنة إلى مزود الذكاء الاصطناعي المهيأ للإجابة عن ذلك الطلب. لا تُرسل صورة الوجبة إلا إذا اخترت التحليل وكانت بوابة الخادم الآمنة مهيأة. في مسار الكلام الحالي على الهاتف، يستلم خادم BIL وGemini النص المتعرّف عليه فقط، وليس صوت الميكروفون الخام؛ وقد تعالج خدمة Apple أو خدمة التعرّف على الكلام التابعة لمنصة أخرى الصوت الذي بدأتَه وفق شروطها وإعداداتها. ويمكنك سحب أذونات الجهاز من إعدادات النظام.',
+    'بعد موافقة صريحة، قد يرسل BIL سؤالك والفئات التي اخترتها—مثل الوزن والأهداف والقياسات والتغذية والوجبات والماء والتفضيلات والنشاط والتدريب والنوم والعادات وما يصل إلى آخر 12 رسالة—إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، لإنشاء إجابتك. ويتطلب تحليل الوجبة موافقة منفصلة قبل إرسال الصورة التي اخترتها ولغة التطبيق وبيانات الطلب التقنية إلى Google Gemini لاقتراح الطعام والحصص. لا يُسجّل شيء حتى تؤكد النتيجة. يمكنك الرفض واستخدام الميزات المحلية والإدخال اليدوي، وسحب الموافقة لاحقًا من إعدادات المدرب أو الخصوصية. يستلم BIL وGoogle Gemini النص المتعرّف عليه لا صوت الميكروفون الخام.',
   ),
   (
     '4. المجتمع والسلامة',
@@ -248,7 +248,7 @@ const _privacySections = <(String, String)>[
   ),
   (
     '3. Images, voice, and connected services',
-    'When Personalized Intelligence is enabled and you ask the AI Coach, BIL may send the minimum relevant context—such as selected profile, diary, and connected-health data—through BIL’s secure gateway to its configured AI provider to answer that request. A meal image is sent only when you choose analysis and the secure server gateway is configured. In the current mobile speech flow, BIL’s backend and Gemini receive only the recognized transcript, not raw microphone audio; Apple or another platform speech-recognition service may process the audio you initiate under its own terms and settings. Device permissions can be withdrawn in system settings.',
+    'After explicit consent, BIL may send your question and selected categories—such as weight, goals and measurements; nutrition, meals, water and preferences; activity and training; sleep and habits; and up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Meal-photo analysis requires separate consent before the selected image, app language and necessary technical request metadata are sent to Google Gemini to suggest foods and portions. Nothing is logged until you confirm it. You may decline and use local/manual features, and withdraw consent later in AI Coach or Privacy settings. BIL and Google Gemini receive recognized text, not raw microphone audio.',
   ),
   (
     '4. Community and safety',

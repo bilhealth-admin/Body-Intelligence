@@ -24,7 +24,7 @@ void main() {
   });
 
   test(
-    'Coach settings uses consent policy v2 and exposes every context focus',
+    'Coach settings uses consent policy v3 and exposes every context focus',
     () {
       final page = File(
         'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
@@ -34,7 +34,7 @@ void main() {
         'ai_coach_settings_components.dart',
       ).readAsStringSync();
 
-      expect(page, contains("'p_policy_version': '2'"));
+      expect(page, contains("'p_policy_version': '3'"));
       expect(page, isNot(contains("policyVersion = '1'")));
       expect(page, contains('CoachContextPreferences.storageKey'));
       for (final focus in CoachContextFocus.values) {
@@ -47,7 +47,7 @@ void main() {
       }
       expect(
         page,
-        contains('last 12 turns sent with that request'),
+        contains('recent conversation context can be sent to Google Gemini'),
         reason: 'The disclosure must match the bounded conversation payload.',
       );
     },
@@ -58,10 +58,11 @@ void main() {
       'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
     ).readAsStringSync();
 
-    expect(source, contains('Use your selected context with BIL?'));
-    expect(source, contains('through BIL’s secure gateway to Gemini'));
+    expect(source, contains('Send selected personal data to Google Gemini?'));
+    expect(source, contains('third-party AI service operated by Google'));
     expect(source, contains('Raw microphone audio is not sent'));
-    expect(source, contains('platform speech service may process it'));
+    expect(source, contains("Don't Allow"));
+    expect(source, contains('Allow & Continue'));
   });
 
   test('non-core locales retain reviewed Coach privacy and focus copy', () {

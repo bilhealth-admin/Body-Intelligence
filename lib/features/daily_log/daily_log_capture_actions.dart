@@ -238,6 +238,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         );
         return;
       }
+      if (!await ensureMealVisionConsent(context) || !mounted) return;
       XFile? image;
       try {
         if (recoveredOnly) {

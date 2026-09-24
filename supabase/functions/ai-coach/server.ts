@@ -770,29 +770,17 @@ export async function handler(
       body: rawBody,
     });
     voiceAudio = boundedVoiceAudio(body.audio);
-    const consentFuture = adminClient.rpc("bil_has_remote_ai_consent", {
-      p_owner_id: ownerId,
-    });
-    const receiptFuture = voiceAudio == null
-      ? Promise.resolve({ data: null, error: null })
-      : adminClient
-        .from("bil_consent_receipts")
-        .select("granted,policy_version")
-        .eq("user_id", ownerId)
-        .eq("purpose", "remote_ai")
-        .order("recorded_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-    const [{ data: consent, error: consentError }, receiptResult] =
-      await Promise.all([consentFuture, receiptFuture]);
+    const { data: consent, error: consentError } = await adminClient.rpc(
+      "bil_has_remote_ai_consent",
+      { p_owner_id: ownerId },
+    );
     if (consentError) throw new Error("consent_check_failed");
-    if (consent !== true) throw new Error("ai_consent_required");
-    if (voiceAudio != null) {
-      const { data: receipt, error: receiptError } = receiptResult;
-      if (receiptError) throw new Error("consent_check_failed");
-      if (receipt?.granted !== true || receipt?.policy_version !== "2") {
-        throw new Error("voice_ai_consent_required");
-      }
+    if (consent !== true) {
+      throw new Error(
+        voiceAudio == null
+          ? "ai_consent_required"
+          : "voice_ai_consent_required",
+      );
     }
     requestId = String(body.request_id ?? "").trim();
     if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(requestId)) {

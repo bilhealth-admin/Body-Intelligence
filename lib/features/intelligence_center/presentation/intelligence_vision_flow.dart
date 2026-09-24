@@ -23,6 +23,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     }
     try {
       final copy = MealVisionUiCopy.ofLocale(Localizations.localeOf(context));
+      if (!await ensureMealVisionConsent(context) || !mounted) return;
       final source = await showModalBottomSheet<ImageSource>(
         context: context,
         useSafeArea: true,

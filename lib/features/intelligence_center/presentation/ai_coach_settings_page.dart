@@ -97,10 +97,12 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     try {
       final consent = await client.rpc('bil_get_remote_ai_consent');
       final consentMap = Map<String, Object?>.from(consent as Map);
-      result['remote_ai_consent'] = consentMap['granted'] == true;
+      result['remote_ai_consent'] =
+          consentMap['granted'] == true &&
+          consentMap['policy_version']?.toString() == '3';
       result['cloud_voice_consent'] =
           consentMap['granted'] == true &&
-          consentMap['policy_version']?.toString() == '2';
+          consentMap['policy_version']?.toString() == '3';
       result['consent_status_available'] = true;
     } on Object {
       result['remote_ai_consent'] = false;
@@ -134,7 +136,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         'bil_record_consent',
         params: <String, Object?>{
           'p_purpose': 'remote_ai',
-          'p_policy_version': '2',
+          'p_policy_version': '3',
           'p_granted': granted,
         },
       );
@@ -371,15 +373,15 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
           enabled: !changingConsent,
           onChanged: _setRemoteAiConsent,
           title: t(
-            'Personalized intelligence',
+            'Google Gemini AI consent',
             'ذكاء مخصص لك',
             'Intelligence personnalisée',
             'Inteligencia personalizada',
             'Kişiselleştirilmiş zekâ',
           ),
           subtitle: t(
-            'When enabled, only the bounded context needed for your question is sent to BIL’s Gemini service. Conversation history remains local except for the last 12 turns sent with that request. Turn this off at any time.',
-            'عند التفعيل، يُرسل إلى خدمة Gemini التابعة لـBIL فقط السياق المحدود اللازم لسؤالك. يبقى سجل المحادثة محليًا باستثناء آخر 12 رسالة تُرسل مع ذلك الطلب. يمكنك إيقافه في أي وقت.',
+            'When enabled, your question and selected weight/body, nutrition, activity, sleep, habit, and recent conversation context can be sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. Turn this off at any time; local BIL features remain available.',
+            'عند التفعيل، قد يُرسل سؤالك والسياق المحدد عن الوزن والجسم والتغذية والنشاط والنوم والعادات والمحادثة الحديثة إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط للإجابة عن طلبك. يمكنك إيقافه في أي وقت، وتبقى ميزات BIL المحلية متاحة.',
             'Lorsque cette option est activée, seul le contexte limité nécessaire à votre question est envoyé au service Gemini de BIL. L’historique reste local, hormis les 12 derniers messages envoyés avec cette requête. Vous pouvez désactiver cette option à tout moment.',
             'Cuando está activado, solo se envía al servicio Gemini de BIL el contexto limitado necesario para tu pregunta. El historial permanece local, salvo los últimos 12 mensajes enviados con esa solicitud. Puedes desactivarlo en cualquier momento.',
             'Etkinleştirildiğinde yalnızca sorunuz için gereken sınırlı bağlam BIL’in Gemini hizmetine gönderilir. Konuşma geçmişi, istekle gönderilen son 12 mesaj dışında yerel kalır. İstediğiniz zaman kapatabilirsiniz.',

@@ -38,6 +38,7 @@ import '../nutrition/presentation/product_identity_copy.dart';
 import '../nutrition/presentation/barcode_food_review_dialog.dart';
 import '../nutrition/presentation/barcode_runtime_copy.dart';
 import '../nutrition/presentation/meal_vision_ui_copy.dart';
+import '../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../nutrition/presentation/meal_image_review_dialog.dart';
 import '../nutrition/services/food_search_assistance.dart';
 import '../nutrition/services/food_presentation_localizer.dart';

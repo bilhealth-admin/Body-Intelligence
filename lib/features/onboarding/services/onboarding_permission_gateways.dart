@@ -73,7 +73,7 @@ final class SupabaseOnboardingRemoteAiGateway
           .rpc('bil_get_remote_ai_consent')
           .timeout(_rpcTimeout);
       if (raw is! Map) return OnboardingRemoteAiResult.failed;
-      return raw['granted'] == true
+      return raw['granted'] == true && raw['policy_version'] == '3'
           ? OnboardingRemoteAiResult.granted
           : OnboardingRemoteAiResult.declined;
     } on Object {
@@ -93,7 +93,7 @@ final class SupabaseOnboardingRemoteAiGateway
             'bil_record_consent',
             params: <String, Object?>{
               'p_purpose': 'remote_ai',
-              'p_policy_version': '2',
+              'p_policy_version': '3',
               'p_granted': granted,
             },
           )

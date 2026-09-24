@@ -55,7 +55,7 @@ class QuestionScopedCoachCloudContextProjector
 /// Accept only the current, explicit consent receipt used by the release.
 /// The Edge Function repeats this check as defense in depth.
 bool isCurrentRemoteAiConsentGranted(Object? raw) =>
-    raw is Map && raw['granted'] == true && raw['policy_version'] == '2';
+    raw is Map && raw['granted'] == true && raw['policy_version'] == '3';
 
 /// Returns true only for an HTTP(S) endpoint bound to this device's exact
 /// loopback host. LAN hosts, public hosts, lookalikes, and other schemes are

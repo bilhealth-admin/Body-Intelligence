@@ -35,6 +35,7 @@ import 'runtime_copy_health_devices_review.dart';
 import 'runtime_copy_health_device_status.dart';
 import 'runtime_copy_community_review.dart';
 import 'runtime_copy_recipe_editor.dart';
+import 'runtime_copy_apple_ai_privacy.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -62,6 +63,11 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final appleAiPrivacy = AppleAiPrivacyRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (appleAiPrivacy != null) return appleAiPrivacy;
     final recipeEditor = RecipeEditorRuntimeCopy.resolve(english, localeTag);
     if (recipeEditor != null) return recipeEditor;
     final communityReview = CommunityReviewCopy.resolve(english, localeTag);

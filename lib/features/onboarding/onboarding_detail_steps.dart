@@ -452,7 +452,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
     return _StepView(
       title: t('Choose whether to use cloud AI'),
       subtitle: t(
-        'AI Coach is optional, is not a doctor, and receives text context only after explicit consent. Voice recognition remains separate from this consent.',
+        'AI Coach is optional. With consent, selected personal context is sent to Google Gemini, a third-party AI service operated by Google, only to answer your request. You may decline and keep local features.',
       ),
       skip: () => unawaited(_setAiConsent(false, thenContinue: true)),
       body: Column(
@@ -516,6 +516,31 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
 
   Future<void> _setAiConsent(bool granted, {bool thenContinue = false}) async {
     if (_permissionBusy) return;
+    if (granted) {
+      final accepted = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => AlertDialog.adaptive(
+          title: Text(t('Send selected personal data to Google Gemini?')),
+          content: Text(
+            t(
+              'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(t("Don't Allow")),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(t('Allow & Continue')),
+            ),
+          ],
+        ),
+      );
+      if (accepted != true || !mounted) return;
+    }
     if (!granted) {
       // Opting out is local and safe. Show the resulting state immediately
       // even if the remote gateway is slow or unavailable.

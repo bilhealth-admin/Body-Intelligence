@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/app_localizations.dart';
@@ -13,6 +14,7 @@ import '../cloud_platform/providers/cloud_sync_providers.dart';
 import '../cloud_platform/services/cloud_manual_sync_service.dart';
 import '../cloud_platform/services/cloud_sync_consent_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../nutrition/presentation/meal_vision_consent_gate.dart';
 import 'cloud_sync_status_presentation.dart';
 import 'reference_settings_copy.dart';
 
@@ -301,6 +303,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             onTap: () => context.push('/settings/diary/sharing'),
           ),
           const _CloudSyncConsentTile(),
+          const _MealVisionConsentTile(),
           ListTile(
             leading: const BilSemanticIconBadge(
               kind: BilSemanticIconKind.profile,
@@ -386,6 +389,83 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _MealVisionConsentTile extends StatefulWidget {
+  const _MealVisionConsentTile();
+
+  @override
+  State<_MealVisionConsentTile> createState() => _MealVisionConsentTileState();
+}
+
+class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
+  bool _saving = false;
+  late Future<bool> _current = _load();
+
+  Future<bool> _load() async {
+    final row = await Supabase.instance.client
+        .from('bil_consent_receipts')
+        .select('granted,policy_version')
+        .eq('purpose', mealVisionConsentPurpose)
+        .order('recorded_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+    return row?['granted'] == true &&
+        row?['policy_version']?.toString() == mealVisionConsentPolicyVersion;
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<bool>(
+    future: _current,
+    builder: (context, snapshot) {
+      return SwitchListTile.adaptive(
+        key: const Key('meal-vision-ai-consent'),
+        value: snapshot.data ?? false,
+        onChanged: snapshot.hasData && !_saving ? _setConsent : null,
+        title: Text(_privacyText(context, 'Google Gemini meal-photo consent')),
+        subtitle: Text(
+          _privacyText(
+            context,
+            'Only when enabled, a selected photo, app language, and technical request metadata may be sent to Google’s third-party AI service to suggest food. Turn it off to stop new uploads.',
+          ),
+        ),
+        secondary: _saving
+            ? const SizedBox.square(
+                dimension: 22,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.privacy,
+                iconOverride: Icons.image_search_rounded,
+              ),
+      );
+    },
+  );
+
+  Future<void> _setConsent(bool next) async {
+    setState(() => _saving = true);
+    var granted = next;
+    if (next) granted = await ensureMealVisionConsent(context);
+    if (!next) {
+      try {
+        await Supabase.instance.client.rpc(
+          'bil_record_consent',
+          params: const <String, Object?>{
+            'p_purpose': mealVisionConsentPurpose,
+            'p_policy_version': mealVisionConsentPolicyVersion,
+            'p_granted': false,
+          },
+        );
+      } on Object {
+        granted = true;
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _current = Future<bool>.value(granted);
+    });
   }
 }
 

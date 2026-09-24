@@ -19,6 +19,7 @@ import '../foods/providers/food_provider.dart';
 import '../nutrition/presentation/food_barcode_scanner_page.dart';
 import '../nutrition/presentation/meal_image_review_dialog.dart';
 import '../nutrition/presentation/meal_vision_ui_copy.dart';
+import '../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../nutrition/services/bil_speech_to_text.dart';
 import '../nutrition/services/food_presentation_localizer.dart';
 import '../nutrition/services/meal_image_analysis_service.dart';

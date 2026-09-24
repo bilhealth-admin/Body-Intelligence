@@ -883,7 +883,7 @@ Deno.test("missing remote AI consent blocks before reservation and provider", as
   assertEquals(providerCalls, 0);
 });
 
-Deno.test("voice uses v2 consent and one voice-seconds reservation", async () => {
+Deno.test("voice uses current consent and one voice-seconds reservation", async () => {
   const calls: Array<{ name: string; params: Record<string, unknown> }> = [];
   let providerContents: unknown[] = [];
   const audioData = btoa(String.fromCharCode(...new Uint8Array(48)));

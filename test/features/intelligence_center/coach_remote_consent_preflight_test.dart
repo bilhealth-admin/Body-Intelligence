@@ -69,7 +69,7 @@ void main() {
     );
 
     for (final receipt in <Object?>[
-      const <String, Object?>{'granted': false, 'policy_version': '2'},
+      const <String, Object?>{'granted': false, 'policy_version': '3'},
       const <String, Object?>{'granted': true, 'policy_version': '1'},
       const <String, Object?>{'granted': true},
       null,
@@ -236,7 +236,7 @@ void main() {
       expect(
         isCurrentRemoteAiConsentGranted(const <String, Object?>{
           'granted': 1,
-          'policy_version': '2',
+          'policy_version': '3',
         }),
         isFalse,
       );
@@ -253,7 +253,7 @@ void main() {
 
 const _grantedConsent = <String, Object?>{
   'granted': true,
-  'policy_version': '2',
+  'policy_version': '3',
 };
 
 LlamaCppLocalGateway _gateway(

@@ -56,6 +56,7 @@ import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
 import '../../nutrition/presentation/meal_vision_ui_copy.dart';
+import '../../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../intelligence_locale_copy.dart';
 import '../ai_coach_chat_copy.dart';
 import 'coach_message_text.dart';

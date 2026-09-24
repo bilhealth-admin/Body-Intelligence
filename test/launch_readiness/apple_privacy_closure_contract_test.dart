@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_apple_ai_privacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String _declarationFor(String manifest, String dataType) {
@@ -25,6 +27,18 @@ String _librarySource(String path) {
 }
 
 void main() {
+  test('Apple AI consent copy is complete across all 25 locales', () {
+    expect(AppleAiPrivacyRuntimeCopy.supported, RuntimeCopy.supported);
+    for (final entry in AppleAiPrivacyRuntimeCopy.values.entries) {
+      expect(entry.value.keys.toSet(), RuntimeCopy.supported, reason: entry.key);
+      for (final locale in RuntimeCopy.supported) {
+        final localized = RuntimeCopy.resolve(entry.key, locale);
+        expect(localized, isNotNull, reason: '$locale: ${entry.key}');
+        expect(localized!.trim(), isNotEmpty, reason: '$locale: ${entry.key}');
+      }
+    }
+  });
+
   test('Apple privacy manifest matches the current linked-data boundary', () {
     final manifest = File(
       'ios/Runner/PrivacyInfo.xcprivacy',
@@ -223,8 +237,8 @@ void main() {
       'treats this authenticated processing as linked to the account',
       'the current selective sync scope is profile/body settings, weight, and hydration',
       'dietary preferences and recent nutrition, weight, activity, sleep, or verified connected-health summaries',
-      'Apple or another platform speech service may process that initiated audio',
-      'BIL’s backend and Gemini receive the recognized transcript—not raw microphone audio',
+      'Google Gemini, a third-party AI service operated by Google',
+      'Meal-photo analysis:',
       'Supabase service and authentication logs can include user ID, IP address, user agent',
       'stores only your language choice in browser local storage',
       'does not currently set BIL marketing cookies or load a BIL web-analytics beacon',
@@ -237,7 +251,10 @@ void main() {
     expect(publicPolicy, contains('لا يحمّل أداة تحليلات ويب من BIL'));
 
     expect(inAppPolicy, contains("bilLegalPolicyRevision = '2026-09-05'"));
-    expect(inAppPolicy, contains('receive only the recognized transcript'));
+    expect(
+      inAppPolicy,
+      contains('Google Gemini, a third-party AI service operated by Google'),
+    );
     expect(inAppPolicy, contains('not raw microphone audio'));
     expect(inAppPolicy, isNot(contains('Meal images and voice are not sent')));
     expect(
@@ -258,6 +275,42 @@ void main() {
     ]) {
       expect(inventory, contains(documented));
     }
+  });
+
+  test('third-party AI consent is explicit and enforced before transmission', () {
+    final coachUi = File(
+      'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
+    ).readAsStringSync();
+    final mealConsent = File(
+      'lib/features/nutrition/presentation/meal_vision_consent_gate.dart',
+    ).readAsStringSync();
+    final mealServer = File(
+      'supabase/functions/analyze-meal/index.ts',
+    ).readAsStringSync();
+    final coachServer = File(
+      'supabase/functions/ai-coach/server.ts',
+    ).readAsStringSync();
+    final migration = File(
+      'supabase/migrations/202609240001_apple_ai_consent_policy_enforcement.sql',
+    ).readAsStringSync();
+
+    for (final source in <String>[coachUi, mealConsent]) {
+      expect(source, contains('third-party AI service operated by Google'));
+      expect(source, contains('Google Gemini'));
+    }
+    expect(coachUi, contains("'p_policy_version': '3'"));
+    expect(
+      mealConsent,
+      contains("mealVisionConsentPurpose = 'meal_vision_ai'"),
+    );
+    expect(mealConsent, contains('Nothing is logged until you confirm'));
+    expect(mealServer, contains('meal_vision_ai_consent_required'));
+    expect(
+      mealServer.indexOf('meal_vision_ai_consent_required'),
+      lessThan(mealServer.indexOf('bil_reserve_ai_vision')),
+    );
+    expect(coachServer, contains('bil_has_remote_ai_consent'));
+    expect(migration, contains("r.policy_version = '3'"));
   });
 
   test('public website and iOS release stay tracking-free', () {

@@ -550,8 +550,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                   const SizedBox(height: 14),
                   Text(
                     tr(
-                      'Use your selected context with BIL?',
-                      'هل تسمح لـBIL باستخدام السياق الذي اخترته؟',
+                      'Send selected personal data to Google Gemini?',
+                      'إرسال بيانات شخصية محددة إلى Google Gemini؟',
                     ),
                     textAlign: TextAlign.center,
                     style: Theme.of(sheetContext).textTheme.titleLarge
@@ -560,8 +560,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                   const SizedBox(height: 9),
                   Text(
                     tr(
-                      'Only relevant records from the categories you selected, recent turns needed for continuity, and the text you submit are sent through BIL’s secure gateway to Gemini. Raw microphone audio is not sent to BIL or Gemini; your device or platform speech service may process it under its settings.',
-                      'تُرسل عبر بوابة BIL الآمنة إلى Gemini فقط السجلات ذات الصلة من الفئات التي اخترتها، والرسائل الحديثة اللازمة لاستمرار المحادثة، والنص الذي ترسله. لا يُرسل صوت الميكروفون الخام إلى BIL أو Gemini، وقد تعالجه خدمة الكلام في الجهاز أو المنصة وفق إعداداتها.',
+                      'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.',
+                      'إذا وافقت، يرسل BIL سؤالك والسياق الذي اخترته فقط—مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ وما يصل إلى آخر 12 رسالة—إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، لإنشاء الإجابة التي طلبتها. لا يُرسل صوت الميكروفون الخام إلى BIL أو Google Gemini. يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، وسحب الموافقة لاحقًا من إعدادات مدرب BIL.',
                     ),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -574,17 +574,12 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => Navigator.pop(sheetContext, true),
-                      child: Text(
-                        tr(
-                          'Enable personal BIL and continue',
-                          'فعّل BIL المخصص وتابع',
-                        ),
-                      ),
+                      child: Text(tr('Allow & Continue', 'السماح والمتابعة')),
                     ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(sheetContext, false),
-                    child: Text(tr('Not now', 'ليس الآن')),
+                    child: Text(tr("Don't Allow", 'عدم السماح')),
                   ),
                 ],
               ),
@@ -597,7 +592,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         'bil_record_consent',
         params: const <String, Object?>{
           'p_purpose': 'remote_ai',
-          'p_policy_version': '2',
+          'p_policy_version': '3',
           'p_granted': true,
         },
       );

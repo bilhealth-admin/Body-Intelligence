@@ -244,6 +244,10 @@ extension _FoodLogActions on _FoodLogPageState {
       }
       return;
     }
+    if (!await ensureMealVisionConsent(context) || !mounted) {
+      _updateState(() => mealImageBusy = false);
+      return;
+    }
 
     XFile? image;
     try {

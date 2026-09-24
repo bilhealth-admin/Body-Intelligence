@@ -96,7 +96,7 @@ final class _CloudSpy implements CoachCloudAccess {
   @override
   Future<Object?> readRemoteAiConsent() async {
     consentReads++;
-    return const <String, Object?>{'granted': true, 'policy_version': '2'};
+    return const <String, Object?>{'granted': true, 'policy_version': '3'};
   }
 
   @override
