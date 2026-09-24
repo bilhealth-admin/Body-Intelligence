@@ -1,6 +1,10 @@
 part of 'app_localizations.dart';
 
 const _appLocaleArabicRuntime = {
+  'Body context': 'سياق الجسم',
+  'Nothing notable': 'لا شيء يُذكر',
+  'Add sleep, travel, stress, hydration, and other context on a focused page.':
+      'أضف النوم والسفر والتوتر والترطيب والسياق الآخر في صفحة مخصصة.',
   'BIL is preparing your local data': 'يُجهّز BIL بياناتك المحلية',
   'Could not open your local data': 'تعذر فتح بياناتك المحلية',
   'Your data was not reset or uploaded. Try opening it again.':

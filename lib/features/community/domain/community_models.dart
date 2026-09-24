@@ -54,6 +54,19 @@ enum CommunityMessagePermission { friends, nobody }
 
 enum CommunityPostModerationStatus { pending, approved, rejected }
 
+enum CommunityPostModerationVisibility {
+  visible,
+  hiddenByModerator,
+  removedByModerator;
+
+  static CommunityPostModerationVisibility fromWire(Object? value) =>
+      switch (value) {
+        'hidden_by_moderator' => hiddenByModerator,
+        'removed_by_moderator' => removedByModerator,
+        _ => visible,
+      };
+}
+
 enum CommunityPostModerationDecision { approved, rejected }
 
 enum CommunityFriendRequestStatus { pending, incoming, accepted, declined }
@@ -392,6 +405,7 @@ class CommunityPost {
     this.mediaWidth,
     this.mediaHeight,
     this.moderationStatus = CommunityPostModerationStatus.approved,
+    this.moderationVisibility = CommunityPostModerationVisibility.visible,
     this.reviewedAt,
     this.likeCount = 0,
     this.liked = false,
@@ -415,6 +429,7 @@ class CommunityPost {
   final int? mediaWidth;
   final int? mediaHeight;
   final CommunityPostModerationStatus moderationStatus;
+  final CommunityPostModerationVisibility moderationVisibility;
   final DateTime? reviewedAt;
   final int likeCount;
   final bool liked;
@@ -442,6 +457,7 @@ class CommunityPost {
       mediaWidth: mediaWidth,
       mediaHeight: mediaHeight,
       moderationStatus: moderationStatus,
+      moderationVisibility: moderationVisibility,
       reviewedAt: reviewedAt,
       likeCount: stats.likeCount,
       liked: stats.liked,
@@ -467,6 +483,7 @@ class CommunityPost {
     mediaWidth: mediaWidth,
     mediaHeight: mediaHeight,
     moderationStatus: moderationStatus,
+    moderationVisibility: moderationVisibility,
     reviewedAt: reviewedAt,
     likeCount: likeCount,
     liked: liked,
@@ -495,6 +512,7 @@ class CommunityPost {
       mediaWidth: mediaWidth,
       mediaHeight: mediaHeight,
       moderationStatus: moderationStatus,
+      moderationVisibility: moderationVisibility,
       reviewedAt: reviewedAt,
       likeCount: likeCount,
       liked: liked,
@@ -538,6 +556,9 @@ class CommunityPost {
     moderationStatus: CommunityPostModerationStatus.values.firstWhere(
       (value) => value.name == json['moderation_status'],
       orElse: () => CommunityPostModerationStatus.approved,
+    ),
+    moderationVisibility: CommunityPostModerationVisibility.fromWire(
+      json['moderation_visibility'],
     ),
     reviewedAt: json['reviewed_at'] == null
         ? null

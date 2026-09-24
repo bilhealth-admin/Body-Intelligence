@@ -282,7 +282,13 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       ),
                     ],
                     if (snapshot.data == true &&
-                        widget.post.authorId != widget.currentUserId)
+                        widget.post.authorId != widget.currentUserId) ...[
+                      PopupMenuItem(
+                        value: 'moderate_hide',
+                        child: Text(
+                          communityText(context, 'Hide post', 'إخفاء المنشور'),
+                        ),
+                      ),
                       PopupMenuItem(
                         value: 'moderate_remove',
                         child: Text(
@@ -293,6 +299,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),

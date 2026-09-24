@@ -52,8 +52,74 @@ class _CommunityPostModerationPageState
       throw const AuthException('Sign-in required');
     }
     final posts = await repository.loadPendingPostsForModeration();
+    final hiddenPosts = await repository.loadHiddenPostsForModeration();
     final reports = await repository.loadOpenModerationReports();
-    return _CommunityModerationQueue(posts: posts, reports: reports);
+    return _CommunityModerationQueue(
+      posts: posts,
+      hiddenPosts: hiddenPosts,
+      reports: reports,
+    );
+  }
+
+  Future<void> _restorePost(CommunityPost post) async {
+    if (_busyTargets.contains(post.id)) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          communityText(context, 'Restore post?', 'استعادة المنشور؟'),
+        ),
+        content: Text(
+          communityText(
+            context,
+            'The post will become public again under its original audience rules.',
+            'سيظهر المنشور مجددًا وفق إعدادات جمهوره الأصلية.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(communityText(context, 'Cancel', 'إلغاء')),
+          ),
+          FilledButton(
+            key: const Key('community-hidden-post-restore-confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              communityText(context, 'Restore post', 'استعادة المنشور'),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _busyTargets.add(post.id));
+    try {
+      await _repository!.restoreHiddenPostAsModerator(postId: post.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(context, 'Post restored.', 'تمت استعادة المنشور.'),
+          ),
+        ),
+      );
+      _reload();
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not restore this post safely.',
+              'تعذرت استعادة المنشور بأمان.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _busyTargets.remove(post.id));
+    }
   }
 
   Future<void> _refresh() async {
@@ -278,7 +344,9 @@ class _CommunityPostModerationPageState
           return _ModerationUnavailable(onRetry: _refresh);
         }
         final queue = snapshot.requireData;
-        if (queue.posts.isEmpty && queue.reports.isEmpty) {
+        if (queue.posts.isEmpty &&
+            queue.hiddenPosts.isEmpty &&
+            queue.reports.isEmpty) {
           return Center(
             child: Text(
               communityText(
@@ -329,6 +397,29 @@ class _CommunityPostModerationPageState
                 ],
               const SizedBox(height: 14),
               Text(
+                communityText(context, 'Hidden posts', 'المنشورات المخفية'),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 10),
+              if (queue.hiddenPosts.isEmpty)
+                Text(
+                  communityText(
+                    context,
+                    'No hidden posts.',
+                    'لا توجد منشورات مخفية.',
+                  ),
+                )
+              else
+                for (final post in queue.hiddenPosts) ...[
+                  _HiddenPostCard(
+                    post: post,
+                    busy: _busyTargets.contains(post.id),
+                    onRestore: () => _restorePost(post),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              const SizedBox(height: 14),
+              Text(
                 communityText(context, 'Open reports', 'البلاغات المفتوحة'),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
@@ -355,6 +446,49 @@ class _CommunityPostModerationPageState
           ),
         );
       },
+    ),
+  );
+}
+
+class _HiddenPostCard extends StatelessWidget {
+  const _HiddenPostCard({
+    required this.post,
+    required this.busy,
+    required this.onRestore,
+  });
+
+  final CommunityPost post;
+  final bool busy;
+  final VoidCallback onRestore;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: Key('community-hidden-post-${post.id}'),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            post.authorName ?? communityText(context, 'BIL member', 'عضو BIL'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          SelectableText(post.body),
+          const SizedBox(height: 12),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: FilledButton.tonalIcon(
+              key: Key('community-hidden-post-restore-${post.id}'),
+              onPressed: busy ? null : onRestore,
+              icon: const Icon(Icons.restore_rounded),
+              label: Text(
+                communityText(context, 'Restore post', 'استعادة المنشور'),
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -567,8 +701,13 @@ class _ModerationUnavailable extends StatelessWidget {
 }
 
 class _CommunityModerationQueue {
-  const _CommunityModerationQueue({required this.posts, required this.reports});
+  const _CommunityModerationQueue({
+    required this.posts,
+    required this.hiddenPosts,
+    required this.reports,
+  });
 
   final List<CommunityPost> posts;
+  final List<CommunityPost> hiddenPosts;
   final List<Map<String, dynamic>> reports;
 }

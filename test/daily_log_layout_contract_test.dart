@@ -13,6 +13,9 @@ void main() {
     final bodyContextPage = File(
       'lib/features/daily_log/daily_body_context_page.dart',
     ).readAsStringSync();
+    final todaySections = File(
+      'lib/features/daily_log/presentation/daily_log_today_sections.dart',
+    ).readAsStringSync();
 
     // Dart formatting may wrap Key constructors without changing layout.
     final summary = page.indexOf("'daily-log-today-summary'");
@@ -21,7 +24,7 @@ void main() {
     final meals = page.indexOf('DailyMealsList(', summary);
     final water = page.indexOf('DailyWaterShortcut(', meals);
     final exercise = page.indexOf('DailyExerciseSection(', water);
-    final bodyContext = page.indexOf("'daily-log-body-context-link'", exercise);
+    final notesShortcut = page.indexOf('DailyLogNotesShortcut(', exercise);
 
     expect(summary, greaterThan(0));
     expect(copyAction, greaterThan(summary));
@@ -30,7 +33,9 @@ void main() {
     expect(meals, greaterThan(copyAction));
     expect(water, greaterThan(meals));
     expect(exercise, greaterThan(water));
-    expect(bodyContext, greaterThan(exercise));
+    expect(notesShortcut, greaterThan(exercise));
+    expect(todaySections, contains("'daily-log-body-context-link'"));
+    expect(todaySections, contains("context.push('/daily-log/body-context')"));
     expect(page, isNot(contains('DailyBodyContextSection(')));
     expect(bodyContextPage, contains('DailyBodyContextSection('));
     expect(bodyContextPage, contains('saveBodyContext('));

@@ -60,7 +60,8 @@ final class CommunityPostCloudStore
   static final _unsafeText = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]');
   static const _postSelection =
       'id,author_id,body,created_at,media_object_path,media_mime_type,'
-      'media_bytes,media_width,media_height,moderation_status,reviewed_at';
+      'media_bytes,media_width,media_height,moderation_status,'
+      'moderation_visibility,reviewed_at';
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>

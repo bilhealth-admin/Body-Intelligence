@@ -428,6 +428,10 @@ final class ConnectedHealthController
     // The visible deadline starts at the tap boundary, before any native work
     // or predecessor coordination. Supersede passive reads instead of waiting
     // behind them; their generation checks prevent stale completion writes.
+    final hadNativeReadInFlight =
+        _nativeSyncTask != null ||
+        _nativeLoadTask != null ||
+        _nativeActivityTask != null;
     _readGeneration++;
     state = AsyncValue.data(
       current.copyWith(
@@ -436,7 +440,7 @@ final class ConnectedHealthController
         isBusy: true,
       ),
     );
-    _cancelIosNativeSynchronization();
+    if (hadNativeReadInFlight) _cancelIosNativeSynchronization();
 
     late final Future<void> task;
     task = _performExplicitSynchronization(current, deadline).whenComplete(() {

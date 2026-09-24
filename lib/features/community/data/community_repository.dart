@@ -138,13 +138,67 @@ class CommunityRepository
     required String reason,
   }) async {
     if (!_uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
-    if (!const {'spam', 'abuse', 'misleading', 'other'}.contains(reason)) {
+    if (!const {
+      'spam',
+      'abuse',
+      'misleading',
+      'privacy',
+      'unsafe_or_inappropriate',
+      'other',
+    }.contains(reason)) {
       throw ArgumentError.value(reason, 'reason');
     }
     await _client.rpc(
       'bil_remove_published_community_post',
       params: {'p_post_id': postId, 'p_reason': reason},
     );
+  }
+
+  Future<void> hidePublishedPostAsModerator({
+    required String postId,
+    required String reason,
+  }) => _moderatePublishedPost(postId: postId, action: 'hide', reason: reason);
+
+  Future<void> restoreHiddenPostAsModerator({required String postId}) =>
+      _moderatePublishedPost(postId: postId, action: 'restore');
+
+  Future<void> _moderatePublishedPost({
+    required String postId,
+    required String action,
+    String? reason,
+  }) async {
+    if (!_uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    const reasons = {
+      'spam',
+      'abuse',
+      'misleading',
+      'privacy',
+      'unsafe_or_inappropriate',
+      'other',
+    };
+    if (action != 'restore' && !reasons.contains(reason)) {
+      throw ArgumentError.value(reason, 'reason');
+    }
+    await _client.rpc(
+      'bil_moderate_published_community_post',
+      params: {'p_post_id': postId, 'p_action': action, 'p_reason': reason},
+    );
+  }
+
+  Future<List<CommunityPost>> loadHiddenPostsForModeration({
+    int limit = 100,
+  }) async {
+    final response = await _client.rpc(
+      'bil_list_hidden_community_posts',
+      params: {'p_limit': limit.clamp(1, 100)},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid hidden Community posts result');
+    }
+    return response
+        .whereType<Map>()
+        .map((row) => CommunityPost.fromJson(Map<String, dynamic>.from(row)))
+        .toList(growable: false);
   }
 
   Future<void> publishPost(String body) async {

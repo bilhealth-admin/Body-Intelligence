@@ -45,6 +45,11 @@ final class _ModerationRepository extends CommunityRepository {
   }) async => includePendingPost ? [pendingPost] : const [];
 
   @override
+  Future<List<CommunityPost>> loadHiddenPostsForModeration({
+    int limit = 100,
+  }) async => const [];
+
+  @override
   Future<List<Map<String, dynamic>>> loadOpenModerationReports() async =>
       const [];
 
@@ -164,7 +169,8 @@ void main() {
     final repository = File(
       'lib/features/community/data/community_repository.dart',
     ).readAsStringSync();
-    expect(store, contains('moderation_status,reviewed_at'));
+    expect(store, contains('moderation_status,'));
+    expect(store, contains('moderation_visibility,reviewed_at'));
     expect(store, contains("'moderation_status': 'pending'"));
     expect(store, contains("'bil_list_pending_community_posts'"));
     expect(repository, contains("'bil_is_community_moderator'"));
