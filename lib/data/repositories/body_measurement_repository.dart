@@ -22,6 +22,28 @@ final class BodyMeasurementRepository {
     return query.getSingleOrNull();
   }
 
+  Future<BodyMeasurementEntry?> getForDay(DateTime date) {
+    return (_database.select(_database.bodyMeasurementEntries)..where(
+          (row) => row.dayKey.equals(dayKeyFor(date)) & row.deletedAt.isNull(),
+        ))
+        .getSingleOrNull();
+  }
+
+  Future<void> deleteForDay(DateTime date) async {
+    final existing = await getForDay(date);
+    if (existing == null) return;
+    await (_database.update(
+      _database.bodyMeasurementEntries,
+    )..where((row) => row.id.equals(existing.id))).write(
+      BodyMeasurementEntriesCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pendingDelete'),
+      ),
+    );
+  }
+
   /// Saves the snapshot for [date].
   ///
   /// Ordinary editors keep replacement semantics. A caller handling a

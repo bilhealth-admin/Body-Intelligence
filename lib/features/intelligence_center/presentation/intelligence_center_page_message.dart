@@ -38,6 +38,9 @@ extension on _IntelligenceCenterPageState {
       onRetry: retryableErrorMessageIds.contains(message.id)
           ? () => unawaited(_retryFailedCoachRequest())
           : null,
+      onUndo: undoOperations.containsKey(message.id)
+          ? () => unawaited(_undoCoachAction(message.id))
+          : null,
       animateReveal: animatedResponseIds.contains(message.id),
       onAction: (action) {
         unawaited(_executeAction(action).then<void>((_) {}));

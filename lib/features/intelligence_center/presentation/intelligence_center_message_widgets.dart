@@ -9,6 +9,7 @@ class _MessageBubble extends StatelessWidget {
     this.onReport,
     this.onSpeak,
     this.onRetry,
+    this.onUndo,
     this.onAction,
     this.actionPhases = const <String, _CoachActionExecutionPhase>{},
     this.animateReveal = false,
@@ -20,6 +21,7 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<String>? onReport;
   final VoidCallback? onSpeak;
   final VoidCallback? onRetry;
+  final VoidCallback? onUndo;
   final ValueChanged<IntelligenceAction>? onAction;
   final Map<String, _CoachActionExecutionPhase> actionPhases;
   final bool animateReveal;
@@ -177,6 +179,18 @@ class _MessageBubble extends StatelessWidget {
                       label: Text(
                         intelligenceText(context, 'Retry', 'إعادة المحاولة'),
                       ),
+                    ),
+                  ),
+                ],
+                if (onUndo != null) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: OutlinedButton.icon(
+                      key: Key('ai-coach-undo-${message.id}'),
+                      onPressed: onUndo,
+                      icon: const Icon(Icons.undo_rounded, size: 18),
+                      label: Text(intelligenceText(context, 'Undo', 'تراجع')),
                     ),
                   ),
                 ],

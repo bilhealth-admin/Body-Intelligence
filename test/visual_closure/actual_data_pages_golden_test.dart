@@ -67,6 +67,7 @@ import 'visual_evidence_font.dart';
 const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
 );
+const _captureIpad = bool.fromEnvironment('BIL_CAPTURE_IPAD');
 
 final _visualVerifiedFreeSubscription = SubscriptionState(
   plan: CommercePlan.free,
@@ -228,7 +229,9 @@ void main() {
     NutritionGoalTarget? dailyGoalOverride,
     List<MealWithItems>? dailyMealsOverride,
   }) async {
-    tester.view.physicalSize = const Size(390, 844);
+    tester.view.physicalSize = _captureIpad
+        ? const Size(1032, 1376)
+        : const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -387,7 +390,9 @@ void main() {
     } else {
       await expectLater(
         captureTarget,
-        matchesGoldenFile('goldens/visual_closure_$name.png'),
+        matchesGoldenFile(
+          'goldens/visual_closure_${_captureIpad ? name.replaceFirst('_phone', '_ipad') : name}.png',
+        ),
       );
     }
     await tester.pumpWidget(const SizedBox.shrink());

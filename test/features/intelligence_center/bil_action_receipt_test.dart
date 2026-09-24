@@ -50,6 +50,10 @@ void main() {
         'entity_type': 'meal_entry',
         'entity_id': 'meal-7',
         'refresh_targets': ['coachContext', 'diary', 'nutritionSummary'],
+        'before': <String, Object?>{},
+        'after': <String, Object?>{},
+        'source': 'ai_coach',
+        'undoable': false,
         'message_key': 'ai_coach.action_receipt.completed',
       });
     },

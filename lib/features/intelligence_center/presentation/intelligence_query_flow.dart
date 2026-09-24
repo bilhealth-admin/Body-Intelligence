@@ -93,6 +93,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       unawaited(_speakCoachText(acknowledgement, questionLocale));
     }
     try {
+      if (_isCoachUndoRequest(text)) {
+        await _undoLatestCoachAction();
+        return;
+      }
       const actionPresentation = CoachActionPresentationPolicy();
       if (actionPresentation.isContextualOpenFollowUp(text)) {
         final contextualNavigation = _latestSafeNavigationAction();

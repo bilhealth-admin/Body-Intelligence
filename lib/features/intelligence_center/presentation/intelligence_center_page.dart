@@ -18,6 +18,7 @@ import '../../../app/services/recoverable_image_picker.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../data/database/database_provider.dart';
+import '../../../data/database/app_database.dart';
 import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
@@ -173,6 +174,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final messageRuntimes = <String, CoachAnswerRuntime>{};
   final messageFeedback = <String, bool>{};
   final reportedMessages = <String>{};
+  final undoOperations = <String, _CoachUndoOperation>{};
   // Only the latest failed turn owns a retry affordance. The failure remains
   // part of the transcript, while the transient progress row is not rendered
   // as a second error surface.
@@ -725,4 +727,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
       ),
     );
   }
+}
+
+final class _CoachUndoOperation {
+  _CoachUndoOperation({required this.receipt, required this.undo});
+
+  final BilActionReceipt receipt;
+  final Future<void> Function() undo;
+  bool completed = false;
 }

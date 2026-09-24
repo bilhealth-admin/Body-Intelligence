@@ -405,6 +405,64 @@ class MealRepository {
     );
   }
 
+  Future<MealItem> getMealItem(int id) => _mealItem(id);
+
+  Future<String> getMealTypeForItem(int id) async {
+    final item = await _mealItem(id);
+    final meal =
+        await (_database.select(_database.meals)..where(
+              (row) => row.id.equals(item.mealId) & row.deletedAt.isNull(),
+            ))
+            .getSingle();
+    return meal.type;
+  }
+
+  Future<void> restoreMealItem(int id) async {
+    final existing = await (_database.select(
+      _database.mealItems,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    if (existing == null) throw StateError('Meal item $id does not exist');
+    await (_database.update(
+      _database.mealItems,
+    )..where((row) => row.id.equals(id))).write(
+      MealItemsCompanion(
+        deletedAt: const Value(null),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pending'),
+      ),
+    );
+  }
+
+  Future<void> deleteMealCascade(int mealId) async {
+    await _database.transaction(() async {
+      final meal = await (_database.select(
+        _database.meals,
+      )..where((row) => row.id.equals(mealId))).getSingleOrNull();
+      if (meal == null) return;
+      final now = DateTime.now();
+      await (_database.update(
+        _database.mealItems,
+      )..where((row) => row.mealId.equals(mealId))).write(
+        MealItemsCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+          syncStatus: const Value('pendingDelete'),
+        ),
+      );
+      await (_database.update(
+        _database.meals,
+      )..where((row) => row.id.equals(mealId))).write(
+        MealsCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+          revision: Value(meal.revision + 1),
+          syncStatus: const Value('pendingDelete'),
+        ),
+      );
+    });
+  }
+
   Future<void> moveMealItem({required int id, required int offset}) async {
     if (offset != -1 && offset != 1) {
       throw ArgumentError.value(offset, 'offset', 'Must be -1 or 1');

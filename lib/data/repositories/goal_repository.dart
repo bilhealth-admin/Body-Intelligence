@@ -61,4 +61,21 @@ class GoalRepository {
           ..limit(1))
         .getSingleOrNull();
   }
+
+  Future<void> delete(int id) async {
+    final existing = await (_database.select(
+      _database.goals,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    if (existing == null) return;
+    await (_database.update(
+      _database.goals,
+    )..where((row) => row.id.equals(id))).write(
+      GoalsCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pendingDelete'),
+      ),
+    );
+  }
 }

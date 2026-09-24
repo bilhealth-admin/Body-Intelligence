@@ -115,6 +115,10 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             entityType: 'water_entry',
             entityId: entityId.toString(),
             refreshTargets: const {'dailyWater', 'dashboard', 'coachContext'},
+            before: const {'exists': false},
+            after: {'amount_ml': amount},
+            toolId: action.id,
+            undoable: true,
           );
           if (mounted && receipt.verified) {
             ref.invalidate(coachContextSnapshotProvider);
@@ -123,6 +127,11 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 'Logged $amount ml of water.',
                 'تم تسجيل $amount مل من الماء.',
               ),
+              receipt: receipt,
+              undo: () async {
+                await ref.read(waterRepositoryProvider).delete(entityId);
+                ref.invalidate(coachContextSnapshotProvider);
+              },
             );
             _showActionCompleted(
               tr('Water logged locally.', 'تم تسجيل الماء محليًا.'),
@@ -140,6 +149,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               ? DateTime.now()
               : DateTime.tryParse(requestedDate);
           if (occurredAt == null) throw StateError('invalid_weight_date');
+          final weightRepository = ref.read(weightRepositoryProvider);
+          final previousWeight = await weightRepository.getForDay(occurredAt);
           final entityId = await ref
               .read(weightRepositoryProvider)
               .addWeight(
@@ -159,6 +170,22 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'dashboard',
               'coachContext',
             },
+            before: previousWeight == null
+                ? const {'exists': false}
+                : {
+                    'exists': true,
+                    'weight_kg': previousWeight.weight,
+                    'date': previousWeight.date.toIso8601String(),
+                    'note': previousWeight.note,
+                    'progress_photo_path': previousWeight.progressPhotoPath,
+                    'measurement_context': previousWeight.measurementContext,
+                  },
+            after: {
+              'weight_kg': value.toDouble(),
+              'date': occurredAt.toIso8601String(),
+            },
+            toolId: action.id,
+            undoable: true,
           );
           if (mounted && receipt.verified) {
             ref.invalidate(coachContextSnapshotProvider);
@@ -167,6 +194,25 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 'Logged weight: ${value.toStringAsFixed(1)} kg.',
                 'تم تسجيل الوزن: ${value.toStringAsFixed(1)} كغ.',
               ),
+              receipt: receipt,
+              undo: () async {
+                final repository = ref.read(weightRepositoryProvider);
+                if (previousWeight == null) {
+                  await repository.deleteWeight(entityId);
+                } else {
+                  await repository.updateWeight(
+                    id: previousWeight.id,
+                    weight: previousWeight.weight,
+                    date: previousWeight.date,
+                    note: previousWeight.note,
+                    progressPhotoPath: previousWeight.progressPhotoPath,
+                    clearProgressPhoto:
+                        previousWeight.progressPhotoPath == null,
+                    measurementContext: previousWeight.measurementContext,
+                  );
+                }
+                ref.invalidate(coachContextSnapshotProvider);
+              },
             );
             _showActionCompleted(
               tr('Weight logged locally.', 'تم تسجيل الوزن محليًا.'),
@@ -196,10 +242,25 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           if (!const {'dark', 'light', 'system'}.contains(mode)) {
             throw StateError('invalid_theme_mode');
           }
+          final previousMode = ref.read(appSettingsProvider).themeMode;
           await ref.read(appSettingsProvider.notifier).setThemeMode(mode!);
           if (mounted) {
             _appendToolReceipt(
               tr('App appearance updated.', 'تم تحديث مظهر التطبيق.'),
+              receipt: BilActionReceipt(
+                actionId: action.id,
+                committed: true,
+                completedAt: DateTime.now(),
+                entityType: 'app_setting',
+                entityId: 'theme_mode',
+                before: {'theme_mode': previousMode},
+                after: {'theme_mode': mode},
+                toolId: action.id,
+                undoable: true,
+              ),
+              undo: () => ref
+                  .read(appSettingsProvider.notifier)
+                  .setThemeMode(previousMode),
             );
             _showActionCompleted(tr('Appearance updated.', 'تم تحديث المظهر.'));
           }
@@ -208,10 +269,25 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             action.payload['locale']?.toString(),
           );
           if (locale == null) throw StateError('invalid_locale');
+          final previousLocale = ref.read(appSettingsProvider).localeCode;
           await ref.read(appSettingsProvider.notifier).setLocale(locale);
           if (mounted) {
             _appendToolReceipt(
               tr('App language updated.', 'تم تحديث لغة التطبيق.'),
+              receipt: BilActionReceipt(
+                actionId: action.id,
+                committed: true,
+                completedAt: DateTime.now(),
+                entityType: 'app_setting',
+                entityId: 'locale',
+                before: {'locale': previousLocale},
+                after: {'locale': locale},
+                toolId: action.id,
+                undoable: true,
+              ),
+              undo: () => ref
+                  .read(appSettingsProvider.notifier)
+                  .setLocale(previousLocale),
             );
             _showActionCompleted(tr('Language updated.', 'تم تحديث اللغة.'));
           }
@@ -232,13 +308,17 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           final profileRepository = ref.read(userProfileRepositoryProvider);
           final goalRepository = ref.read(goalRepositoryProvider);
           final weightRepository = ref.read(weightRepositoryProvider);
-          await database.transaction(() async {
+          late UserProfileData previousProfile;
+          Goal? previousGoal;
+          final goalId = await database.transaction(() async {
             // Reads and writes belong to one snapshot. In particular, do not
             // classify the goal from StreamProvider.value: it can still hold
             // the profile fallback while the latest weight query is loading.
             final profile = await profileRepository.getProfile();
             if (profile == null) throw StateError('goal_profile_missing');
             final existing = await goalRepository.getActive();
+            previousProfile = profile;
+            previousGoal = existing;
             final weights = await weightRepository.getAll();
             final currentWeight = weights.isEmpty
                 ? profile.currentWeight
@@ -293,6 +373,57 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'Target weight updated to ${target.toStringAsFixed(1)} kg.',
               'تم تحديث الوزن المستهدف إلى ${target.toStringAsFixed(1)} كغ.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: goalId > 0,
+              completedAt: DateTime.now(),
+              entityType: 'goal',
+              entityId: goalId.toString(),
+              before: {
+                'target_weight_kg': previousProfile.targetWeight,
+                'goal_id': previousGoal?.id,
+              },
+              after: {
+                'target_weight_kg': target.toDouble(),
+                'target_date': targetDate?.toIso8601String(),
+              },
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              await database.transaction(() async {
+                await profileRepository.save(
+                  gender: previousProfile.gender,
+                  age: previousProfile.age,
+                  height: previousProfile.height,
+                  currentWeight: previousProfile.currentWeight,
+                  targetWeight: previousProfile.targetWeight,
+                  activityLevel: previousProfile.activityLevel,
+                  exercises: previousProfile.exercises,
+                  medicalConditions: previousProfile.medicalConditions,
+                  waist: previousProfile.waist,
+                  neck: previousProfile.neck,
+                  chest: previousProfile.chest,
+                  arm: previousProfile.arm,
+                  thigh: previousProfile.thigh,
+                );
+                final oldGoal = previousGoal;
+                if (oldGoal == null) {
+                  await goalRepository.delete(goalId);
+                } else {
+                  await goalRepository.save(
+                    uuid: oldGoal.uuid,
+                    profileUuid: oldGoal.profileUuid,
+                    type: oldGoal.type,
+                    targetWeight: oldGoal.targetWeight,
+                    targetDate: oldGoal.targetDate,
+                  );
+                }
+              });
+              ref.invalidate(userProfileProvider);
+              ref.invalidate(activeGoalProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
           _showActionCompleted(tr('Goal updated.', 'تم تحديث الهدف.'));
         case IntelligenceActionType.saveMeasurements:
@@ -303,18 +434,22 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               ? DateTime.now()
               : DateTime.tryParse(requestedDate);
           if (date == null) throw StateError('invalid_measurement_date');
-          await ref
-              .read(bodyMeasurementRepositoryProvider)
-              .saveForDay(
-                date: date,
-                neckCm: measurement('neckCm'),
-                waistCm: measurement('waistCm'),
-                hipsCm: measurement('hipsCm'),
-                chestCm: measurement('chestCm'),
-                armCm: measurement('armCm'),
-                thighCm: measurement('thighCm'),
-                preserveExistingValues: true,
-              );
+          final measurementRepository = ref.read(
+            bodyMeasurementRepositoryProvider,
+          );
+          final previousMeasurement = await measurementRepository.getForDay(
+            date,
+          );
+          await measurementRepository.saveForDay(
+            date: date,
+            neckCm: measurement('neckCm'),
+            waistCm: measurement('waistCm'),
+            hipsCm: measurement('hipsCm'),
+            chestCm: measurement('chestCm'),
+            armCm: measurement('armCm'),
+            thighCm: measurement('thighCm'),
+            preserveExistingValues: true,
+          );
           if (!mounted) {
             succeeded = true;
             return true;
@@ -326,6 +461,45 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'Body measurements saved for ${_coachDateLabel(date)}.',
               'تم حفظ قياسات الجسم لتاريخ ${_coachDateLabel(date)}.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'body_measurement',
+              entityId: _coachDateLabel(date),
+              before: _measurementSnapshot(previousMeasurement),
+              after: {
+                for (final key in const [
+                  'neckCm',
+                  'waistCm',
+                  'hipsCm',
+                  'chestCm',
+                  'armCm',
+                  'thighCm',
+                ])
+                  if (measurement(key) != null) key: measurement(key),
+              },
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              if (previousMeasurement == null) {
+                await measurementRepository.deleteForDay(date);
+              } else {
+                await measurementRepository.saveForDay(
+                  date: previousMeasurement.date,
+                  neckCm: previousMeasurement.neckCm,
+                  waistCm: previousMeasurement.waistCm,
+                  hipsCm: previousMeasurement.hipsCm,
+                  chestCm: previousMeasurement.chestCm,
+                  armCm: previousMeasurement.armCm,
+                  thighCm: previousMeasurement.thighCm,
+                  allowEmptySnapshot: true,
+                );
+              }
+              ref.invalidate(bodyMeasurementHistoryProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
           _showActionCompleted(
             tr('Measurements updated.', 'تم تحديث القياسات.'),
@@ -364,15 +538,37 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'تمت إضافة المغذيات السريعة إلى ${action.payload['mealType']}: '
                   '${(action.payload['calories']! as num).round()} سعرة.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'meal',
+              entityId: entityId.toString(),
+              before: const {'exists': false},
+              after: {
+                'meal_type': action.payload['mealType'].toString(),
+                'calories': (action.payload['calories']! as num).toDouble(),
+              },
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              await ref
+                  .read(mealRepositoryProvider)
+                  .deleteMealCascade(entityId);
+              ref.invalidate(dailyMealsProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
           _showActionCompleted(tr('Meal updated.', 'تم تحديث الوجبة.'));
         case IntelligenceActionType.updateMealItem:
-          await ref
-              .read(mealRepositoryProvider)
-              .updateMealItem(
-                id: action.payload['itemId']! as int,
-                quantity: (action.payload['quantityGrams']! as num).toDouble(),
-              );
+          final mealRepository = ref.read(mealRepositoryProvider);
+          final itemId = action.payload['itemId']! as int;
+          final previousItem = await mealRepository.getMealItem(itemId);
+          await mealRepository.updateMealItem(
+            id: itemId,
+            quantity: (action.payload['quantityGrams']! as num).toDouble(),
+          );
           if (!mounted) {
             succeeded = true;
             return true;
@@ -386,14 +582,37 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'تم تحديث عنصر الوجبة ${action.payload['itemId']} إلى '
                   '${(action.payload['quantityGrams']! as num).toStringAsFixed(1)} غ.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'meal_item',
+              entityId: itemId.toString(),
+              before: {'quantity': previousItem.quantity},
+              after: {
+                'quantity': (action.payload['quantityGrams']! as num)
+                    .toDouble(),
+              },
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              await mealRepository.updateMealItem(
+                id: itemId,
+                quantity: previousItem.quantity,
+              );
+              ref.invalidate(dailyMealsProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
           _showActionCompleted(
             tr('Meal item updated.', 'تم تحديث عنصر الوجبة.'),
           );
         case IntelligenceActionType.deleteMealItem:
-          await ref
-              .read(mealRepositoryProvider)
-              .deleteMealItem(action.payload['itemId']! as int);
+          final mealRepository = ref.read(mealRepositoryProvider);
+          final itemId = action.payload['itemId']! as int;
+          final previousItem = await mealRepository.getMealItem(itemId);
+          await mealRepository.deleteMealItem(itemId);
           if (!mounted) {
             succeeded = true;
             return true;
@@ -405,15 +624,34 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'Meal item ${action.payload['itemId']} deleted.',
               'تم حذف عنصر الوجبة ${action.payload['itemId']}.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'meal_item',
+              entityId: itemId.toString(),
+              before: {'deleted': false, 'quantity': previousItem.quantity},
+              after: const {'deleted': true},
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              await mealRepository.restoreMealItem(itemId);
+              ref.invalidate(dailyMealsProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
           _showActionCompleted(tr('Meal item deleted.', 'تم حذف عنصر الوجبة.'));
         case IntelligenceActionType.moveMealItem:
-          await ref
-              .read(mealRepositoryProvider)
-              .moveMealItemToType(
-                id: action.payload['itemId']! as int,
-                mealType: action.payload['mealType']!.toString(),
-              );
+          final mealRepository = ref.read(mealRepositoryProvider);
+          final itemId = action.payload['itemId']! as int;
+          final previousMealType = await mealRepository.getMealTypeForItem(
+            itemId,
+          );
+          await mealRepository.moveMealItemToType(
+            id: itemId,
+            mealType: action.payload['mealType']!.toString(),
+          );
           if (!mounted) {
             succeeded = true;
             return true;
@@ -427,6 +665,25 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'تم نقل عنصر الوجبة ${action.payload['itemId']} إلى '
                   '${action.payload['mealType']}.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'meal_item',
+              entityId: itemId.toString(),
+              before: {'meal_type': previousMealType},
+              after: {'meal_type': action.payload['mealType'].toString()},
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              await mealRepository.moveMealItemToType(
+                id: itemId,
+                mealType: previousMealType,
+              );
+              ref.invalidate(dailyMealsProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
           _showActionCompleted(tr('Meal item moved.', 'تم نقل عنصر الوجبة.'));
         case IntelligenceActionType.requestAccountDeletion:
@@ -447,9 +704,10 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           if (value.isEmpty || value.length > 500) {
             throw StateError('invalid_memory_value');
           }
-          await CoachMemoryRepository(
+          final memoryRepository = CoachMemoryRepository(
             preferences: ref.read(preferencesRepositoryProvider),
-          ).saveConfirmed(
+          );
+          final memory = await memoryRepository.saveConfirmed(
             text: value,
             kind: action.payload['kind']?.toString() ?? 'user_fact',
           );
@@ -463,6 +721,21 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
               'BIL will remember this. You can review or remove it any time.',
               'سيتذكر BIL هذه المعلومة. يمكنك مراجعتها أو حذفها في أي وقت.',
             ),
+            receipt: BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'coach_memory',
+              entityId: memory['id'].toString(),
+              before: const {'exists': false},
+              after: {'kind': memory['kind'], 'text': memory['text']},
+              toolId: action.id,
+              undoable: true,
+            ),
+            undo: () async {
+              await memoryRepository.delete(memory['id'].toString());
+              ref.invalidate(coachContextSnapshotProvider);
+            },
           );
       }
       succeeded = true;
@@ -626,23 +899,108 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
       '${value.month.toString().padLeft(2, '0')}-'
       '${value.day.toString().padLeft(2, '0')}';
 
-  void _appendToolReceipt(String text) {
+  Map<String, Object?> _measurementSnapshot(BodyMeasurementEntry? value) =>
+      value == null
+      ? const {'exists': false}
+      : {
+          'exists': true,
+          'neckCm': value.neckCm,
+          'waistCm': value.waistCm,
+          'hipsCm': value.hipsCm,
+          'chestCm': value.chestCm,
+          'armCm': value.armCm,
+          'thighCm': value.thighCm,
+        };
+
+  void _appendToolReceipt(
+    String text, {
+    BilActionReceipt? receipt,
+    Future<void> Function()? undo,
+  }) {
     if (!mounted) return;
+    final messageId = 'tool-${DateTime.now().microsecondsSinceEpoch}';
     _updateState(() {
       messages.add(
         IntelligenceMessage(
-          id: 'tool-${DateTime.now().microsecondsSinceEpoch}',
+          id: messageId,
           role: IntelligenceMessageRole.bil,
           kind: IntelligenceMessageKind.action,
           text: text,
           createdAt: DateTime.now(),
-          evidence: const ['BIL verified tool result'],
+          evidence: [
+            'BIL verified tool result',
+            if (receipt != null) jsonEncode(receipt.toStructuredPayload()),
+          ],
           confidence: 1,
         ),
       );
+      if (receipt != null && undo != null && receipt.undoable) {
+        undoOperations[messageId] = _CoachUndoOperation(
+          receipt: receipt,
+          undo: undo,
+        );
+      }
     });
     _scrollToLatest();
     unawaited(_saveConversation());
+  }
+
+  bool _isCoachUndoRequest(String value) {
+    final normalized = value.trim().toLowerCase();
+    return const {
+      'undo',
+      'undo that',
+      'revert',
+      'تراجع',
+      'تراجع عن ذلك',
+      'الغاء',
+      'إلغاء',
+    }.contains(normalized);
+  }
+
+  Future<void> _undoLatestCoachAction() async {
+    final messageId = messages.reversed
+        .map((message) => message.id)
+        .firstWhere(
+          (id) => undoOperations[id]?.completed == false,
+          orElse: () => '',
+        );
+    if (messageId.isEmpty) {
+      _appendToolReceipt(
+        tr(
+          'There is no recent reversible action.',
+          'لا يوجد إجراء حديث قابل للتراجع.',
+        ),
+      );
+      return;
+    }
+    await _undoCoachAction(messageId);
+  }
+
+  Future<void> _undoCoachAction(String messageId) async {
+    final operation = undoOperations[messageId];
+    if (operation == null || operation.completed) return;
+    await operation.undo();
+    if (!mounted) return;
+    _updateState(() {
+      operation.completed = true;
+      undoOperations.remove(messageId);
+    });
+    _appendToolReceipt(
+      tr('The previous action was undone.', 'تم التراجع عن الإجراء السابق.'),
+      receipt: BilActionReceipt(
+        actionId: operation.receipt.actionId,
+        committed: true,
+        completedAt: operation.receipt.completedAt,
+        entityType: operation.receipt.entityType,
+        entityId: operation.receipt.entityId,
+        refreshTargets: operation.receipt.refreshTargets,
+        before: operation.receipt.before,
+        after: operation.receipt.after,
+        toolId: operation.receipt.toolId,
+        undoneAt: DateTime.now(),
+      ),
+    );
   }
 
   Future<void> _recordFeedback(

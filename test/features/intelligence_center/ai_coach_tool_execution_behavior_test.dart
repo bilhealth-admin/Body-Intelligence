@@ -19,6 +19,7 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/coach_
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_action.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/coach_memory_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
@@ -218,6 +219,13 @@ void main() {
       expect(measurements?.neckCm, 39);
       expect(measurements?.waistCm, 90);
       expect(measurements?.chestCm, 101);
+      await _tapLatestUndo(tester);
+      final restoredMeasurements = await BodyMeasurementRepository(
+        database,
+      ).getLatest();
+      expect(restoredMeasurements?.neckCm, isNull);
+      expect(restoredMeasurements?.waistCm, 90);
+      expect(restoredMeasurements?.chestCm, 101);
 
       await _submitNextTool(
         tester,
@@ -231,6 +239,12 @@ void main() {
       expect(goal?.targetWeight, 80);
       expect(goal?.type, 'lose');
       expect(goal?.targetDate, DateTime(2026, 12, 15));
+      await _tapLatestUndo(tester);
+      final restoredProfile = await UserProfileRepository(
+        database,
+      ).getProfile();
+      expect(restoredProfile?.targetWeight, 82);
+      expect(await GoalRepository(database).getActive(), isNull);
       await _disposeCoach(tester);
     },
   );
@@ -562,6 +576,9 @@ void main() {
       );
       var snapshot = await meals.watchMealsForDate(day).first;
       expect(snapshot.where((meal) => meal.meal.type == 'lunch'), isNotEmpty);
+      await _tapLatestUndo(tester);
+      snapshot = await meals.watchMealsForDate(day).first;
+      expect(snapshot.where((meal) => meal.meal.type == 'lunch'), isEmpty);
 
       await _submitNextTool(
         tester,
@@ -571,6 +588,9 @@ void main() {
       );
       snapshot = await meals.watchMealsForDate(day).first;
       expect(_activeItem(snapshot, itemId).quantity, 150);
+      await _tapLatestUndo(tester);
+      snapshot = await meals.watchMealsForDate(day).first;
+      expect(_activeItem(snapshot, itemId).quantity, 100);
 
       await _submitNextTool(
         tester,
@@ -586,6 +606,15 @@ void main() {
             .map((item) => item.id),
         contains(itemId),
       );
+      await _tapLatestUndo(tester);
+      snapshot = await meals.watchMealsForDate(day).first;
+      expect(
+        snapshot
+            .singleWhere((meal) => meal.meal.type == 'breakfast')
+            .items
+            .map((item) => item.id),
+        contains(itemId),
+      );
 
       await _submitNextTool(
         tester,
@@ -597,6 +626,12 @@ void main() {
       expect(
         snapshot.expand((meal) => meal.items).map((item) => item.id),
         isNot(contains(itemId)),
+      );
+      await _tapLatestUndo(tester);
+      snapshot = await meals.watchMealsForDate(day).first;
+      expect(
+        snapshot.expand((meal) => meal.items).map((item) => item.id),
+        contains(itemId),
       );
       final receiptsBeforeFailure = await _waitForStoredReceipts(
         tester,
@@ -702,6 +737,76 @@ void main() {
       ),
       hasLength(3),
     );
+    await _tapLatestUndo(tester);
+    expect(
+      await CoachMemoryRepository(
+        preferences: PreferencesRepository(database),
+      ).readLocal(),
+      isEmpty,
+    );
+    await _tapLatestUndo(tester);
+    expect(container.read(appSettingsProvider).localeCode, 'en');
+    await _tapLatestUndo(tester);
+    expect(container.read(appSettingsProvider).themeMode, 'light');
+    await _disposeCoach(tester);
+  });
+
+  testWidgets('water and weight receipts provide verified compensating Undo', (
+    tester,
+  ) async {
+    await _setPhoneSurface(tester);
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final gateway = _QueuedToolGateway(<Map<String, Object?>>[
+      _tool('log_water', <String, Object?>{'amountMl': 250}),
+      _tool('log_weight', <String, Object?>{
+        'weightKg': 81.2,
+        'date': '2026-09-05',
+      }),
+    ]);
+    await tester.pumpWidget(
+      _coachApp(
+        database: database,
+        gateway: gateway,
+        settingsService: AppSettingsService(store: _MemorySettingsStore()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await _submitNextTool(
+      tester,
+      type: IntelligenceActionType.addWater,
+      id: 'log_water',
+      expectedReceipt: 'Logged 250 ml of water.',
+    );
+    expect(await WaterRepository(database).totalForDay(DateTime.now()), 250);
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Undo').last);
+    await _pumpUntil(
+      tester,
+      () => find.text('The previous action was undone.').evaluate().isNotEmpty,
+    );
+    expect(await WaterRepository(database).totalForDay(DateTime.now()), 0);
+
+    await _submitNextTool(
+      tester,
+      type: IntelligenceActionType.addWeight,
+      id: 'log_weight',
+      expectedReceipt: 'Logged weight: 81.2 kg.',
+    );
+    expect(await WeightRepository(database).getAll(), hasLength(1));
+    await tester.enterText(
+      find.byKey(const Key('ai-coach-question-field')),
+      'Undo',
+    );
+    FocusManager.instance.primaryFocus?.unfocus();
+    tester.testTextInput.hide();
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('ai-coach-send-button')));
+    for (var attempt = 0; attempt < 20; attempt += 1) {
+      if ((await WeightRepository(database).getAll()).isEmpty) break;
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(await WeightRepository(database).getAll(), isEmpty);
     await _disposeCoach(tester);
   });
 }
@@ -809,6 +914,18 @@ Future<void> _submitNextTool(
   } else {
     await _pumpUntil(tester, () => find.byType(AlertDialog).evaluate().isEmpty);
   }
+}
+
+Future<void> _tapLatestUndo(WidgetTester tester) async {
+  await tester.enterText(
+    find.byKey(const Key('ai-coach-question-field')),
+    'Undo',
+  );
+  FocusManager.instance.primaryFocus?.unfocus();
+  tester.testTextInput.hide();
+  await tester.pump();
+  await tester.tap(find.byKey(const Key('ai-coach-send-button')));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _openNextToolAction(
