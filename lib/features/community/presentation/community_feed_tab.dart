@@ -134,6 +134,23 @@ class _FeedTabState extends State<_FeedTab>
 
   Future<void> _managePost(CommunityPost post, String action) async {
     if (_openingComposer || _managingPost) return;
+    String? moderationReason;
+    if (action == 'moderate_remove') {
+      moderationReason = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => SimpleDialog(
+          title: Text(communityText(context, 'Remove post', 'إزالة المنشور')),
+          children: [
+            for (final reason in const ['spam', 'abuse', 'misleading', 'other'])
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(dialogContext, reason),
+                child: Text(reason),
+              ),
+          ],
+        ),
+      );
+      if (moderationReason == null || !mounted) return;
+    }
     if (action == 'delete' || action == 'block') {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -202,6 +219,13 @@ class _FeedTabState extends State<_FeedTab>
             _feed = refreshedFeed;
           });
         }
+      } else if (action == 'moderate_remove') {
+        await widget.repository.removePublishedPostAsModerator(
+          postId: post.id,
+          reason: moderationReason!,
+        );
+        final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
+        if (mounted) setState(() => _feed = refreshedFeed);
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -216,6 +240,11 @@ class _FeedTabState extends State<_FeedTab>
               context,
               'Member blocked.',
               'تم حظر العضو.',
+            ),
+            'moderate_remove' => communityText(
+              context,
+              'Post removed by moderation.',
+              'تمت إزالة المنشور بواسطة الإشراف.',
             ),
             _ => communityText(context, 'Post deleted.', 'تم حذف المشاركة.'),
           }),

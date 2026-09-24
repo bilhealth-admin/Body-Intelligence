@@ -14,6 +14,8 @@ import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/presentation/premium_crown_emblem.dart';
 import '../commerce/providers/commerce_providers.dart';
+import '../connected_health/connected_health_page.dart';
+import '../connected_health/providers/connected_health_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import '../weight/domain/weight_goal_progress.dart';
@@ -43,6 +45,7 @@ class SettingsPage extends ConsumerWidget {
     final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     final subscription = ref.watch(verifiedSubscriptionStateProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
+    final connectedHealth = ref.watch(connectedHealthProvider);
     final adminAccess = ref.watch(aiCoachAdminAccessProvider);
     final name = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
@@ -98,6 +101,16 @@ class SettingsPage extends ConsumerWidget {
                   : copy('Active'),
               onTap: () => context.push('/plans'),
             ),
+          ),
+          const SizedBox(height: 12),
+          _DevicesSyncCard(
+            status: connectedHealth.when(
+              loading: () => copy('Checking'),
+              error: (_, _) => copy('Unavailable'),
+              data: (snapshot) =>
+                  connectedHealthStatusText(context, snapshot.status),
+            ),
+            onTap: () => context.push('/connected-health'),
           ),
           const SizedBox(height: 20),
           _MoreSection(
@@ -232,6 +245,35 @@ class SettingsPage extends ConsumerWidget {
   }
 }
 
+class _DevicesSyncCard extends StatelessWidget {
+  const _DevicesSyncCard({required this.status, required this.onTap});
+
+  final String status;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: const Key('more-devices-sync-card'),
+    clipBehavior: Clip.antiAlias,
+    child: ListTile(
+      minTileHeight: 72,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+      leading: const _MoreIcon(
+        icon: Icons.devices_other_rounded,
+        key: Key('more-devices-sync-icon'),
+      ),
+      title: Text(ReferenceSettingsCopy.of(context)('Apps & Devices')),
+      subtitle: Text(status, maxLines: 2, overflow: TextOverflow.ellipsis),
+      trailing: Icon(
+        Directionality.of(context) == TextDirection.rtl
+            ? Icons.chevron_left_rounded
+            : Icons.chevron_right_rounded,
+      ),
+      onTap: onTap,
+    ),
+  );
+}
+
 class _PremiumMembershipCard extends StatelessWidget {
   const _PremiumMembershipCard({required this.label, this.onTap});
 
@@ -292,8 +334,10 @@ class _PremiumMembershipCard extends StatelessWidget {
                   ),
                 )
               else
-                const Icon(
-                  Icons.arrow_forward_rounded,
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.arrow_back_rounded
+                      : Icons.arrow_forward_rounded,
                   color: Color(0xFFFFE59A),
                 ),
             ],
@@ -429,7 +473,11 @@ class _ProfileSummary extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -497,18 +545,15 @@ class _MoreRow extends StatelessWidget {
                   size: 18,
                   color: Theme.of(context).colorScheme.error,
                 )
-              : semanticKind == null
-              ? Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                )
-              : BilSemanticIconBadge(
-                  key: Key('more-semantic-icon-${semanticKind.name}'),
-                  kind: semanticKind,
-                  size: 28,
-                  iconSize: 17,
-                  shape: BoxShape.rectangle,
+              : _MoreIcon(
+                  key: Key(
+                    'more-semantic-icon-${semanticKind?.name ?? 'generic'}',
+                  ),
+                  icon: semanticKind == null
+                      ? Icons.arrow_forward_rounded
+                      : BilSemanticIcons.spec(
+                          semanticKind,
+                        ).iconFor(Theme.of(context).platform),
                 ),
           title: Text(
             label,
@@ -517,9 +562,11 @@ class _MoreRow extends StatelessWidget {
               fontWeight: _isFeatured ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
-          trailing: const Icon(
-            Icons.chevron_right_rounded,
-            color: Color(0xFFB7B9BD),
+          trailing: Icon(
+            Directionality.of(context) == TextDirection.rtl
+                ? Icons.chevron_left_rounded
+                : Icons.chevron_right_rounded,
+            color: const Color(0xFF8B93A1),
           ),
           onTap: () => context.push(route),
         ),
@@ -527,6 +574,23 @@ class _MoreRow extends StatelessWidget {
       ],
     );
   }
+}
+
+class _MoreIcon extends StatelessWidget {
+  const _MoreIcon({required this.icon, super.key});
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: SizedBox.square(
+      dimension: 40,
+      child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+    ),
+  );
 }
 
 class _CloudSyncRow extends ConsumerWidget {
@@ -620,9 +684,11 @@ class _MoreActionRow extends StatelessWidget {
           shape: BoxShape.rectangle,
         ),
         title: Text(label),
-        trailing: const Icon(
-          Icons.chevron_right_rounded,
-          color: Color(0xFFB7B9BD),
+        trailing: Icon(
+          Directionality.of(context) == TextDirection.rtl
+              ? Icons.chevron_left_rounded
+              : Icons.chevron_right_rounded,
+          color: const Color(0xFFB7B9BD),
         ),
         onTap: onTap,
       ),

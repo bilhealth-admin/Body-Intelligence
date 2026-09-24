@@ -22,6 +22,7 @@ import 'app/services/app_settings_provider.dart';
 import 'app/services/recoverable_image_picker.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
 import 'features/commerce/providers/commerce_providers.dart';
+import 'features/cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import 'features/auth/apple_credential_lifecycle.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/auth/oauth_browser_return.dart';
@@ -418,23 +419,25 @@ class BILApp extends ConsumerWidget {
               return false;
             },
             child: AiCoachResetNoticeCoordinator(
-              child: InactivityReminderCoordinator(
-                child: BilAppleCredentialLifecycleCoordinator(
-                  child: AppResumeDashboardCoordinator(
-                    onMeaningfulResume: () {
-                      // Resume is not a cold launch. Retain the active route,
-                      // theme, locale and draft while refreshing server truth.
-                      // Re-entering startup here raced restored iOS metrics.
-                      ref.invalidate(verifiedSubscriptionStateProvider);
-                      ref
-                          .read(aiCoachUsageRefreshProvider.notifier)
-                          .requestAuthoritativeReload();
-                    },
-                    child: AppSwitcherPrivacyShield(
-                      child: Semantics(
-                        container: true,
-                        label: AppLocalizations.of(context).get('app_title'),
-                        child: content,
+              child: CloudAutoSyncCoordinator(
+                child: InactivityReminderCoordinator(
+                  child: BilAppleCredentialLifecycleCoordinator(
+                    child: AppResumeDashboardCoordinator(
+                      onMeaningfulResume: () {
+                        // Resume is not a cold launch. Retain the active route,
+                        // theme, locale and draft while refreshing server truth.
+                        // Re-entering startup here raced restored iOS metrics.
+                        ref.invalidate(verifiedSubscriptionStateProvider);
+                        ref
+                            .read(aiCoachUsageRefreshProvider.notifier)
+                            .requestAuthoritativeReload();
+                      },
+                      child: AppSwitcherPrivacyShield(
+                        child: Semantics(
+                          container: true,
+                          label: AppLocalizations.of(context).get('app_title'),
+                          child: content,
+                        ),
                       ),
                     ),
                   ),

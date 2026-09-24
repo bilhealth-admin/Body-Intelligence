@@ -21,7 +21,7 @@ ConnectedHealthSignalView _signal(
   value: value,
   unit: unit,
   source: source,
-  observedAt: DateTime.utc(2026, 8, 31, 12),
+  observedAt: DateTime.utc(2026, 8, 31, 11, 10),
   confidence: confidence,
 );
 
@@ -290,6 +290,119 @@ void main() {
     }
   });
 
+  testWidgets(
+    'recent sync cannot present prior-day activity or two-day-old vitals as current',
+    (tester) async {
+      final now = DateTime(2026, 8, 31, 14, 22, 8);
+      ConnectedHealthSignalView old(String key, double value, String unit) =>
+          ConnectedHealthSignalView(
+            key: key,
+            value: value,
+            unit: unit,
+            source: 'Native health',
+            observedAt: now.subtract(const Duration(days: 2)),
+            confidence: 1,
+          );
+      await tester.pumpWidget(
+        _subject(
+          ConnectedHealthSnapshot(
+            status: ConnectedHealthStatus.synchronized,
+            platformSource: 'Apple Health',
+            availableSources: const ['Apple Health'],
+            signals: [
+              old('activeEnergy', 901, 'kcal'),
+              old('heartRate', 88, 'bpm'),
+              old('sleep', 9, 'h'),
+            ],
+            stepHistory: [old('steps', 9999, 'count')],
+            importedCount: 4,
+            lastSyncAt: now,
+            failureCode: null,
+            deviceVerified: true,
+          ),
+          now: () => now,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('9999'), findsNothing);
+      expect(find.text('901'), findsNothing);
+      expect(find.text('88'), findsNothing);
+      expect(find.text('9.0'), findsNothing);
+      expect(find.byKey(const Key('watch-metric-steps')), findsNothing);
+      expect(find.byKey(const Key('watch-metric-active-energy')), findsNothing);
+      expect(find.byKey(const Key('watch-metric-heart-rate')), findsNothing);
+      expect(find.byKey(const Key('watch-metric-sleep')), findsNothing);
+    },
+  );
+
+  testWidgets('current observations replace retained older activity', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 8, 31, 14, 22, 8);
+    ConnectedHealthSignalView reading(
+      String key,
+      double value,
+      String unit,
+      DateTime at,
+    ) => ConnectedHealthSignalView(
+      key: key,
+      value: value,
+      unit: unit,
+      source: 'Native health',
+      observedAt: at,
+      confidence: 1,
+    );
+    await tester.pumpWidget(
+      _subject(
+        ConnectedHealthSnapshot(
+          status: ConnectedHealthStatus.synchronized,
+          platformSource: 'Apple Health',
+          availableSources: const ['Apple Health'],
+          signals: [
+            reading(
+              'activeEnergy',
+              900,
+              'kcal',
+              now.subtract(const Duration(days: 1)),
+            ),
+            reading(
+              'activeEnergy',
+              415,
+              'kcal',
+              now.subtract(const Duration(minutes: 4)),
+            ),
+          ],
+          stepHistory: [
+            reading(
+              'steps',
+              9000,
+              'count',
+              now.subtract(const Duration(days: 1)),
+            ),
+            reading(
+              'steps',
+              4321,
+              'count',
+              now.subtract(const Duration(minutes: 4)),
+            ),
+          ],
+          importedCount: 4,
+          lastSyncAt: now,
+          failureCode: null,
+          deviceVerified: true,
+        ),
+        now: () => now,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('4321'), findsOneWidget);
+    expect(find.text('415'), findsOneWidget);
+    expect(find.text('9000'), findsNothing);
+    expect(find.text('900'), findsNothing);
+  });
+
   test('watch scope contains no oxygen or SpO2 metric', () {
     expect(liveHealthWatchSignalIsActual(_signal('oxygen', 98, '%')), isFalse);
     expect(liveHealthWatchSignalIsActual(_signal('SpO2', 98, '%')), isFalse);
@@ -338,19 +451,19 @@ void main() {
               'kind': 'weight',
               'value': 78.0,
               'unit': 'kg',
-              'observedAt': DateTime.utc(2026, 8, 31, 12).toIso8601String(),
+              'observedAt': DateTime.utc(2026, 8, 31, 11, 10).toIso8601String(),
             },
             <String, Object?>{
               'kind': 'body_fat',
               'value': 20.0,
               'unit': '%',
-              'observedAt': DateTime.utc(2026, 8, 31, 12).toIso8601String(),
+              'observedAt': DateTime.utc(2026, 8, 31, 11, 10).toIso8601String(),
             },
             <String, Object?>{
               'kind': 'heart_rate',
               'value': 72.0,
               'unit': 'bpm',
-              'observedAt': DateTime.utc(2026, 8, 31, 12).toIso8601String(),
+              'observedAt': DateTime.utc(2026, 8, 31, 11, 10).toIso8601String(),
             },
           ],
         ),

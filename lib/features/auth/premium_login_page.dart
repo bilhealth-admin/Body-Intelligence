@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
+import 'apple_sign_in_cancellation.dart';
 import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
@@ -28,6 +30,8 @@ class _LoginPageState extends State<LoginPage> {
   bool loading = false;
   OAuthProvider? oauthLoading;
   String? status;
+  bool appleSignInCanceled = false;
+  Timer? _appleCancellationTimer;
 
   bool get _usesNativeAppleButton =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
@@ -86,7 +90,9 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       oauthLoading = provider;
       status = null;
+      appleSignInCanceled = false;
     });
+    _appleCancellationTimer?.cancel();
     try {
       final authService = SupabaseAuthService(Supabase.instance.client);
       final nativeApple =
@@ -154,6 +160,22 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       }
+    } on SignInWithAppleAuthorizationException catch (error) {
+      if (!isAppleSignInCancellation(error)) {
+        if (mounted) {
+          setState(
+            () => status = authEntryText(
+              context,
+              AuthEntryCopyKey.openSecureFailure,
+            ),
+          );
+        }
+      } else if (mounted) {
+        setState(() => appleSignInCanceled = true);
+        _appleCancellationTimer = Timer(const Duration(seconds: 4), () {
+          if (mounted) setState(() => appleSignInCanceled = false);
+        });
+      }
     } on AuthException catch (error) {
       if (mounted) setState(() => status = localizedAuthError(context, error));
     } catch (_) {
@@ -172,6 +194,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    _appleCancellationTimer?.cancel();
     email.dispose();
     super.dispose();
   }
@@ -255,6 +278,17 @@ class _LoginPageState extends State<LoginPage> {
                                 if (status != null) ...[
                                   const SizedBox(height: 12),
                                   AuthStatusPanel(message: status!),
+                                ],
+                                if (appleSignInCanceled) ...[
+                                  const SizedBox(height: 12),
+                                  AppleSignInCanceledBanner(
+                                    onDismiss: () {
+                                      _appleCancellationTimer?.cancel();
+                                      setState(
+                                        () => appleSignInCanceled = false,
+                                      );
+                                    },
+                                  ),
                                 ],
                                 const SizedBox(height: 18),
                                 FilledButton(

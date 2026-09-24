@@ -111,10 +111,10 @@ void main() {
   );
 
   test(
-    'validator targets the current non-self-referential Android 22 manifest',
+    'validator targets the current non-self-referential Android 24 manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V22_FROZEN_SOURCE_MANIFEST_2026-09-22.md';
+          'docs/release/BIL_ANDROID_V24_FROZEN_SOURCE_MANIFEST_2026-09-24.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();
@@ -128,18 +128,18 @@ void main() {
       );
       expect(metadata.unresolvedReviewCount, 0);
       expect(metadata.releaseVersion, '1.0.0');
-      expect(metadata.releaseBuildNumber, 22);
+      expect(metadata.releaseBuildNumber, 24);
       expect(
         metadata.stagingManifestComplete,
         metadata.candidateFrozenOrAccepted,
         reason: 'The current manifest must transition from NO/NO to YES/YES.',
       );
-      expect(manifestSource, contains('BIL_ANDROID_V22_AUDITED_SOURCE_SHA'));
+      expect(manifestSource, contains('BIL_ANDROID_V24_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
-        contains('BIL_ANDROID_V22_STAGING_MANIFEST_SHA256'),
+        contains('BIL_ANDROID_V24_STAGING_MANIFEST_SHA256'),
       );
-      expect(manifestSource, contains('not self-referential'));
+      expect(manifestSource, contains('not self-referentially'));
     },
   );
 }

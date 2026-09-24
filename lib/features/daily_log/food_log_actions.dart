@@ -180,9 +180,12 @@ extension _FoodLogActions on _FoodLogPageState {
         BilRuntimePermissionState.granted;
   }
 
-  Future<void> _analyzeMealImage({bool directCamera = false}) async {
+  Future<void> _analyzeMealImage({
+    bool directCamera = false,
+    XFile? initialImage,
+  }) async {
     if (mealImageBusy) return;
-    mealImageBusy = true;
+    _updateState(() => mealImageBusy = true);
     final visionCopy = MealVisionUiCopy.ofLocale(
       Localizations.localeOf(context),
     );
@@ -249,9 +252,12 @@ extension _FoodLogActions on _FoodLogPageState {
       return;
     }
 
-    XFile? image;
+    XFile? image = initialImage;
     try {
-      if (directCamera) {
+      if (image != null) {
+        // Quick Add captured before Food Log mounted; proceed directly to
+        // analysis so the idle browser never flashes before the camera.
+      } else if (directCamera) {
         if (!await _ensureCameraPermission() || !mounted) return;
         image = await Navigator.of(context).push<XFile>(
           MaterialPageRoute<XFile>(

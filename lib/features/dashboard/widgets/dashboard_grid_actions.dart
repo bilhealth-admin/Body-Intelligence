@@ -23,7 +23,7 @@ void _openDashboardCanonicalAction(BuildContext context, String? actionId) {
       context.push('/plan?origin=dashboard');
     case 'increase-protein':
     case 'rebalance-electrolytes':
-      context.go('/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard');
+      context.go('/daily-log?foodLog=1&from=%2Fdashboard');
     case 'protect-sleep':
     case 'increase-activity':
       context.go('/daily-log?from=%2Fdashboard');

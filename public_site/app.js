@@ -373,6 +373,15 @@ async function renderPasswordReset(lang) {
   } catch (_) { status.textContent = ar ? 'الرابط منتهي أو مستخدم أو غير صالح. اطلب رابطًا جديدًا.' : 'This link is expired, used, or invalid. Request a new link.'; }
 }
 
+function renderAuthCallbackFallback(lang) {
+  // The native app owns verified HTTPS callbacks. If the OS/browser opens the
+  // website instead, remove all credential-bearing URL data immediately and
+  // show only a safe recovery message. Never bridge OAuth material to bil://.
+  history.replaceState(null, '', '/auth/callback');
+  const ar = lang === 'ar';
+  document.getElementById('app').innerHTML = `<section class="reset-card"><span class="eyebrow">BIL SECURITY</span><h1>${ar ? 'العودة إلى تطبيق BIL' : 'Return to the BIL app'}</h1><p class="reset-status">${ar ? 'افتح تطبيق BIL لإكمال تسجيل الدخول. إذا لم يفتح التطبيق، أغلق هذه الصفحة وابدأ تسجيل الدخول من التطبيق مرة أخرى.' : 'Open the BIL app to complete sign-in. If the app did not open, close this page and start sign-in again from the app.'}</p></section>`;
+}
+
 function updateDocumentMetadata(path, lang, page) {
   const title = page ? `${page.title} — BIL Health` : (lang === 'ar' ? 'BIL Health — افهم جسمك' : 'BIL Health — Understand your body');
   document.title = title;
@@ -389,6 +398,7 @@ async function render() {
   setShellLanguage(lang);
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('active', a.getAttribute('data-nav') === (path === '/' ? 'home' : path.slice(1))));
   if (path === '/auth/reset-password') { updateDocumentMetadata(path, lang, { title: lang === 'ar' ? 'إعادة تعيين كلمة المرور' : 'Reset password', intro: 'Secure BIL account recovery.' }); await renderPasswordReset(lang); return; }
+  if (path === '/auth/callback') { renderAuthCallbackFallback(lang); updateDocumentMetadata(path, lang, { title: lang === 'ar' ? 'العودة إلى تطبيق BIL' : 'Return to the BIL app', intro: 'Secure BIL sign-in callback.' }); return; }
   const page = legal[lang][path];
   document.getElementById('app').innerHTML = path === '/' ? renderHome(lang) : page ? renderDocument(page, lang) : renderDocument({ eyebrow: '404', title: lang === 'ar' ? 'الصفحة غير موجودة' : 'Page not found', intro: lang === 'ar' ? 'لم نجد الصفحة المطلوبة. عد إلى موقع BIL Health.' : 'We could not find that page. Return to BIL Health.', sections: [['home', lang === 'ar' ? 'العودة' : 'Go home', `<p><a href="${localizedHref('/', lang)}">${lang === 'ar' ? 'الصفحة الرئيسية' : 'BIL Health home'}</a></p>`]] }, lang);
   updateDocumentMetadata(path, lang, page);

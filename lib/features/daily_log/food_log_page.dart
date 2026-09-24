@@ -57,12 +57,14 @@ class FoodLogPage extends ConsumerStatefulWidget {
     this.initialMealType,
     this.initialAction,
     this.directPhotoCapture = false,
+    this.initialImage,
     this.returnPath,
   });
 
   final String? initialMealType;
   final String? initialAction;
   final bool directPhotoCapture;
+  final XFile? initialImage;
   final String? returnPath;
 
   @override
@@ -123,7 +125,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         return;
       }
       try {
-        await _analyzeMealImage(directCamera: widget.directPhotoCapture);
+        await _analyzeMealImage(
+          directCamera: widget.directPhotoCapture,
+          initialImage: widget.initialImage,
+        );
       } finally {
         if (initialPhotoActionInFlight == action) {
           initialPhotoActionInFlight = null;
@@ -214,8 +219,22 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
             label: Text(_t(context, 'Retry')),
           ),
         ),
-        data: (items) =>
-            _buildBody(context, items, rankedFoods: popularFoods.value),
+        data: (items) => mealImageBusy
+            ? Center(
+                key: const Key('food-log-meal-analysis-progress'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      '${_t(context, 'Analyze meal photo')}…',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              )
+            : _buildBody(context, items, rankedFoods: popularFoods.value),
       ),
     );
   }

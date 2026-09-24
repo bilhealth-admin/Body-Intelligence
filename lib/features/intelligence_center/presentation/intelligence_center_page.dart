@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -27,6 +28,8 @@ import '../../daily_log/providers/daily_log_provider.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../foods/providers/food_provider.dart';
 import '../domain/intelligence_action.dart';
+import '../domain/bil_tool_registry.dart';
+import '../domain/coach_action_permission.dart';
 import '../domain/bil_navigation_registry.dart';
 import '../domain/bil_action_receipt.dart';
 import '../domain/coach_context_snapshot.dart';
@@ -92,6 +95,11 @@ final intelligenceConversationClockProvider = Provider<DateTime Function()>(
 final intelligenceCenterModelGatewayProvider = Provider<LocalModelGateway>(
   (ref) => createLocalModelGateway(),
 );
+
+final coachActionPermissionModeProvider =
+    StateProvider<CoachActionPermissionMode>(
+      (ref) => CoachActionPermissionMode.askBeforeWrite,
+    );
 
 class IntelligenceCenterPage extends ConsumerStatefulWidget {
   const IntelligenceCenterPage({
@@ -546,6 +554,44 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            PopupMenuButton<CoachActionPermissionMode>(
+                              key: const Key('ai-coach-permission-mode'),
+                              tooltip: tr(
+                                'Coach action permissions',
+                                'صلاحيات إجراءات المدرب',
+                              ),
+                              initialValue: ref.watch(
+                                coachActionPermissionModeProvider,
+                              ),
+                              onSelected: (mode) =>
+                                  ref
+                                          .read(
+                                            coachActionPermissionModeProvider
+                                                .notifier,
+                                          )
+                                          .state =
+                                      mode,
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: CoachActionPermissionMode.readOnly,
+                                  child: Text(tr('Read only', 'قراءة فقط')),
+                                ),
+                                PopupMenuItem(
+                                  value:
+                                      CoachActionPermissionMode.askBeforeWrite,
+                                  child: Text(
+                                    tr('Ask before write', 'اسأل قبل الكتابة'),
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: CoachActionPermissionMode.writeAllowed,
+                                  child: Text(
+                                    tr('Write allowed', 'الكتابة مسموحة'),
+                                  ),
+                                ),
+                              ],
+                              icon: const Icon(Icons.shield_outlined),
+                            ),
                             IconButton(
                               key: const Key('ai-coach-food-image-button'),
                               tooltip: tr('Open camera', 'افتح الكاميرا'),

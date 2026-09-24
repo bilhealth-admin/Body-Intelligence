@@ -58,6 +58,7 @@ class BilToolDescriptor {
         }
       case 'read_nutrition_remaining':
       case 'read_profile_identity':
+      case 'sign_out':
         if (raw.isNotEmpty) return null;
       case 'log_water':
         final amount = raw['amountMl'];
@@ -358,6 +359,12 @@ class BilToolRegistry {
       name: 'request_account_deletion',
       type: IntelligenceActionType.requestAccountDeletion,
       risk: BilToolRisk.destructive,
+      trustBoundary: BilToolTrustBoundary.serverVerified,
+    ),
+    'sign_out': BilToolDescriptor(
+      name: 'sign_out',
+      type: IntelligenceActionType.signOut,
+      risk: BilToolRisk.sensitive,
       trustBoundary: BilToolTrustBoundary.serverVerified,
     ),
     'log_water': BilToolDescriptor(

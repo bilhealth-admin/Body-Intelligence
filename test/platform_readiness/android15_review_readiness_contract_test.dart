@@ -6,7 +6,7 @@ String _read(String path) => File(path).readAsStringSync();
 
 void main() {
   test(
-    'Android 22 release identity and modern Android package gates are exact',
+    'Android 24 release identity and modern Android package gates are exact',
     () {
       final gradle = _read('android/app/build.gradle.kts');
       final workflow = _read(
@@ -20,13 +20,13 @@ void main() {
       expect(gradle, contains('isShrinkResources = true'));
       expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
-      expect(workflow, contains('(( BUILD_NUMBER == 22 ))'));
+      expect(workflow, contains('(( BUILD_NUMBER == 24 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 21 ))')));
-      expect(workflow, contains('BIL_ANDROID_V22_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V22_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('BIL_ANDROID_V24_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_ANDROID_V24_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V22_FROZEN_SOURCE_MANIFEST_2026-09-22.md'),
+        contains('BIL_ANDROID_V24_FROZEN_SOURCE_MANIFEST_2026-09-24.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));

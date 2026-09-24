@@ -8,6 +8,7 @@ import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import 'bil_speech_to_text.dart';
 import 'meal_voice_candidate.dart';
+import '../presentation/bil_meal_voice_capture_dialog.dart';
 
 typedef MealVoicePermissionGate = Future<bool> Function(BuildContext context);
 
@@ -264,6 +265,7 @@ class MealVoiceInputService {
       return null;
     }
     var accepted = false;
+    var editing = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -273,60 +275,38 @@ class MealVoiceInputService {
           final copy = _VoiceCopy.forLocaleTag(
             BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
           );
-          return AlertDialog(
-            icon: Icon(
-              failure == null
-                  ? Icons.graphic_eq_rounded
-                  : Icons.mic_off_outlined,
-            ),
-            title: Text(copy.title),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(copy.instructions),
-                const SizedBox(height: 16),
-                TextField(
-                  key: const Key('editable-voice-food-candidate'),
-                  controller: editor,
-                  minLines: 2,
-                  maxLines: 4,
-                  onChanged: (_) {
-                    userEdited = true;
-                    setDialogState(() {});
+          return BilMealVoiceCaptureDialog(
+            title: copy.title,
+            instructions: copy.instructions,
+            transcript: editor.text,
+            editor: editor,
+            editing: editing,
+            cancelLabel: copy.cancel,
+            useLabel: copy.useForSearch,
+            error: failure == null ? null : copy.failure(failure!),
+            onEdit: () => setDialogState(() {
+              editing = true;
+              userEdited = true;
+            }),
+            onCancel: () {
+              unawaited(() async {
+                dialogActive = false;
+                refreshDialog = null;
+                await _speech.cancel();
+                if (dialogContext.mounted) Navigator.pop(dialogContext);
+              }());
+            },
+            onUse: failure != null || editor.text.trim().isEmpty
+                ? null
+                : () {
+                    unawaited(() async {
+                      accepted = true;
+                      dialogActive = false;
+                      refreshDialog = null;
+                      await _speech.stop();
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    }());
                   },
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: copy.reviewLabel,
-                    errorText: failure == null ? null : copy.failure(failure!),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  dialogActive = false;
-                  refreshDialog = null;
-                  await _speech.cancel();
-                  if (dialogContext.mounted) Navigator.pop(dialogContext);
-                },
-                child: Text(copy.cancel),
-              ),
-              FilledButton.icon(
-                key: const Key('accept-reviewed-voice-candidate'),
-                onPressed: failure != null || editor.text.trim().isEmpty
-                    ? null
-                    : () async {
-                        accepted = true;
-                        dialogActive = false;
-                        refreshDialog = null;
-                        await _speech.stop();
-                        if (dialogContext.mounted) Navigator.pop(dialogContext);
-                      },
-                icon: const Icon(Icons.fact_check_outlined),
-                label: Text(copy.useForSearch),
-              ),
-            ],
           );
         },
       ),

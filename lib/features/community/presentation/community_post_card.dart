@@ -24,6 +24,7 @@ class _CommunityPostCard extends StatefulWidget {
 }
 
 class _CommunityPostCardState extends State<_CommunityPostCard> {
+  late final Future<bool> _moderator = widget.repository.isCommunityModerator();
   late CommunityPostStats _stats = CommunityPostStats(
     postId: widget.post.id,
     likeCount: widget.post.likeCount,
@@ -255,32 +256,45 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                   ],
                 ),
               ),
-              PopupMenuButton<String>(
-                key: Key('community-post-actions-${widget.post.id}'),
-                icon: const Icon(Icons.more_horiz_rounded),
-                enabled: widget.actionsEnabled,
-                onSelected: widget.onAction,
-                itemBuilder: (_) => widget.post.authorId == widget.currentUserId
-                    ? [
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(communityText(context, 'Delete', 'حذف')),
+              FutureBuilder<bool>(
+                future: _moderator,
+                builder: (context, snapshot) => PopupMenuButton<String>(
+                  key: Key('community-post-actions-${widget.post.id}'),
+                  icon: const Icon(Icons.more_horiz_rounded),
+                  enabled: widget.actionsEnabled,
+                  onSelected: widget.onAction,
+                  itemBuilder: (_) => [
+                    if (widget.post.authorId == widget.currentUserId)
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Text(communityText(context, 'Delete', 'حذف')),
+                      )
+                    else ...[
+                      PopupMenuItem(
+                        value: 'report',
+                        child: Text(communityText(context, 'Report', 'إبلاغ')),
+                      ),
+                      PopupMenuItem(
+                        value: 'block',
+                        child: Text(
+                          communityText(context, 'Block member', 'حظر العضو'),
                         ),
-                      ]
-                    : [
-                        PopupMenuItem(
-                          value: 'report',
-                          child: Text(
-                            communityText(context, 'Report', 'إبلاغ'),
+                      ),
+                    ],
+                    if (snapshot.data == true &&
+                        widget.post.authorId != widget.currentUserId)
+                      PopupMenuItem(
+                        value: 'moderate_remove',
+                        child: Text(
+                          communityText(
+                            context,
+                            'Remove post',
+                            'إزالة المنشور',
                           ),
                         ),
-                        PopupMenuItem(
-                          value: 'block',
-                          child: Text(
-                            communityText(context, 'Block member', 'حظر العضو'),
-                          ),
-                        ),
-                      ],
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

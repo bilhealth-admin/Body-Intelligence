@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,11 +20,21 @@ class _DashboardHealthActivityRefreshState
     extends ConsumerState<DashboardHealthActivityRefresh>
     with WidgetsBindingObserver {
   Future<void>? _refreshTask;
+  Timer? _foregroundTimer;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _schedule();
+    _startForegroundTimer();
+  }
+
+  void _startForegroundTimer() {
+    _foregroundTimer?.cancel();
+    _foregroundTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => _schedule(),
+    );
   }
 
   void _schedule() {
@@ -52,12 +64,23 @@ class _DashboardHealthActivityRefreshState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _schedule();
+    if (state == AppLifecycleState.resumed) {
+      _schedule();
+      _startForegroundTimer();
+      return;
+    }
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _foregroundTimer?.cancel();
+      _foregroundTimer = null;
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _foregroundTimer?.cancel();
     super.dispose();
   }
 

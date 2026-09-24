@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../analytics/bil_launch_deep_link.dart';
@@ -19,6 +20,7 @@ import '../../features/auth/bil_auth_callback_controller.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_log/food_log_page.dart';
+import '../../features/daily_log/quick_add_meal_camera_page.dart';
 import '../../features/daily_log/daily_body_context_page.dart';
 import '../../features/daily_log/daily_water_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
@@ -599,6 +601,9 @@ class AppRouter {
                   initialAction: state.uri.queryParameters['action'],
                   directPhotoCapture:
                       state.uri.queryParameters['source'] == 'camera',
+                  initialImage: state.extra is XFile
+                      ? state.extra! as XFile
+                      : null,
                   returnPath: returnPath,
                 );
               }
@@ -611,6 +616,14 @@ class AppRouter {
                 returnPath: returnPath,
               );
             },
+          ),
+          GoRoute(
+            path: '/quick-add/meal-camera',
+            builder: (_, state) => QuickAddMealCameraPage(
+              returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
+                state.uri.queryParameters['from'],
+              ),
+            ),
           ),
           GoRoute(
             path: '/daily-log/body-context',

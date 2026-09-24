@@ -133,6 +133,20 @@ class CommunityRepository
     );
   }
 
+  Future<void> removePublishedPostAsModerator({
+    required String postId,
+    required String reason,
+  }) async {
+    if (!_uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    if (!const {'spam', 'abuse', 'misleading', 'other'}.contains(reason)) {
+      throw ArgumentError.value(reason, 'reason');
+    }
+    await _client.rpc(
+      'bil_remove_published_community_post',
+      params: {'p_post_id': postId, 'p_reason': reason},
+    );
+  }
+
   Future<void> publishPost(String body) async {
     await assertCommunityPublishReady();
     await _runCommunityMutation(() => _posts.publishText(body));

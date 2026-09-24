@@ -44,9 +44,17 @@ class ProgressAnalysis {
         projectedGoalDate: null,
       );
     }
-    final spanDays = ordered.length == 1
-        ? 0
-        : ordered.last.date.difference(ordered.first.date).inDays.abs();
+    final firstDay = DateTime.utc(
+      ordered.first.date.year,
+      ordered.first.date.month,
+      ordered.first.date.day,
+    );
+    final lastDay = DateTime.utc(
+      ordered.last.date.year,
+      ordered.last.date.month,
+      ordered.last.date.day,
+    );
+    final spanDays = lastDay.difference(firstDay).inDays.abs();
     final confidence = ordered.length < 4 || spanDays < 6
         ? ProgressConfidence.insufficient
         : ordered.length >= 14 && spanDays >= 21

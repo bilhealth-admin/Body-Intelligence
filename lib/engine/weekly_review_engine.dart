@@ -29,12 +29,16 @@ class WeeklyReviewEngine {
     required int waterDays,
     required int contextDays,
     required double? weeklyWeightChangeKg,
+    int? distinctTrackedDays,
   }) {
-    final trackedDays = [
-      weightDays,
-      nutritionDays,
-      waterDays,
-    ].reduce((a, b) => a > b ? a : b);
+    final trackedDays =
+        distinctTrackedDays ??
+        [
+          weightDays,
+          nutritionDays,
+          waterDays,
+          contextDays,
+        ].reduce((a, b) => a > b ? a : b);
     final missing = <String>[
       if (weightDays < 4) 'At least 4 weight days improve trend interpretation',
       if (nutritionDays < 5) 'More complete meal days improve intake context',

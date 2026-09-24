@@ -21,6 +21,7 @@ enum IntelligenceActionType {
   moveMealItem,
   deleteMealItem,
   requestAccountDeletion,
+  signOut,
   saveMemory,
 }
 

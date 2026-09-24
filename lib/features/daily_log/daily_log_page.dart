@@ -604,37 +604,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                               const SizedBox(
                                 height: PremiumDesignTokens.spaceSm,
                               ),
-                              PremiumSurface(
-                                key: const Key('daily-log-body-context-link'),
-                                padding: EdgeInsets.zero,
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.all(16),
-                                  horizontalTitleGap: 12,
-                                  leading: BilSemanticIconBadge(
-                                    kind: BilSemanticIconKind.health,
-                                    size: 32,
-                                    iconSize: 18,
-                                    shape: BoxShape.rectangle,
-                                  ),
-                                  title: Text(
-                                    _tr('Body context', 'سياق الجسم'),
-                                  ),
-                                  subtitle: Text(
-                                    _tr(
-                                      'Add sleep, travel, stress, hydration, and other context on a focused page.',
-                                      'أضف النوم والسفر والإجهاد والترطيب والسياقات الأخرى في صفحة مخصصة.',
-                                    ),
-                                  ),
-                                  trailing: const Icon(
-                                    Icons.chevron_right_rounded,
-                                  ),
-                                  onTap: () =>
-                                      context.push('/daily-log/body-context'),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: PremiumDesignTokens.spaceSm,
-                              ),
                               _diaryStatus(ledger),
                               const SizedBox(
                                 height: PremiumDesignTokens.spaceLg,

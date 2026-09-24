@@ -43,7 +43,7 @@ void main() {
       RegExp(
         r'returnPath:\s*ResponsiveAppShell\.safeQuickAddReturnPath\(',
       ).allMatches(source).length,
-      2,
+      3,
     );
   });
 

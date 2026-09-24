@@ -214,6 +214,7 @@ class IntelligenceMessageAction {
         });
       case IntelligenceActionType.readNutritionRemaining:
       case IntelligenceActionType.readProfileIdentity:
+      case IntelligenceActionType.signOut:
         if (raw.isNotEmpty) return null;
         return const <String, Object?>{};
       case IntelligenceActionType.openDailyLog:

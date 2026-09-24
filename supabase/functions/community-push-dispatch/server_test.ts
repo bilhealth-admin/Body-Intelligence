@@ -118,11 +118,12 @@ Deno.test("private push previews stay generic and every delivery is recorded onc
   assertEquals(fake.payloads[0].body, "You have a new private update.");
   assertEquals(fake.payloads[0].idempotency_key, token.delivery_key);
   assertEquals(fake.calls.map((c) => c.name), [
+    "bil_quarantine_stale_push_outbox",
     "bil_claim_push_deliveries",
     "bil_record_push_delivery_result",
     "bil_finalize_push_outbox",
   ]);
-  assertEquals(fake.calls[1].args?.p_delivered, true);
+  assertEquals(fake.calls[2].args?.p_delivered, true);
 });
 
 for (const invalidHeader of [false, true]) {
@@ -139,8 +140,8 @@ for (const invalidHeader of [false, true]) {
       delivered: 0,
       failed: 1,
     });
-    assertEquals(fake.calls[1].args?.p_permanent_token_failure, invalidHeader);
-    assertEquals(fake.calls[1].args?.p_delivered, false);
+    assertEquals(fake.calls[2].args?.p_permanent_token_failure, invalidHeader);
+    assertEquals(fake.calls[2].args?.p_delivered, false);
   });
 }
 

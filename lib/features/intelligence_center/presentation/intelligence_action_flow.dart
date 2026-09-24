@@ -5,6 +5,21 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     IntelligenceAction action, {
     bool confirmationAlreadyProvided = false,
   }) async {
+    final descriptor = const BilToolRegistry().lookup(action.id);
+    final permissionMode = ref.read(coachActionPermissionModeProvider);
+    if (descriptor != null &&
+        !const CoachActionPermissionGate().allows(
+          mode: permissionMode,
+          descriptor: descriptor,
+        )) {
+      _appendToolReceipt(
+        tr(
+          'This action needs write permission. Change the shield setting to continue.',
+          'يحتاج هذا الإجراء إلى إذن كتابة. غيّر إعداد الدرع للمتابعة.',
+        ),
+      );
+      return false;
+    }
     final executionKey = _coachActionExecutionKey(action);
     if (!executingActionKeys.add(executionKey)) return false;
     final tracksInlineNavigation = const CoachActionPresentationPolicy()
@@ -15,7 +30,13 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           confirmationAlreadyProvided &&
           action.type == IntelligenceActionType.updateGoal &&
           !action.destructive;
-      if (action.requiresConfirmation &&
+      final requiresConfirmation = descriptor == null
+          ? action.requiresConfirmation
+          : const CoachActionPermissionGate().requiresConfirmation(
+              mode: permissionMode,
+              descriptor: descriptor,
+            );
+      if (requiresConfirmation &&
           !acceptsTypedConfirmation &&
           !await _confirmAction(action)) {
         return false;
@@ -412,6 +433,16 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           _showActionCompleted(tr('Meal item moved.', 'تم نقل عنصر الوجبة.'));
         case IntelligenceActionType.requestAccountDeletion:
           await _openCoachRoute('/help/delete-account', push: true);
+        case IntelligenceActionType.signOut:
+          await Supabase.instance.client.auth.signOut();
+          if (Supabase.instance.client.auth.currentSession != null) {
+            throw StateError('sign_out_readback_failed');
+          }
+          if (mounted) {
+            _appendToolReceipt(
+              tr('Signed out successfully.', 'تم تسجيل الخروج بنجاح.'),
+            );
+          }
         case IntelligenceActionType.saveMemory:
           final value = action.payload['text']?.toString().trim() ?? '';
           if (value.isEmpty || value.length > 500) {

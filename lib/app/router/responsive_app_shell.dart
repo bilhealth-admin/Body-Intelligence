@@ -228,9 +228,7 @@ class ResponsiveAppShell extends StatelessWidget {
           // Photo analysis belongs to the standalone Food Log surface. Keep
           // the dashboard as the validated return destination and do not
           // route a meal image through AI Coach or the legacy Daily Log.
-          context.push(
-            '/daily-log?foodLog=1&action=photo&source=camera&from=$origin',
-          );
+          context.push('/quick-add/meal-camera?from=$origin');
           break;
         case 'exercise':
           context.push('/wellness/workouts');

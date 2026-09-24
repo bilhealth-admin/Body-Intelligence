@@ -88,6 +88,18 @@ export async function handler(
   const client = (dependencies.client ?? createClient)(url, key, {
     auth: { persistSession: false },
   });
+  // Fail closed before reading deliverable rows. Production activation first
+  // quarantines the historical backlog, and every later run applies the same
+  // bounded 72-hour delivery window so an outage cannot notify weeks later.
+  const staleBefore = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
+  const { error: staleError } = await client.rpc(
+    "bil_quarantine_stale_push_outbox",
+    {
+      p_before: staleBefore,
+      p_reason: "stale_delivery_window_expired",
+    },
+  );
+  if (staleError) return reply(500, { error: "stale_outbox_guard_failed" });
   const { data: events, error } = await client.from("bil_push_outbox").select(
     "*",
   ).is("dispatched_at", null).order("created_at").limit(100);

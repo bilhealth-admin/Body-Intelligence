@@ -177,6 +177,7 @@ final class ConnectedHealthController
   Future<ConnectedHealthSnapshot>? _nativeSyncTask;
   Future<ConnectedHealthSnapshot>? _nativeLoadTask;
   Future<ConnectedHealthSnapshot>? _nativeActivityTask;
+  Future<void>? _explicitSyncTask;
   Future<void>? _cachedSnapshotTask;
   Future<void>? _startupPermissionTask;
   DateTime? _activityRefreshedAt;
@@ -416,30 +417,80 @@ final class ConnectedHealthController
     }
   }
 
-  Future<void> synchronize() => _runMutation(
-    _HealthMutation.synchronize,
-    () async {
-      try {
-        return await _readNativeOnce().timeout(_synchronizationTimeout);
-      } on TimeoutException {
-        _cancelIosNativeSynchronization();
-        if (!mounted) return const ConnectedHealthSnapshot.unavailable();
-        // iOS actively stops the owned HealthKit query above. Android keeps
-        // its existing Health Connect behavior. In either case, end the
-        // visible wait honestly instead of trapping Apps & Devices in a
-        // permanent busy state.
-        return (state.value ?? const ConnectedHealthSnapshot.unavailable())
-            .copyWith(
-              status: ConnectedHealthStatus.degraded,
-              failureCode: 'health_sync_timed_out',
-            );
-      }
-    },
-    transition: (current) => current.copyWith(
-      status: ConnectedHealthStatus.syncing,
-      clearFailure: true,
-    ),
-  );
+  Future<void> synchronize() {
+    if (!mounted || _readsSuspended) return Future<void>.value();
+    final existing = _explicitSyncTask;
+    if (existing != null) return existing;
+    final startedAt = DateTime.now();
+    final deadline = startedAt.add(_synchronizationTimeout);
+    final current = state.value ?? const ConnectedHealthSnapshot.unavailable();
+
+    // The visible deadline starts at the tap boundary, before any native work
+    // or predecessor coordination. Supersede passive reads instead of waiting
+    // behind them; their generation checks prevent stale completion writes.
+    _readGeneration++;
+    state = AsyncValue.data(
+      current.copyWith(
+        status: ConnectedHealthStatus.syncing,
+        clearFailure: true,
+        isBusy: true,
+      ),
+    );
+    _cancelIosNativeSynchronization();
+
+    late final Future<void> task;
+    task = _performExplicitSynchronization(current, deadline).whenComplete(() {
+      if (identical(_explicitSyncTask, task)) _explicitSyncTask = null;
+    });
+    _explicitSyncTask = task;
+    return task;
+  }
+
+  Future<void> _performExplicitSynchronization(
+    ConnectedHealthSnapshot previous,
+    DateTime deadline,
+  ) async {
+    await _yieldIosSynchronizationFrame();
+    if (!mounted || _readsSuspended) return;
+    // Invoke the single native flight before evaluating the remaining UX
+    // budget. Even a zero-budget test/action must start (and then cancel) the
+    // one requested synchronization rather than silently doing nothing.
+    final native = _readNativeOnce();
+    final remaining = deadline.difference(DateTime.now());
+    if (remaining <= Duration.zero) {
+      _cancelIosNativeSynchronization();
+      _publishExplicitSyncTimeout(previous);
+      return;
+    }
+    try {
+      final snapshot = await native.timeout(remaining);
+      if (!mounted || _readsSuspended) return;
+      state = AsyncValue.data(snapshot.copyWith(isBusy: false));
+    } on TimeoutException {
+      _cancelIosNativeSynchronization();
+      _publishExplicitSyncTimeout(previous);
+    } catch (_) {
+      if (!mounted || _readsSuspended) return;
+      state = AsyncValue.data(
+        previous.copyWith(
+          status: ConnectedHealthStatus.degraded,
+          failureCode: 'health_sync_failed_offline_cache_preserved',
+          isBusy: false,
+        ),
+      );
+    }
+  }
+
+  void _publishExplicitSyncTimeout(ConnectedHealthSnapshot previous) {
+    if (!mounted || _readsSuspended) return;
+    state = AsyncValue.data(
+      previous.copyWith(
+        status: ConnectedHealthStatus.degraded,
+        failureCode: 'health_sync_timed_out',
+        isBusy: false,
+      ),
+    );
+  }
 
   Future<void> _yieldIosSynchronizationFrame() async {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return;
@@ -478,14 +529,16 @@ final class ConnectedHealthController
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) _readsSuspended = false;
-    if (state == AppLifecycleState.paused ||
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _readsSuspended = true;
       _readGeneration++;
       final current = this.state.value;
       if (current != null &&
           current.isBusy &&
-          (_mutationKind == _HealthMutation.synchronize ||
+          (_explicitSyncTask != null ||
+              _mutationKind == _HealthMutation.synchronize ||
               _mutationKind == _HealthMutation.dailyActivity ||
               _refreshTask != null)) {
         this.state = AsyncValue.data(

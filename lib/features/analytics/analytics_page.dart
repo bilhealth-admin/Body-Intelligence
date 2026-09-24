@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../data/database/date_keys.dart';
+import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/theme/premium_motion_tokens.dart';
@@ -229,19 +230,35 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final caloriesByDay = <String, double>{};
     final proteinByDay = <String, double>{};
     final sodiumByDay = <String, double>{};
+    var incompleteCalories = false;
+    var incompleteProtein = false;
     for (final meal in meals) {
-      caloriesByDay.update(
-        meal.meal.dayKey,
-        (value) =>
-            value + meal.items.fold(0, (sum, item) => sum + item.calories),
-        ifAbsent: () => meal.items.fold(0, (sum, item) => sum + item.calories),
-      );
-      proteinByDay.update(
-        meal.meal.dayKey,
-        (value) =>
-            value + meal.items.fold(0, (sum, item) => sum + item.protein),
-        ifAbsent: () => meal.items.fold(0, (sum, item) => sum + item.protein),
-      );
+      for (final item in meal.items) {
+        if (NutrientEvidenceMask.contains(
+          item.nutrientEvidenceMask,
+          TrackedNutrient.calories,
+        )) {
+          caloriesByDay.update(
+            meal.meal.dayKey,
+            (value) => value + item.calories,
+            ifAbsent: () => item.calories,
+          );
+        } else {
+          incompleteCalories = true;
+        }
+        if (NutrientEvidenceMask.contains(
+          item.nutrientEvidenceMask,
+          TrackedNutrient.protein,
+        )) {
+          proteinByDay.update(
+            meal.meal.dayKey,
+            (value) => value + item.protein,
+            ifAbsent: () => item.protein,
+          );
+        } else {
+          incompleteProtein = true;
+        }
+      }
       sodiumByDay.update(
         meal.meal.dayKey,
         (value) => value + meal.items.fold(0, (sum, item) => sum + item.sodium),
@@ -256,7 +273,13 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         ifAbsent: () => entry.amountMl,
       );
     }
-    final trackedDays = {...caloriesByDay.keys, ...waterByDay.keys}.length;
+    final trackedDays = <String>{
+      ...weights.map((row) => dayKeyFor(row.date)),
+      ...meals.map((row) => row.meal.dayKey),
+      ...waterByDay.keys,
+      ...contexts.map((row) => row.dayKey),
+      ...bodyContextLogs.map((row) => row.dayKey),
+    }.length;
     final progress = ProgressAnalysis.evaluate(
       samples: weights
           .map((row) => ProgressSample(date: row.date, weightKg: row.weight))
@@ -268,6 +291,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         .where((row) => dayKeyFor(row.date).compareTo(cutoffKey) >= 0)
         .map((row) => dayKeyFor(row.date))
         .toSet();
+    final recentWeightValues = allWeights
+        .where((row) => dayKeyFor(row.date).compareTo(cutoffKey) >= 0)
+        .map((row) => row.weight)
+        .toList(growable: false);
+    final recentAverageWeightKg = recentWeightValues.isEmpty
+        ? null
+        : recentWeightValues.reduce((a, b) => a + b) /
+              recentWeightValues.length;
     final recentMealDays = caloriesByDay.keys
         .where((day) => day.compareTo(cutoffKey) >= 0)
         .toSet();
@@ -287,6 +318,12 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       nutritionDays: recentMealDays.length,
       waterDays: recentWaterDays.length,
       contextDays: recentContextDays.length,
+      distinctTrackedDays: <String>{
+        ...recentWeightDays,
+        ...recentMealDays,
+        ...recentWaterDays,
+        ...recentContextDays,
+      }.length,
       weeklyWeightChangeKg: rate,
     );
     final activityDates = <DateTime>[
@@ -400,6 +437,15 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 title: tr('Your personal baseline', 'خطك الأساسي الشخصي'),
                 lines: baseline.sufficient
                     ? [
+                        if (recentAverageWeightKg != null)
+                          tr(
+                            'Recent average weight: ${UnitConverter.weightFromKg(recentAverageWeightKg, system).toStringAsFixed(1)} $weightUnit',
+                            'متوسط الوزن الحديث: ${UnitConverter.weightFromKg(recentAverageWeightKg, system).toStringAsFixed(1)} $weightUnit',
+                          ),
+                        tr(
+                          'Last 7 days compared with your previous record',
+                          'آخر 7 أيام مقارنة بسجلك السابق',
+                        ),
                         tr(
                           'Compared with your own earlier records · ${localizedBaselineConfidence(baseline.confidence, arabic: false)} confidence',
                           'مقارنة بسجلاتك السابقة أنت · ثقة ${localizedBaselineConfidence(baseline.confidence, arabic: true)}',
@@ -588,6 +634,16 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               tr('Calories and protein by day', 'السعرات والبروتين حسب اليوم'),
               style: PremiumDesignTokens.sectionHeading(context),
             ),
+            if (incompleteCalories || incompleteProtein) ...[
+              const SizedBox(height: PremiumDesignTokens.spaceXs),
+              Text(
+                tr(
+                  'Totals are incomplete because some meal items do not include verified nutrient evidence.',
+                  'الإجماليات غير مكتملة لأن بعض عناصر الوجبات لا تحتوي على دليل غذائي موثّق.',
+                ),
+                key: const Key('analytics-incomplete-nutrient-evidence'),
+              ),
+            ],
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: TextButton.icon(
@@ -621,7 +677,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                         (day) => ListTile(
                           title: Text(day),
                           subtitle: Text(
-                            '${caloriesByDay[day]!.round()} ${tr('kcal', 'سعرة')} · ${proteinByDay[day]!.toStringAsFixed(1)} ${tr('g protein', 'غ بروتين')}',
+                            '${caloriesByDay[day]!.round()} ${tr('kcal', 'سعرة')} · ${(proteinByDay[day] ?? 0).toStringAsFixed(1)} ${tr('g protein', 'غ بروتين')}',
                           ),
                         ),
                       )
@@ -639,6 +695,22 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 value: waterByDay[day]!.toDouble(),
                 maximum: 3000,
                 suffix: 'ml',
+              ),
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
+            PremiumSurface(
+              child: ListTile(
+                key: const Key('analytics-health-information-sources'),
+                leading: const Icon(Icons.menu_book_outlined),
+                title: Text(tr('Sources', 'المصادر')),
+                subtitle: Text(
+                  tr(
+                    'Methods and references, including Carbon Cycling',
+                    'المنهجيات والمراجع، بما فيها تدوير الكربوهيدرات',
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push('/health-information-sources'),
               ),
             ),
           ],

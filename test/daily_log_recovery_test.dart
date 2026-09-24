@@ -89,14 +89,13 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      // Body context is intentionally isolated on its own focused route. The
-      // diary keeps a reachable entry point while private note contents are
-      // not duplicated into the main diary surface.
+      // Today presents one unified private note/day-context summary while the
+      // editor remains isolated on its focused route.
       expect(
         find.byKey(const Key('daily-log-body-context-link')),
         findsOneWidget,
       );
-      expect(find.text('hello notes'), findsNothing);
+      expect(find.text('hello notes'), findsOneWidget);
       expect(find.byKey(const Key('body-context-other-field')), findsNothing);
 
       await tester.scrollUntilVisible(

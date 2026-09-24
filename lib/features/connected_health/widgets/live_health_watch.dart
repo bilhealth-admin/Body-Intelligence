@@ -154,20 +154,31 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
       final date = signal.observedAt.toLocal();
       return DateTime(date.year, date.month, date.day) == today;
     });
-    // Prefer today's aggregate when it exists, but do not hide a valid
-    // reading merely because the native source reported it shortly before
-    // the local day boundary. The card already exposes the last-sync time;
-    // showing the latest confirmed value is more useful than replacing it
-    // with an empty watch face.
+    // A native daily aggregate may be carried in stepHistory or in the
+    // compact signal set. Both are acceptable only for the current local
+    // calendar day; never fall back to a previous-day total.
     final signals = key == 'steps'
         ? <ConnectedHealthSignalView>[
             ...todayHistory,
-            ...widget.snapshot.signals.where((signal) => signal.key == key),
+            if (todayHistory.isEmpty) ...widget.snapshot.signals,
           ]
         : widget.snapshot.signals;
     ConnectedHealthSignalView? latest;
     for (final signal in signals) {
       if (signal.key != key || !liveHealthWatchSignalIsActual(signal)) {
+        continue;
+      }
+      final observed = signal.observedAt.toLocal();
+      final observedDay = DateTime(observed.year, observed.month, observed.day);
+      if ((key == 'steps' || key == 'activeEnergy') && observedDay != today) {
+        continue;
+      }
+      if ((key == 'heartRate' || key == 'restingHeartRate') &&
+          _now.difference(observed).abs() > const Duration(minutes: 30)) {
+        continue;
+      }
+      if (key == 'sleep' &&
+          _now.difference(observed).abs() > const Duration(hours: 36)) {
         continue;
       }
       if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {

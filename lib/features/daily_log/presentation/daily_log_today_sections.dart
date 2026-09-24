@@ -9,6 +9,7 @@ import '../../connected_health/connected_health_model.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../weight/providers/weight_provider.dart';
+import '../domain/daily_body_context_codec.dart';
 import '../providers/daily_log_provider.dart';
 
 class DailyLogTodayBackground extends StatelessWidget {
@@ -281,29 +282,75 @@ class DailyLogNotesShortcut extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final log = ref.watch(selectedDailyLogProvider);
-    final notes = log.isLoading ? null : log.value?.notes;
+    final selection = DailyBodyContextCodec.decode(
+      log.isLoading ? null : log.value?.notes,
+    );
+    final contextLabels = selection.selected
+        .map((key) => _dailyContextLabel(context, key))
+        .where((value) => value.isNotEmpty)
+        .toList(growable: false);
+    final summary = <String>[
+      if (selection.note.trim().isNotEmpty) selection.note.trim(),
+      if (contextLabels.isNotEmpty) contextLabels.join(' · '),
+      if (selection.other.trim().isNotEmpty) selection.other.trim(),
+    ].join('\n');
+    final direction = Directionality.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            '$title · ${context.strings.text('Body context')}',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 10),
-          DailyLogTodayCard(
+          KeyedSubtree(
             key: const Key('daily-log-notes-shortcut'),
-            child: ListTile(
-              minTileHeight: 64,
-              title: Text(
-                notes?.isNotEmpty == true ? notes! : '—',
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
+            child: DailyLogTodayCard(
+              child: ListTile(
+                key: const Key('daily-log-body-context-link'),
+                contentPadding: const EdgeInsets.all(16),
+                minTileHeight: 64,
+                title: Text(
+                  summary.isNotEmpty
+                      ? summary
+                      : context.strings.text('Nothing notable'),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Icon(
+                  direction == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                ),
+                onTap: () => context.push('/daily-log/body-context'),
               ),
-              trailing: const Icon(Icons.edit_outlined),
-              onTap: () => context.push('/daily-log/body-context'),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+String _dailyContextLabel(BuildContext context, String key) {
+  const labels = <String, String>{
+    'poorSleep': 'Less sleep than usual',
+    'greatSleep': 'Excellent sleep',
+    'travel': 'Travel',
+    'fasting': 'Fasting',
+    'highSodiumMeal': 'High-sodium meal',
+    'hardWorkout': 'Hard workout',
+    'psychologicalStress': 'Psychological stress',
+    'illnessSymptoms': 'Illness or symptoms',
+    'medication': 'Medication',
+    'lessWater': 'Less water than usual',
+    'moreWater': 'More water than usual',
+    'constipation': 'Constipation',
+    'nothingNotable': 'Nothing notable',
+    'other': 'Other',
+  };
+  final source = labels[key];
+  return source == null ? '' : context.strings.text(source);
 }

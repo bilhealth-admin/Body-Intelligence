@@ -579,6 +579,7 @@ IconData _iconForAction(IntelligenceActionType type) => switch (type) {
   IntelligenceActionType.deleteMealItem => Icons.delete_outline_rounded,
   IntelligenceActionType.requestAccountDeletion =>
     BilSemanticIcons.deleteAccount,
+  IntelligenceActionType.signOut => Icons.logout_rounded,
   IntelligenceActionType.saveMemory => Icons.bookmark_add_outlined,
 };
 
@@ -607,5 +608,6 @@ BilSemanticIconKind? _semanticKindForAction(IntelligenceActionType type) =>
       IntelligenceActionType.manageSubscription ||
       IntelligenceActionType.navigate => BilSemanticIconKind.aiCoach,
       IntelligenceActionType.deleteMealItem ||
-      IntelligenceActionType.requestAccountDeletion => null,
+      IntelligenceActionType.requestAccountDeletion ||
+      IntelligenceActionType.signOut => null,
     };

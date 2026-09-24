@@ -120,7 +120,11 @@ void main() {
             );
             expect(rows, isNotEmpty, reason: '$title keeps its action rows');
             for (final row in rows) {
-              expect(row.leading, isA<BilSemanticIconBadge>());
+              expect(row.leading, isNotNull);
+              expect(
+                row.leading.runtimeType.toString(),
+                anyOf('_MoreIcon', 'BilSemanticIconBadge'),
+              );
               expect(row.onTap, isNotNull);
             }
             expect(tester.takeException(), isNull);

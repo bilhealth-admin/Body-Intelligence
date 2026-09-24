@@ -17,7 +17,7 @@ String _librarySource(String path) {
 }
 
 void main() {
-  test('complete-meal action requests meal-focused diary context', () {
+  test('dashboard meals opens the neutral standalone Food Log', () {
     final dashboard = <String>[
       File(
         'lib/features/dashboard/widgets/dashboard_grid.dart',
@@ -32,12 +32,9 @@ void main() {
       'lib/features/daily_log/daily_log_meal_entry.dart',
     ).readAsStringSync();
 
-    expect(
-      dashboard,
-      contains(
-        "context.go('/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard')",
-      ),
-    );
+    expect(dashboard, contains("/daily-log?foodLog=1&from=%2Fdashboard"));
+    expect(dashboard, isNot(contains('meal=breakfast')));
+    expect(dashboard, isNot(contains('focus=meal')));
     expect(
       router,
       contains("focusMealEntry: state.uri.queryParameters['focus'] == 'meal'"),

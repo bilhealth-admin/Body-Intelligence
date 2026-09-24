@@ -78,6 +78,8 @@ void main() {
     Future<void> openCoach() async {
       final entry = find.byKey(const Key('more-ai-coach-entry'));
       await tester.scrollUntilVisible(entry, 280);
+      await tester.ensureVisible(entry);
+      await tester.pumpAndSettle();
       await tester.tap(entry);
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('ai-coach-hero')), findsOneWidget);
@@ -154,6 +156,8 @@ void main() {
     Future<void> openPaywall() async {
       final entry = find.byKey(const Key('more-ai-coach-entry'));
       await tester.scrollUntilVisible(entry, 280);
+      await tester.ensureVisible(entry);
+      await tester.pumpAndSettle();
       await tester.tap(entry);
       await tester.pumpAndSettle();
       expect(

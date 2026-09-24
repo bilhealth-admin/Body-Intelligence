@@ -143,7 +143,11 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
         title: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: AlignmentDirectional.centerStart,
-          child: Text(tr('Apps & Devices', 'التطبيقات والأجهزة')),
+          child: Text(
+            defaultTargetPlatform == TargetPlatform.android
+                ? tr('Health Connect', 'Health Connect')
+                : tr('Apps & Devices', 'التطبيقات والأجهزة'),
+          ),
         ),
         actions: [
           IconButton(

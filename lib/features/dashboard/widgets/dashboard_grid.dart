@@ -469,9 +469,7 @@ class DashboardGrid extends ConsumerWidget {
                         context.push('/daily-check-in');
                       case BestActionType.completeLogging:
                       case BestActionType.protein:
-                        context.go(
-                          '/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard',
-                        );
+                        context.go('/daily-log?foodLog=1&from=%2Fdashboard');
                       case BestActionType.hydration:
                         _addDashboardWater(
                           context: context,
@@ -501,9 +499,8 @@ class DashboardGrid extends ConsumerWidget {
                     ),
               onPrimaryAction: null,
               onWeightTap: () => context.push('/daily-check-in'),
-              onMealsTap: () => context.go(
-                '/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard',
-              ),
+              onMealsTap: () =>
+                  context.go('/daily-log?foodLog=1&from=%2Fdashboard'),
               onWaterTap: () =>
                   context.go('/daily-log/water?from=%2Fdashboard'),
             ),
