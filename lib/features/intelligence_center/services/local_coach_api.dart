@@ -292,6 +292,12 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         requiresConfirmation: true,
         destructive: true,
       ),
+      'sign_out' => IntelligenceAction(
+        id: name!,
+        type: IntelligenceActionType.signOut,
+        label: tr('Sign out', 'تسجيل الخروج'),
+        requiresConfirmation: true,
+      ),
       'save_memory' => IntelligenceAction(
         id: name!,
         type: IntelligenceActionType.saveMemory,

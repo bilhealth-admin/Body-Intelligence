@@ -105,6 +105,16 @@ void main() {
   test('registry is the finite model-visible allow-list', () {
     expect(BilToolRegistry.tools, hasLength(23));
     expect(BilToolRegistry.tools['sign_out']?.risk, BilToolRisk.sensitive);
+    expect(
+      const BilToolRegistry()
+          .createAction(
+            name: 'sign_out',
+            arguments: const {},
+            label: 'Sign out',
+          )
+          ?.requiresConfirmation,
+      isTrue,
+    );
     expect(BilToolRegistry.tools, contains('save_memory'));
     expect(
       BilToolRegistry.tools.values

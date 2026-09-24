@@ -11,6 +11,7 @@ import '../../shared/widgets/bil_native_settings_icon.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/profile_auth_identity_provider.dart';
+import '../cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import 'reference_settings_copy.dart';
 
 /// Explicitly local sign-out: never revoke the member's other devices.
@@ -34,6 +35,7 @@ Future<void> signOutSettingsSession(
     throw StateError('The active account changed');
   }
   try {
+    await CloudBeforeSignOutSync.runBounded();
     await auth.signOut(scope: SignOutScope.local);
   } catch (_) {
     // GoTrue clears the local session before contacting the revocation API.

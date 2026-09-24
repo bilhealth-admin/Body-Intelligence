@@ -35,6 +35,7 @@ const allowedActions = new Set([
   "delete_meal_item",
   "manage_subscription",
   "request_account_deletion",
+  "sign_out",
   "save_memory",
 ]);
 
@@ -114,6 +115,7 @@ quick_add_macros {"mealType":"breakfast|lunch|dinner|snack","calories":number,"p
 update_meal_item {"itemId":integer,"quantityGrams":number};
 move_meal_item {"itemId":integer,"mealType":"breakfast|lunch|dinner|snack"};
 delete_meal_item {"itemId":integer};
+sign_out {};
 save_memory {"text":string,"kind":"user_fact|preference|constraint|goal|routine"}.
 Read-only, open, subscription, and deletion actions use {}. When an exact write
 value is clear, propose the action now; do not ask the user to type a
@@ -839,7 +841,10 @@ export async function handler(
         JSON.stringify(providerContext)
       }</context>`;
     const system =
-      `${toolArgumentContract} ${healthCitationContract} ${systemCore}`;
+      `${toolArgumentContract} ${healthCitationContract} ${systemCore}`.replace(
+        "|request_account_deletion|save_memory",
+        "|request_account_deletion|sign_out|save_memory",
+      );
     const contents = messages.map((message, index) => ({
       role: message.role === "assistant" ? "model" : "user",
       parts: index === messages.length - 1 && voiceAudio != null

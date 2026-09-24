@@ -453,7 +453,7 @@ open_workouts, open_plan, open_report, log_water, log_weight,
 set_theme_mode, set_language, update_goal, save_measurements,
 quick_add_macros, update_meal_item, move_meal_item, delete_meal_item,
 read_nutrition_remaining, read_profile_identity, navigate,
-manage_subscription, request_account_deletion, save_memory. For writes include
+manage_subscription, request_account_deletion, sign_out, save_memory. For writes include
 the exact validated value and expect BIL to request confirmation. Use these
 argument names exactly:
 navigate {"target":"dashboard|daily_log|nutrition|weight_history|measurements|goals|analytics|profile|settings|notifications|ai_coach"};
@@ -472,7 +472,7 @@ move_meal_item {"itemId":integer,"mealType":"breakfast|lunch|dinner|snack"};
 delete_meal_item {"itemId":integer};
 read_nutrition_remaining, read_profile_identity, open_weight_log, open_meals,
 open_meals_yesterday, open_workouts, open_plan, open_report,
-manage_subscription, request_account_deletion use {}.
+manage_subscription, request_account_deletion, sign_out use {}.
 When the exact write value is clear, return the action now. Do not ask the user
 to type confirmation in chat because BIL presents the confirmation UI. Use
 save_memory with {"text":string,"kind":"user_fact|preference|constraint|goal|routine"}

@@ -8,6 +8,30 @@ import '../../../app/environment/app_environment.dart';
 import '../../../data/database/database_provider.dart';
 import '../providers/cloud_sync_providers.dart';
 
+/// Process-wide bridge used by explicit sign-out entry points.
+///
+/// It performs only a bounded best-effort flush. Durable owner-bound pending
+/// rows remain intact when offline or when the deadline expires.
+final class CloudBeforeSignOutSync {
+  CloudBeforeSignOutSync._();
+
+  static Future<void> Function()? _runner;
+
+  static void install(Future<void> Function() runner) => _runner = runner;
+
+  static void uninstall() => _runner = null;
+
+  static Future<void> runBounded() async {
+    final runner = _runner;
+    if (runner == null) return;
+    try {
+      await runner().timeout(const Duration(seconds: 12));
+    } on Object {
+      // Sign-out must remain available offline. The durable queue is retained.
+    }
+  }
+}
+
 /// Best-effort transport trigger for durable, supported local mutations.
 /// Local writes are authoritative and are never awaited by this widget.
 class CloudAutoSyncCoordinator extends ConsumerStatefulWidget {
@@ -32,6 +56,7 @@ class _CloudAutoSyncCoordinatorState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    CloudBeforeSignOutSync.install(_sync);
     if (!AppEnvironment.supabaseRuntimeReady) return;
     final database = ref.read(databaseProvider);
     _watch(database.select(database.userProfile).watch());
@@ -82,6 +107,7 @@ class _CloudAutoSyncCoordinatorState
 
   @override
   void dispose() {
+    CloudBeforeSignOutSync.uninstall();
     WidgetsBinding.instance.removeObserver(this);
     _debounce?.cancel();
     for (final subscription in _subscriptions) {

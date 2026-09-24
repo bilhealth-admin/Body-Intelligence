@@ -101,7 +101,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           return;
         }
       }
-      final pendingAction = _latestPendingGoalAction();
+      final pendingAction = _latestPendingAction();
       final pendingDecision = coachPendingActionDecision(text);
       if (pendingAction != null &&
           pendingDecision != CoachPendingActionDecision.none) {
@@ -114,8 +114,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           await _retireDurableAction(pendingAction);
           _appendToolReceipt(
             tr(
-              'The pending goal change was cancelled. Your goal was not changed.',
-              'تم إلغاء تغيير الهدف المعلّق. لم يتغير هدفك.',
+              'The pending action was cancelled. Nothing was changed.',
+              'تم إلغاء الإجراء المعلّق. لم يتغير شيء.',
             ),
           );
         }
@@ -458,13 +458,13 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     }
   }
 
-  IntelligenceAction? _latestPendingGoalAction() {
+  IntelligenceAction? _latestPendingAction() {
     for (final message in messages.reversed) {
       for (final action in message.actionLinks.reversed) {
-        if (action.type == IntelligenceActionType.updateGoal &&
-            action.isTrusted) {
-          return action.toAction();
-        }
+        if (!action.isTrusted) continue;
+        final candidate = action.toAction();
+        final descriptor = const BilToolRegistry().lookup(candidate.id);
+        if (descriptor?.requiresConfirmation == true) return candidate;
       }
     }
     return null;
@@ -656,12 +656,50 @@ CoachPendingActionDecision coachPendingActionDecision(String input) {
     'yes confirm',
     'yes, confirm',
     'proceed',
+    'execute',
+    'approved',
     'تأكيد',
     'تاكيد',
     'نعم',
     'نعم تأكيد',
     'نعم تاكيد',
     'موافق',
+    'نفذ',
+    'ننفذ',
+    'oui',
+    'confirmer',
+    'si',
+    'sí',
+    'confirmar',
+    'evet',
+    'onayla',
+    'ja',
+    'bestätigen',
+    'conferma',
+    'sim',
+    'ہاں',
+    'تصدیق',
+    'بله',
+    'تأیید',
+    'हाँ',
+    'पुष्टि',
+    'ya',
+    'konfirmasi',
+    'sahkan',
+    'はい',
+    '確認',
+    '네',
+    '확인',
+    '是',
+    '确认',
+    'да',
+    'подтвердить',
+    'হ্যাঁ',
+    'xác nhận',
+    'ใช่',
+    'potwierdź',
+    'bevestigen',
+    'так',
   }.contains(normalized)) {
     return CoachPendingActionDecision.confirm;
   }

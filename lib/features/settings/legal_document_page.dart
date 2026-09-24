@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../app/localization/runtime_copy.dart';
 
+const _aiCoachPrivacyDisclosure =
+    'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.';
+const _mealVisionPrivacyDisclosure =
+    'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.';
+const _combinedAiPrivacyDisclosure =
+    '$_aiCoachPrivacyDisclosure $_mealVisionPrivacyDisclosure';
+
 enum BilLegalDocument { terms, privacy, healthDisclaimer }
 
 const bilLegalPolicyId = 'BIL-LEGAL';
@@ -106,6 +113,14 @@ class LegalDocumentPage extends StatelessWidget {
 
 _LegalPageCopy _extendedLegalCopy(String locale) {
   String direct(String value) {
+    if (value == _combinedAiPrivacyDisclosure) {
+      final coach = RuntimeCopy.resolve(_aiCoachPrivacyDisclosure, locale);
+      final meal = RuntimeCopy.resolve(_mealVisionPrivacyDisclosure, locale);
+      if (coach == null || meal == null) {
+        throw StateError('Missing AI legal copy for $locale');
+      }
+      return '$coach\n\n$meal';
+    }
     final override = _legalTranslationOverrides[locale]?[value];
     if (override != null) return override;
     final translated = RuntimeCopy.resolve(value, locale);
@@ -246,10 +261,7 @@ const _privacySections = <(String, String)>[
     '2. Data we process',
     'We process only the data needed for the feature you choose. Sources remain labelled as manual, Health Connect, HealthKit, BLE, or cloud. BIL does not sell health information or use it for personalized advertising.',
   ),
-  (
-    '3. Images, voice, and connected services',
-    'After explicit consent, BIL may send your question and selected categories—such as weight, goals and measurements; nutrition, meals, water and preferences; activity and training; sleep and habits; and up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Meal-photo analysis requires separate consent before the selected image, app language and necessary technical request metadata are sent to Google Gemini to suggest foods and portions. Nothing is logged until you confirm it. You may decline and use local/manual features, and withdraw consent later in AI Coach or Privacy settings. BIL and Google Gemini receive recognized text, not raw microphone audio.',
-  ),
+  ('3. Images, voice, and connected services', _combinedAiPrivacyDisclosure),
   (
     '4. Community and safety',
     'Community content requires an authenticated account. Server rules limit access, support report and block controls, and retain auditable moderation events. Private health records are not community profile fields.',
@@ -325,7 +337,7 @@ const _privacySectionsFr = <(String, String)>[
   ),
   (
     '3. Images, voix et services connectés',
-    'Lorsque l’Intelligence personnalisée est activée et que vous interrogez le Coach IA, BIL peut envoyer le minimum de contexte pertinent — par exemple certaines données du profil, du journal et de santé connectée — via la passerelle sécurisée de BIL au fournisseur d’IA configuré afin de répondre à cette demande. Une image de repas n’est envoyée que si vous choisissez l’analyse et si la passerelle sécurisée est configurée. Dans le parcours vocal mobile actuel, le serveur BIL et Gemini ne reçoivent que la transcription reconnue, jamais l’audio brut du microphone ; Apple ou un autre service de reconnaissance vocale de la plateforme peut traiter l’audio que vous lancez selon ses propres conditions et réglages. Les autorisations peuvent être retirées dans les réglages système.',
+    'Après votre consentement explicite, BIL peut envoyer votre question et uniquement les catégories pertinentes que vous avez choisies — notamment poids, objectifs et mensurations ; nutrition, repas, eau et préférences ; activité et entraînement ; sommeil et habitudes ; ainsi que jusqu’aux 12 derniers messages — à Google Gemini, un service d’IA tiers exploité par Google, afin de générer la réponse demandée. L’analyse d’une photo de repas exige un consentement distinct avant l’envoi à Google Gemini de l’image sélectionnée, de la langue de l’application et des métadonnées techniques nécessaires pour suggérer des aliments et des portions. Rien n’est ajouté au journal avant votre confirmation. Vous pouvez refuser et continuer à utiliser les fonctions locales ou manuelles, puis retirer votre consentement dans les réglages du Coach IA ou de confidentialité. BIL et Google Gemini reçoivent le texte reconnu, jamais l’audio brut du microphone.',
   ),
   (
     '4. Communauté et sécurité',
@@ -400,7 +412,7 @@ const _privacySectionsEs = <(String, String)>[
   ),
   (
     '3. Imágenes, voz y servicios conectados',
-    'Cuando la Inteligencia personalizada está activada y preguntas al Coach de IA, BIL puede enviar el contexto pertinente mínimo —por ejemplo, determinados datos del perfil, diario y salud conectada— a través de la pasarela segura de BIL al proveedor de IA configurado para responder a esa solicitud. Una imagen de comida solo se envía si eliges analizarla y la pasarela segura está configurada. En el flujo de voz móvil actual, el servidor de BIL y Gemini solo reciben la transcripción reconocida, no el audio sin procesar del micrófono; Apple u otro servicio de reconocimiento de voz de la plataforma puede procesar el audio que inicies según sus propios términos y ajustes. Puedes retirar los permisos en los ajustes del sistema.',
+    'Tras tu consentimiento explícito, BIL puede enviar tu pregunta y solo las categorías pertinentes que hayas elegido —como peso, objetivos y medidas; nutrición, comidas, agua y preferencias; actividad y entrenamiento; sueño y hábitos; y hasta los 12 mensajes recientes— a Google Gemini, un servicio de IA de terceros operado por Google, para generar la respuesta solicitada. El análisis de fotos de comidas requiere un consentimiento separado antes de enviar a Google Gemini la imagen seleccionada, el idioma de la aplicación y los metadatos técnicos necesarios para sugerir alimentos y porciones. Nada se registra hasta que confirmes el resultado. Puedes rechazarlo y seguir usando funciones locales o manuales, y retirar el consentimiento después en los ajustes del Coach de IA o de privacidad. BIL y Google Gemini reciben el texto reconocido, no el audio sin procesar del micrófono.',
   ),
   (
     '4. Comunidad y seguridad',
@@ -475,7 +487,7 @@ const _privacySectionsTr = <(String, String)>[
   ),
   (
     '3. Görüntü, ses ve bağlı hizmetler',
-    'Kişiselleştirilmiş Zekâ açıkken AI Koç’a bir soru sorduğunuzda BIL, bu isteği yanıtlamak için seçilmiş profil, günlük ve bağlı sağlık verileri gibi gereken en az ilgili bağlamı BIL’in güvenli geçidi üzerinden yapılandırılmış AI sağlayıcısına gönderebilir. Bir öğün görüntüsü yalnızca analizi seçtiğinizde ve güvenli sunucu geçidi yapılandırıldığında gönderilir. Mevcut mobil konuşma akışında BIL sunucusu ve Gemini yalnızca tanınan metni alır, ham mikrofon sesini almaz; Apple veya başka bir platformun konuşma tanıma hizmeti, başlattığınız sesi kendi koşulları ve ayarları kapsamında işleyebilir. Cihaz izinlerini sistem ayarlarından kaldırabilirsiniz.',
+    'Açık onayınızdan sonra BIL; sorunuzu ve yalnızca seçtiğiniz ilgili kategorileri — kilo, hedefler ve ölçümler; beslenme, öğünler, su ve tercihler; aktivite ve antrenman; uyku ve alışkanlıklar; ayrıca en fazla son 12 mesaj gibi — istediğiniz yanıtı oluşturmak için Google tarafından işletilen üçüncü taraf bir yapay zekâ hizmeti olan Google Gemini’a gönderebilir. Öğün fotoğrafı analizi; seçilen görsel, uygulama dili ve gerekli teknik istek meta verileri yiyecek ve porsiyon önerileri için Google Gemini’a gönderilmeden önce ayrı onay gerektirir. Siz sonucu onaylayana kadar günlüğe hiçbir şey eklenmez. Reddedip yerel veya manuel özellikleri kullanmaya devam edebilir ve onayı daha sonra AI Koç veya gizlilik ayarlarından geri çekebilirsiniz. BIL ve Google Gemini yalnızca tanınan metni alır, ham mikrofon sesini almaz.',
   ),
   (
     '4. Topluluk ve güvenlik',

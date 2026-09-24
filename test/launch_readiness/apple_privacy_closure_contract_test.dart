@@ -255,7 +255,7 @@ void main() {
       inAppPolicy,
       contains('Google Gemini, a third-party AI service operated by Google'),
     );
-    expect(inAppPolicy, contains('not raw microphone audio'));
+    expect(inAppPolicy, contains('Raw microphone audio is not sent'));
     expect(inAppPolicy, isNot(contains('Meal images and voice are not sent')));
     expect(
       legacyCopy,

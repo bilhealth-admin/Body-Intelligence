@@ -19,6 +19,10 @@ void main() {
       CoachPendingActionDecision.confirm,
     );
     expect(
+      coachPendingActionDecision('確認'),
+      CoachPendingActionDecision.confirm,
+    );
+    expect(
       coachPendingActionDecision('نعم؟'),
       CoachPendingActionDecision.confirm,
     );

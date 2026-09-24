@@ -35,6 +35,7 @@ import '../domain/bil_action_receipt.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../domain/intelligence_message.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../services/intelligence_center_engine.dart';
 import '../services/bil_text_to_speech.dart';

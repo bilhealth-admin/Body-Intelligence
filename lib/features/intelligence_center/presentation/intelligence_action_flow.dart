@@ -27,9 +27,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     var succeeded = false;
     try {
       final acceptsTypedConfirmation =
-          confirmationAlreadyProvided &&
-          action.type == IntelligenceActionType.updateGoal &&
-          !action.destructive;
+          confirmationAlreadyProvided && !action.destructive;
       final requiresConfirmation = descriptor == null
           ? action.requiresConfirmation
           : const CoachActionPermissionGate().requiresConfirmation(
@@ -434,6 +432,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
         case IntelligenceActionType.requestAccountDeletion:
           await _openCoachRoute('/help/delete-account', push: true);
         case IntelligenceActionType.signOut:
+          await CloudBeforeSignOutSync.runBounded();
           await Supabase.instance.client.auth.signOut();
           if (Supabase.instance.client.auth.currentSession != null) {
             throw StateError('sign_out_readback_failed');

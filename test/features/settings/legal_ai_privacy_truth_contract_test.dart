@@ -5,7 +5,9 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dar
 import 'package:flutter_test/flutter_test.dart';
 
 const _englishAiVoiceDisclosure =
-    'When Personalized Intelligence is enabled and you ask the AI Coach, BIL may send the minimum relevant context—such as selected profile, diary, and connected-health data—through BIL’s secure gateway to its configured AI provider to answer that request. A meal image is sent only when you choose analysis and the secure server gateway is configured. In the current mobile speech flow, BIL’s backend and Gemini receive only the recognized transcript, not raw microphone audio; Apple or another platform speech-recognition service may process the audio you initiate under its own terms and settings. Device permissions can be withdrawn in system settings.';
+    'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.';
+const _englishMealVisionDisclosure =
+    'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.';
 
 void main() {
   String authoredPrivacyBlock(String source, String suffix) {
@@ -22,61 +24,42 @@ void main() {
       'lib/features/settings/legal_document_page.dart',
     ).readAsStringSync();
     final expectedMarkers = <String, List<String>>{
-      '': const [
-        'When Personalized Intelligence is enabled',
-        'minimum relevant context',
-        'selected profile, diary, and connected-health data',
-        'through BIL’s secure gateway',
-        'configured AI provider',
-        'current mobile speech flow',
-        'receive only the recognized transcript',
-        'not raw microphone audio',
-        'platform speech-recognition service may process',
-        'own terms and settings',
-      ],
+      '': const ['_combinedAiPrivacyDisclosure'],
       'Ar': const [
-        'عند تفعيل «الذكاء المخصص»',
-        'أقل قدر من السياق ذي الصلة',
-        'الملف واليوميات والصحة المتصلة',
-        'عبر بوابة BIL الآمنة',
-        'مزود الذكاء الاصطناعي المهيأ',
-        'مسار الكلام الحالي على الهاتف',
-        'النص المتعرّف عليه فقط',
-        'وليس صوت الميكروفون الخام',
-        'وفق شروطها وإعداداتها',
+        'بعد موافقة صريحة',
+        'Google Gemini',
+        'خدمة ذكاء اصطناعي تابعة لجهة خارجية',
+        'آخر 12 رسالة',
+        'موافقة منفصلة',
+        'سحب الموافقة لاحقًا',
+        'لا صوت الميكروفون الخام',
       ],
       'Fr': const [
-        'Intelligence personnalisée est activée',
-        'minimum de contexte pertinent',
-        'du profil, du journal et de santé connectée',
-        'passerelle sécurisée de BIL',
-        'fournisseur d’IA configuré',
-        'parcours vocal mobile actuel',
-        'que la transcription reconnue',
+        'consentement explicite',
+        'Google Gemini',
+        'service d’IA tiers exploité par Google',
+        '12 derniers messages',
+        'consentement distinct',
+        'retirer votre consentement',
         'jamais l’audio brut du microphone',
-        'propres conditions et réglages',
       ],
       'Es': const [
-        'Inteligencia personalizada está activada',
-        'contexto pertinente mínimo',
-        'del perfil, diario y salud conectada',
-        'pasarela segura de BIL',
-        'proveedor de IA configurado',
-        'flujo de voz móvil actual',
-        'solo reciben la transcripción reconocida',
+        'consentimiento explícito',
+        'Google Gemini',
+        'servicio de IA de terceros operado por Google',
+        '12 mensajes recientes',
+        'consentimiento separado',
+        'retirar el consentimiento',
         'no el audio sin procesar del micrófono',
-        'propios términos y ajustes',
       ],
       'Tr': const [
-        'Kişiselleştirilmiş Zekâ açıkken',
-        'gereken en az ilgili bağlamı',
-        'profil, günlük ve bağlı sağlık verileri',
-        'BIL’in güvenli geçidi üzerinden',
-        'yapılandırılmış AI sağlayıcısına',
-        'Mevcut mobil konuşma akışında',
-        'yalnızca tanınan metni alır',
+        'Açık onayınızdan sonra',
+        'Google Gemini',
+        'üçüncü taraf bir yapay zekâ hizmeti',
+        'son 12 mesaj',
+        'ayrı onay gerektirir',
+        'onayı daha sonra',
         'ham mikrofon sesini almaz',
-        'kendi koşulları ve ayarları kapsamında',
       ],
     };
 
@@ -91,9 +74,20 @@ void main() {
   test('extended legal locales resolve the revised disclosure directly', () {
     for (final locale in ExtendedRuntimeCopy.supported) {
       final translated = RuntimeCopy.resolve(_englishAiVoiceDisclosure, locale);
+      final mealTranslated = RuntimeCopy.resolve(
+        _englishMealVisionDisclosure,
+        locale,
+      );
       expect(translated, isNotNull, reason: locale);
+      expect(mealTranslated, isNotNull, reason: 'meal $locale');
       expect(translated!.trim(), isNotEmpty, reason: locale);
+      expect(mealTranslated!.trim(), isNotEmpty, reason: 'meal $locale');
       expect(translated, isNot(_englishAiVoiceDisclosure), reason: locale);
+      expect(
+        mealTranslated,
+        isNot(_englishMealVisionDisclosure),
+        reason: 'meal $locale',
+      );
     }
   });
 
