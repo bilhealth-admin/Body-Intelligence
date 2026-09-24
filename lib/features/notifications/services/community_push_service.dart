@@ -93,20 +93,17 @@ class CommunityPushService {
     if (Platform.isAndroid && !await _androidProviderReady()) {
       throw StateError('Android push provider is not ready');
     }
-    final token = await _tokenProvider.requestToken();
-    if (token == null || token.isEmpty) {
-      throw StateError('Push permission or native configuration unavailable');
-    }
-    final local = await FlutterTimezone.getLocalTimezone();
-    await _client.rpc(
-      'bil_register_push_token',
-      params: {
-        'p_token': token,
-        'p_platform': Platform.isIOS ? 'apns' : 'fcm',
-        'p_timezone': local.identifier,
-        'p_sensitive_preview_allowed': false,
-      },
-    );
+    await _registerCurrentToken();
+  }
+
+  /// Reconciles an FCM token rotated while BIL was closed with the durable
+  /// owner-scoped registration. This remains a no-op until remote push is
+  /// explicitly enabled for the release and by the signed-in user.
+  Future<void> refreshRegistrationIfEnabled() async {
+    if (!isAvailable || _client.auth.currentUser == null) return;
+    final preferences = await loadPreferences();
+    if (!preferences.enabled) return;
+    await _registerCurrentToken();
   }
 
   Future<void> setSensitivePreviewAllowed(bool allowed) => _client.rpc(
@@ -140,5 +137,25 @@ class CommunityPushService {
   Future<bool> _androidProviderReady() async {
     final capability = await _tokenProvider.capability();
     return capability.ready;
+  }
+
+  Future<void> _registerCurrentToken() async {
+    if (Platform.isAndroid && !await _androidProviderReady()) {
+      throw StateError('Android push provider is not ready');
+    }
+    final token = await _tokenProvider.requestToken();
+    if (token == null || token.isEmpty) {
+      throw StateError('Push permission or native configuration unavailable');
+    }
+    final local = await FlutterTimezone.getLocalTimezone();
+    await _client.rpc(
+      'bil_register_push_token',
+      params: {
+        'p_token': token,
+        'p_platform': Platform.isIOS ? 'apns' : 'fcm',
+        'p_timezone': local.identifier,
+        'p_sensitive_preview_allowed': false,
+      },
+    );
   }
 }

@@ -28,6 +28,7 @@ import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/auth/oauth_browser_return.dart';
 import 'features/notifications/services/inactivity_reminder_coordinator.dart';
 import 'features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
+import 'features/notifications/presentation/community_push_registration_coordinator.dart';
 import 'features/startup/premium_splash_experience.dart';
 import 'app/theme/bil_flagship_theme.dart';
 
@@ -418,25 +419,29 @@ class BILApp extends ConsumerWidget {
               }
               return false;
             },
-            child: AiCoachResetNoticeCoordinator(
-              child: CloudAutoSyncCoordinator(
-                child: InactivityReminderCoordinator(
-                  child: BilAppleCredentialLifecycleCoordinator(
-                    child: AppResumeDashboardCoordinator(
-                      onMeaningfulResume: () {
-                        // Resume is not a cold launch. Retain the active route,
-                        // theme, locale and draft while refreshing server truth.
-                        // Re-entering startup here raced restored iOS metrics.
-                        ref.invalidate(verifiedSubscriptionStateProvider);
-                        ref
-                            .read(aiCoachUsageRefreshProvider.notifier)
-                            .requestAuthoritativeReload();
-                      },
-                      child: AppSwitcherPrivacyShield(
-                        child: Semantics(
-                          container: true,
-                          label: AppLocalizations.of(context).get('app_title'),
-                          child: content,
+            child: CommunityPushRegistrationCoordinator(
+              child: AiCoachResetNoticeCoordinator(
+                child: CloudAutoSyncCoordinator(
+                  child: InactivityReminderCoordinator(
+                    child: BilAppleCredentialLifecycleCoordinator(
+                      child: AppResumeDashboardCoordinator(
+                        onMeaningfulResume: () {
+                          // Resume is not a cold launch. Retain the active route,
+                          // theme, locale and draft while refreshing server truth.
+                          // Re-entering startup here raced restored iOS metrics.
+                          ref.invalidate(verifiedSubscriptionStateProvider);
+                          ref
+                              .read(aiCoachUsageRefreshProvider.notifier)
+                              .requestAuthoritativeReload();
+                        },
+                        child: AppSwitcherPrivacyShield(
+                          child: Semantics(
+                            container: true,
+                            label: AppLocalizations.of(
+                              context,
+                            ).get('app_title'),
+                            child: content,
+                          ),
                         ),
                       ),
                     ),

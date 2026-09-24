@@ -93,6 +93,9 @@ void main() {
       final service = source(
         'lib/features/notifications/services/community_push_service.dart',
       );
+      final registrationCoordinator = source(
+        'lib/features/notifications/presentation/community_push_registration_coordinator.dart',
+      );
       final settings = source(
         'lib/features/notifications/presentation/notification_settings_page.dart',
       );
@@ -119,6 +122,7 @@ void main() {
       final redirect = source('lib/app/router/app_route_redirect.dart');
       expect(service, contains('AppEnvironment.pushConfigured'));
       expect(service, contains('bil_disable_push_tokens'));
+      expect(service, contains('refreshRegistrationIfEnabled'));
       expect(service, contains('bil_set_sensitive_push_previews'));
       expect(service, contains('FlutterTimezone.getLocalTimezone'));
       expect(settings, contains("Key('community-cloud-push')"));
@@ -143,6 +147,8 @@ void main() {
         contains('override fun onMessageReceived'),
       );
       expect(androidFirebaseService, contains('isSafeDeepLink'));
+      expect(registrationCoordinator, contains('AppLifecycleState.resumed'));
+      expect(registrationCoordinator, contains('refreshRegistrationIfEnabled'));
       expect(androidGradle, contains('com.google.gms.google-services'));
       expect(androidGradle, contains('com.google.firebase:firebase-messaging'));
       expect(googleServices, contains('com.bilhealth.bodyintelligencelog'));
