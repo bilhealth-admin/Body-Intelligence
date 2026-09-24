@@ -122,9 +122,7 @@ class _MealStudioAction extends StatelessWidget {
       button: true,
       label: tr('Open Meal Studio', 'فتح استوديو الوجبة'),
       child: InkWell(
-        onTap: () => context.go(
-          '/daily-log?foodLog=1&from=%2Fdashboard',
-        ),
+        onTap: () => context.go('/daily-log?foodLog=1&from=%2Fdashboard'),
         borderRadius: BorderRadius.circular(22),
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),

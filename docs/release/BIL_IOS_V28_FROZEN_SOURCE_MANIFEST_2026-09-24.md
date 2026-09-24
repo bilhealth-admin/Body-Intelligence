@@ -14,9 +14,9 @@
 
 iOS build 28 is the next candidate after Apple rejected build 27 under Guidelines 2.3.10, 5.1.1(i), and 5.1.2(i). It is derived from the exact build-27/Android-22 shared source commit `14786b08fa24991ba7445e8c607a993413a840a6` and preserves the existing application behavior except for the verified third-party AI disclosure, consent enforcement, privacy-language, and App Store screenshot closure documented in `BIL_APPLE_BUILD28_PRIVACY_CLOSURE_2026-09-24.md`.
 
-The signed iOS workflow supplies `--build-number 28`, producing `CFBundleVersion 28`; the public marketing version remains `1.0.0`.
+The signed iOS workflow supplies `--build-number 28`, producing `CFBundleVersion 28`; the public marketing version remains `1.0.0`. Its default mode creates and preserves a signed IPA artifact without contacting App Store Connect or uploading to TestFlight. Store validation/upload occurs only when the owner explicitly selects `upload_to_testflight=true`.
 
-After the final source commit is pushed, repository variable `BIL_IOS_V28_AUDITED_SOURCE_SHA` must equal that exact commit and `BIL_IOS_V28_STAGING_MANIFEST_SHA256` must equal the SHA-256 of this committed file. The workflow independently validates the source, manifest, build number, signing, package, entitlements, and App Store Connect upload prerequisites.
+After the final source commit is pushed, repository variable `BIL_IOS_V28_AUDITED_SOURCE_SHA` must equal that exact commit and `BIL_IOS_V28_STAGING_MANIFEST_SHA256` must equal the SHA-256 of this committed file. The workflow independently validates the source, manifest, build number, signing, package, and entitlements. App Store Connect credentials and validation are required only for an owner-authorized upload run.
 
 ## Deployment prerequisites
 

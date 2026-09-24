@@ -29,6 +29,9 @@ function Invoke-DbQuery([string]$Sql) {
 
 function Get-HttpFailureBody($Exception) {
   if ($null -eq $Exception.Response) { return $Exception.Message }
+  if ($null -ne $Exception.Response.Content) {
+    return $Exception.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+  }
   $reader = [IO.StreamReader]::new($Exception.Response.GetResponseStream())
   try { return $reader.ReadToEnd() }
   finally { $reader.Dispose() }
@@ -82,7 +85,7 @@ try {
   $userHeaders = @{ apikey = $publishableKey; Authorization = "Bearer $authToken" }
   [void](Invoke-RestMethod -Method Post -Uri "$baseUrl/rest/v1/rpc/bil_record_consent" -Headers $userHeaders -ContentType 'application/json' -Body (@{
         p_purpose = 'remote_ai'
-        p_policy_version = '1'
+        p_policy_version = '3'
         p_granted = $true
       } | ConvertTo-Json))
 

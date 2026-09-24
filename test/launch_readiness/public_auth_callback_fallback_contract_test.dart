@@ -10,7 +10,10 @@ void main() {
     final fallback = source.substring(start, end);
 
     expect(source, contains("path === '/auth/callback'"));
-    expect(fallback, contains("history.replaceState(null, '', '/auth/callback')"));
+    expect(
+      fallback,
+      contains("history.replaceState(null, '', '/auth/callback')"),
+    );
     expect(fallback, isNot(contains('location.search')));
     expect(fallback, isNot(contains('location.hash')));
     expect(fallback, isNot(contains('access_token')));

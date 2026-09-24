@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       upload_to_testflight:
-        description: Upload the validated build to TestFlight
+        description: Upload the validated build to TestFlight (owner-controlled; leave false for artifact-only QA)
         required: true
-        default: true
+        default: false
         type: boolean
       build_number:
         description: Exact App Store build number for this candidate; must be 28
@@ -73,8 +73,8 @@ jobs:
             echo 'build_number must be exactly 28 for the iOS release candidate; build 27 and earlier must never be selected.' >&2
             exit 1
           }
-          [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' ]] || {
-            echo 'upload_to_testflight must remain true for the iOS release candidate.' >&2
+          [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
+            echo 'upload_to_testflight must be a boolean.' >&2
             exit 1
           }
           test -n "${APPLE_TEAM_ID:-}" || {
@@ -104,9 +104,11 @@ jobs:
           test -n "${CERTIFICATE_PASSWORD:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD'; exit 1; }
           test -n "${PROVISIONING_PROFILE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_PROVISIONING_PROFILE_BASE64'; exit 1; }
           test -n "${APPLE_TEAM_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID'; exit 1; }
-          test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
-          test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
-          test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
+          if [[ "${{ inputs.upload_to_testflight }}" == 'true' ]]; then
+            test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
+            test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
+            test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
+          fi
           [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
 
       - name: Import distribution certificate
@@ -498,7 +500,7 @@ jobs:
             'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
             'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
             'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=ABSENT_VERIFIED' \
-            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_TESTFLIGHT_UPLOAD' \
+            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_OWNER_INSTALL_OR_UPLOAD' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
@@ -506,6 +508,7 @@ jobs:
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
+        if: ${{ inputs.upload_to_testflight }}
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}

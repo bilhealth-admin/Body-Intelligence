@@ -29,6 +29,9 @@ function Invoke-DbQuery([string]$Sql) {
 
 function Get-HttpFailureBody($Exception) {
   if ($null -eq $Exception.Response) { return $Exception.Message }
+  if ($null -ne $Exception.Response.Content) {
+    return $Exception.Response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+  }
   $reader = New-Object System.IO.StreamReader($Exception.Response.GetResponseStream())
   try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
 }
@@ -60,9 +63,15 @@ try {
   $userId = [string]$created.id
   if ([string]::IsNullOrWhiteSpace($userId)) { throw 'Test user creation returned no id.' }
 
-  $now = [DateTime]::UtcNow.ToString('o')
   $expiry = [DateTime]::UtcNow.AddHours(1).ToString('o')
-  [void](Invoke-DbQuery "insert into public.bil_ai_coach_subscriptions(owner_id,provider,product_id,lifecycle,original_transaction_id,latest_transaction_id,expires_at,verified_at) values ('$userId','google','bil_ai_coach_benchmark_only','trial','e2e-$suffix','e2e-$suffix','$expiry','$now')")
+  [void](Invoke-RestMethod -Method Post -Uri "$baseUrl/rest/v1/rpc/bil_set_ai_closed_test_access" `
+    -Headers $adminHeaders -ContentType 'application/json' -Body (@{
+      p_owner_id = $userId
+      p_cohort = 'automated-meal-vision-e2e'
+      p_active = $true
+      p_expires_at = $expiry
+      p_reason = 'Ephemeral automated meal vision end-to-end verification'
+    } | ConvertTo-Json))
 
   $auth = Invoke-RestMethod -Method Post -Uri "$baseUrl/auth/v1/token?grant_type=password" `
     -Headers @{ apikey = $publishableKey } -ContentType 'application/json' `
@@ -78,23 +87,62 @@ try {
     mime_type = $mime
     requested_locale = $Locale
   } | ConvertTo-Json -Compress
+  $endpoint = "$baseUrl/functions/v1/analyze-meal"
+  $consentDeniedRequestId = "bilvisiondenied$([guid]::NewGuid().ToString('N'))"
+  $consentDeniedStatus = $null
+  $consentDeniedError = $null
+  try {
+    [void](Invoke-RestMethod -Method Post -Uri $endpoint -Headers @{
+        apikey = $publishableKey
+        Authorization = "Bearer $accessToken"
+        'x-idempotency-key' = $consentDeniedRequestId
+      } -ContentType 'application/json' -Body '{}' -TimeoutSec 30)
+  } catch {
+    $consentDeniedStatus = [int]$_.Exception.Response.StatusCode
+    $consentDeniedBody = if ($_.ErrorDetails.Message) {
+      $_.ErrorDetails.Message
+    } else {
+      Get-HttpFailureBody $_.Exception
+    }
+    $consentDeniedJson = try { $consentDeniedBody | ConvertFrom-Json } catch { $null }
+    $consentDeniedError = $consentDeniedJson.error
+  }
+  if ($consentDeniedStatus -ne 403 -or $consentDeniedError -ne 'meal_vision_ai_consent_required') {
+    throw "Meal vision did not fail closed before explicit current consent (status=$consentDeniedStatus error=$consentDeniedError)."
+  }
+  $deniedUsage = (Invoke-DbQuery "select count(*) as count from public.bil_ai_usage_events where owner_id='$userId' and request_id='$consentDeniedRequestId'").rows | Select-Object -First 1
+  if ([int]$deniedUsage.count -ne 0) {
+    throw 'Consent-denied meal vision request reached metering/provider work.'
+  }
+
+  [void](Invoke-RestMethod -Method Post -Uri "$baseUrl/rest/v1/rpc/bil_record_consent" `
+    -Headers @{ apikey = $publishableKey; Authorization = "Bearer $accessToken" } `
+    -ContentType 'application/json' -Body (@{
+      p_purpose = 'meal_vision_ai'
+      p_policy_version = '1'
+      p_granted = $true
+    } | ConvertTo-Json))
+
   $requestId = "bilvision$([guid]::NewGuid().ToString('N'))"
   $headers = @{
     apikey = $publishableKey
     Authorization = "Bearer $accessToken"
     'x-idempotency-key' = $requestId
   }
-  $endpoint = "$baseUrl/functions/v1/analyze-meal"
   try {
     $first = Invoke-RestMethod -Method Post -Uri $endpoint -Headers $headers `
       -ContentType 'application/json' -Body $payload -TimeoutSec 75
   } catch {
     $failureStatus = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { $null }
-    $failureBody = Get-HttpFailureBody $_.Exception
+    $failureBody = if ($_.ErrorDetails.Message) {
+      $_.ErrorDetails.Message
+    } else {
+      Get-HttpFailureBody $_.Exception
+    }
     $failureJson = try { $failureBody | ConvertFrom-Json } catch { $null }
     $failedReceiptQuery = Invoke-DbQuery "select state,provider,model,latency_ms,input_tokens,output_tokens,cost_usd,provider_attempts,cost_source from public.bil_ai_usage_events where owner_id='$userId' and capability='vision' and request_id='$requestId'"
     $failedReceipt = $failedReceiptQuery.rows | Select-Object -First 1
-    $failedUsageQuery = Invoke-DbQuery "select used,reserved from public.bil_ai_weekly_usage where owner_id='$userId' and capability='vision' order by week_start desc limit 1"
+    $failedUsageQuery = Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$userId' order by week_start desc limit 1"
     $failedUsage = $failedUsageQuery.rows | Select-Object -First 1
     [pscustomobject]@{
       success = $false
@@ -114,6 +162,7 @@ try {
   }
   $replay = Invoke-RestMethod -Method Post -Uri $endpoint -Headers $headers `
     -ContentType 'application/json' -Body $payload -TimeoutSec 75
+  $replaySameRequest = $replay.request_id -eq $first.request_id
 
   $duplicateRejected = $false
   $duplicateStatus = $null
@@ -137,11 +186,25 @@ try {
 
   $receiptQuery = Invoke-DbQuery "select state,provider,model,latency_ms,input_tokens,output_tokens,cost_usd,provider_attempts,cost_source from public.bil_ai_usage_events where owner_id='$userId' and capability='vision' and request_id='$requestId'"
   $receipt = $receiptQuery.rows | Select-Object -First 1
-  $usageQuery = Invoke-DbQuery "select used,reserved from public.bil_ai_weekly_usage where owner_id='$userId' and capability='vision' order by week_start desc limit 1"
+  $usageQuery = Invoke-DbQuery "select used,reserved from public.bil_ai_credit_weekly_usage where owner_id='$userId' order by week_start desc limit 1"
   $usage = $usageQuery.rows | Select-Object -First 1
 
+  $success = (
+    $consentDeniedStatus -eq 403 -and
+    $consentDeniedError -eq 'meal_vision_ai_consent_required' -and
+    [int]$deniedUsage.count -eq 0 -and
+    @($first.candidates).Count -gt 0 -and
+    $receipt.state -eq 'succeeded' -and
+    [int]$usage.used -gt 0 -and
+    [int]$usage.reserved -eq 0 -and
+    $replaySameRequest
+  )
+
   [pscustomobject]@{
-    success = $true
+    success = $success
+    consent_denied_status = $consentDeniedStatus
+    consent_denied_error = $consentDeniedError
+    consent_denied_provider_events = [int]$deniedUsage.count
     request_id = $requestId
     candidate_count = @($first.candidates).Count
     provider = $first.provider_metrics.provider
@@ -155,7 +218,7 @@ try {
     receipt_state = $receipt.state
     quota_used = $usage.used
     quota_reserved = $usage.reserved
-    replay_same_request = ($replay.request_id -eq $first.request_id)
+    replay_same_request = $replaySameRequest
     exact_duplicate_handled = ($duplicateRejected -or ($duplicateCacheHit -and -not $duplicateCharged))
     exact_duplicate_cache_hit = $duplicateCacheHit
     exact_duplicate_charged = $duplicateCharged

@@ -30,7 +30,11 @@ void main() {
   test('Apple AI consent copy is complete across all 25 locales', () {
     expect(AppleAiPrivacyRuntimeCopy.supported, RuntimeCopy.supported);
     for (final entry in AppleAiPrivacyRuntimeCopy.values.entries) {
-      expect(entry.value.keys.toSet(), RuntimeCopy.supported, reason: entry.key);
+      expect(
+        entry.value.keys.toSet(),
+        RuntimeCopy.supported,
+        reason: entry.key,
+      );
       for (final locale in RuntimeCopy.supported) {
         final localized = RuntimeCopy.resolve(entry.key, locale);
         expect(localized, isNotNull, reason: '$locale: ${entry.key}');
@@ -293,6 +297,9 @@ void main() {
     final migration = File(
       'supabase/migrations/202609240001_apple_ai_consent_policy_enforcement.sql',
     ).readAsStringSync();
+    final mealConsentMigration = File(
+      'supabase/migrations/20260924200207_allow_meal_vision_ai_consent.sql',
+    ).readAsStringSync();
 
     for (final source in <String>[coachUi, mealConsent]) {
       expect(source, contains('third-party AI service operated by Google'));
@@ -311,6 +318,11 @@ void main() {
     );
     expect(coachServer, contains('bil_has_remote_ai_consent'));
     expect(migration, contains("r.policy_version = '3'"));
+    expect(
+      mealConsentMigration,
+      contains("'remote_ai','cloud_sync','meal_vision_ai'"),
+    );
+    expect(mealConsentMigration, contains('to authenticated;'));
   });
 
   test('public website and iOS release stay tracking-free', () {

@@ -313,9 +313,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                     kind: BilSemanticIconKind.foodLog,
                     label: tr('Food', 'الطعام'),
                     recorded: meals?.recorded ?? false,
-                    onTap: () => context.go(
-                      '/daily-log?foodLog=1&from=%2Fdashboard',
-                    ),
+                    onTap: () =>
+                        context.go('/daily-log?foodLog=1&from=%2Fdashboard'),
                   ),
                 ),
                 const SizedBox(width: 8),
