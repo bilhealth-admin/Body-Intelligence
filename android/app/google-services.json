@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1041595138122",
+    "project_id": "bil-health",
+    "storage_bucket": "bil-health.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041595138122:android:971f4bb6680a841df126b3",
+        "android_client_info": {
+          "package_name": "com.bilhealth.bodyintelligencelog"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041595138122-hpe2ke9c5rpphijvmk2ssvsbggvbp14j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHkwq2VwZFLNBEfnCm034UOuG1meBgvM0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041595138122-hpe2ke9c5rpphijvmk2ssvsbggvbp14j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1041595138122-1bpu2k7vs1fjkkm1d3tg6o0rnn4i15fh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bilhealth.bodyintelligencelog"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -183,6 +183,13 @@
                     android:path="/auth/reset-password"/>
             </intent-filter>
         </activity>
+        <service
+            android:name=".BILFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
             android:exported="false" />

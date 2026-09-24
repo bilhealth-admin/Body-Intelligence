@@ -26,7 +26,9 @@ class MainActivity : FlutterFragmentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             speechBridge?.onMicrophonePermissionResult(granted)
         }
-    private val pushProvider: BILPushProvider = BILUnconfiguredPushProvider()
+    private val pushProvider: BILPushProvider by lazy {
+        BILFirebasePushProvider(applicationContext)
+    }
     private val healthPermissionLauncher: ActivityResultLauncher<Set<String>> =
         registerForActivityResult(BILGlobalHealthBridge.permissionContract(this)) { granted ->
             healthBridge?.onPermissionsResult(granted)
@@ -241,8 +243,8 @@ class MainActivity : FlutterFragmentActivity() {
 
     companion object {
         private const val PUSH_CHANNEL = "bil/push"
-        private const val REMOTE_PUSH_DEEP_LINK_EXTRA = "deep_link"
-        private const val MAX_PUSH_PAYLOAD_LENGTH = 512
+        internal const val REMOTE_PUSH_DEEP_LINK_EXTRA = "deep_link"
+        internal const val MAX_PUSH_PAYLOAD_LENGTH = 512
         private const val MAX_PENDING_PUSH_TAPS = 32
     }
 }

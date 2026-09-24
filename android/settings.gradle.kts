@@ -25,6 +25,7 @@ plugins {
     // Flutter versions before 3.47 still use the temporary legacy-KGP bridge
     // for plugins that have not completed their built-in Kotlin migration.
     id("org.jetbrains.kotlin.android") version "2.3.20" apply false
+    id("com.google.gms.google-services") version "4.5.0" apply false
 }
 
 include(":app")

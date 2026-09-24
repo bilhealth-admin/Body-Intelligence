@@ -105,6 +105,11 @@ void main() {
       final androidActivity = source(
         'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
       );
+      final androidFirebaseService = source(
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFirebaseMessagingService.kt',
+      );
+      final androidGradle = source('android/app/build.gradle.kts');
+      final googleServices = source('android/app/google-services.json');
       final android = source('android/app/src/main/AndroidManifest.xml');
       final ios = source('ios/Runner/Info.plist');
       final deepLinks = source(
@@ -124,13 +129,31 @@ void main() {
       expect(dispatch, contains('data: {'));
       expect(dispatch, contains('deep_link: event.deep_link'));
       expect(androidBridge, contains('BILPushProvider'));
-      expect(androidBridge, contains('push_provider_not_configured'));
+      expect(androidBridge, contains('BILFirebasePushProvider'));
+      expect(androidBridge, contains('firebase_cloud_messaging'));
+      expect(androidBridge, contains('FirebaseMessaging.getInstance().token'));
+      expect(
+        androidBridge,
+        contains('FirebaseMessaging.getInstance().deleteToken()'),
+      );
       expect(androidBridge, contains('fun status(): Map<String, Any>'));
+      expect(androidFirebaseService, contains('override fun onNewToken'));
+      expect(
+        androidFirebaseService,
+        contains('override fun onMessageReceived'),
+      );
+      expect(androidFirebaseService, contains('isSafeDeepLink'));
+      expect(androidGradle, contains('com.google.gms.google-services'));
+      expect(androidGradle, contains('com.google.firebase:firebase-messaging'));
+      expect(googleServices, contains('com.bilhealth.bodyintelligencelog'));
+      expect(googleServices, contains('bil-health'));
       expect(androidActivity, contains('"providerStatus"'));
       expect(androidActivity, contains('"takeInitialPayload"'));
       expect(androidActivity, contains('override fun onNewIntent'));
       expect(service, contains('!await _androidProviderReady()'));
       expect(android, contains('android:scheme="bil"'));
+      expect(android, contains('.BILFirebaseMessagingService'));
+      expect(android, contains('com.google.firebase.MESSAGING_EVENT'));
       expect(ios, contains('bil'));
       expect(deepLinks, contains("uri.scheme.toLowerCase() != 'bil'"));
       expect(deepLinks, contains("segments.first == 'community'"));
