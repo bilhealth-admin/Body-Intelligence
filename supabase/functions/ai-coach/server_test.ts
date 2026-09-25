@@ -4,6 +4,7 @@ import {
   assertThrows,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
+  acceptedWeightHistoryNavigation,
   actionExecutionContract,
   answerNeedsHealthCitation,
   boundedMessages,
@@ -13,8 +14,8 @@ import {
   geminiCall,
   geminiCallWithFallback,
   geminiSafetySettings,
-  isFallbackEligibleGeminiError,
   handler,
+  isFallbackEligibleGeminiError,
   isRetryableGeminiError,
   isRetryableGeminiStatus,
   parseModelJson,
@@ -29,6 +30,40 @@ Deno.test("model prompt separates proposed actions from execution receipts", () 
     true,
   );
   assertEquals(actionExecutionContract.includes("never say"), true);
+  assertEquals(
+    actionExecutionContract.includes("Never mention a button"),
+    true,
+  );
+});
+
+Deno.test("accepted weight-history offer restores the safe navigation action", () => {
+  assertEquals(
+    acceptedWeightHistoryNavigation([
+      {
+        role: "assistant",
+        content: "هل تود استعراض تاريخ أوزانك بالكامل؟",
+      },
+      { role: "user", content: "نعم" },
+    ]),
+    true,
+  );
+  assertEquals(
+    acceptedWeightHistoryNavigation([
+      {
+        role: "assistant",
+        content: "Would you like to open your weight history?",
+      },
+      { role: "user", content: "Yes" },
+    ]),
+    true,
+  );
+  assertEquals(
+    acceptedWeightHistoryNavigation([
+      { role: "assistant", content: "Would you like another nutrition tip?" },
+      { role: "user", content: "Yes" },
+    ]),
+    false,
+  );
 });
 
 Deno.test("structured response ignores thought parts and joins visible text", () => {

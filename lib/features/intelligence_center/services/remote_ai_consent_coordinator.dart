@@ -50,6 +50,7 @@ class RemoteAiConsentCoordinator {
   void invalidate() {
     _granted = false;
     _readInFlight = null;
+    _grantInFlight = null;
   }
 
   String? _syncOwner() {

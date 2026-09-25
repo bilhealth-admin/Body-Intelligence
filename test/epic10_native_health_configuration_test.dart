@@ -94,16 +94,20 @@ void main() {
       expect(ios, contains('private static let readPageLimit = 100'));
       expect(readChanges, contains('withStart: historyStart'));
       expect(readChanges, contains('anchor: anchors[name]'));
+      expect(readChanges, contains('limit: perTypePageLimit'));
       expect(
         readChanges,
         contains(
-          'limit: max(1, Self.readPageLimit - records.count - deleted.count)',
+          'let perTypePageLimit = max(1, Self.readPageLimit / max(1, names.count))',
         ),
       );
+      expect(readChanges, contains('if typeResultCount >= perTypePageLimit'));
       expect(
         readChanges,
-        contains(
-          'guard records.count + deleted.count < Self.readPageLimit else',
+        isNot(
+          contains(
+            'guard records.count + deleted.count < Self.readPageLimit else',
+          ),
         ),
       );
       expect(readChanges, contains('nextAnchors[name] = newAnchor'));

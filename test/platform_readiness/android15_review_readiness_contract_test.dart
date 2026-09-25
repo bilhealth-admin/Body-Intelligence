@@ -6,7 +6,7 @@ String _read(String path) => File(path).readAsStringSync();
 
 void main() {
   test(
-    'Android 25 release identity and modern Android package gates are exact',
+    'Android 26 release identity and modern Android package gates are exact',
     () {
       final gradle = _read('android/app/build.gradle.kts');
       final workflow = _read(
@@ -20,13 +20,13 @@ void main() {
       expect(gradle, contains('isShrinkResources = true'));
       expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
-      expect(workflow, contains('(( BUILD_NUMBER == 25 ))'));
+      expect(workflow, contains('(( BUILD_NUMBER == 26 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 21 ))')));
-      expect(workflow, contains('BIL_ANDROID_V25_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V25_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('BIL_ANDROID_V26_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_ANDROID_V26_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V25_FROZEN_SOURCE_MANIFEST_2026-09-25.md'),
+        contains('BIL_ANDROID_V26_FROZEN_SOURCE_MANIFEST_2026-09-26.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));

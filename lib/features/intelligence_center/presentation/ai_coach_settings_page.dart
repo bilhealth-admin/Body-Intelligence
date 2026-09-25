@@ -16,6 +16,7 @@ import '../../onboarding/onboarding_runtime_copy.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/coach_context_preferences.dart';
 import '../services/ai_boost_purchase_service.dart';
+import '../services/remote_ai_consent_coordinator.dart';
 
 part 'ai_coach_settings_components.dart';
 part 'ai_coach_settings_usage_widgets.dart';
@@ -140,6 +141,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
           'p_granted': granted,
         },
       );
+      // The settings write is authoritative. Drop any session-cached positive
+      // receipt so a revoke cannot be reused by the conversation flow.
+      sharedRemoteAiConsentCoordinator().invalidate();
       if (mounted) setState(() => usage = _loadUsage());
     } on Object {
       if (!mounted) return;

@@ -125,7 +125,8 @@ export const actionExecutionContract =
   "A proposed action is not an execution receipt. Use pending wording until " +
   "a later client tool receipt confirms success; never say that a screen was " +
   "opened, navigation happened, or data changed merely because you proposed " +
-  "an action.";
+  "an action. Never mention a button, control, or action below unless the same " +
+  "JSON response contains the matching proposed_actions entry.";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -176,6 +177,27 @@ export function boundedMessages(raw: unknown): ChatMessage[] {
     throw new Error("invalid_messages");
   }
   return messages;
+}
+
+export function acceptedWeightHistoryNavigation(
+  messages: ChatMessage[],
+): boolean {
+  if (messages.length < 2) return false;
+  const answer = messages.at(-1)?.content.trim() ?? "";
+  const offer = messages.at(-2);
+  if (offer?.role !== "assistant") return false;
+  const accepted =
+    /^(?:yes|yeah|yep|sure|ok(?:ay)?|نعم|أجل|أكيد|اكيد|تمام)[\s.!؟]*$/iu
+      .test(answer);
+  if (!accepted) return false;
+  const prior = offer.content;
+  const arabicOffer = /(?:وزن|أوزان)/u.test(prior) &&
+    /(?:سجل|تاريخ)/u.test(prior) &&
+    /(?:فتح|عرض|استعراض|مراجعة|تود|هل)/u.test(prior);
+  const englishOffer = /\bweight\b/i.test(prior) &&
+    /\b(?:history|log|records?)\b/i.test(prior) &&
+    /\b(?:open|show|view|review|would you|do you want)\b/i.test(prior);
+  return arabicOffer || englishOffer;
 }
 
 function boundedContext(raw: unknown): Json {
@@ -932,6 +954,19 @@ export async function handler(
       extractModelText(parts),
       voiceAudio != null,
     );
+    // A short acceptance refers to the immediately preceding assistant offer.
+    // Recover this safe read-only navigation deterministically if the model's
+    // prose promises the control but omits the structured action.
+    if (
+      result.proposed_actions.length === 0 &&
+      acceptedWeightHistoryNavigation(messages)
+    ) {
+      result.proposed_actions.push({
+        type: "open_weight_log",
+        arguments: {},
+        requires_confirmation: true,
+      });
+    }
     const usage = (provider.data.usageMetadata ?? {}) as Record<
       string,
       unknown

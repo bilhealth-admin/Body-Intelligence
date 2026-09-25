@@ -9,8 +9,8 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // A first foreground import must not ask HealthKit for an account's entire
   // lifetime in one unbounded query. One year still preserves useful Apple
   // Watch history (sleep, workouts, heart rate and daily activity), while the
-  // whole-page limit keeps each platform-channel reply bounded enough for
-  // the Flutter main isolate to remain responsive. The existing per-type
+  // fair per-type page partition keeps each platform-channel reply bounded
+  // enough for the Flutter main isolate to remain responsive. The existing per-type
   // HKQueryAnchor continues each page and later incremental refreshes without
   // restarting the backfill.
   private static let initialHistoryDays = 365
@@ -175,6 +175,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     let names = ((args?["types"] as? [String]) ?? Self.supportedTypeNames)
       .filter { sampleType($0) != nil }
       .sorted()
+    let perTypePageLimit = max(1, Self.readPageLimit / max(1, names.count))
     let asOf = ISO8601DateFormatter().date(from: args?["asOf"] as? String ?? "") ?? Date()
     let anchors = decodeAnchors(args?["anchor"] as? String)
     let historyStart = asOf.addingTimeInterval(
@@ -202,19 +203,8 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       func executeNext() {
         guard self.isActiveRead else { return }
         // Flutter's standard codec encodes the result on the main thread.
-        // Limiting every type to 100 still allowed roughly 2,000 dictionaries
-        // in one callback and could make the whole app appear frozen after a
-        // Watch sync tap. Keep the *entire* native page bounded instead.
-        guard records.count + deleted.count < Self.readPageLimit else {
-          pageHasMore = true
-          self.completeActiveRead([
-            "records": records,
-            "deletedIds": deleted,
-            "nextAnchor": self.encodeAnchors(nextAnchors),
-            "hasMore": true,
-          ])
-          return
-        }
+        // Give every requested signal a fair slice of the bounded page so an
+        // early high-volume type cannot starve sleep or later signal types.
         guard nextIndex < names.count else {
           self.completeActiveRead([
             "records": records,
@@ -240,7 +230,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
           type: type,
           predicate: predicate,
           anchor: anchors[name],
-          limit: max(1, Self.readPageLimit - records.count - deleted.count)
+          limit: perTypePageLimit
         ) { [weak self] query, samples, deletedObjects, newAnchor, queryError in
           guard let self else { return }
           self.healthQueryQueue.async {
@@ -252,13 +242,14 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
               )
               return
             }
+            let typeResultCount = (samples?.count ?? 0) + (deletedObjects?.count ?? 0)
             records.append(
               contentsOf: (samples ?? []).compactMap {
                 self.serialize(sample: $0, logicalType: name)
               }
             )
             deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
-            if records.count + deleted.count >= Self.readPageLimit {
+            if typeResultCount >= perTypePageLimit {
               pageHasMore = true
             }
             if let newAnchor { nextAnchors[name] = newAnchor }

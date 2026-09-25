@@ -110,6 +110,18 @@ void main() {
       expect(harness.reads, 2);
     });
 
+    test(
+      'L explicit invalidation forces a fresh grant write and readback',
+      () async {
+        final harness = _Harness(readValues: <Object?>[_granted, _granted]);
+        expect(await harness.coordinator.isGranted(), isTrue);
+        harness.coordinator.invalidate();
+        expect(await harness.coordinator.grantAndVerify(), isTrue);
+        expect(harness.writes, 1);
+        expect(harness.reads, 2);
+      },
+    );
+
     test('UI clears progress before consent and retries original turn once', () {
       final source = File(
         'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
@@ -119,6 +131,27 @@ void main() {
       expect(source, contains('addUserMessage: false'));
       expect(source, contains('consentChoiceInFlight'));
       expect(source, contains('grantAndVerify()'));
+      final consentRequired = source.indexOf(
+        'reply.serviceStatus == CoachServiceStatus.consentRequired',
+      );
+      final invalidate = source.indexOf(
+        'sharedRemoteAiConsentCoordinator().invalidate()',
+        consentRequired,
+      );
+      final offer = source.indexOf(
+        'final choice = await _offerPersonalIntelligence()',
+        consentRequired,
+      );
+      expect(consentRequired, greaterThanOrEqualTo(0));
+      expect(invalidate, greaterThan(consentRequired));
+      expect(invalidate, lessThan(offer));
+      final settings = File(
+        'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
+      ).readAsStringSync();
+      expect(
+        settings,
+        contains('sharedRemoteAiConsentCoordinator().invalidate()'),
+      );
       final page = File(
         'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
       ).readAsStringSync();

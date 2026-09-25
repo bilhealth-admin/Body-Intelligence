@@ -1,4 +1,4 @@
-name: BIL iOS signed release candidate (build 29)
+name: BIL iOS signed release candidate (build 30)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: false
         type: boolean
       build_number:
-        description: Exact App Store build number for this candidate; must be 29
+        description: Exact App Store build number for this candidate; must be 30
         required: true
         type: string
       run_native_crypto_checks:
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: ${{ vars.BIL_IOS_V29_AUDITED_SOURCE_SHA }}
+          ref: ${{ vars.BIL_IOS_V30_AUDITED_SOURCE_SHA }}
 
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
@@ -46,7 +46,7 @@ jobs:
         if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V29_AUDITED_SOURCE_SHA }}
+          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V30_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -71,8 +71,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 29 )) || {
-            echo 'build_number must be exactly 29 for the iOS release candidate; build 28 and earlier must never be selected.' >&2
+          (( BUILD_NUMBER == 30 )) || {
+            echo 'build_number must be exactly 30 for the iOS release candidate; build 29 and earlier must never be selected.' >&2
             exit 1
           }
           [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
@@ -224,11 +224,11 @@ jobs:
           BIL_PUSH_PROVIDER_READY: true
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V29_AUDITED_SOURCE_SHA }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V29_AUDITED_SOURCE_SHA }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V25_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V29_FROZEN_SOURCE_MANIFEST_2026-09-25.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V29_STAGING_MANIFEST_SHA256 }}
+          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V30_AUDITED_SOURCE_SHA }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V30_AUDITED_SOURCE_SHA }}
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V26_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V30_FROZEN_SOURCE_MANIFEST_2026-09-26.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V30_STAGING_MANIFEST_SHA256 }}
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
           flutter pub get
@@ -557,7 +557,7 @@ jobs:
       - name: Upload signed IPA and validation evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V29_AUDITED_SOURCE_SHA }}
+          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V30_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |

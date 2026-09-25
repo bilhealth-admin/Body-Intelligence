@@ -255,6 +255,9 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       }
       if (!mounted || generation != requestGeneration) return;
       if (reply.serviceStatus == CoachServiceStatus.consentRequired) {
+        // An authoritative server denial outranks a cached positive receipt.
+        // Invalidate before the sheet so Allow performs a fresh write/readback.
+        sharedRemoteAiConsentCoordinator().invalidate();
         // Consent is a pending local decision, not an in-flight AI request.
         // Clear all progress UI before presenting the single-flight sheet.
         _updateState(() {
