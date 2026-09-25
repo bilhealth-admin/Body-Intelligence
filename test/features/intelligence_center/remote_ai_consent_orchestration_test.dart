@@ -122,7 +122,8 @@ void main() {
       final page = File(
         'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
       ).readAsStringSync();
-      expect(page, contains('Preparing your answer'));
+      expect(page, contains('showReplyThinking'));
+      expect(page, isNot(contains('Preparing your answer')));
       expect(page, isNot(contains("? tr('Thinking with your BIL data'")));
     });
   });

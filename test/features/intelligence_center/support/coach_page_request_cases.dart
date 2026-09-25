@@ -9,12 +9,20 @@ void registerCoachRequestCases() {
       final gateway = _HeldGateway();
       await _mount(tester, database: database, gateway: gateway);
       await _send(tester, gateway, question: 'كيفك');
+      expect(
+        find.byKey(const Key('ai-coach-thinking-indicator')),
+        findsOneWidget,
+      );
       gateway.reply.complete(
         const LocalModelResult(
           status: CoachServiceStatus.temporarilyUnavailable,
         ),
       );
       await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('ai-coach-thinking-indicator')),
+        findsNothing,
+      );
       expect(find.textContaining('أنا جاهز معك'), findsOneWidget);
       expect(find.byKey(const Key('ai-coach-retry')), findsNothing);
       expect(find.byKey(const Key('ai-coach-reply-progress')), findsNothing);

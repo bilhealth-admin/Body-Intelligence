@@ -46,7 +46,6 @@ class DiaryDateNavigator extends StatelessWidget {
         ? semanticLabel
         : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${(date.year % 100).toString().padLeft(2, '0')}';
     final scheme = Theme.of(context).colorScheme;
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     final dateButton = Flexible(
       flex: 3,
       child: TextButton(
@@ -98,17 +97,16 @@ class DiaryDateNavigator extends StatelessWidget {
       key: const Key('daily-log-previous'),
       tooltip: _summaryText(context, 'previous'),
       onPressed: onPrevious,
-      icon: Icon(
-        rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
-      ),
+      // Material chevrons mirror themselves with Directionality. Selecting an
+      // RTL-specific glyph here mirrored it a second time, so the Arabic
+      // previous/next controls appeared to move in the opposite direction.
+      icon: const Icon(Icons.chevron_left_rounded),
     );
     final next = IconButton(
       key: const Key('daily-log-next'),
       tooltip: _summaryText(context, 'next'),
       onPressed: onNext,
-      icon: Icon(
-        rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
-      ),
+      icon: const Icon(Icons.chevron_right_rounded),
     );
     return SizedBox(
       key: const Key('daily-log-date-bar'),

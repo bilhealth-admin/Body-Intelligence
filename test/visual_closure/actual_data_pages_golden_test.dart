@@ -379,6 +379,10 @@ void main() {
     } else {
       await tester.pumpAndSettle();
     }
+    if (name == 'ai_coach_conversation_phone') {
+      expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
+      expect(find.text('Let’s make the first decision'), findsOneWidget);
+    }
     expect(tester.takeException(), isNull);
     final captureTarget = captureOverlay
         ? find.byType(Overlay).first
@@ -622,6 +626,15 @@ void main() {
       ),
       db: db,
       name: 'ai_coach_conversation_phone',
+      prepare: (tester) async {
+        expect(find.byType(Scaffold), findsOneWidget);
+        final field = find.byKey(const Key('ai-coach-question-field'));
+        final decision = find.text('Let’s make the first decision');
+        expect(field, findsOneWidget);
+        expect(decision, findsOneWidget);
+        expect(tester.getRect(field).top, lessThan(844));
+        expect(tester.getRect(decision).top, lessThan(844));
+      },
     );
   });
 

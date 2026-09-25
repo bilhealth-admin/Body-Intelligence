@@ -243,7 +243,19 @@ void main() {
             ),
           )
           .icon,
+      Icons.chevron_left_rounded,
+    );
+    expect(
+      tester
+          .widget<Icon>(
+            find.descendant(
+              of: find.byKey(const Key('daily-log-next')),
+              matching: find.byType(Icon),
+            ),
+          )
+          .icon,
       Icons.chevron_right_rounded,
+      reason: 'Material mirrors both glyphs once for RTL',
     );
     await tester.tap(find.byKey(const Key('daily-log-previous')));
     expect(selected, DateTime(2026, 9, 19));

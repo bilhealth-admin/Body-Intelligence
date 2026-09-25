@@ -57,10 +57,7 @@ abstract interface class BilFacebookSessionAuthority {
 
   String generateRawNonce();
 
-  Future<AuthResponse> exchange({
-    required String idToken,
-    required String nonce,
-  });
+  Future<AuthResponse> exchange({required String idToken, String? nonce});
 }
 
 final class SupabaseFacebookSessionAuthority
@@ -76,14 +73,12 @@ final class SupabaseFacebookSessionAuthority
   String generateRawNonce() => client.auth.generateRawNonce();
 
   @override
-  Future<AuthResponse> exchange({
-    required String idToken,
-    required String nonce,
-  }) => client.auth.signInWithIdToken(
-    provider: OAuthProvider.facebook,
-    idToken: idToken,
-    nonce: nonce,
-  );
+  Future<AuthResponse> exchange({required String idToken, String? nonce}) =>
+      client.auth.signInWithIdToken(
+        provider: OAuthProvider.facebook,
+        idToken: idToken,
+        nonce: nonce,
+      );
 }
 
 class SupabaseAuthService {
@@ -260,8 +255,9 @@ class SupabaseAuthService {
     return observedSession != null || client.auth.currentSession != null;
   }
 
-  /// Signs in through Meta's native SDK, then exchanges only its OIDC JWT for
-  /// BIL's authoritative Supabase session.
+  /// Signs in through Meta's native SDK, then exchanges its platform token for
+  /// BIL's authoritative Supabase session. iOS Limited Login supplies a
+  /// nonce-bound OIDC JWT; Android supplies Meta's classic tokenString.
   ///
   /// A null result means the person dismissed Meta's authorization UI.
   Future<AuthResponse?> signInWithFacebookNative() async {

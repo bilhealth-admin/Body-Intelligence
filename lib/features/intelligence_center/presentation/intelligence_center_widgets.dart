@@ -85,31 +85,15 @@ class _InlineCoachDecision extends StatelessWidget {
 class _CoachHero extends StatelessWidget {
   const _CoachHero({
     super.key,
-    required this.onStart,
-    required this.onStop,
     required this.onBack,
     required this.onHistory,
     required this.onMenu,
-    required this.active,
-    required this.waiting,
-    required this.restoring,
-    required this.status,
-    required this.liveCallActive,
-    required this.liveCallPaused,
     this.interactionEnabled = true,
   });
 
-  final VoidCallback onStart;
-  final VoidCallback onStop;
   final VoidCallback onBack;
   final VoidCallback onHistory;
   final VoidCallback onMenu;
-  final bool active;
-  final bool waiting;
-  final bool restoring;
-  final String status;
-  final bool liveCallActive;
-  final bool liveCallPaused;
   final bool interactionEnabled;
 
   @override
@@ -126,13 +110,6 @@ class _CoachHero extends StatelessWidget {
       'Global multilingual voice',
       'صوت متعدد اللغات',
     );
-    final callLabel = liveCallActive && !liveCallPaused
-        ? intelligenceText(context, 'Pause live call', 'إيقاف المكالمة مؤقتًا')
-        : liveCallPaused
-        ? intelligenceText(context, 'Resume live call', 'متابعة المكالمة')
-        : intelligenceText(context, 'Start live call', 'ابدأ مكالمة مباشرة');
-    final stopLabel = intelligenceText(context, 'End call', 'إنهاء المكالمة');
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
@@ -151,9 +128,7 @@ class _CoachHero extends StatelessWidget {
       ),
       child: Semantics(
         container: true,
-        label: status.isEmpty
-            ? '$coachName. $voiceDescription'
-            : '$coachName. $voiceDescription. $status',
+        label: '$coachName. $voiceDescription',
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact =
@@ -184,88 +159,29 @@ class _CoachHero extends StatelessWidget {
                 ],
               ),
             );
-            final controls = <Widget>[
-              IconButton(
-                key: const Key('ai-coach-hero-start'),
-                tooltip: callLabel,
-                onPressed: interactionEnabled ? onStart : null,
-                style: IconButton.styleFrom(
-                  foregroundColor: light,
-                  backgroundColor: Colors.white.withValues(alpha: .08),
-                  minimumSize: const Size.square(48),
-                  tapTargetSize: MaterialTapTargetSize.padded,
-                ),
-                icon: Icon(
-                  liveCallActive && !liveCallPaused
-                      ? Icons.pause_rounded
-                      : Icons.mic_none_rounded,
-                ),
-              ),
-              if (liveCallActive)
-                IconButton(
-                  key: const Key('ai-coach-live-call-stop'),
-                  tooltip: stopLabel,
-                  onPressed: interactionEnabled ? onStop : null,
-                  style: IconButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.square(48),
-                    tapTargetSize: MaterialTapTargetSize.padded,
-                  ),
-                  icon: const Icon(Icons.call_end_rounded),
-                ),
-            ];
-            final statusBadge = Flexible(
-              child: Semantics(
-                liveRegion: true,
-                child: _CoachStatusBadge(
-                  active: active,
-                  waiting: waiting,
-                  restoring: restoring,
-                  status: status,
-                  light: light,
-                ),
-              ),
-            );
-            return Column(
-              mainAxisSize: MainAxisSize.min,
+            return Row(
               children: [
-                Row(
-                  children: [
-                    _CoachHeroControl(
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).backButtonTooltip,
-                      icon: const BackButtonIcon(),
-                      onPressed: onBack,
-                    ),
-                    const SizedBox(width: 6),
-                    _CoachHeroPortrait(
-                      size: 48,
-                      onTap: interactionEnabled ? onHistory : null,
-                    ),
-                    const SizedBox(width: 8),
-                    identity,
-                    if (!compact) ...[statusBadge, ...controls],
-                    _CoachHeroControl(
-                      tooltip: intelligenceText(
-                        context,
-                        'Coach controls',
-                        'أدوات المدرب',
-                      ),
-                      icon: const Icon(Icons.tune_rounded),
-                      onPressed: interactionEnabled ? onMenu : null,
-                    ),
-                  ],
+                _CoachHeroControl(
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  icon: const BackButtonIcon(),
+                  onPressed: onBack,
                 ),
-                if (compact)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      statusBadge,
-                      const SizedBox(width: 8),
-                      ...controls,
-                    ],
+                const SizedBox(width: 6),
+                _CoachHeroPortrait(
+                  size: 48,
+                  onTap: interactionEnabled ? onHistory : null,
+                ),
+                const SizedBox(width: 8),
+                identity,
+                _CoachHeroControl(
+                  tooltip: intelligenceText(
+                    context,
+                    'Coach controls',
+                    'أدوات المدرب',
                   ),
+                  icon: const Icon(Icons.tune_rounded),
+                  onPressed: interactionEnabled ? onMenu : null,
+                ),
               ],
             );
           },
@@ -273,74 +189,6 @@ class _CoachHero extends StatelessWidget {
       ),
     );
   }
-}
-
-class _CoachStatusBadge extends StatelessWidget {
-  const _CoachStatusBadge({
-    required this.active,
-    required this.waiting,
-    required this.restoring,
-    required this.status,
-    required this.light,
-  });
-
-  final bool active;
-  final bool waiting;
-  final bool restoring;
-  final String status;
-  final Color light;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: active || waiting ? .14 : .08),
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: light.withValues(alpha: .22)),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          waiting
-              ? SizedBox.square(
-                  key: restoring
-                      ? const ValueKey('ai-coach-conversation-restoring')
-                      : null,
-                  dimension: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: light,
-                  ),
-                )
-              : active
-              ? _VoiceListeningWave(color: light, compact: true)
-              : Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF65D59A),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-          if (status.isNotEmpty) ...[
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                status,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: light,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
 }
 
 class _CoachHeroControl extends StatelessWidget {

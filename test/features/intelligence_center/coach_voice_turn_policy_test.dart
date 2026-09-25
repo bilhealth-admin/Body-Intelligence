@@ -15,7 +15,7 @@ void main() {
     },
   );
 
-  test('top microphone is an automatic spoken live-call loop', () {
+  test('composer microphone can run the automatic spoken live-call loop', () {
     final plan = policy.planFor(CoachVoiceEntryPoint.liveCall);
 
     expect(plan.maySendAudio, isFalse);

@@ -123,25 +123,21 @@ void registerCoachVoiceCases() {
     await _unmount(tester);
   });
 
-  testWidgets('unavailable recognizer preserves the typed draft', (
+  testWidgets('unavailable recognizer leaves the composer usable', (
     tester,
   ) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     _mockCoachVoice(tester, available: Future.value(false));
     await _mount(tester, database: database, gateway: _HeldGateway());
-    await tester.enterText(
-      find.byKey(const Key('ai-coach-question-field')),
-      'Keep this draft',
-    );
-    await tester.tap(find.byKey(const Key('ai-coach-hero-start')));
+    await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
     await tester.pumpAndSettle();
     expect(
       tester
           .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))
           .controller!
           .text,
-      'Keep this draft',
+      '',
     );
     expect(find.textContaining('Voice input is unavailable'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -201,7 +197,7 @@ void registerCoachVoiceCases() {
       final calls = _mockCoachVoice(tester);
       final gateway = _HeldGateway();
       await _mount(tester, database: database, gateway: gateway);
-      await tester.tap(find.byKey(const Key('ai-coach-hero-start')));
+      await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
       await tester.pump(const Duration(milliseconds: 200));
       await _emitCoachVoice(tester);
       await _waitForCoachCall(tester, gateway);
@@ -224,7 +220,7 @@ void registerCoachVoiceCases() {
       );
       await tester.pumpAndSettle();
       expect(calls['bil/speech:listen'] ?? 0, listenedBefore);
-      expect(find.byTooltip('Resume live call'), findsOneWidget);
+      expect(find.byTooltip('End live call'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await _unmount(tester);
     },

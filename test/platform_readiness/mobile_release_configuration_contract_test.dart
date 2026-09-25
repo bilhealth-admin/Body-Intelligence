@@ -57,10 +57,15 @@ void main() {
 
       expect(manifest, contains('android:resizeableActivity="true"'));
       expect(
-        RegExp(r'android:screenOrientation="portrait"').allMatches(manifest),
-        hasLength(2),
-        reason: 'Both the rationale and main activities must stay portrait.',
+        manifest,
+        isNot(contains('android:screenOrientation=')),
+        reason: 'Android 16 large screens must not retain orientation locks.',
       );
+      final main = File('lib/main.dart').readAsStringSync();
+      expect(main, contains('SystemUiMode.edgeToEdge'));
+      expect(main, contains('defaultTargetPlatform == TargetPlatform.android'));
+      expect(main, contains('DeviceOrientation.values'));
+      expect(main, contains('defaultTargetPlatform == TargetPlatform.iOS'));
       expect(manifest, isNot(contains('android:required="true"')));
     },
   );

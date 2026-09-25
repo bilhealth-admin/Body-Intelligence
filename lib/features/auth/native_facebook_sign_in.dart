@@ -5,10 +5,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 ///
 /// It is exchanged with Supabase immediately and is never persisted in BIL.
 final class BilFacebookIdentityToken {
-  const BilFacebookIdentityToken({required this.idToken, required this.nonce});
+  const BilFacebookIdentityToken({required this.idToken, this.nonce});
 
   final String idToken;
-  final String nonce;
+  final String? nonce;
 }
 
 abstract interface class BilFacebookLoginClient {
@@ -37,12 +37,12 @@ final class MetaFacebookLoginClient implements BilFacebookLoginClient {
   );
 }
 
-/// Uses Meta's native Android/iOS SDK and accepts only a real OIDC JWT.
+/// Uses Meta's native Android/iOS SDK and returns the proof expected by
+/// Supabase for the token type produced on each platform.
 ///
-/// On Android, [ClassicToken.tokenString] is a Graph API access token and is
-/// never an identity token. flutter_facebook_auth 7.2.0 exposes Meta's OIDC
-/// AuthenticationToken separately as [ClassicToken.authenticationToken]. On
-/// iOS Limited Login, [LimitedToken.tokenString] is the identity JWT.
+/// Supabase's Flutter Facebook flow expects [ClassicToken.tokenString] in its
+/// `idToken` parameter. On iOS Limited Login, [LimitedToken.tokenString] is an
+/// OIDC JWT and remains bound to the raw nonce supplied to Meta.
 final class BilNativeFacebookSignIn {
   const BilNativeFacebookSignIn({
     this.client = const MetaFacebookLoginClient(),
@@ -76,16 +76,25 @@ final class BilNativeFacebookSignIn {
     }
 
     final accessToken = result.accessToken;
-    final identityToken = switch (accessToken) {
-      ClassicToken(:final authenticationToken) => authenticationToken?.trim(),
-      LimitedToken(:final tokenString) => tokenString.trim(),
-      _ => null,
-    };
-    if (identityToken == null || !isStructurallyValidJwt(identityToken)) {
-      throw const AuthException(
-        'Facebook did not return a valid identity token.',
-      );
+    switch (accessToken) {
+      case ClassicToken(:final tokenString):
+        final token = tokenString.trim();
+        if (token.isEmpty) {
+          throw const AuthException(
+            'Facebook did not return a valid access token.',
+          );
+        }
+        return BilFacebookIdentityToken(idToken: token);
+      case LimitedToken(:final tokenString):
+        final token = tokenString.trim();
+        if (!isStructurallyValidJwt(token)) {
+          throw const AuthException(
+            'Facebook did not return a valid identity token.',
+          );
+        }
+        return BilFacebookIdentityToken(idToken: token, nonce: nonce);
+      default:
+        throw const AuthException('Facebook did not return a sign-in token.');
     }
-    return BilFacebookIdentityToken(idToken: identityToken, nonce: nonce);
   }
 }

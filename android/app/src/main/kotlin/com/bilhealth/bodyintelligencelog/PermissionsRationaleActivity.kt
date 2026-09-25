@@ -11,6 +11,8 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 /**
  * In-app Health Connect permissions rationale required by Android.
@@ -56,6 +58,13 @@ class PermissionsRationaleActivity : Activity() {
             }
         }, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        setContentView(ScrollView(this).apply { addView(content) })
+        val scrollView = ScrollView(this).apply { addView(content) }
+        ViewCompat.setOnApplyWindowInsetsListener(scrollView) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        setContentView(scrollView)
+        ViewCompat.requestApplyInsets(scrollView)
     }
 }

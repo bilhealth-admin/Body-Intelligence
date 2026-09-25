@@ -178,25 +178,6 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
   }
 
-  Future<void> _toggleDictation() async {
-    if (!mounted ||
-        !conversationReady ||
-        coachInBackground ||
-        voiceCaptureStarting ||
-        sending ||
-        voiceMode == _CoachVoiceMode.liveCall) {
-      return;
-    }
-    if (listening) {
-      await _submitVoiceTranscript();
-      return;
-    }
-    voiceMode = _CoachVoiceMode.dictation;
-    liveCallPaused = false;
-    voiceTransientRestarts = 0;
-    await _startVoiceCapture();
-  }
-
   Future<void> _toggleLiveCall() async {
     if (!mounted || !conversationReady || coachInBackground) return;
     if (voiceMode == _CoachVoiceMode.liveCall) {

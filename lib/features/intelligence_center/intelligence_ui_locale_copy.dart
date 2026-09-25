@@ -1,6 +1,7 @@
 part of 'intelligence_locale_copy.dart';
 
 const _authored = <String, Map<String, String>>{
+  'Thinking…': {'fr': 'Réflexion…', 'es': 'Pensando…', 'tr': 'Düşünüyor…'},
   'Personalized Remote AI': {
     'fr': 'IA distante personnalisée',
     'es': 'IA remota personalizada',

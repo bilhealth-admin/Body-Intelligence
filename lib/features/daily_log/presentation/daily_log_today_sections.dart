@@ -277,8 +277,7 @@ class DailyLogWeightShortcut extends ConsumerWidget {
 }
 
 class DailyLogNotesShortcut extends ConsumerWidget {
-  const DailyLogNotesShortcut({super.key, required this.title});
-  final String title;
+  const DailyLogNotesShortcut({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -302,7 +301,8 @@ class DailyLogNotesShortcut extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '$title · ${context.strings.text('Body context')}',
+            context.strings.text('Body context'),
+            key: const Key('daily-log-body-context-title'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 10),
@@ -326,13 +326,10 @@ class DailyLogNotesShortcut extends ConsumerWidget {
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
-                subtitle: Text(
-                  context.strings.text(
-                    'Add sleep, travel, stress, hydration, and other context on a focused page.',
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                // The saved selection/note above is the only changing copy on
+                // this shortcut. A fixed fallback sentence could remain in
+                // English for an incomplete locale and made the card look
+                // editable even though editing belongs on the focused page.
                 trailing: Icon(
                   direction == TextDirection.rtl
                       ? Icons.chevron_left_rounded

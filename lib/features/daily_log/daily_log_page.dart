@@ -176,7 +176,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       date: date,
       defaultGoal: ref.watch(defaultNutritionGoalTargetProvider),
     );
-    final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
+    // Consume the owner-scoped access view, which retains a still-valid
+    // server grant during a same-account refresh. Reading the raw future here
+    // temporarily downgraded Premium/admin accounts every 30 seconds.
+    final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
     final premiumMealFeatures =
         verifiedSubscription.value?.grants(
           CommerceEntitlement.advancedIntelligence,
@@ -598,9 +601,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 ),
                               ),
                               DailyLogWeightShortcut(date: date),
-                              DailyLogNotesShortcut(
-                                title: dailyLogPrivateNoteLabel(),
-                              ),
+                              const DailyLogNotesShortcut(),
                               const SizedBox(
                                 height: PremiumDesignTokens.spaceSm,
                               ),

@@ -429,24 +429,11 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     // Failures are rendered once as a transcript message with its Retry
     // action; retain the progress row only as a defensive fallback if a
     // failure has no persisted message yet.
-    final showReplyProgress =
+    final showReplyFailure =
         replyPhase == _CoachReplyPhase.failed &&
         retryableErrorMessageIds.isEmpty;
+    final showReplyThinking = sending;
     final showIntroBrief = introVisible && dailyBrief != null;
-    final coachStatus = conversationLoadFailed
-        ? tr('Unavailable', 'غير متاح')
-        : !conversationReady
-        ? tr('Restoring conversation', 'جارٍ استعادة المحادثة')
-        : voiceMode == _CoachVoiceMode.liveCall && liveCallPaused
-        ? tr('Live call paused', 'المكالمة المباشرة متوقفة مؤقتًا')
-        : listening
-        ? tr(
-            'Listening live · pause to send',
-            'أكتب كلامك مباشرة · اسكت للإرسال',
-          )
-        : sending
-        ? tr('Preparing your answer', 'جارٍ تجهيز إجابتك')
-        : '';
     const coachNavy = Color(0xFF071923);
     return Scaffold(
       backgroundColor: coachNavy,
@@ -481,16 +468,6 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                     _CoachHero(
                       key: const ValueKey('ai-coach-hero'),
                       interactionEnabled: conversationReady,
-                      onStart: _toggleLiveCall,
-                      onStop: _stopLiveCall,
-                      liveCallActive: voiceMode == _CoachVoiceMode.liveCall,
-                      liveCallPaused: liveCallPaused,
-                      active: listening,
-                      waiting:
-                          sending ||
-                          (!conversationReady && !conversationLoadFailed),
-                      restoring: !conversationReady && !conversationLoadFailed,
-                      status: coachStatus,
                       onBack: () {
                         if (context.canPop()) {
                           context.pop();
@@ -529,7 +506,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                       ? dailyBrief
                                       : null,
                                   showLiveVoiceDraft: showLiveVoiceDraft,
-                                  showReplyFailure: showReplyProgress,
+                                  showReplyThinking: showReplyThinking,
+                                  showReplyFailure: showReplyFailure,
                                 ),
                         ),
                       ),
@@ -680,21 +658,29 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                     ? _cancelCurrentCoachRequest
                                     : null,
                                 style: IconButton.styleFrom(
-                                  backgroundColor: scheme.errorContainer,
-                                  foregroundColor: scheme.onErrorContainer,
+                                  backgroundColor: const Color(0xFF12394E),
+                                  foregroundColor: const Color(0xFFC8F3FF),
                                   minimumSize: const Size.square(48),
                                 ),
-                                icon: const Icon(Icons.close_rounded),
+                                icon: const SizedBox.square(
+                                  dimension: 21,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.4,
+                                    color: Color(0xFFC8F3FF),
+                                  ),
+                                ),
                               )
                             else if (question.text.trim().isEmpty || listening)
                               IconButton.filled(
                                 key: const Key('ai-coach-voice-button'),
-                                tooltip: listening
-                                    ? tr('Stop listening', 'إيقاف الاستماع')
+                                tooltip: voiceMode == _CoachVoiceMode.liveCall
+                                    ? tr('End live call', 'إنهاء المكالمة')
                                     : tr('Talk to BIL', 'تحدث مع BIL'),
                                 onPressed: !conversationReady
                                     ? null
-                                    : _toggleDictation,
+                                    : voiceMode == _CoachVoiceMode.liveCall
+                                    ? _stopLiveCall
+                                    : _toggleLiveCall,
                                 style: IconButton.styleFrom(
                                   backgroundColor: const Color(0xFF12394E),
                                   foregroundColor: const Color(0xFFC8F3FF),
@@ -713,6 +699,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                 tooltip: tr('Send', 'إرسال'),
                                 onPressed: !conversationReady ? null : ask,
                                 style: IconButton.styleFrom(
+                                  backgroundColor: const Color(0xFF12394E),
+                                  foregroundColor: const Color(0xFFC8F3FF),
                                   minimumSize: const Size.square(48),
                                 ),
                                 icon: const Icon(Icons.arrow_upward_rounded),

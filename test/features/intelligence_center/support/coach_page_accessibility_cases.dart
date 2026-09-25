@@ -100,7 +100,7 @@ void registerCoachAccessibilityCases() {
           expect(tester.takeException(), isNull);
           for (final finder in [
             find.byTooltip(arabic ? 'رجوع' : 'Back'),
-            find.byKey(const Key('ai-coach-hero-start')),
+            find.byKey(const Key('ai-coach-voice-button')),
             find.byKey(const Key('ai-coach-conversation-history-button')),
           ]) {
             final size = tester.getSize(finder);

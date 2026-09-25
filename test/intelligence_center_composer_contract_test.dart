@@ -58,18 +58,19 @@ void main() {
     expect(page, contains('_submitVoiceTranscript()'));
   });
 
-  test('bottom dictation and top live call are separate state machines', () {
+  test('bottom microphone owns the live-call state machine', () {
     expect(
       page,
       contains('enum _CoachVoiceMode { idle, dictation, liveCall }'),
     );
-    expect(page, contains('_toggleDictation()'));
+    expect(page, contains('_toggleLiveCall'));
+    expect(page, contains('_stopLiveCall'));
     expect(page, contains('_toggleLiveCall()'));
     expect(page, contains('autoSpeakReply: autoSpeakReply'));
     expect(page, contains('voiceMode == _CoachVoiceMode.liveCall'));
-    expect(page, contains("Key('ai-coach-live-call-stop')"));
+    expect(page, isNot(contains("Key('ai-coach-live-call-stop')")));
     expect(page, contains('_resumeLiveCallIfNeeded'));
-    expect(page, contains('await _startVoiceCapture();'));
+    expect(page, contains('await _startVoiceCapture(playCue: true);'));
     expect(page, contains('CoachVoiceEntryPoint.composerDictation'));
     expect(page, contains('CoachVoiceEntryPoint.liveCall'));
     expect(page, contains('coachContextSnapshotProvider.future'));
@@ -83,8 +84,9 @@ void main() {
     expect(page, contains('final coachName = intelligenceText'));
     expect(page, contains('final voiceTagline = intelligenceText'));
     expect(page, contains('size: 48'));
-    expect(page, contains("Key('ai-coach-hero-start')"));
-    expect(page, contains('Icons.mic_none_rounded'));
+    expect(page, isNot(contains("Key('ai-coach-hero-start')")));
+    expect(page, contains("Key('ai-coach-voice-button')"));
+    expect(page, contains('Icons.graphic_eq_rounded'));
     expect(page, contains('minLines: 1'));
     expect(page, contains('maxLines: 1'));
     expect(page, contains('TextAlignVertical.center'));
@@ -103,6 +105,7 @@ void main() {
   test('slow and failed replies remain visible and actionable', () {
     expect(page, contains('enum _CoachReplyPhase'));
     expect(page, contains("Key('ai-coach-reply-progress')"));
+    expect(page, contains("Key('ai-coach-thinking-indicator')"));
     expect(page, contains("Key('ai-coach-cancel-request')"));
     expect(page, contains("Key('ai-coach-retry')"));
     // The transient "Searching your BIL context" banner was removed from the
@@ -132,13 +135,14 @@ void main() {
     expect(page, contains('_InlineCoachDecision'));
     expect(page, contains('final showIntroBrief = introVisible'));
     expect(page, contains("ValueKey('ai-coach-hero')"));
-    expect(page, contains("Key('ai-coach-hero-start')"));
+    expect(page, isNot(contains("Key('ai-coach-hero-start')")));
     expect(page, contains('BilCoachPortrait('));
     expect(page, isNot(contains('BilAccountAvatar(')));
     expect(page, isNot(contains('profilePhotoProvider')));
     expect(page, contains('colors: [Color(0xFF12394E), Color(0xFF071923)]'));
-    expect(page, contains(": '';"));
-    expect(page, contains('Preparing your answer'));
+    expect(page, contains('final showReplyThinking = sending;'));
+    expect(page, contains('Thinking…'));
+    expect(page, isNot(contains('Preparing your answer')));
     expect(page, isNot(contains("? tr('Thinking with your BIL data'")));
     expect(page, contains('final visibleMessages = messages'));
     expect(
@@ -158,7 +162,7 @@ void main() {
     expect(page, contains('_scrollToLatest();'));
     expect(page, contains('reverse: true'));
     expect(page, contains('conversationScroll.position.minScrollExtent'));
-    expect(page, contains("'ai-coach-conversation-restoring'"));
+    expect(page, contains('if (!conversationReady)'));
     expect(page, contains('sessionWelcomeMessage'));
   });
 

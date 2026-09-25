@@ -72,8 +72,8 @@ class ReleaseConfigurationValidator {
 
   static const approvedApplicationId = 'com.bilhealth.bodyintelligencelog';
   static const approvedReleaseVersion = '1.0.0';
-  static const androidReleaseBuildNumber = 24;
-  static const iosReleaseBuildNumber = 28;
+  static const androidReleaseBuildNumber = 25;
+  static const iosReleaseBuildNumber = 29;
 
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,
@@ -232,7 +232,7 @@ class ReleaseConfigurationValidator {
       issues.add(
         const ReleaseConfigurationIssue(
           'cross_platform_source_mismatch',
-          'Android 24 and iOS 28 must bind to the same audited commit.',
+          'Android 25 and iOS 29 must bind to the same audited commit.',
         ),
       );
     }

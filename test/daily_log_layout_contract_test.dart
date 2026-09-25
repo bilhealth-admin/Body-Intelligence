@@ -35,6 +35,16 @@ void main() {
     expect(exercise, greaterThan(water));
     expect(notesShortcut, greaterThan(exercise));
     expect(todaySections, contains("'daily-log-body-context-link'"));
+    expect(todaySections, contains("'daily-log-body-context-title'"));
+    expect(todaySections, isNot(contains('Private daily note ·')));
+    expect(
+      todaySections,
+      isNot(
+        contains(
+          'Add sleep, travel, stress, hydration, and other context on a focused page.',
+        ),
+      ),
+    );
     expect(todaySections, contains("context.push('/daily-log/body-context')"));
     expect(page, isNot(contains('DailyBodyContextSection(')));
     expect(bodyContextPage, contains('DailyBodyContextSection('));

@@ -11,6 +11,32 @@ import 'package:sqlite3/sqlite3.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test(
+    'concurrent health entry points share complete native bootstrap',
+    () async {
+      final host = GlobalNativeIntegrationHost.instance;
+      await host.close();
+      final database = sqlite3.openInMemory();
+      final configuration = const GlobalProductRuntimeConfiguration(
+        localeCatalogs: <GlobalLocaleCatalog>[],
+      );
+
+      final first = host.initialize(
+        database: database,
+        configuration: configuration,
+      );
+      final second = host.initialize(
+        database: database,
+        configuration: configuration,
+      );
+
+      expect(identical(first, second), isTrue);
+      await Future.wait(<Future<void>>[first, second]);
+      expect(host.productFlows, isNotNull);
+      await host.close();
+    },
+  );
+
   test('production composition bootstraps real product use cases', () async {
     final host = GlobalNativeIntegrationHost.instance;
     await host.close();

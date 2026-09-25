@@ -139,6 +139,51 @@ class _CoachReplyFailure extends StatelessWidget {
   }
 }
 
+class _CoachThinkingIndicator extends StatelessWidget {
+  const _CoachThinkingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final label = intelligenceText(context, 'Thinking…', 'جارٍ التفكير…');
+    return Semantics(
+      liveRegion: true,
+      label: label,
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Container(
+          key: const Key('ai-coach-thinking-indicator'),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsetsDirectional.fromSTEB(13, 9, 13, 9),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _VoiceListeningWave extends StatefulWidget {
   const _VoiceListeningWave({required this.color, this.compact = false});
 

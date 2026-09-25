@@ -58,15 +58,30 @@ final class GlobalNativeIntegrationHost {
   PluginRegistry? plugins;
   GlobalizationRuntime? globalization;
   final InMemoryGlobalAuditSink audit = InMemoryGlobalAuditSink();
+  Future<void>? _initialization;
 
   Future<void> initialize({
     Database? database,
     GlobalProductRuntimeConfiguration configuration =
         const GlobalProductRuntimeConfiguration(),
+  }) {
+    if (productFlows != null) return Future<void>.value();
+    // Several health surfaces can become visible in the same frame (the
+    // dashboard cache refresh, Apps & Devices, and an explicit Watch tap).
+    // They must share the complete initialization, not observe `_store`
+    // halfway through construction and either start duplicate SQLite work or
+    // fail because `productFlows` is still null.
+    return _initialization ??= _initialize(
+      database: database,
+      configuration: configuration,
+    ).whenComplete(() => _initialization = null);
+  }
+
+  Future<void> _initialize({
+    required Database? database,
+    required GlobalProductRuntimeConfiguration configuration,
   }) async {
-    if (_store != null) {
-      return;
-    }
+    if (productFlows != null) return;
 
     final Database opened;
     if (database != null) {
@@ -301,6 +316,7 @@ final class GlobalNativeIntegrationHost {
   }
 
   Future<void> close() async {
+    await _initialization;
     _store?.close();
     _store = null;
     appleHealth = null;

@@ -394,6 +394,26 @@ void main() {
     expect(saved?.preferredName, 'Ada');
   });
 
+  testWidgets('name step advances before any goal has been selected', (
+    tester,
+  ) async {
+    await drafts.save(
+      const OnboardingDraft(
+        stepId: 'name',
+        preferredName: 'Mohamed',
+        goals: <OnboardingGoal>{},
+      ),
+    );
+    await mount(tester);
+
+    await tester.tap(find.byKey(const Key('onboarding-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('What would you like to work on?'), findsOneWidget);
+    expect(find.text('Choose at least one goal.'), findsNothing);
+    expect((await drafts.load())?.stepId, 'goals');
+  });
+
   testWidgets('Android system Back uses the same saved step transition', (
     tester,
   ) async {

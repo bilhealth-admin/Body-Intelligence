@@ -25,6 +25,8 @@ final class ServerEntitlementRepository {
   final EntitlementResolver _resolver;
   static final VerifiedEntitlementSessionCache _sessionCache =
       VerifiedEntitlementSessionCache();
+  static final VerifiedEntitlementSessionCache _adminSessionCache =
+      VerifiedEntitlementSessionCache(maximumAge: const Duration(seconds: 45));
 
   Future<SubscriptionState> current() async {
     if (!AppEnvironment.supabaseRuntimeReady) return FreePlan.createState();
@@ -38,18 +40,28 @@ final class ServerEntitlementRepository {
           .rpc('bil_get_my_admin_subscription')
           .timeout(const Duration(seconds: 10));
       if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
-      return composeAdminSubscriptionAccess(
+      final resolved = composeAdminSubscriptionAccess(
         store: store,
         grant: grant,
         ownerId: ownerId,
         now: DateTime.now().toUtc(),
       );
+      _adminSessionCache.remember(
+        ownerId: ownerId,
+        state: resolved,
+        now: DateTime.now().toUtc(),
+      );
+      return resolved;
     } on Object {
-      // A missing/new admin endpoint or a revoked grant must never erase a
-      // verified store purchase. Admin grants are not put in the store cache.
-      return client.auth.currentUser?.id == ownerId
-          ? store
-          : FreePlan.createState();
+      // A transient RPC failure must not visibly switch a currently verified
+      // admin lease between Premium and Free. Continuity is owner-scoped,
+      // bounded to 45 seconds, and cannot outlive the server lease itself.
+      if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
+      return _adminSessionCache.fallbackFor(
+            ownerId: ownerId,
+            now: DateTime.now().toUtc(),
+          ) ??
+          store;
     }
   }
 

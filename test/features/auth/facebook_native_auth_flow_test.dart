@@ -88,7 +88,7 @@ final class _FakeFacebookSessionAuthority
   @override
   Future<AuthResponse> exchange({
     required String idToken,
-    required String nonce,
+    String? nonce,
   }) async {
     exchangeCalls += 1;
     exchangedIdToken = idToken;
@@ -109,7 +109,7 @@ SupabaseAuthService _service(
 
 void main() {
   test(
-    'A ClassicToken exchanges only its valid OIDC authentication token',
+    'A Android ClassicToken exchanges its access token as Supabase requires',
     () async {
       final login = _FakeFacebookLoginClient(
         LoginResult(
@@ -125,8 +125,8 @@ void main() {
       ).signInWithFacebookNative();
 
       expect(response?.session, isNotNull);
-      expect(authority.exchangedIdToken, _jwt);
-      expect(authority.exchangedNonce, _nonce);
+      expect(authority.exchangedIdToken, 'opaque-facebook-access-token');
+      expect(authority.exchangedNonce, isNull);
       expect(
         login.permissions,
         containsAll(['openid', 'email', 'public_profile']),
@@ -135,9 +135,12 @@ void main() {
     },
   );
 
-  test('B opaque ClassicToken without OIDC token fails closed', () async {
+  test('B empty Android ClassicToken fails closed', () async {
     final login = _FakeFacebookLoginClient(
-      LoginResult(status: LoginStatus.success, accessToken: _classic()),
+      LoginResult(
+        status: LoginStatus.success,
+        accessToken: _classic(opaqueToken: '   '),
+      ),
     );
     final authority = _FakeFacebookSessionAuthority();
 
@@ -160,22 +163,25 @@ void main() {
     expect(authority.exchangedNonce, _nonce);
   });
 
-  test('D malformed identity tokens are rejected before Supabase', () async {
-    for (final malformed in ['', 'opaque', 'two.parts', 'a..c', 'a.b.c.d']) {
-      final login = _FakeFacebookLoginClient(
-        LoginResult(
-          status: LoginStatus.success,
-          accessToken: _classic(authenticationToken: malformed),
-        ),
-      );
-      final authority = _FakeFacebookSessionAuthority();
-      await expectLater(
-        _service(authority, login).signInWithFacebookNative(),
-        throwsA(isA<AuthException>()),
-      );
-      expect(authority.exchangeCalls, 0, reason: malformed);
-    }
-  });
+  test(
+    'D malformed Limited Login identity tokens fail before Supabase',
+    () async {
+      for (final malformed in ['', 'opaque', 'two.parts', 'a..c', 'a.b.c.d']) {
+        final login = _FakeFacebookLoginClient(
+          LoginResult(
+            status: LoginStatus.success,
+            accessToken: _limited(malformed),
+          ),
+        );
+        final authority = _FakeFacebookSessionAuthority();
+        await expectLater(
+          _service(authority, login).signInWithFacebookNative(),
+          throwsA(isA<AuthException>()),
+        );
+        expect(authority.exchangeCalls, 0, reason: malformed);
+      }
+    },
+  );
 
   test('E Meta cancellation is clean and never mutates Supabase', () async {
     final login = _FakeFacebookLoginClient(
@@ -279,7 +285,8 @@ void main() {
         );
         expect(login.calls, 1);
         expect(authority.exchangeCalls, 1);
-        expect(authority.exchangedIdToken, _jwt);
+        expect(authority.exchangedIdToken, 'opaque-facebook-access-token');
+        expect(authority.exchangedNonce, isNull);
       } finally {
         debugDefaultTargetPlatformOverride = null;
       }

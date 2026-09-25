@@ -9,7 +9,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // A first foreground import must not ask HealthKit for an account's entire
   // lifetime in one unbounded query. One year still preserves useful Apple
   // Watch history (sleep, workouts, heart rate and daily activity), while the
-  // per-type page limit keeps each platform-channel reply bounded enough for
+  // whole-page limit keeps each platform-channel reply bounded enough for
   // the Flutter main isolate to remain responsive. The existing per-type
   // HKQueryAnchor continues each page and later incremental refreshes without
   // restarting the backfill.
@@ -201,6 +201,20 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
 
       func executeNext() {
         guard self.isActiveRead else { return }
+        // Flutter's standard codec encodes the result on the main thread.
+        // Limiting every type to 100 still allowed roughly 2,000 dictionaries
+        // in one callback and could make the whole app appear frozen after a
+        // Watch sync tap. Keep the *entire* native page bounded instead.
+        guard records.count + deleted.count < Self.readPageLimit else {
+          pageHasMore = true
+          self.completeActiveRead([
+            "records": records,
+            "deletedIds": deleted,
+            "nextAnchor": self.encodeAnchors(nextAnchors),
+            "hasMore": true,
+          ])
+          return
+        }
         guard nextIndex < names.count else {
           self.completeActiveRead([
             "records": records,
@@ -226,7 +240,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
           type: type,
           predicate: predicate,
           anchor: anchors[name],
-          limit: Self.readPageLimit
+          limit: max(1, Self.readPageLimit - records.count - deleted.count)
         ) { [weak self] query, samples, deletedObjects, newAnchor, queryError in
           guard let self else { return }
           self.healthQueryQueue.async {
@@ -244,7 +258,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
               }
             )
             deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
-            if (samples?.count ?? 0) + (deletedObjects?.count ?? 0) >= Self.readPageLimit {
+            if records.count + deleted.count >= Self.readPageLimit {
               pageHasMore = true
             }
             if let newAnchor { nextAnchors[name] = newAnchor }

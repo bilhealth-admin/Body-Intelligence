@@ -94,7 +94,18 @@ void main() {
       expect(ios, contains('private static let readPageLimit = 100'));
       expect(readChanges, contains('withStart: historyStart'));
       expect(readChanges, contains('anchor: anchors[name]'));
-      expect(readChanges, contains('limit: Self.readPageLimit'));
+      expect(
+        readChanges,
+        contains(
+          'limit: max(1, Self.readPageLimit - records.count - deleted.count)',
+        ),
+      );
+      expect(
+        readChanges,
+        contains(
+          'guard records.count + deleted.count < Self.readPageLimit else',
+        ),
+      );
       expect(readChanges, contains('nextAnchors[name] = newAnchor'));
       expect(readChanges, contains('"hasMore": pageHasMore'));
       expect(readChanges, contains('healthQueryQueue.async'));

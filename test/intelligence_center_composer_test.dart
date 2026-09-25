@@ -175,20 +175,10 @@ void main() {
       await tester.pump();
       expect(delayed.conversationReadStarted, isTrue);
       expect(
-        find.byKey(const Key('ai-coach-conversation-restoring')),
-        findsOneWidget,
-      );
-      expect(
         tester
             .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))
             .enabled,
         isFalse,
-      );
-      expect(
-        tester
-            .widget<IconButton>(find.byKey(const Key('ai-coach-hero-start')))
-            .onPressed,
-        isNull,
       );
       expect(
         tester
@@ -207,10 +197,6 @@ void main() {
 
       delayed.releaseConversationRead();
       await tester.pumpAndSettle();
-      expect(
-        find.byKey(const Key('ai-coach-conversation-restoring')),
-        findsNothing,
-      );
       expect(
         tester
             .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))
@@ -298,7 +284,7 @@ void main() {
       findsNothing,
     );
     expect(find.text('Speak your language'), findsOneWidget);
-    expect(find.byKey(const Key('ai-coach-hero-start')), findsOneWidget);
+    expect(find.byKey(const Key('ai-coach-voice-button')), findsOneWidget);
     expect(tester.getBottomLeft(fieldFinder).dy, lessThanOrEqualTo(544));
     expect(fieldFinder.hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);

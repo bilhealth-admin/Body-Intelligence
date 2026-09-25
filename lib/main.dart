@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -34,12 +35,19 @@ import 'app/theme/bil_flagship_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // BIL is a portrait-only mobile experience. Keep Flutter aligned with the
-  // native Android/iOS declarations so device rotation cannot rebuild the
-  // responsive route tree while a form, scanner, or conversation is active.
-  await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[
-    DeviceOrientation.portraitUp,
-  ]);
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    // Android 15+ enforces edge-to-edge and Android 16 ignores orientation
+    // locks on large displays. Opt in consistently on older Android versions
+    // as well; BIL's Flutter surfaces already consume system-bar insets.
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+  } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+    // Preserve the reviewed iPhone/iPad presentation. This Android adaptive
+    // migration must not change the iOS release contract.
+    await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+    ]);
+  }
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     AppObservability.crashes.record(

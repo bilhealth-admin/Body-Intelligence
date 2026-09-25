@@ -5,6 +5,7 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
     List<IntelligenceMessage> visibleMessages, {
     required CoachDailyBrief? dailyBrief,
     required bool showLiveVoiceDraft,
+    required bool showReplyThinking,
     required bool showReplyFailure,
   }) {
     // The daily brief is already the opening Coach surface. Do not stack the
@@ -19,6 +20,7 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
       if (dailyBrief != null) 'coach-session-brief',
       ...presentedMessages.map((message) => message.id),
       if (showLiveVoiceDraft) 'coach-live-draft',
+      if (showReplyThinking) 'coach-reply-thinking',
       if (showReplyFailure) 'coach-reply-failure',
     ];
     return CoachAnchoredHistory(
@@ -44,6 +46,9 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
             text: pendingVoiceTranscript.trim(),
             liveCall: voiceMode == _CoachVoiceMode.liveCall,
           );
+        }
+        if (id == 'coach-reply-thinking') {
+          return const _CoachThinkingIndicator();
         }
         if (id == 'coach-reply-failure') {
           return _CoachReplyFailure(

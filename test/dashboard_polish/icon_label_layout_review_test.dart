@@ -204,12 +204,7 @@ void main() {
               find.byWidget(tile.title!),
               32,
             );
-            _expectBadgeGap(
-              tester,
-              bodyContext,
-              find.byWidget(tile.subtitle!),
-              32,
-            );
+            expect(tile.subtitle, isNull);
             expect(tester.takeException(), isNull);
             if (capture) {
               await _capture(tester, 'body-context-${locale.languageCode}');

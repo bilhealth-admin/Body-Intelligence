@@ -30,25 +30,25 @@ void main() {
     );
     expect(gate, contains('CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE'));
     expect(gate, isNot(contains('## Accepted parent')));
-    expect(androidWorkflow, contains('(( BUILD_NUMBER == 24 ))'));
+    expect(androidWorkflow, contains('(( BUILD_NUMBER == 25 ))'));
     expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 21 ))')));
-    expect(iosWorkflow, contains('(( BUILD_NUMBER == 28 ))'));
+    expect(iosWorkflow, contains('(( BUILD_NUMBER == 29 ))'));
     expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 26 ))')));
     expect(
       androidWorkflow,
-      contains('build 23 and earlier must never be promoted'),
+      contains('build 24 and earlier must never be promoted'),
     );
     expect(
       iosWorkflow,
       contains(r'--build-number "$BUILD_NUMBER"'),
-      reason: 'iOS must override pubspec +8 with the signed release build 28.',
+      reason: 'iOS must override pubspec +8 with the signed release build 29.',
     );
     expect(
       iosWorkflow,
-      contains('BIL_IOS_V28_FROZEN_SOURCE_MANIFEST_2026-09-24.md'),
+      contains('BIL_IOS_V29_FROZEN_SOURCE_MANIFEST_2026-09-25.md'),
     );
-    expect(iosWorkflow, contains('BIL_IOS_V28_AUDITED_SOURCE_SHA'));
-    expect(iosWorkflow, contains('BIL_IOS_V28_STAGING_MANIFEST_SHA256'));
+    expect(iosWorkflow, contains('BIL_IOS_V29_AUDITED_SOURCE_SHA'));
+    expect(iosWorkflow, contains('BIL_IOS_V29_STAGING_MANIFEST_SHA256'));
   });
 
   test('all accepted launch boundaries remain present', () {
