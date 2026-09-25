@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ vars.BIL_IOS_V28_AUDITED_SOURCE_SHA }}
 
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
@@ -44,7 +46,7 @@ jobs:
         if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-toolchain-evidence-${{ github.sha }}
+          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V28_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -222,7 +224,7 @@ jobs:
           BIL_PUSH_PROVIDER_READY: true
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V28_AUDITED_SOURCE_SHA }}
           BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V28_AUDITED_SOURCE_SHA }}
           BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V24_AUDITED_SOURCE_SHA }}
           BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V28_FROZEN_SOURCE_MANIFEST_2026-09-24.md
@@ -373,7 +375,7 @@ jobs:
           plutil -lint "$EXPORT_OPTIONS"
 
           BUILD_SETTINGS="$(xcodebuild \
-            -workspace ios/Runner.xcworkspace \
+            -project ios/Runner.xcodeproj \
             -scheme Runner \
             -configuration Release \
             -sdk iphoneos \
@@ -555,7 +557,7 @@ jobs:
       - name: Upload signed IPA and validation evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-signed-ipa-${{ github.sha }}
+          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V28_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
