@@ -21,7 +21,10 @@ ConnectedHealthSignalView _signal(
   value: value,
   unit: unit,
   source: source,
-  observedAt: DateTime.utc(2026, 8, 31, 11, 10),
+  // Keep the fixture in the same local-time basis as [liveHealthNowProvider].
+  // Using UTC here made the 30-minute freshness check depend on the CI host's
+  // timezone (passing in Cairo and failing on UTC runners).
+  observedAt: DateTime(2026, 8, 31, 14, 10),
   confidence: confidence,
 );
 
@@ -451,19 +454,19 @@ void main() {
               'kind': 'weight',
               'value': 78.0,
               'unit': 'kg',
-              'observedAt': DateTime.utc(2026, 8, 31, 11, 10).toIso8601String(),
+              'observedAt': DateTime(2026, 8, 31, 14, 10).toIso8601String(),
             },
             <String, Object?>{
               'kind': 'body_fat',
               'value': 20.0,
               'unit': '%',
-              'observedAt': DateTime.utc(2026, 8, 31, 11, 10).toIso8601String(),
+              'observedAt': DateTime(2026, 8, 31, 14, 10).toIso8601String(),
             },
             <String, Object?>{
               'kind': 'heart_rate',
               'value': 72.0,
               'unit': 'bpm',
-              'observedAt': DateTime.utc(2026, 8, 31, 11, 10).toIso8601String(),
+              'observedAt': DateTime(2026, 8, 31, 14, 10).toIso8601String(),
             },
           ],
         ),
