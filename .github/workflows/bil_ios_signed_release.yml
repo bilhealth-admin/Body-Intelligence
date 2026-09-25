@@ -375,7 +375,7 @@ jobs:
           plutil -lint "$EXPORT_OPTIONS"
 
           BUILD_SETTINGS="$(xcodebuild \
-            -project ios/Runner.xcodeproj \
+            -workspace ios/Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -sdk iphoneos \
