@@ -37,7 +37,6 @@ dependencies:
   flutter_riverpod: ^3.3.2
   go_router: ^17.3.0
   drift: ^2.34.2
-  sqlite3_flutter_libs: ^0.6.0+eol
   sqlite3: ^3.4.0
   path_provider: ^2.1.6
   path: ^1.9.1
@@ -81,7 +80,7 @@ dependencies:
   # 7.1+ references the iOS 26-only NWPath.isUltraConstrained symbol at
   # compile time. Keep the cloud/release Xcode matrix compatible until the
   # minimum Apple toolchain includes that SDK.
-  connectivity_plus: 7.0.0
+  connectivity_plus: 7.1.0
 
 dev_dependencies:
   flutter_test:

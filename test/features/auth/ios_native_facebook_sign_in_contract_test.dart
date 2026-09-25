@@ -24,16 +24,21 @@ void main() {
     expect(plist, contains('<string>fbapi</string>'));
 
     expect(nativeFacebook, contains('FacebookAuth.instance.login('));
-    expect(nativeFacebook, contains("'public_profile', 'email'"));
+    expect(nativeFacebook, contains("'public_profile', 'email', 'openid'"));
     expect(nativeFacebook, contains('LoginTracking.limited'));
     expect(nativeFacebook, contains('LoginBehavior.nativeWithFallback'));
     expect(nativeFacebook, contains('LoginStatus.cancelled'));
-    expect(nativeFacebook, contains('result.accessToken?.tokenString'));
+    expect(nativeFacebook, contains('LimitedToken(:final tokenString)'));
+    expect(
+      nativeFacebook,
+      contains('ClassicToken(:final authenticationToken)'),
+    );
 
     expect(service, contains('usesNativeIosFacebookSignIn'));
     expect(service, contains('signInWithFacebookNative'));
     expect(service, contains('provider: OAuthProvider.facebook'));
     expect(service, contains('idToken: token.idToken'));
+    expect(service, contains('nonce: token.nonce'));
     expect(service, isNot(contains('LaunchMode.inAppBrowserView')));
     expect(loginPage, contains('authService.signInWithFacebookNative()'));
     expect(loginPage, contains('nativeGoogle && !nativeFacebook'));

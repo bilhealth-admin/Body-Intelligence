@@ -51,6 +51,7 @@ import '../services/coach_voice_transcript_normalizer.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
 import '../services/local_coach_api.dart';
+import '../services/remote_ai_consent_coordinator.dart';
 
 import '../services/local_model_gateway.dart';
 import '../services/coach_catalog_grounding.dart';
@@ -78,6 +79,7 @@ part 'intelligence_conversation_viewport.dart';
 part 'intelligence_conversation_voice.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_query_flow.dart';
+part 'intelligence_query_decision.dart';
 part 'intelligence_action_flow.dart';
 part 'intelligence_action_runtime.dart';
 
@@ -154,6 +156,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   bool analyzingFoodImage = false;
   bool foodImageFlowOpening = false;
   bool consentPromptVisible = false;
+  Future<_RemoteAiConsentChoice>? consentChoiceInFlight;
   IntelligenceMessage? sessionWelcomeMessage;
   bool introVisible = true;
   bool conversationReady = false;
@@ -442,7 +445,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
             'أكتب كلامك مباشرة · اسكت للإرسال',
           )
         : sending
-        ? tr('Thinking with your BIL data', 'أفكر باستخدام بيانات BIL')
+        ? tr('Preparing your answer', 'جارٍ تجهيز إجابتك')
         : '';
     const coachNavy = Color(0xFF071923);
     return Scaffold(

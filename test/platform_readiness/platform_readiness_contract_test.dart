@@ -103,20 +103,21 @@ void main() {
         playIntegrityProjectNumber: '1041595138122',
         sourceCommit: List.filled(40, 'a').join(),
         auditedSourceCommit: List.filled(40, 'a').join(),
+        counterpartAuditedSourceCommit: List.filled(40, 'a').join(),
         freezeManifestSha256: List.filled(64, 'b').join(),
         auditedFreezeManifestSha256: List.filled(64, 'b').join(),
         stagingManifestComplete: true,
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 11,
+        manifestReleaseBuildNumber: 24,
       ),
     );
 
     expect(issues, isEmpty);
   });
 
-  test('frozen iOS release configuration requires build 12', () {
+  test('frozen iOS release configuration requires build 28', () {
     final issues = ReleaseConfigurationValidator.validate(
       ReleaseConfiguration(
         production: true,
@@ -137,20 +138,21 @@ void main() {
         mobileIntegrityBackendReleaseId: 'reviewed-backend-release',
         sourceCommit: List.filled(40, 'a').join(),
         auditedSourceCommit: List.filled(40, 'a').join(),
+        counterpartAuditedSourceCommit: List.filled(40, 'a').join(),
         freezeManifestSha256: List.filled(64, 'b').join(),
         auditedFreezeManifestSha256: List.filled(64, 'b').join(),
         stagingManifestComplete: true,
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 12,
+        manifestReleaseBuildNumber: 28,
       ),
     );
 
     expect(issues, isEmpty);
   });
 
-  test('iOS rejects the previous build 11 frozen manifest', () {
+  test('iOS rejects the previous build 27 frozen manifest', () {
     final issues = ReleaseConfigurationValidator.validate(
       ReleaseConfiguration(
         production: true,
@@ -171,20 +173,21 @@ void main() {
         mobileIntegrityBackendReleaseId: 'reviewed-backend-release',
         sourceCommit: List.filled(40, 'a').join(),
         auditedSourceCommit: List.filled(40, 'a').join(),
+        counterpartAuditedSourceCommit: List.filled(40, 'a').join(),
         freezeManifestSha256: List.filled(64, 'b').join(),
         auditedFreezeManifestSha256: List.filled(64, 'b').join(),
         stagingManifestComplete: true,
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 11,
+        manifestReleaseBuildNumber: 27,
       ),
     );
 
     final releaseIssue = issues.singleWhere(
       (issue) => issue.code == 'wrong_frozen_release_version',
     );
-    expect(releaseIssue.message, contains('build 12 for ios'));
+    expect(releaseIssue.message, contains('build 28 for ios'));
   });
 
   test('production rejects mismatched feature integrity and freeze gates', () {
@@ -209,6 +212,7 @@ void main() {
         playIntegrityProjectNumber: 'invalid',
         sourceCommit: List.filled(40, 'a').join(),
         auditedSourceCommit: List.filled(40, 'c').join(),
+        counterpartAuditedSourceCommit: List.filled(40, 'd').join(),
         freezeManifestSha256: List.filled(64, 'b').join(),
         auditedFreezeManifestSha256: List.filled(64, 'd').join(),
         stagingManifestComplete: false,
@@ -228,6 +232,7 @@ void main() {
         'missing_mobile_integrity_backend_release',
         'invalid_play_integrity_project',
         'unaudited_source_commit',
+        'cross_platform_source_mismatch',
         'unapproved_freeze_manifest',
         'incomplete_release_manifest',
         'release_candidate_not_accepted',

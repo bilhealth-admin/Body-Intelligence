@@ -18,6 +18,10 @@ void main() {
       'lib/features/intelligence_center/presentation/'
       'intelligence_query_flow.dart',
     ).readAsStringSync();
+    final consentCoordinator = File(
+      'lib/features/intelligence_center/services/'
+      'remote_ai_consent_coordinator.dart',
+    ).readAsStringSync();
     final server = File(
       'supabase/functions/ai-coach/server.ts',
     ).readAsStringSync();
@@ -27,7 +31,13 @@ void main() {
     expect(gateway, contains("client.rpc('bil_get_remote_ai_consent')"));
     expect(privacyBoundary, contains('projectCoachCloudContext'));
     expect(gateway, contains('context_disclosure'));
-    expect(queryFlow, contains("'p_purpose': 'remote_ai'"));
+    expect(queryFlow, contains('.grantAndVerify()'));
+    expect(consentCoordinator, contains("'p_purpose': 'remote_ai'"));
+    expect(consentCoordinator, contains("'p_policy_version': '3'"));
+    expect(
+      consentCoordinator,
+      contains('return isGranted(forceServerRead: true);'),
+    );
     expect(server, contains('bil_has_remote_ai_consent'));
   });
 

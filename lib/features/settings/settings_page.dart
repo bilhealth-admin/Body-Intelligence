@@ -545,15 +545,14 @@ class _MoreRow extends StatelessWidget {
                   size: 18,
                   color: Theme.of(context).colorScheme.error,
                 )
-              : _MoreIcon(
-                  key: Key(
-                    'more-semantic-icon-${semanticKind?.name ?? 'generic'}',
-                  ),
-                  icon: semanticKind == null
-                      ? Icons.arrow_forward_rounded
-                      : BilSemanticIcons.spec(
-                          semanticKind,
-                        ).iconFor(Theme.of(context).platform),
+              : semanticKind == null
+              ? const _MoreIcon(icon: Icons.arrow_forward_rounded)
+              : BilSemanticIconBadge(
+                  key: Key('more-semantic-icon-${semanticKind.name}'),
+                  kind: semanticKind,
+                  size: 40,
+                  iconSize: 20,
+                  shape: BoxShape.rectangle,
                 ),
           title: Text(
             label,

@@ -598,6 +598,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         onSkip: view.skip,
         nextLabel: _stepId == 'review' ? t('Finish setup') : null,
         nextEnabled: view.nextEnabled && !_permissionBusy,
+        nextPending: _permissionBusy,
         busy: navigationBusy,
       ),
     );

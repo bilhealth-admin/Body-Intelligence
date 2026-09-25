@@ -733,10 +733,7 @@ void main() {
     expect(mealList, contains("'daily-meal-macros-\$type'"));
     expect(mealList, contains('showLabel: false'));
     expect(mealList, isNot(contains('_DiaryFoodRow(')));
-    expect(
-      RegExp('PremiumNutritionGlass\\(').allMatches(mealList).length,
-      1,
-    );
+    expect(RegExp('PremiumNutritionGlass\\(').allMatches(mealList).length, 1);
     expect(dashboard, isNot(contains("tr('Premium nutrient goals'")));
     expect(dashboard, isNot(contains("tr('Premium heart health'")));
     expect(dashboard, contains("Key('dashboard-premium-page-label')"));

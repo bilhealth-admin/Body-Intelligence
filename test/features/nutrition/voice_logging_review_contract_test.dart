@@ -10,11 +10,14 @@ void main() {
     final service = File(
       'lib/features/nutrition/services/meal_voice_input_service.dart',
     ).readAsStringSync();
+    final dialog = File(
+      'lib/features/nutrition/presentation/bil_meal_voice_capture_dialog.dart',
+    ).readAsStringSync();
     final localizedCopy = File(
       'lib/app/localization/runtime_copy_meal_voice.dart',
     ).readAsStringSync();
-    expect(service, contains("Key('editable-voice-food-candidate')"));
-    expect(service, contains("Key('accept-reviewed-voice-candidate')"));
+    expect(dialog, contains("Key('editable-voice-food-candidate')"));
+    expect(dialog, contains("Key('accept-reviewed-voice-candidate')"));
     expect(service, contains('MealVoiceRuntimeCopy.resolve'));
     expect(localizedCopy, contains('Nothing is logged automatically.'));
     expect(service, isNot(contains('mealRepositoryProvider')));

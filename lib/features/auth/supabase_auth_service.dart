@@ -52,11 +52,46 @@ final class SupabaseAppleAuthorizationCodeRegistrar
   }
 }
 
+abstract interface class BilFacebookSessionAuthority {
+  Session? get currentSession;
+
+  String generateRawNonce();
+
+  Future<AuthResponse> exchange({
+    required String idToken,
+    required String nonce,
+  });
+}
+
+final class SupabaseFacebookSessionAuthority
+    implements BilFacebookSessionAuthority {
+  const SupabaseFacebookSessionAuthority(this.client);
+
+  final SupabaseClient client;
+
+  @override
+  Session? get currentSession => client.auth.currentSession;
+
+  @override
+  String generateRawNonce() => client.auth.generateRawNonce();
+
+  @override
+  Future<AuthResponse> exchange({
+    required String idToken,
+    required String nonce,
+  }) => client.auth.signInWithIdToken(
+    provider: OAuthProvider.facebook,
+    idToken: idToken,
+    nonce: nonce,
+  );
+}
+
 class SupabaseAuthService {
   const SupabaseAuthService(
     this.client, {
     this.appleCredentialIdentifierStore,
     this.appleAuthorizationCodeRegistrar,
+    this.facebookSessionAuthority,
     this.nativeFacebookSignIn = const BilNativeFacebookSignIn(),
     this.nativeGoogleSignIn = const BilNativeGoogleSignIn(),
   });
@@ -64,6 +99,7 @@ class SupabaseAuthService {
   final SupabaseClient client;
   final AppleCredentialIdentifierStore? appleCredentialIdentifierStore;
   final AppleAuthorizationCodeRegistrar? appleAuthorizationCodeRegistrar;
+  final BilFacebookSessionAuthority? facebookSessionAuthority;
   final BilNativeFacebookSignIn nativeFacebookSignIn;
   final BilNativeGoogleSignIn nativeGoogleSignIn;
 
@@ -72,9 +108,8 @@ class SupabaseAuthService {
   static const passwordResetRedirectUri =
       'https://www.bilhealth.com/auth/reset-password';
 
-  /// Browser OAuth remains external-only for providers that need a browser
-  /// (for example, Apple on Android). Google and Facebook take their native
-  /// mobile SDK routes before this setting is consulted.
+  /// Browser OAuth remains external-only for providers without a native BIL
+  /// route. Google and Facebook use their native SDKs on Android and iOS.
   static LaunchMode oauthLaunchModeFor(
     OAuthProvider provider, {
     required bool isWeb,
@@ -133,8 +168,8 @@ class SupabaseAuthService {
       usesNativeFacebookSignIn(provider, isWeb: isWeb, platform: platform) &&
       platform == TargetPlatform.android;
 
-  /// Native Google and Facebook never use this URL. Other OAuth providers
-  /// retain the verified HTTPS return route.
+  /// Native Google and Facebook never use this URL. Other browser OAuth
+  /// providers retain the verified HTTPS return route.
   static String oauthRedirectUriFor(
     OAuthProvider provider, {
     required bool isWeb,
@@ -225,17 +260,35 @@ class SupabaseAuthService {
     return observedSession != null || client.auth.currentSession != null;
   }
 
-  /// Signs in through Meta's native mobile SDK, then exchanges its short-lived
-  /// identity proof for BIL's normal Supabase session.
+  /// Signs in through Meta's native SDK, then exchanges only its OIDC JWT for
+  /// BIL's authoritative Supabase session.
   ///
   /// A null result means the person dismissed Meta's authorization UI.
   Future<AuthResponse?> signInWithFacebookNative() async {
-    final token = await nativeFacebookSignIn.authenticate();
+    final authority =
+        facebookSessionAuthority ?? SupabaseFacebookSessionAuthority(client);
+    final existingSession = authority.currentSession;
+    if (existingSession != null) {
+      return AuthResponse(session: existingSession);
+    }
+    final rawNonce = authority.generateRawNonce();
+    final token = await nativeFacebookSignIn.authenticate(nonce: rawNonce);
     if (token == null) return null;
-    return client.auth.signInWithIdToken(
-      provider: OAuthProvider.facebook,
+    final response = await authority.exchange(
       idToken: token.idToken,
+      nonce: token.nonce,
     );
+    final session = response.session;
+    final user = response.user;
+    if (session == null ||
+        user == null ||
+        user.id.isEmpty ||
+        session.user.id != user.id) {
+      throw const AuthException(
+        'Facebook sign-in did not establish a Supabase session.',
+      );
+    }
+    return response;
   }
 
   /// Signs in with Apple's native iOS/macOS authorization sheet.

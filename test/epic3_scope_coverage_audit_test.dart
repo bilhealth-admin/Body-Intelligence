@@ -98,6 +98,7 @@ void main() {
     '/daily-log': 'diary',
     '/daily-log/body-context': 'diary',
     '/daily-log/water': 'diary',
+    '/quick-add/meal-camera': 'diary',
     '/intelligence-center': 'intelligence',
     '/settings/ai-coach': 'intelligence',
     '/admin/ai-coach': 'intelligence',

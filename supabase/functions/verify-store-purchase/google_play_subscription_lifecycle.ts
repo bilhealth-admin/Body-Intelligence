@@ -39,6 +39,7 @@ function isCurrentGooglePlayFreeTrial(
   lineItem: Record<string, unknown>,
   now: Date,
   subscriptionStartTime: unknown,
+  environment: "sandbox" | "production",
 ) {
   if (!googlePlayTrialAccessStates.has(state)) return false;
   if (!googlePlayTrialProductIds.has(String(lineItem.productId ?? ""))) {
@@ -59,11 +60,16 @@ function isCurrentGooglePlayFreeTrial(
     ? new Date(subscriptionStartTime)
     : null;
   const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const durationMs = expiryTime.getTime() - (startTime?.getTime() ?? NaN);
   if (
     startTime === null ||
     !Number.isFinite(startTime.getTime()) ||
     startTime.getTime() > now.getTime() ||
-    expiryTime.getTime() - startTime.getTime() !== sevenDaysMs
+    !Number.isFinite(durationMs) ||
+    durationMs <= 0 ||
+    (environment === "production"
+      ? durationMs !== sevenDaysMs
+      : durationMs > sevenDaysMs)
   ) return false;
 
   const offerDetails = asRecord(lineItem.offerDetails);
@@ -87,6 +93,7 @@ export function googleLifecycle(
   lineItem: Record<string, unknown>,
   now = new Date(),
   subscriptionStartTime: unknown = undefined,
+  environment: "sandbox" | "production" = "production",
 ): GoogleSubscriptionLifecycle {
   if (!googlePlaySubscriptionProductIds.has(String(lineItem.productId ?? ""))) {
     return "suspended";
@@ -106,6 +113,7 @@ export function googleLifecycle(
       lineItem,
       now,
       subscriptionStartTime,
+      environment,
     )
   ) return "trial";
   return ({

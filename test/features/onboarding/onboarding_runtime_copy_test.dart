@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/features/onboarding/onboarding_runtime_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -67,7 +68,13 @@ void main() {
     };
 
     expect(sourceKeys, isNotEmpty);
-    final missing = sourceKeys.difference(OnboardingRuntimeCopy.englishKeys);
+    final missing = sourceKeys
+        .where(
+          (key) =>
+              !OnboardingRuntimeCopy.englishKeys.contains(key) &&
+              RuntimeCopy.resolve(key, 'en') == null,
+        )
+        .toSet();
     expect(
       missing,
       isEmpty,

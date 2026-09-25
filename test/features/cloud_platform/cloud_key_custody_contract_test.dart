@@ -52,6 +52,22 @@ void main() {
     expect(source, isNot(contains('vault.create_secret')));
   });
 
+  test('create-capable cloud-key RPC fails closed without current consent', () {
+    final source = File(
+      'supabase/migrations/20260925005205_final_hardening_cloud_consent_community_authority.sql',
+    ).readAsStringSync();
+
+    expect(source, contains('public.bil_get_or_create_cloud_key()'));
+    expect(source, contains("receipt.purpose = 'cloud_sync'"));
+    expect(source, contains('order by receipt.recorded_at desc'));
+    expect(source, contains('v_latest_consent is distinct from true'));
+    expect(source, contains('cloud_sync_consent_required'));
+    expect(
+      source.indexOf('cloud_sync_consent_required'),
+      lessThan(source.indexOf('vault.create_secret')),
+    );
+  });
+
   test('client key cache uses secure storage, not SharedPreferences', () {
     final source = File(
       'lib/features/cloud_platform/services/cloud_account_key_repository.dart',

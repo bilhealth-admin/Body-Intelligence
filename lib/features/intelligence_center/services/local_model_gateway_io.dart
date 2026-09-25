@@ -8,6 +8,7 @@ import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../domain/coach_context_snapshot.dart';
 import 'coach_cloud_privacy_boundary.dart';
 import 'local_model_gateway.dart';
+import 'remote_ai_consent_coordinator.dart';
 
 export 'coach_cloud_privacy_boundary.dart';
 
@@ -257,18 +258,22 @@ class LlamaCppLocalGateway implements LocalModelGateway {
       );
     }
 
-    Object? consent;
+    bool consentGranted;
     try {
-      consent = await access.readRemoteAiConsent().timeout(
-        const Duration(seconds: 8),
-      );
+      consentGranted = cloudAccess == null
+          ? await sharedRemoteAiConsentCoordinator().isGranted()
+          : isCurrentRemoteAiConsentGranted(
+              await access.readRemoteAiConsent().timeout(
+                const Duration(seconds: 8),
+              ),
+            );
     } on Object {
       return const LocalModelResult(
         status: CoachServiceStatus.temporarilyUnavailable,
         diagnosticCode: 'remote_ai_consent_preflight_failed',
       );
     }
-    if (!isCurrentRemoteAiConsentGranted(consent)) {
+    if (!consentGranted) {
       return const LocalModelResult(
         status: CoachServiceStatus.consentRequired,
         diagnosticCode: 'ai_consent_required',

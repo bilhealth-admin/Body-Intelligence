@@ -12,7 +12,7 @@ void main() {
       'lib/features/intelligence_center/services/local_model_gateway_io.dart',
     ).readAsStringSync();
 
-    expect(BilToolRegistry.tools, hasLength(22));
+    expect(BilToolRegistry.tools, hasLength(23));
     for (final name in BilToolRegistry.tools.keys) {
       expect(server, contains(name), reason: 'server missing $name');
       expect(

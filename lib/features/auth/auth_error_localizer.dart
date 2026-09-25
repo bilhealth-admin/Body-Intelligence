@@ -19,6 +19,15 @@ String localizedAuthError(BuildContext context, AuthException error) {
       message.contains('provider is disabled')) {
     return authEntryText(context, AuthEntryCopyKey.providerUnavailable);
   }
+  if (message.contains('facebook') &&
+      (message.contains('identity token') ||
+          message.contains('supabase session'))) {
+    return authFiveLocaleTextOf(
+      context,
+      'Facebook could not provide a secure sign-in. Update Facebook and try again.',
+      'تعذر على فيسبوك توفير تسجيل دخول آمن. حدّث تطبيق فيسبوك ثم حاول مجددًا.',
+    );
+  }
   if (code == 'otp_expired' ||
       message.contains('token has expired') ||
       message.contains('otp expired') ||

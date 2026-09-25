@@ -3,6 +3,17 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('paywall exposes configured Terms and Privacy links', () {
+    final source = File(
+      'lib/features/commerce/presentation/commerce_paywall.dart',
+    ).readAsStringSync();
+    expect(source, contains('StoreCatalogConfiguration.legalLinksConfigured'));
+    expect(source, contains("Key('paywall-terms-link')"));
+    expect(source, contains("Key('paywall-privacy-link')"));
+    expect(source, contains('StoreCatalogConfiguration.termsUrl'));
+    expect(source, contains('StoreCatalogConfiguration.privacyUrl'));
+  });
+
   test('signed workflows preserve commerce and owner-defer ads', () {
     final workflows =
         <
@@ -157,10 +168,7 @@ void main() {
       stableOwner,
       contains('ref.watch(verifiedEntitlementOwnerProvider)'),
     );
-    expect(
-      stableOwner,
-      contains('if (owner.hasValue) return owner.value;'),
-    );
+    expect(stableOwner, contains('if (owner.hasValue) return owner.value;'));
   });
 
   test('pending migration normalizes AI access from canonical entitlement', () {

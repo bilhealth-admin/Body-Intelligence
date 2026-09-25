@@ -189,9 +189,7 @@ class DashboardBodyProfileSnapshot extends StatelessWidget {
                   '/health-information-sources?topic=body-composition',
                 ),
                 icon: const Icon(Icons.menu_book_outlined),
-                label: Text(
-                  tr('Methods & sources', 'المنهجية والمصادر'),
-                ),
+                label: Text(tr('Methods & sources', 'المنهجية والمصادر')),
               ),
             ],
           ),

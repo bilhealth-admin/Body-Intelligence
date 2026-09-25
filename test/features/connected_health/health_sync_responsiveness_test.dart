@@ -47,7 +47,7 @@ void main() {
                     'id': 'heart-$index',
                     'type': 'heartRate',
                     'value': 70.0 + index % 5,
-                  'unit': 'count/min',
+                    'unit': 'count/min',
                     'observedAt': asOf
                         .subtract(Duration(minutes: index + 1))
                         .toIso8601String(),

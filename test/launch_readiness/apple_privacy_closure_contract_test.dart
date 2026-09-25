@@ -285,6 +285,9 @@ void main() {
     final coachUi = File(
       'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
     ).readAsStringSync();
+    final coachConsentCoordinator = File(
+      'lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart',
+    ).readAsStringSync();
     final mealConsent = File(
       'lib/features/nutrition/presentation/meal_vision_consent_gate.dart',
     ).readAsStringSync();
@@ -305,7 +308,15 @@ void main() {
       expect(source, contains('third-party AI service operated by Google'));
       expect(source, contains('Google Gemini'));
     }
-    expect(coachUi, contains("'p_policy_version': '3'"));
+    expect(coachUi, contains('.grantAndVerify()'));
+    expect(
+      coachConsentCoordinator,
+      contains("'p_policy_version': '3'"),
+    );
+    expect(
+      coachConsentCoordinator,
+      contains('return isGranted(forceServerRead: true);'),
+    );
     expect(
       mealConsent,
       contains("mealVisionConsentPurpose = 'meal_vision_ai'"),

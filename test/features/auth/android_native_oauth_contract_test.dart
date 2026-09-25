@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/auth/supabase_auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
-  test('Android uses native Google and Meta sign-in without BIL browser bridges', () {
+  test('Android uses native Google and native OIDC login for Meta', () {
     final service = File(
       'lib/features/auth/supabase_auth_service.dart',
     ).readAsStringSync();
@@ -45,10 +48,25 @@ void main() {
     expect(nativeGoogle, contains('authorizationForScopes'));
     expect(nativeGoogle, contains('authorizeScopes'));
 
+    // Meta's Android AuthenticationToken is the OIDC JWT required by
+    // Supabase. The classic Graph API access token is never exchanged.
+    expect(
+      SupabaseAuthService.usesNativeAndroidFacebookSignIn(
+        OAuthProvider.facebook,
+        isWeb: false,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
     expect(nativeFacebook, contains('FacebookAuth.instance.login('));
-    expect(nativeFacebook, contains('LoginBehavior.nativeWithFallback'));
-    expect(nativeFacebook, contains('LoginTracking.limited'));
-    expect(nativeFacebook, contains('result.accessToken?.tokenString'));
+    expect(
+      nativeFacebook,
+      contains('ClassicToken(:final authenticationToken)'),
+    );
+    expect(nativeFacebook, contains('LimitedToken(:final tokenString)'));
+    expect(nativeFacebook, contains("'public_profile', 'email', 'openid'"));
+    expect(nativeFacebook, contains('nonce: nonce'));
+    expect(service, contains('nonce: token.nonce'));
 
     expect(manifest, contains('com.facebook.sdk.ApplicationId'));
     expect(manifest, contains('com.facebook.sdk.ClientToken'));
@@ -64,6 +82,10 @@ void main() {
     expect(strings, contains('Body Intelligence Log™'));
     expect(strings, contains('name="facebook_app_id"'));
     expect(strings, contains('name="facebook_client_token"'));
+    expect(strings, contains('1384055070498598'));
+    expect(gradle, contains('com.bilhealth.bodyintelligencelog'));
+    expect(nativeFacebook, isNot(contains('print(')));
+    expect(nativeFacebook, isNot(contains('debugPrint(')));
 
     expect(activity, isNot(contains('BILGoogleOAuthBridge')));
     expect(activity, isNot(contains('BILFacebookOAuthBridge')));

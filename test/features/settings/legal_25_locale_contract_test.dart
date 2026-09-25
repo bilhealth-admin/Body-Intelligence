@@ -87,7 +87,7 @@ void main() {
       expect(start, greaterThanOrEqualTo(0), reason: constantName);
       expect(end, greaterThan(start), reason: constantName);
       return RegExp(
-        r'^  \($',
+        r"\(\s*'\d+\.",
         multiLine: true,
       ).allMatches(source.substring(start, end)).length;
     }
@@ -95,7 +95,7 @@ void main() {
     List<int> sectionOrdinals(String constantName) {
       final start = source.indexOf('const $constantName =');
       final end = source.indexOf('\n];', start);
-      return RegExp(r"^    '(\d+)\.", multiLine: true)
+      return RegExp(r"\(\s*'(\d+)\.", multiLine: true)
           .allMatches(source.substring(start, end))
           .map((match) => int.parse(match.group(1)!))
           .toList(growable: false);

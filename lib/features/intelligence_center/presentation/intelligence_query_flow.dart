@@ -13,7 +13,11 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     final text = inputChannel == CoachInputChannel.voice
         ? normalizeCoachVoiceTranscript(rawText)
         : rawText;
-    if (!conversationReady || text.isEmpty || sending || foodImageFlowOpening) {
+    if (!conversationReady ||
+        text.isEmpty ||
+        sending ||
+        consentPromptVisible ||
+        foodImageFlowOpening) {
       return;
     }
     if (addUserMessage) _beginConversationForUserAction();
@@ -251,10 +255,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       }
       if (!mounted || generation != requestGeneration) return;
       if (reply.serviceStatus == CoachServiceStatus.consentRequired) {
-        final enabled = await _offerPersonalIntelligence();
+        // Consent is a pending local decision, not an in-flight AI request.
+        // Clear all progress UI before presenting the single-flight sheet.
+        _updateState(() {
+          sending = false;
+          replyPhase = _CoachReplyPhase.idle;
+        });
+        replyDelayTimer?.cancel();
+        final choice = await _offerPersonalIntelligence();
         if (!mounted || generation != requestGeneration) return;
-        if (enabled) {
-          _updateState(() => sending = false);
+        if (choice == _RemoteAiConsentChoice.granted) {
           await ask(
             inputChannel: inputChannel,
             detectedLanguageTag: effectiveLanguageHint,
@@ -262,12 +272,13 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             addUserMessage: false,
             autoSpeakReply: autoSpeakReply,
           );
-        } else {
+        } else if (choice == _RemoteAiConsentChoice.declined) {
           final localMessage = IntelligenceMessage(
             id: 'coach-local-${DateTime.now().microsecondsSinceEpoch}',
             role: IntelligenceMessageRole.bil,
             kind: IntelligenceMessageKind.coach,
-            text: tr(
+            text: intelligenceTextFor(
+              questionLocale,
               'No problem. I’ll keep helping from verified data on this device.',
               'لا مشكلة. سأستمر بمساعدتك من البيانات الموثقة على هذا الجهاز.',
             ),
@@ -284,6 +295,31 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             await _speakCoachText(localMessage.text, questionLocale);
             await _resumeLiveCallIfNeeded(generation);
           }
+        } else if (choice == _RemoteAiConsentChoice.failed) {
+          final errorMessage = IntelligenceMessage(
+            id: 'coach-consent-error-${DateTime.now().microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.safety,
+            text: intelligenceTextFor(
+              questionLocale,
+              'Remote AI consent could not be saved and verified. Nothing was sent; try again.',
+              'تعذر حفظ موافقة الذكاء الاصطناعي البعيد والتحقق منها. لم يُرسل شيء؛ أعد المحاولة.',
+            ),
+            createdAt: DateTime.now(),
+            confidence: 1,
+          );
+          _updateState(() {
+            messages.add(errorMessage);
+            animatedResponseIds.add(errorMessage.id);
+            retryableErrorMessageIds.add(errorMessage.id);
+            replyPhase = _CoachReplyPhase.failed;
+            failedRequest = (
+              text: text,
+              detectedLanguageTag: effectiveLanguageHint,
+              autoSpeak: autoSpeakReply,
+              channel: inputChannel,
+            );
+          });
         }
         return;
       }
@@ -526,8 +562,20 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     );
   }
 
-  Future<bool> _offerPersonalIntelligence() async {
-    if (consentPromptVisible || !mounted) return false;
+  Future<_RemoteAiConsentChoice> _offerPersonalIntelligence() {
+    final inFlight = consentChoiceInFlight;
+    if (inFlight != null) return inFlight;
+    final operation = _runPersonalIntelligenceOffer();
+    consentChoiceInFlight = operation;
+    return operation.whenComplete(() {
+      consentChoiceInFlight = null;
+    });
+  }
+
+  Future<_RemoteAiConsentChoice> _runPersonalIntelligenceOffer() async {
+    if (consentPromptVisible || !mounted) {
+      return _RemoteAiConsentChoice.alreadyOpen;
+    }
     consentPromptVisible = true;
     try {
       final enabled = await showModalBottomSheet<bool>(
@@ -591,26 +639,14 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           );
         },
       );
-      if (enabled != true) return false;
-      await Supabase.instance.client.rpc(
-        'bil_record_consent',
-        params: const <String, Object?>{
-          'p_purpose': 'remote_ai',
-          'p_policy_version': '3',
-          'p_granted': true,
-        },
-      );
-      return true;
+      if (enabled != true) return _RemoteAiConsentChoice.declined;
+      final verified = await sharedRemoteAiConsentCoordinator()
+          .grantAndVerify();
+      return verified
+          ? _RemoteAiConsentChoice.granted
+          : _RemoteAiConsentChoice.failed;
     } on Object {
-      if (mounted) {
-        _showActionCompleted(
-          tr(
-            'Personal BIL could not be enabled right now.',
-            'تعذر تفعيل BIL المخصص الآن.',
-          ),
-        );
-      }
-      return false;
+      return _RemoteAiConsentChoice.failed;
     } finally {
       consentPromptVisible = false;
     }
@@ -645,79 +681,4 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
   }
 }
 
-enum CoachPendingActionDecision { none, confirm, cancel }
-
-@visibleForTesting
-CoachPendingActionDecision coachPendingActionDecision(String input) {
-  final normalized = input
-      .trim()
-      .toLowerCase()
-      .replaceAll(RegExp(r'[.!?؟،,]+$'), '')
-      .trim();
-  if (const <String>{
-    'confirm',
-    'confirmed',
-    'yes confirm',
-    'yes, confirm',
-    'proceed',
-    'execute',
-    'approved',
-    'تأكيد',
-    'تاكيد',
-    'نعم',
-    'نعم تأكيد',
-    'نعم تاكيد',
-    'موافق',
-    'نفذ',
-    'ننفذ',
-    'oui',
-    'confirmer',
-    'si',
-    'sí',
-    'confirmar',
-    'evet',
-    'onayla',
-    'ja',
-    'bestätigen',
-    'conferma',
-    'sim',
-    'ہاں',
-    'تصدیق',
-    'بله',
-    'تأیید',
-    'हाँ',
-    'पुष्टि',
-    'ya',
-    'konfirmasi',
-    'sahkan',
-    'はい',
-    '確認',
-    '네',
-    '확인',
-    '是',
-    '确认',
-    'да',
-    'подтвердить',
-    'হ্যাঁ',
-    'xác nhận',
-    'ใช่',
-    'potwierdź',
-    'bevestigen',
-    'так',
-  }.contains(normalized)) {
-    return CoachPendingActionDecision.confirm;
-  }
-  if (const <String>{
-    'cancel',
-    'cancel it',
-    'do not change it',
-    "don't change it",
-    'إلغاء',
-    'الغاء',
-    'لا تغيره',
-    'لا تغيّره',
-  }.contains(normalized)) {
-    return CoachPendingActionDecision.cancel;
-  }
-  return CoachPendingActionDecision.none;
-}
+enum _RemoteAiConsentChoice { granted, declined, failed, alreadyOpen }

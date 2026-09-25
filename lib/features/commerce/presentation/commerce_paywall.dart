@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../domain/store_catalog_configuration.dart';
 import 'paywall_plan_view_model.dart';
 import 'paywall_state.dart';
 
@@ -132,6 +136,36 @@ class CommercePaywall extends StatelessWidget {
                           ),
                   ),
                 ),
+                if (StoreCatalogConfiguration.legalLinksConfigured) ...[
+                  const SizedBox(height: 4),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      TextButton(
+                        key: const Key('paywall-terms-link'),
+                        onPressed: () => unawaited(
+                          launchUrl(
+                            Uri.parse(StoreCatalogConfiguration.termsUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                        ),
+                        child: Text(context.strings.text('Terms of Use')),
+                      ),
+                      Text('·', semanticsLabel: ''),
+                      TextButton(
+                        key: const Key('paywall-privacy-link'),
+                        onPressed: () => unawaited(
+                          launchUrl(
+                            Uri.parse(StoreCatalogConfiguration.privacyUrl),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                        ),
+                        child: Text(context.strings.text('Privacy Policy')),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           );

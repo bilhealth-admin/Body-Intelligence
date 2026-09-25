@@ -13,8 +13,10 @@ void main() {
 
     expect(
       flow,
-      contains(
-        'if (!conversationReady || text.isEmpty || sending || foodImageFlowOpening)',
+      allOf(
+        contains('if (!conversationReady ||'),
+        contains('consentPromptVisible ||'),
+        contains('foodImageFlowOpening)'),
       ),
     );
     expect(flow, contains('final generation = ++requestGeneration;'));

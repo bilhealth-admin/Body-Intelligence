@@ -140,6 +140,9 @@ Future<GoRouter> _mount(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
+        intelligenceCoachMealVisionConsentProvider.overrideWithValue(
+          (_) async => true,
+        ),
         if (preferences != null)
           preferencesRepositoryProvider.overrideWithValue(preferences),
         intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),

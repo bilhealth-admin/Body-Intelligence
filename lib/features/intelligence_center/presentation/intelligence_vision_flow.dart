@@ -11,6 +11,10 @@ final intelligenceCoachImageAnalysisProvider =
       (ref) =>
           (locale) => MealImageAnalysisService(requestedLocale: locale),
     );
+final intelligenceCoachMealVisionConsentProvider =
+    Provider<Future<bool> Function(BuildContext)>((ref) {
+      return ensureMealVisionConsent;
+    });
 
 extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
   Future<void> _analyzeFoodImageInChat() async {
@@ -23,7 +27,12 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     }
     try {
       final copy = MealVisionUiCopy.ofLocale(Localizations.localeOf(context));
-      if (!await ensureMealVisionConsent(context) || !mounted) return;
+      if (!await ref.read(intelligenceCoachMealVisionConsentProvider)(
+            context,
+          ) ||
+          !mounted) {
+        return;
+      }
       final source = await showModalBottomSheet<ImageSource>(
         context: context,
         useSafeArea: true,

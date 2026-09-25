@@ -23,6 +23,21 @@ class PrivacySafeLogger implements AppLogger {
     'weight',
     'food',
     'notes',
+    'receipt',
+    'authorization',
+    'health',
+    'medical',
+    'meal',
+    'nutrition',
+    'message',
+    'content',
+    'photo',
+    'image',
+    'audio',
+    'transcript',
+    'session',
+    'secret',
+    'credential',
   };
 
   @override
@@ -33,12 +48,25 @@ class PrivacySafeLogger implements AppLogger {
   }) {
     final safe = <String, Object?>{};
     for (final entry in attributes.entries) {
-      safe[entry.key] =
-          _sensitiveKeys.any((key) => entry.key.toLowerCase().contains(key))
-          ? '[redacted]'
-          : entry.value;
+      safe[entry.key] = _sanitize(entry.key, entry.value);
     }
     _sink(jsonEncode({'level': level.name, 'event': event, ...safe}));
+  }
+
+  static Object? _sanitize(String key, Object? value) {
+    if (_sensitiveKeys.any((part) => key.toLowerCase().contains(part))) {
+      return '[redacted]';
+    }
+    if (value is Map) {
+      return <String, Object?>{
+        for (final entry in value.entries)
+          entry.key.toString(): _sanitize(entry.key.toString(), entry.value),
+      };
+    }
+    if (value is Iterable) {
+      return value.map((item) => _sanitize('', item)).toList(growable: false);
+    }
+    return value;
   }
 }
 

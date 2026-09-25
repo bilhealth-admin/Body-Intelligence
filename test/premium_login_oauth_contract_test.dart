@@ -25,7 +25,10 @@ void main() {
     expect(service, contains('signInWithGoogleNative'));
     expect(service, contains('nativeGoogleSignIn.authenticate()'));
     expect(service, contains('signInWithFacebookNative'));
-    expect(service, contains('nativeFacebookSignIn.authenticate()'));
+    expect(
+      service,
+      contains('nativeFacebookSignIn.authenticate(nonce: rawNonce)'),
+    );
     expect(service, contains('signInWithAppleNative'));
     expect(service, contains('client.auth.signInWithIdToken'));
     expect(service, contains('client.auth.generateRawNonce'));

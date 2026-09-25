@@ -138,7 +138,8 @@ void main() {
     expect(page, isNot(contains('profilePhotoProvider')));
     expect(page, contains('colors: [Color(0xFF12394E), Color(0xFF071923)]'));
     expect(page, contains(": '';"));
-    expect(page, contains('Thinking with your BIL data'));
+    expect(page, contains('Preparing your answer'));
+    expect(page, isNot(contains("? tr('Thinking with your BIL data'")));
     expect(page, contains('final visibleMessages = messages'));
     expect(
       page,

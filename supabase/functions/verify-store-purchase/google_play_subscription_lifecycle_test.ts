@@ -262,3 +262,117 @@ test("preserves existing lifecycle mappings and unknown-state suspension", () =>
     "suspended",
   );
 });
+
+test("production genuine seven-day trial is trial", () => {
+  assert.equal(
+    googleLifecycle(
+      "SUBSCRIPTION_STATE_ACTIVE",
+      trialLine(),
+      now,
+      trialStartTime,
+      "production",
+    ),
+    "trial",
+  );
+});
+
+test("production wrong-duration offer is not trial", () => {
+  assert.notEqual(
+    googleLifecycle(
+      "SUBSCRIPTION_STATE_ACTIVE",
+      trialLine({ expiryTime: "2026-09-03T12:00:00.000Z" }),
+      now,
+      trialStartTime,
+      "production",
+    ),
+    "trial",
+  );
+});
+
+test("sandbox accelerated valid trial is trial", () => {
+  assert.equal(
+    googleLifecycle(
+      "SUBSCRIPTION_STATE_ACTIVE",
+      trialLine({ expiryTime: "2026-08-28T12:05:00.000Z" }),
+      now,
+      trialStartTime,
+      "sandbox",
+    ),
+    "trial",
+  );
+});
+
+test("sandbox expired trial is expired and never trial", () => {
+  assert.equal(
+    googleLifecycle(
+      "SUBSCRIPTION_STATE_ACTIVE",
+      trialLine({ expiryTime: "2026-08-28T11:59:59.000Z" }),
+      now,
+      "2026-08-28T11:54:59.000Z",
+      "sandbox",
+    ),
+    "expired",
+  );
+});
+
+test("wrong product is not trial in either environment", () => {
+  for (const environment of ["production", "sandbox"] as const) {
+    assert.notEqual(
+      googleLifecycle(
+        "SUBSCRIPTION_STATE_ACTIVE",
+        trialLine({ productId: "bil_premium" }),
+        now,
+        trialStartTime,
+        environment,
+      ),
+      "trial",
+    );
+  }
+});
+
+test("wrong offer id or eligibility tag is not trial", () => {
+  for (
+    const offerDetails of [
+      { offerId: "wrong-offer", offerTags: ["new-customer"] },
+      { offerId: "trial-7-day", offerTags: ["wrong-tag"] },
+    ]
+  ) {
+    assert.notEqual(
+      googleLifecycle(
+        "SUBSCRIPTION_STATE_ACTIVE",
+        trialLine({ offerDetails }),
+        now,
+        trialStartTime,
+        "sandbox",
+      ),
+      "trial",
+    );
+  }
+});
+
+test("malformed or missing expiry and start metadata is not trial", () => {
+  for (const expiryTime of [undefined, "not-a-date"]) {
+    assert.notEqual(
+      googleLifecycle(
+        "SUBSCRIPTION_STATE_ACTIVE",
+        trialLine({ expiryTime }),
+        now,
+        trialStartTime,
+        "sandbox",
+      ),
+      "trial",
+    );
+  }
+  for (const startTime of [undefined, "not-a-date"]) {
+    assert.notEqual(
+      googleLifecycle(
+        "SUBSCRIPTION_STATE_ACTIVE",
+        trialLine({ expiryTime: "2026-08-28T12:05:00.000Z" }),
+        now,
+        startTime,
+        "sandbox",
+      ),
+      "trial",
+    );
+  }
+});

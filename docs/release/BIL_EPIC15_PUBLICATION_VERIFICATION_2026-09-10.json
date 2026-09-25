@@ -4,20 +4,20 @@
   "verification_scope": "PUBLIC_ENDPOINT_AVAILABILITY_AND_DEPLOYED_STATIC_ASSET_BYTE_IDENTITY",
   "legal_approval": "NOT_CLAIMED",
   "method": "GET_ONLY_NO_STORE_OR_SITE_MUTATION",
-  "verified_at_utc": "2026-09-10T11:43:26.495Z",
+  "verified_at_utc": "2026-09-25T01:08:04.4509515Z",
   "domain": "bilhealth.com",
   "local_asset": {
     "path": "public_site/app.js",
-    "bytes": 88272,
-    "sha256": "59d3857dc8846affb3203df55497b12570db4c3bc15a3038f1a8b4447c785855"
+    "bytes": 91373,
+    "sha256": "934b8cae65302048220195fc35ab918cfc2a23ab73645d76b0c93ac4caee159b"
   },
   "remote_asset": {
     "url": "https://www.bilhealth.com/app.js",
     "final_url": "https://www.bilhealth.com/app.js",
     "http_status": 200,
     "content_type": "text/javascript",
-    "bytes": 88272,
-    "sha256": "59d3857dc8846affb3203df55497b12570db4c3bc15a3038f1a8b4447c785855",
+    "bytes": 91373,
+    "sha256": "934b8cae65302048220195fc35ab918cfc2a23ab73645d76b0c93ac4caee159b",
     "byte_identical_to_local": true
   },
   "routes": [
@@ -29,8 +29,8 @@
       "http_status": 200,
       "redirected": false,
       "content_type": "text/html",
-      "bytes": 3211,
-      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+      "bytes": 8018,
+      "response_sha256": "aa6779dd4dbf9f9a2fd1e2e2f7631b7745e7a6dd6d4be69382211c297ad0680d"
     },
     {
       "name": "terms",
@@ -40,8 +40,8 @@
       "http_status": 200,
       "redirected": false,
       "content_type": "text/html",
-      "bytes": 3211,
-      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+      "bytes": 8018,
+      "response_sha256": "aa6779dd4dbf9f9a2fd1e2e2f7631b7745e7a6dd6d4be69382211c297ad0680d"
     },
     {
       "name": "support",
@@ -51,8 +51,8 @@
       "http_status": 200,
       "redirected": false,
       "content_type": "text/html",
-      "bytes": 3211,
-      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+      "bytes": 8018,
+      "response_sha256": "aa6779dd4dbf9f9a2fd1e2e2f7631b7745e7a6dd6d4be69382211c297ad0680d"
     },
     {
       "name": "account_deletion",
@@ -62,8 +62,8 @@
       "http_status": 200,
       "redirected": false,
       "content_type": "text/html",
-      "bytes": 3211,
-      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+      "bytes": 8018,
+      "response_sha256": "aa6779dd4dbf9f9a2fd1e2e2f7631b7745e7a6dd6d4be69382211c297ad0680d"
     }
   ],
   "content_assertions": {

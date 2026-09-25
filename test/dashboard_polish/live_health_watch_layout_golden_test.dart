@@ -12,7 +12,7 @@ ConnectedHealthSignalView _signal(String key, double value, String unit) =>
       value: value,
       unit: unit,
       source: 'QA watch',
-      observedAt: DateTime.utc(2026, 8, 31, 12),
+      observedAt: DateTime.utc(2026, 8, 31, 14, 20),
       confidence: .98,
     );
 
@@ -27,7 +27,7 @@ void main() {
       ProviderScope(
         overrides: [
           liveHealthNowProvider.overrideWithValue(
-            () => DateTime(2026, 8, 31, 14, 22, 8),
+            () => DateTime.utc(2026, 8, 31, 14, 22, 8),
           ),
         ],
         child: MaterialApp(
@@ -40,28 +40,34 @@ void main() {
           ],
           home: Scaffold(
             backgroundColor: Color(0xFFF5F6F8),
-            body: Center(
-              child: SizedBox.square(
-                dimension: 176,
-                child: LiveHealthWatch(
-                  compact: true,
-                  languageCode: 'en',
-                  snapshot: ConnectedHealthSnapshot(
-                    status: ConnectedHealthStatus.synchronized,
-                    platformSource: 'Apple Health',
-                    availableSources: const ['Apple Health'],
-                    signals: [
-                      _signal('heartRate', 80, 'bpm'),
-                      _signal('activeEnergy', 300, 'kcal'),
-                      _signal('sleep', 4.8, 'h'),
-                    ],
-                    stepHistory: [_signal('steps', 2198, 'count')],
-                    importedCount: 4,
-                    lastSyncAt: DateTime.utc(2026, 8, 31, 12),
-                    failureCode: null,
-                    deviceVerified: true,
+            body: RepaintBoundary(
+              key: const Key('live-health-watch-golden-boundary'),
+              child: ColoredBox(
+                color: const Color(0xFFF5F6F8),
+                child: Center(
+                  child: SizedBox.square(
+                    dimension: 176,
+                    child: LiveHealthWatch(
+                      compact: true,
+                      languageCode: 'en',
+                      snapshot: ConnectedHealthSnapshot(
+                        status: ConnectedHealthStatus.synchronized,
+                        platformSource: 'Apple Health',
+                        availableSources: const ['Apple Health'],
+                        signals: [
+                          _signal('heartRate', 80, 'bpm'),
+                          _signal('activeEnergy', 300, 'kcal'),
+                          _signal('sleep', 4.8, 'h'),
+                        ],
+                        stepHistory: [_signal('steps', 2198, 'count')],
+                        importedCount: 4,
+                        lastSyncAt: DateTime.utc(2026, 8, 31, 12),
+                        failureCode: null,
+                        deviceVerified: true,
+                      ),
+                      showConnectControl: false,
+                    ),
                   ),
-                  showConnectControl: false,
                 ),
               ),
             ),
@@ -72,7 +78,7 @@ void main() {
     await tester.pump();
 
     await expectLater(
-      find.byKey(const Key('bil-live-health-watch')),
+      find.byKey(const Key('live-health-watch-golden-boundary')),
       matchesGoldenFile('goldens/live_health_watch_compact_all_metrics.png'),
     );
   });

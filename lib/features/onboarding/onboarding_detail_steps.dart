@@ -529,10 +529,12 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
           ),
           actions: [
             TextButton(
+              key: const Key('onboarding-ai-consent-decline'),
               onPressed: () => Navigator.pop(dialogContext, false),
               child: Text(t("Don't Allow")),
             ),
             FilledButton(
+              key: const Key('onboarding-ai-consent-accept'),
               onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(t('Allow & Continue')),
             ),

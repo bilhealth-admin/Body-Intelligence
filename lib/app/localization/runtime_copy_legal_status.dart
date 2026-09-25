@@ -29,6 +29,33 @@ abstract final class LegalStatusRuntimeCopy {
   };
 
   static const values = <String, Map<String, String>>{
+    'Terms of Use': {
+      'en': 'Terms of Use',
+      'ar': 'شروط الاستخدام',
+      'fr': "Conditions d'utilisation",
+      'es': 'Términos de uso',
+      'tr': 'Kullanım Koşulları',
+      'de': 'Nutzungsbedingungen',
+      'it': "Condizioni d'uso",
+      'pt-BR': 'Termos de Uso',
+      'pt-PT': 'Termos de Utilização',
+      'ur': 'استعمال کی شرائط',
+      'fa': 'شرایط استفاده',
+      'hi': 'उपयोग की शर्तें',
+      'id': 'Ketentuan Penggunaan',
+      'ms': 'Syarat Penggunaan',
+      'ja': '利用規約',
+      'ko': '이용약관',
+      'zh-Hans': '使用条款',
+      'zh-Hant': '使用條款',
+      'ru': 'Условия использования',
+      'bn': 'ব্যবহারের শর্তাবলী',
+      'vi': 'Điều khoản sử dụng',
+      'th': 'เงื่อนไขการใช้งาน',
+      'pl': 'Warunki użytkowania',
+      'nl': 'Gebruiksvoorwaarden',
+      'uk': 'Умови використання',
+    },
     'Last updated: 5 September 2026 • BIL Health': {
       'ar': 'آخر تحديث: 5 سبتمبر 2026 • BIL Health',
       'en': 'Last updated: 5 September 2026 • BIL Health',

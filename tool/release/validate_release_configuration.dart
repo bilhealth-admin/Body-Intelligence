@@ -87,6 +87,8 @@ Future<void> main() async {
         sourceCommit: environment['BIL_SOURCE_COMMIT']?.trim() ?? '',
         auditedSourceCommit:
             environment['BIL_AUDITED_SOURCE_COMMIT']?.trim() ?? '',
+        counterpartAuditedSourceCommit:
+            environment['BIL_COUNTERPART_AUDITED_SOURCE_COMMIT']?.trim() ?? '',
         freezeManifestSha256: manifest.digest,
         auditedFreezeManifestSha256:
             environment['BIL_AUDITED_FREEZE_MANIFEST_SHA256']?.trim() ?? '',

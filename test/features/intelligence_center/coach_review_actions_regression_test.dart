@@ -89,6 +89,9 @@ Future<GoRouter> mount(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
+        intelligenceCoachMealVisionConsentProvider.overrideWithValue(
+          (_) async => true,
+        ),
         if (imagePicker != null)
           intelligenceCoachImagePickerProvider.overrideWithValue(
             BilRecoverableImagePicker(picker: imagePicker, isAndroid: false),

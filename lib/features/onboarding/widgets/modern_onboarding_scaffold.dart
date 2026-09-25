@@ -19,6 +19,7 @@ class ModernOnboardingScaffold extends StatelessWidget {
     this.onSkip,
     this.nextLabel,
     this.nextEnabled = true,
+    this.nextPending = false,
     this.busy = false,
     this.artwork,
   });
@@ -33,6 +34,7 @@ class ModernOnboardingScaffold extends StatelessWidget {
   final VoidCallback? onSkip;
   final String? nextLabel;
   final bool nextEnabled;
+  final bool nextPending;
   final bool busy;
 
   /// Optional BIL-owned photo hero. The slot collapses when a step deliberately
@@ -186,6 +188,14 @@ class ModernOnboardingScaffold extends StatelessWidget {
                                 ),
                                 child: FilledButton(
                                   key: const Key('onboarding-next'),
+                                  style: nextPending
+                                      ? FilledButton.styleFrom(
+                                          disabledBackgroundColor:
+                                              scheme.primary,
+                                          disabledForegroundColor:
+                                              scheme.onPrimary,
+                                        )
+                                      : null,
                                   onPressed: busy || !nextEnabled
                                       ? null
                                       : onNext,

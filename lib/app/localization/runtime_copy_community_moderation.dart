@@ -1,6 +1,6 @@
 import 'bil_locale_policy.dart';
 
-/// Reviewed 25-locale copy for the human community-moderation workflow.
+/// Authored 25-locale copy for the human community-moderation workflow.
 ///
 /// Keeping this security-sensitive surface in one positional catalog makes a
 /// missing locale or placeholder mismatch fail validation instead of silently
@@ -62,6 +62,361 @@ abstract final class CommunityModerationRuntimeCopy {
     closesReportAndRemoves,
     decisionAlreadySaved,
   ];
+
+  static const supplementalSources = <String>[
+    'Could not restore this post safely.',
+    'Hidden posts',
+    'Hide post',
+    'No hidden posts.',
+    'Post hidden by moderation.',
+    'Post removed by moderation.',
+    'Post restored.',
+    'Remove post',
+    'Restore post',
+    'Restore post?',
+    'The post will become public again under its original audience rules.',
+    'Undo',
+  ];
+
+  static const supplementalRows = <String, List<String>>{
+    'en': supplementalSources,
+    'ar': [
+      'تعذرت استعادة المنشور بأمان.',
+      'المنشورات المخفية',
+      'إخفاء المنشور',
+      'لا توجد منشورات مخفية.',
+      'أخفى الإشراف المنشور.',
+      'أزال الإشراف المنشور.',
+      'تمت استعادة المنشور.',
+      'إزالة المنشور',
+      'استعادة المنشور',
+      'استعادة المنشور؟',
+      'سيظهر المنشور مجددًا وفق إعدادات جمهوره الأصلية.',
+      'تراجع',
+    ],
+    'fr': [
+      'Impossible de restaurer cette publication en toute sécurité.',
+      'Publications masquées',
+      'Masquer la publication',
+      'Aucune publication masquée.',
+      'Publication masquée par la modération.',
+      'Publication supprimée par la modération.',
+      'Publication restaurée.',
+      'Supprimer la publication',
+      'Restaurer la publication',
+      'Restaurer la publication ?',
+      'La publication redeviendra publique selon ses règles d’audience initiales.',
+      'Annuler',
+    ],
+    'es': [
+      'No se pudo restaurar esta publicación de forma segura.',
+      'Publicaciones ocultas',
+      'Ocultar publicación',
+      'No hay publicaciones ocultas.',
+      'Publicación ocultada por moderación.',
+      'Publicación eliminada por moderación.',
+      'Publicación restaurada.',
+      'Eliminar publicación',
+      'Restaurar publicación',
+      '¿Restaurar publicación?',
+      'La publicación volverá a ser pública según sus reglas de audiencia originales.',
+      'Deshacer',
+    ],
+    'tr': [
+      'Bu gönderi güvenli şekilde geri yüklenemedi.',
+      'Gizli gönderiler',
+      'Gönderiyi gizle',
+      'Gizli gönderi yok.',
+      'Gönderi moderasyonca gizlendi.',
+      'Gönderi moderasyonca kaldırıldı.',
+      'Gönderi geri yüklendi.',
+      'Gönderiyi kaldır',
+      'Gönderiyi geri yükle',
+      'Gönderi geri yüklensin mi?',
+      'Gönderi özgün hedef kitle kurallarıyla yeniden herkese açık olacaktır.',
+      'Geri al',
+    ],
+    'de': [
+      'Dieser Beitrag konnte nicht sicher wiederhergestellt werden.',
+      'Ausgeblendete Beiträge',
+      'Beitrag ausblenden',
+      'Keine ausgeblendeten Beiträge.',
+      'Beitrag durch Moderation ausgeblendet.',
+      'Beitrag durch Moderation entfernt.',
+      'Beitrag wiederhergestellt.',
+      'Beitrag entfernen',
+      'Beitrag wiederherstellen',
+      'Beitrag wiederherstellen?',
+      'Der Beitrag wird gemäß seinen ursprünglichen Zielgruppenregeln wieder öffentlich.',
+      'Rückgängig',
+    ],
+    'it': [
+      'Impossibile ripristinare il post in modo sicuro.',
+      'Post nascosti',
+      'Nascondi post',
+      'Nessun post nascosto.',
+      'Post nascosto dalla moderazione.',
+      'Post rimosso dalla moderazione.',
+      'Post ripristinato.',
+      'Rimuovi post',
+      'Ripristina post',
+      'Ripristinare il post?',
+      'Il post tornerà pubblico secondo le regole del pubblico originali.',
+      'Annulla',
+    ],
+    'pt-BR': [
+      'Não foi possível restaurar esta publicação com segurança.',
+      'Publicações ocultas',
+      'Ocultar publicação',
+      'Nenhuma publicação oculta.',
+      'Publicação ocultada pela moderação.',
+      'Publicação removida pela moderação.',
+      'Publicação restaurada.',
+      'Remover publicação',
+      'Restaurar publicação',
+      'Restaurar publicação?',
+      'A publicação voltará a ser pública conforme as regras de público originais.',
+      'Desfazer',
+    ],
+    'pt-PT': [
+      'Não foi possível restaurar esta publicação em segurança.',
+      'Publicações ocultas',
+      'Ocultar publicação',
+      'Sem publicações ocultas.',
+      'Publicação ocultada pela moderação.',
+      'Publicação removida pela moderação.',
+      'Publicação restaurada.',
+      'Remover publicação',
+      'Restaurar publicação',
+      'Restaurar publicação?',
+      'A publicação voltará a ser pública segundo as regras de público originais.',
+      'Anular',
+    ],
+    'ur': [
+      'اس پوسٹ کو محفوظ طریقے سے بحال نہیں کیا جا سکا۔',
+      'چھپی ہوئی پوسٹس',
+      'پوسٹ چھپائیں',
+      'کوئی چھپی ہوئی پوسٹ نہیں۔',
+      'پوسٹ کو ماڈریشن نے چھپا دیا۔',
+      'پوسٹ کو ماڈریشن نے ہٹا دیا۔',
+      'پوسٹ بحال کر دی گئی۔',
+      'پوسٹ ہٹائیں',
+      'پوسٹ بحال کریں',
+      'پوسٹ بحال کریں؟',
+      'پوسٹ اپنے اصل ناظرین کے اصولوں کے تحت دوبارہ عوامی ہو جائے گی۔',
+      'واپس کریں',
+    ],
+    'fa': [
+      'این پست به‌طور ایمن بازیابی نشد.',
+      'پست‌های پنهان',
+      'پنهان کردن پست',
+      'پست پنهانی وجود ندارد.',
+      'پست توسط ناظر پنهان شد.',
+      'پست توسط ناظر حذف شد.',
+      'پست بازیابی شد.',
+      'حذف پست',
+      'بازیابی پست',
+      'پست بازیابی شود؟',
+      'پست با قوانین اصلی مخاطبان خود دوباره عمومی می‌شود.',
+      'واگرد',
+    ],
+    'hi': [
+      'इस पोस्ट को सुरक्षित रूप से बहाल नहीं किया जा सका।',
+      'छिपी हुई पोस्ट',
+      'पोस्ट छिपाएँ',
+      'कोई छिपी हुई पोस्ट नहीं।',
+      'पोस्ट को मॉडरेशन ने छिपाया।',
+      'पोस्ट को मॉडरेशन ने हटाया।',
+      'पोस्ट बहाल की गई।',
+      'पोस्ट हटाएँ',
+      'पोस्ट बहाल करें',
+      'पोस्ट बहाल करें?',
+      'पोस्ट अपने मूल दर्शक नियमों के तहत फिर सार्वजनिक होगी।',
+      'पूर्ववत करें',
+    ],
+    'id': [
+      'Postingan ini tidak dapat dipulihkan dengan aman.',
+      'Postingan tersembunyi',
+      'Sembunyikan postingan',
+      'Tidak ada postingan tersembunyi.',
+      'Postingan disembunyikan oleh moderasi.',
+      'Postingan dihapus oleh moderasi.',
+      'Postingan dipulihkan.',
+      'Hapus postingan',
+      'Pulihkan postingan',
+      'Pulihkan postingan?',
+      'Postingan akan kembali publik sesuai aturan audiens aslinya.',
+      'Urungkan',
+    ],
+    'ms': [
+      'Siaran ini tidak dapat dipulihkan dengan selamat.',
+      'Siaran tersembunyi',
+      'Sembunyikan siaran',
+      'Tiada siaran tersembunyi.',
+      'Siaran disembunyikan oleh penyederhanaan.',
+      'Siaran dialih keluar oleh penyederhanaan.',
+      'Siaran dipulihkan.',
+      'Alih keluar siaran',
+      'Pulihkan siaran',
+      'Pulihkan siaran?',
+      'Siaran akan kembali umum mengikut peraturan khalayak asalnya.',
+      'Buat asal',
+    ],
+    'ja': [
+      'この投稿を安全に復元できませんでした。',
+      '非表示の投稿',
+      '投稿を非表示',
+      '非表示の投稿はありません。',
+      'モデレーションにより投稿が非表示になりました。',
+      'モデレーションにより投稿が削除されました。',
+      '投稿を復元しました。',
+      '投稿を削除',
+      '投稿を復元',
+      '投稿を復元しますか？',
+      '投稿は元の公開範囲のルールに従って再び公開されます。',
+      '元に戻す',
+    ],
+    'ko': [
+      '이 게시물을 안전하게 복원하지 못했습니다.',
+      '숨긴 게시물',
+      '게시물 숨기기',
+      '숨긴 게시물이 없습니다.',
+      '검토에 의해 게시물이 숨겨졌습니다.',
+      '검토에 의해 게시물이 삭제되었습니다.',
+      '게시물이 복원되었습니다.',
+      '게시물 삭제',
+      '게시물 복원',
+      '게시물을 복원할까요?',
+      '게시물이 원래 공개 대상 규칙에 따라 다시 공개됩니다.',
+      '실행 취소',
+    ],
+    'zh-Hans': [
+      '无法安全恢复此帖子。',
+      '已隐藏的帖子',
+      '隐藏帖子',
+      '没有已隐藏的帖子。',
+      '帖子已被审核隐藏。',
+      '帖子已被审核移除。',
+      '帖子已恢复。',
+      '移除帖子',
+      '恢复帖子',
+      '恢复帖子？',
+      '帖子将按照原有受众规则重新公开。',
+      '撤销',
+    ],
+    'zh-Hant': [
+      '無法安全還原此貼文。',
+      '已隱藏的貼文',
+      '隱藏貼文',
+      '沒有已隱藏的貼文。',
+      '貼文已被審核隱藏。',
+      '貼文已被審核移除。',
+      '貼文已還原。',
+      '移除貼文',
+      '還原貼文',
+      '還原貼文？',
+      '貼文將依照原有受眾規則重新公開。',
+      '復原',
+    ],
+    'ru': [
+      'Не удалось безопасно восстановить публикацию.',
+      'Скрытые публикации',
+      'Скрыть публикацию',
+      'Скрытых публикаций нет.',
+      'Публикация скрыта модератором.',
+      'Публикация удалена модератором.',
+      'Публикация восстановлена.',
+      'Удалить публикацию',
+      'Восстановить публикацию',
+      'Восстановить публикацию?',
+      'Публикация снова станет общедоступной по исходным правилам аудитории.',
+      'Отменить',
+    ],
+    'bn': [
+      'এই পোস্টটি নিরাপদে পুনরুদ্ধার করা যায়নি।',
+      'লুকানো পোস্ট',
+      'পোস্ট লুকান',
+      'কোনো লুকানো পোস্ট নেই।',
+      'মডারেশন পোস্টটি লুকিয়েছে।',
+      'মডারেশন পোস্টটি সরিয়েছে।',
+      'পোস্ট পুনরুদ্ধার করা হয়েছে।',
+      'পোস্ট সরান',
+      'পোস্ট পুনরুদ্ধার করুন',
+      'পোস্ট পুনরুদ্ধার করবেন?',
+      'পোস্টটি তার মূল দর্শক নীতি অনুযায়ী আবার সর্বজনীন হবে।',
+      'পূর্বাবস্থায় ফেরান',
+    ],
+    'vi': [
+      'Không thể khôi phục bài viết này một cách an toàn.',
+      'Bài viết đã ẩn',
+      'Ẩn bài viết',
+      'Không có bài viết đã ẩn.',
+      'Bài viết đã bị kiểm duyệt ẩn.',
+      'Bài viết đã bị kiểm duyệt xóa.',
+      'Đã khôi phục bài viết.',
+      'Xóa bài viết',
+      'Khôi phục bài viết',
+      'Khôi phục bài viết?',
+      'Bài viết sẽ công khai trở lại theo quy tắc đối tượng ban đầu.',
+      'Hoàn tác',
+    ],
+    'th': [
+      'ไม่สามารถกู้คืนโพสต์นี้ได้อย่างปลอดภัย',
+      'โพสต์ที่ซ่อน',
+      'ซ่อนโพสต์',
+      'ไม่มีโพสต์ที่ซ่อน',
+      'โพสต์ถูกซ่อนโดยผู้ดูแล',
+      'โพสต์ถูกลบโดยผู้ดูแล',
+      'กู้คืนโพสต์แล้ว',
+      'ลบโพสต์',
+      'กู้คืนโพสต์',
+      'กู้คืนโพสต์หรือไม่',
+      'โพสต์จะกลับเป็นสาธารณะตามกฎผู้ชมเดิม',
+      'เลิกทำ',
+    ],
+    'pl': [
+      'Nie udało się bezpiecznie przywrócić tego wpisu.',
+      'Ukryte wpisy',
+      'Ukryj wpis',
+      'Brak ukrytych wpisów.',
+      'Wpis ukryty przez moderację.',
+      'Wpis usunięty przez moderację.',
+      'Wpis przywrócony.',
+      'Usuń wpis',
+      'Przywróć wpis',
+      'Przywrócić wpis?',
+      'Wpis ponownie stanie się publiczny zgodnie z pierwotnymi zasadami odbiorców.',
+      'Cofnij',
+    ],
+    'nl': [
+      'Dit bericht kon niet veilig worden hersteld.',
+      'Verborgen berichten',
+      'Bericht verbergen',
+      'Geen verborgen berichten.',
+      'Bericht verborgen door moderatie.',
+      'Bericht verwijderd door moderatie.',
+      'Bericht hersteld.',
+      'Bericht verwijderen',
+      'Bericht herstellen',
+      'Bericht herstellen?',
+      'Het bericht wordt opnieuw openbaar volgens de oorspronkelijke publieksregels.',
+      'Ongedaan maken',
+    ],
+    'uk': [
+      'Не вдалося безпечно відновити цей допис.',
+      'Приховані дописи',
+      'Приховати допис',
+      'Прихованих дописів немає.',
+      'Допис приховано модератором.',
+      'Допис видалено модератором.',
+      'Допис відновлено.',
+      'Видалити допис',
+      'Відновити допис',
+      'Відновити допис?',
+      'Допис знову стане загальнодоступним за початковими правилами аудиторії.',
+      'Скасувати',
+    ],
+  };
 
   static const supported = <String>{
     'ar',
@@ -672,6 +1027,18 @@ abstract final class CommunityModerationRuntimeCopy {
   };
 
   static String? resolve(String source, String localeTag) {
+    final supplementalIndex = supplementalSources.indexOf(source);
+    if (supplementalIndex >= 0) {
+      final tag = _canonicalTag(localeTag);
+      if (tag == null) return null;
+      final row = supplementalRows[tag];
+      if (row == null || row.length != supplementalSources.length) {
+        throw StateError(
+          'Missing supplemental community-moderation copy for $tag.',
+        );
+      }
+      return row[supplementalIndex];
+    }
     final index = sources.indexOf(source);
     if (index < 0) return null;
     final tag = _canonicalTag(localeTag);
@@ -689,6 +1056,14 @@ abstract final class CommunityModerationRuntimeCopy {
       BilLocalePolicy.productionTags.containsAll(supported) &&
       supported.containsAll(rows.keys) &&
       rows.keys.toSet().containsAll(supported) &&
+      supported.containsAll(supplementalRows.keys) &&
+      supplementalRows.keys.toSet().containsAll(supported) &&
+      _sameValues(supplementalRows['en'], supplementalSources) &&
+      supplementalRows.entries.every(
+        (entry) =>
+            entry.value.length == supplementalSources.length &&
+            (entry.key == 'en' || _isSupplementalTranslated(entry.value)),
+      ) &&
       _sameValues(rows['en'], sources) &&
       rows.entries.every(
         (entry) =>
@@ -716,6 +1091,13 @@ abstract final class CommunityModerationRuntimeCopy {
   static bool _isTranslated(List<String> translations) {
     for (var index = 0; index < sources.length; index++) {
       if (translations[index] == sources[index]) return false;
+    }
+    return true;
+  }
+
+  static bool _isSupplementalTranslated(List<String> translations) {
+    for (var index = 0; index < supplementalSources.length; index++) {
+      if (translations[index] == supplementalSources[index]) return false;
     }
     return true;
   }

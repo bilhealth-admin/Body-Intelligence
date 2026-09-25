@@ -187,6 +187,14 @@ void main() {
   void expectStableContinue(WidgetTester tester) {
     final next = find.byKey(const Key('onboarding-next'));
     expect(next, findsOneWidget);
+    final button = tester.widget<FilledButton>(next);
+    expect(button.onPressed, isNull);
+    expect(
+      button.style?.backgroundColor?.resolve(const <WidgetState>{
+        WidgetState.disabled,
+      }),
+      const Color(0xFF1D4ED8),
+    );
     expect(
       find.descendant(
         of: next,
@@ -208,6 +216,8 @@ void main() {
 
       await revealAiButton(tester, const Key('onboarding-cloud-ai-toggle'));
       await tester.tap(find.byKey(const Key('onboarding-cloud-ai-toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('onboarding-ai-consent-accept')));
       await tester.pump();
 
       expect(remote.setGrantedCalls, 1);
@@ -244,6 +254,8 @@ void main() {
 
       await revealAiButton(tester, const Key('onboarding-cloud-ai-toggle'));
       await tester.tap(find.byKey(const Key('onboarding-cloud-ai-toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('onboarding-ai-consent-accept')));
       await tester.tap(
         find.byKey(const Key('onboarding-cloud-ai-toggle')),
         warnIfMissed: false,

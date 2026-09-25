@@ -19,6 +19,7 @@ class ReleaseConfiguration {
     this.playIntegrityProjectNumber = '',
     this.sourceCommit = '',
     this.auditedSourceCommit = '',
+    this.counterpartAuditedSourceCommit = '',
     this.freezeManifestSha256 = '',
     this.auditedFreezeManifestSha256 = '',
     this.stagingManifestComplete = false,
@@ -48,6 +49,7 @@ class ReleaseConfiguration {
   final String playIntegrityProjectNumber;
   final String sourceCommit;
   final String auditedSourceCommit;
+  final String counterpartAuditedSourceCommit;
   final String freezeManifestSha256;
   final String auditedFreezeManifestSha256;
   final bool stagingManifestComplete;
@@ -70,8 +72,8 @@ class ReleaseConfigurationValidator {
 
   static const approvedApplicationId = 'com.bilhealth.bodyintelligencelog';
   static const approvedReleaseVersion = '1.0.0';
-  static const androidReleaseBuildNumber = 11;
-  static const iosReleaseBuildNumber = 12;
+  static const androidReleaseBuildNumber = 24;
+  static const iosReleaseBuildNumber = 28;
 
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,
@@ -219,6 +221,18 @@ class ReleaseConfigurationValidator {
         const ReleaseConfigurationIssue(
           'unaudited_source_commit',
           'The checked-out commit must equal the frozen audited commit.',
+        ),
+      );
+    }
+
+    if (configuration.production &&
+        (!_isSha1(configuration.counterpartAuditedSourceCommit) ||
+            configuration.sourceCommit.toLowerCase() !=
+                configuration.counterpartAuditedSourceCommit.toLowerCase())) {
+      issues.add(
+        const ReleaseConfigurationIssue(
+          'cross_platform_source_mismatch',
+          'Android 24 and iOS 28 must bind to the same audited commit.',
         ),
       );
     }

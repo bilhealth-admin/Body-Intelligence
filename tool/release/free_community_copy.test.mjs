@@ -14,11 +14,11 @@ function copyFrom(text) {
 const current = copyFrom(source);
 
 for (const lang of ['en', 'ar']) {
-  test(`${lang}: home explains Free Community and next-update availability`, () => {
+  test(`${lang}: home explains current Free Community availability`, () => {
     const feature = current.home[lang].features.at(-1);
     assert.match(feature[2], /BIL Free/);
-    assert.match(feature[2], lang === 'en' ? /next BIL app update/ : /تحديث تطبيق BIL القادم/);
     assert.match(feature[2], lang === 'en' ? /signed-in adults/ : /للبالغين المسجلين/);
+    assert.doesNotMatch(feature[2], lang === 'en' ? /next BIL app update/ : /تحديث تطبيق BIL القادم/);
   });
   test(`${lang}: subscription copy separates Free social access from paid AI`, () => {
     const sections = current.legal[lang]['/subscription-terms'].sections;
@@ -26,9 +26,10 @@ for (const lang of ['en', 'ar']) {
     assert.match(copy, /BIL Free/);
     assert.match(copy, /Premium/);
     assert.match(copy, /AI Boost/);
-    assert.match(copy, lang === 'en' ? /Older app builds/ : /الإصدارات الأقدم/);
+    assert.match(copy, lang === 'en' ? /No Premium subscription or AI Boost purchase is required/ : /لا تتطلب هذه الميزات اشتراك Premium أو شراء AI Boost/);
+    assert.doesNotMatch(copy, lang === 'en' ? /Older app builds/ : /الإصدارات الأقدم/);
     assert.match(copy, lang === 'en' ? /blocking, reporting, and moderation/ : /الحظر والإبلاغ والإشراف/);
-    assert.match(copy, lang === 'en' ? /does not cancel or reprice/ : /لا يلغي هذا التغيير أي اشتراك قائم أو يغير سعره/);
+    assert.match(copy, lang === 'en' ? /does not cancel or reprice/ : /لا يلغي ذلك أي اشتراك قائم أو يغير سعره/);
   });
   test(`${lang}: Free copy keeps billing topics and the real Community policy`, () => {
     const sections = current.legal[lang]['/subscription-terms'].sections;

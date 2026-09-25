@@ -415,9 +415,9 @@ void main() {
 
     expect(site, contains("version: 'community-policy-v1'"));
     expect(site, contains("effective: '8 September 2026'"));
-    expect(site, contains("updated: '8 September 2026'"));
+    expect(site, contains("updated: '23 September 2026'"));
     expect(site, contains('posts, comments, replies, likes'));
-    expect(site, contains('friend and follow requests'));
+    expect(site, contains('friend requests, friendships'));
     expect(site, contains('private messages'));
     expect(site, contains('Keep contact inside BIL'));
     expect(site, contains('Human moderation and enforcement'));

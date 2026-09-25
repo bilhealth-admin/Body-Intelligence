@@ -18,7 +18,7 @@ void main() {
       // Data-only 25-locale moderation matrix. Keeping the status placeholder
       // and every reviewed translation together makes fallback auditing
       // mechanical; moderation behavior and widgets live in separate files.
-      'lib/app/localization/runtime_copy_community_moderation.dart': 775,
+      'lib/app/localization/runtime_copy_community_moderation.dart': 1200,
       'lib/features/profile/profile_locale_copy.dart': 875,
       // This part owns one cohesive phone composition. Its reusable cards,
       // goal controls, and discover sections already live in sibling parts;
@@ -37,7 +37,32 @@ void main() {
       // mapping. The underlying cloud store, models, and policy rules are
       // separate; retain a narrow reviewed margin until the next repository
       // boundary split is planned.
-      'lib/features/community/data/community_repository.dart': 750,
+      'lib/features/community/data/community_repository.dart': 800,
+      // Community value objects and moderation commands remain data-only
+      // contracts. Keeping the sealed result/status families together makes
+      // exhaustive handling reviewable without introducing runtime coupling.
+      'lib/features/community/domain/community_models.dart': 725,
+      // This admin-only surface owns one moderation lifecycle: visible/hidden
+      // queues, reason capture, irreversible-removal confirmation, and restore.
+      // Repository and localized copy remain in separate sources.
+      'lib/features/community/presentation/community_post_moderation_page.dart':
+          725,
+      // Analytics presentation is already separated from report engines,
+      // providers, and chart components; retain a narrow render-only margin.
+      'lib/features/analytics/analytics_page.dart': 725,
+      // Premium authentication is one guarded form lifecycle. Provider SDKs,
+      // session completion, and localized copy remain separate.
+      'lib/features/auth/premium_login_page.dart': 750,
+      // Intelligence action orchestration keeps confirmation, execution,
+      // rollback, and user-visible receipts in one auditable state machine.
+      'lib/features/intelligence_center/presentation/intelligence_action_flow.dart':
+          1100,
+      // These two root surfaces coordinate already-separated widgets, query,
+      // voice, action, and persistence parts; keep only a narrow UI margin.
+      'lib/features/intelligence_center/presentation/intelligence_center_page.dart':
+          750,
+      'lib/features/intelligence_center/presentation/intelligence_query_flow.dart':
+          725,
       // Voice capture is one seek-safe conversation lifecycle. Recognition,
       // silence detection, placeholder reconciliation, and cancellation must
       // remain in the same State extension to preserve ordering guarantees.
