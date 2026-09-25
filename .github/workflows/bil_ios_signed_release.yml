@@ -284,8 +284,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "$RUN_NATIVE_CRYPTO_CHECKS" == 'true' ]]; then
+            NATIVE_CRYPTO_GATE="$(printf '%s' "$NATIVE_CRYPTO_OUTCOME" | tr '[:lower:]' '[:upper:]')"
             printf '%s\n' \
-              "NATIVE_CRYPTO_RUNTIME_GATE=${NATIVE_CRYPTO_OUTCOME^^}" \
+              "NATIVE_CRYPTO_RUNTIME_GATE=$NATIVE_CRYPTO_GATE" \
               'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=NOT_USED'
           else
             printf '%s\n' \
