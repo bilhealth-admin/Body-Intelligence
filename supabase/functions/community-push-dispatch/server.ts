@@ -103,7 +103,12 @@ export async function handler(
   const { data: events, error } = await client.from("bil_push_outbox").select(
     "*",
   ).is("dispatched_at", null).order("created_at").limit(100);
-  if (error) return reply(500, { error: "outbox_read_failed" });
+  if (error) {
+    return reply(500, {
+      error: "outbox_read_failed",
+      code: typeof error.code === "string" ? error.code : "unknown",
+    });
+  }
 
   let delivered = 0;
   let failed = 0;

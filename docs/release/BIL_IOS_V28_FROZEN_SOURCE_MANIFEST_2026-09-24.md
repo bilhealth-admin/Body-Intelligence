@@ -18,6 +18,9 @@ The signed iOS workflow supplies `--build-number 28`, producing `CFBundleVersion
 
 After the final source commit is pushed, repository variable `BIL_IOS_V28_AUDITED_SOURCE_SHA` must equal that exact commit and `BIL_IOS_V28_STAGING_MANIFEST_SHA256` must equal the SHA-256 of this committed file. The workflow independently validates the source, manifest, build number, signing, package, and entitlements. App Store Connect credentials and validation are required only for an owner-authorized upload run.
 
+Remote push is enabled only in the signed v28 workflow after APNs provider
+authentication and the internal production dispatcher scheduler were verified.
+
 ## Deployment prerequisites
 
 Before build 28 is submitted for review, deploy and verify:

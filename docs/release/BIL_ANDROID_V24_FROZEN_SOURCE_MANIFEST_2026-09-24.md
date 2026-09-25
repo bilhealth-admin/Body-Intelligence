@@ -30,7 +30,9 @@ The binding is not self-referentially embedded in the commit it validates.
 
 - compileSdk and targetSdk remain 36; minSdk remains 26.
 - Health Connect remains limited to steps, distance and active calories.
-- Advertising and remote push remain disabled until their providers are ready.
+- Advertising remains disabled. Remote push is enabled only in the signed v24
+  workflow after FCM/APNs provider authentication and the internal production
+  dispatcher scheduler were verified.
 - Store ownership remains server-verified and account-scoped.
 
 This manifest does not claim that a signed AAB was built, uploaded, installed,
