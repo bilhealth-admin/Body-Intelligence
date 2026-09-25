@@ -11,7 +11,9 @@ import {
   extractModelText,
   geminiAttemptTimeoutMs,
   geminiCall,
+  geminiCallWithFallback,
   geminiSafetySettings,
+  isFallbackEligibleGeminiError,
   handler,
   isRetryableGeminiError,
   isRetryableGeminiStatus,
@@ -425,6 +427,57 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
     );
     assertEquals(parseCalls, 1);
   });
+});
+
+Deno.test("Gemini falls back only after a transient primary-model outage", async () => {
+  assertEquals(
+    isFallbackEligibleGeminiError(new Error("provider_http_503")),
+    true,
+  );
+  assertEquals(
+    isFallbackEligibleGeminiError(new Error("provider_rate_limited")),
+    true,
+  );
+  assertEquals(
+    isFallbackEligibleGeminiError(new Error("provider_http_400")),
+    false,
+  );
+
+  const models: string[] = [];
+  const recovered = await geminiCallWithFallback(
+    (model) => {
+      models.push(model);
+      if (models.length === 1) {
+        return Promise.reject(new Error("provider_http_503"));
+      }
+      return Promise.resolve({ data: {}, attempts: 1 });
+    },
+    "gemini-primary",
+    [],
+    "test",
+    32,
+  );
+  assertEquals(models, ["gemini-primary", "gemini-2.5-flash"]);
+  assertEquals(recovered.model, "gemini-2.5-flash");
+  assertEquals(recovered.fallbackUsed, true);
+
+  let permanentFailureCalls = 0;
+  await assertRejects(
+    () =>
+      geminiCallWithFallback(
+        () => {
+          permanentFailureCalls += 1;
+          return Promise.reject(new Error("provider_http_400"));
+        },
+        "gemini-primary",
+        [],
+        "test",
+        32,
+      ),
+    Error,
+    "provider_http_400",
+  );
+  assertEquals(permanentFailureCalls, 1);
 });
 
 Deno.test("Gemini request always carries the four explicit conservative safety settings", async () => {

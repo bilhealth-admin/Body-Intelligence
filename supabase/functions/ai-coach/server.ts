@@ -355,6 +355,12 @@ function modelFor(_simple: boolean) {
   return env("BIL_GEMINI_TEXT_MODEL") || "gemini-3.7-flash";
 }
 
+function fallbackModelFor(primary: string) {
+  const configured = env("BIL_GEMINI_TEXT_FALLBACK_MODEL") ||
+    "gemini-2.5-flash";
+  return configured === primary ? "" : configured;
+}
+
 export function parseModelJson(raw: string, requireTranscript = false) {
   const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(
     /\s*```$/,
@@ -582,6 +588,53 @@ export function isRetryableGeminiError(error: unknown) {
 
 export function isRetryableGeminiStatus(status: number) {
   return status === 429 || status >= 500;
+}
+
+export function isFallbackEligibleGeminiError(error: unknown) {
+  if (isRetryableGeminiError(error)) return true;
+  if (!(error instanceof Error)) return false;
+  return error.message === "provider_rate_limited" ||
+    /^provider_http_5\d\d(?:_|$)/.test(error.message);
+}
+
+export async function geminiCallWithFallback(
+  call: typeof geminiCall,
+  primaryModel: string,
+  contents: unknown[],
+  system: string,
+  maxOutputTokens: number,
+  requireTranscript = false,
+  thinkingLevel: "LOW" | "MEDIUM" | "HIGH" = "MEDIUM",
+) {
+  try {
+    return {
+      provider: await call(
+        primaryModel,
+        contents,
+        system,
+        maxOutputTokens,
+        requireTranscript,
+        thinkingLevel,
+      ),
+      model: primaryModel,
+      fallbackUsed: false,
+    };
+  } catch (error) {
+    const fallbackModel = fallbackModelFor(primaryModel);
+    if (!fallbackModel || !isFallbackEligibleGeminiError(error)) throw error;
+    return {
+      provider: await call(
+        fallbackModel,
+        contents,
+        system,
+        maxOutputTokens,
+        requireTranscript,
+        thinkingLevel,
+      ),
+      model: fallbackModel,
+      fallbackUsed: true,
+    };
+  }
 }
 
 export async function geminiCall(
@@ -859,7 +912,8 @@ export async function handler(
         ]
         : [{ text: message.content }],
     }));
-    const provider = await callGemini(
+    const providerCall = await geminiCallWithFallback(
+      callGemini,
       model,
       contents,
       system,
@@ -867,6 +921,8 @@ export async function handler(
       voiceAudio != null,
       voiceAudio != null || simple ? "LOW" : "MEDIUM",
     );
+    const provider = providerCall.provider;
+    const servedModel = providerCall.model;
     const candidate = requireSafeGeminiCandidate(provider.data);
     const content = candidate.content as
       | Record<string, unknown>
@@ -885,7 +941,7 @@ export async function handler(
     const thinkingTokens = Number(usage.thoughtsTokenCount ?? 0);
     const billedOutputTokens = visibleOutputTokens + thinkingTokens;
     const latency = now() - started;
-    const cost = estimateCost(model, inputTokens, billedOutputTokens);
+    const cost = estimateCost(servedModel, inputTokens, billedOutputTokens);
     const { error: settleError } = await adminClient.rpc(
       voiceAudio == null ? "bil_settle_ai_usage" : "bil_settle_ai_voice",
       voiceAudio == null
@@ -895,7 +951,7 @@ export async function handler(
           p_capability: "text",
           p_succeeded: true,
           p_provider: "gemini",
-          p_model: model,
+          p_model: servedModel,
           p_input_tokens: inputTokens,
           p_output_tokens: billedOutputTokens,
           p_latency_ms: latency,
@@ -907,7 +963,7 @@ export async function handler(
           p_succeeded: true,
           p_actual_seconds: voiceAudio.durationSeconds,
           p_provider: "gemini",
-          p_model: model,
+          p_model: servedModel,
           p_input_tokens: inputTokens,
           p_output_tokens: billedOutputTokens,
           p_latency_ms: latency,
@@ -920,7 +976,8 @@ export async function handler(
       response_id: requestId,
       response_locale: locale,
       provider: "gemini",
-      model,
+      model: servedModel,
+      fallback_used: providerCall.fallbackUsed,
       latency_ms: latency,
       attempts: provider.attempts,
       usage: {
