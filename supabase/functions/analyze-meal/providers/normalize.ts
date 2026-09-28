@@ -54,6 +54,13 @@ function textAndUsage(envelope: unknown, config: ProviderConfig): {
     );
   }
   if (config.provider === "openai") {
+    if (typeof root.status === "string" && root.status !== "completed") {
+      throw new VisionProviderError(
+        "provider_error",
+        "OpenAI response is not complete",
+        config.provider,
+      );
+    }
     const output = Array.isArray(root.output) ? root.output : [];
     const content = output.flatMap((row) =>
       row && typeof row === "object" &&
@@ -83,8 +90,29 @@ function textAndUsage(envelope: unknown, config: ProviderConfig): {
     };
   }
   if (config.provider === "gemini") {
+    const promptFeedback = root.promptFeedback &&
+        typeof root.promptFeedback === "object"
+      ? root.promptFeedback as Record<string, unknown>
+      : {};
+    if (typeof promptFeedback.blockReason === "string") {
+      throw new VisionProviderError(
+        "provider_error",
+        "Gemini response was blocked",
+        config.provider,
+      );
+    }
     const candidates = Array.isArray(root.candidates) ? root.candidates : [];
     const first = candidates[0] as Record<string, unknown> | undefined;
+    if (
+      typeof first?.finishReason === "string" &&
+      first.finishReason !== "STOP"
+    ) {
+      throw new VisionProviderError(
+        "provider_error",
+        "Gemini response is not complete",
+        config.provider,
+      );
+    }
     const content = first?.content as Record<string, unknown> | undefined;
     const parts = Array.isArray(content?.parts) ? content.parts : [];
     // Gemini 3 may return thought parts before the visible structured JSON.
@@ -122,6 +150,15 @@ function textAndUsage(envelope: unknown, config: ProviderConfig): {
   }
   const choices = Array.isArray(root.choices) ? root.choices : [];
   const first = choices[0] as Record<string, unknown> | undefined;
+  if (
+    typeof first?.finish_reason === "string" && first.finish_reason !== "stop"
+  ) {
+    throw new VisionProviderError(
+      "provider_error",
+      "Mistral response is not complete",
+      config.provider,
+    );
+  }
   const message = first?.message as Record<string, unknown> | undefined;
   const usage = root.usage && typeof root.usage === "object"
     ? root.usage as Record<string, unknown>

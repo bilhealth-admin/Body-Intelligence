@@ -22,7 +22,7 @@ param(
   [string]$IosBuildNumber = '31',
 
   [Parameter(Mandatory = $false)]
-  [string]$AndroidBuildNumber = '27',
+  [string]$AndroidBuildNumber = '28',
 
   [Parameter(Mandatory = $false)]
   [bool]$UploadToTestflight = $true,
@@ -140,8 +140,8 @@ $ref = Resolve-ReleaseRef -RequestedRef $Ref
 if (-not (Test-PositiveInt $IosBuildNumber) -or [int]$IosBuildNumber -ne 31) {
   throw 'iOS build number must be exactly 31.'
 }
-if (-not (Test-PositiveInt $AndroidBuildNumber) -or [int]$AndroidBuildNumber -ne 27) {
-  throw 'Android build number must be exactly 27.'
+if (-not (Test-PositiveInt $AndroidBuildNumber) -or [int]$AndroidBuildNumber -ne 28) {
+  throw 'Android build number must be exactly 28.'
 }
 
 $headers = Resolve-AuthHeaders -Token $GithubToken

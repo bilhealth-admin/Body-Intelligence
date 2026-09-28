@@ -256,8 +256,10 @@ class SupabaseAuthService {
   }
 
   /// Signs in through Meta's native SDK, then exchanges its platform token for
-  /// BIL's authoritative Supabase session. iOS Limited Login supplies a
-  /// nonce-bound OIDC JWT; Android supplies Meta's classic tokenString.
+  /// BIL's authoritative Supabase session. iOS Limited Login supplies its
+  /// nonce-bound tokenString; Android supplies ClassicToken's separate,
+  /// nonce-bound AuthenticationToken. The Graph API access token is never
+  /// accepted as an OIDC identity proof.
   ///
   /// A null result means the person dismissed Meta's authorization UI.
   Future<AuthResponse?> signInWithFacebookNative() async {

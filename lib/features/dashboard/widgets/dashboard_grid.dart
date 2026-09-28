@@ -87,9 +87,14 @@ class DashboardGrid extends ConsumerWidget {
     final allContextsAsync = ref.watch(insightLifeContextProvider);
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final clock = ref.watch(dashboardClockProvider);
-    final verifiedPlan =
-        ref.watch(verifiedSubscriptionStateProvider).value?.plan ??
-        CommercePlan.free;
+    final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
+    // An unresolved server entitlement is not a verified Free decision. Keep
+    // the neutral dashboard loading state until the signed-in owner's result
+    // arrives so Premium/Admin members never see a false locked-card flash.
+    if (verifiedSubscription.isLoading && !verifiedSubscription.hasValue) {
+      return const DashboardLoadingSkeleton();
+    }
+    final verifiedPlan = verifiedSubscription.value?.plan ?? CommercePlan.free;
     final premiumUnlocked = verifiedPlan != CommercePlan.free;
     final visibleSections = DashboardSectionIds.all
         .where(

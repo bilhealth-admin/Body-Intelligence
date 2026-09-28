@@ -132,6 +132,23 @@ void main() {
     },
   );
 
+  test(
+    'notification initialization survives a timezone channel failure',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            timezoneChannel,
+            (_) async => throw PlatformException(code: 'timezone_unavailable'),
+          );
+
+      await BilNotificationService(
+        FlutterLocalNotificationsPlugin(),
+      ).initialize();
+
+      expect(fakeIos.initializeCalls, 1);
+    },
+  );
+
   test('iOS remote APNs bridge handles cold and warm audited taps', () async {
     final nativeCalls = <String>[];
     messenger.setMockMethodCallHandler(navigationTestChannel, (call) async {

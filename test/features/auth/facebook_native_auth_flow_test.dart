@@ -108,38 +108,48 @@ SupabaseAuthService _service(
 );
 
 void main() {
-  test(
-    'A Android ClassicToken exchanges its access token as Supabase requires',
-    () async {
-      final login = _FakeFacebookLoginClient(
-        LoginResult(
-          status: LoginStatus.success,
-          accessToken: _classic(authenticationToken: _jwt),
-        ),
-      );
-      final authority = _FakeFacebookSessionAuthority();
-
-      final response = await _service(
-        authority,
-        login,
-      ).signInWithFacebookNative();
-
-      expect(response?.session, isNotNull);
-      expect(authority.exchangedIdToken, 'opaque-facebook-access-token');
-      expect(authority.exchangedNonce, isNull);
-      expect(
-        login.permissions,
-        containsAll(['openid', 'email', 'public_profile']),
-      );
-      expect(login.nonce, _nonce);
-    },
-  );
-
-  test('B empty Android ClassicToken fails closed', () async {
+  test('A Android ClassicToken exchanges its nonce-bound OIDC token', () async {
     final login = _FakeFacebookLoginClient(
       LoginResult(
         status: LoginStatus.success,
-        accessToken: _classic(opaqueToken: '   '),
+        accessToken: _classic(authenticationToken: _jwt),
+      ),
+    );
+    final authority = _FakeFacebookSessionAuthority();
+
+    final response = await _service(
+      authority,
+      login,
+    ).signInWithFacebookNative();
+
+    expect(response?.session, isNotNull);
+    expect(authority.exchangedIdToken, _jwt);
+    expect(authority.exchangedNonce, _nonce);
+    expect(
+      login.permissions,
+      containsAll(['openid', 'email', 'public_profile']),
+    );
+    expect(login.nonce, _nonce);
+  });
+
+  test('B missing Android OIDC token fails closed', () async {
+    final login = _FakeFacebookLoginClient(
+      LoginResult(status: LoginStatus.success, accessToken: _classic()),
+    );
+    final authority = _FakeFacebookSessionAuthority();
+
+    await expectLater(
+      _service(authority, login).signInWithFacebookNative(),
+      throwsA(isA<AuthException>()),
+    );
+    expect(authority.exchangeCalls, 0);
+  });
+
+  test('B2 malformed Android OIDC token fails before Supabase', () async {
+    final login = _FakeFacebookLoginClient(
+      LoginResult(
+        status: LoginStatus.success,
+        accessToken: _classic(authenticationToken: 'opaque-access-token'),
       ),
     );
     final authority = _FakeFacebookSessionAuthority();
@@ -285,8 +295,8 @@ void main() {
         );
         expect(login.calls, 1);
         expect(authority.exchangeCalls, 1);
-        expect(authority.exchangedIdToken, 'opaque-facebook-access-token');
-        expect(authority.exchangedNonce, isNull);
+        expect(authority.exchangedIdToken, _jwt);
+        expect(authority.exchangedNonce, _nonce);
       } finally {
         debugDefaultTargetPlatformOverride = null;
       }

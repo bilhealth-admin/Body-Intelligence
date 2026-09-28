@@ -144,6 +144,42 @@ Deno.test("malformed candidates fail closed", () => {
   }
 });
 
+Deno.test("provider envelopes marked incomplete or blocked fail closed", () => {
+  const incomplete: Array<[ProviderConfig, unknown]> = [
+    [configs.openai, {
+      status: "incomplete",
+      output: [{ content: [{ type: "output_text", text: modelJson }] }],
+    }],
+    [configs.gemini, {
+      candidates: [{
+        finishReason: "MAX_TOKENS",
+        content: { parts: [{ text: modelJson }] },
+      }],
+    }],
+    [configs.gemini, {
+      promptFeedback: { blockReason: "SAFETY" },
+      candidates: [{ content: { parts: [{ text: modelJson }] } }],
+    }],
+    [configs.mistral, {
+      choices: [{
+        finish_reason: "length",
+        message: { content: modelJson },
+      }],
+    }],
+  ];
+  for (const [config, envelope] of incomplete) {
+    try {
+      normalizeProviderResponse(envelope, config);
+      throw new Error(`expected ${config.provider} to fail closed`);
+    } catch (error) {
+      if (
+        !(error instanceof VisionProviderError) ||
+        error.code !== "provider_error"
+      ) throw error;
+    }
+  }
+});
+
 Deno.test("empty low-confidence dish identity is a safe abstention", () => {
   const content = JSON.stringify({
     candidates: [{

@@ -18,6 +18,7 @@ import 'system_cloud_connectivity.dart';
 
 enum CloudManualSyncDisposition {
   completed,
+  partial,
   offline,
   notAuthenticated,
   localOwnerMismatch,
@@ -77,6 +78,8 @@ final class CloudManualSyncService {
   final SupabaseClient _client;
   final AppDatabase _database;
   final LocalDataAccountBoundary _accountBoundary;
+
+  static const int _maximumPagesPerRun = 20;
 
   Future<CloudManualSyncResult> runOnce() async {
     final access = await CloudRuntimeAccessGate(
@@ -156,8 +159,12 @@ final class CloudManualSyncService {
         accountBoundary: _accountBoundary,
         sink: coordinator,
       ).produce();
-      final sync = await coordinator.synchronize();
-      if (sync.availability != CloudPlatformAvailability.ready) {
+      final sync = await drainCloudSyncPages(
+        coordinator.synchronize,
+        maximumPages: _maximumPagesPerRun,
+      );
+      if (sync.availability != CloudPlatformAvailability.ready &&
+          sync.availability != CloudPlatformAvailability.paused) {
         return CloudManualSyncResult(
           disposition: sync.availability == CloudPlatformAvailability.localOnly
               ? CloudManualSyncDisposition.offline
@@ -182,8 +189,12 @@ final class CloudManualSyncService {
           );
 
       return CloudManualSyncResult(
-        disposition: CloudManualSyncDisposition.completed,
-        completedAt: sync.completedAt.toUtc(),
+        disposition: sync.availability == CloudPlatformAvailability.ready
+            ? CloudManualSyncDisposition.completed
+            : CloudManualSyncDisposition.partial,
+        completedAt: sync.availability == CloudPlatformAvailability.ready
+            ? sync.completedAt.toUtc()
+            : null,
         ownerId: ownerId,
         enqueued: produce.enqueued,
         pushed: sync.pushed,
@@ -217,4 +228,38 @@ final class CloudManualSyncService {
     CloudRuntimeAccessDisposition.unavailable =>
       CloudManualSyncDisposition.unavailable,
   };
+}
+
+/// Drains a bounded number of cursor-backed pages while yielding between
+/// pages. Every page is durably stored by the platform before this helper is
+/// called again, so interruption never discards the saved cursor.
+Future<CloudSyncReport> drainCloudSyncPages(
+  Future<CloudSyncReport> Function() synchronizePage, {
+  int maximumPages = 20,
+}) async {
+  assert(maximumPages > 0);
+  CloudSyncReport? latest;
+  var pushed = 0;
+  var pulled = 0;
+  var conflicts = 0;
+  for (var page = 0; page < maximumPages; page++) {
+    final report = await synchronizePage();
+    latest = report;
+    pushed += report.pushed;
+    pulled += report.pulled;
+    conflicts += report.conflicts;
+    if (report.availability != CloudPlatformAvailability.paused) break;
+    await Future<void>.delayed(Duration.zero);
+  }
+  final report = latest!;
+  return CloudSyncReport(
+    startedAt: report.startedAt,
+    completedAt: report.completedAt,
+    pushed: pushed,
+    pulled: pulled,
+    conflicts: conflicts,
+    pending: report.pending,
+    availability: report.availability,
+    diagnostics: report.diagnostics,
+  );
 }

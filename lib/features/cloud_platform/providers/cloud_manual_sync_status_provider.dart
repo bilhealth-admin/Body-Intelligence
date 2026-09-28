@@ -155,7 +155,11 @@ final class CloudManualSyncStatusController
       } else {
         if (mounted) {
           state = CloudManualSyncStatus(
-            phase: CloudManualSyncPhase.unavailable,
+            phase: result.disposition == CloudManualSyncDisposition.partial
+                ? previous == null
+                      ? CloudManualSyncPhase.never
+                      : CloudManualSyncPhase.idle
+                : CloudManualSyncPhase.unavailable,
             lastSuccessfulSyncAt: previous,
           );
         }

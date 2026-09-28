@@ -41,19 +41,27 @@ void main() {
     expect(source, isNot(contains('--export-method app-store')));
   });
 
-  test('resolved Xcode release settings are checked before archiving', () {
+  test('manual signing inputs are checked before Xcode archiving', () {
     final source = File(workflowPath).readAsStringSync();
 
-    expect(source, contains('-workspace ios/Runner.xcworkspace'));
-    expect(source, contains('-configuration Release'));
-    expect(source, contains('-sdk iphoneos'));
-    expect(source, contains('-showBuildSettings'));
-    expect(source, contains("grep -Fq 'CODE_SIGN_STYLE = Manual'"));
+    expect(source, isNot(contains('BUILD_SETTINGS="\$(xcodebuild')));
+    expect(source, contains("grep -Fqx 'CODE_SIGN_STYLE = Manual'"));
     expect(
       source,
-      contains("grep -Fq 'CODE_SIGN_IDENTITY = Apple Distribution'"),
+      contains(
+        "grep -Fqx 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution'",
+      ),
     );
-    expect(source, contains('grep -Fq "DEVELOPMENT_TEAM = \$APPLE_TEAM_ID"'));
+    expect(source, contains('grep -Fqx "DEVELOPMENT_TEAM = \$APPLE_TEAM_ID"'));
+    expect(source, contains("PlistBuddy -c 'Print :signingStyle'"));
+    expect(source, contains("PlistBuddy -c 'Print :teamID'"));
+    expect(
+      source,
+      contains(
+        "PlistBuddy -c 'Print :provisioningProfiles:com.bilhealth.bodyintelligencelog'",
+      ),
+    );
+    expect(source, contains('flutter build ipa --release --no-pub'));
   });
 
   test(

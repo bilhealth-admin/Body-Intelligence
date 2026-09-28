@@ -40,9 +40,11 @@ final class MetaFacebookLoginClient implements BilFacebookLoginClient {
 /// Uses Meta's native Android/iOS SDK and returns the proof expected by
 /// Supabase for the token type produced on each platform.
 ///
-/// Supabase's Flutter Facebook flow expects [ClassicToken.tokenString] in its
-/// `idToken` parameter. On iOS Limited Login, [LimitedToken.tokenString] is an
-/// OIDC JWT and remains bound to the raw nonce supplied to Meta.
+/// flutter_facebook_auth 7.2.0 exposes Meta's Android OIDC proof as
+/// [ClassicToken.authenticationToken]. The classic [ClassicToken.tokenString]
+/// is only a Graph API access token and must never be sent to Supabase's OIDC
+/// `idToken` exchange. On iOS Limited Login, [LimitedToken.tokenString] is the
+/// nonce-bound OIDC JWT.
 final class BilNativeFacebookSignIn {
   const BilNativeFacebookSignIn({
     this.client = const MetaFacebookLoginClient(),
@@ -77,14 +79,14 @@ final class BilNativeFacebookSignIn {
 
     final accessToken = result.accessToken;
     switch (accessToken) {
-      case ClassicToken(:final tokenString):
-        final token = tokenString.trim();
-        if (token.isEmpty) {
+      case ClassicToken(:final authenticationToken):
+        final token = authenticationToken?.trim();
+        if (token == null || !isStructurallyValidJwt(token)) {
           throw const AuthException(
-            'Facebook did not return a valid access token.',
+            'Facebook did not return a valid identity token.',
           );
         }
-        return BilFacebookIdentityToken(idToken: token);
+        return BilFacebookIdentityToken(idToken: token, nonce: nonce);
       case LimitedToken(:final tokenString):
         final token = tokenString.trim();
         if (!isStructurallyValidJwt(token)) {

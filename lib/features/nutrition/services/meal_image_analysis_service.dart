@@ -18,6 +18,9 @@ class MealImageAnalysisService {
     MealImageAccessToken? accessToken,
     MealVisionImagePreprocessor? imagePreprocessor,
     this.requestedLocale,
+    this.requestTimeout = const Duration(seconds: 35),
+    this.operationTimeout = const Duration(seconds: 75),
+    this.inProgressPollDelay = const Duration(seconds: 2),
   }) : _endpoint = endpoint ?? configuredEndpoint,
        _gatewayPost = gatewayPost ?? _post,
        _accessToken = accessToken ?? _currentAccessToken,
@@ -31,6 +34,9 @@ class MealImageAnalysisService {
   final MealImageAccessToken _accessToken;
   final MealVisionImagePreprocessor _imagePreprocessor;
   final String? requestedLocale;
+  final Duration requestTimeout;
+  final Duration operationTimeout;
+  final Duration inProgressPollDelay;
 
   bool get configured => _endpoint.trim().isNotEmpty;
 
@@ -64,7 +70,11 @@ class MealImageAnalysisService {
 
     final idempotencyKey = const Uuid().v4();
     MealImageGatewayResponse? response;
-    for (var attempt = 0; attempt < 2; attempt++) {
+    final operation = Stopwatch()..start();
+    var transientAttempts = 0;
+    while (operation.elapsed < operationTimeout) {
+      final remaining = operationTimeout - operation.elapsed;
+      final timeout = remaining < requestTimeout ? remaining : requestTimeout;
       try {
         response =
             await _gatewayPost(
@@ -88,22 +98,30 @@ class MealImageAnalysisService {
                 ),
               }),
             ).timeout(
-              const Duration(seconds: 35),
+              timeout,
               onTimeout: () => throw const MealImageAnalysisException(
                 MealImageAnalysisFailure.serviceUnavailable,
               ),
             );
       } on MealImageAnalysisException catch (error) {
-        if (attempt == 1 ||
+        if (transientAttempts++ >= 1 ||
             error.failure != MealImageAnalysisFailure.serviceUnavailable) {
           rethrow;
         }
+        continue;
       }
-      if (response != null &&
-          (_isLanguageMismatch(response) ||
-              !_transientStatusCodes.contains(response.statusCode))) {
+      if (_isSameRequestInProgress(response)) {
+        if (operation.elapsed + inProgressPollDelay >= operationTimeout) break;
+        await Future<void>.delayed(inProgressPollDelay);
+        response = null;
+        continue;
+      }
+      if (_isLanguageMismatch(response) ||
+          !_transientStatusCodes.contains(response.statusCode)) {
         break;
       }
+      if (transientAttempts++ >= 1) break;
+      response = null;
     }
     if (response == null) {
       throw const MealImageAnalysisException(
@@ -162,6 +180,21 @@ class MealImageAnalysisService {
     try {
       final failure = jsonDecode(response.body);
       return failure is Map && failure['error'] == 'vision_language_mismatch';
+    } on FormatException {
+      return false;
+    }
+  }
+
+  static bool _isSameRequestInProgress(MealImageGatewayResponse response) {
+    if (response.statusCode != HttpStatus.conflict ||
+        response.body.length >= 2048) {
+      return false;
+    }
+    try {
+      final failure = jsonDecode(response.body);
+      return failure is Map &&
+          failure['error'] == 'request_already_processed' &&
+          failure['state'] == 'reserved';
     } on FormatException {
       return false;
     }

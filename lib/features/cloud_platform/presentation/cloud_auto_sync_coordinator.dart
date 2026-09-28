@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../data/database/database_provider.dart';
 import '../providers/cloud_sync_providers.dart';
+import '../services/cloud_manual_sync_service.dart';
 
 /// Process-wide bridge used by explicit sign-out entry points.
 ///
@@ -89,10 +90,11 @@ class _CloudAutoSyncCoordinatorState
     if (_running || !mounted) return;
     _running = true;
     try {
-      await ref
+      final result = await ref
           .read(cloudManualSyncServiceProvider)
           .runOnce()
           .timeout(const Duration(seconds: 12));
+      if (result.disposition == CloudManualSyncDisposition.partial) _schedule();
     } on Object {
       // Durable dirty/outbox state remains owner-bound for the next retry.
     } finally {

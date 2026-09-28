@@ -226,7 +226,7 @@ jobs:
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V31_AUDITED_SOURCE_SHA }}
           BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V31_AUDITED_SOURCE_SHA }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V27_AUDITED_SOURCE_SHA }}
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V28_AUDITED_SOURCE_SHA }}
           BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V31_FROZEN_SOURCE_MANIFEST_2026-09-27.md
           BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V31_STAGING_MANIFEST_SHA256 }}
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
@@ -374,17 +374,19 @@ jobs:
           PY
           plutil -lint "$EXPORT_OPTIONS"
 
-          BUILD_SETTINGS="$(xcodebuild \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -sdk iphoneos \
-            -showBuildSettings 2>&1)"
-          grep -Fq 'CODE_SIGN_STYLE = Manual' <<< "$BUILD_SETTINGS"
-          grep -Fq 'CODE_SIGN_IDENTITY = Apple Distribution' <<< "$BUILD_SETTINGS"
-          grep -Fq "DEVELOPMENT_TEAM = $APPLE_TEAM_ID" <<< "$BUILD_SETTINGS"
-          grep -Fq "PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME" <<< "$BUILD_SETTINGS"
-          grep -Fq "PROVISIONING_PROFILE = $PROFILE_UUID" <<< "$BUILD_SETTINGS"
+          # Do not invoke `xcodebuild -showBuildSettings` here. Immediately
+          # before this step the deferred-plugin graph is intentionally
+          # sanitized; Xcode 26 aborts while resolving that transient graph.
+          # `flutter build ipa` regenerates the graph in the next step and is
+          # the authoritative resolved-settings and signing gate.
+          grep -Fqx 'CODE_SIGN_STYLE = Manual' ios/Flutter/Release.xcconfig
+          grep -Fqx 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution' ios/Flutter/Release.xcconfig
+          grep -Fqx "DEVELOPMENT_TEAM = $APPLE_TEAM_ID" ios/Flutter/Release.xcconfig
+          grep -Fqx "PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME" ios/Flutter/Release.xcconfig
+          grep -Fqx "PROVISIONING_PROFILE = $PROFILE_UUID" ios/Flutter/Release.xcconfig
+          test "$(/usr/libexec/PlistBuddy -c 'Print :signingStyle' "$EXPORT_OPTIONS")" = 'manual'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :teamID' "$EXPORT_OPTIONS")" = "$APPLE_TEAM_ID"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :provisioningProfiles:com.bilhealth.bodyintelligencelog' "$EXPORT_OPTIONS")" = "$PROFILE_UUID"
           printf '%s\n' 'IOS_MANUAL_DISTRIBUTION_SIGNING_GATE=PASS'
 
       - name: Build signed archive

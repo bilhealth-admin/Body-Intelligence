@@ -57,6 +57,25 @@ void main() {
     expect(source, contains('ref.watch(verifiedEntitlementOwnerProvider)'));
   });
 
+  test('dashboard never renders an unresolved entitlement as locked Free', () {
+    final source = File(
+      'lib/features/dashboard/widgets/dashboard_grid.dart',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      contains(
+        'verifiedSubscription.isLoading && '
+        '!verifiedSubscription.hasValue',
+      ),
+    );
+    expect(source, contains('return const DashboardLoadingSkeleton();'));
+    expect(
+      source.indexOf('verifiedSubscription.isLoading'),
+      lessThan(source.indexOf('final verifiedPlan =')),
+    );
+  });
+
   test('closed-test grant is a server-owned Premium AI Coach overlay', () {
     final source = File(
       'lib/features/commerce/repositories/server_entitlement_repository.dart',

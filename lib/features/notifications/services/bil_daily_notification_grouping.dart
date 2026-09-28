@@ -6,10 +6,14 @@ extension BilNotificationPlatformInitialization on BilNotificationService {
   Future<void> _initializeNotificationPlatform() async {
     if (_initialized) return;
     tz_data.initializeTimeZones();
-    final local = await FlutterTimezone.getLocalTimezone();
     try {
+      final local = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(local.identifier));
-    } on tz.LocationNotFoundException {
+    } on Object {
+      // Permission prompts and immediate notifications must remain usable when
+      // an OEM timezone channel is temporarily unavailable. Scheduling falls
+      // back to UTC for this service instance instead of aborting initialization
+      // before the native notification permission request can run.
       tz.setLocalLocation(tz.UTC);
     }
     final platform = defaultTargetPlatform;

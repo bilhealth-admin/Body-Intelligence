@@ -48,9 +48,10 @@ void main() {
     expect(nativeGoogle, contains('authorizationForScopes'));
     expect(nativeGoogle, contains('authorizeScopes'));
 
-    // Meta Android returns a ClassicToken. Supabase's Flutter Facebook
-    // exchange accepts its tokenString as idToken; unlike iOS Limited Login,
-    // this token is not nonce-bound and must not be treated as a JWT.
+    // Meta Android returns a ClassicToken whose tokenString is a Graph API
+    // access token. flutter_facebook_auth 7.2.0 exposes the separate,
+    // nonce-bound OIDC proof as authenticationToken; only that JWT can enter
+    // Supabase's signInWithIdToken exchange.
     expect(
       SupabaseAuthService.usesNativeAndroidFacebookSignIn(
         OAuthProvider.facebook,
@@ -60,7 +61,10 @@ void main() {
       isTrue,
     );
     expect(nativeFacebook, contains('FacebookAuth.instance.login('));
-    expect(nativeFacebook, contains('ClassicToken(:final tokenString)'));
+    expect(
+      nativeFacebook,
+      contains('ClassicToken(:final authenticationToken)'),
+    );
     expect(nativeFacebook, contains('LimitedToken(:final tokenString)'));
     expect(nativeFacebook, contains("'public_profile', 'email', 'openid'"));
     expect(nativeFacebook, contains('nonce: nonce'));

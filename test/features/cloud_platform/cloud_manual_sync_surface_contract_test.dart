@@ -89,13 +89,15 @@ void main() {
       'SystemCloudConnectivitySnapshot.current()',
     );
     final producer = service.indexOf('AppDatabaseCloudOutboxProducer(');
-    final synchronize = service.indexOf('coordinator.synchronize()');
+    final synchronize = service.indexOf('drainCloudSyncPages(');
+    final synchronizePage = service.indexOf('coordinator.synchronize,');
     final applier = service.indexOf('AppDatabaseCloudInboxApplier(');
 
     expect(gate, greaterThanOrEqualTo(0));
     expect(connectivity, greaterThan(gate));
     expect(producer, greaterThan(connectivity));
     expect(synchronize, greaterThan(producer));
+    expect(synchronizePage, greaterThan(synchronize));
     expect(applier, greaterThan(synchronize));
 
     expect(service, contains('CloudEntityKind.profile'));

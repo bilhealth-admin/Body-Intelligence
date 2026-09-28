@@ -101,6 +101,54 @@ void main() {
       expect(keys.toSet(), hasLength(1));
     });
 
+    test(
+      'polls the same reserved request until its cached result is ready',
+      () async {
+        final keys = <String>[];
+        var calls = 0;
+        final service = MealImageAnalysisService(
+          endpoint: 'https://example.test/functions/v1/analyze-meal',
+          accessToken: () => 'session',
+          operationTimeout: const Duration(seconds: 1),
+          inProgressPollDelay: Duration.zero,
+          gatewayPost: ({required uri, required headers, required body}) async {
+            keys.add(headers['x-idempotency-key']!);
+            calls++;
+            if (calls < 3) {
+              return const MealImageGatewayResponse(
+                statusCode: 409,
+                body:
+                    '{"error":"request_already_processed","state":"reserved"}',
+              );
+            }
+            return const MealImageGatewayResponse(
+              statusCode: 200,
+              body: '{"schema_version":1,"request_id":"r","candidates":[]}',
+            );
+          },
+        );
+
+        await service.analyze(
+          XFile.fromData(
+            Uint8List.fromList([
+              0x89,
+              0x50,
+              0x4e,
+              0x47,
+              0x0d,
+              0x0a,
+              0x1a,
+              0x0a,
+            ]),
+            mimeType: 'image/png',
+          ),
+        );
+
+        expect(calls, 3);
+        expect(keys.toSet(), hasLength(1));
+      },
+    );
+
     test('maps a paid Boost boundary to a dedicated failure', () async {
       final service = MealImageAnalysisService(
         endpoint: 'https://example.test/functions/v1/analyze-meal',

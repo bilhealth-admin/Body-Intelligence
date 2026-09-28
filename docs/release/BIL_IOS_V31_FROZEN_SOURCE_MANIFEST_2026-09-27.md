@@ -13,7 +13,7 @@
 ## Release identity and source boundary
 
 iOS build 31 is the next candidate after build 30 and shares the same final,
-host-validated source with Android build 27. It preserves the accepted 30/26
+host-validated source with Android build 28. It preserves the accepted 30/26
 lineage and layers the current local reliability, connected-health, AI Coach,
 navigation, localization, commerce, and release-audit repairs above it.
 
@@ -25,13 +25,13 @@ occurs only when the owner explicitly dispatches with
 After the final integration commit is pushed,
 `BIL_IOS_V31_AUDITED_SOURCE_SHA` must equal that commit and
 `BIL_IOS_V31_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
-SHA-256. `BIL_ANDROID_V27_AUDITED_SOURCE_SHA` must name the same commit. These
+SHA-256. `BIL_ANDROID_V28_AUDITED_SOURCE_SHA` must name the same commit. These
 bindings are intentionally set only after the comprehensive host suite passes.
 
 ## Validation boundary
 
 The final local host validation completed on 2026-09-28: `flutter analyze`
-reported no issues and the comprehensive Flutter suite completed with 5,520
+reported no issues and the comprehensive Flutter suite completed with 5,526
 passing tests, 6 intentional skips, and 0 failures. The focused AI Coach,
 commerce, navigation, and Quick Add regressions also passed after the final
 repairs.
