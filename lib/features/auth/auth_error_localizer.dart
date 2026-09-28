@@ -24,8 +24,8 @@ String localizedAuthError(BuildContext context, AuthException error) {
           message.contains('supabase session'))) {
     return authFiveLocaleTextOf(
       context,
-      'Facebook could not provide a secure sign-in. Update Facebook and try again.',
-      'تعذر على فيسبوك توفير تسجيل دخول آمن. حدّث تطبيق فيسبوك ثم حاول مجددًا.',
+      'Facebook sign-in could not be completed. Please try again.',
+      'تعذر إكمال تسجيل الدخول عبر فيسبوك. حاول مجددًا.',
     );
   }
   if (code == 'otp_expired' ||

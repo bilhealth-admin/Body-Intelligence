@@ -46,10 +46,12 @@ final class MetaFacebookLoginClient implements BilFacebookLoginClient {
 /// Uses Meta's native Android/iOS SDK and returns the proof expected by
 /// Supabase for the token type produced on each platform.
 ///
-/// flutter_facebook_auth 7.2.0 exposes Meta's Android OIDC proof as
-/// [ClassicToken.authenticationToken]. The classic [ClassicToken.tokenString]
-/// is the matching Graph access token: it is sent only as the exchange's
-/// `accessToken`, never as its `idToken`. On iOS Limited Login,
+/// flutter_facebook_auth 7.2.0 can expose Meta's Android OIDC proof as
+/// [ClassicToken.authenticationToken]. Some valid native/fallback results do
+/// not include that optional proof and return only [ClassicToken.tokenString].
+/// Supabase's documented Facebook exchange accepts that Facebook access token
+/// in `idToken`, so BIL supports both forms instead of rejecting a successful
+/// Meta login before it reaches Supabase. On iOS Limited Login,
 /// [LimitedToken.tokenString] is the nonce-bound OIDC JWT.
 final class BilNativeFacebookSignIn {
   const BilNativeFacebookSignIn({
@@ -72,15 +74,10 @@ final class BilNativeFacebookSignIn {
   Future<BilFacebookIdentityToken?> authenticate({
     required String nonce,
   }) async {
-    // Supabase's supported Android OIDC flow requires Facebook's web-only
-    // behavior. nativeWithFallback can return an authentication token whose
-    // email claims are not accepted by the hosted Auth exchange.
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final result = await client.login(
       permissions: const <String>['public_profile', 'email', 'openid'],
-      loginBehavior: isAndroid
-          ? LoginBehavior.webOnly
-          : LoginBehavior.nativeWithFallback,
+      loginBehavior: LoginBehavior.nativeWithFallback,
       loginTracking: isAndroid ? LoginTracking.enabled : LoginTracking.limited,
       nonce: nonce,
     );
@@ -92,23 +89,29 @@ final class BilNativeFacebookSignIn {
     final accessToken = result.accessToken;
     switch (accessToken) {
       case ClassicToken(:final authenticationToken, :final tokenString):
-        final token = authenticationToken?.trim();
-        if (token == null || !isStructurallyValidJwt(token)) {
-          throw const AuthException(
-            'Facebook did not return a valid identity token.',
-          );
-        }
         final graphAccessToken = tokenString.trim();
         if (graphAccessToken.isEmpty) {
           throw const AuthException(
             'Facebook did not return a valid access token.',
           );
         }
-        return BilFacebookIdentityToken(
-          idToken: token,
-          accessToken: graphAccessToken,
-          nonce: nonce,
-        );
+        final oidcToken = authenticationToken?.trim();
+        if (oidcToken != null && oidcToken.isNotEmpty) {
+          if (!isStructurallyValidJwt(oidcToken)) {
+            throw const AuthException(
+              'Facebook returned a malformed identity token.',
+            );
+          }
+          return BilFacebookIdentityToken(
+            idToken: oidcToken,
+            accessToken: graphAccessToken,
+            nonce: nonce,
+          );
+        }
+        // Supabase documents Classic Facebook's access token as the value for
+        // signInWithIdToken(idToken: ...). Do not attach the OIDC nonce to this
+        // non-JWT exchange; Meta did not bind this token to that nonce.
+        return BilFacebookIdentityToken(idToken: graphAccessToken);
       case LimitedToken(:final tokenString):
         final token = tokenString.trim();
         if (!isStructurallyValidJwt(token)) {
