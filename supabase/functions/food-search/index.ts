@@ -51,16 +51,17 @@ type AccessResult =
   };
 
 type TranslationFunction = (
-  value: string,
+  values: readonly string[],
   sourceLocale: string,
   targetLocale: string,
-) => Promise<string | null>;
+) => Promise<Array<string | null>>;
 
 export interface FoodSearchRuntime {
   authorize(request: Request): Promise<AccessResult>;
   apiKey(): string;
   fetch: typeof fetch;
-  translate?: TranslationFunction;
+  translateQuery?: TranslationFunction;
+  translateResults?: TranslationFunction;
 }
 
 type BoundedJsonResult =
@@ -158,13 +159,14 @@ const productionRuntime: FoodSearchRuntime = {
   // Function, and this prevents a naming-only configuration outage.
   apiKey: () => firstEnv("BIL_USDA_API_KEY", "USDA"),
   fetch,
-  translate: (value, sourceLocale, targetLocale) =>
+  translateQuery: (values, sourceLocale, targetLocale) =>
     translateWithGoogle(
-      value,
+      values,
       sourceLocale,
       targetLocale,
       fetch,
     ),
+  translateResults: translateFoodNamesWithCache,
 };
 
 const supportedLocales = new Set([
@@ -221,13 +223,19 @@ function normalizedUsda(food: Record<string, unknown>) {
 /// translation. This keeps the search multilingual without pretending that a
 /// machine translation is a canonical food identity.
 async function translateWithGoogle(
-  value: string,
+  values: readonly string[],
   sourceLocale: string,
   targetLocale: string,
   fetcher: typeof fetch,
-): Promise<string | null> {
+): Promise<Array<string | null>> {
   const key = firstEnv("BIL_TRANSLATION_API_KEY", "Translation");
-  if (!key || !value.trim() || sourceLocale === targetLocale) return null;
+  if (!key || values.length === 0 || sourceLocale === targetLocale) {
+    return values.map(() => null);
+  }
+  const bounded = values.slice(0, 20).map((value) => value.trim());
+  if (bounded.some((value) => value.length < 2 || value.length > 240)) {
+    return bounded.map(() => null);
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 2500);
@@ -241,38 +249,104 @@ async function translateWithGoogle(
         signal: controller.signal,
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          q: [value],
+          q: bounded,
           source: sourceLocale,
           target: targetLocale,
           format: "text",
         }),
       },
     );
-    if (!response.ok) return null;
+    if (!response.ok) return bounded.map(() => null);
     const root = await response.json() as Record<string, unknown>;
     const data = root.data;
     if (data == null || typeof data !== "object" || Array.isArray(data)) {
-      return null;
+      return bounded.map(() => null);
     }
     const translations = (data as Record<string, unknown>).translations;
-    if (!Array.isArray(translations) || translations.length === 0) return null;
-    const first = translations[0];
-    if (first == null || typeof first !== "object" || Array.isArray(first)) {
-      return null;
+    if (
+      !Array.isArray(translations) || translations.length !== bounded.length
+    ) {
+      return bounded.map(() => null);
     }
-    const translated = text(
-      (first as Record<string, unknown>).translatedText,
-    );
-    return translated.length >= 2 && translated.length <= 120
-      ? translated
-      : null;
+    return translations.map((raw) => {
+      if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+        return null;
+      }
+      const translated = text(
+        (raw as Record<string, unknown>).translatedText,
+      );
+      return translated.length >= 2 && translated.length <= 240
+        ? translated
+        : null;
+    });
   } catch {
     // Search must still be able to use the reviewed offline aliases or the
     // original query when the optional translation provider is unavailable.
-    return null;
+    return bounded.map(() => null);
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function translateFoodNamesWithCache(
+  values: readonly string[],
+  sourceLocale: string,
+  targetLocale: string,
+): Promise<Array<string | null>> {
+  if (values.length === 0 || sourceLocale === targetLocale) {
+    return values.map((value) => value);
+  }
+  const url = env("SUPABASE_URL");
+  const serviceRole = env("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !serviceRole) {
+    return translateWithGoogle(values, sourceLocale, targetLocale, fetch);
+  }
+
+  const admin = createClient(url, serviceRole, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const unique = [...new Set(values.map((value) => value.trim()))];
+  const cached = new Map<string, string>();
+  const { data } = await admin
+    .from("bil_food_translation_cache")
+    .select("source_text,translated_text")
+    .eq("source_locale", sourceLocale)
+    .eq("target_locale", targetLocale)
+    .in("source_text", unique);
+  for (const row of data ?? []) {
+    const source = text(row.source_text);
+    const translated = text(row.translated_text);
+    if (source && translated) cached.set(source, translated);
+  }
+
+  const missing = unique.filter((value) => !cached.has(value));
+  if (missing.length > 0) {
+    const translated = await translateWithGoogle(
+      missing,
+      sourceLocale,
+      targetLocale,
+      fetch,
+    );
+    const rows = missing.flatMap((source, index) => {
+      const translatedText = translated[index]?.trim();
+      if (!translatedText) return [];
+      cached.set(source, translatedText);
+      return [{
+        source_locale: sourceLocale,
+        target_locale: targetLocale,
+        source_text: source,
+        translated_text: translatedText,
+        provider: "google-cloud-translation-v2",
+        updated_at: new Date().toISOString(),
+      }];
+    });
+    if (rows.length > 0) {
+      await admin.from("bil_food_translation_cache").upsert(rows, {
+        onConflict: "source_locale,target_locale,source_text",
+      });
+    }
+  }
+  return values.map((value) => cached.get(value.trim()) ?? null);
 }
 
 export async function handleFoodSearchRequest(
@@ -334,7 +408,8 @@ export async function handleFoodSearchRequest(
     ? searchHint
     : isSafeSearchHint(serverReviewedHint)
     ? serverReviewedHint
-    : ((await runtime.translate?.(query, locale, "en"))?.trim() || query);
+    : ((await runtime.translateQuery?.([query], locale, "en"))?.[0]?.trim() ||
+      query);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
@@ -362,11 +437,27 @@ export async function handleFoodSearchRequest(
       return json({ error: `usda_${response.status}` }, 503);
     }
     const root = await response.json() as Record<string, unknown>;
-    const foods = ((Array.isArray(root.foods) ? root.foods : []) as Array<
+    const sourceFoods = ((Array.isArray(root.foods) ? root.foods : []) as Array<
       Record<string, unknown>
     >)
       .map(normalizedUsda)
       .filter((food) => food.fdc_id !== null && food.name.length > 0);
+    const translatedNames = locale === "en"
+      ? sourceFoods.map((food) => food.name)
+      : await runtime.translateResults?.(
+        sourceFoods.map((food) => food.name),
+        "en",
+        locale,
+      ) ?? sourceFoods.map(() => null);
+    // For non-English searches, never leak USDA's English canonical text into
+    // the result list. If translation is unavailable, omit that row rather
+    // than mixing languages. The canonical identity remains the FDC id.
+    const foods = sourceFoods.flatMap((food, index) => {
+      if (locale === "en") return [food];
+      const localizedName = translatedNames[index]?.trim();
+      if (!localizedName) return [];
+      return [{ ...food, name: localizedName, canonical_name: food.name }];
+    });
     return json({
       status: foods.length === 0 ? "unresolved" : "found",
       source: "usda",

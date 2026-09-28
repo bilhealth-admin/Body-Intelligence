@@ -9,11 +9,13 @@ function expectEqual(actual: unknown, expected: unknown, label: string) {
 function runtime({
   quota = "allowed",
   fetchImpl,
-  translate,
+  translateQuery,
+  translateResults,
 }: {
   quota?: "allowed" | "rate_limited" | "unavailable";
   fetchImpl?: typeof fetch;
-  translate?: FoodSearchRuntime["translate"];
+  translateQuery?: FoodSearchRuntime["translateQuery"];
+  translateResults?: FoodSearchRuntime["translateResults"];
 } = {}): FoodSearchRuntime {
   return {
     authorize: () =>
@@ -25,7 +27,8 @@ function runtime({
     fetch: fetchImpl ?? (() => {
       return Promise.reject(new Error("Unexpected USDA request"));
     }) as typeof fetch,
-    translate,
+    translateQuery,
+    translateResults,
   };
 }
 
@@ -144,9 +147,15 @@ Deno.test("translated query reaches USDA while canonical identity is preserved",
       }),
     }),
     runtime({
-      translate: (value, source, target) => {
-        translationCall = `${value}|${source}|${target}`;
-        return Promise.resolve("teff cooked");
+      translateQuery: (values, source, target) => {
+        translationCall = `${values.join(",")}|${source}|${target}`;
+        return Promise.resolve(["teff cooked"]);
+      },
+      translateResults: (values, source, target) => {
+        expectEqual(values.join(","), "Teff, cooked", "result source names");
+        expectEqual(source, "en", "result source locale");
+        expectEqual(target, "ar", "result target locale");
+        return Promise.resolve(["تيف مطبوخ"]);
       },
       fetchImpl: ((_input, init) => {
         const body = JSON.parse(String(init?.body)) as { query?: string };
@@ -169,7 +178,34 @@ Deno.test("translated query reaches USDA while canonical identity is preserved",
   const body = await response.json() as Record<string, unknown>;
   expectEqual(body.search_query, "teff cooked", "response search query");
   const foods = body.foods as Array<Record<string, unknown>>;
-  expectEqual(foods[0].name, "Teff, cooked", "canonical USDA name");
+  expectEqual(foods[0].name, "تيف مطبوخ", "localized result name");
+  expectEqual(foods[0].canonical_name, "Teff, cooked", "canonical USDA name");
+});
+
+Deno.test("non-English results never fall back to an untranslated USDA name", async () => {
+  const response = await handleFoodSearchRequest(
+    new Request("https://example.test/food-search", {
+      method: "POST",
+      body: JSON.stringify({ query: "بامية", locale: "ar", limit: 5 }),
+    }),
+    runtime({
+      translateQuery: () => Promise.resolve(["okra"]),
+      translateResults: () => Promise.resolve([null]),
+      fetchImpl: (() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              foods: [{ fdcId: 169262, description: "Okra, frozen" }],
+            }),
+            { status: 200 },
+          ),
+        )) as typeof fetch,
+    }),
+  );
+
+  expectEqual(response.status, 404, "status");
+  const body = await response.json() as Record<string, unknown>;
+  expectEqual((body.foods as unknown[]).length, 0, "untranslated rows");
 });
 
 Deno.test("unsafe client search hint cannot replace the typed query", async () => {
