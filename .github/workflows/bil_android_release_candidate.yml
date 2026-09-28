@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ vars.BIL_ANDROID_V28_AUDITED_SOURCE_SHA }}
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
