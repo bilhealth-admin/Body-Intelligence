@@ -59,8 +59,8 @@ void main() {
         reason: path,
       );
       final expectedSourceBinding = path.contains('ios')
-          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V31_AUDITED_SOURCE_SHA }}'
-          : r'BIL_SOURCE_COMMIT: ${{ github.sha }}';
+          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V32_AUDITED_SOURCE_SHA }}'
+          : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V29_AUDITED_SOURCE_SHA }}';
       expect(source, contains(expectedSourceBinding), reason: path);
       expect(
         source,
@@ -84,12 +84,12 @@ void main() {
 
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V28_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_IOS_V31_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V28_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V31_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_ANDROID_V28_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V31_STAGING_MANIFEST_SHA256'));
+    expect(android, contains('BIL_ANDROID_V29_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_IOS_V32_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_ANDROID_V29_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V32_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_ANDROID_V29_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V32_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -100,7 +100,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V28_FROZEN_SOURCE_MANIFEST_2026-09-28.md',
+        'docs/release/BIL_ANDROID_V29_FROZEN_SOURCE_MANIFEST_2026-09-28.md',
       ),
     );
     expect(
@@ -114,13 +114,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 31 release manifest', () {
+  test('iOS validator consumes only the build 32 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V31_FROZEN_SOURCE_MANIFEST_2026-09-27.md',
+        'docs/release/BIL_IOS_V32_FROZEN_SOURCE_MANIFEST_2026-09-28.md',
       ),
     );
     expect(
@@ -132,8 +132,8 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 31 ))'));
-    expect(source, isNot(contains('(( BUILD_NUMBER == 26 ))')));
+    expect(source, contains('(( BUILD_NUMBER == 32 ))'));
+    expect(source, isNot(contains('(( BUILD_NUMBER == 31 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {

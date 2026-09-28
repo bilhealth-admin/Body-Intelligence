@@ -111,10 +111,10 @@ void main() {
   );
 
   test(
-    'validator targets the current non-self-referential Android 28 manifest',
+    'validator targets the current non-self-referential Android 29 manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V28_FROZEN_SOURCE_MANIFEST_2026-09-28.md';
+          'docs/release/BIL_ANDROID_V29_FROZEN_SOURCE_MANIFEST_2026-09-28.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();
@@ -128,18 +128,18 @@ void main() {
       );
       expect(metadata.unresolvedReviewCount, 0);
       expect(metadata.releaseVersion, '1.0.0');
-      expect(metadata.releaseBuildNumber, 28);
+      expect(metadata.releaseBuildNumber, 29);
       expect(
         metadata.stagingManifestComplete,
         metadata.candidateFrozenOrAccepted,
         reason: 'The current manifest must transition from NO/NO to YES/YES.',
       );
-      expect(manifestSource, contains('BIL_ANDROID_V28_AUDITED_SOURCE_SHA'));
+      expect(manifestSource, contains('BIL_ANDROID_V29_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
-        contains('BIL_ANDROID_V28_STAGING_MANIFEST_SHA256'),
+        contains('BIL_ANDROID_V29_STAGING_MANIFEST_SHA256'),
       );
-      expect(manifestSource, contains('not self-referentially'));
+      expect(manifestSource, contains("this file's committed-byte"));
     },
   );
 }
