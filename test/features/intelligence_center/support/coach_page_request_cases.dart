@@ -283,7 +283,7 @@ void registerCoachRequestCases() {
     );
   }
 
-  testWidgets('cancelled response cannot overwrite a newer request', (
+  testWidgets('in-flight response disables send without a second spinner', (
     tester,
   ) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -291,23 +291,18 @@ void registerCoachRequestCases() {
     final gateway = _HeldGateway();
     await _mount(tester, database: database, gateway: gateway);
     await _send(tester, gateway);
-    await tester.tap(find.byKey(const Key('ai-coach-cancel-request')));
-    await tester.pump();
-    await tester.enterText(
-      find.byKey(const Key('ai-coach-question-field')),
-      'hi',
+    final disabledSend = tester.widget<IconButton>(
+      find.byKey(const Key('ai-coach-send-button')),
     );
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('ai-coach-send-button')));
-    for (var i = 0; i < 60 && gateway.calls < 2; i++) {
-      await tester.pump(const Duration(milliseconds: 50));
-    }
-    expect(gateway.calls, 2);
-    gateway.finish(text: 'Discard this cancelled reply');
-    await tester.pump(const Duration(milliseconds: 1200));
-    expect(find.text('Discard this cancelled reply'), findsNothing);
-    expect(find.byKey(const Key('ai-coach-cancel-request')), findsOneWidget);
-    gateway.finish(index: 1, text: 'Keep this current reply');
+    expect(disabledSend.onPressed, isNull);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('ai-coach-send-button')),
+        matching: find.byType(CircularProgressIndicator),
+      ),
+      findsNothing,
+    );
+    gateway.finish(text: 'Keep this current reply');
     await tester.pumpAndSettle();
     expect(find.text('Keep this current reply'), findsOneWidget);
     expect(find.textContaining('Searching your BIL context'), findsNothing);

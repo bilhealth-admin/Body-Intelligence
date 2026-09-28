@@ -488,11 +488,11 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
               compact: true,
               showConnectControl: false,
               showMetrics: true,
-              onStepsTap: () => context.push('/connected-health/steps'),
+              onStepsTap: () => context.push('/connected-health/steps/history'),
               onHeartTap: () => context.push('/connected-health/heart'),
               onActiveEnergyTap: () =>
-                  context.push('/settings/exercise-calories'),
-              onSleepTap: () => context.push('/wellness/sleep'),
+                  context.push('/connected-health/active-energy'),
+              onSleepTap: () => context.push('/connected-health/sleep'),
             ),
           );
           return Column(
@@ -592,11 +592,11 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
             compact: true,
             showConnectControl: false,
             showMetrics: true,
-            onStepsTap: () => context.push('/connected-health/steps'),
+            onStepsTap: () => context.push('/connected-health/steps/history'),
             onHeartTap: () => context.push('/connected-health/heart'),
             onActiveEnergyTap: () =>
-                context.push('/settings/exercise-calories'),
-            onSleepTap: () => context.push('/wellness/sleep'),
+                context.push('/connected-health/active-energy'),
+            onSleepTap: () => context.push('/connected-health/sleep'),
           ),
         ),
         if (hasData) ...[

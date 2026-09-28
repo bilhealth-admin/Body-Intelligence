@@ -83,6 +83,7 @@ final class ConnectedHealthSnapshot {
     this.deviceVerified = false,
     this.isBusy = false,
     this.stepHistory = const <ConnectedHealthSignalView>[],
+    this.signalHistory = const <ConnectedHealthSignalView>[],
   });
 
   const ConnectedHealthSnapshot.unavailable()
@@ -96,7 +97,8 @@ final class ConnectedHealthSnapshot {
       availabilityStatus = null,
       deviceVerified = false,
       isBusy = false,
-      stepHistory = const <ConnectedHealthSignalView>[];
+      stepHistory = const <ConnectedHealthSignalView>[],
+      signalHistory = const <ConnectedHealthSignalView>[];
 
   final ConnectedHealthStatus status;
   final String? platformSource;
@@ -121,6 +123,11 @@ final class ConnectedHealthSnapshot {
   /// history is what powers the dashboard trend.
   final List<ConnectedHealthSignalView> stepHistory;
 
+  /// Bounded, verified history for detail surfaces such as heart rate, sleep,
+  /// and active energy. This is separate from [signals], which intentionally
+  /// contains only the latest representative value for the live watch.
+  final List<ConnectedHealthSignalView> signalHistory;
+
   ConnectedHealthSnapshot copyWith({
     ConnectedHealthStatus? status,
     String? platformSource,
@@ -134,6 +141,7 @@ final class ConnectedHealthSnapshot {
     bool? deviceVerified,
     bool? isBusy,
     List<ConnectedHealthSignalView>? stepHistory,
+    List<ConnectedHealthSignalView>? signalHistory,
   }) => ConnectedHealthSnapshot(
     status: status ?? this.status,
     platformSource: platformSource ?? this.platformSource,
@@ -146,7 +154,18 @@ final class ConnectedHealthSnapshot {
     deviceVerified: deviceVerified ?? this.deviceVerified,
     isBusy: isBusy ?? this.isBusy,
     stepHistory: stepHistory ?? this.stepHistory,
+    signalHistory: signalHistory ?? this.signalHistory,
   );
+}
+
+String connectedHealthDisplaySource(ConnectedHealthSignalView signal) {
+  if (connectedHealthSignalHasWearableProvenance(signal)) return 'Apple Watch';
+  final normalized = signal.source.trim().toLowerCase();
+  if (normalized.contains('health connect')) return 'Health Connect';
+  if (normalized.contains('apple') || normalized.contains('healthkit')) {
+    return 'Apple Health';
+  }
+  return signal.source.trim();
 }
 
 /// Returns one value for each of the last 30 local calendar days.

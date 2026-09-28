@@ -36,7 +36,8 @@ void main() {
     expect(consentCoordinator, contains("'p_policy_version': '3'"));
     expect(
       consentCoordinator,
-      contains('return isGranted(forceServerRead: true);'),
+      contains('return _readCurrent(owner, generation);'),
+      reason: 'Consent grants must be verified by an authoritative readback.',
     );
     expect(server, contains('bil_has_remote_ai_consent'));
   });

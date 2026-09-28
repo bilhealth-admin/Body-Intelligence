@@ -69,7 +69,10 @@ class TrustedFoodNetworkSearchResolver {
                   : <String, Object?>{'search_hint': searchHint}),
             },
           )
-          .timeout(const Duration(seconds: 8));
+          // The Edge Function may spend up to 2.5 seconds translating before
+          // its bounded 8-second USDA request, in addition to auth and quota
+          // checks. Keep the client deadline above that complete server path.
+          .timeout(const Duration(seconds: 16));
       if (response.status != 200 || response.data is! Map) {
         return const <UnifiedFood>[];
       }

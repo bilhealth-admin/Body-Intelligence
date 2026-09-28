@@ -116,6 +116,8 @@ class _RetainedAiCoachSurfaceState
     return Stack(
       fit: StackFit.expand,
       children: [
+        if (!_contentMounted && !unavailable)
+          const _AiCoachAccessCheckingSurface(),
         // Keep the same element position even when the gate is shown. Credit
         // settlement must not discard a draft, scroll position or transcript.
         if (_contentMounted)
@@ -132,7 +134,7 @@ class _RetainedAiCoachSurfaceState
               ),
             ),
           ),
-        if (!allowed)
+        if (!allowed && (_contentMounted || unavailable))
           const _PremiumRouteGateContents(
             feature: PremiumGateFeature.aiCoach,
             child: SizedBox.shrink(),
@@ -140,6 +142,39 @@ class _RetainedAiCoachSurfaceState
       ],
     );
   }
+}
+
+/// Opaque first-frame surface for the one-time server credit check.
+///
+/// It matches the immersive Coach background, exposes no transcript or
+/// purchase offer, and still lets the member leave while access is resolving.
+class _AiCoachAccessCheckingSurface extends StatelessWidget {
+  const _AiCoachAccessCheckingSurface();
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+    key: const ValueKey('ai-coach-access-checking-surface'),
+    color: const Color(0xFF071923),
+    child: SafeArea(
+      child: Align(
+        alignment: AlignmentDirectional.topStart,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: IconButton(
+            key: const ValueKey('premium-route-loading-back'),
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            onPressed: () =>
+                _handlePremiumRouteBack(context, returnToDashboard: true),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0x99141414),
+              foregroundColor: Colors.white,
+            ),
+            icon: const BackButtonIcon(),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _PremiumRouteGateContents extends ConsumerWidget {

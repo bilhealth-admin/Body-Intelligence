@@ -507,9 +507,9 @@ abstract final class BilSemanticIcons {
     '/weekly-report' => BilSemanticIconKind.report,
     '/challenges' => BilSemanticIconKind.challenges,
     '/analytics/nutrition' => BilSemanticIconKind.nutrition,
-    '/nutrition' => BilSemanticIconKind.recipes,
-    '/intelligence-center' ||
-    '/settings/ai-coach' => BilSemanticIconKind.aiCoach,
+    '/nutrition' => BilSemanticIconKind.meal,
+    '/intelligence-center' => BilSemanticIconKind.aiCoach,
+    '/settings/ai-coach' => BilSemanticIconKind.preferences,
     '/wellness/fasting' => BilSemanticIconKind.fasting,
     '/wellness/sleep' => BilSemanticIconKind.sleep,
     '/wellness/recipes' => BilSemanticIconKind.recipes,
@@ -529,8 +529,8 @@ abstract final class BilSemanticIcons {
     '/community/food-review' => BilSemanticIconKind.verifiedFood,
     '/notification-settings' => BilSemanticIconKind.notifications,
     '/settings/preferences' => BilSemanticIconKind.preferences,
-    '/settings/sharing-privacy' ||
-    '/advertising-privacy' => BilSemanticIconKind.privacy,
+    '/settings/sharing-privacy' => BilSemanticIconKind.privacy,
+    '/advertising-privacy' => BilSemanticIconKind.legal,
     '/help' => BilSemanticIconKind.support,
     '/help/delete-account' => BilSemanticIconKind.accountDeletion,
     '/legal/privacy' => BilSemanticIconKind.privacy,

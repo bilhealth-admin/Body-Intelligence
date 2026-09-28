@@ -17,69 +17,8 @@ import '../weight/providers/weight_provider.dart';
 
 part 'progress_page_components.dart';
 part 'progress_page_copy.dart';
-
-enum ProgressMetric { steps, weight, neck, waist, hips, chest, arm, thigh }
-
-enum ProgressRange { week, month, twoMonths, threeMonths, sixMonths, year, all }
-
-DateTime? progressRangeCutoff(ProgressRange range, DateTime now) {
-  final days = switch (range) {
-    ProgressRange.week => 7,
-    ProgressRange.month => 30,
-    ProgressRange.twoMonths => 60,
-    ProgressRange.threeMonths => 90,
-    ProgressRange.sixMonths => 180,
-    ProgressRange.year => 365,
-    ProgressRange.all => null,
-  };
-  if (days == null) return null;
-  final dayStart = now.isUtc
-      ? DateTime.utc(now.year, now.month, now.day)
-      : DateTime(now.year, now.month, now.day);
-  return dayStart.subtract(Duration(days: days - 1));
-}
-
-bool progressDateInRange(DateTime date, ProgressRange range, DateTime now) {
-  final cutoff = progressRangeCutoff(range, now);
-  return (cutoff == null || !date.isBefore(cutoff)) && !date.isAfter(now);
-}
-
-bool progressValidMeasurementCm(double? value) =>
-    value != null && value.isFinite && value > 0;
-
-final class ProgressSeriesStats {
-  const ProgressSeriesStats({
-    required this.average,
-    required this.best,
-    required this.total,
-    required this.start,
-    required this.current,
-    required this.change,
-  });
-  final double average;
-  final double best;
-  final double total;
-  final double start;
-  final double current;
-  final double change;
-
-  /// [values] must be ordered oldest to newest.
-  static ProgressSeriesStats? fromChronologicalValues(List<double> values) {
-    if (values.isEmpty) return null;
-    if (values.any((value) => !value.isFinite || value < 0)) {
-      throw ArgumentError.value(values, 'values');
-    }
-    final total = values.fold<double>(0, (sum, value) => sum + value);
-    return ProgressSeriesStats(
-      average: total / values.length,
-      best: values.reduce(math.max),
-      total: total,
-      start: values.first,
-      current: values.last,
-      change: values.last - values.first,
-    );
-  }
-}
+part 'progress_page_domain.dart';
+part 'progress_page_series.dart';
 
 final progressDailyLogsProvider = StreamProvider<List<DailyLog>>(
   (ref) => ref.watch(dailyLogRepositoryProvider).watchAll(),
@@ -144,7 +83,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             IconButton(
               key: const Key('progress-edit-measurements'),
               tooltip: copy.editMeasurements,
-              onPressed: () => context.push('/profile-settings'),
+              onPressed: () => _editMeasurement(copy),
               icon: const Icon(Icons.straighten_rounded),
             ),
         ],
@@ -432,140 +371,214 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     return _Point(row.date, UnitConverter.heightFromCm(centimeters!, system));
   }
 
-  Widget _series(_ProgressCopy copy, List<_Point> points, String unit) {
-    if (points.isEmpty) {
-      final canAdd = metric != ProgressMetric.steps;
-      return _ProgressEmptyState(
-        message: copy.noRecords,
-        actionLabel: canAdd
-            ? metric == ProgressMetric.weight
-                  ? copy.addEditWeight
-                  : copy.editMeasurements
-            : null,
-        onAction: canAdd
-            ? () => context.push(
-                metric == ProgressMetric.weight
-                    ? '/weight-history'
-                    : '/profile-settings',
-              )
-            : null,
-      );
-    }
-    points.sort((a, b) => a.date.compareTo(b.date));
-    final latest = points.last;
-    final stats = ProgressSeriesStats.fromChronologicalValues(
-      points.map((point) => point.value).toList(growable: false),
-    )!;
-    final decimals = metric == ProgressMetric.steps ? 0 : 1;
-    final currentValue = stats.current.toStringAsFixed(decimals);
-    final changeValue = metric == ProgressMetric.steps
-        ? stats.total.toStringAsFixed(0)
-        : '${stats.change >= 0 ? '+' : ''}${stats.change.toStringAsFixed(1)}';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _ProgressChartCard(
-          title: copy.metricLabel(metric),
-          latestLabel: copy.latest,
-          latestValue: currentValue,
-          unit: unit,
-          dateLabel: MaterialLocalizations.of(
-            context,
-          ).formatMediumDate(latest.date),
-          semanticsLabel: copy.chartSummary(
-            copy.metricLabel(metric),
-            copy.rangeLabel(range),
-            points.length,
-            points.map((point) => point.value).reduce(math.min),
-            points.map((point) => point.value).reduce(math.max),
-            latest.value,
-            unit,
-          ),
-          points: points,
-          summaries: [
-            _ProgressSummaryData(
-              metric == ProgressMetric.steps ? copy.average : copy.start,
-              (metric == ProgressMetric.steps ? stats.average : stats.start)
-                  .toStringAsFixed(decimals),
-            ),
-            _ProgressSummaryData(
-              metric == ProgressMetric.steps ? copy.best : copy.current,
-              (metric == ProgressMetric.steps ? stats.best : stats.current)
-                  .toStringAsFixed(decimals),
-            ),
-            _ProgressSummaryData(
-              metric == ProgressMetric.steps ? copy.total : copy.change,
-              changeValue,
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Card(
-          margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 17, 18, 11),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        copy.entries,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                    Text(
-                      copy.recordCount(points.length),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              for (var index = points.length - 1; index >= 0; index--) ...[
-                if (index != points.length - 1) const Divider(height: 1),
-                ListTile(
-                  minTileHeight: 58,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 18),
-                  leading: BilSemanticIconBadge(
-                    kind: _metricKind(metric),
-                    iconOverride: _metricIcon(metric),
-                    appleIconOverride: _metricAppleIcon(metric),
-                    size: 34,
-                    iconSize: 18,
-                  ),
-                  title: Text(
-                    MaterialLocalizations.of(
-                      context,
-                    ).formatMediumDate(points[index].date),
-                  ),
-                  trailing: Directionality(
-                    textDirection: TextDirection.ltr,
-                    child: Text(
-                      '${points[index].value.toStringAsFixed(decimals)} $unit',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   List<_Point> _filter(List<_Point> points) {
     final now = ref.read(progressClockProvider)();
     return points
         .where((point) => progressDateInRange(point.date, range, now))
         .toList();
+  }
+
+  double? _measurementValue(BodyMeasurementEntry? row) => switch (metric) {
+    ProgressMetric.neck => row?.neckCm,
+    ProgressMetric.waist => row?.waistCm,
+    ProgressMetric.hips => row?.hipsCm,
+    ProgressMetric.chest => row?.chestCm,
+    ProgressMetric.arm => row?.armCm,
+    ProgressMetric.thigh => row?.thighCm,
+    _ => null,
+  };
+
+  Future<void> _editMeasurement(_ProgressCopy copy, {DateTime? date}) async {
+    if (metric == ProgressMetric.steps || metric == ProgressMetric.weight) {
+      return;
+    }
+    final system = ref.read(measurementSystemProvider).value;
+    if (system == null) return;
+    final repository = ref.read(bodyMeasurementRepositoryProvider);
+    var selectedDate = DateUtils.dateOnly(
+      date ?? ref.read(progressClockProvider)(),
+    );
+    final controller = TextEditingController();
+
+    Future<void> loadDay() async {
+      final existing = await repository.getForDay(selectedDate);
+      final centimeters = _measurementValue(existing);
+      controller.text = centimeters == null
+          ? ''
+          : UnitConverter.heightFromCm(centimeters, system).toStringAsFixed(1);
+      controller.selection = TextSelection.collapsed(
+        offset: controller.text.length,
+      );
+    }
+
+    await loadDay();
+    if (!mounted) {
+      controller.dispose();
+      return;
+    }
+    var saving = false;
+    String? error;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          final unit = system == MeasurementSystem.imperial ? 'in' : 'cm';
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                4,
+                20,
+                20 + MediaQuery.viewInsetsOf(sheetContext).bottom,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      copy.addMeasurement(copy.metricLabel(metric)),
+                      style: Theme.of(sheetContext).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      key: const Key('measurement-entry-date'),
+                      onPressed: saving
+                          ? null
+                          : () async {
+                              final picked = await showDatePicker(
+                                context: sheetContext,
+                                initialDate: selectedDate,
+                                firstDate: DateTime(2000),
+                                lastDate: DateUtils.dateOnly(
+                                  ref.read(progressClockProvider)(),
+                                ),
+                              );
+                              if (picked == null) return;
+                              selectedDate = DateUtils.dateOnly(picked);
+                              await loadDay();
+                              setSheetState(() => error = null);
+                            },
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: Text(
+                        MaterialLocalizations.of(
+                          sheetContext,
+                        ).formatFullDate(selectedDate),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const Key('measurement-entry-value'),
+                      controller: controller,
+                      autofocus: false,
+                      enabled: !saving,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: copy.metricLabel(metric),
+                        suffixText: unit,
+                        errorText: error,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    FilledButton.icon(
+                      key: const Key('measurement-entry-save'),
+                      onPressed: saving
+                          ? null
+                          : () async {
+                              final displayValue = double.tryParse(
+                                controller.text.trim().replaceAll(',', '.'),
+                              );
+                              final centimeters = displayValue == null
+                                  ? null
+                                  : UnitConverter.heightToCm(
+                                      displayValue,
+                                      system,
+                                    );
+                              if (centimeters == null ||
+                                  !centimeters.isFinite ||
+                                  centimeters < 20 ||
+                                  centimeters > 300) {
+                                setSheetState(
+                                  () => error = copy.invalidMeasurement,
+                                );
+                                return;
+                              }
+                              setSheetState(() {
+                                saving = true;
+                                error = null;
+                              });
+                              try {
+                                await switch (metric) {
+                                  ProgressMetric.neck => repository.saveForDay(
+                                    date: selectedDate,
+                                    neckCm: centimeters,
+                                    preserveExistingValues: true,
+                                  ),
+                                  ProgressMetric.waist => repository.saveForDay(
+                                    date: selectedDate,
+                                    waistCm: centimeters,
+                                    preserveExistingValues: true,
+                                  ),
+                                  ProgressMetric.hips => repository.saveForDay(
+                                    date: selectedDate,
+                                    hipsCm: centimeters,
+                                    preserveExistingValues: true,
+                                  ),
+                                  ProgressMetric.chest => repository.saveForDay(
+                                    date: selectedDate,
+                                    chestCm: centimeters,
+                                    preserveExistingValues: true,
+                                  ),
+                                  ProgressMetric.arm => repository.saveForDay(
+                                    date: selectedDate,
+                                    armCm: centimeters,
+                                    preserveExistingValues: true,
+                                  ),
+                                  ProgressMetric.thigh => repository.saveForDay(
+                                    date: selectedDate,
+                                    thighCm: centimeters,
+                                    preserveExistingValues: true,
+                                  ),
+                                  _ => Future<void>.value(),
+                                };
+                                ref.invalidate(bodyMeasurementHistoryProvider);
+                                if (sheetContext.mounted) {
+                                  Navigator.pop(sheetContext);
+                                }
+                              } on Object {
+                                if (sheetContext.mounted) {
+                                  setSheetState(() {
+                                    saving = false;
+                                    error = copy.saveFailed;
+                                  });
+                                }
+                              }
+                            },
+                      icon: saving
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.check_rounded),
+                      label: Text(copy.saveMeasurement),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    // The modal future resolves when dismissal begins; its reverse transition
+    // can still build the text field for a short time. Dispose only after the
+    // route has fully left the overlay.
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    controller.dispose();
   }
 
   Widget _loading() => const _ProgressLoadingState();

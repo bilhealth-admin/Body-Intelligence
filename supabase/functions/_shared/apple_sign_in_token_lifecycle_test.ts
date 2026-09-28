@@ -41,6 +41,7 @@ class FakeAppleRpc implements AppleTokenRpcClient {
   readonly calls: Array<{ name: string; args: Record<string, unknown> }> = [];
   row: Record<string, unknown> | null = null;
   owner: string | null = null;
+  appleEventStatus = "deletion_queued";
 
   rpc(name: string, args: Record<string, unknown>) {
     this.calls.push({ name, args });
@@ -68,6 +69,12 @@ class FakeAppleRpc implements AppleTokenRpcClient {
     if (name === "bil_queue_apple_account_deletion") {
       return Promise.resolve({
         data: { request_id: "request-a", status: "pending" },
+        error: null,
+      });
+    }
+    if (name === "bil_apply_apple_account_event") {
+      return Promise.resolve({
+        data: { status: this.appleEventStatus },
         error: null,
       });
     }
@@ -248,32 +255,84 @@ test("failed Apple revocation preserves encrypted custody for retry", async () =
 test("Apple account-change events normalize current and legacy names", () => {
   assert.deepEqual(
     appleAccountEventFromClaims({
+      jti: "event-current",
+      iat: 1_790_500_000,
       events: JSON.stringify({
         type: "account-deleted",
         sub: "apple-subject-a",
+        event_time: 1_790_500_001_000,
       }),
     }),
-    { type: "account-deleted", subject: "apple-subject-a" },
+    {
+      type: "account-deleted",
+      subject: "apple-subject-a",
+      eventId: "event-current",
+      occurredAt: "2026-09-27T09:06:41.000Z",
+    },
   );
   assert.deepEqual(
     appleAccountEventFromClaims({
-      events: { type: "account-delete", sub: "apple-subject-a" },
+      jti: "event-legacy",
+      iat: 1_790_500_002,
+      events: {
+        type: "account-delete",
+        sub: "apple-subject-a",
+        event_time: 1_790_500_002,
+      },
     }),
-    { type: "account-deleted", subject: "apple-subject-a" },
+    {
+      type: "account-deleted",
+      subject: "apple-subject-a",
+      eventId: "event-legacy",
+      occurredAt: "2026-09-27T09:06:42.000Z",
+    },
+  );
+  assert.throws(
+    () =>
+      appleAccountEventFromClaims({
+        events: { type: "consent-revoked", sub: "apple-subject-a" },
+      }),
+    /invalid_apple_notification_events/,
   );
 });
 
-test("verified consent revocation queues deletion before removing mapping", async () => {
+test("verified destructive events use one atomic replay and generation guard", async () => {
   const client = new FakeAppleRpc();
-  client.owner = "owner-a";
   const result = await applyAppleAccountEvent(client, {
     type: "consent-revoked",
     subject: "apple-subject-a",
+    eventId: "event-a",
+    occurredAt: "2026-09-27T08:13:22.000Z",
   });
   assert.deepEqual(result, { status: "deletion_queued" });
-  const names = client.calls.map((call) => call.name);
-  assert.ok(
-    names.indexOf("bil_queue_apple_account_deletion") <
-      names.indexOf("bil_delete_apple_sign_in_credential"),
+  assert.equal(client.calls.length, 1);
+  assert.equal(client.calls[0].name, "bil_apply_apple_account_event");
+  assert.equal(
+    client.calls[0].args.p_event_id_hash,
+    await sha256Hex("event-a"),
   );
+  assert.equal(
+    client.calls[0].args.p_apple_subject_hash,
+    await sha256Hex("apple-subject-a"),
+  );
+
+  for (
+    const status of [
+      "duplicate_event",
+      "unknown_subject",
+      "stale_authorization",
+    ]
+  ) {
+    const statusClient = new FakeAppleRpc();
+    statusClient.appleEventStatus = status;
+    assert.deepEqual(
+      await applyAppleAccountEvent(statusClient, {
+        type: "account-deleted",
+        subject: "apple-subject-a",
+        eventId: `event-${status}`,
+        occurredAt: "2026-09-27T08:13:22.000Z",
+      }),
+      { status },
+    );
+  }
 });

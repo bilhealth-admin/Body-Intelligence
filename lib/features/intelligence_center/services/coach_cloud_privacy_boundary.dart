@@ -80,7 +80,11 @@ Set<CoachCloudContextCategory> coachCloudContextCategoriesForQuestion({
     if (turn.role != 'user') continue;
     final prior = turn.content.trim();
     if (prior.isEmpty || prior == question.trim()) continue;
-    return _coachCloudCategoriesInText(prior);
+    final priorCategories = _coachCloudCategoriesInText(prior);
+    // Short slot answers such as "83", "today", or "yes" do not carry a
+    // category by themselves. Keep walking back to the nearest explicit user
+    // topic instead of dropping the task that the Coach is completing.
+    if (priorCategories.isNotEmpty) return priorCategories;
   }
   return const <CoachCloudContextCategory>{};
 }
@@ -109,21 +113,33 @@ List<CoachConversationTurn> questionScopedCoachCloudConversation({
       values.last.content.trim() == question.trim()) {
     values.removeLast();
   }
-  final retained = <CoachConversationTurn>[];
-  var relevantUserTurn = false;
-  for (final turn in values) {
+  // Start at the latest explicit user turn in the same privacy category, then
+  // retain its bounded clarification chain. This preserves "log my weight" →
+  // "what value?" → "83" without leaking an older unrelated health topic.
+  var chainStart = -1;
+  for (var index = values.length - 1; index >= 0; index--) {
+    final turn = values[index];
+    if (turn.role != 'user') continue;
     final turnCategories = _coachCloudCategoriesInText(turn.content);
-    final isSubset = turnCategories.every(categories.contains);
-    if (turn.role == 'user') {
-      relevantUserTurn = turnCategories.isNotEmpty && isSubset;
-      if (relevantUserTurn) retained.add(turn);
-      continue;
+    if (turnCategories.isNotEmpty &&
+        turnCategories.every(categories.contains)) {
+      chainStart = index;
+      break;
     }
-    if (relevantUserTurn && isSubset) retained.add(turn);
   }
-  return retained.length <= 6
+  if (chainStart < 0) return const <CoachConversationTurn>[];
+  final retained = <CoachConversationTurn>[];
+  for (final turn in values.skip(chainStart)) {
+    final turnCategories = _coachCloudCategoriesInText(turn.content);
+    if (turnCategories.isNotEmpty &&
+        !turnCategories.every(categories.contains)) {
+      break;
+    }
+    retained.add(turn);
+  }
+  return retained.length <= 8
       ? retained
-      : retained.sublist(retained.length - 6);
+      : retained.sublist(retained.length - 8);
 }
 
 Set<CoachCloudContextCategory> _coachCloudCategoriesInText(String source) {

@@ -152,10 +152,11 @@ class _DiaryMealsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    const types = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
     return Column(
       key: const Key('daily-meal-loading-skeleton'),
       children: [
-        for (var index = 0; index < 4; index++) ...[
+        for (final type in types) ...[
           Container(
             height: 68,
             decoration: BoxDecoration(
@@ -174,21 +175,21 @@ class _DiaryMealsSkeleton extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Container(
-                  width: 108,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
+                Expanded(
+                  child: Text(
+                    context.strings.text(type),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                Container(
-                  width: 72,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(18),
+                const SizedBox(width: 12),
+                Text(
+                  '—',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],

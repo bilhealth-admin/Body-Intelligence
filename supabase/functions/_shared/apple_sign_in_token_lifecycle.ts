@@ -65,6 +65,8 @@ export type AppleAccountEventType =
 export interface AppleAccountEvent {
   type: AppleAccountEventType;
   subject: string;
+  eventId: string;
+  occurredAt: string;
 }
 
 function requiredEnvironment(
@@ -538,10 +540,30 @@ export function appleAccountEventFromClaims(
     "account-deleted",
   ]);
   const subject = typeof event.sub === "string" ? event.sub.trim() : "";
-  if (!supported.has(type as AppleAccountEventType) || !subject) {
+  const eventId = typeof payload.jti === "string" ? payload.jti.trim() : "";
+  const rawOccurredAt = event.event_time ?? payload.iat;
+  const numericOccurredAt = typeof rawOccurredAt === "number"
+    ? rawOccurredAt
+    : typeof rawOccurredAt === "string" && rawOccurredAt.trim() !== ""
+    ? Number(rawOccurredAt)
+    : Number.NaN;
+  const occurredAtMilliseconds = numericOccurredAt >= 1_000_000_000_000
+    ? numericOccurredAt
+    : numericOccurredAt * 1000;
+  const occurredAt = new Date(occurredAtMilliseconds);
+  if (
+    !supported.has(type as AppleAccountEventType) || !subject || !eventId ||
+    !Number.isFinite(occurredAtMilliseconds) ||
+    Number.isNaN(occurredAt.getTime())
+  ) {
     throw new Error("invalid_apple_notification_events");
   }
-  return { type: type as AppleAccountEventType, subject };
+  return {
+    type: type as AppleAccountEventType,
+    subject,
+    eventId,
+    occurredAt: occurredAt.toISOString(),
+  };
 }
 
 export async function applyAppleAccountEvent(
@@ -553,27 +575,30 @@ export async function applyAppleAccountEvent(
     // events therefore require no user-data mutation.
     return { status: "acknowledged" as const };
   }
-  const owner = await rpc(
+  const result = await rpc(
     client,
-    "bil_read_apple_sign_in_owner_by_subject_hash",
-    { p_apple_subject_hash: await sha256Hex(event.subject) },
+    "bil_apply_apple_account_event",
+    {
+      p_event_id_hash: await sha256Hex(event.eventId),
+      p_event_occurred_at: event.occurredAt,
+      p_apple_subject_hash: await sha256Hex(event.subject),
+      p_event_type: event.type,
+    },
   );
-  const userId = typeof owner === "string" ? owner.trim() : "";
-  if (!userId) return { status: "unknown_subject" as const };
-
-  const reason = event.type === "consent-revoked"
-    ? "apple_consent_revoked"
-    : "apple_account_deleted";
-  // Queue first. If credential cleanup then fails, Apple's retry still finds
-  // the owner mapping and the queue's unique active-request guard is idempotent.
-  await rpc(client, "bil_queue_apple_account_deletion", {
-    p_user_id: userId,
-    p_reason: reason,
-  });
-  await rpc(client, "bil_delete_apple_sign_in_credential", {
-    p_user_id: userId,
-  });
-  return { status: "deletion_queued" as const };
+  const status = record(result)?.status;
+  if (
+    status !== "deletion_queued" && status !== "duplicate_event" &&
+    status !== "unknown_subject" && status !== "stale_authorization"
+  ) {
+    throw new Error("invalid_apple_account_event_result");
+  }
+  return { status } as {
+    status:
+      | "deletion_queued"
+      | "duplicate_event"
+      | "unknown_subject"
+      | "stale_authorization";
+  };
 }
 
 export async function verifyAppleNotification(

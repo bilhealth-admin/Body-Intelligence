@@ -270,20 +270,21 @@ void main() {
     },
   );
 
-  testWidgets('explicit Review uses canonical data over a stale draft', (
-    tester,
-  ) async {
-    await seedCanonicalData();
-    await drafts.save(canonicalDraft().copyWith(preferredName: 'Stale draft'));
+  testWidgets(
+    'explicit Review skips identity and leaves stale draft untouched',
+    (tester) async {
+      await seedCanonicalData();
+      await drafts.save(
+        canonicalDraft().copyWith(preferredName: 'Stale draft'),
+      );
 
-    await mountReview(tester);
+      await mountReview(tester);
 
-    final name = tester.widget<TextField>(
-      find.byKey(const Key('onboarding-name-field')),
-    );
-    expect(name.controller!.text, 'Canonical');
-    expect((await drafts.load())!.preferredName, 'Stale draft');
-  });
+      expect(find.byKey(const Key('onboarding-name-field')), findsNothing);
+      expect(find.text('What would you like to work on?'), findsOneWidget);
+      expect((await drafts.load())!.preferredName, 'Stale draft');
+    },
+  );
 
   testWidgets('leaving Review without finishing does not write its draft', (
     tester,

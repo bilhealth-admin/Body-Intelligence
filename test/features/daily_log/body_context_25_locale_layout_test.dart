@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_body_context_page.dart';
+import 'package:body_intelligence_log/features/daily_log/daily_body_context_copy.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -54,6 +55,16 @@ void main() {
       expect(find.byType(Scrollable), findsWidgets);
       if (tag != 'en') {
         expect(find.text('Body context'), findsNothing, reason: tag);
+        expect(
+          find.text(dailyBodyContextEnglishCopy['poorSleep']!),
+          findsNothing,
+          reason: '$tag must localize saved context labels',
+        );
+        expect(
+          find.text(dailyBodyContextEnglishCopy['nothingNotable']!),
+          findsNothing,
+          reason: '$tag must localize the empty-context choice',
+        );
       }
       await tester.scrollUntilVisible(
         find.byKey(const Key('daily-body-context-save-action')),

@@ -19,10 +19,16 @@ import {
   isRetryableGeminiError,
   isRetryableGeminiStatus,
   parseModelJson,
+  recoverExactUserAction,
   requireSafeGeminiCandidate,
   responseLanguage,
   spokenWithinComfortableTurn,
+  thinkingConfigForModel,
 } from "./server.ts";
+
+// Handler unit tests below isolate consent, metering, provider, and response
+// behavior. Mobile-integrity enforcement has its own shared boundary suite.
+Deno.env.set("BIL_MOBILE_INTEGRITY_ENFORCEMENT", "off");
 
 Deno.test("model prompt separates proposed actions from execution receipts", () => {
   assertEquals(
@@ -183,6 +189,8 @@ Deno.test("weight history stays a proposed client action, not a receipt", () => 
     reason: "The user requested a read-only screen.",
     confidence: 0.95,
     evidence: [],
+    citations: [],
+    requires_health_citation: false,
     missing_data: [],
     proposed_actions: [{
       type: "open_weight_log",
@@ -205,6 +213,8 @@ Deno.test("model actions are allow-listed and confirmation-gated", () => {
     reason: "The request includes an exact amount.",
     confidence: 0.9,
     evidence: ["context.waterHistory"],
+    citations: [],
+    requires_health_citation: false,
     missing_data: [],
     proposed_actions: [
       {
@@ -230,6 +240,8 @@ Deno.test("model actions are allow-listed and confirmation-gated", () => {
     parseModelJson(JSON.stringify({
       reply: "Safe written answer.",
       spoken_reply: "* not a spoken sentence",
+      citations: [],
+      requires_health_citation: false,
       proposed_actions: [],
     }))
   );
@@ -248,6 +260,7 @@ Deno.test("health citations keep only trusted registry identifiers", () => {
       "invented_study",
       "cdc_adult_bmi",
     ],
+    requires_health_citation: true,
     missing_data: [],
     proposed_actions: [],
   }));
@@ -268,6 +281,20 @@ Deno.test("uncited health recommendations fail closed", () => {
     answerNeedsHealthCitation("Most adults need 7 to 9 hours."),
     true,
   );
+  for (
+    const recommendation of [
+      "Vous devriez manger plus de légumes.",
+      "Debes comer más verduras.",
+      "Du solltest mehr Gemüse essen.",
+      "Dovresti mangiare più verdure per la salute.",
+      "Ешьте больше овощей для здоровья.",
+      "为了健康，建议多吃蔬菜。",
+      "健康のために野菜をもっと食べてください。",
+      "Sağlığınız için daha fazla sebze yemelisiniz.",
+    ]
+  ) {
+    assertEquals(answerNeedsHealthCitation(recommendation), true);
+  }
   assertThrows(
     () =>
       parseModelJson(JSON.stringify({
@@ -277,12 +304,81 @@ Deno.test("uncited health recommendations fail closed", () => {
         confidence: 0.9,
         evidence: [],
         citations: [],
+        requires_health_citation: true,
         missing_data: [],
         proposed_actions: [],
       })),
     Error,
     "missing_health_citation",
   );
+});
+
+Deno.test("spoken health guidance cannot bypass the citation gate", () => {
+  assertThrows(
+    () =>
+      parseModelJson(JSON.stringify({
+        reply: "Hello!",
+        spoken_reply: "You should eat more vegetables.",
+        reason: "General guidance.",
+        confidence: 0.9,
+        evidence: [],
+        citations: [],
+        requires_health_citation: true,
+        missing_data: [],
+        proposed_actions: [],
+      })),
+    Error,
+    "missing_health_citation",
+  );
+});
+
+Deno.test("structured health citation classification closes every 25-locale path", () => {
+  const releaseLocales = [
+    "ar",
+    "en",
+    "fr",
+    "es",
+    "tr",
+    "de",
+    "it",
+    "pt-BR",
+    "pt-PT",
+    "ur",
+    "fa",
+    "hi",
+    "id",
+    "ms",
+    "ja",
+    "ko",
+    "zh-Hans",
+    "zh-Hant",
+    "ru",
+    "bn",
+    "vi",
+    "th",
+    "pl",
+    "nl",
+    "uk",
+  ];
+  assertEquals(releaseLocales.length, 25);
+  for (const locale of releaseLocales) {
+    assertThrows(
+      () =>
+        parseModelJson(JSON.stringify({
+          reply: `Localized substantive guidance (${locale}).`,
+          spoken_reply: `Localized guidance for ${locale}.`,
+          reason: "General health guidance.",
+          confidence: 0.9,
+          evidence: [],
+          citations: [],
+          requires_health_citation: true,
+          missing_data: [],
+          proposed_actions: [],
+        })),
+      Error,
+      "missing_health_citation",
+    );
+  }
 });
 
 Deno.test("spoken summary is bounded to a comfortable voice turn", () => {
@@ -302,6 +398,8 @@ Deno.test("spoken summary is bounded to a comfortable voice turn", () => {
     parseModelJson(JSON.stringify({
       reply: "A detailed answer remains visible.",
       spoken_reply: Array(49).fill("word").join(" "),
+      citations: [],
+      requires_health_citation: false,
       proposed_actions: [],
     }))
   );
@@ -339,8 +437,8 @@ function providerSuccess() {
   return new Response(JSON.stringify({ candidates: [] }), { status: 200 });
 }
 
-Deno.test("Gemini retry policy bounds each attempt and retries only transient failures", async () => {
-  assertEquals(geminiAttemptTimeoutMs, 12_000);
+Deno.test("Gemini provider budget fits the client deadline", async () => {
+  assertEquals(geminiAttemptTimeoutMs, 10_000);
   assertEquals(isRetryableGeminiStatus(429), true);
   assertEquals(isRetryableGeminiStatus(503), true);
   assertEquals(isRetryableGeminiStatus(400), false);
@@ -353,46 +451,63 @@ Deno.test("Gemini retry policy bounds each attempt and retries only transient fa
 
   await withGeminiTestKey(async () => {
     let rateLimitedCalls = 0;
-    const recovered = await geminiCall(
-      "gemini-test",
-      [],
-      "test",
-      32,
-      false,
-      "LOW",
-      (_url, _init) => {
-        rateLimitedCalls += 1;
-        return Promise.resolve(
-          rateLimitedCalls === 1
-            ? new Response(
-              JSON.stringify({ error: { status: "RESOURCE_EXHAUSTED" } }),
-              { status: 429 },
-            )
-            : providerSuccess(),
-        );
-      },
+    await assertRejects(
+      () =>
+        geminiCall(
+          "gemini-test",
+          [],
+          "test",
+          32,
+          false,
+          "LOW",
+          (_url, _init) => {
+            rateLimitedCalls += 1;
+            return Promise.resolve(
+              rateLimitedCalls === 1
+                ? new Response(
+                  JSON.stringify({ error: { status: "RESOURCE_EXHAUSTED" } }),
+                  { status: 429 },
+                )
+                : providerSuccess(),
+            );
+          },
+        ),
+      Error,
+      "provider_rate_limited",
     );
-    assertEquals(recovered.attempts, 2);
-    assertEquals(rateLimitedCalls, 2);
+    assertEquals(rateLimitedCalls, 1);
 
     let networkCalls = 0;
-    const networkRecovered = await geminiCall(
-      "gemini-test",
-      [],
-      "test",
-      32,
-      false,
-      "LOW",
-      (_url, _init) => {
-        networkCalls += 1;
-        if (networkCalls === 1) {
-          return Promise.reject(new TypeError("network unavailable"));
-        }
-        return Promise.resolve(providerSuccess());
-      },
+    await assertRejects(
+      () =>
+        geminiCall(
+          "gemini-test",
+          [],
+          "test",
+          32,
+          false,
+          "LOW",
+          (_url, _init) => {
+            networkCalls += 1;
+            if (networkCalls === 1) {
+              return Promise.reject(new TypeError("network unavailable"));
+            }
+            return Promise.resolve(providerSuccess());
+          },
+        ),
+      TypeError,
+      "network unavailable",
     );
-    assertEquals(networkRecovered.attempts, 2);
-    assertEquals(networkCalls, 2);
+    assertEquals(networkCalls, 1);
+  });
+});
+
+Deno.test("Gemini thinking configuration matches the model generation", () => {
+  assertEquals(thinkingConfigForModel("gemini-2.5-flash", "MEDIUM"), {
+    thinkingBudget: -1,
+  });
+  assertEquals(thinkingConfigForModel("gemini-3.7-flash", "HIGH"), {
+    thinkingLevel: "HIGH",
   });
 });
 
@@ -441,7 +556,7 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
       Error,
       "provider_http_503",
     );
-    assertEquals(serverErrorCalls, 2);
+    assertEquals(serverErrorCalls, 1);
 
     let parseCalls = 0;
     await assertRejects(
@@ -492,8 +607,8 @@ Deno.test("Gemini falls back only after a transient primary-model outage", async
     "test",
     32,
   );
-  assertEquals(models, ["gemini-primary", "gemini-2.5-flash"]);
-  assertEquals(recovered.model, "gemini-2.5-flash");
+  assertEquals(models, ["gemini-primary", "gemini-3.7-flash"]);
+  assertEquals(recovered.model, "gemini-3.7-flash");
   assertEquals(recovered.fallbackUsed, true);
 
   let permanentFailureCalls = 0;
@@ -513,6 +628,170 @@ Deno.test("Gemini falls back only after a transient primary-model outage", async
     "provider_http_400",
   );
   assertEquals(permanentFailureCalls, 1);
+});
+
+Deno.test("explicit app actions recover without treating bare values as writes", () => {
+  assertEquals(
+    recoverExactUserAction([
+      { role: "user", content: "سجل وزني اليوم" },
+      { role: "assistant", content: "كم وزنك؟" },
+      { role: "user", content: "٨٣٫٥" },
+    ]),
+    null,
+  );
+  assertEquals(
+    recoverExactUserAction([
+      { role: "user", content: "أضف ماء" },
+      { role: "assistant", content: "كم شربت؟" },
+      { role: "user", content: "0.75 لتر" },
+    ]),
+    null,
+  );
+  assertEquals(
+    recoverExactUserAction([
+      { role: "user", content: "سجل وزني ٨٣٫٥ كيلو" },
+    ]),
+    {
+      type: "log_weight",
+      arguments: { weightKg: 83.5 },
+      requires_confirmation: true,
+    },
+  );
+  assertEquals(
+    recoverExactUserAction([
+      { role: "user", content: "أضف 0.75 لتر ماء" },
+    ]),
+    {
+      type: "log_water",
+      arguments: { amountMl: 750 },
+      requires_confirmation: true,
+    },
+  );
+  assertEquals(
+    recoverExactUserAction([
+      { role: "user", content: "سجل فطوري اليوم" },
+      { role: "assistant", content: "ما مكونات الوجبة؟" },
+      { role: "user", content: "بيض وخبز" },
+    ]),
+    {
+      type: "open_meals",
+      arguments: {},
+      requires_confirmation: true,
+    },
+  );
+  assertEquals(
+    recoverExactUserAction([
+      { role: "user", content: "أكلت بيض وخبز" },
+    ]),
+    null,
+  );
+});
+
+Deno.test("completed or cancelled actions never recover stale writes", () => {
+  const user = (content: string) => ({ role: "user" as const, content });
+  const assistant = (content: string) => ({
+    role: "assistant" as const,
+    content,
+  });
+  for (
+    const messages of [
+      [
+        user("Log my weight 83 kg"),
+        assistant("The weight entry is complete."),
+        user("Explain how a waist measurement of 99 cm relates to health."),
+      ],
+      [
+        user("Log my weight 83 kg"),
+        assistant("The weight entry is complete."),
+        user("What does my waist measurement mean?"),
+        assistant("What is your waist circumference in cm?"),
+        user("99"),
+      ],
+      [
+        user("Log my weight 83 kg"),
+        assistant("The weight entry is complete."),
+        user("Help me think about my target weight."),
+        assistant("What target weight would you like to reach?"),
+        user("79"),
+      ],
+      [
+        user("سجل وزني 83 كيلو"),
+        assistant("انتهت عملية تسجيل الوزن."),
+        user("ساعدني أفكر بهدف الوزن."),
+        assistant("ما الوزن المستهدف الذي تريد الوصول إليه؟"),
+        user("٧٩"),
+      ],
+      [
+        user("Log my weight"),
+        assistant("What is your weight?"),
+        user(
+          "Cancel recording my weight. Let us discuss my target weight only.",
+        ),
+        assistant("What is your target weight?"),
+        user("79"),
+      ],
+      [
+        user("Log water 500 ml"),
+        assistant("Your water entry is complete."),
+        user("Help me understand the milk in my breakfast meal."),
+        assistant("How much milk did your breakfast contain?"),
+        user("250 ml"),
+      ],
+      [
+        user("Log my weight 83 kg"),
+        assistant(
+          "Please confirm the weight entry. What target weight would you like to reach?",
+        ),
+        user("79"),
+      ],
+      [
+        user("سجل وزني 83 كيلو"),
+        assistant(
+          "أكد إدخال الوزن من البطاقة. ما الوزن المستهدف الذي تريد الوصول إليه؟",
+        ),
+        user("٧٩"),
+      ],
+      [
+        user("Log water 500 ml"),
+        assistant(
+          "Please confirm the water entry. How much milk did your breakfast contain?",
+        ),
+        user("250 ml"),
+      ],
+      [
+        user("سجل ماء 500 مل"),
+        assistant(
+          "أكد تسجيل الماء من البطاقة. كم كمية الحليب التي تناولتها مع الفطور؟",
+        ),
+        user("٢٥٠ مل"),
+      ],
+      [
+        user("Log my weight 83 kg"),
+        assistant("The weight entry is complete."),
+        user("How many calories are in 250 grams of chicken?"),
+      ],
+      [user("Do not log my weight 83 kg")],
+      [
+        user("سجل وزني 83 كيلو"),
+        assistant("تم حفظ القياس."),
+        user("كم سعرة في 250 غرام دجاج؟"),
+      ],
+      [
+        user("سجل وزني 83 كيلو"),
+        assistant("تم حفظ القياس."),
+        user("هل محيط خصري مناسب؟"),
+        assistant("كم محيط خصرك بالسنتيمتر؟"),
+        user("٩٩"),
+      ],
+      [
+        user("Log my breakfast"),
+        assistant("The breakfast task is complete."),
+        user("What is dark mode?"),
+      ],
+    ]
+  ) {
+    assertEquals(recoverExactUserAction(messages), null);
+  }
 });
 
 Deno.test("Gemini request always carries the four explicit conservative safety settings", async () => {
@@ -760,6 +1039,7 @@ Deno.test("successful response exposes the metered request id for feedback corre
                   confidence: 0.8,
                   evidence: [],
                   citations: ["sleep_foundation_adult_duration"],
+                  requires_health_citation: true,
                   missing_data: [],
                   proposed_actions: [],
                 }),
@@ -1053,6 +1333,8 @@ Deno.test("voice uses current consent and one voice-seconds reservation", async 
                   reason: "السؤال يطلب تفسير ثبات الوزن.",
                   confidence: 0.8,
                   evidence: [],
+                  citations: [],
+                  requires_health_citation: false,
                   missing_data: [],
                   proposed_actions: [],
                 }),

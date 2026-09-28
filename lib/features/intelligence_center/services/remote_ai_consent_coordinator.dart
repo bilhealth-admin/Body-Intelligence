@@ -28,26 +28,40 @@ class RemoteAiConsentCoordinator {
   bool _granted = false;
   Future<bool>? _readInFlight;
   Future<bool>? _grantInFlight;
+  int _generation = 0;
 
   Future<bool> isGranted({bool forceServerRead = false}) {
     final owner = _syncOwner();
     if (owner == null) return Future<bool>.value(false);
     if (_granted && !forceServerRead) return Future<bool>.value(true);
-    return _readInFlight ??= _readCurrent(owner).whenComplete(() {
-      _readInFlight = null;
+    final existing = _readInFlight;
+    if (existing != null) return existing;
+    final generation = _generation;
+    late final Future<bool> pending;
+    pending = _readCurrent(owner, generation).whenComplete(() {
+      if (identical(_readInFlight, pending)) _readInFlight = null;
     });
+    _readInFlight = pending;
+    return pending;
   }
 
   Future<bool> grantAndVerify() {
     final owner = _syncOwner();
     if (owner == null) return Future<bool>.value(false);
     if (_granted) return Future<bool>.value(true);
-    return _grantInFlight ??= _grantCurrent(owner).whenComplete(() {
-      _grantInFlight = null;
+    final existing = _grantInFlight;
+    if (existing != null) return existing;
+    final generation = _generation;
+    late final Future<bool> pending;
+    pending = _grantCurrent(owner, generation).whenComplete(() {
+      if (identical(_grantInFlight, pending)) _grantInFlight = null;
     });
+    _grantInFlight = pending;
+    return pending;
   }
 
   void invalidate() {
+    _generation++;
     _granted = false;
     _readInFlight = null;
     _grantInFlight = null;
@@ -57,6 +71,7 @@ class RemoteAiConsentCoordinator {
     final owner = this.owner()?.trim();
     final normalized = owner == null || owner.isEmpty ? null : owner;
     if (_cachedOwner != normalized) {
+      _generation++;
       _cachedOwner = normalized;
       _granted = false;
       _readInFlight = null;
@@ -65,19 +80,20 @@ class RemoteAiConsentCoordinator {
     return normalized;
   }
 
-  Future<bool> _readCurrent(String owner) async {
+  Future<bool> _readCurrent(String owner, int generation) async {
     final receipt = await read().timeout(const Duration(seconds: 8));
     final granted = isCurrentRemoteAiConsentGranted(receipt);
-    if (_syncOwner() == owner) _granted = granted;
+    if (_syncOwner() != owner || _generation != generation) return false;
+    _granted = granted;
     return granted;
   }
 
-  Future<bool> _grantCurrent(String owner) async {
+  Future<bool> _grantCurrent(String owner, int generation) async {
     await write().timeout(const Duration(seconds: 8));
-    if (_syncOwner() != owner) return false;
+    if (_syncOwner() != owner || _generation != generation) return false;
     // Force one authoritative readback after persistence. The pending message
     // cannot proceed to Gemini unless policy version 3 is visible here.
-    return isGranted(forceServerRead: true);
+    return _readCurrent(owner, generation);
   }
 }
 

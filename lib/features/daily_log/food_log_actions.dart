@@ -76,29 +76,31 @@ extension _FoodLogActions on _FoodLogPageState {
     }
   }
 
-  Future<void> _scanBarcode() async {
-    if (barcodeBusy) return;
+  Future<bool> _scanBarcode() async {
+    if (barcodeBusy) return true;
     barcodeBusy = true;
     try {
-      if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) return;
+      if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) {
+        return false;
+      }
       final barcode = await Navigator.of(context).push<String>(
         MaterialPageRoute<String>(
           builder: (_) => const FoodBarcodeScannerPage(),
         ),
       );
-      if (!mounted || barcode == null || barcode.trim().isEmpty) return;
+      if (!mounted || barcode == null || barcode.trim().isEmpty) return false;
       try {
         final outcome = await ref
             .read(foodRuntimeSearchAuthorityProvider)
             .lookupBarcodeJourney(barcode);
-        if (!mounted) return;
+        if (!mounted) return true;
         if (outcome.found) {
           search.text = outcome.normalizedBarcode;
           _updateState(() {
             searchResults = outcome.foods.take(30).toList(growable: false);
             searchLoading = false;
           });
-          return;
+          return true;
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -110,18 +112,19 @@ extension _FoodLogActions on _FoodLogPageState {
           ),
         );
       } on Object {
-        if (!mounted) return;
+        if (!mounted) return true;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_t(context, 'Barcode lookup failed'))),
         );
       }
+      return true;
     } finally {
       barcodeBusy = false;
     }
   }
 
-  Future<void> _voiceSearch() async {
-    if (voiceBusy) return;
+  Future<bool> _voiceSearch() async {
+    if (voiceBusy) return true;
     voiceBusy = true;
     try {
       final locale = Localizations.localeOf(context);
@@ -132,10 +135,11 @@ extension _FoodLogActions on _FoodLogPageState {
         arabic: localeTag == 'ar',
       );
       if (!mounted || result == null || result.foodQuery.trim().isEmpty) {
-        return;
+        return false;
       }
       search.text = result.foodQuery.trim();
       _scheduleSearch(search.text);
+      return true;
     } finally {
       voiceBusy = false;
     }

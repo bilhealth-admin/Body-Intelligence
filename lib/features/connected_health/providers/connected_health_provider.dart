@@ -17,6 +17,7 @@ import '../connected_health_model.dart';
 part 'connected_health_gateway_helpers.dart';
 part 'connected_health_aggregations.dart';
 part 'connected_health_native_gateway.dart';
+part 'connected_health_native_daily_activity.dart';
 
 abstract interface class ConnectedHealthGateway {
   Future<ConnectedHealthSnapshot> load();

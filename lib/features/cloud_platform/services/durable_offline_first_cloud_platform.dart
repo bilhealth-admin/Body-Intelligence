@@ -179,8 +179,12 @@ final class DurableOfflineFirstCloudPlatform {
         pulled: applied,
         conflicts: conflicts,
         pending: await store.pendingCount(ownerId: consent.ownerId),
-        availability: CloudPlatformAvailability.ready,
-        diagnostics: const [],
+        availability: batch.hasMore
+            ? CloudPlatformAvailability.paused
+            : CloudPlatformAvailability.ready,
+        diagnostics: batch.hasMore
+            ? const ['More cloud pages remain; durable cursor saved.']
+            : const [],
       );
     } catch (error) {
       for (final op in pending) {

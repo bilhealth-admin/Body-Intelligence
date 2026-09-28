@@ -122,6 +122,27 @@ void main() {
       },
     );
 
+    test('M stale consent read fails closed after owner change', () async {
+      final readCompleter = Completer<Object?>();
+      final harness = _Harness(readFuture: readCompleter.future);
+      final pending = harness.coordinator.isGranted();
+      harness.owner = 'user-2';
+      readCompleter.complete(_granted);
+      expect(await pending, isFalse);
+    });
+
+    test(
+      'N invalidation prevents an old read from restoring consent',
+      () async {
+        final readCompleter = Completer<Object?>();
+        final harness = _Harness(readFuture: readCompleter.future);
+        final pending = harness.coordinator.isGranted();
+        harness.coordinator.invalidate();
+        readCompleter.complete(_granted);
+        expect(await pending, isFalse);
+      },
+    );
+
     test('UI clears progress before consent and retries original turn once', () {
       final source = File(
         'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',

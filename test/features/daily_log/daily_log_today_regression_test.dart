@@ -263,6 +263,45 @@ void main() {
     expect(selected, DateTime(2026, 9, 20));
   });
 
+  testWidgets('date labels never move the previous and next controls', (
+    tester,
+  ) async {
+    var date = DateTime(2026, 9, 9);
+
+    Widget navigator() => _localizedApp(
+      StatefulBuilder(
+        builder: (context, setState) => Scaffold(
+          body: DiaryDateNavigator(
+            date: date,
+            arabic: false,
+            todayHeader: true,
+            onBack: () {},
+            onPrevious: () => setState(() => date = DateTime(2026, 12, 28)),
+            onNext: () => setState(() => date = DateTime(2026, 1, 1)),
+            onPick: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(navigator());
+    await tester.pumpAndSettle();
+    final previous = find.byKey(const Key('daily-log-previous'));
+    final next = find.byKey(const Key('daily-log-next'));
+    final previousCenter = tester.getCenter(previous);
+    final nextCenter = tester.getCenter(next);
+
+    await tester.tap(previous);
+    await tester.pump();
+    expect(tester.getCenter(previous), previousCenter);
+    expect(tester.getCenter(next), nextCenter);
+
+    await tester.tap(next);
+    await tester.pump();
+    expect(tester.getCenter(previous), previousCenter);
+    expect(tester.getCenter(next), nextCenter);
+  });
+
   testWidgets('date loading keeps a stable summary and meal shell', (
     tester,
   ) async {

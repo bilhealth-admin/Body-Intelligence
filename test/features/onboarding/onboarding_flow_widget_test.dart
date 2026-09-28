@@ -375,44 +375,43 @@ void main() {
     expect(await UserProfileRepository(database).getProfile(), isNull);
   });
 
-  testWidgets('first-page Back saves typed data before leaving onboarding', (
+  testWidgets('first-page Back preserves a legacy name and leaves onboarding', (
     tester,
   ) async {
-    await drafts.save(valid(step: 'name').copyWith(preferredName: ''));
+    await drafts.save(valid(step: 'name').copyWith(preferredName: 'Ada'));
     await mountRouted(tester);
 
-    await tester.enterText(
-      find.byKey(const Key('onboarding-name-field')),
-      'Ada',
-    );
+    expect(find.byKey(const Key('onboarding-name-field')), findsNothing);
+    expect(find.text('What would you like to work on?'), findsOneWidget);
     await tester.tap(find.byKey(const Key('onboarding-back')));
     await tester.pumpAndSettle();
 
     expect(find.text('Account gateway'), findsOneWidget);
     final saved = await drafts.load();
-    expect(saved?.stepId, 'name');
+    expect(saved?.stepId, 'goals');
     expect(saved?.preferredName, 'Ada');
   });
 
-  testWidgets('name step advances before any goal has been selected', (
-    tester,
-  ) async {
-    await drafts.save(
-      const OnboardingDraft(
-        stepId: 'name',
-        preferredName: 'Mohamed',
-        goals: <OnboardingGoal>{},
-      ),
-    );
-    await mount(tester);
+  testWidgets(
+    'legacy name step resumes at goals without showing a name field',
+    (tester) async {
+      await drafts.save(
+        const OnboardingDraft(
+          stepId: 'name',
+          preferredName: 'Mohamed',
+          goals: <OnboardingGoal>{},
+        ),
+      );
+      await mount(tester);
 
-    await tester.tap(find.byKey(const Key('onboarding-next')));
-    await tester.pumpAndSettle();
+      expect(find.byKey(const Key('onboarding-name-field')), findsNothing);
+      expect(find.text('What would you like to work on?'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('onboarding-next')));
+      await tester.pumpAndSettle();
 
-    expect(find.text('What would you like to work on?'), findsOneWidget);
-    expect(find.text('Choose at least one goal.'), findsNothing);
-    expect((await drafts.load())?.stepId, 'goals');
-  });
+      expect(find.text('Choose at least one goal.'), findsOneWidget);
+    },
+  );
 
   testWidgets('Android system Back uses the same saved step transition', (
     tester,

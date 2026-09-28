@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/cloud_identity_models.dart';
@@ -42,6 +44,16 @@ final class SupabaseCloudTransport implements CloudTransport {
       throw StateError('Cross-account or cross-device sync batch rejected.');
     }
 
+    final submitted = operations.map((value) => value.operationId).toSet();
+    final activeUser = client.auth.currentUser;
+    if (activeUser == null || activeUser.id != ownerId) {
+      throw StateError('Cloud owner changed during synchronization.');
+    }
+
+    // Fetch exactly one server page. The runtime persists its acknowledgement,
+    // records, and cursor before the next sync asks for another page, so a later
+    // process restart resumes from durable progress instead of replaying an
+    // in-memory aggregate.
     final response = await client
         .rpc(
           'bil_sync_records',
@@ -54,33 +66,41 @@ final class SupabaseCloudTransport implements CloudTransport {
           },
         )
         .timeout(requestTimeout);
+    final ownerAfterRequest = client.auth.currentUser;
+    if (ownerAfterRequest == null || ownerAfterRequest.id != ownerId) {
+      throw StateError('Cloud owner changed during synchronization.');
+    }
     if (response is! Map) {
       throw const FormatException('Invalid BIL cloud sync response.');
     }
     final body = Map<String, Object?>.from(response);
-    final acknowledged = (body['acknowledged'] as List? ?? const <Object?>[])
-        .map((value) => value.toString())
-        .toList(growable: false);
-    final records = (body['records'] as List? ?? const <Object?>[])
+    final pageAcknowledged =
+        (body['acknowledged'] as List? ?? const <Object?>[])
+            .map((value) => value.toString())
+            .toList(growable: false);
+    if (!pageAcknowledged.every(submitted.contains)) {
+      throw const FormatException('Invalid BIL cloud acknowledgement.');
+    }
+    final pageRecords = (body['records'] as List? ?? const <Object?>[])
         .map(
           (value) => _recordFromJson(Map<String, Object?>.from(value as Map)),
         )
         .toList(growable: false);
-    final submitted = operations.map((value) => value.operationId).toSet();
-    if (!acknowledged.every(submitted.contains)) {
-      throw const FormatException('Invalid BIL cloud acknowledgement.');
-    }
-    if (!records.every((record) => record.ownerId == ownerId)) {
+    if (!pageRecords.every((record) => record.ownerId == ownerId)) {
       throw const FormatException('Cross-account BIL cloud response.');
     }
-    final serverCursor = (body['cursor'] ?? cursor)?.toString();
-    if (serverCursor != null && int.tryParse(serverCursor) == null) {
+    final nextCursor = (body['cursor'] ?? cursor)?.toString();
+    if (nextCursor != null && int.tryParse(nextCursor) == null) {
       throw const FormatException('Invalid BIL cloud cursor.');
     }
+    if (body['has_more'] == true && nextCursor == cursor) {
+      throw const FormatException('BIL cloud cursor did not advance.');
+    }
     return CloudSyncBatchResult(
-      acknowledgedOperationIds: acknowledged,
-      remoteRecords: records,
-      serverCursor: serverCursor,
+      acknowledgedOperationIds: pageAcknowledged,
+      remoteRecords: pageRecords,
+      serverCursor: nextCursor,
+      hasMore: body['has_more'] == true,
     );
   }
 

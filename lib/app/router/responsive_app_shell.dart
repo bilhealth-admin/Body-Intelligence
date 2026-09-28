@@ -207,6 +207,7 @@ class ResponsiveAppShell extends StatelessWidget {
       // barcode/photo actions from opening their capture surfaces.
       if (!context.mounted || action == null) return;
       final origin = Uri.encodeComponent(paths[index]);
+      final cancelledTaskReturn = Uri.encodeComponent('/dashboard');
       switch (action) {
         case 'food':
           // Quick Add's Log food action owns a separate entry surface. The
@@ -219,10 +220,14 @@ class ResponsiveAppShell extends StatelessWidget {
           context.push('/daily-log?foodLog=1&from=$origin');
           break;
         case 'barcode':
-          context.go('/daily-log?action=barcode&from=$origin');
+          context.push(
+            '/daily-log?foodLog=1&action=barcode&from=$cancelledTaskReturn',
+          );
           break;
         case 'voice':
-          context.go('/daily-log?action=voice&from=$origin');
+          context.push(
+            '/daily-log?foodLog=1&action=voice&from=$cancelledTaskReturn',
+          );
           break;
         case 'photo':
           // Photo analysis belongs to the standalone Food Log surface. Keep

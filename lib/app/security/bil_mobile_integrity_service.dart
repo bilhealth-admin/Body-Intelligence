@@ -28,13 +28,11 @@ final class BilMobileIntegrityService {
   final bool Function() _isWeb;
   final bool Function() _integrityRequired;
 
-  // Keep false for existing production clients while the migration, both
-  // attestation functions, server configuration and guarded functions are
-  // staged. Signed release workflows turn this on only behind their backend
-  // readiness gate.
+  // Production builds must request one-use grants. Debug/profile builds remain
+  // opt-in so local development does not require store attestation services.
   static const _requiredByBuild = bool.fromEnvironment(
     'BIL_MOBILE_INTEGRITY_REQUIRED',
-    defaultValue: false,
+    defaultValue: kReleaseMode,
   );
 
   Future<Map<String, Object?>> protect({

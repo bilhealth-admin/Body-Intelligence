@@ -17,6 +17,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
+  test('weekly report cold-open recovery is bounded and backs off', () {
+    expect(weeklyReportRetryDelay(0), const Duration(milliseconds: 250));
+    expect(weeklyReportRetryDelay(1), const Duration(milliseconds: 500));
+    expect(weeklyReportRetryDelay(2), const Duration(seconds: 1));
+    expect(weeklyReportRetryDelay(3), const Duration(seconds: 2));
+    expect(weeklyReportRetryDelay(4), isNull);
+  });
+
   test(
     'historical weekly report selection starts today and persists a week',
     () {

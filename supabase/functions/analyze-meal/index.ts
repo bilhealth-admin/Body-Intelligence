@@ -50,6 +50,40 @@ const candidate = (value: unknown): VisionCandidate | null => {
   return { name, confidence, evidence };
 };
 
+const maximumProviderResponseBytes = 256 * 1024;
+
+export async function readProviderResponseBody(
+  response: Response,
+  maximumBytes = maximumProviderResponseBytes,
+): Promise<string> {
+  if (!response.body) return "";
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      total += value.byteLength;
+      if (total > maximumBytes) {
+        await reader.cancel("provider_response_too_large").catch(() => {});
+        throw new Error("provider_response_too_large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const joined = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    joined.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(joined);
+}
+
 deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
@@ -216,6 +250,8 @@ deno.serve(async (request: Request) => {
       p_cost_source: metrics.cost_source ?? "unavailable",
     });
   let upstream: Response | null = null;
+  let upstreamText: string | null = null;
+  let invalidProviderBody = false;
   const startedAt = Date.now();
   // Gemini image requests regularly exceed 12 seconds even when healthy.
   // Keep each attempt bounded, but allow one normal high-latency response to
@@ -266,6 +302,16 @@ deno.serve(async (request: Request) => {
         });
       }
       if (upstream.ok || !transientStatus(upstream.status) || attempt === 2) {
+        try {
+          // Keep the abort deadline active through body consumption. Fetch
+          // resolving headers alone does not mean the provider request ended.
+          upstreamText = await readProviderResponseBody(upstream);
+        } catch (_) {
+          // Once headers arrived the provider may already have charged us.
+          // Settle this reservation as failed instead of issuing a duplicate.
+          invalidProviderBody = true;
+          upstream = null;
+        }
         break;
       }
       await upstream.body?.cancel();
@@ -279,15 +325,16 @@ deno.serve(async (request: Request) => {
   if (!upstream) {
     await settle(false, { latency_ms: Date.now() - startedAt });
     return reply({
-      error: directConfig ? "vision_provider_failed" : "vision_gateway_failed",
+      error: invalidProviderBody
+        ? "invalid_vision_response"
+        : directConfig ? "vision_provider_failed" : "vision_gateway_failed",
     }, 502);
   }
   if (!upstream.ok) {
     await settle(false, { latency_ms: Date.now() - startedAt });
-    const failureText = await upstream.text().catch(() => "");
     let providerErrorCode: string | number | null = null;
     try {
-      const failure = JSON.parse(failureText) as Record<string, unknown>;
+      const failure = JSON.parse(upstreamText ?? "") as Record<string, unknown>;
       const nested = failure.error && typeof failure.error === "object"
         ? failure.error as Record<string, unknown>
         : failure;
@@ -304,8 +351,7 @@ deno.serve(async (request: Request) => {
       provider_error_code: providerErrorCode,
     }, 502);
   }
-  const upstreamText = await upstream.text();
-  if (new TextEncoder().encode(upstreamText).byteLength > 256 * 1024) {
+  if (upstreamText == null) {
     await settle(false, { latency_ms: Date.now() - startedAt });
     return reply({ error: "invalid_vision_response" }, 502);
   }

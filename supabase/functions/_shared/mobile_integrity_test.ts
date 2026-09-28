@@ -82,6 +82,28 @@ Deno.test("missing or rejected grants fail closed", async () => {
   );
 });
 
+Deno.test("production default fails closed when no grant is supplied", async () => {
+  const name = "BIL_MOBILE_INTEGRITY_ENFORCEMENT";
+  const previous = Deno.env.get(name);
+  Deno.env.delete(name);
+  try {
+    await assertRejects(
+      () =>
+        requireMobileIntegrityGrant({
+          admin: { rpc: () => Promise.resolve({ data: true, error: null }) },
+          ownerId: "00000000-0000-4000-8000-000000000002",
+          action: "test.sensitive",
+          body: { value: 7 },
+        }),
+      MobileIntegrityFailure,
+      "mobile_integrity_grant_required",
+    );
+  } finally {
+    if (previous == null) Deno.env.delete(name);
+    else Deno.env.set(name, previous);
+  }
+});
+
 Deno.test("rollout-off strips envelopes without requiring an unavailable migration", async () => {
   let rpcCalled = false;
   const result = await requireMobileIntegrityGrant({
@@ -105,6 +127,68 @@ Deno.test("rollout-off strips envelopes without requiring an unavailable migrati
 
   assertEquals(result, { value: 7 });
   assertEquals(rpcCalled, false);
+});
+
+Deno.test("canary mode enforces only configured owner ids", async () => {
+  const name = "BIL_MOBILE_INTEGRITY_CANARY_OWNER_IDS";
+  const previous = Deno.env.get(name);
+  Deno.env.set(name, "00000000-0000-4000-8000-000000000002");
+  try {
+    let rpcCalled = false;
+    const bypassed = await requireMobileIntegrityGrant({
+      admin: {
+        rpc: () => {
+          rpcCalled = true;
+          return Promise.resolve({ data: true, error: null });
+        },
+      },
+      ownerId: "00000000-0000-4000-8000-000000000003",
+      action: "test.sensitive",
+      body: { value: 7 },
+      enforcement: "canary",
+    });
+    assertEquals(bypassed, { value: 7 });
+    assertEquals(rpcCalled, false);
+
+    await assertRejects(
+      () =>
+        requireMobileIntegrityGrant({
+          admin: { rpc: () => Promise.resolve({ data: true, error: null }) },
+          ownerId: "00000000-0000-4000-8000-000000000002",
+          action: "test.sensitive",
+          body: { value: 7 },
+          enforcement: "canary",
+        }),
+      MobileIntegrityFailure,
+      "mobile_integrity_grant_required",
+    );
+  } finally {
+    if (previous == null) Deno.env.delete(name);
+    else Deno.env.set(name, previous);
+  }
+});
+
+Deno.test("canary mode fails closed when its owner list is missing", async () => {
+  const name = "BIL_MOBILE_INTEGRITY_CANARY_OWNER_IDS";
+  const previous = Deno.env.get(name);
+  Deno.env.delete(name);
+  try {
+    await assertRejects(
+      () =>
+        requireMobileIntegrityGrant({
+          admin: { rpc: () => Promise.resolve({ data: true, error: null }) },
+          ownerId: "00000000-0000-4000-8000-000000000002",
+          action: "test.sensitive",
+          body: { value: 7 },
+          enforcement: "canary",
+        }),
+      MobileIntegrityFailure,
+      "mobile_integrity_server_misconfigured",
+    );
+  } finally {
+    if (previous == null) Deno.env.delete(name);
+    else Deno.env.set(name, previous);
+  }
 });
 
 Deno.test("an unknown rollout mode fails closed instead of downgrading", async () => {

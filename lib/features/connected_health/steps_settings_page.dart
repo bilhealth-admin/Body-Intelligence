@@ -357,7 +357,9 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                     ),
                     title: Text(t('View step history')),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: saving ? null : () => context.go('/history'),
+                    onTap: saving
+                        ? null
+                        : () => context.go('/connected-health/steps/history'),
                   ),
                   ListTile(
                     key: const Key('daily-step-goal'),

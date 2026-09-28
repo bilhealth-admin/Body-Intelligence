@@ -493,9 +493,17 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                         latestMessageId: visibleMessages.isEmpty
                             ? null
                             : visibleMessages.last.id,
+                        centerJumpButton: true,
                         child: AbsorbPointer(
                           absorbing: !conversationReady,
-                          child: visibleMessages.isEmpty
+                          // Do not paint a provisional greeting and replace it
+                          // with the restored transcript one frame later. The
+                          // stable surface keeps the coach shell opaque while
+                          // local history is read, then paints user content
+                          // exactly once.
+                          child: !conversationReady
+                              ? ColoredBox(color: scheme.surface)
+                              : visibleMessages.isEmpty
                               ? _CoachEmptyState(
                                   onVoice: _toggleLiveCall,
                                   onCamera: _analyzeFoodImageInChat,
@@ -652,23 +660,21 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                             const SizedBox(width: 4),
                             if (sending)
                               IconButton.filled(
-                                key: const Key('ai-coach-cancel-request'),
-                                tooltip: tr('Cancel waiting', 'إلغاء الانتظار'),
-                                onPressed: conversationReady
-                                    ? _cancelCurrentCoachRequest
-                                    : null,
+                                key: const Key('ai-coach-send-button'),
+                                tooltip: tr('Sending', 'جارٍ الإرسال'),
+                                onPressed: null,
                                 style: IconButton.styleFrom(
                                   backgroundColor: const Color(0xFF12394E),
                                   foregroundColor: const Color(0xFFC8F3FF),
+                                  disabledBackgroundColor: const Color(
+                                    0xFF12394E,
+                                  ).withValues(alpha: .58),
+                                  disabledForegroundColor: const Color(
+                                    0xFFC8F3FF,
+                                  ).withValues(alpha: .58),
                                   minimumSize: const Size.square(48),
                                 ),
-                                icon: const SizedBox.square(
-                                  dimension: 21,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.4,
-                                    color: Color(0xFFC8F3FF),
-                                  ),
-                                ),
+                                icon: const Icon(Icons.arrow_upward_rounded),
                               )
                             else if (question.text.trim().isEmpty || listening)
                               IconButton.filled(

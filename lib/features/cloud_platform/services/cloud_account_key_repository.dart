@@ -31,6 +31,8 @@ final class FlutterSecureCloudSecretStore implements CloudSecretStore {
 }
 
 typedef CloudKeyRpcLookup = FutureOr<dynamic> Function(String fnName);
+typedef CloudActiveOwnerLookup = String? Function();
+typedef CloudActiveSessionLookup = Object? Function();
 
 /// Resolves one stable 256-bit account payload key.
 ///
@@ -43,8 +45,13 @@ final class CloudAccountKeyRepository {
     required this._client,
     CloudSecretStore? secureStore,
     CloudKeyRpcLookup? rpc,
+    CloudActiveOwnerLookup? activeOwner,
+    CloudActiveSessionLookup? activeSession,
   }) : _secureStore = secureStore ?? FlutterSecureCloudSecretStore(),
-       _rpc = rpc ?? ((String fnName) => _client.rpc<dynamic>(fnName));
+       _rpc = rpc ?? ((String fnName) => _client.rpc<dynamic>(fnName)) {
+    _activeOwner = activeOwner;
+    _activeSession = activeSession;
+  }
 
   static const _storagePrefix = 'bil.cloud.payload-key.v1.';
   static const keyByteLength = 32;
@@ -52,6 +59,48 @@ final class CloudAccountKeyRepository {
   final SupabaseClient _client;
   final CloudSecretStore _secureStore;
   final CloudKeyRpcLookup _rpc;
+  late final CloudActiveOwnerLookup? _activeOwner;
+  late final CloudActiveSessionLookup? _activeSession;
+
+  void _assertActiveOwner(String owner) {
+    final activeOwner = _activeOwner?.call() ?? _client.auth.currentUser?.id;
+    if (activeOwner != owner) {
+      throw StateError('Cloud key request does not match the active account.');
+    }
+  }
+
+  Object? _sessionFence() =>
+      _activeSession?.call() ?? _client.auth.currentSession?.accessToken;
+
+  Object? _captureContext(String owner) {
+    _assertActiveOwner(owner);
+    return _sessionFence();
+  }
+
+  void _assertContext(String owner, Object? sessionFence) {
+    _assertActiveOwner(owner);
+    if (_sessionFence() != sessionFence) {
+      throw StateError('Cloud key request crossed an authentication session.');
+    }
+  }
+
+  Future<void> _writeForContext({
+    required String owner,
+    required Object? sessionFence,
+    required String storageKey,
+    required String canonical,
+  }) async {
+    _assertContext(owner, sessionFence);
+    await _secureStore.write(storageKey, canonical);
+    try {
+      _assertContext(owner, sessionFence);
+    } on StateError {
+      // The owner-namespaced value was written after its session became stale.
+      // Remove only that stale slot; a different account uses a different key.
+      await _secureStore.delete(storageKey);
+      rethrow;
+    }
+  }
 
   /// Reads only key material already cached for this authenticated account.
   ///
@@ -63,11 +112,9 @@ final class CloudAccountKeyRepository {
     if (owner.isEmpty) {
       throw ArgumentError.value(ownerId, 'ownerId', 'Must not be empty');
     }
-    final currentUser = _client.auth.currentUser;
-    if (currentUser == null || currentUser.id != owner) {
-      throw StateError('Cloud key request does not match the active account.');
-    }
+    final sessionFence = _captureContext(owner);
     final cached = await _secureStore.read('$_storagePrefix$owner');
+    _assertContext(owner, sessionFence);
     return cached == null ? null : _decodeAndValidate(cached);
   }
 
@@ -76,18 +123,18 @@ final class CloudAccountKeyRepository {
     if (owner.isEmpty) {
       throw ArgumentError.value(ownerId, 'ownerId', 'Must not be empty');
     }
-    final currentUser = _client.auth.currentUser;
-    if (currentUser == null || currentUser.id != owner) {
-      throw StateError('Cloud key request does not match the active account.');
-    }
+    final sessionFence = _captureContext(owner);
 
     final storageKey = '$_storagePrefix$owner';
     final cached = await _secureStore.read(storageKey);
+    _assertContext(owner, sessionFence);
     if (cached != null) {
       return _decodeAndValidate(cached);
     }
 
+    _assertContext(owner, sessionFence);
     final response = await _rpc('bil_get_existing_cloud_key');
+    _assertContext(owner, sessionFence);
     if (response == null) {
       return null;
     }
@@ -96,7 +143,12 @@ final class CloudAccountKeyRepository {
     }
     final canonical = response.trim();
     final key = _decodeAndValidate(canonical);
-    await _secureStore.write(storageKey, canonical);
+    await _writeForContext(
+      owner: owner,
+      sessionFence: sessionFence,
+      storageKey: storageKey,
+      canonical: canonical,
+    );
     return key;
   }
 
@@ -105,24 +157,29 @@ final class CloudAccountKeyRepository {
     if (owner.isEmpty) {
       throw ArgumentError.value(ownerId, 'ownerId', 'Must not be empty');
     }
-    final currentUser = _client.auth.currentUser;
-    if (currentUser == null || currentUser.id != owner) {
-      throw StateError('Cloud key request does not match the active account.');
-    }
+    final sessionFence = _captureContext(owner);
 
     final storageKey = '$_storagePrefix$owner';
     final cached = await _secureStore.read(storageKey);
+    _assertContext(owner, sessionFence);
     if (cached != null) {
       return _decodeAndValidate(cached);
     }
 
-    final response = await _client.rpc('bil_get_or_create_cloud_key');
+    _assertContext(owner, sessionFence);
+    final response = await _rpc('bil_get_or_create_cloud_key');
+    _assertContext(owner, sessionFence);
     if (response is! String || response.trim().isEmpty) {
       throw const FormatException('Invalid BIL cloud key response.');
     }
     final canonical = response.trim();
     final key = _decodeAndValidate(canonical);
-    await _secureStore.write(storageKey, canonical);
+    await _writeForContext(
+      owner: owner,
+      sessionFence: sessionFence,
+      storageKey: storageKey,
+      canonical: canonical,
+    );
     return key;
   }
 

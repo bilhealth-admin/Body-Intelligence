@@ -171,7 +171,7 @@ class _ReferenceTrendRailState extends State<_ReferenceTrendRail> {
               'Connect or log steps to see your trend',
               'اربط مصدرًا أو سجل خطواتك لعرض الاتجاه',
             ),
-            onTap: () => context.push('/connected-health'),
+            onTap: () => context.push('/connected-health/steps/history'),
           ),
         ],
       ),

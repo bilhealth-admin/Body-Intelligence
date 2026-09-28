@@ -34,6 +34,22 @@ void main() {
       coachPendingActionDecision('نعم اشرح لي الخطة'),
       CoachPendingActionDecision.none,
     );
+    expect(
+      coachPendingActionDecision('نعم سجله بقيمة 83'),
+      CoachPendingActionDecision.none,
+    );
+    expect(
+      coachPendingActionDecision('Yes, log it as 83 kg'),
+      CoachPendingActionDecision.none,
+    );
+    expect(
+      coachPendingActionDecision('نعم احفظ الوزن المستهدف 79 بدل 83'),
+      CoachPendingActionDecision.none,
+    );
+    expect(
+      coachPendingActionDecision('Yes, save target weight 79 instead of 83'),
+      CoachPendingActionDecision.none,
+    );
   });
 
   test('iOS voice permission recovery identifies the exact permission', () {

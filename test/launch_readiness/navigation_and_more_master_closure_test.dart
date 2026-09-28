@@ -90,10 +90,16 @@ void main() {
     }
     expect(source, contains('aiCoachAdminAccessProvider'));
     expect(source, contains('cloudManualSyncStatusProvider'));
-    expect(source, contains('connectedHealthProvider'));
-    expect(source, contains("context.push('/connected-health')"));
+    expect(
+      RegExp(r"copy\('Apps & Devices'\)").allMatches(source).length,
+      1,
+      reason: 'More must expose one canonical Apps & Devices destination',
+    );
+    expect(source, contains("Key('settings-connected-health-entry')"));
     expect(source, contains('Directionality.of(context) == TextDirection.rtl'));
-    expect(source, contains("Key('more-devices-sync-card')"));
+    expect(source, isNot(contains("Key('more-devices-sync-card')")));
+    expect(source, contains('size: 30'));
+    expect(source, contains('iconSize: 18'));
     expect(source, contains('PremiumCrownEmblem'));
   });
 }

@@ -64,16 +64,13 @@ void main() {
         estimatesAcknowledged: true,
       );
 
-  // iOS intentionally omits the name and integrations permission stages so
-  // Sign in with Apple remains the identity source and health permissions are
-  // reviewed from Settings. Render those two real stages on Android when the
-  // matrix needs to exercise their widgets.
+  // iOS intentionally omits the integrations permission stage so health
+  // permissions are reviewed from Settings. Render that real stage on Android
+  // when the matrix needs to exercise its widgets.
   TargetPlatform platformForStep(
     String step, {
     TargetPlatform fallback = TargetPlatform.iOS,
-  }) => step == 'name' || step == 'integrations'
-      ? TargetPlatform.android
-      : fallback;
+  }) => step == 'integrations' ? TargetPlatform.android : fallback;
 
   Future<void> render(
     WidgetTester tester, {
@@ -297,7 +294,6 @@ void main() {
   assert(cartesianIndex == 36);
 
   const photoSteps = <String>[
-    'name',
     'goals',
     'activity',
     'facts',
@@ -315,8 +311,6 @@ void main() {
     'review',
   ];
   const expectedPhotoAssets = <String, String>{
-    'name':
-        'assets/images/onboarding_2026/bil_onboarding_welcome_photo_v1.webp',
     'goals':
         'assets/images/onboarding_2026/bil_onboarding_goals_activity_photo_v1.webp',
     'activity':
@@ -395,7 +389,7 @@ void main() {
       }
     }
   }
-  assert(photoMatrixCount == 192);
+  assert(photoMatrixCount == 180);
 
   test('release onboarding matrix enumerates all 25 locales', () {
     expect(AppLocalizations.supportedLocales, hasLength(25));
@@ -416,7 +410,7 @@ void main() {
           for (var scaleIndex = 0; scaleIndex < 2; scaleIndex++) {
             final scale = scaleIndex == 0 ? 1.0 : 2.0;
             final dark = (localeIndex + stepIndex + scaleIndex).isOdd;
-            final platform = step == 'name' || step == 'integrations'
+            final platform = step == 'integrations'
                 ? TargetPlatform.android
                 : ((localeIndex + stepIndex).isEven
                       ? TargetPlatform.iOS
@@ -493,7 +487,7 @@ void main() {
             );
           }
         }
-        expect(rendered, 32);
+        expect(rendered, 30);
       },
       timeout: const Timeout(Duration(minutes: 2)),
     );
@@ -504,7 +498,7 @@ void main() {
   ) async {
     await render(
       tester,
-      draft: valid(step: 'name'),
+      draft: valid(step: 'goals'),
       size: const Size(320, 568),
       locale: const Locale('en'),
       themeMode: ThemeMode.light,
@@ -555,7 +549,7 @@ void main() {
   ) async {
     await render(
       tester,
-      draft: valid(step: 'name'),
+      draft: valid(step: 'currentWeight'),
       size: const Size(390, 844),
       locale: const Locale('en'),
       themeMode: ThemeMode.light,
@@ -563,7 +557,7 @@ void main() {
       platform: TargetPlatform.android,
     );
 
-    await tester.tap(find.byKey(const Key('onboarding-name-field')));
+    await tester.tap(find.byKey(const Key('onboarding-current-weight')));
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
@@ -639,7 +633,7 @@ void main() {
       platform: TargetPlatform.android,
     );
     var progress = find.byKey(const Key('onboarding-progress-semantics'));
-    expect(tester.getSemantics(progress).value, '15 / 15');
+    expect(tester.getSemantics(progress).value, '14 / 14');
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();

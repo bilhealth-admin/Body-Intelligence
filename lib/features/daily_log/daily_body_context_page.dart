@@ -6,6 +6,7 @@ import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/premium_design_tokens.dart';
+import 'daily_body_context_copy.dart';
 import 'domain/daily_body_context_codec.dart';
 import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_summary_widgets.dart';
@@ -33,11 +34,9 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
       Localizations.localeOf(context).languageCode.toLowerCase();
   bool get arabic => languageCode == 'ar';
   String copy(String key) {
-    final english = _bodyContextCopy['en']![key] ?? key;
     final authored = _bodyContextCopy[languageCode]?[key];
     if (authored != null) return authored;
-    final tag = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
-    return RuntimeCopy.resolve(english, tag) ?? english;
+    return dailyBodyContextCopy(context, key);
   }
 
   String labelFor(String value) => copy(value);
@@ -194,23 +193,6 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
 }
 
 const _bodyContextCopy = <String, Map<String, String>>{
-  'en': {
-    'title': 'Body context',
-    'poorSleep': 'Less sleep than usual',
-    'greatSleep': 'Excellent sleep',
-    'travel': 'Travel',
-    'fasting': 'Fasting',
-    'highSodiumMeal': 'High-sodium meal',
-    'hardWorkout': 'Hard workout',
-    'psychologicalStress': 'Psychological stress',
-    'illnessSymptoms': 'Illness or symptoms',
-    'medication': 'Medication',
-    'lessWater': 'Less water than usual',
-    'moreWater': 'More water than usual',
-    'constipation': 'Constipation',
-    'nothingNotable': 'Nothing notable',
-    'other': 'Other',
-  },
   'ar': {
     'title': 'سياق الجسم',
     'poorSleep': 'نوم أقل من المعتاد',

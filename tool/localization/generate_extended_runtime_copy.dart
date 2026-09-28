@@ -1514,17 +1514,11 @@ Future<void> _mergeMissingSources(List<String> sources) async {
 }
 
 Future<Set<String>> _bodyContextPageSources() async {
-  final source = await File(
-    'lib/features/daily_log/daily_body_context_page.dart',
-  ).readAsString();
-  final marker = "'en': {";
-  final start = source.indexOf(marker);
-  final end = source.indexOf("\n  },", start);
-  if (start < 0 || end < 0) return const <String>{};
-  return RegExp(r":\s*'((?:\\.|[^'])*)'")
-      .allMatches(source.substring(start, end))
-      .map((match) => _unescapeDartSingle(match.group(1)!))
-      .toSet();
+  return _englishMapValues(
+    'lib/features/daily_log/daily_body_context_copy.dart',
+    'dailyBodyContextEnglishCopy = <String, String>{',
+    endMarker: '\n};',
+  );
 }
 
 Future<Set<String>> _englishMapValues(

@@ -72,8 +72,8 @@ class ReleaseConfigurationValidator {
 
   static const approvedApplicationId = 'com.bilhealth.bodyintelligencelog';
   static const approvedReleaseVersion = '1.0.0';
-  static const androidReleaseBuildNumber = 26;
-  static const iosReleaseBuildNumber = 30;
+  static const androidReleaseBuildNumber = 27;
+  static const iosReleaseBuildNumber = 31;
 
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,

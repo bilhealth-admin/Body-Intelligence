@@ -3,31 +3,32 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('iOS onboarding does not re-request identity or stage HealthKit', () {
-    final onboarding = File(
-      'lib/features/onboarding/onboarding_page.dart',
-    ).readAsStringSync();
-    final completion = File(
-      'lib/features/onboarding/domain/onboarding_completion_service.dart',
-    ).readAsStringSync();
+  test(
+    'onboarding does not request identity and iOS does not stage HealthKit',
+    () {
+      final onboarding = File(
+        'lib/features/onboarding/onboarding_page.dart',
+      ).readAsStringSync();
+      final completion = File(
+        'lib/features/onboarding/domain/onboarding_completion_service.dart',
+      ).readAsStringSync();
 
-    expect(
-      onboarding,
-      contains("if (defaultTargetPlatform != TargetPlatform.iOS) 'name'"),
-    );
-    expect(
-      onboarding,
-      contains(
-        "if (defaultTargetPlatform != TargetPlatform.iOS) 'integrations'",
-      ),
-    );
-    expect(completion, isNot(contains('preferred_name_required')));
-    expect(completion, contains('if (preferredName.isNotEmpty)'));
-    expect(
-      completion,
-      contains('...DisplayNameSync.localEdit(preferredName),'),
-    );
-  });
+      expect(onboarding, isNot(contains("'name',")));
+      expect(onboarding, isNot(contains('onboarding-name-field')));
+      expect(
+        onboarding,
+        contains(
+          "if (defaultTargetPlatform != TargetPlatform.iOS) 'integrations'",
+        ),
+      );
+      expect(completion, isNot(contains('preferred_name_required')));
+      expect(completion, contains('if (preferredName.isNotEmpty)'));
+      expect(
+        completion,
+        contains('...DisplayNameSync.localEdit(preferredName),'),
+      );
+    },
+  );
 
   test('camera requests do not use a dismissible pre-permission prompt', () {
     final profile = File(

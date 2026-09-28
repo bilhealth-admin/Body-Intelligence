@@ -56,4 +56,30 @@ void main() {
       expect(sql, contains('security invoker'));
     },
   );
+
+  test('cloud download is paged and sequence allocation is serialized', () {
+    final sql = File(
+      'supabase/migrations/'
+      '20260927064227_cloud_sync_cursor_and_page_hardening.sql',
+    ).readAsStringSync();
+    final transport = File(
+      'lib/features/cloud_platform/services/supabase_cloud_transport.dart',
+    ).readAsStringSync();
+
+    expect(sql, contains("hashtextextended('bil.sync.'"));
+    expect(sql, contains('limit 100'));
+    expect(sql, contains("'has_more', v_has_more"));
+    expect(
+      sql,
+      contains(
+        'revoke insert, update, delete on public.bil_cloud_records '
+        'from authenticated',
+      ),
+    );
+    expect(transport, contains("body['has_more'] == true"));
+    expect(transport, contains('Cloud owner changed during synchronization.'));
+    expect(transport, contains('BIL cloud cursor did not advance.'));
+    expect(transport, contains('Fetch exactly one server page'));
+    expect(transport, contains("hasMore: body['has_more'] == true"));
+  });
 }

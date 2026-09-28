@@ -28,9 +28,22 @@ void main() {
       expect(shell, contains('switch (action)'));
 
       for (final action in const ['barcode', 'voice']) {
-        expect(shell, contains('action=$action'));
-        expect(diary, contains("case '$action':"));
+        expect(shell, contains('foodLog=1&action=$action'));
       }
+      expect(
+        shell,
+        contains(
+          "final cancelledTaskReturn = Uri.encodeComponent('/dashboard')",
+        ),
+      );
+      expect(RegExp(r'from=\$cancelledTaskReturn').allMatches(shell).length, 2);
+      final foodLog = [
+        'lib/features/daily_log/food_log_page.dart',
+        'lib/features/daily_log/food_log_actions.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
+      expect(foodLog, contains("'barcode' => await _scanBarcode()"));
+      expect(foodLog, contains("'voice' => await _voiceSearch()"));
+      expect(foodLog, contains('if (mounted && !completed) _close(context);'));
       // Photo Quick Add opens the meal-vision camera directly. It must never
       // route through the AI Coach conversation.
       expect(shell, contains("'/quick-add/meal-camera?from=\$origin'"));

@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('progress uses real repositories and all requested selectors', () {
-    final source = File(
+    final source = <String>[
       'lib/features/history/progress_page.dart',
-    ).readAsStringSync();
+      'lib/features/history/progress_page_domain.dart',
+      'lib/features/history/progress_page_series.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     for (final metric in [
       'steps',
       'weight',

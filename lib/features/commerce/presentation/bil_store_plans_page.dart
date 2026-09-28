@@ -98,11 +98,34 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     }
     _lastStoreState = store.state;
     _lastStoreMessage = store.messageCode;
+    _syncOwnershipConflict(store);
     final feedback = _purchaseFeedbackFor(store);
     setState(() {
       _purchaseFeedbackKey = feedback.$1;
       _purchaseFeedbackIsError = feedback.$2;
     });
+  }
+
+  void _syncOwnershipConflict(VerifiedStorePurchaseService store) {
+    PurchaseOwnershipConflictStore conflict;
+    try {
+      conflict = ref.read(purchaseOwnershipConflictStoreProvider);
+    } on StateError {
+      // Isolated previews may intentionally render without ProviderScope.
+      return;
+    }
+    if (store.messageCode == 'purchase_owned_by_another_account') {
+      conflict.recordConflict();
+    } else if (store.state == VerifiedStoreState.verified &&
+        const {
+          'subscription_verified',
+          'ai_boost_verified',
+        }.contains(store.messageCode)) {
+      // Clear only after the current BIL owner has passed server verification.
+      // A local StoreKit/Play callback, empty restore, or retryable error is not
+      // sufficient to erase a proven ownership conflict.
+      conflict.clearAfterVerifiedOwnership();
+    }
   }
 
   void _onOfferSelected(BilStoreOfferMetadata _) {
@@ -216,6 +239,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     try {
       await catalog.restorePurchases().timeout(const Duration(seconds: 20));
       final store = widget.store ?? _ownedStore;
+      if (store != null) _syncOwnershipConflict(store);
       messageKey = switch (store?.messageCode) {
         'subscription_verified' => 'restore_verified',
         'no_restorable_purchases' => 'restore_none',
@@ -247,7 +271,19 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   Future<void> _requestPurchase(BilStoreOfferMetadata offer) async {
     final catalog = _catalog;
     final store = widget.store ?? _ownedStore;
-    if (catalog == null || _purchaseRequestInFlight || store?.busy == true) {
+    var ownershipBlocked = false;
+    try {
+      ownershipBlocked = ref
+          .read(purchaseOwnershipConflictStoreProvider)
+          .blocked;
+    } on StateError {
+      // Production is always mounted below ProviderScope. Preview-only pages
+      // have no authenticated owner state to retain.
+    }
+    if (catalog == null ||
+        ownershipBlocked ||
+        _purchaseRequestInFlight ||
+        store?.busy == true) {
       return;
     }
     setState(() {
@@ -310,7 +346,18 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       currentPlan = CommercePlan.free;
     }
     final store = widget.store ?? _ownedStore;
-    final purchaseFeedbackKey = _purchaseFeedbackKey;
+    PurchaseOwnershipConflictStore? ownershipConflict;
+    try {
+      ownershipConflict = ref.watch(purchaseOwnershipConflictStoreProvider);
+    } on StateError {
+      ownershipConflict = null;
+    }
+    final ownershipBlocked = ownershipConflict?.blocked ?? false;
+    final purchaseFeedbackKey = ownershipBlocked
+        ? 'purchase_owned_by_another_account'
+        : _purchaseFeedbackKey == 'purchase_owned_by_another_account'
+        ? null
+        : _purchaseFeedbackKey;
     return Scaffold(
       backgroundColor: pageBackground,
       appBar: AppBar(
@@ -339,11 +386,11 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         loading: _loading,
         purchaseInProgress: _purchaseInProgress,
         restoreInProgress: _restoring,
-        purchaseEnabled: store?.canStartPurchase ?? true,
+        purchaseEnabled: !ownershipBlocked && (store?.canStartPurchase ?? true),
         purchaseStatusMessage: purchaseFeedbackKey == null
             ? null
             : BilStoreCopy.text(locale, purchaseFeedbackKey),
-        purchaseStatusIsError: _purchaseFeedbackIsError,
+        purchaseStatusIsError: ownershipBlocked || _purchaseFeedbackIsError,
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
         onPurchaseRequested: _requestPurchase,

@@ -14,6 +14,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('ownership conflict is scoped to the authenticated BIL owner', () {
+    final container = ProviderContainer(
+      overrides: [
+        verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-a'),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final firstOwner = container.read(purchaseOwnershipConflictStoreProvider);
+    firstOwner.recordConflict();
+    expect(firstOwner.blocked, isTrue);
+    expect(
+      identical(
+        firstOwner,
+        container.read(purchaseOwnershipConflictStoreProvider),
+      ),
+      isTrue,
+    );
+
+    container.updateOverrides([
+      verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-b'),
+    ]);
+    final secondOwner = container.read(purchaseOwnershipConflictStoreProvider);
+    expect(identical(firstOwner, secondOwner), isFalse);
+    expect(secondOwner.blocked, isFalse);
+  });
+
   testWidgets(
     'changed Play offer reloads the screen without a second purchase',
     (tester) async {
@@ -259,6 +286,88 @@ void main() {
     expect(catalog.requested, isEmpty);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'ownership conflict survives plans route recreation and blocks repurchase',
+    (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final rejectedStore = _CancellationReadyStore();
+      final rejectedCatalog = _RestoreVerificationFailureCatalog(
+        rejectedStore,
+        code: 'purchase_owned_by_another_account',
+      );
+      addTearDown(rejectedStore.dispose);
+
+      Widget plans(
+        VerifiedStorePurchaseService store,
+        BilStoreCatalogGateway catalog,
+      ) {
+        return UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            home: BilStorePlansPage(
+              store: store,
+              catalog: catalog,
+              productIds: const {'premium.monthly'},
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(plans(rejectedStore, rejectedCatalog));
+      await tester.pumpAndSettle();
+      final restore = find.text(BilStoreCopy.text('en', 'restore'));
+      await tester.ensureVisible(restore);
+      await tester.tap(restore);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const ValueKey('store-purchase-cta')))
+            .onTap,
+        isNull,
+      );
+
+      // Closing the plans route must not create a fresh, apparently purchasable
+      // state for the same signed-in BIL owner.
+      await tester.pumpWidget(const SizedBox.shrink());
+      final reopenedStore = _CancellationReadyStore();
+      final reopenedCatalog = _RecordingCatalog(const [_monthlyOffer]);
+      addTearDown(reopenedStore.dispose);
+      await tester.pumpWidget(plans(reopenedStore, reopenedCatalog));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_owned_by_another_account')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const ValueKey('store-purchase-cta')))
+            .onTap,
+        isNull,
+      );
+
+      // Only a server-verified entitlement for the current BIL owner clears the
+      // remembered conflict and makes the native purchase action available.
+      reopenedStore.reportFeedback(
+        VerifiedStoreState.verified,
+        'subscription_verified',
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_owned_by_another_account')),
+        findsNothing,
+      );
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const ValueKey('store-purchase-cta')))
+            .onTap,
+        isNotNull,
+      );
+    },
+  );
 
   testWidgets('plan route is fail-closed when owner store IDs are absent', (
     tester,

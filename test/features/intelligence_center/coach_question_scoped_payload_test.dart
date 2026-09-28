@@ -159,6 +159,39 @@ void main() {
     _expectDisclosureMatches(projection, const <String>['nutrition_water']);
   });
 
+  test('multi-turn slot answer keeps the nearest unresolved task', () {
+    final turns = questionScopedCoachCloudConversation(
+      question: '83',
+      conversation: const <CoachConversationTurn>[
+        CoachConversationTurn(role: 'user', content: 'Review my meals'),
+        CoachConversationTurn(role: 'assistant', content: 'Protein was low'),
+        CoachConversationTurn(role: 'user', content: 'سجل وزني اليوم'),
+        CoachConversationTurn(role: 'assistant', content: 'كم وزنك؟'),
+        CoachConversationTurn(role: 'user', content: 'نعم'),
+        CoachConversationTurn(role: 'assistant', content: 'أرسل الرقم'),
+        CoachConversationTurn(role: 'user', content: '83'),
+      ],
+    );
+    expect(turns.map((turn) => turn.content), <String>[
+      'سجل وزني اليوم',
+      'كم وزنك؟',
+      'نعم',
+      'أرسل الرقم',
+    ]);
+    expect(
+      coachCloudContextCategoriesForQuestion(
+        question: '83',
+        conversation: const <CoachConversationTurn>[
+          CoachConversationTurn(role: 'user', content: 'سجل وزني اليوم'),
+          CoachConversationTurn(role: 'assistant', content: 'كم وزنك؟'),
+          CoachConversationTurn(role: 'user', content: 'نعم'),
+          CoachConversationTurn(role: 'user', content: '83'),
+        ],
+      ),
+      contains(CoachCloudContextCategory.weightMeasurementsAndGoal),
+    );
+  });
+
   test(
     'cloud conversation excludes prior unrelated and mixed-category turns',
     () {

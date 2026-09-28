@@ -163,8 +163,12 @@ final class OfflineFirstCloudPlatform {
       pulled: applied,
       conflicts: conflicts,
       pending: await localStore.pendingCount(),
-      availability: CloudPlatformAvailability.ready,
-      diagnostics: diagnostics,
+      availability: batch.hasMore
+          ? CloudPlatformAvailability.paused
+          : CloudPlatformAvailability.ready,
+      diagnostics: batch.hasMore
+          ? (diagnostics..add('More cloud pages remain; cursor saved.'))
+          : diagnostics,
     );
   }
 

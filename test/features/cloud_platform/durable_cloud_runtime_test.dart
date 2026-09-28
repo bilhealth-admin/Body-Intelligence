@@ -7,6 +7,51 @@ import 'package:body_intelligence_log/features/cloud_platform/services/durable_o
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('persists a partial page cursor and never reports ready', () async {
+    final store = SqliteCloudPlatformStore.inMemory();
+    await store.initialize();
+    final clock = _Clock(DateTime.utc(2026, 7, 24));
+    final runtime = DurableOfflineFirstCloudPlatform(
+      store: store,
+      transport: _PagedTransport(),
+      cipher: _Cipher(),
+      connectivity: _Connectivity(true),
+      clock: clock,
+      policy: const CloudPlatformPolicy(),
+    );
+    final consent = CloudPrivacyConsent(
+      ownerId: 'o',
+      policy: CloudSelectiveSyncPolicy(
+        enabledKinds: const {CloudEntityKind.weight},
+      ),
+      grantedAt: clock.now(),
+    );
+    final device = CloudDeviceRegistration(
+      deviceId: 'd',
+      ownerId: 'o',
+      displayName: 'phone',
+      registeredAt: clock.now(),
+    );
+    final session = CloudSession(
+      sessionId: 's',
+      ownerId: 'o',
+      deviceId: 'd',
+      issuedAt: clock.now(),
+      expiresAt: clock.now().add(const Duration(days: 1)),
+    );
+
+    final report = await runtime.synchronize(
+      consent: consent,
+      device: device,
+      session: session,
+    );
+
+    expect(report.availability, CloudPlatformAvailability.paused);
+    expect(report.completed, isFalse);
+    expect(await store.readCursor('o', 'd'), '100');
+    expect(report.diagnostics, contains(contains('durable cursor saved')));
+  });
+
   test('retries durably and resumes after runtime restart', () async {
     final store = SqliteCloudPlatformStore.inMemory();
     await store.initialize();
@@ -131,5 +176,21 @@ final class _SuccessTransport implements CloudTransport {
     acknowledgedOperationIds: operations.map((e) => e.operationId),
     remoteRecords: const [],
     serverCursor: 'next',
+  );
+}
+
+final class _PagedTransport implements CloudTransport {
+  @override
+  Future<CloudSyncBatchResult> synchronize({
+    required String ownerId,
+    required String deviceId,
+    required CloudSession session,
+    required List<CloudSyncOperation> operations,
+    required String? cursor,
+  }) async => CloudSyncBatchResult(
+    acknowledgedOperationIds: operations.map((e) => e.operationId),
+    remoteRecords: const [],
+    serverCursor: '100',
+    hasMore: true,
   );
 }

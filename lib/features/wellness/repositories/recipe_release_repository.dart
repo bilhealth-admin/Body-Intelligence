@@ -228,8 +228,13 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
       expectedBytes: manifest.imageManifestSizeBytes,
       expectedSha256: manifest.imageManifestSha256,
     );
-    final images = await compute(_decodeObject, imageBytes);
-    final imageManifest = _validateImageManifest(images);
+    // The image manifest contains 1,500 rows. Decode and validate it away from
+    // the UI isolate so opening the library cannot stall an in-flight route
+    // transition.
+    final imageManifest = await compute(
+      _decodeAndValidateImageManifest,
+      imageBytes,
+    );
     final provenanceBytes = await _readBounded(
       manifest.provenancePath,
       manifest.provenanceSizeBytes,
@@ -239,8 +244,10 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
       expectedBytes: manifest.provenanceSizeBytes,
       expectedSha256: manifest.provenanceSha256,
     );
-    final provenance = await compute(_decodeObject, provenanceBytes);
-    final provenanceImageCount = _validateProvenance(provenance);
+    final provenanceImageCount = await compute(
+      _decodeAndValidateProvenance,
+      provenanceBytes,
+    );
     if (provenanceImageCount !=
         imageManifest.states.values
             .where((value) => value == 'external_candidate')
@@ -256,76 +263,13 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
       expectedBytes: manifest.indexSizeBytes,
       expectedSha256: manifest.indexSha256,
     );
-    final index = await compute(_decodeObject, indexBytes);
-    _exactKeys(index, const {'schema_version', 'record_count', 'entries'});
-    if (index['schema_version'] != 1 || index['record_count'] != 1500) {
-      throw const FormatException('Unsupported recipe index.');
-    }
-    final entries = index['entries'];
-    if (entries is! List || entries.length != 1500) {
-      throw const FormatException('Recipe index must contain 1500 entries.');
-    }
-    final ids = <String>{};
-    final fingerprints = <String>{};
-    final result = <RecipeCatalogSummary>[];
-    for (var index = 0; index < entries.length; index++) {
-      final raw = entries[index];
-      if (raw is! Map<String, dynamic>) {
-        throw const FormatException('Recipe index entry must be an object.');
-      }
-      _exactKeys(raw, const {
-        'canonical_id',
-        'content_fingerprint',
-        'shard',
-        'ordinal',
-        'primary_locale',
-        'title',
-        'localized_titles',
-        'total_minutes',
-        'meal_types',
-        'diet_tags',
-        'allergens',
-        'image_status',
-        'region',
-        'cuisine_key',
-      });
-      final id = _text(raw['canonical_id'], 'canonical_id');
-      final fingerprint = _digest(raw['content_fingerprint']);
-      final shard = _integer(raw['shard'], 'shard');
-      final ordinal = _integer(raw['ordinal'], 'ordinal');
-      if (!ids.add(id) ||
-          !fingerprints.add(fingerprint) ||
-          shard != index ~/ 50 ||
-          ordinal != index % 50) {
-        throw const FormatException('Recipe index ordering is invalid.');
-      }
-      result.add(
-        RecipeCatalogSummary(
-          id: id,
-          fingerprint: fingerprint,
-          shard: shard,
-          ordinal: ordinal,
-          primaryLocale: _text(raw['primary_locale'], 'primary_locale'),
-          title: _text(raw['title'], 'title'),
-          localizedTitles: _stringMap(
-            raw['localized_titles'],
-            'localized_titles',
-          ),
-          totalMinutes: _integer(raw['total_minutes'], 'total_minutes'),
-          mealTypes: _strings(raw['meal_types'], 'meal_types'),
-          dietTags: _strings(raw['diet_tags'], 'diet_tags'),
-          allergens: _strings(raw['allergens'], 'allergens'),
-          imageStatus: _text(raw['image_status'], 'image_status'),
-          region: _text(raw['region'], 'region'),
-          cuisine: _text(raw['cuisine_key'], 'cuisine_key'),
-        ),
-      );
-    }
-    for (final recipe in result) {
-      if (imageManifest.states[recipe.id] != recipe.imageStatus) {
-        throw const FormatException('Recipe index/image state mismatch.');
-      }
-    }
+    // Decoding alone was already isolated, but validating and projecting all
+    // 1,500 entries still ran on the UI isolate. Keep the whole O(n) pass in a
+    // worker isolate; only the immutable result crosses back.
+    final result = await compute(_decodeRecipeIndex, (
+      bytes: indexBytes,
+      imageStates: imageManifest.states,
+    ));
     _byId = Map.unmodifiable({for (final recipe in result) recipe.id: recipe});
     _imageAssets = imageManifest.assets;
     return List.unmodifiable(result);

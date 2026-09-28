@@ -2,7 +2,6 @@ part of 'onboarding_page.dart';
 
 extension _OnboardingCoreSteps on _OnboardingPageState {
   _StepView _stepView(String id) => switch (id) {
-    'name' => _nameStep(),
     'goals' => _goalsStep(),
     'activity' => _activityStep(),
     'facts' => _factsStep(),
@@ -19,25 +18,6 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
     'ai' => _aiStep(),
     _ => _reviewStep(),
   };
-
-  _StepView _nameStep() => _StepView(
-    title: t('What should BIL call you?'),
-    subtitle: t(
-      'This name stays on this device unless you later choose account sync.',
-    ),
-    body: TextField(
-      key: const Key('onboarding-name-field'),
-      controller: _name,
-      textInputAction: TextInputAction.done,
-      autofillHints: const [AutofillHints.nickname],
-      decoration: InputDecoration(
-        labelText: t('Preferred name'),
-        border: const OutlineInputBorder(),
-      ),
-      onChanged: (value) => _setDraft(_draft.copyWith(preferredName: value)),
-      onSubmitted: (_) => unawaited(_goNext()),
-    ),
-  );
 
   _StepView _goalsStep() {
     final options = <(OnboardingGoal, String, String, IconData)>[

@@ -437,6 +437,27 @@ void main() {
     expect(clockText(), contains('14:24'));
   });
 
+  testWidgets('digital clock uses fixed-width figures for every digit', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _subject(
+        const ConnectedHealthSnapshot.unavailable(),
+        now: () => DateTime(2026, 8, 31, 14, 22, 8),
+      ),
+    );
+    await tester.pump();
+
+    final clock = tester.widget<Text>(
+      find.byKey(const Key('watch-digital-time')),
+    );
+    final rootStyle = clock.style!;
+    final secondsStyle = (clock.textSpan! as TextSpan).children![1].style!;
+
+    expect(rootStyle.fontFeatures, const [FontFeature.tabularFigures()]);
+    expect(secondsStyle.fontFeatures, const [FontFeature.tabularFigures()]);
+  });
+
   testWidgets(
     'connected BLE heart rate is shown inside watch without body metrics',
     (tester) async {

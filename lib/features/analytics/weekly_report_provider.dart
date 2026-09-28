@@ -45,6 +45,16 @@ final selectedWeeklyReportDateProvider = StateProvider<DateTime>(
 /// Repository-backed streams are the only inputs. Their loading/error states
 /// flow through this provider, while calculation remains deterministic and
 /// offline in [WeeklyReportEngine].
+Duration? weeklyReportRetryDelay(int retryCount) {
+  const delays = <Duration>[
+    Duration(milliseconds: 250),
+    Duration(milliseconds: 500),
+    Duration(seconds: 1),
+    Duration(seconds: 2),
+  ];
+  return retryCount < delays.length ? delays[retryCount] : null;
+}
+
 final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
   (ref) async {
     final meals = await ref.watch(allMealsProvider.future);
@@ -248,10 +258,10 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
     );
   },
   retry: (retryCount, _) {
-    // A cold launch can briefly race the local Drift connection opening. Retry
-    // the read a couple of times so the first report page recovers in place
-    // instead of requiring the user to leave and reopen it.
-    return retryCount < 2 ? const Duration(milliseconds: 250) : null;
+    // iOS can need longer than a single 250 ms window to finish opening the
+    // local Drift database after a cold launch. Keep recovery bounded, but let
+    // the report heal in place before surfacing the manual Retry state.
+    return weeklyReportRetryDelay(retryCount);
   },
 );
 

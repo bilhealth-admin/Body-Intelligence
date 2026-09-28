@@ -130,12 +130,14 @@ final class CloudSyncBatchResult {
     required Iterable<String> acknowledgedOperationIds,
     required Iterable<CloudRecordEnvelope> remoteRecords,
     required this.serverCursor,
+    this.hasMore = false,
   }) : acknowledgedOperationIds = List.unmodifiable(acknowledgedOperationIds),
        remoteRecords = List.unmodifiable(remoteRecords);
 
   final List<String> acknowledgedOperationIds;
   final List<CloudRecordEnvelope> remoteRecords;
   final String? serverCursor;
+  final bool hasMore;
 }
 
 final class CloudSyncReport {

@@ -111,8 +111,18 @@ void main() {
             reason: 'Focused meal search must not duplicate global tool $tool',
           );
         }
-        expect(shell, contains("'/daily-log?action=barcode&from=\$origin'"));
-        expect(shell, contains("'/daily-log?action=voice&from=\$origin'"));
+        expect(
+          shell,
+          contains(
+            "'/daily-log?foodLog=1&action=barcode&from=\$cancelledTaskReturn'",
+          ),
+        );
+        expect(
+          shell,
+          contains(
+            "'/daily-log?foodLog=1&action=voice&from=\$cancelledTaskReturn'",
+          ),
+        );
         expect(shell, contains("'/quick-add/meal-camera?from=\$origin'"));
         expect(shell, isNot(contains('vision=capture&from=\$origin')));
         expect(diary, contains("case 'barcode':"));

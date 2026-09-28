@@ -129,6 +129,22 @@ void main() {
         BilSemanticIconKind.appearance,
       );
       expect(
+        BilSemanticIcons.kindForRoute('/nutrition'),
+        BilSemanticIconKind.meal,
+      );
+      expect(
+        BilSemanticIcons.kindForRoute('/intelligence-center'),
+        BilSemanticIconKind.aiCoach,
+      );
+      expect(
+        BilSemanticIcons.kindForRoute('/settings/ai-coach'),
+        BilSemanticIconKind.preferences,
+      );
+      expect(
+        BilSemanticIcons.kindForRoute('/advertising-privacy'),
+        BilSemanticIconKind.legal,
+      );
+      expect(
         BilSemanticIcons.kindForHealthSignal('resting_heart_rate'),
         BilSemanticIconKind.heartRate,
       );

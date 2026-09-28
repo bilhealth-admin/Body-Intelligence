@@ -46,44 +46,38 @@ class DiaryDateNavigator extends StatelessWidget {
         ? semanticLabel
         : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${(date.year % 100).toString().padLeft(2, '0')}';
     final scheme = Theme.of(context).colorScheme;
-    final dateButton = Flexible(
-      flex: 3,
-      child: TextButton(
-        onPressed: onPick,
-        style: TextButton.styleFrom(
-          foregroundColor: scheme.onSurface,
-          minimumSize: const Size(92, 48),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Directionality(
-                textDirection: today
-                    ? Directionality.of(context)
-                    : TextDirection.ltr,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    visualLabel,
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: todayHeader ? (today ? 30 : 24) : 19,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.25,
-                    ),
+    final dateButton = TextButton(
+      onPressed: onPick,
+      style: TextButton.styleFrom(
+        foregroundColor: scheme.onSurface,
+        minimumSize: const Size(92, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Directionality(
+              textDirection: today
+                  ? Directionality.of(context)
+                  : TextDirection.ltr,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  visualLabel,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: todayHeader ? (today ? 30 : 24) : 19,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.25,
                   ),
                 ),
               ),
             ),
-            const Icon(Icons.arrow_drop_down_rounded, size: 24),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_drop_down_rounded, size: 24),
+        ],
       ),
     );
     final back = onBack != null
@@ -108,30 +102,29 @@ class DiaryDateNavigator extends StatelessWidget {
       onPressed: onNext,
       icon: const Icon(Icons.chevron_right_rounded),
     );
-    return SizedBox(
+    return RepaintBoundary(
       key: const Key('daily-log-date-bar'),
-      height: 64,
-      child: Semantics(
-        container: true,
-        label: semanticLabel,
-        child: Row(
-          children: todayHeader
-              ? [
-                  dateButton,
-                  const Spacer(),
-                  if (onBack != null) back,
-                  previous,
-                  next,
-                ]
-              : [
-                  back,
-                  const Spacer(),
-                  previous,
-                  dateButton,
-                  next,
-                  const Spacer(),
-                  const SizedBox(width: 48),
-                ],
+      child: SizedBox(
+        height: 64,
+        child: Semantics(
+          container: true,
+          label: semanticLabel,
+          child: Row(
+            children: todayHeader
+                ? [
+                    Expanded(child: dateButton),
+                    if (onBack != null) SizedBox(width: 48, child: back),
+                    SizedBox(width: 48, child: previous),
+                    SizedBox(width: 48, child: next),
+                  ]
+                : [
+                    SizedBox(width: 48, child: back),
+                    SizedBox(width: 48, child: previous),
+                    Expanded(child: dateButton),
+                    SizedBox(width: 48, child: next),
+                    const SizedBox(width: 48),
+                  ],
+          ),
         ),
       ),
     );
@@ -311,13 +304,12 @@ class _CalorieSummary extends StatelessWidget {
           builder: (context, constraints) {
             final values = <Widget>[
               if (loading)
-                Container(
+                Text(
                   key: const Key('daily-summary-calories-loading'),
-                  width: 150,
-                  height: 27,
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
+                  '—',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
                   ),
                 )
               else

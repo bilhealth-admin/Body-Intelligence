@@ -202,3 +202,38 @@ Deno.test("unsafe client search hint cannot replace the typed query", async () =
   expectEqual(response.status, 200, "status");
   expectEqual(usdaQuery, "rise", "USDA query");
 });
+
+Deno.test("non-numeric USDA values remain unknown instead of becoming zero", async () => {
+  const response = await handleFoodSearchRequest(
+    new Request("https://example.test/food-search", {
+      method: "POST",
+      body: JSON.stringify({ query: "apple", locale: "en" }),
+    }),
+    runtime({
+      fetchImpl: (() =>
+        Promise.resolve(
+          new Response(JSON.stringify({
+            foods: [{
+              fdcId: 1,
+              description: "Apple",
+              servingSize: "   ",
+              foodNutrients: [
+                { nutrientName: "Protein", unitName: "G", value: null },
+                { nutrientName: "Fat", unitName: "G", value: false },
+                { nutrientName: "Carbohydrate", unitName: "G", value: "0" },
+              ],
+            }],
+          })),
+        )) as typeof fetch,
+    }),
+  );
+
+  expectEqual(response.status, 200, "status");
+  const body = await response.json() as Record<string, unknown>;
+  const food = (body.foods as Array<Record<string, unknown>>)[0];
+  expectEqual(food.serving_size, null, "blank serving size");
+  const nutrients = food.nutrients as Array<Record<string, unknown>>;
+  expectEqual(nutrients[0].amount, null, "null nutrient amount");
+  expectEqual(nutrients[1].amount, null, "boolean nutrient amount");
+  expectEqual(nutrients[2].amount, 0, "real numeric zero");
+});

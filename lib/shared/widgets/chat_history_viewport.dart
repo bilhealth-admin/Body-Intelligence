@@ -9,11 +9,13 @@ class ChatHistoryViewport extends StatefulWidget {
     required this.controller,
     required this.child,
     required this.latestMessageId,
+    this.centerJumpButton = false,
     super.key,
   });
   final ScrollController controller;
   final Widget child;
   final String? latestMessageId;
+  final bool centerJumpButton;
 
   @override
   State<ChatHistoryViewport> createState() => _ChatHistoryViewportState();
@@ -122,50 +124,71 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      NotificationListener<ScrollNotification>(
-        onNotification: _onScroll,
-        child: NotificationListener<ScrollMetricsNotification>(
-          onNotification: (notification) {
-            if (notification.depth == 0 && _followingLatest) _queuePin();
-            return false;
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              widget.child,
-              PositionedDirectional(
-                bottom: 10,
-                end: 12,
-                child: AnimatedBuilder(
-                  animation: widget.controller,
-                  builder: (context, _) {
-                    if (_nearLatest) return const SizedBox.shrink();
-                    return IconButton.filledTonal(
-                      key: const ValueKey('chat-jump-to-latest'),
-                      tooltip: _latestMessageLabel(
-                        Localizations.localeOf(context),
-                      ),
-                      onPressed: () {
-                        _interactionGeneration++;
-                        _followingLatest = true;
-                        if (widget.controller.hasClients &&
-                            widget.controller.position.hasContentDimensions) {
-                          widget.controller.jumpTo(
-                            widget.controller.position.minScrollExtent,
-                          );
-                        }
-                        _queuePin(force: true);
-                      },
-                      icon: const Icon(Icons.arrow_downward_rounded),
-                    );
-                  },
-                ),
-              ),
-            ],
+  Widget build(
+    BuildContext context,
+  ) => NotificationListener<ScrollNotification>(
+    onNotification: _onScroll,
+    child: NotificationListener<ScrollMetricsNotification>(
+      onNotification: (notification) {
+        if (notification.depth == 0 && _followingLatest) _queuePin();
+        return false;
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.child,
+          Positioned(
+            bottom: 10,
+            left: widget.centerJumpButton ? 0 : null,
+            right: widget.centerJumpButton ? 0 : 12,
+            child: AnimatedBuilder(
+              animation: widget.controller,
+              builder: (context, _) {
+                if (_nearLatest) return const SizedBox.shrink();
+                final scheme = Theme.of(context).colorScheme;
+                final button = Material(
+                  elevation: 5,
+                  shadowColor: scheme.shadow.withValues(alpha: .18),
+                  color: scheme.surface,
+                  shape: CircleBorder(
+                    side: BorderSide(
+                      color: scheme.outlineVariant.withValues(alpha: .55),
+                      width: .8,
+                    ),
+                  ),
+                  child: IconButton(
+                    key: const ValueKey('chat-jump-to-latest'),
+                    tooltip: _latestMessageLabel(
+                      Localizations.localeOf(context),
+                    ),
+                    onPressed: () {
+                      _interactionGeneration++;
+                      _followingLatest = true;
+                      if (widget.controller.hasClients &&
+                          widget.controller.position.hasContentDimensions) {
+                        widget.controller.jumpTo(
+                          widget.controller.position.minScrollExtent,
+                        );
+                      }
+                      _queuePin(force: true);
+                    },
+                    style: IconButton.styleFrom(
+                      foregroundColor: scheme.onSurface,
+                      minimumSize: const Size.square(42),
+                      maximumSize: const Size.square(42),
+                      padding: EdgeInsets.zero,
+                    ),
+                    icon: const Icon(Icons.arrow_downward_rounded, size: 23),
+                  ),
+                );
+                return widget.centerJumpButton ? Center(child: button) : button;
+              },
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 String _latestMessageLabel(Locale locale) =>

@@ -132,6 +132,26 @@ void main() {
         expect(authoritativeExerciseEnergyForDay(result, now)?.kcal, 321);
         expect(authoritativeExerciseEnergyForDay(result, yesterday), isNull);
         expect(result.stepHistory.single.value, 4321);
+        expect(
+          result.signalHistory
+              .firstWhere(
+                (row) =>
+                    row.key == 'activeEnergy' &&
+                    row.observedAt.toLocal().day == now.toLocal().day,
+              )
+              .value,
+          321,
+        );
+        expect(
+          result.signalHistory
+              .firstWhere(
+                (row) =>
+                    row.key == 'activeEnergy' &&
+                    row.observedAt.toLocal().day == yesterday.toLocal().day,
+              )
+              .value,
+          900,
+        );
         if (ios) {
           expect(
             result.signals.singleWhere((s) => s.key == 'weight').value,
@@ -161,6 +181,16 @@ void main() {
         321,
       );
       expect(afterEmpty.stepHistory.single.value, 4321);
+      expect(
+        afterEmpty.signalHistory
+            .firstWhere(
+              (row) =>
+                  row.key == 'activeEnergy' &&
+                  row.observedAt.toLocal().day == now.toLocal().day,
+            )
+            .value,
+        321,
+      );
       failRead = true;
       final afterFailure = await gateway.loadDailyActivity();
       expect(
@@ -202,6 +232,16 @@ void main() {
         444,
       );
       expect(synced.failureCode, isNull);
+      expect(
+        synced.signalHistory
+            .firstWhere(
+              (row) =>
+                  row.key == 'activeEnergy' &&
+                  row.observedAt.toLocal().day == now.toLocal().day,
+            )
+            .value,
+        444,
+      );
     });
   }
 }

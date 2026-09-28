@@ -14,8 +14,6 @@ import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/presentation/premium_crown_emblem.dart';
 import '../commerce/providers/commerce_providers.dart';
-import '../connected_health/connected_health_page.dart';
-import '../connected_health/providers/connected_health_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import '../weight/domain/weight_goal_progress.dart';
@@ -45,7 +43,6 @@ class SettingsPage extends ConsumerWidget {
     final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     final subscription = ref.watch(verifiedSubscriptionStateProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
-    final connectedHealth = ref.watch(connectedHealthProvider);
     final adminAccess = ref.watch(aiCoachAdminAccessProvider);
     final name = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
@@ -101,16 +98,6 @@ class SettingsPage extends ConsumerWidget {
                   : copy('Active'),
               onTap: () => context.push('/plans'),
             ),
-          ),
-          const SizedBox(height: 12),
-          _DevicesSyncCard(
-            status: connectedHealth.when(
-              loading: () => copy('Checking'),
-              error: (_, _) => copy('Unavailable'),
-              data: (snapshot) =>
-                  connectedHealthStatusText(context, snapshot.status),
-            ),
-            onTap: () => context.push('/connected-health'),
           ),
           const SizedBox(height: 20),
           _MoreSection(
@@ -203,7 +190,7 @@ class SettingsPage extends ConsumerWidget {
               _MoreActionRow(
                 key: const Key('settings-review-onboarding'),
                 label: copy('Review initial setup'),
-                kind: BilSemanticIconKind.preferences,
+                kind: BilSemanticIconKind.notes,
                 onTap: () => _reviewSetupAgain(context, ref),
               ),
               _MoreRow(copy('Sharing & Privacy'), '/settings/sharing-privacy'),
@@ -243,35 +230,6 @@ class SettingsPage extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _DevicesSyncCard extends StatelessWidget {
-  const _DevicesSyncCard({required this.status, required this.onTap});
-
-  final String status;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    key: const Key('more-devices-sync-card'),
-    clipBehavior: Clip.antiAlias,
-    child: ListTile(
-      minTileHeight: 72,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-      leading: const _MoreIcon(
-        icon: Icons.devices_other_rounded,
-        key: Key('more-devices-sync-icon'),
-      ),
-      title: Text(ReferenceSettingsCopy.of(context)('Apps & Devices')),
-      subtitle: Text(status, maxLines: 2, overflow: TextOverflow.ellipsis),
-      trailing: Icon(
-        Directionality.of(context) == TextDirection.rtl
-            ? Icons.chevron_left_rounded
-            : Icons.chevron_right_rounded,
-      ),
-      onTap: onTap,
-    ),
-  );
 }
 
 class _PremiumMembershipCard extends StatelessWidget {
@@ -528,7 +486,6 @@ class _MoreRow extends StatelessWidget {
   final bool showDivider;
 
   bool get _isDanger => route == '/help/delete-account';
-  bool get _isFeatured => route == '/intelligence-center';
 
   @override
   Widget build(BuildContext context) {
@@ -536,8 +493,8 @@ class _MoreRow extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          minTileHeight: 60,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          minTileHeight: 56,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 18),
           horizontalTitleGap: 12,
           leading: _isDanger
               ? Icon(
@@ -550,15 +507,16 @@ class _MoreRow extends StatelessWidget {
               : BilSemanticIconBadge(
                   key: Key('more-semantic-icon-${semanticKind.name}'),
                   kind: semanticKind,
-                  size: 40,
-                  iconSize: 20,
+                  size: 30,
+                  iconSize: 18,
                   shape: BoxShape.rectangle,
                 ),
           title: Text(
             label,
-            style: TextStyle(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: _isDanger ? Theme.of(context).colorScheme.error : null,
-              fontWeight: _isFeatured ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
             ),
           ),
           trailing: Icon(
@@ -569,14 +527,14 @@ class _MoreRow extends StatelessWidget {
           ),
           onTap: () => context.push(route),
         ),
-        if (showDivider) const Divider(height: 1, indent: 54),
+        if (showDivider) const Divider(height: 1, indent: 60),
       ],
     );
   }
 }
 
 class _MoreIcon extends StatelessWidget {
-  const _MoreIcon({required this.icon, super.key});
+  const _MoreIcon({required this.icon});
   final IconData icon;
 
   @override
@@ -586,8 +544,8 @@ class _MoreIcon extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
     ),
     child: SizedBox.square(
-      dimension: 40,
-      child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+      dimension: 30,
+      child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
     ),
   );
 }
@@ -613,11 +571,14 @@ class _CloudSyncRow extends ConsumerWidget {
               )
             : BilSemanticIconBadge(
                 kind: BilSemanticIconKind.cloudSync,
-                size: 28,
-                iconSize: 17,
+                size: 30,
+                iconSize: 18,
                 shape: BoxShape.rectangle,
               ),
-        title: Text(label),
+        title: Text(
+          label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
         subtitle: CloudSyncStatusLine(status: status),
         onTap: status.isSyncing ? null : () => _runSync(context, ref),
       ),
@@ -678,11 +639,14 @@ class _MoreActionRow extends StatelessWidget {
         horizontalTitleGap: 12,
         leading: BilSemanticIconBadge(
           kind: kind,
-          size: 28,
-          iconSize: 17,
+          size: 30,
+          iconSize: 18,
           shape: BoxShape.rectangle,
         ),
-        title: Text(label),
+        title: Text(
+          label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+        ),
         trailing: Icon(
           Directionality.of(context) == TextDirection.rtl
               ? Icons.chevron_left_rounded

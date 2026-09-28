@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_account_key_repository.dart';
@@ -115,6 +116,133 @@ void main() {
     expect(store.writeCount, 0);
     expect(calls, isEmpty);
   });
+
+  test('account switch during secure-store read fails closed', () async {
+    var activeOwner = ownerId;
+    final readGate = Completer<String?>();
+    final store = _DelayedReadSecretStore(readGate.future);
+    final calls = <String>[];
+    final repository = CloudAccountKeyRepository(
+      client: _FakeSupabaseClient(user: _user(ownerId)),
+      activeOwner: () => activeOwner,
+      secureStore: store,
+      rpc: (fnName) {
+        calls.add(fnName);
+        return validEncoded;
+      },
+    );
+
+    final pending = repository.resolveExisting(ownerId);
+    activeOwner = ownerMismatch;
+    readGate.complete(validEncoded);
+
+    await expectLater(pending, throwsA(isA<StateError>()));
+    expect(calls, isEmpty);
+    expect(store.writeCount, 0);
+  });
+
+  test('account switch during cloud RPC cannot cache returned key', () async {
+    var activeOwner = ownerId;
+    final rpcGate = Completer<dynamic>();
+    final store = _InMemorySecretStore();
+    final repository = CloudAccountKeyRepository(
+      client: _FakeSupabaseClient(user: _user(ownerId)),
+      activeOwner: () => activeOwner,
+      secureStore: store,
+      rpc: (_) => rpcGate.future,
+    );
+
+    final pending = repository.resolveExisting(ownerId);
+    await Future<void>.delayed(Duration.zero);
+    activeOwner = ownerMismatch;
+    rpcGate.complete(validEncoded);
+
+    await expectLater(pending, throwsA(isA<StateError>()));
+    expect(store.writeCount, 0);
+  });
+
+  test('account switch during secure write removes the stale key', () async {
+    var activeOwner = ownerId;
+    final writeGate = Completer<void>();
+    final store = _DelayedWriteSecretStore(writeGate.future);
+    final repository = CloudAccountKeyRepository(
+      client: _FakeSupabaseClient(user: _user(ownerId)),
+      activeOwner: () => activeOwner,
+      secureStore: store,
+      rpc: (_) => validEncoded,
+    );
+
+    final pending = repository.resolveExisting(ownerId);
+    await Future<void>.delayed(Duration.zero);
+    activeOwner = ownerMismatch;
+    writeGate.complete();
+
+    await expectLater(pending, throwsA(isA<StateError>()));
+    expect(store.value, isNull);
+    expect(store.deleteCount, 1);
+  });
+
+  test('same owner with a replaced auth session fails closed', () async {
+    var sessionGeneration = 1;
+    final rpcGate = Completer<dynamic>();
+    final store = _InMemorySecretStore();
+    final repository = CloudAccountKeyRepository(
+      client: _FakeSupabaseClient(user: _user(ownerId)),
+      activeOwner: () => ownerId,
+      activeSession: () => sessionGeneration,
+      secureStore: store,
+      rpc: (_) => rpcGate.future,
+    );
+
+    final pending = repository.resolve(ownerId);
+    await Future<void>.delayed(Duration.zero);
+    sessionGeneration = 2;
+    rpcGate.complete(validEncoded);
+
+    await expectLater(pending, throwsA(isA<StateError>()));
+    expect(store.writeCount, 0);
+  });
+}
+
+final class _DelayedWriteSecretStore implements CloudSecretStore {
+  _DelayedWriteSecretStore(this.writeGate);
+
+  final Future<void> writeGate;
+  String? value;
+  int deleteCount = 0;
+
+  @override
+  Future<String?> read(String key) async => null;
+
+  @override
+  Future<void> write(String key, String value) async {
+    await writeGate;
+    this.value = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    deleteCount += 1;
+    value = null;
+  }
+}
+
+final class _DelayedReadSecretStore implements CloudSecretStore {
+  _DelayedReadSecretStore(this.readResult);
+
+  final Future<String?> readResult;
+  int writeCount = 0;
+
+  @override
+  Future<String?> read(String key) => readResult;
+
+  @override
+  Future<void> write(String key, String value) async {
+    writeCount += 1;
+  }
+
+  @override
+  Future<void> delete(String key) async {}
 }
 
 final class _InMemorySecretStore implements CloudSecretStore {
@@ -167,6 +295,9 @@ final class _FakeAuthClient extends Fake implements GoTrueClient {
 
   @override
   final User currentUser;
+
+  @override
+  Session? get currentSession => null;
 }
 
 User _user(String id) => User(

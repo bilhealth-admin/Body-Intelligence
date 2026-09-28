@@ -125,8 +125,12 @@ void main() {
     await tester.pump();
 
     expect(
-      find.byKey(const ValueKey('premium-route-access-checking')),
+      find.byKey(const ValueKey('ai-coach-access-checking-surface')),
       findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-access-checking')),
+      findsNothing,
     );
     expect(
       find.byKey(const ValueKey('premium-route-glass-blur')),

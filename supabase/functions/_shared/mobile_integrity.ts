@@ -63,11 +63,16 @@ export type IntegrityGrantAdmin = {
   ) => Promise<{ data: unknown; error: null | { message?: string } }>;
 };
 
-function mobileIntegrityEnforcement(override?: string): "off" | "enforce" {
+type MobileIntegrityEnforcement = "off" | "canary" | "enforce";
+
+function mobileIntegrityEnforcement(
+  override?: string,
+): MobileIntegrityEnforcement {
   const value =
-    (override ?? Deno.env.get("BIL_MOBILE_INTEGRITY_ENFORCEMENT") ?? "off")
+    (override ?? Deno.env.get("BIL_MOBILE_INTEGRITY_ENFORCEMENT") ?? "enforce")
       .trim().toLowerCase();
   if (value === "" || value === "off") return "off";
+  if (value === "canary") return "canary";
   if (value === "enforce") return "enforce";
   // A typo must never silently downgrade an intended enforcement deployment.
   throw new MobileIntegrityFailure(
@@ -76,12 +81,37 @@ function mobileIntegrityEnforcement(override?: string): "off" | "enforce" {
   );
 }
 
+function canaryOwners(): Set<string> {
+  const raw = Deno.env.get("BIL_MOBILE_INTEGRITY_CANARY_OWNER_IDS") ?? "";
+  const owners = raw.split(",").map((value) => value.trim()).filter(Boolean);
+  const uuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!owners.length || owners.some((owner) => !uuid.test(owner))) {
+    throw new MobileIntegrityFailure(
+      "mobile_integrity_server_misconfigured",
+      503,
+    );
+  }
+  return new Set(owners.map((owner) => owner.toLowerCase()));
+}
+
+function mobileIntegrityRequired(
+  ownerId: string,
+  override?: string,
+): boolean {
+  const mode = mobileIntegrityEnforcement(override);
+  if (mode === "enforce") return true;
+  if (mode === "off") return false;
+  return canaryOwners().has(ownerId.toLowerCase());
+}
+
 /**
- * Removes the private envelope in every rollout phase. In explicit `enforce`
- * mode it atomically consumes the one-use grant; the database compares owner,
- * action, server-computed payload digest and expiry in the same UPDATE, so a
- * copied grant cannot authorize another request. The default `off` phase is
- * backward-compatible and must not be represented as an integrity guarantee.
+ * Removes the private envelope in every rollout phase. The production-safe
+ * default is `enforce`: it atomically consumes the one-use grant and the
+ * database compares owner, action, server-computed payload digest and expiry
+ * in the same UPDATE, so a copied grant cannot authorize another request.
+ * `off` remains an explicit emergency rollback only; it must never be treated
+ * as an integrity guarantee.
  */
 export async function requireMobileIntegrityGrant({
   admin,
@@ -95,14 +125,14 @@ export async function requireMobileIntegrityGrant({
   action: string;
   body: JsonObject;
   /** Test/rollout override; production callers use the Edge Function secret. */
-  enforcement?: "off" | "enforce";
+  enforcement?: MobileIntegrityEnforcement;
 }): Promise<JsonObject> {
   const protectedBody: JsonObject = { ...body };
   delete protectedBody._integrity;
   // This compatibility phase deliberately provides no attestation claim. It
   // prevents a protected-function deployment from breaking existing clients
   // before the migration/functions/configuration and new app are all live.
-  if (mobileIntegrityEnforcement(enforcement) === "off") {
+  if (!mobileIntegrityRequired(ownerId, enforcement)) {
     return protectedBody;
   }
 

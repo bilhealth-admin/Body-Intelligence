@@ -309,13 +309,12 @@ void main() {
       expect(source, contains('Google Gemini'));
     }
     expect(coachUi, contains('.grantAndVerify()'));
+    expect(coachConsentCoordinator, contains("'p_policy_version': '3'"));
     expect(
       coachConsentCoordinator,
-      contains("'p_policy_version': '3'"),
-    );
-    expect(
-      coachConsentCoordinator,
-      contains('return isGranted(forceServerRead: true);'),
+      contains('return _readCurrent(owner, generation);'),
+      reason:
+          'Grant must finish with an authoritative policy-receipt readback.',
     );
     expect(
       mealConsent,

@@ -46,7 +46,17 @@ Widget shellApp({
                 key: ValueKey(
                   'daily-log-action-${state.uri.queryParameters['action'] ?? 'none'}',
                 ),
-                child: const Text('daily-log'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('daily-log'),
+                    SizedBox.shrink(
+                      key: ValueKey(
+                        'daily-log-from-${state.uri.queryParameters['from'] ?? 'none'}',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -705,7 +715,7 @@ void main() {
     '/analytics',
     '/settings',
   ]) {
-    testWidgets('Quick Add barcode preserves $origin as its return path', (
+    testWidgets('Quick Add barcode cancels from $origin back to dashboard', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(600, 900);
@@ -720,12 +730,9 @@ void main() {
       await tester.tap(find.textContaining('Scan barcode'));
       await tester.pumpAndSettle();
 
-      final router = GoRouter.of(
-        tester.element(find.byKey(const Key('daily-log-action-barcode'))),
-      );
       expect(
-        router.routeInformationProvider.value.uri.queryParameters['from'],
-        origin,
+        find.byKey(const ValueKey('daily-log-from-/dashboard')),
+        findsOneWidget,
       );
     });
   }

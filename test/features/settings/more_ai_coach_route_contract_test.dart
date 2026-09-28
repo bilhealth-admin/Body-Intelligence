@@ -334,7 +334,7 @@ void main() {
 
     expect(find.byType(PremiumRouteGlassGate), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('premium-route-access-checking')),
+      find.byKey(const ValueKey('ai-coach-access-checking-surface')),
       findsOneWidget,
     );
     await tester.tap(find.byKey(const ValueKey('premium-route-loading-back')));

@@ -118,37 +118,38 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('a slow reply stays cancelable without a context-search banner', (
-    tester,
-  ) async {
-    final db = await database(tester);
-    final gateway = _BlockingGateway();
-    await tester.pumpWidget(_app(db, gateway: gateway));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'a slow reply disables send without duplicate progress controls',
+    (tester) async {
+      final db = await database(tester);
+      final gateway = _BlockingGateway();
+      await tester.pumpWidget(_app(db, gateway: gateway));
+      await tester.pumpAndSettle();
 
-    final field = find.byKey(const Key('ai-coach-question-field'));
-    await tester.enterText(field, 'Help me plan tomorrow');
-    await tester.testTextInput.receiveAction(TextInputAction.send);
-    for (
-      var attempt = 0;
-      attempt < 20 && !gateway.entered.isCompleted;
-      attempt++
-    ) {
-      await tester.pump(const Duration(milliseconds: 20));
-    }
-    expect(gateway.entered.isCompleted, isTrue);
-    await tester.pump(const Duration(milliseconds: 1200));
+      final field = find.byKey(const Key('ai-coach-question-field'));
+      await tester.enterText(field, 'Help me plan tomorrow');
+      await tester.testTextInput.receiveAction(TextInputAction.send);
+      for (
+        var attempt = 0;
+        attempt < 20 && !gateway.entered.isCompleted;
+        attempt++
+      ) {
+        await tester.pump(const Duration(milliseconds: 20));
+      }
+      expect(gateway.entered.isCompleted, isTrue);
+      await tester.pump(const Duration(milliseconds: 1200));
 
-    expect(find.text('Searching your BIL context…'), findsNothing);
-    final cancel = tester.widget<IconButton>(
-      find.byKey(const Key('ai-coach-cancel-request')),
-    );
-    expect(cancel.onPressed, isNotNull);
-    await tester.tap(find.byKey(const Key('ai-coach-cancel-request')));
-    gateway.release();
-    await tester.pump(const Duration(milliseconds: 80));
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text('Searching your BIL context…'), findsNothing);
+      expect(find.byKey(const Key('ai-coach-cancel-request')), findsNothing);
+      final send = tester.widget<IconButton>(
+        find.byKey(const Key('ai-coach-send-button')),
+      );
+      expect(send.onPressed, isNull);
+      gateway.release();
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'conversation input stays locked until the stored transcript is restored',

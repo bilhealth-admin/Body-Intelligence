@@ -69,6 +69,26 @@ final verifiedEntitlementOwnerIdProvider = Provider<String?>((ref) {
   return ref.watch(verifiedEntitlementOwnerSeedProvider);
 });
 
+/// Owner-scoped memory of a store receipt that the server has proved belongs
+/// to another BIL account. This is presentation state only: the backend remains
+/// the entitlement authority. Keeping it above the plans route prevents closing
+/// and reopening that route from re-enabling a second purchase attempt.
+final class PurchaseOwnershipConflictStore {
+  bool blocked = false;
+
+  void recordConflict() => blocked = true;
+
+  void clearAfterVerifiedOwnership() => blocked = false;
+}
+
+final purchaseOwnershipConflictStoreProvider =
+    Provider<PurchaseOwnershipConflictStore>((ref) {
+      // A different signed-in BIL owner receives a fresh state. Route disposal,
+      // catalog refresh, cancellation, and ordinary store errors do not clear it.
+      ref.watch(verifiedEntitlementOwnerIdProvider);
+      return PurchaseOwnershipConflictStore();
+    });
+
 final verifiedEntitlementLoaderProvider =
     Provider<Future<SubscriptionState> Function()>(
       (_) => const ServerEntitlementRepository().current,

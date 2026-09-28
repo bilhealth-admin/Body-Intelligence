@@ -19,7 +19,10 @@ const firstEnv = (...names: string[]) => {
 };
 const text = (value: unknown) => String(value ?? "").trim();
 const finite = (value: unknown) => {
-  const parsed = Number(value);
+  if (typeof value === "boolean" || value == null) return null;
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  if (typeof value === "string" && value.trim().length === 0) return null;
+  const parsed = typeof value === "number" ? value : Number(value.trim());
   return Number.isFinite(parsed) ? parsed : null;
 };
 const isSafeSearchHint = (value: string) =>

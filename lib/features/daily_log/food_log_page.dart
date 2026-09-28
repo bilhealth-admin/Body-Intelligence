@@ -82,15 +82,15 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   bool voiceBusy = false;
   bool quickAddBusy = false;
   final Set<int> addingFoodIds = <int>{};
-  bool initialPhotoActionApplied = false;
-  String? initialPhotoActionInFlight;
+  bool initialCaptureActionApplied = false;
+  String? initialCaptureActionInFlight;
   int _searchGeneration = 0;
 
   @override
   void initState() {
     super.initState();
     mealType = normalizeFoodLogMealType(widget.initialMealType);
-    _scheduleInitialPhotoAction();
+    _scheduleInitialCaptureAction();
   }
 
   @override
@@ -98,48 +98,72 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialAction != widget.initialAction ||
         oldWidget.directPhotoCapture != widget.directPhotoCapture) {
-      initialPhotoActionApplied = false;
-      if (initialPhotoActionInFlight == null) {
-        _scheduleInitialPhotoAction();
+      initialCaptureActionApplied = false;
+      if (initialCaptureActionInFlight == null) {
+        _scheduleInitialCaptureAction();
       }
     }
   }
 
-  void _scheduleInitialPhotoAction() {
+  void _scheduleInitialCaptureAction() {
     final action = widget.initialAction;
-    if (action != 'photo' ||
-        initialPhotoActionApplied ||
-        initialPhotoActionInFlight != null) {
+    if (!const {'barcode', 'voice', 'photo'}.contains(action) ||
+        initialCaptureActionApplied ||
+        initialCaptureActionInFlight != null) {
       return;
     }
-    initialPhotoActionApplied = true;
-    initialPhotoActionInFlight = action;
+    initialCaptureActionApplied = true;
+    initialCaptureActionInFlight = action;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || widget.initialAction != action) {
-        initialPhotoActionInFlight = null;
+        initialCaptureActionInFlight = null;
         if (mounted &&
-            widget.initialAction == 'photo' &&
-            !initialPhotoActionApplied) {
-          _scheduleInitialPhotoAction();
+            const {
+              'barcode',
+              'voice',
+              'photo',
+            }.contains(widget.initialAction) &&
+            !initialCaptureActionApplied) {
+          _scheduleInitialCaptureAction();
         }
         return;
       }
       try {
-        await _analyzeMealImage(
-          directCamera: widget.directPhotoCapture,
-          initialImage: widget.initialImage,
-        );
+        final completed = switch (action) {
+          'barcode' => await _scanBarcode(),
+          'voice' => await _voiceSearch(),
+          _ => await _runInitialPhotoCapture(),
+        };
+        // Quick Add is a one-shot task. Cancelling the native scanner, voice
+        // sheet, or photo picker returns to the validated caller instead of
+        // silently dropping the member on Today/Food Log.
+        if (mounted && !completed) _close(context);
       } finally {
-        if (initialPhotoActionInFlight == action) {
-          initialPhotoActionInFlight = null;
+        if (initialCaptureActionInFlight == action) {
+          initialCaptureActionInFlight = null;
           if (mounted &&
-              widget.initialAction == 'photo' &&
-              !initialPhotoActionApplied) {
-            _scheduleInitialPhotoAction();
+              const {
+                'barcode',
+                'voice',
+                'photo',
+              }.contains(widget.initialAction) &&
+              !initialCaptureActionApplied) {
+            _scheduleInitialCaptureAction();
           }
         }
       }
     });
+  }
+
+  Future<bool> _runInitialPhotoCapture() async {
+    await _analyzeMealImage(
+      directCamera: widget.directPhotoCapture,
+      initialImage: widget.initialImage,
+    );
+    // Photo capture owns its existing review/consent flow. It may remain on
+    // Food Log after a handled result; only barcode/voice expose a definitive
+    // null cancellation result at this boundary.
+    return true;
   }
 
   @override

@@ -37,6 +37,7 @@ import '../../features/challenges/challenges_page.dart';
 import '../../features/connected_health/connected_health_page.dart';
 import '../../features/connected_health/partner_capabilities_page.dart';
 import '../../features/connected_health/steps_settings_page.dart';
+import '../../features/connected_health/steps_history_page.dart';
 import '../../features/connected_health/connected_health_signal_detail_page.dart';
 import '../../features/exercise_calorie_controls/presentation/exercise_calorie_settings_page.dart';
 import '../../features/commerce/presentation/bil_store_plans_page.dart';
@@ -237,11 +238,31 @@ class AppRouter {
         builder: (_, _) => const StepsSettingsPage(),
       ),
       GoRoute(
+        path: '/connected-health/steps/history',
+        builder: (_, _) => const StepsHistoryPage(),
+      ),
+      GoRoute(
         path: '/connected-health/heart',
         builder: (_, _) => const ConnectedHealthSignalDetailPage(
           keys: ['heartRate', 'restingHeartRate'],
           title: 'Heart rate',
           unitFallback: 'bpm',
+        ),
+      ),
+      GoRoute(
+        path: '/connected-health/sleep',
+        builder: (_, _) => const ConnectedHealthSignalDetailPage(
+          keys: ['sleep'],
+          title: 'Sleep',
+          unitFallback: 'h',
+        ),
+      ),
+      GoRoute(
+        path: '/connected-health/active-energy',
+        builder: (_, _) => const ConnectedHealthSignalDetailPage(
+          keys: ['activeEnergy'],
+          title: 'Active energy',
+          unitFallback: 'kcal',
         ),
       ),
       GoRoute(

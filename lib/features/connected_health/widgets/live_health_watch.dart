@@ -288,6 +288,9 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                               color: const Color(0xFF55DFF2),
                               fontSize: d(widget.compact ? 10 : 14),
                               fontWeight: FontWeight.w600,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
                             ),
                           ),
                         ],
@@ -300,6 +303,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                         height: 1,
                         fontWeight: FontWeight.w400,
                         letterSpacing: d(-1.8),
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ),

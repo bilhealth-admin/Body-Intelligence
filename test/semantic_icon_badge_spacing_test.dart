@@ -137,6 +137,10 @@ void main() {
         expect(tile, findsOneWidget);
         expect(badge, findsOneWidget);
         expect(tester.widget<ListTile>(tile).horizontalTitleGap, 12);
+        expect(tester.widget<BilSemanticIconBadge>(badge).size, 30);
+        expect(tester.widget<BilSemanticIconBadge>(badge).iconSize, 18);
+        expect(tester.widget<Text>(title).style?.fontSize, 14);
+        expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w700);
         expect(Directionality.of(tester.element(tile)), direction);
         expect(
           _directionalGap(

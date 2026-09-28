@@ -33,6 +33,7 @@ void main() {
     expect(backend, contains('query: translatedQuery'));
     expect(backend, contains('search_query: translatedQuery'));
     expect(client, contains("'food-search'"));
+    expect(client, contains('Duration(seconds: 16)'));
     expect(client, isNot(contains('BIL_USDA_API_KEY')));
     expect(client, isNot(contains('api.nal.usda.gov')));
   });

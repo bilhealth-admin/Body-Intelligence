@@ -109,7 +109,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       final ownerId = _currentStoreOwnerId();
       if (ownerId == null) return;
       final verification = boost
-          ? await _verifyBoostOnServer(purchase)
+          ? await _verifyBoostOnServer(purchase, ownerId: ownerId)
           : await _verifyOnServer(purchase, ownerId: ownerId);
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       final verifiedActive =
@@ -562,12 +562,16 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
   }
 
   Future<_StoreReceiptVerificationResult> _verifyBoostOnServer(
-    PurchaseDetails purchase,
-  ) async {
+    PurchaseDetails purchase, {
+    required String ownerId,
+  }) async {
     if (purchase.productID != StoreCatalogConfiguration.aiBoost) {
       return _StoreReceiptVerificationResult.failed;
     }
     try {
+      if (!_isCurrentStoreOwner(ownerId)) {
+        return _StoreReceiptVerificationResult.failed;
+      }
       final body = <String, Object?>{
         'action': 'verify_ai_boost',
         'product_id': purchase.productID,
@@ -577,10 +581,16 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       final protectedBody = await BilMobileIntegrityService.instance
           .protect(action: 'store.verify_ai_boost', payload: body)
           .timeout(const Duration(seconds: 12));
+      if (!_isCurrentStoreOwner(ownerId)) {
+        return _StoreReceiptVerificationResult.failed;
+      }
       final response = await Supabase.instance.client.functions
           .invoke('verify-store-purchase', body: protectedBody)
           .timeout(const Duration(seconds: 30));
       final data = response.data;
+      if (!_isCurrentStoreOwner(ownerId)) {
+        return _StoreReceiptVerificationResult.failed;
+      }
       return response.status == 200 && data is Map && data['verified'] == true
           ? _StoreReceiptVerificationResult.verifiedActive
           : _verificationFailure(data);

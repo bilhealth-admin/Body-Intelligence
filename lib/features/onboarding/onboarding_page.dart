@@ -48,7 +48,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     OnboardingGoal.gainWeight,
   };
 
-  final _name = TextEditingController();
   final _country = TextEditingController();
   final _height = TextEditingController();
   final _currentWeight = TextEditingController();
@@ -69,7 +68,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _draftWrites = Future<void>.value();
 
   List<String> get _steps => <String>[
-    if (defaultTargetPlatform != TargetPlatform.iOS) 'name',
     'goals',
     'activity',
     'facts',
@@ -104,7 +102,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   @override
   void dispose() {
     for (final controller in <TextEditingController>[
-      _name,
       _country,
       _height,
       _currentWeight,
@@ -262,7 +259,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   void _syncControllers() {
-    _name.text = _draft.preferredName;
     _country.text = _draft.countryRegion;
     _height.text = _displayLength(_draft.heightCm);
     _currentWeight.text = _displayWeight(_draft.currentWeightKg);
@@ -349,7 +345,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           if (mounted) context.go('/settings');
           return;
         }
-        final savedDraft = _draft.copyWith(stepId: 'name');
+        final savedDraft = _draft.copyWith(stepId: 'goals');
         await _queueDraftSave(savedDraft);
         if (mounted) context.go('/account-gateway');
         return;
@@ -391,8 +387,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   String? _validateStep(String step) {
     switch (step) {
-      case 'name':
-        return null;
       case 'goals':
         if (_draft.goals.isEmpty) return t('Choose at least one goal.');
       case 'activity':

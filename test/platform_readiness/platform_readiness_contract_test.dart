@@ -110,14 +110,14 @@ void main() {
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 26,
+        manifestReleaseBuildNumber: 27,
       ),
     );
 
     expect(issues, isEmpty);
   });
 
-  test('frozen iOS release configuration requires build 30', () {
+  test('frozen iOS release configuration requires build 31', () {
     final issues = ReleaseConfigurationValidator.validate(
       ReleaseConfiguration(
         production: true,
@@ -145,7 +145,7 @@ void main() {
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 30,
+        manifestReleaseBuildNumber: 31,
       ),
     );
 
@@ -187,7 +187,7 @@ void main() {
     final releaseIssue = issues.singleWhere(
       (issue) => issue.code == 'wrong_frozen_release_version',
     );
-    expect(releaseIssue.message, contains('build 30 for ios'));
+    expect(releaseIssue.message, contains('build 31 for ios'));
   });
 
   test('production rejects mismatched feature integrity and freeze gates', () {

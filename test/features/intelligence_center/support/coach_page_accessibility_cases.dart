@@ -207,6 +207,10 @@ void registerCoachAccessibilityCases() {
       await tester.pumpAndSettle();
       expect(scroll.offset - scroll.position.minScrollExtent, greaterThan(72));
       expect(find.byKey(const ValueKey('chat-jump-to-latest')), findsOneWidget);
+      expect(
+        tester.getCenter(find.byKey(const ValueKey('chat-jump-to-latest'))).dx,
+        closeTo(tester.getCenter(find.byType(ChatHistoryViewport)).dx, 1),
+      );
       expect(tester.takeException(), isNull);
       await _unmount(tester);
     },

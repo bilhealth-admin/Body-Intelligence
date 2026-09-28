@@ -11,6 +11,7 @@ import '../../connected_health/providers/connected_health_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../domain/daily_body_context_codec.dart';
+import '../daily_body_context_copy.dart';
 import '../providers/daily_log_provider.dart';
 
 class DailyLogTodayBackground extends StatelessWidget {
@@ -221,7 +222,7 @@ class DailyLogStepsShortcut extends ConsumerWidget {
         key: const Key('daily-log-steps-value'),
       ),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.push('/connected-health/steps'),
+      onTap: () => context.push('/connected-health/steps/history'),
     );
   }
 }
@@ -346,22 +347,6 @@ class DailyLogNotesShortcut extends ConsumerWidget {
 }
 
 String _dailyContextLabel(BuildContext context, String key) {
-  const labels = <String, String>{
-    'poorSleep': 'Less sleep than usual',
-    'greatSleep': 'Excellent sleep',
-    'travel': 'Travel',
-    'fasting': 'Fasting',
-    'highSodiumMeal': 'High-sodium meal',
-    'hardWorkout': 'Hard workout',
-    'psychologicalStress': 'Psychological stress',
-    'illnessSymptoms': 'Illness or symptoms',
-    'medication': 'Medication',
-    'lessWater': 'Less water than usual',
-    'moreWater': 'More water than usual',
-    'constipation': 'Constipation',
-    'nothingNotable': 'Nothing notable',
-    'other': 'Other',
-  };
-  final source = labels[key];
-  return source == null ? '' : context.strings.text(source);
+  if (!dailyBodyContextEnglishCopy.containsKey(key)) return '';
+  return dailyBodyContextCopy(context, key);
 }

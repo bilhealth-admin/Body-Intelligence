@@ -18,6 +18,10 @@ class _ProgressCopy {
   String get hipsUnavailable => t('hipsUnavailable');
   String get addEditWeight => t('addEditWeight');
   String get editMeasurements => t('editMeasurements');
+  String get saveMeasurement => t('saveMeasurement');
+  String get invalidMeasurement => t('invalidMeasurement');
+  String get saveFailed => t('saveFailed');
+  String addMeasurement(String metric) => '${t('addMeasurement')}: $metric';
   String get shareProgress => t('shareProgress');
   String get average => t('average');
   String get best => t('best');
@@ -116,6 +120,10 @@ const _progressCopy = <String, Map<String, String>>{
         'Hip measurement is unavailable because the current profile schema does not store it.',
     'addEditWeight': 'Add or edit weight',
     'editMeasurements': 'Edit measurements',
+    'addMeasurement': 'Add measurement',
+    'saveMeasurement': 'Save measurement',
+    'invalidMeasurement': 'Enter a valid measurement from 20 to 300 cm.',
+    'saveFailed': 'The measurement could not be saved. Try again.',
     'shareProgress': 'Share progress',
     'average': 'Average',
     'best': 'Best',
@@ -162,6 +170,10 @@ const _progressCopy = <String, Map<String, String>>{
     'hipsUnavailable': 'قياس الورك غير متاح لأن مخطط الملف الحالي لا يخزنه.',
     'addEditWeight': 'إضافة أو تعديل الوزن',
     'editMeasurements': 'تعديل القياسات',
+    'addMeasurement': 'إضافة قياس',
+    'saveMeasurement': 'حفظ القياس',
+    'invalidMeasurement': 'أدخل قياسًا صحيحًا بين 20 و300 سم.',
+    'saveFailed': 'تعذر حفظ القياس. حاول مجددًا.',
     'shareProgress': 'مشاركة التقدم',
     'average': 'المتوسط',
     'best': 'الأفضل',
@@ -209,6 +221,10 @@ const _progressCopy = <String, Map<String, String>>{
         'La mesure des hanches est indisponible car le schéma actuel ne la stocke pas.',
     'addEditWeight': 'Ajouter ou modifier le poids',
     'editMeasurements': 'Modifier les mesures',
+    'addMeasurement': 'Ajouter une mesure',
+    'saveMeasurement': 'Enregistrer la mesure',
+    'invalidMeasurement': 'Saisissez une mesure valide de 20 à 300 cm.',
+    'saveFailed': 'Impossible d’enregistrer la mesure. Réessayez.',
     'shareProgress': 'Partager la progression',
     'average': 'Moyenne',
     'best': 'Meilleur',
@@ -256,6 +272,10 @@ const _progressCopy = <String, Map<String, String>>{
         'La medida de caderas no está disponible porque el esquema actual no la almacena.',
     'addEditWeight': 'Añadir o editar peso',
     'editMeasurements': 'Editar medidas',
+    'addMeasurement': 'Añadir medida',
+    'saveMeasurement': 'Guardar medida',
+    'invalidMeasurement': 'Introduce una medida válida de 20 a 300 cm.',
+    'saveFailed': 'No se pudo guardar la medida. Inténtalo de nuevo.',
     'shareProgress': 'Compartir progreso',
     'average': 'Promedio',
     'best': 'Mejor',
@@ -302,6 +322,10 @@ const _progressCopy = <String, Map<String, String>>{
         'Kalça ölçümü mevcut profil şemasında saklanmadığı için kullanılamıyor.',
     'addEditWeight': 'Kilo ekle veya düzenle',
     'editMeasurements': 'Ölçümleri düzenle',
+    'addMeasurement': 'Ölçüm ekle',
+    'saveMeasurement': 'Ölçümü kaydet',
+    'invalidMeasurement': '20 ile 300 cm arasında geçerli bir ölçüm girin.',
+    'saveFailed': 'Ölçüm kaydedilemedi. Tekrar deneyin.',
     'shareProgress': 'İlerlemeyi paylaş',
     'average': 'Ortalama',
     'best': 'En iyi',

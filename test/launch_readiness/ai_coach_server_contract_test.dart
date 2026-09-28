@@ -13,14 +13,15 @@ void main() {
     expect(source, contains('bil_settle_ai_usage'));
     expect(source, contains('p_capability: "text"'));
     expect(source, contains('BIL_GEMINI_TEXT_MODEL'));
+    expect(source, contains('gemini-3.8-flash'));
     expect(source, contains('gemini-3.7-flash'));
     expect(
       source,
       isNot(contains('env("BIL_GEMINI_VISION_MODEL") || "gemini-2.5-flash"')),
     );
     expect(source, contains('BIL_GEMINI_COST_RATES_JSON'));
-    expect(source, contains('attempt <= 2'));
-    expect(source, contains('geminiAttemptTimeoutMs = 12_000'));
+    expect(source, contains('attempt <= 1'));
+    expect(source, contains('geminiAttemptTimeoutMs = 10_000'));
     expect(source, contains('AbortSignal.timeout(geminiAttemptTimeoutMs)'));
     expect(source, contains('maxOutputTokens'));
     expect(source, contains('responseMimeType: "application/json"'));
