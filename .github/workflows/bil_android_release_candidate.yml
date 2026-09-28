@@ -24,7 +24,7 @@ jobs:
       - name: Checkout accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: ${{ vars.BIL_ANDROID_V28_AUDITED_SOURCE_SHA }}
+          ref: ${{ vars.BIL_ANDROID_V29_AUDITED_SOURCE_SHA }}
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -102,11 +102,11 @@ jobs:
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
-          BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V28_AUDITED_SOURCE_SHA }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V31_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V28_FROZEN_SOURCE_MANIFEST_2026-09-28.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V28_STAGING_MANIFEST_SHA256 }}
+          BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V29_AUDITED_SOURCE_SHA }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V29_AUDITED_SOURCE_SHA }}
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V32_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V29_FROZEN_SOURCE_MANIFEST_2026-09-28.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V29_STAGING_MANIFEST_SHA256 }}
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: dart run tool/release/validate_release_configuration.dart
 
