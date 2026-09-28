@@ -13,7 +13,7 @@
 ## Release identity and source boundary
 
 iOS build 32 replaces the already-uploaded build 31 while preserving the same
-host-validated application source and Android build 28 lineage. The increment
+host-validated application source and Android build 29 lineage. The increment
 is required solely because App Store Connect does not accept a reused
 `CFBundleVersion`.
 
@@ -25,7 +25,7 @@ occurs only when the owner explicitly dispatches with
 After the release-binding commit is pushed,
 `BIL_IOS_V32_AUDITED_SOURCE_SHA` must equal that commit and
 `BIL_IOS_V32_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
-SHA-256. `BIL_ANDROID_V28_AUDITED_SOURCE_SHA` continues to identify the audited
+SHA-256. `BIL_ANDROID_V29_AUDITED_SOURCE_SHA` identifies the matching audited
 Android application source.
 
 ## Validation boundary
