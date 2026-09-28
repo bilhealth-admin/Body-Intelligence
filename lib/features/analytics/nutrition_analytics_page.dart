@@ -227,7 +227,9 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                   final evidence = _dashboardEvidence(value);
                   if (value.every((meal) => meal.items.isEmpty)) {
                     return _NutritionEmptyDay(
-                      onLogFood: () => context.push('/nutrition'),
+                      onLogFood: () => context.push(
+                        '/daily-log?foodLog=1&from=%2Fanalytics',
+                      ),
                     );
                   }
                   return TabBarView(

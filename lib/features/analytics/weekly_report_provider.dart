@@ -51,6 +51,8 @@ Duration? weeklyReportRetryDelay(int retryCount) {
     Duration(milliseconds: 500),
     Duration(seconds: 1),
     Duration(seconds: 2),
+    Duration(seconds: 3),
+    Duration(seconds: 5),
   ];
   return retryCount < delays.length ? delays[retryCount] : null;
 }
@@ -120,6 +122,18 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
       for (final entry in dailyLogs.where((entry) => recent(entry.date)))
         entry.dayKey: entry,
     };
+    final verifiedStepsByDay = <String, int>{};
+    if (connectedHealth?.deviceVerified == true) {
+      for (final signal in connectedHealth!.stepHistory) {
+        final day = signal.observedAt.toLocal();
+        if (signal.key != 'steps' ||
+            !signal.value.isFinite ||
+            signal.value < 0) {
+          continue;
+        }
+        verifiedStepsByDay[dayKeyFor(day)] = signal.value.round();
+      }
+    }
     final sleepByDay = <String, WeeklySleepObservation>{};
     for (final entry in dailyLogsByDay.values) {
       final hours = entry.sleepHours;
@@ -164,10 +178,13 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
     final weeklyActivity = <WeeklyActivityObservation>[
       for (final day in reportDays)
         if (dailyLogsByDay[dayKeyFor(day)] != null ||
+            verifiedStepsByDay[dayKeyFor(day)] != null ||
             authoritativeExerciseEnergyForDay(connectedHealth, day) != null)
           WeeklyActivityObservation(
             dayKey: dayKeyFor(day),
-            steps: dailyLogsByDay[dayKeyFor(day)]?.steps,
+            steps:
+                verifiedStepsByDay[dayKeyFor(day)] ??
+                dailyLogsByDay[dayKeyFor(day)]?.steps,
             exerciseNotes: dailyLogsByDay[dayKeyFor(day)]?.exerciseNotes,
             estimatedBurnedCaloriesKcal: estimatedExerciseCaloriesFromNotes(
               dailyLogsByDay[dayKeyFor(day)]?.exerciseNotes,
@@ -242,9 +259,7 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
       allTimeExerciseDays: dailyLogs
           .where((entry) => entry.exerciseNotes?.trim().isNotEmpty == true)
           .length,
-      allTimeSteps: dailyLogs.any((entry) => entry.steps != null)
-          ? dailyLogs.fold<int>(0, (sum, entry) => sum + (entry.steps ?? 0))
-          : null,
+      allTimeSteps: _allTimeSteps(dailyLogs, verifiedStepsByDay),
       dailyCalorieGoal: fallbackCalorieGoal?.round(),
       calorieGoalsByDay: calorieGoalsByDay,
       loggingStreakDays: computeWeeklyLoggingStreak(asOf, <String>{
@@ -254,6 +269,7 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
         ...dailyLogs
             .where(_hasRecordedDailyEvidence)
             .map((entry) => entry.dayKey),
+        ...verifiedStepsByDay.keys,
       }),
     );
   },
@@ -264,6 +280,15 @@ final weeklyReportProvider = FutureProvider.autoDispose<WeeklyReportSnapshot>(
     return weeklyReportRetryDelay(retryCount);
   },
 );
+
+int? _allTimeSteps(List<DailyLog> dailyLogs, Map<String, int> verifiedByDay) {
+  final byDay = <String, int>{
+    for (final entry in dailyLogs)
+      if (entry.steps != null) entry.dayKey: entry.steps!,
+    ...verifiedByDay,
+  };
+  return byDay.isEmpty ? null : byDay.values.fold<int>(0, (a, b) => a + b);
+}
 
 DateTime _connectedSleepDay(
   DateTime observedAt,

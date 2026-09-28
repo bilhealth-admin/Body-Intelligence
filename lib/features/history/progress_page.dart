@@ -9,9 +9,12 @@ import 'package:share_plus/share_plus.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../../data/database/app_database.dart';
+import '../../data/database/date_keys.dart';
 import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../daily_log/providers/daily_log_provider.dart';
+import '../connected_health/connected_health_model.dart';
+import '../connected_health/providers/connected_health_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -43,10 +46,17 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   Widget build(BuildContext context) {
     final copy = _ProgressCopy.of(context);
     final logs = ref.watch(progressDailyLogsProvider);
+    final connectedHealth = ref.watch(connectedHealthProvider).value;
     final weights = ref.watch(weightHistoryProvider);
     final measurements = ref.watch(bodyMeasurementHistoryProvider);
     final systemState = ref.watch(measurementSystemProvider);
-    final shareData = _shareData(logs, weights, measurements, systemState);
+    final shareData = _shareData(
+      logs,
+      connectedHealth,
+      weights,
+      measurements,
+      systemState,
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
@@ -124,12 +134,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                   _error(copy, () => ref.invalidate(progressDailyLogsProvider)),
               data: (rows) => _series(
                 copy,
-                _filter(
-                  rows
-                      .where((row) => row.steps != null && row.steps! >= 0)
-                      .map((row) => _Point(row.date, row.steps!.toDouble()))
-                      .toList(growable: false),
-                ),
+                _filter(_progressStepPoints(rows, connectedHealth)),
                 copy.stepsUnit,
               ),
             )
@@ -211,6 +216,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
 
   ({List<_Point> points, String unit})? _shareData(
     AsyncValue<List<DailyLog>> logs,
+    ConnectedHealthSnapshot? connectedHealth,
     AsyncValue<List<WeightEntry>> weights,
     AsyncValue<List<BodyMeasurementEntry>> measurements,
     AsyncValue<MeasurementSystem> systemState,
@@ -218,12 +224,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     List<_Point>? points;
     String? unit;
     if (metric == ProgressMetric.steps && logs.hasValue) {
-      points = _filter(
-        logs.requireValue
-            .where((row) => row.steps != null && row.steps! >= 0)
-            .map((row) => _Point(row.date, row.steps!.toDouble()))
-            .toList(growable: false),
-      );
+      points = _filter(_progressStepPoints(logs.requireValue, connectedHealth));
       unit = _ProgressCopy.of(context).stepsUnit;
     } else if (metric == ProgressMetric.weight &&
         weights.hasValue &&

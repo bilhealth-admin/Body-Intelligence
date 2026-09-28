@@ -50,8 +50,8 @@ void main() {
 
     // Meta Android returns a ClassicToken whose tokenString is a Graph API
     // access token. flutter_facebook_auth 7.2.0 exposes the separate,
-    // nonce-bound OIDC proof as authenticationToken; only that JWT can enter
-    // Supabase's signInWithIdToken exchange.
+    // nonce-bound OIDC proof as authenticationToken. The JWT is the identity
+    // proof and tokenString is supplied separately for at_hash validation.
     expect(
       SupabaseAuthService.usesNativeAndroidFacebookSignIn(
         OAuthProvider.facebook,
@@ -61,13 +61,15 @@ void main() {
       isTrue,
     );
     expect(nativeFacebook, contains('FacebookAuth.instance.login('));
-    expect(
-      nativeFacebook,
-      contains('ClassicToken(:final authenticationToken)'),
-    );
+    expect(nativeFacebook, contains('ClassicToken('));
+    expect(nativeFacebook, contains(':final authenticationToken'));
+    expect(nativeFacebook, contains(':final tokenString'));
     expect(nativeFacebook, contains('LimitedToken(:final tokenString)'));
     expect(nativeFacebook, contains("'public_profile', 'email', 'openid'"));
+    expect(nativeFacebook, contains('LoginBehavior.webOnly'));
+    expect(nativeFacebook, contains('LoginTracking.enabled'));
     expect(nativeFacebook, contains('nonce: nonce'));
+    expect(service, contains('accessToken: token.accessToken'));
     expect(service, contains('nonce: token.nonce'));
 
     expect(manifest, contains('com.facebook.sdk.ApplicationId'));

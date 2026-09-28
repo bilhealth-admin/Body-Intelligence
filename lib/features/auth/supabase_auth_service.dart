@@ -57,7 +57,11 @@ abstract interface class BilFacebookSessionAuthority {
 
   String generateRawNonce();
 
-  Future<AuthResponse> exchange({required String idToken, String? nonce});
+  Future<AuthResponse> exchange({
+    required String idToken,
+    String? accessToken,
+    String? nonce,
+  });
 }
 
 final class SupabaseFacebookSessionAuthority
@@ -73,12 +77,16 @@ final class SupabaseFacebookSessionAuthority
   String generateRawNonce() => client.auth.generateRawNonce();
 
   @override
-  Future<AuthResponse> exchange({required String idToken, String? nonce}) =>
-      client.auth.signInWithIdToken(
-        provider: OAuthProvider.facebook,
-        idToken: idToken,
-        nonce: nonce,
-      );
+  Future<AuthResponse> exchange({
+    required String idToken,
+    String? accessToken,
+    String? nonce,
+  }) => client.auth.signInWithIdToken(
+    provider: OAuthProvider.facebook,
+    idToken: idToken,
+    accessToken: accessToken,
+    nonce: nonce,
+  );
 }
 
 class SupabaseAuthService {
@@ -258,8 +266,9 @@ class SupabaseAuthService {
   /// Signs in through Meta's native SDK, then exchanges its platform token for
   /// BIL's authoritative Supabase session. iOS Limited Login supplies its
   /// nonce-bound tokenString; Android supplies ClassicToken's separate,
-  /// nonce-bound AuthenticationToken. The Graph API access token is never
-  /// accepted as an OIDC identity proof.
+  /// nonce-bound AuthenticationToken plus the matching Graph access token
+  /// required to validate an OIDC `at_hash` claim. The Graph token is never
+  /// accepted as the identity proof itself.
   ///
   /// A null result means the person dismissed Meta's authorization UI.
   Future<AuthResponse?> signInWithFacebookNative() async {
@@ -274,6 +283,7 @@ class SupabaseAuthService {
     if (token == null) return null;
     final response = await authority.exchange(
       idToken: token.idToken,
+      accessToken: token.accessToken,
       nonce: token.nonce,
     );
     final session = response.session;

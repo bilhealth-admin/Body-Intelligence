@@ -5,50 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
-import '../../app/services/app_observability.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_notice.dart';
-import '../connected_health/providers/connected_health_provider.dart';
 import '../connected_health/widgets/dashboard_health_activity_refresh.dart';
-import '../life_context/providers/life_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../profile/services/profile_photo_service.dart';
-import '../weight/providers/weight_provider.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
-import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_composition.dart';
 import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/dashboard_shell.dart';
 import 'widgets/dashboard_top_bar.dart';
 import 'widgets/first_value_handoff_card.dart';
-
-/// Keeps pull-to-refresh responsive even when a provider or device source is
-/// slow. The refresh work continues safely after the indicator is dismissed.
-@visibleForTesting
-const dashboardRefreshIndicatorMaximum = Duration(milliseconds: 850);
-
-/// One slow local source must not make an otherwise usable dashboard look as
-/// though its whole refresh failed. Each source is bounded independently and
-/// its failure is retained in local diagnostics instead of replacing the
-/// visible dashboard with an all-or-nothing error.
-@visibleForTesting
-const dashboardSourceRefreshMaximum = Duration(seconds: 2);
-
-Future<bool> _settleDashboardRefresh<T>(Future<T> Function() refresh) async {
-  try {
-    await refresh().timeout(dashboardSourceRefreshMaximum);
-    return true;
-  } on Object catch (error, _) {
-    AppObservability.logger.record(
-      AppLogLevel.warning,
-      'dashboard_refresh_source_failed',
-      attributes: <String, Object?>{'errorType': error.runtimeType.toString()},
-    );
-    return false;
-  }
-}
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -225,56 +194,6 @@ class DashboardPage extends ConsumerWidget {
         BilRuntimePermissionState.granted;
   }
 
-  Future<void> refresh(BuildContext context, WidgetRef ref) async {
-    final refreshWork = _refreshDashboardData(context, ref);
-    await Future.any<void>([
-      refreshWork,
-      Future<void>.delayed(dashboardRefreshIndicatorMaximum),
-    ]);
-  }
-
-  Future<void> _refreshDashboardData(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final refreshed = await Future.wait<bool>([
-      _settleDashboardRefresh(
-        () => ref
-            .read(connectedHealthProvider.notifier)
-            .refreshDailyActivity(force: true),
-      ),
-      _settleDashboardRefresh(() => ref.refresh(latestWeightProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(weightHistoryProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(userProfileProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(todayMealsProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(todayWaterProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(allMealsProvider.future)),
-      _settleDashboardRefresh(() => ref.refresh(allWaterProvider.future)),
-      _settleDashboardRefresh(
-        () => ref.refresh(weightReminderSkippedTodayProvider.future),
-      ),
-      _settleDashboardRefresh(
-        () => ref.refresh(todayLifeContextProvider.future),
-      ),
-    ]);
-
-    // Pull-to-refresh is intentionally quiet when at least one source is
-    // available. Individual cards retain their last usable value and show
-    // their own truthful state; a single temporary local timeout is not a
-    // dashboard-wide failure.
-    if (context.mounted && refreshed.every((succeeded) => !succeeded)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text(
-              'Some local Today data could not be refreshed.',
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resolvedLocale = Localizations.localeOf(context);
@@ -328,7 +247,6 @@ class DashboardPage extends ConsumerWidget {
     return Theme(
       data: dashboardTheme,
       child: DashboardShell(
-        onRefresh: () => refresh(context, ref),
         leading: const CloudSyncConsentNotice(),
         edgeHeader: DashboardTopBar(
           profilePhoto: profilePhoto,

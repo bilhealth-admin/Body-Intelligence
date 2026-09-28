@@ -29,10 +29,9 @@ void main() {
     expect(nativeFacebook, contains('LoginBehavior.nativeWithFallback'));
     expect(nativeFacebook, contains('LoginStatus.cancelled'));
     expect(nativeFacebook, contains('LimitedToken(:final tokenString)'));
-    expect(
-      nativeFacebook,
-      contains('ClassicToken(:final authenticationToken)'),
-    );
+    expect(nativeFacebook, contains('ClassicToken('));
+    expect(nativeFacebook, contains(':final authenticationToken'));
+    expect(nativeFacebook, contains(':final tokenString'));
 
     expect(service, contains('usesNativeIosFacebookSignIn'));
     expect(service, contains('signInWithFacebookNative'));

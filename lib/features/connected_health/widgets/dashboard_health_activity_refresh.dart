@@ -25,6 +25,13 @@ class _DashboardHealthActivityRefreshState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Start the local-only projection read immediately. Permission prompts and
+    // native activity refresh still wait for the first rendered frame, but a
+    // cold dashboard must not spend that frame showing an empty watch when a
+    // verified cached snapshot already exists on the device.
+    unawaited(
+      ref.read(connectedHealthProvider.notifier).restoreCachedSnapshot(),
+    );
     _schedule();
     _startForegroundTimer();
   }

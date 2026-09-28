@@ -121,7 +121,6 @@ Widget _subject(Locale locale, double scale) {
         child: child!,
       ),
       home: DashboardShell(
-        onRefresh: () async {},
         child: RepaintBoundary(
           key: const Key('dashboard-polish-review'),
           child: ColoredBox(

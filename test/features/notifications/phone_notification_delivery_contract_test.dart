@@ -67,9 +67,8 @@ void main() {
     expect(presentation, contains('NotificationVisibility.private'));
     expect(actions, contains('scheduleDailyGroupSummary'));
     expect(page, contains("Key('notification-phone-check')"));
-    expect(actions, contains('_sendNotificationCheck'));
-    expect(actions, contains('showActivationConfirmation'));
-    expect(actions, contains('await _refreshSystemStatus()'));
+    expect(page, isNot(contains("'Try now'")));
+    expect(actions, isNot(contains('_sendNotificationCheck')));
     expect(actions, isNot(contains('_service.areNotificationsEnabled()')));
   });
 }

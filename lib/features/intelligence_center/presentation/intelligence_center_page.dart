@@ -132,6 +132,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   String? lastClearWritingLanguageTag;
   Timer? voiceSilenceTimer;
   Timer? replyDelayTimer;
+  Timer? entryWelcomeTimer;
   String? voiceLanguageHint;
   String pendingVoiceTranscript = '';
   _CoachVoiceMode voiceMode = _CoachVoiceMode.idle;
@@ -164,6 +165,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   CoachContextSnapshot? lastCoachContextSnapshot;
   bool conversationHistoryOpening = false;
   bool coachMenuOpening = false;
+  bool entryWelcomeVisible = true;
   String? activeConversationId;
   Future<void> conversationPersistenceTail = Future<void>.value();
   int conversationPersistenceEpoch = 0;
@@ -196,6 +198,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void initState() {
     super.initState();
+    entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
+      if (mounted) setState(() => entryWelcomeVisible = false);
+    });
     // Riverpod refs are unavailable from dispose. Retain the stable,
     // database-backed repositories while this element is active so the last
     // conversation snapshot can still be queued during teardown.
@@ -392,6 +397,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     WidgetsBinding.instance.removeObserver(this);
     voiceSilenceTimer?.cancel();
     replyDelayTimer?.cancel();
+    entryWelcomeTimer?.cancel();
     unawaited(const BilTextToSpeech().stop());
     unawaited(speech.dispose());
     question.dispose();
@@ -401,6 +407,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   Widget build(BuildContext context) {
+    if (entryWelcomeVisible) {
+      return const _AiCoachEntryWelcome();
+    }
     final scheme = Theme.of(context).colorScheme;
     final coachContext = ref.watch(coachContextSnapshotProvider);
     final currentCoachContext = coachContext.asData?.value;
@@ -724,12 +733,4 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
       ),
     );
   }
-}
-
-final class _CoachUndoOperation {
-  _CoachUndoOperation({required this.receipt, required this.undo});
-
-  final BilActionReceipt receipt;
-  final Future<void> Function() undo;
-  bool completed = false;
 }

@@ -1,5 +1,39 @@
 part of 'progress_page.dart';
 
+/// Combines local/manual daily steps with verified native daily totals.
+/// Native evidence wins for the same calendar day because it is the source
+/// shown by the dedicated Apple Health / Health Connect history screen.
+List<_Point> _progressStepPoints(
+  List<DailyLog> logs,
+  ConnectedHealthSnapshot? connectedHealth,
+) => progressMergedStepValues(logs, connectedHealth).entries
+    .map((entry) => _Point(entry.key, entry.value))
+    .toList(growable: false);
+
+Map<DateTime, double> progressMergedStepValues(
+  List<DailyLog> logs,
+  ConnectedHealthSnapshot? connectedHealth,
+) {
+  final byDay = <String, MapEntry<DateTime, double>>{
+    for (final row in logs)
+      if (row.steps != null && row.steps! >= 0)
+        row.dayKey: MapEntry(
+          DateUtils.dateOnly(row.date),
+          row.steps!.toDouble(),
+        ),
+  };
+  if (connectedHealth?.deviceVerified == true) {
+    for (final signal in connectedHealth!.stepHistory) {
+      if (signal.key != 'steps' || !signal.value.isFinite || signal.value < 0) {
+        continue;
+      }
+      final day = DateUtils.dateOnly(signal.observedAt.toLocal());
+      byDay[dayKeyFor(day)] = MapEntry(day, signal.value);
+    }
+  }
+  return Map<DateTime, double>.fromEntries(byDay.values);
+}
+
 enum ProgressMetric { steps, weight, neck, waist, hips, chest, arm, thigh }
 
 enum ProgressRange { week, month, twoMonths, threeMonths, sixMonths, year, all }

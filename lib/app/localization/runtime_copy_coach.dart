@@ -2,6 +2,13 @@
 // dart run tool/localization/generate_extended_runtime_copy.dart --coach-base
 abstract final class CoachRuntimeCopy {
   static const values = <String, Map<String, String>>{
+    "Welcome to AI Coach": {
+      'en': "Welcome to AI Coach",
+      "ar": "مرحبًا بك في المدرب الذكي",
+      "fr": "Bienvenue dans le coach IA",
+      "es": "Te damos la bienvenida al coach de IA",
+      "tr": "Yapay zekâ koçuna hoş geldiniz",
+    },
     "1,500 nutrition-aware recipes": {
       'en': "1,500 nutrition-aware recipes",
       "ar": "1500 وصفة غذائية",

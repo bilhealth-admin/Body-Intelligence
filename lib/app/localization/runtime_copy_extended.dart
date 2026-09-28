@@ -25,6 +25,28 @@ abstract final class ExtendedRuntimeCopy {
     "uk",
   };
   static const values = <String, Map<String, String>>{
+    "Welcome to AI Coach": {
+      "de": "Willkommen bei AI Coach",
+      "it": "Benvenuto in AI Coach",
+      "pt-BR": "Bem-vindo ao AI Coach",
+      "pt-PT": "Bem-vindo ao AI Coach",
+      "ur": "AI Coach میں خوش آمدید",
+      "fa": "به AI Coach خوش آمدید",
+      "hi": "AI Coach में आपका स्वागत है",
+      "id": "Selamat datang di AI Coach",
+      "ms": "Selamat datang ke AI Coach",
+      "ja": "AI Coachへようこそ",
+      "ko": "AI Coach에 오신 것을 환영합니다",
+      "zh-Hans": "欢迎使用 AI Coach",
+      "zh-Hant": "歡迎使用 AI Coach",
+      "ru": "Добро пожаловать в AI Coach",
+      "bn": "AI Coach-এ স্বাগতম",
+      "vi": "Chào mừng bạn đến với AI Coach",
+      "th": "ยินดีต้อนรับสู่ AI Coach",
+      "pl": "Witaj w AI Coach",
+      "nl": "Welkom bij AI Coach",
+      "uk": "Ласкаво просимо до AI Coach",
+    },
     "Today": {
       "de": "Heute",
       "it": "Oggi",

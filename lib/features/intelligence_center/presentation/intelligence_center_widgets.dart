@@ -1,5 +1,57 @@
 part of 'intelligence_center_page.dart';
 
+class _AiCoachEntryWelcome extends StatelessWidget {
+  const _AiCoachEntryWelcome();
+
+  @override
+  Widget build(BuildContext context) {
+    const navy = Color(0xFF071923);
+    const accent = Color(0xFFC8F3FF);
+    return Scaffold(
+      backgroundColor: navy,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                intelligenceText(
+                  context,
+                  'Welcome to AI Coach',
+                  'مرحبًا بك في المدرب الذكي',
+                ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: .2,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const SizedBox.square(
+                dimension: 34,
+                child: CircularProgressIndicator(
+                  color: accent,
+                  strokeWidth: 3,
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _CoachUndoOperation {
+  _CoachUndoOperation({required this.receipt, required this.undo});
+
+  final BilActionReceipt receipt;
+  final Future<void> Function() undo;
+  bool completed = false;
+}
+
 class _InlineCoachDecision extends StatelessWidget {
   const _InlineCoachDecision({required this.brief, required this.onAction});
 

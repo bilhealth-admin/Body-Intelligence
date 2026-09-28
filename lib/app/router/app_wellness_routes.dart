@@ -39,8 +39,11 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   ),
   GoRoute(
     path: '/wellness/recipes',
-    builder: (_, state) =>
-        RecipeLibraryPage(initialRecipeId: state.uri.queryParameters['recipe']),
+    pageBuilder: (_, state) => NoTransitionPage(
+      child: RecipeLibraryPage(
+        initialRecipeId: state.uri.queryParameters['recipe'],
+      ),
+    ),
   ),
   GoRoute(
     path: '/nutrition/recipes/import',

@@ -154,21 +154,6 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     context,
   ).showSnackBar(SnackBar(content: Text(_copy.permissionError)));
 
-  Future<void> _sendNotificationCheck() async {
-    if (_saving) return;
-    _updateState(() => _saving = true);
-    try {
-      final allowed = await _service.requestPermission();
-      if (!allowed) throw StateError('notification permission denied');
-      await _service.showActivationConfirmation(languageCode: _languageCode);
-      await _refreshSystemStatus();
-    } on Object {
-      if (mounted) _showLocalError();
-    } finally {
-      if (mounted) _updateState(() => _saving = false);
-    }
-  }
-
   Future<void> _toggleCategory(NotificationCategory category, bool enabled) {
     final current = _deliveryPreferences!;
     final categories = {...current.enabledCategories};

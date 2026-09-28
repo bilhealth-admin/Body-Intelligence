@@ -8,7 +8,6 @@ class _DayHeader extends ConsumerWidget {
     final today = DateUtils.dateOnly(DateTime.now());
     final day = DateUtils.dateOnly(selected);
     final isToday = DateUtils.isSameDay(day, today);
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     void select(DateTime value) {
       ref.read(selectedLogDateProvider.notifier).state = DateUtils.dateOnly(
         value,
@@ -25,8 +24,9 @@ class _DayHeader extends ConsumerWidget {
           IconButton(
             tooltip: _t(context, 'Previous day'),
             onPressed: () => select(day.subtract(const Duration(days: 1))),
-            icon: Icon(
-              rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+            icon: const Icon(
+              Icons.chevron_left_rounded,
+              textDirection: TextDirection.ltr,
             ),
           ),
           Expanded(
@@ -67,8 +67,9 @@ class _DayHeader extends ConsumerWidget {
             onPressed: isToday
                 ? null
                 : () => select(day.add(const Duration(days: 1))),
-            icon: Icon(
-              rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+            icon: const Icon(
+              Icons.chevron_right_rounded,
+              textDirection: TextDirection.ltr,
             ),
           ),
         ],

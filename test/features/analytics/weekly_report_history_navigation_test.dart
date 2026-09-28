@@ -22,7 +22,9 @@ void main() {
     expect(weeklyReportRetryDelay(1), const Duration(milliseconds: 500));
     expect(weeklyReportRetryDelay(2), const Duration(seconds: 1));
     expect(weeklyReportRetryDelay(3), const Duration(seconds: 2));
-    expect(weeklyReportRetryDelay(4), isNull);
+    expect(weeklyReportRetryDelay(4), const Duration(seconds: 3));
+    expect(weeklyReportRetryDelay(5), const Duration(seconds: 5));
+    expect(weeklyReportRetryDelay(6), isNull);
   });
 
   test(
@@ -100,7 +102,7 @@ void main() {
     );
   });
 
-  testWidgets('weekly report arrows use RTL direction without changing dates', (
+  testWidgets('weekly report arrows keep chronological direction in RTL', (
     tester,
   ) async {
     final today = DateTime(2026, 8, 11);
@@ -194,7 +196,7 @@ void main() {
             ),
           )
           .icon,
-      Icons.chevron_right_rounded,
+      Icons.chevron_left_rounded,
     );
     await tester.tap(find.byKey(const Key('weekly-report-previous')));
     expect(rtl.read(selectedWeeklyReportDateProvider), DateTime(2026, 8, 4));
@@ -208,7 +210,7 @@ void main() {
             ),
           )
           .icon,
-      Icons.chevron_left_rounded,
+      Icons.chevron_right_rounded,
     );
     await tester.tap(find.byKey(const Key('weekly-report-next')));
     expect(rtl.read(selectedWeeklyReportDateProvider), today);

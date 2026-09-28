@@ -39,12 +39,16 @@ void main() {
       "Key('nutrition-macros-tab')",
       'NutrientEvidenceMask.contains',
       'selectedLogDateProvider',
-      'Directionality.of(context) == TextDirection.rtl',
+      'textDirection: TextDirection.ltr',
       "context.push('/settings/local-export?from=\$iso&to=\$iso')",
       "_t(context, 'No foods logged for this day.')",
     ]) {
       expect(source, contains(contract));
     }
+    expect(
+      source,
+      isNot(contains('Directionality.of(context) == TextDirection.rtl')),
+    );
     for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
       expect(source, contains("'$locale':"));
     }

@@ -288,41 +288,33 @@ class _NotificationSettingsPageState
                             ),
                           ),
                           const SizedBox(width: 8),
-                          FilledButton.tonal(
-                            key: const Key('notification-phone-check'),
-                            onPressed: _saving
-                                ? null
-                                : _requiresSystemSettings
-                                ? _openSystemNotificationSettings
-                                : _phoneNotificationsEnabled == true
-                                ? _sendNotificationCheck
-                                : () => _setAllDaily(true),
-                            child: Text(
-                              _requiresSystemSettings
-                                  ? _phoneText(
-                                      'Open settings',
-                                      ar: 'فتح الإعدادات',
-                                      fr: 'Ouvrir les réglages',
-                                      es: 'Abrir ajustes',
-                                      tr: 'Ayarları aç',
-                                    )
-                                  : _phoneNotificationsEnabled == true
-                                  ? (RuntimeCopy.resolve(
-                                          'Try now',
-                                          Localizations.localeOf(
-                                            context,
-                                          ).toLanguageTag(),
-                                        ) ??
-                                        'Try now')
-                                  : _phoneText(
-                                      'Turn on',
-                                      ar: 'تشغيل',
-                                      fr: 'Activer',
-                                      es: 'Activar',
-                                      tr: 'Aç',
-                                    ),
+                          if (_requiresSystemSettings ||
+                              _phoneNotificationsEnabled != true)
+                            FilledButton.tonal(
+                              key: const Key('notification-phone-check'),
+                              onPressed: _saving
+                                  ? null
+                                  : _requiresSystemSettings
+                                  ? _openSystemNotificationSettings
+                                  : () => _setAllDaily(true),
+                              child: Text(
+                                _requiresSystemSettings
+                                    ? _phoneText(
+                                        'Open settings',
+                                        ar: 'فتح الإعدادات',
+                                        fr: 'Ouvrir les réglages',
+                                        es: 'Abrir ajustes',
+                                        tr: 'Ayarları aç',
+                                      )
+                                    : _phoneText(
+                                        'Turn on',
+                                        ar: 'تشغيل',
+                                        fr: 'Activer',
+                                        es: 'Activar',
+                                        tr: 'Aç',
+                                      ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),

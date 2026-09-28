@@ -48,6 +48,8 @@ final class _FakeFacebookLoginClient implements BilFacebookLoginClient {
   final LoginResult result;
   int calls = 0;
   List<String>? permissions;
+  LoginBehavior? loginBehavior;
+  LoginTracking? loginTracking;
   String? nonce;
 
   @override
@@ -59,6 +61,8 @@ final class _FakeFacebookLoginClient implements BilFacebookLoginClient {
   }) async {
     calls += 1;
     this.permissions = permissions;
+    this.loginBehavior = loginBehavior;
+    this.loginTracking = loginTracking;
     this.nonce = nonce;
     return result;
   }
@@ -77,6 +81,7 @@ final class _FakeFacebookSessionAuthority
   final Object? exchangeError;
   int exchangeCalls = 0;
   String? exchangedIdToken;
+  String? exchangedAccessToken;
   String? exchangedNonce;
 
   @override
@@ -88,10 +93,12 @@ final class _FakeFacebookSessionAuthority
   @override
   Future<AuthResponse> exchange({
     required String idToken,
+    String? accessToken,
     String? nonce,
   }) async {
     exchangeCalls += 1;
     exchangedIdToken = idToken;
+    exchangedAccessToken = accessToken;
     exchangedNonce = nonce;
     if (exchangeError case final error?) throw error;
     return response ?? AuthResponse(session: _session());
@@ -124,7 +131,10 @@ void main() {
 
     expect(response?.session, isNotNull);
     expect(authority.exchangedIdToken, _jwt);
+    expect(authority.exchangedAccessToken, 'opaque-facebook-access-token');
     expect(authority.exchangedNonce, _nonce);
+    expect(login.loginBehavior, LoginBehavior.webOnly);
+    expect(login.loginTracking, LoginTracking.enabled);
     expect(
       login.permissions,
       containsAll(['openid', 'email', 'public_profile']),
@@ -170,6 +180,7 @@ void main() {
     await _service(authority, login).signInWithFacebookNative();
 
     expect(authority.exchangedIdToken, _jwt);
+    expect(authority.exchangedAccessToken, isNull);
     expect(authority.exchangedNonce, _nonce);
   });
 
@@ -296,6 +307,7 @@ void main() {
         expect(login.calls, 1);
         expect(authority.exchangeCalls, 1);
         expect(authority.exchangedIdToken, _jwt);
+        expect(authority.exchangedAccessToken, 'opaque-facebook-access-token');
         expect(authority.exchangedNonce, _nonce);
       } finally {
         debugDefaultTargetPlatformOverride = null;

@@ -175,6 +175,8 @@ void main() {
       await tester.pumpWidget(_app(db, preferences: delayed));
       await tester.pump();
       expect(delayed.conversationReadStarted, isTrue);
+      await tester.pump(const Duration(milliseconds: 2200));
+      await tester.pump();
       expect(
         tester
             .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))

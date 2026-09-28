@@ -3,6 +3,7 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/body_measurement_repository.dart';
 import 'package:body_intelligence_log/features/history/progress_page.dart';
+import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
 
 void main() {
+  test('verified connected step history feeds progress without daily logs', () {
+    final day = DateTime(2026, 9, 27, 23, 15);
+    final values = progressMergedStepValues(
+      const <DailyLog>[],
+      ConnectedHealthSnapshot(
+        status: ConnectedHealthStatus.synchronized,
+        platformSource: 'Apple Health',
+        availableSources: const ['Apple Health'],
+        signals: const [],
+        importedCount: 1,
+        lastSyncAt: day,
+        failureCode: null,
+        deviceVerified: true,
+        stepHistory: [
+          ConnectedHealthSignalView(
+            key: 'steps',
+            value: 4321,
+            unit: 'count',
+            source: 'Apple Health',
+            observedAt: day,
+            confidence: 1,
+          ),
+        ],
+      ),
+    );
+
+    expect(values[DateTime(2026, 9, 27)], 4321);
+  });
+
   testWidgets('metric and date range use accessible bottom pickers', (
     tester,
   ) async {

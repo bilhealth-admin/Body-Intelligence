@@ -9,6 +9,7 @@ import '../domain/subscription_lifecycle.dart';
 import '../domain/subscription_provider.dart';
 import '../domain/subscription_record.dart';
 import '../domain/subscription_state.dart';
+import 'admin_entitlement_continuity_store.dart';
 
 /// Reads only the server-owned subscription snapshot.
 ///
@@ -19,20 +20,55 @@ import '../domain/subscription_state.dart';
 /// never deletes user data and never treats local preferences, debug flags, or
 /// a paywall selection as an entitlement.
 final class ServerEntitlementRepository {
-  const ServerEntitlementRepository({EntitlementResolver? resolver})
-    : _resolver = resolver ?? const EntitlementResolver();
+  const ServerEntitlementRepository({
+    EntitlementResolver? resolver,
+    AdminEntitlementContinuityStore? adminContinuityStore,
+  }) : _resolver = resolver ?? const EntitlementResolver(),
+       _adminContinuityStoreOverride = adminContinuityStore;
 
   final EntitlementResolver _resolver;
+  final AdminEntitlementContinuityStore? _adminContinuityStoreOverride;
+  static final AdminEntitlementContinuityStore _defaultAdminContinuityStore =
+      AdminEntitlementContinuityStore();
+  AdminEntitlementContinuityStore get _adminContinuityStore =>
+      _adminContinuityStoreOverride ?? _defaultAdminContinuityStore;
   static final VerifiedEntitlementSessionCache _sessionCache =
       VerifiedEntitlementSessionCache();
   static final VerifiedEntitlementSessionCache _adminSessionCache =
-      VerifiedEntitlementSessionCache(maximumAge: const Duration(seconds: 45));
+      VerifiedEntitlementSessionCache(maximumAge: const Duration(minutes: 6));
+  static final Set<String> _startupContinuityConsumed = <String>{};
 
   Future<SubscriptionState> current() async {
     if (!AppEnvironment.supabaseRuntimeReady) return FreePlan.createState();
     final client = Supabase.instance.client;
     final ownerId = client.auth.currentUser?.id;
     if (ownerId == null) return FreePlan.createState();
+    // On a cold process, render a still-valid server lease from encrypted
+    // storage before waiting for network timeouts. Consume this shortcut once
+    // per owner so the observed provider's next scheduled refresh reaches the
+    // server and renews or revokes the lease normally.
+    if (_startupContinuityConsumed.add(ownerId)) {
+      try {
+        final persisted = await _adminContinuityStore.read(
+          ownerId: ownerId,
+          now: DateTime.now().toUtc(),
+        );
+        if (client.auth.currentUser?.id != ownerId) {
+          return FreePlan.createState();
+        }
+        if (persisted != null) {
+          _adminSessionCache.remember(
+            ownerId: ownerId,
+            state: persisted,
+            now: DateTime.now().toUtc(),
+          );
+          return persisted;
+        }
+      } on Object {
+        // Continue to the authoritative network path when secure storage is
+        // unavailable or corrupt.
+      }
+    }
     final store = await _storeCurrent();
     if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
     try {
@@ -51,17 +87,48 @@ final class ServerEntitlementRepository {
         state: resolved,
         now: DateTime.now().toUtc(),
       );
+      if (identical(resolved, store)) {
+        await _adminContinuityStore.clear(ownerId);
+      } else {
+        await _adminContinuityStore.remember(
+          ownerId: ownerId,
+          state: resolved,
+          now: DateTime.now().toUtc(),
+        );
+      }
       return resolved;
     } on Object {
       // A transient RPC failure must not visibly switch a currently verified
       // admin lease between Premium and Free. Continuity is owner-scoped,
-      // bounded to 45 seconds, and cannot outlive the server lease itself.
+      // bounded to the exact server lease, and cannot cross owners. Secure
+      // continuity also survives a process restart during that same lease.
       if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
-      return _adminSessionCache.fallbackFor(
+      final inMemory = _adminSessionCache.fallbackFor(
+        ownerId: ownerId,
+        now: DateTime.now().toUtc(),
+      );
+      if (inMemory != null) return inMemory;
+      try {
+        final persisted = await _adminContinuityStore.read(
+          ownerId: ownerId,
+          now: DateTime.now().toUtc(),
+        );
+        if (client.auth.currentUser?.id != ownerId) {
+          return FreePlan.createState();
+        }
+        if (persisted != null) {
+          _adminSessionCache.remember(
             ownerId: ownerId,
+            state: persisted,
             now: DateTime.now().toUtc(),
-          ) ??
-          store;
+          );
+          return persisted;
+        }
+      } on Object {
+        // Secure storage is continuity only. Store authority still determines
+        // access when the local encrypted slot is unavailable.
+      }
+      return store;
     }
   }
 

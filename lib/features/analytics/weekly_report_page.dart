@@ -484,7 +484,6 @@ class WeeklyReportPage extends ConsumerWidget {
   const WeeklyReportPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rtl = Directionality.of(context) == TextDirection.rtl;
     return Scaffold(
       appBar: AppBar(
         title: FittedBox(
@@ -514,8 +513,9 @@ class WeeklyReportPage extends ConsumerWidget {
               ref.read(selectedWeeklyReportDateProvider.notifier).state =
                   selected.subtract(const Duration(days: 7));
             },
-            icon: Icon(
-              rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+            icon: const Icon(
+              Icons.chevron_left_rounded,
+              textDirection: TextDirection.ltr,
             ),
           ),
           IconButton(
@@ -531,8 +531,9 @@ class WeeklyReportPage extends ConsumerWidget {
                         candidate.isAfter(today) ? today : candidate;
                   }
                 : null,
-            icon: Icon(
-              rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+            icon: const Icon(
+              Icons.chevron_right_rounded,
+              textDirection: TextDirection.ltr,
             ),
           ),
         ],
