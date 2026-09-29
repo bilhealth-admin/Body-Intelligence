@@ -248,7 +248,24 @@ class _CommunityChatPageState extends State<CommunityChatPage>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(widget.displayName)),
+    appBar: AppBar(
+      title: Row(
+        children: [
+          const CircleAvatar(
+            radius: 18,
+            child: Icon(Icons.person_outline_rounded, size: 20),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              widget.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    ),
     body: _repository == null
         ? Center(
             child: SingleChildScrollView(
@@ -373,74 +390,88 @@ class _CommunityChatPageState extends State<CommunityChatPage>
                                     alignment: mine
                                         ? AlignmentDirectional.centerEnd
                                         : AlignmentDirectional.centerStart,
-                                    child: Card(
-                                      color: mine
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.primaryContainer
-                                          : null,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            SelectableText(
-                                              message.body,
-                                              textDirection:
-                                                  BilWrittenLanguageResolver.directionFor(
-                                                    message.body,
-                                                    fallback: Directionality.of(
-                                                      context,
-                                                    ),
-                                                  ),
-                                              key: ValueKey(
-                                                'community-message-text-${message.id}',
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  TimeOfDay.fromDateTime(
-                                                    message.createdAt.toLocal(),
-                                                  ).format(context),
-                                                  style: Theme.of(
-                                                    context,
-                                                  ).textTheme.labelSmall,
+                                    child: CommunityMessageBubble(
+                                      mine: mine,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          SelectableText(
+                                            message.body,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge
+                                                ?.copyWith(
+                                                  color: mine
+                                                      ? Colors.white
+                                                      : CommunitySapphire.ink(
+                                                          context,
+                                                        ),
                                                 ),
-                                                if (mine) ...[
-                                                  const SizedBox(width: 4),
-                                                  Icon(
-                                                    message.isRead
-                                                        ? Icons.done_all_rounded
-                                                        : Icons.done_rounded,
-                                                    size: 15,
-                                                    semanticLabel:
-                                                        message.isRead
-                                                        ? _copy(
-                                                            context,
-                                                            'مقروءة',
-                                                            'Read',
-                                                            'Lu',
-                                                            'Leído',
-                                                            'Okundu',
-                                                          )
-                                                        : _copy(
-                                                            context,
-                                                            'مُرسلة',
-                                                            'Sent',
-                                                            'Envoyé',
-                                                            'Enviado',
-                                                            'Gönderildi',
-                                                          ),
+                                            textDirection:
+                                                BilWrittenLanguageResolver.directionFor(
+                                                  message.body,
+                                                  fallback: Directionality.of(
+                                                    context,
                                                   ),
-                                                ],
-                                              ],
+                                                ),
+                                            key: ValueKey(
+                                              'community-message-text-${message.id}',
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                TimeOfDay.fromDateTime(
+                                                  message.createdAt.toLocal(),
+                                                ).format(context),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall
+                                                    ?.copyWith(
+                                                      color: mine
+                                                          ? Colors.white
+                                                          : CommunitySapphire.muted(
+                                                              context,
+                                                            ),
+                                                    ),
+                                              ),
+                                              if (mine) ...[
+                                                const SizedBox(width: 4),
+                                                Icon(
+                                                  message.isRead
+                                                      ? Icons.done_all_rounded
+                                                      : Icons.done_rounded,
+                                                  size: 15,
+                                                  color: mine
+                                                      ? Colors.white
+                                                      : CommunitySapphire.muted(
+                                                          context,
+                                                        ),
+                                                  semanticLabel: message.isRead
+                                                      ? _copy(
+                                                          context,
+                                                          'مقروءة',
+                                                          'Read',
+                                                          'Lu',
+                                                          'Leído',
+                                                          'Okundu',
+                                                        )
+                                                      : _copy(
+                                                          context,
+                                                          'مُرسلة',
+                                                          'Sent',
+                                                          'Envoyé',
+                                                          'Enviado',
+                                                          'Gönderildi',
+                                                        ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -526,6 +557,7 @@ class _CommunityChatPageState extends State<CommunityChatPage>
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       IconButton.filled(
                         tooltip: _copy(
                           context,

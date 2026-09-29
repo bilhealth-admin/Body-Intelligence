@@ -42,18 +42,17 @@ Future<ConnectedHealthSnapshot> _loadNativeDailyActivity(
     final stepHistory = steps.isEmpty
         ? cached.stepHistory
         : steps.map(ConnectedHealthSignalView.fromSignal).toList();
-    final activeEnergy = activity
-        .where((signal) => signal.key == 'activeEnergy')
+    final energyHistory = projectConnectedDailyHistory(
+      ConnectedDailyHistoryInput(
+        samples: const [],
+        nativeTotals: activity,
+        retained: await gateway._retainedProjection('signalHistory'),
+        asOf: now,
+      ),
+    );
+    final signalHistory = energyHistory
         .map(ConnectedHealthSignalView.fromSignal)
-        .toList();
-    final signalHistory = activeEnergy.isEmpty
-        ? cached.signalHistory
-        : <ConnectedHealthSignalView>[
-            ...cached.signalHistory.where(
-              (signal) => signal.key != 'activeEnergy',
-            ),
-            ...activeEnergy,
-          ];
+        .toList(growable: false);
     final stored = await gateway._flows.store.get(
       'connected_health_ui',
       'snapshot',
@@ -75,16 +74,7 @@ Future<ConnectedHealthSnapshot> _loadNativeDailyActivity(
       'stepHistory': steps.isEmpty
           ? (stored?['stepHistory'] as List<Object?>? ?? const <Object?>[])
           : steps.map((signal) => signal.toMap()).toList(),
-      'signalHistory': activeEnergy.isEmpty
-          ? (stored?['signalHistory'] as List<Object?>? ?? const <Object?>[])
-          : [
-              for (final raw
-                  in stored?['signalHistory'] as List<Object?>? ?? const [])
-                if (raw is Map && raw['key'] != 'activeEnergy') raw,
-              ...activity
-                  .where((signal) => signal.key == 'activeEnergy')
-                  .map((signal) => signal.toMap()),
-            ],
+      'signalHistory': energyHistory.map((signal) => signal.toMap()).toList(),
     });
     return cached.copyWith(
       status: signals.isEmpty && gateway._isIos

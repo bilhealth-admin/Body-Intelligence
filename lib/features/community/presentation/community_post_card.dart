@@ -186,12 +186,12 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.symmetric(vertical: 7),
     decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(18),
+      color: CommunitySapphire.paper(context),
+      borderRadius: BorderRadius.circular(22),
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -199,7 +199,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               BilAccountAvatar(
-                radius: 20,
+                radius: 24,
                 networkUrl: widget.post.authorAvatarUrl,
               ),
               const SizedBox(width: 10),
@@ -234,9 +234,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                         ),
                       ],
                     ),
-                    if (widget.post.authorHandle != null &&
-                        widget.post.authorRelationship !=
-                            CommunityRelationshipStatus.accepted)
+                    if (widget.post.authorHandle != null)
                       Text(
                         '@${widget.post.authorHandle}',
                         textDirection: TextDirection.ltr,

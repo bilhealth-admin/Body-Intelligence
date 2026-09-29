@@ -25,6 +25,8 @@ import 'community_policy_notice.dart';
 import 'community_safety_page.dart';
 import 'community_taxonomy_sheet.dart';
 import 'community_surface.dart';
+import 'community_welcome.dart';
+import 'community_sapphire.dart';
 
 part 'community_feed_tab.dart';
 

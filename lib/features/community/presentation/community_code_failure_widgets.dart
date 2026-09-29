@@ -88,18 +88,48 @@ class _CodeUnavailable extends StatelessWidget {
 
 class _MemberCodeUnavailable extends StatelessWidget {
   const _MemberCodeUnavailable();
-
   @override
   Widget build(BuildContext context) => Center(
-    child: Padding(
+    child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Text(
-        communityText(
-          context,
-          'This code is invalid, expired, private, or unavailable.',
-          'هذا الرمز غير صالح أو منتهي أو خاص أو غير متاح.',
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.qr_code_2_rounded,
+                size: 54,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 18),
+              Text(
+                communityText(
+                  context,
+                  'This code is invalid, expired, private, or unavailable.',
+                  'هذا الرمز غير صالح أو منتهي أو خاص أو غير متاح.',
+                ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 20),
+              OutlinedButton.icon(
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/community');
+                  }
+                },
+                icon: const BackButtonIcon(),
+                label: Text(
+                  MaterialLocalizations.of(context).backButtonTooltip,
+                ),
+              ),
+            ],
+          ),
         ),
-        textAlign: TextAlign.center,
       ),
     ),
   );

@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../app/localization/app_localizations.dart';
 import 'connected_health_copy.dart';
 import 'connected_health_model.dart';
+import 'connected_health_daily_history.dart';
+import 'connected_health_daily_history_view.dart';
+import '../../app/localization/sapphire_copy.dart';
 import 'providers/connected_health_provider.dart';
 
 /// Truthful detail surface for a measured connected-health signal.
@@ -16,12 +19,14 @@ class ConnectedHealthSignalDetailPage extends ConsumerWidget {
     required this.title,
     required this.unitFallback,
     this.historyKeys,
+    this.clock,
   });
 
   final List<String> keys;
   final String title;
   final String unitFallback;
   final List<String>? historyKeys;
+  final DateTime Function()? clock;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,14 +41,26 @@ class ConnectedHealthSignalDetailPage extends ConsumerWidget {
         signal = candidate;
       }
     }
-    final history = <ConnectedHealthSignalView>[
+    final asOf = (clock ?? DateTime.now)();
+    final heart = acceptedHistoryKeys.contains('heartRate');
+    final compact = compactConnectedHistoryViews([
       for (final candidate
           in snapshot?.signalHistory ?? const <ConnectedHealthSignalView>[])
         if (acceptedHistoryKeys.contains(candidate.key) &&
             candidate.value.isFinite &&
             candidate.confidence > 0)
           candidate,
-    ]..sort((left, right) => right.observedAt.compareTo(left.observedAt));
+    ], asOf);
+    final history = heart ? closedHeartHistory(compact, asOf) : compact;
+    final todayNotices = compact
+        .where(
+          (s) =>
+              heart &&
+              s.key == 'heartRate' &&
+              !connectedHistoryDayComplete(connectedViewHistoryDay(s), asOf) &&
+              ((s.attributes['aboveThresholdCount'] as num?)?.toInt() ?? 0) > 0,
+        )
+        .toList();
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text(title))),
       body: health.isLoading
@@ -63,7 +80,23 @@ class ConnectedHealthSignalDetailPage extends ConsumerWidget {
                   ),
                 if (history.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  _SignalHistoryCard(signals: history),
+                  _SignalHistoryCard(signals: history, asOf: asOf),
+                ],
+                if (heart) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    sapphireText(context, 'closedDays'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  for (final notice in todayNotices) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      sapphireText(context, 'inProgress'),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    ConnectedDailyHeartNotice(signal: notice),
+                  ],
                 ],
                 const SizedBox(height: 16),
                 Text(
@@ -181,9 +214,10 @@ class _MeasuredSignalCard extends StatelessWidget {
 }
 
 class _SignalHistoryCard extends StatelessWidget {
-  const _SignalHistoryCard({required this.signals});
+  const _SignalHistoryCard({required this.signals, required this.asOf});
 
   final List<ConnectedHealthSignalView> signals;
+  final DateTime asOf;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -199,7 +233,10 @@ class _SignalHistoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           for (var index = 0; index < signals.length; index++) ...[
-            _SignalHistoryRow(signal: signals[index]),
+            if (signals[index].attributes['historyProjection'] == 'daily_v1')
+              ConnectedDailyHistoryRow(signal: signals[index], asOf: asOf)
+            else
+              _SignalHistoryRow(signal: signals[index]),
             if (index != signals.length - 1)
               const Divider(height: 1, indent: 44),
           ],

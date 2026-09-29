@@ -25,7 +25,7 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
         builder: (context, snapshot) => ListView(
           key: const Key('community-navigation-sheet'),
           shrinkWrap: true,
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
           children: [
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 16),
@@ -127,39 +127,50 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
     String arabic, {
     String? key,
     String? subtitle,
-  }) => ListTile(
-    key: Key(key ?? 'community-nav-$value'),
-    minTileHeight: 52,
-    contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 4, 16, 4),
-    leading:
-        (value == '/community/messages' ||
-            value == '/community/connections' ||
-            value == '/community/notifications')
-        ? CommunityUnreadBadge(
-            kind: value == '/community/messages'
-                ? CommunityAttentionKind.messages
-                : value == '/community/connections'
-                ? CommunityAttentionKind.requests
-                : CommunityAttentionKind.all,
-            child: Icon(
-              icon,
-              size: 22,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          )
-        : Icon(
-            icon,
-            size: 22,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-    title: Text(communityText(context, english, arabic)),
-    subtitle: subtitle == null ? null : Text(subtitle),
-    trailing: Icon(
-      Directionality.of(context) == TextDirection.rtl
-          ? Icons.chevron_left_rounded
-          : Icons.chevron_right_rounded,
-      size: 20,
+  }) => Card(
+    margin: const EdgeInsets.only(bottom: 8),
+    child: ListTile(
+      key: Key(key ?? 'community-nav-$value'),
+      minTileHeight: 60,
+      contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 4, 16, 4),
+      leading: _CommunityNavigationGlyph(icon: icon, value: value),
+      title: Text(communityText(context, english, arabic)),
+      subtitle: subtitle == null ? null : Text(subtitle),
+      trailing: Icon(
+        Directionality.of(context) == TextDirection.rtl
+            ? Icons.chevron_left_rounded
+            : Icons.chevron_right_rounded,
+        size: 20,
+      ),
+      onTap: () => Navigator.pop(context, value),
     ),
-    onTap: () => Navigator.pop(context, value),
   );
+}
+
+class _CommunityNavigationGlyph extends StatelessWidget {
+  const _CommunityNavigationGlyph({required this.icon, required this.value});
+  final IconData icon;
+  final String value;
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final child = Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, size: 22, color: scheme.onPrimaryContainer),
+    );
+    final kind = switch (value) {
+      '/community/messages' => CommunityAttentionKind.messages,
+      '/community/connections' => CommunityAttentionKind.requests,
+      '/community/notifications' => CommunityAttentionKind.all,
+      _ => null,
+    };
+    return kind == null
+        ? child
+        : CommunityUnreadBadge(kind: kind, child: child);
+  }
 }

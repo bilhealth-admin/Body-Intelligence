@@ -20,6 +20,7 @@ import '../domain/community_text_policy.dart';
 import '../services/contact_picker_service.dart';
 import 'community_chat_runtime_copy.dart';
 import 'community_copy.dart';
+import 'community_sapphire.dart';
 import 'community_invite_copy.dart';
 
 part 'community_chat_page.dart';

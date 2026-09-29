@@ -14,6 +14,7 @@ import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_text_policy.dart';
 import 'community_copy.dart';
+import 'community_sapphire.dart';
 import 'community_policy_notice.dart';
 import 'community_safety_page.dart';
 
@@ -206,7 +207,8 @@ class _MessageList extends StatelessWidget {
       if (snapshot.hasError) {
         return _MessagesLoadError(copy: copy, onRetry: onRetry);
       }
-      final rows = snapshot.data ?? const [];
+      final rawRows = snapshot.data ?? const <Map<String, dynamic>>[];
+      final rows = communityThreadPreviewRows(rawRows, incoming: incoming);
       return RefreshIndicator(
         onRefresh: onRetry,
         child: rows.isEmpty
@@ -219,7 +221,8 @@ class _MessageList extends StatelessWidget {
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: rows.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final row = rows[index];
                   final profile = row['profile'] as Map<String, dynamic>?;
@@ -231,87 +234,133 @@ class _MessageList extends StatelessWidget {
                           as String;
                   final name =
                       profile?['display_name'] as String? ?? copy.unknownMember;
-                  final unread = incoming && row['read_at'] == null;
+                  final attention = CommunityAttentionScope.controllerOf(
+                    context,
+                  );
+                  final unreadCount = incoming
+                      ? communityThreadUnreadCount(
+                          otherId,
+                          rawRows,
+                          authoritative: attention?.hasSnapshot == true
+                              ? attention!.value.unreadBySender
+                              : null,
+                        )
+                      : 0;
+                  final unread = unreadCount > 0;
                   final createdAt = DateTime.tryParse(
                     row['created_at'] as String? ?? '',
                   );
-                  return ListTile(
-                    key: ValueKey('community-inbox-${row['id']}'),
-                    minTileHeight: 80,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 6,
-                    ),
-                    tileColor: unread
-                        ? Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer.withValues(alpha: .25)
-                        : null,
-                    leading: BilAccountAvatar(
-                      radius: 20,
-                      networkUrl: profile?['avatar_url'] as String?,
-                    ),
-                    title: _NaturalMessageText(
-                      parsed.subject.isEmpty ? name : parsed.subject,
-                      maxLines: 1,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Material(
+                      color: CommunitySapphire.paper(context),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        key: ValueKey('community-inbox-${row['id']}'),
+                        minTileHeight: 88,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 6,
+                        ),
+                        tileColor: unread
+                            ? Theme.of(context).colorScheme.primaryContainer
+                                  .withValues(alpha: .25)
+                            : null,
+                        leading: BilAccountAvatar(
+                          radius: 24,
+                          networkUrl: profile?['avatar_url'] as String?,
+                        ),
+                        title: _NaturalMessageText(
+                          parsed.subject.isEmpty ? name : parsed.subject,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: unread
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (parsed.subject.isNotEmpty)
+                              _NaturalMessageText(name, maxLines: 1),
+                            _NaturalMessageText(parsed.body, maxLines: 2),
+                          ],
+                        ),
+                        trailing: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (createdAt != null)
+                              Text(
+                                DateUtils.isSameDay(
+                                      createdAt.toLocal(),
+                                      DateTime.now(),
+                                    )
+                                    ? TimeOfDay.fromDateTime(
+                                        createdAt.toLocal(),
+                                      ).format(context)
+                                    : MaterialLocalizations.of(
+                                        context,
+                                      ).formatShortDate(createdAt.toLocal()),
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            if (unread) ...[
+                              const SizedBox(height: 8),
+                              Semantics(
+                                label: communityText(
+                                  context,
+                                  'Unread messages',
+                                  'الرسائل غير المقروءة',
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    unreadCount > 99 ? '99+' : '$unreadCount',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        onTap: () async {
+                          await context.push(
+                            '/community/chat/$otherId?name=${Uri.encodeQueryComponent(name)}',
+                          );
+                          if (context.mounted) {
+                            await onRetry();
+                            if (context.mounted) {
+                              await CommunityAttentionScope.refresh(context);
+                            }
+                          }
+                        },
                       ),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (parsed.subject.isNotEmpty)
-                          _NaturalMessageText(name, maxLines: 1),
-                        _NaturalMessageText(parsed.body, maxLines: 2),
-                      ],
-                    ),
-                    trailing: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (createdAt != null)
-                          Text(
-                            DateUtils.isSameDay(
-                                  createdAt.toLocal(),
-                                  DateTime.now(),
-                                )
-                                ? TimeOfDay.fromDateTime(
-                                    createdAt.toLocal(),
-                                  ).format(context)
-                                : MaterialLocalizations.of(
-                                    context,
-                                  ).formatShortDate(createdAt.toLocal()),
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        if (unread) ...[
-                          const SizedBox(height: 8),
-                          Semantics(
-                            label: communityText(
-                              context,
-                              'Unread messages',
-                              'الرسائل غير المقروءة',
-                            ),
-                            child: Icon(
-                              Icons.circle,
-                              size: 10,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    onTap: () async {
-                      await context.push(
-                        '/community/chat/$otherId?name=${Uri.encodeQueryComponent(name)}',
-                      );
-                      if (context.mounted) {
-                        await onRetry();
-                        if (context.mounted) {
-                          await CommunityAttentionScope.refresh(context);
-                        }
-                      }
-                    },
                   );
                 },
               ),

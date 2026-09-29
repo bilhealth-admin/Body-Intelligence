@@ -335,39 +335,44 @@ class _FeedTabState extends State<_FeedTab>
                         onRetry: () => _refreshPolicyState(),
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                          16,
-                          8,
-                          16,
-                          4,
-                        ),
-                        child: Card(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer.withValues(alpha: .35),
-                          child: ListTile(
-                            key: const Key('community-compose-prompt'),
-                            minTileHeight: 64,
-                            leading: const ExcludeSemantics(
-                              child: Text('👋', style: TextStyle(fontSize: 26)),
-                            ),
-                            title: Text(
-                              communityText(
-                                context,
-                                'Share an experience or win',
-                                'شارك تجربة أو إنجازًا',
+                    if (!loading || snapshot.hasData)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                            16,
+                            8,
+                            16,
+                            4,
+                          ),
+                          child: Card(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withValues(alpha: .35),
+                            child: ListTile(
+                              key: const Key('community-compose-prompt'),
+                              minTileHeight: 64,
+                              leading: const ExcludeSemantics(
+                                child: Text(
+                                  '👋',
+                                  style: TextStyle(fontSize: 26),
+                                ),
                               ),
+                              title: Text(
+                                communityText(
+                                  context,
+                                  'Share an experience or win',
+                                  'شارك تجربة أو إنجازًا',
+                                ),
+                              ),
+                              trailing: const Icon(Icons.edit_outlined),
+                              onTap: _openingComposer || _managingPost
+                                  ? null
+                                  : () => _openComposer(),
                             ),
-                            trailing: const Icon(Icons.edit_outlined),
-                            onTap: _openingComposer || _managingPost
-                                ? null
-                                : () => _openComposer(),
                           ),
                         ),
                       ),
-                    ),
                     if (loading && snapshot.hasData)
                       const SliverToBoxAdapter(
                         child: LinearProgressIndicator(),
@@ -378,10 +383,7 @@ class _FeedTabState extends State<_FeedTab>
                         child: _InlineError(onRetry: _refresh),
                       )
                     else if (loading && !snapshot.hasData)
-                      const SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(child: CircularProgressIndicator()),
-                      )
+                      const SliverToBoxAdapter(child: CommunityWelcome())
                     else if (posts.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,

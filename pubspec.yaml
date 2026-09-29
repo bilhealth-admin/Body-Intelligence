@@ -133,6 +133,7 @@ flutter:
   config:
     enable-swift-package-manager: true
   assets:
+    - assets/images/community/community_welcome_athletes.webp
     - assets/branding/bil_splash_identity.png
     - assets/branding/bil_splash_motion.mp4
     - assets/branding/google_g.svg

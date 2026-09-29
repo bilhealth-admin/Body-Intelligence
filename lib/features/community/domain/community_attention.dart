@@ -65,12 +65,15 @@ class CommunityAttentionController extends ChangeNotifier {
   bool _queued = false;
   bool _stale = false;
   bool get stale => _stale;
+  bool _hasSnapshot = false;
+  bool get hasSnapshot => _hasSnapshot;
 
   void setOwner(String? owner) {
     if (_disposed || _owner == owner) return;
     _owner = owner;
     _generation++;
     _value = const CommunityAttention();
+    _hasSnapshot = false;
     _stale = false;
     _queued = false;
     // An old account's pending Future does not block a new account's reload.
@@ -100,6 +103,7 @@ class CommunityAttentionController extends ChangeNotifier {
           final next = await loader();
           if (_disposed || generation != _generation) return;
           _value = next;
+          _hasSnapshot = true;
           _stale = false;
           notifyListeners();
         } on Object {

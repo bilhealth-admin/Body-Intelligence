@@ -97,7 +97,6 @@ final class NativeConnectedHealthGateway
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
       final signals = <ConnectedHealthSignalView>[];
       final stepHistory = <ConnectedHealthSignalView>[];
-      final signalHistory = <ConnectedHealthSignalView>[];
       final retainedSignalMaps = <Map<String, Object?>>[];
       final retainedStepHistoryMaps = <Map<String, Object?>>[];
       final retainedSignalHistoryMaps = <Map<String, Object?>>[];
@@ -162,7 +161,6 @@ final class NativeConnectedHealthGateway
             continue;
           }
           retainedSignalHistoryMaps.add(signal.toMap());
-          signalHistory.add(ConnectedHealthSignalView.fromSignal(signal));
           hasVerifiedNativeEvidence = true;
         } on Object {
           // One malformed history row must not hide the remaining records.
@@ -218,9 +216,15 @@ final class NativeConnectedHealthGateway
         availabilityStatus: availability['status']?.toString(),
         deviceVerified: hasVerifiedNativeEvidence,
         stepHistory: List<ConnectedHealthSignalView>.unmodifiable(stepHistory),
-        signalHistory: List<ConnectedHealthSignalView>.unmodifiable(
-          signalHistory,
-        ),
+        signalHistory: projectConnectedDailyHistory(
+          ConnectedDailyHistoryInput(
+            samples: [
+              for (final row in retainedSignalHistoryMaps)
+                GlobalHealthSignal.fromMap(row),
+            ],
+            asOf: DateTime.now(),
+          ),
+        ).map(ConnectedHealthSignalView.fromSignal).toList(growable: false),
       );
     } catch (_) {
       if (!cachedOnly) {
@@ -513,31 +517,19 @@ final class NativeConnectedHealthGateway
               await _retainedProjection('stepHistory'),
               aggregateConnectedStepSignals(graph.selectedSignals),
             );
-      // Match the native HealthKit import window. The UI remains bounded to
-      // 500 verified rows, but older heart/sleep records are not discarded
-      // merely because the live dashboard only needs a recent value.
-      final historyCutoff = now.subtract(const Duration(days: 365));
-      final signalHistoryById = <String, GlobalHealthSignal>{
-        for (final signal in await _retainedProjection('signalHistory'))
-          if (!signal.provenance.observedAt.isBefore(historyCutoff))
-            signal.identity: signal,
-      };
-      for (final signal in <GlobalHealthSignal>[...ordered, ...?nativeTotals]) {
-        if (!const {
-              'heartRate',
-              'restingHeartRate',
-              'sleep',
-              'activeEnergy',
-            }.contains(signal.key) ||
-            signal.provenance.observedAt.isBefore(historyCutoff)) {
-          continue;
-        }
-        signalHistoryById[signal.identity] = signal;
-      }
-      final signalHistorySignals = signalHistoryById.values.toList()
-        ..sort(
-          (a, b) => b.provenance.observedAt.compareTo(a.provenance.observedAt),
-        );
+      // Daily UI projection only; raw health_signals and live `selected`
+      // remain untouched. Recompute from the complete retained native store,
+      // not the old 500-row UI preview or a mean of previous daily means.
+      final signalHistorySignals = await compute(
+        projectConnectedDailyHistory,
+        ConnectedDailyHistoryInput(
+          samples: normalizedPersisted,
+          selectedEvidence: graph.selectedSignals,
+          nativeTotals: nativeTotals ?? const [],
+          retained: await _retainedProjection('signalHistory'),
+          asOf: now,
+        ),
+      );
       final hasVerifiedNativeEvidence = selected.any(
         _isEvidenceFromNativeBridge,
       );
@@ -571,7 +563,8 @@ final class NativeConnectedHealthGateway
             for (final signal in stepHistorySignals) signal.toMap(),
           ],
           'signalHistory': <Map<String, Object?>>[
-            for (final signal in signalHistorySignals.take(500)) signal.toMap(),
+            for (final signal in signalHistorySignals.take(1464))
+              signal.toMap(),
           ],
         },
       );
@@ -598,7 +591,7 @@ final class NativeConnectedHealthGateway
             ConnectedHealthSignalView.fromSignal(signal),
         ],
         signalHistory: <ConnectedHealthSignalView>[
-          for (final signal in signalHistorySignals.take(500))
+          for (final signal in signalHistorySignals.take(1464))
             ConnectedHealthSignalView.fromSignal(signal),
         ],
       );

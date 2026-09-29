@@ -16,9 +16,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     _feedRefreshing = true;
     _loadingMore = false;
     try {
-      final posts = await widget.repository.loadFeed(
-        limit: _FeedTabState._pageSize,
-      );
+      final posts = await widget.repository
+          .loadFeed(limit: _FeedTabState._pageSize)
+          .timeout(const Duration(seconds: 15));
       if (mounted && generation == _feedGeneration) {
         _hasMore = posts.length == _FeedTabState._pageSize;
       }
