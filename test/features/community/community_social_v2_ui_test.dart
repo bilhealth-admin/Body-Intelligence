@@ -302,6 +302,17 @@ void main() {
 
     await tester.tap(find.byKey(const Key('community-settings')));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('community-saved-posts')),
+      180,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('community-navigation-sheet')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-saved-posts')));
     await tester.pumpAndSettle();
     expect(find.text('Saved posts'), findsOneWidget);

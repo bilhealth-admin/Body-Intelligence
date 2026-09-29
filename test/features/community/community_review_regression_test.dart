@@ -551,6 +551,16 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(const Key('community-settings')));
           await tester.pumpAndSettle();
+          await tester.scrollUntilVisible(
+            find.byKey(const Key('community-my-bil-code')),
+            180,
+            scrollable: find
+                .descendant(
+                  of: find.byKey(const Key('community-navigation-sheet')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          );
           expect(
             find.byKey(const Key('community-my-bil-code')),
             findsOneWidget,
@@ -558,6 +568,10 @@ void main() {
           if ((tag == 'ar' || tag == 'en') && scale == 1) {
             await _captureSurface(tester, '${tag}_settings');
           }
+          await tester.ensureVisible(
+            find.byKey(const Key('community-nav-friends')),
+          );
+          await tester.pumpAndSettle();
           await tester.tap(find.byKey(const Key('community-nav-friends')));
           await tester.pumpAndSettle();
           expect(find.text('accepted'), findsNothing);

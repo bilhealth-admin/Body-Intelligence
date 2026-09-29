@@ -2,25 +2,29 @@
   "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
   "scope": "Community presentation and health history only; native watch code unchanged",
   "files": {
-    "lib/features/community/presentation/community_surface.dart": {
-      "before": "87f23ac9e2aefd4832648118541466d0a9141762b1c73eb35915a1df70a3a4e1",
-      "after_before_formatter": "8bef5a23dbd412f84afdfe2a86215331810d12cb01f1bc5cf1f7c2ca12ede20b"
-    },
-    "lib/features/connected_health/connected_health_daily_history.dart": {
-      "before": "52d459267420f64b88dd1d4cf069768980c40c26063212dbb294566a5f99e9c8",
-      "after_before_formatter": "7d9faaa6bc2f3e89383868ddff2c278b236961a326281c8ce62e89fe409cba6f"
-    },
-    "test/features/community/community_sapphire_contract_test.dart": {
-      "before": "0a10efec4fc36048e10616be7428fd414a495fb485e715b96e039e9f0f968134",
-      "after_before_formatter": "675d3fa64165ff7ef2a9acc7fc89f4b48943a9bcd184f3b5ddfa0aad9b2c05a9"
+    "lib/features/community/presentation/community_welcome.dart": {
+      "before": "75c472f9273b3aaf8bf81179ab58d2fe4243bcac6d3a729dceff17757574d215",
+      "after_before_formatter": "f9ec20ca095ee79fd8630096d978e19ec031a6ea3235a598a9ea63e072bc5a6b"
     },
     "lib/features/connected_health/providers/connected_health_gateway_helpers.dart": {
-      "before": "a973702027a40e121f349fe5e4929790fc9351f00aa45c83a27b8eb76ea5bc58",
-      "after_before_formatter": "0a13c04226fbbcb281af10832581129745741d35a3b53210165f316c7cdd505e"
+      "before": "0a13c04226fbbcb281af10832581129745741d35a3b53210165f316c7cdd505e",
+      "after_before_formatter": "12e8fd13fb7b6d94dec37f8be679a273fc3515cb456c90d984e913c37bf0a46c"
     },
-    "lib/features/connected_health/providers/connected_health_native_gateway.dart": {
-      "before": "33ab3c4a73dcd51adda61b89613a3e2ec19597b822ee21772682d822c2fbb373",
-      "after_before_formatter": "d6647d4e70dc2e1c92474300b4ca44a6122eaa821e89125b7347e8464e1c96ca"
+    "lib/features/connected_health/providers/connected_health_provider.dart": {
+      "before": "99f63ee8e232a109ee68714ddb68ff2d4ef3e666cebae9c54084ef3c7af83f56",
+      "after_before_formatter": "9ae3eff107578b44e044d532c9ab9a26e56b1d9e2063b2e224376709fa006157"
+    },
+    "test/features/community/community_review_regression_test.dart": {
+      "before": "fb127d026f7283085c5707c9978ba645fbe5999cde095347731599f50efc597b",
+      "after_before_formatter": "a2e25425b4749eacb91ef6ff997fc39b487410825139673a9b3366ea86b92bd0"
+    },
+    "test/features/community/community_social_v2_ui_test.dart": {
+      "before": "805333a144778774d26b9280015099f785223d1d3aa24d83ce8b262f180840e0",
+      "after_before_formatter": "37f68c52932788d182e021f4aa6e15ebef3025ab1aef389320ff86c0d5d3c203"
+    },
+    "test/features/community/community_polish_visual_test.dart": {
+      "before": "17e30bf16898b7d6fed224eb9d6ac3b014fd764636fefa31830b9abe8b414953",
+      "after_before_formatter": "72728f366dc499214f412b448ce60b7163184b3cc130bff01235da45bcd8637c"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"

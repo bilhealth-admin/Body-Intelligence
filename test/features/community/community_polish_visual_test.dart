@@ -15,6 +15,11 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_surface.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_welcome.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_profile_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_bil_code_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_safety_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
@@ -43,6 +48,94 @@ class _VisualRepository extends CommunityRepository {
   String get currentUserId => owner;
   @override
   Future<bool> isCommunityModerator() async => false;
+  @override
+  Future<CommunityProfile?> loadMyProfile() async => CommunityProfile(
+    userId: owner,
+    displayName: name,
+    localeCode: arabic ? 'ar' : 'en',
+    discoverable: true,
+    bio: arabic
+        ? 'أشارك خطوات رحلتي مع أصدقائي.'
+        : 'Sharing small steps with my friends.',
+  );
+  @override
+  Future<CommunitySocialIdentity> loadSocialIdentity() async =>
+      const CommunitySocialIdentity(
+        handle: 'sample_member',
+        chosen: true,
+        discoverable: true,
+      );
+  @override
+  Future<CommunityPublicCode> loadPublicCode() async => CommunityPublicCode(
+    code: '11111111111141118111111111111111',
+    uri: Uri.parse('bil://community/member/11111111111141118111111111111111'),
+    handle: 'sample_member',
+  );
+  @override
+  Future<CommunityAttention> loadAttention() async => const CommunityAttention(
+    unreadMessages: 3,
+    incomingRequests: 1,
+    unreadBySender: {peer: 3},
+  );
+  @override
+  Future<CommunityFeedBatch> loadMyPosts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  }) async => CommunityFeedBatch(
+    posts: [
+      CommunityPost(
+        id: '88888888-8888-4888-8888-888888888888',
+        authorId: owner,
+        authorName: name,
+        authorHandle: 'sample_member',
+        body: arabic ? 'يوم جديد وخطوة جديدة.' : 'A new day and a new step.',
+        createdAt: DateTime.utc(2026, 9, 29, 8),
+        moderationStatus: CommunityPostModerationStatus.pending,
+      ),
+    ],
+    hasMore: false,
+  );
+  @override
+  Future<CommunitySavedPostBatch> loadSavedPosts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async => CommunitySavedPostBatch(
+    posts: (await loadFeed()).map((p) => p.withSaved(true)).toList(),
+    hasMore: false,
+  );
+  @override
+  Future<List<CommunityPostStats>> loadPostStats(List<String> ids) async => [
+    for (final id in ids)
+      CommunityPostStats(
+        postId: id,
+        likeCount: 4,
+        liked: false,
+        commentCount: 1,
+      ),
+  ];
+  @override
+  Future<List<CommunityComment>> loadPostComments(
+    String postId, {
+    DateTime? after,
+    String? afterId,
+    int limit = 30,
+  }) async => [
+    CommunityComment(
+      id: 'fixture-comment',
+      authorId: peer,
+      authorName: name,
+      authorHandle: 'sample_member',
+      body: arabic
+          ? 'شكرًا على المشاركة والتشجيع!'
+          : 'Thanks for sharing and encouraging everyone!',
+      createdAt: DateTime.utc(2026, 9, 29, 8, 15),
+      likeCount: 0,
+      liked: false,
+    ),
+  ];
+
   @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
     required String localeCode,
@@ -158,6 +251,7 @@ void main() {
               () async => const CommunityAttention(
                 unreadMessages: 3,
                 incomingRequests: 1,
+                unreadBySender: {_VisualRepository.peer: 3},
               ),
             );
             controller.setOwner('fixture');
@@ -168,7 +262,18 @@ void main() {
                 ? BilFlagshipTheme.dark(isArabic: arabic)
                 : BilFlagshipTheme.light(isArabic: arabic);
             final scenes = <String, Widget>{
+              'welcome': const Scaffold(body: CommunityWelcome()),
               'feed': CommunityHubPage(repository: repository),
+              'profile': CommunityProfilePage(repository: repository),
+              'my_code': CommunityBilCodePage(repository: repository),
+              'my_posts': CommunityMyPostsPage(
+                repository: repository,
+                showProfileHeader: true,
+              ),
+              'saved': CommunitySavedPostsPage(repository: repository),
+              'updates': CommunityNotificationsPage(repository: repository),
+              'safety': CommunitySafetyPage(repository: repository),
+              'find_people': CommunityPeoplePage(repository: repository),
               'messages': CommunityMessagesPage(repository: repository),
               'friends': CommunityConnectionsPage(repository: repository),
               'chat': CommunityChatPage(
@@ -208,9 +313,10 @@ void main() {
                       GlobalCupertinoLocalizations.delegate,
                     ],
                     builder: (context, child) => MediaQuery(
-                      data: MediaQuery.of(
-                        context,
-                      ).copyWith(textScaler: TextScaler.linear(scale)),
+                      data: MediaQuery.of(context).copyWith(
+                        textScaler: TextScaler.linear(scale),
+                        disableAnimations: true,
+                      ),
                       child: CommunityAttentionScope(
                         controller: controller,
                         child: RepaintBoundary(key: key, child: child!),
@@ -243,6 +349,57 @@ void main() {
                   tester,
                   key,
                   'actions_${locale.languageCode}_${dark ? 'dark' : 'light'}_${scale.toInt()}',
+                );
+                tester
+                    .state<NavigatorState>(find.byType(Navigator).first)
+                    .pop();
+                await tester.pumpAndSettle();
+                final comments = find.byKey(
+                  const Key(
+                    'community-post-comments-66666666-6666-4666-8666-666666666666',
+                  ),
+                );
+                await tester.scrollUntilVisible(
+                  comments,
+                  180,
+                  scrollable: find
+                      .descendant(
+                        of: find.byKey(
+                          const PageStorageKey('community-feed-scroll'),
+                        ),
+                        matching: find.byType(Scrollable),
+                      )
+                      .first,
+                );
+                await tester.tap(comments);
+                await tester.pumpAndSettle();
+                expect(
+                  tester.takeException(),
+                  isNull,
+                  reason: 'post details/comments',
+                );
+                await _capture(
+                  tester,
+                  key,
+                  'comments_${locale.languageCode}_${dark ? 'dark' : 'light'}_${scale.toInt()}',
+                );
+                tester
+                    .state<NavigatorState>(find.byType(Navigator).first)
+                    .pop();
+                await tester.pumpAndSettle();
+                await tester.tap(
+                  find.byKey(const Key('community-create-post')),
+                );
+                await tester.pumpAndSettle();
+                expect(
+                  find.byKey(const Key('community-post-editor-page')),
+                  findsOneWidget,
+                );
+                expect(tester.takeException(), isNull, reason: 'create post');
+                await _capture(
+                  tester,
+                  key,
+                  'composer_${locale.languageCode}_${dark ? 'dark' : 'light'}_${scale.toInt()}',
                 );
               }
               await tester.pumpWidget(const SizedBox.shrink());

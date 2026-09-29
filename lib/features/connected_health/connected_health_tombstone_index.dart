@@ -10,15 +10,19 @@ final class ConnectedHealthTombstoneIndex {
   final bool _legacy;
   final Map<String, bool> _lookedUp = {};
 
-  static Future<ConnectedHealthTombstoneIndex> load(GlobalDurableStore store) async {
+  static Future<ConnectedHealthTombstoneIndex> load(
+    GlobalDurableStore store,
+  ) async {
     final rows = await store.list('health_tombstones');
     final ids = <String>{};
     var legacy = false;
     for (final row in rows) {
       final provider = row['provider'];
       final record = row['recordId'];
-      if (provider is String && provider.isNotEmpty &&
-          record is String && record.isNotEmpty) {
+      if (provider is String &&
+          provider.isNotEmpty &&
+          record is String &&
+          record.isNotEmpty) {
         ids.add('$provider:$record');
       } else {
         // Some installed clients wrote only {deleted: true} under the native
@@ -34,7 +38,8 @@ final class ConnectedHealthTombstoneIndex {
     if (unique.any(_ids.contains)) return true;
     if (!_legacy) return false;
     for (final key in unique) {
-      final found = _lookedUp[key] ??
+      final found =
+          _lookedUp[key] ??
           (await _store.get('health_tombstones', key) != null);
       _lookedUp[key] = found;
       if (found) return true;

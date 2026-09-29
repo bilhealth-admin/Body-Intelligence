@@ -14,6 +14,7 @@ import '../../global_platform/product/global_product_coordinators.dart';
 import '../../global_platform/runtime/global_product_composition_root.dart';
 import '../connected_health_model.dart';
 import '../connected_health_daily_history.dart';
+import '../connected_health_tombstone_index.dart';
 
 part 'connected_health_gateway_helpers.dart';
 part 'connected_health_aggregations.dart';
