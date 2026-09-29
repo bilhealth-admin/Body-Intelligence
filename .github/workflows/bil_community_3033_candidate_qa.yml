@@ -6,12 +6,132 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: community-candidate-${{ github.ref }}
-  cancel-in-progress: true
+  group: community-sharded-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  committed-candidate:
+  source-and-performance:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact committed source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Record exact source and patch
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-candidate
+          git merge-base --is-ancestor 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD
+          git rev-parse HEAD > /tmp/bil-candidate/source-sha.txt
+          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --binary > /tmp/bil-candidate/source.patch
+          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --name-only > /tmp/bil-candidate/changed-paths.txt
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies and check formatting without modifying source
+        run: |
+          set -euo pipefail
+          flutter pub get
+          python3 - <<'PY'
+          import pathlib,subprocess
+          paths=[p for p in pathlib.Path('/tmp/bil-candidate/changed-paths.txt').read_text().splitlines() if p.endswith('.dart') and pathlib.Path(p).is_file()]
+          if paths: subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*paths],check=True)
+          for path,limit in [('lib/features/community/data/community_repository.dart',800),('lib/features/community/data/community_social_repository_mixin.dart',700)]:
+              assert len(pathlib.Path(path).read_text().splitlines())<=limit, path
+          PY
+      - name: Analyze all application source
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-candidate/analyze.log
+      - name: Run unchanged performance budget in its own serial process before all test shards
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' 2>&1 | tee /tmp/bil-candidate/performance.log
+          import importlib.util,pathlib,subprocess,sys
+          spec=importlib.util.spec_from_file_location('portable',pathlib.Path('tool/release/run_portable_release_tests.py'))
+          portable=importlib.util.module_from_spec(spec);spec.loader.exec_module(portable)
+          policy=portable.load_code_only_policy();policy.discover()
+          cmd=[*policy.flutter_test_command(portable.resolve_flutter_executable()),'--timeout','30s',portable.PERFORMANCE_BUDGET_TEST]
+          sys.exit(subprocess.run(cmd,check=False).returncode)
+          PY
+      - name: Upload source and performance evidence without fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-3033-source-${{ github.sha }}
+          path: /tmp/bil-candidate
+          retention-days: 14
+          if-no-files-found: error
+  portable:
+    needs: source-and-performance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - name: Checkout the same exact commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Execute an exact partition of the existing portable code-only selection
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-shard
+          python3 - <<'PY' 2>&1 | tee /tmp/bil-shard/tests.log
+          import importlib.util,json,os,pathlib,subprocess,sys
+          spec=importlib.util.spec_from_file_location('portable',pathlib.Path('tool/release/run_portable_release_tests.py'))
+          portable=importlib.util.module_from_spec(spec);spec.loader.exec_module(portable)
+          all_files,selected=portable.discover_tests()
+          policy=portable.load_code_only_policy();policy.discover()
+          selected=[p for p in selected if p not in policy.NOT_RUN]
+          performance,remaining=portable.partition_tests(selected)
+          mixed={p:pattern for p,pattern in policy.MIXED_NAMES.items() if p in remaining}
+          ordinary=[p for p in remaining if p not in mixed]
+          tasks=[{'path':p,'name':None} for p in ordinary]+[{'path':p,'name':pattern} for p,pattern in mixed.items()]
+          partitions=[tasks[i::4] for i in range(4)]
+          assert len({t['path'] for group in partitions for t in group})==len(remaining)
+          assert sorted(t['path'] for group in partitions for t in group)==sorted(remaining)
+          shard=int(os.environ['SHARD']);assigned=partitions[shard]
+          plan={'source':subprocess.check_output(['git','rev-parse','HEAD']).decode().strip(),'shard':shard,'all_files':len(all_files),'selected_files_including_performance':len(selected),'performance_ran_in_prerequisite':performance,'not_run':sorted(set(all_files)-set(selected)),'name_filters':mixed,'assigned':assigned}
+          pathlib.Path('/tmp/bil-shard/plan.json').write_text(json.dumps(plan,indent=2))
+          cmd=[*policy.flutter_test_command(portable.resolve_flutter_executable()),'--timeout','30s']
+          results=[]
+          paths=[t['path'] for t in assigned if t['name'] is None]
+          for batch in portable.partition_test_batches(cmd,paths):
+              code=subprocess.run([*cmd,*batch],check=False).returncode
+              results.append({'paths':batch,'exit_code':code})
+          for task in assigned:
+              if task['name'] is not None:
+                  code=subprocess.run([*cmd,task['path'],'--name',task['name']],check=False).returncode
+                  results.append({'paths':[task['path']],'name':task['name'],'exit_code':code})
+          pathlib.Path('/tmp/bil-shard/results.json').write_text(json.dumps(results,indent=2))
+          print('SHARD_EXECUTED_FILES='+str(sum(len(r['paths']) for r in results)),flush=True)
+          sys.exit(int(any(r['exit_code']!=0 for r in results)))
+          PY
+      - name: Upload shard evidence without credentials or fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-3033-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: /tmp/bil-shard
+          if-no-files-found: error
+          retention-days: 14
+  visual-cloud-boundaries:
+    needs: source-and-performance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:17
@@ -23,68 +143,48 @@ jobs:
           --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s
           --health-timeout 5s --health-retries 10
     steps:
-      - name: Checkout committed application source without patch scripts
+      - name: Checkout the same exact commit
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-          fetch-depth: 0
-      - name: Record exact source and base
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/bil-community-candidate
-          git merge-base --is-ancestor 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD
-          git rev-parse HEAD > /tmp/bil-community-candidate/source-sha.txt
-          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --binary > /tmp/bil-community-candidate/source.patch
-          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --name-only > /tmp/bil-community-candidate/changed-paths.txt
       - name: Install pinned Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Resolve dependencies and validate formatting of changed Dart files
+      - name: Run Community visual and large-text matrix separately
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-boundaries/ui
         run: |
           set -euo pipefail
+          mkdir -p /tmp/bil-boundaries
           flutter pub get
-          python3 - <<'PY'
-          import pathlib, subprocess
-          paths=[p for p in pathlib.Path('/tmp/bil-community-candidate/changed-paths.txt').read_text().splitlines() if p.endswith('.dart') and pathlib.Path(p).is_file()]
-          if paths: subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*paths],check=True)
-          PY
-      - name: Analyze all application source
-        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-community-candidate/analyze.log
-      - name: Run complete portable code-only release suite with its existing declared exclusions
-        run: |
-          set -o pipefail
-          python3 tool/release/run_portable_release_tests.py --code-only 2>&1 | tee /tmp/bil-community-candidate/portable-release-tests.log
-      - name: Run separate Community visual and large-text matrix
-        if: ${{ !cancelled() }}
-        env:
-          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-community-candidate/ui
-        run: |
-          set -o pipefail
-          flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-community-candidate/community-visual-tests.log
-      - name: Test SQL with synthetic users in disposable PostgreSQL only
+          flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-boundaries/visual-tests.log
+      - name: Run synthetic SQL fixtures in disposable PostgreSQL only
         if: ${{ !cancelled() }}
         env:
           PGPASSWORD: isolated-fixture-only
         run: |
           set -o pipefail
-          psql -h 127.0.0.1 -p 5432 -U postgres -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-community-candidate/sql-tests.log
-      - name: Test provider payloads with mocked transports
+          mkdir -p /tmp/bil-boundaries
+          psql -h 127.0.0.1 -p 5432 -U postgres -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-boundaries/sql-tests.log
+      - name: Run provider payload tests with mocked transports only
         if: ${{ !cancelled() }}
         run: |
           set -euo pipefail
+          mkdir -p /tmp/bil-boundaries
           npm install --prefix /tmp/bil-deno deno@2.5.1
-          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/bil-community-candidate/push-tests.log
-      - name: Record verification boundary
+          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/bil-boundaries/push-tests.log
+      - name: Record device and release boundary
         if: always()
         run: |
-          printf '%s\n' 'NO_SIGNED_BUILD_CREATED' 'NO_STORE_UPLOAD' 'PHYSICAL_DEVICE_PUSH_AND_AUTH_ACCEPTANCE_NOT_RUN' 'HEADLESS_CAPTURE_FONTS_ARE_TEST_SUBSTITUTES_NOT_IOS_FONT_EQUIVALENCE' > /tmp/bil-community-candidate/boundary.txt
-      - name: Upload source diff and test evidence without bundled fonts
+          mkdir -p /tmp/bil-boundaries
+          printf '%s\n' 'NO_SIGNED_BUILD_CREATED' 'NO_STORE_UPLOAD' 'PHYSICAL_DEVICE_PUSH_AND_AUTH_ACCEPTANCE_NOT_RUN' 'HEADLESS_CAPTURE_FONTS_ARE_TEST_SUBSTITUTES_NOT_IOS_FONT_EQUIVALENCE' > /tmp/bil-boundaries/boundary.txt
+      - name: Upload layout and cloud contract evidence without bundled fonts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: community-3033-candidate-${{ github.sha }}
-          path: /tmp/bil-community-candidate
+          name: community-3033-boundaries-${{ github.sha }}
+          path: /tmp/bil-boundaries
           if-no-files-found: error
           retention-days: 14
