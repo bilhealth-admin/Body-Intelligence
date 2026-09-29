@@ -58,17 +58,23 @@ class _CommunityConversationTile extends StatelessWidget {
                               title,
                               maxLines: 1,
                               style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
+                                fontWeight: unread
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                               ),
                             ),
                           ),
                           if (unread) ...[
                             const SizedBox(width: 8),
                             Semantics(
-                              label: '$unreadCount ${communityText(context, 'Unread messages', 'الرسائل غير المقروءة')}',
+                              label:
+                                  '$unreadCount ${communityText(context, 'Unread messages', 'الرسائل غير المقروءة')}',
                               child: ExcludeSemantics(
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: theme.colorScheme.primary,
                                     borderRadius: BorderRadius.circular(20),
@@ -88,19 +94,30 @@ class _CommunityConversationTile extends StatelessWidget {
                       ),
                       if (authorName != null) ...[
                         const SizedBox(height: 2),
-                        _NaturalMessageText(authorName!, maxLines: 1,
-                          style: theme.textTheme.bodySmall),
+                        _NaturalMessageText(
+                          authorName!,
+                          maxLines: 1,
+                          style: theme.textTheme.bodySmall,
+                        ),
                       ],
                       const SizedBox(height: 4),
-                      _NaturalMessageText(body, maxLines: 2,
+                      _NaturalMessageText(
+                        body,
+                        maxLines: 2,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant)),
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                       if (time != null) ...[
                         const SizedBox(height: 6),
                         Align(
                           alignment: AlignmentDirectional.centerEnd,
-                          child: Text(time, style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant)),
+                          child: Text(
+                            time,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
                       ],
                     ],

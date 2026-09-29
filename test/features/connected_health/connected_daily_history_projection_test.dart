@@ -248,6 +248,43 @@ void main() {
       );
     },
   );
+  test(
+    'history does not invent clinical range filters for accepted readings',
+    () {
+      final result = project([hr('low', 15, 8), hr('high', 310, 9)]).single;
+      expect(result.canonicalValue, 162.5);
+      expect(result.attributes['sampleCount'], 2);
+      expect(result.attributes['dailyMinimum'], 15);
+      expect(result.attributes['dailyMaximum'], 310);
+      expect(result.attributes['aboveThresholdCount'], 1);
+    },
+  );
+  test(
+    'non-positive rates and non-finite confidence are not verified samples',
+    () {
+      expect(
+        project([
+          hr('zero', 0, 8),
+          hr('negative', -1, 9),
+          row(
+            'nan-confidence',
+            'heartRate',
+            80,
+            DateTime(2026, 9, 29),
+            confidence: double.nan,
+          ),
+          row(
+            'infinite-confidence',
+            'heartRate',
+            80,
+            DateTime(2026, 9, 29),
+            confidence: double.infinity,
+          ),
+        ]),
+        isEmpty,
+      );
+    },
+  );
   test('projection keeps provenance and never mutates raw observations', () {
     final a = hr('a', 80, 8);
     final before = a.toMap();

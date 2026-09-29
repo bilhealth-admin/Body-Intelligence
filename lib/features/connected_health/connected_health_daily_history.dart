@@ -69,6 +69,7 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
     final day = connectedHistoryDate(dayOf(s));
     if (s.deleted ||
         !s.canonicalValue.isFinite ||
+        !s.provenance.confidence.isFinite ||
         s.provenance.confidence <= 0 ||
         s.provenance.observedAt.isAfter(input.asOf) ||
         day == null ||
@@ -80,9 +81,9 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
       return s.canonicalUnit == 'kcal' && s.canonicalValue >= 0;
     }
     if (s.key == 'heartRate' || s.key == 'restingHeartRate') {
-      return s.canonicalUnit == 'count/min' &&
-          s.canonicalValue >= 20 &&
-          s.canonicalValue <= 300;
+      // Import already owns source validation. A history projection must not
+      // silently discard accepted readings using invented clinical cutoffs.
+      return s.canonicalUnit == 'count/min' && s.canonicalValue > 0;
     }
     return s.key == 'sleep';
   }

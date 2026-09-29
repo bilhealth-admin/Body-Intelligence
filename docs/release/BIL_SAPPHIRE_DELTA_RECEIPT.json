@@ -2,25 +2,21 @@
   "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
   "scope": "Community presentation and health history only; native watch code unchanged",
   "files": {
-    "lib/features/community/presentation/community_surface.dart": {
-      "before": "8bef5a23dbd412f84afdfe2a86215331810d12cb01f1bc5cf1f7c2ca12ede20b",
-      "after_before_formatter": "ce2f67e6d52552f08a3ead943071f189d012ba95b172dab708200794acc24aac"
+    "lib/features/connected_health/connected_health_daily_history.dart": {
+      "before": "7d9faaa6bc2f3e89383868ddff2c278b236961a326281c8ce62e89fe409cba6f",
+      "after_before_formatter": "11a7c85cfcc80bc074441afb00f0818c6cfaa1de7c6a1b46cc0022391ad2dce7"
     },
-    "lib/features/community/presentation/community_post_widgets.dart": {
-      "before": "d61dbefe36b2ea7d2c8f5ed70dd87c638c31d5ba4055b0c15cdb20746bc95fdd",
-      "after_before_formatter": "19cc134ec7ba6d64162f453b8ff477d34ee40019852642a35a15210005606a32"
+    "test/features/connected_health/connected_daily_history_projection_test.dart": {
+      "before": "241e396bad8db3548e687ccfc99631e30519375c27168d2a79af8ff6e602883e",
+      "after_before_formatter": "42b17d1becebb3de1a242cd4b998e240fdb9e48f03f3c082c86b0d3a4bc3ca8c"
     },
-    "test/visual_closure/visual_evidence_font.dart": {
-      "before": "f97508b0d3922107a1f65a6df0768602d62822e9575949d8c4a0b9d888ac708e",
-      "after_before_formatter": "263ed28382ada1b17c25da3e60acfc9c0ef71b6f01ba1cd73ecd31a9c1fa7561"
+    "lib/features/community/presentation/community_messages_page.dart": {
+      "before": "f0170765f9d2602052224a0d327511e6ce3bcfbe9e948479c5c5f3f567530a58",
+      "after_before_formatter": "30c01da00ee990bf72d19ee0be2cff8db2ebf23a11d2d6c856ac67c992f0b9b1"
     },
-    "test/architecture_source_file_size_guard_test.dart": {
-      "before": "3bad4c726a1f2dd77038b72d9b424f92182d847e0d2d8028a4300482c7c496ae",
-      "after_before_formatter": "da9e08f1e3324ae063538e1c86bd60c89686be6b2441b60453658a9754508aee"
-    },
-    "test/features/community/community_review_regression_test.dart": {
-      "before": "52237be288149f71b031449d267b580eb693b33f85b61dfcba43dfe35b0bf546",
-      "after_before_formatter": "cb32dbe971abd24ef988bc9f28c39e0cbbc9b5c392338f05d772bcfe380136aa"
+    "test/features/community/community_welcome_responsive_test.dart": {
+      "before": "39f207cddf4eae3430c47064d9d90e90ec553898584a2db30e59f6f4b07379fb",
+      "after_before_formatter": "28a943990912e0c81dc2b8d260e9342f3140ab4f7b6a4dcf41fcfb316db17915"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"

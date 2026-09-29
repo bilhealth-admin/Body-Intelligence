@@ -19,6 +19,7 @@ import 'community_policy_notice.dart';
 import 'community_safety_page.dart';
 
 part 'community_messages_copy.dart';
+part 'community_conversation_tile.dart';
 part 'new_community_message_page.dart';
 
 SupabaseClient? _initializedCommunityClient() {
@@ -246,7 +247,6 @@ class _MessageList extends StatelessWidget {
                               : null,
                         )
                       : 0;
-                  final unread = unreadCount > 0;
                   final createdAt = DateTime.tryParse(
                     row['created_at'] as String? ?? '',
                   );
@@ -261,93 +261,14 @@ class _MessageList extends StatelessWidget {
                         ),
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: ListTile(
+                      child: _CommunityConversationTile(
                         key: ValueKey('community-inbox-${row['id']}'),
-                        minTileHeight: 88,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 6,
-                        ),
-                        tileColor: unread
-                            ? Theme.of(context).colorScheme.primaryContainer
-                                  .withValues(alpha: .25)
-                            : null,
-                        leading: BilAccountAvatar(
-                          radius: 24,
-                          networkUrl: profile?['avatar_url'] as String?,
-                        ),
-                        title: _NaturalMessageText(
-                          parsed.subject.isEmpty ? name : parsed.subject,
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: unread
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                              ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (parsed.subject.isNotEmpty)
-                              _NaturalMessageText(name, maxLines: 1),
-                            _NaturalMessageText(parsed.body, maxLines: 2),
-                          ],
-                        ),
-                        trailing: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (createdAt != null)
-                              Text(
-                                DateUtils.isSameDay(
-                                      createdAt.toLocal(),
-                                      DateTime.now(),
-                                    )
-                                    ? TimeOfDay.fromDateTime(
-                                        createdAt.toLocal(),
-                                      ).format(context)
-                                    : MaterialLocalizations.of(
-                                        context,
-                                      ).formatShortDate(createdAt.toLocal()),
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                            if (unread) ...[
-                              const SizedBox(height: 8),
-                              Semantics(
-                                label: communityText(
-                                  context,
-                                  'Unread messages',
-                                  'الرسائل غير المقروءة',
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    unreadCount > 99 ? '99+' : '$unreadCount',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
+                        title: parsed.subject.isEmpty ? name : parsed.subject,
+                        authorName: parsed.subject.isNotEmpty ? name : null,
+                        body: parsed.body,
+                        avatarUrl: profile?['avatar_url'] as String?,
+                        createdAt: createdAt,
+                        unreadCount: unreadCount,
                         onTap: () async {
                           await context.push(
                             '/community/chat/$otherId?name=${Uri.encodeQueryComponent(name)}',
