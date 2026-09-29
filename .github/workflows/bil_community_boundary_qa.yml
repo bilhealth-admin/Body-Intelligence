@@ -1,0 +1,95 @@
+name: Community attention boundary verification
+on:
+  push:
+    branches: [qa/community-boundary-3033]
+permissions:
+  contents: write
+jobs:
+  boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout reviewed parent
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ebd3d465edf0d5794ad5e0577cf7c03d8c2b354a
+          persist-credentials: false
+      - name: Move only the two new attention operations to their existing social boundary
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-boundary
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          repo=Path('lib/features/community/data/community_repository.dart')
+          social=Path('lib/features/community/data/community_social_repository_mixin.dart')
+          r=repo.read_text(); s=social.read_text()
+          start=r.index('  Future<CommunityAttention> loadAttention() async {')
+          end=r.index('  Future<void> markConversationRead(',start)
+          moved=r[start:end]
+          assert 'bil_community_attention_v1' in moved and 'bil_mark_visible_messages_read_v1' in moved
+          assert moved.count('_client')==2
+          moved=moved.replace('_client','communitySocialClient')
+          r=r[:start]+r[end:]
+          assert r.count("import '../domain/community_attention.dart';\n")==1
+          r=r.replace("import '../domain/community_attention.dart';\n",'')
+          assert 'loadAttention()' not in s
+          s=s.replace("import '../domain/community_models.dart';", "import '../domain/community_attention.dart';\nimport '../domain/community_models.dart';")
+          at=s.index('  Future<List<Map<String, dynamic>>> searchProfiles(')
+          s=s[:at]+moved+s[at:]
+          repo.write_text(r); social.write_text(s)
+          print('Only RPC placement changed; signatures, validation and response contracts retained.')
+          PY
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve format and check changed source sizes
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart format lib/features/community/data/community_repository.dart lib/features/community/data/community_social_repository_mixin.dart
+          python3 - <<'PY'
+          from pathlib import Path
+          for path,maximum in [('lib/features/community/data/community_repository.dart',800),('lib/features/community/data/community_social_repository_mixin.dart',700)]:
+              lines=len(Path(path).read_text().splitlines())
+              print(path,lines,'/',maximum)
+              assert lines<=maximum
+          PY
+      - name: Analyze exact post-extraction source
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-boundary/analyze.log
+      - name: Run Community and notification regressions
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 4 test/features/community test/features/notifications --timeout 2m 2>&1 | tee /tmp/bil-boundary/tests.log
+      - name: Export verified non-workflow tree only
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib,subprocess,urllib.request,hashlib
+          base='ebd3d465edf0d5794ad5e0577cf7c03d8c2b354a'
+          root='https://api.github.com/repos/'+os.environ['REPOSITORY']
+          def api(path,payload=None):
+              req=urllib.request.Request(root+path,data=None if payload is None else json.dumps(payload).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json'},method='GET' if payload is None else 'POST')
+              with urllib.request.urlopen(req,timeout=90) as response:return json.load(response)
+          paths=subprocess.check_output(['git','diff','--name-only']).decode().splitlines()
+          assert set(paths)=={'lib/features/community/data/community_repository.dart','lib/features/community/data/community_social_repository_mixin.dart'}
+          tree=api('/git/trees',{'base_tree':api('/git/commits/'+base)['tree']['sha'],'tree':[{'path':p,'mode':'100644','type':'blob','content':pathlib.Path(p).read_text()} for p in paths]})['sha']
+          record={'base':base,'tree':tree,'sha256':{p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths}}
+          pathlib.Path('/tmp/bil-boundary/tree.json').write_text(json.dumps(record,indent=2))
+          pathlib.Path('/tmp/bil-boundary/changes.patch').write_bytes(subprocess.check_output(['git','diff','--binary']))
+          for p in paths:
+              out=pathlib.Path('/tmp/bil-boundary/source')/p;out.parent.mkdir(parents=True,exist_ok=True);out.write_bytes(pathlib.Path(p).read_bytes())
+          print('VERIFIED_TREE='+tree)
+          PY
+      - name: Upload boundary evidence without credentials or fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-boundary-${{ github.sha }}
+          path: /tmp/bil-boundary
+          if-no-files-found: error
+          retention-days: 7
