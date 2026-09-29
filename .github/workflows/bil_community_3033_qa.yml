@@ -82,6 +82,18 @@ jobs:
             test/platform_readiness/android15_review_readiness_contract_test.dart \
             test/platform_readiness/platform_readiness_contract_test.dart \
             --timeout 2m 2>&1 | tee /tmp/bil-community-qa/flutter-tests.log
+      - name: Verify shared shell and settings regressions
+        if: ${{ !cancelled() && steps.format.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 4 \
+            test/responsive_shell_test.dart test/responsive_shell_accessibility_test.dart \
+            test/secondary_page_navigation_test.dart test/features/settings \
+            test/community_messages_reference_contract_test.dart \
+            test/community_reference_taxonomy_contract_test.dart \
+            test/notification_delivery_preferences_test.dart \
+            test/reference_settings_functional_parity_contract_test.dart \
+            --timeout 2m 2>&1 | tee /tmp/bil-community-qa/shared-shell-tests.log
       - name: Test SQL with synthetic users in disposable PostgreSQL only
         if: ${{ !cancelled() && steps.apply.outcome == 'success' }}
         env:
@@ -98,38 +110,40 @@ jobs:
           /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net \
             supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch \
             2>&1 | tee /tmp/bil-community-qa/push-tests.log
-      - name: Create tested Git objects without changing any branch
+      - name: Export tested application Git tree without workflow writes or branch changes
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          PARENT_SHA: ${{ github.sha }}
+          QA_SOURCE_SHA: ${{ github.sha }}
         shell: bash
         run: |
           python3 - <<'PY'
-          import json, os, pathlib, subprocess, urllib.request
+          import hashlib, json, os, pathlib, subprocess, urllib.error, urllib.request
           root='https://api.github.com/repos/'+os.environ['REPOSITORY']
           def api(path, payload=None):
               req=urllib.request.Request(root+path, data=None if payload is None else json.dumps(payload).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'},method='GET' if payload is None else 'POST')
-              with urllib.request.urlopen(req,timeout=90) as response: return json.load(response)
-          parent=os.environ['PARENT_SHA']
+              try:
+                  with urllib.request.urlopen(req,timeout=90) as response: return json.load(response)
+              except urllib.error.HTTPError as error:
+                  print('Git object request failed:', error.code, path, error.read().decode()[:2000])
+                  raise
+          base='9f439cae97d72b784880a1b1ac4ef1d33ede30c1'
           paths=subprocess.check_output(['git','diff','HEAD','--name-only']).decode().splitlines()
-          entries=[]
+          entries=[]; checksums={}; workflow_paths=[]
           for path in paths:
               if not path.startswith(('lib/','test/','tool/','supabase/','android/','ios/','docs/release/','.github/workflows/')):
                   raise SystemExit('Unexpected patch path: '+path)
               file=pathlib.Path(path)
+              checksums[path]=hashlib.sha256(file.read_bytes()).hexdigest() if file.exists() else None
+              if path.startswith('.github/workflows/'):
+                  workflow_paths.append(path)
+                  continue
               entries.append({'path':path,'mode':'100644','type':'blob',**({'content':file.read_text()} if file.exists() else {'sha':None})})
-          for patch in pathlib.Path('.github').glob('community-3033.patch.part*.gz'):
-              entries.append({'path':str(patch),'mode':'100644','type':'blob','sha':None})
-          auxiliary=pathlib.Path('.github/community-3033-followup.py')
-          if auxiliary.exists(): entries.append({'path':str(auxiliary),'mode':'100644','type':'blob','sha':None})
-          candidate=parent
-          if entries:
-              tree=api('/git/trees',{'base_tree':api('/git/commits/'+parent)['tree']['sha'],'tree':entries})['sha']
-              candidate=api('/git/commits',{'message':'feat(community): synchronized unread badges, visible read receipts and 30/33 release preparation','tree':tree,'parents':[parent]})['sha']
-          record={'candidate_commit':candidate,'parent_commit':parent,'paths':paths,'tests':'analyzer + affected Flutter + isolated SQL + mocked push transports passed','not_run':['signed Android build','signed iOS build','physical-device push delivery','store upload']}
+          base_tree=api('/git/commits/'+base)['tree']['sha']
+          tree=api('/git/trees',{'base_tree':base_tree,'tree':entries})['sha'] if entries else base_tree
+          record={'tested_application_tree':tree,'base_commit':base,'qa_source_commit':os.environ['QA_SOURCE_SHA'],'pending_workflow_paths':workflow_paths,'sha256':checksums,'tests':'analyzer + affected Flutter + shared shell/settings + isolated SQL + mocked push transports passed','not_run':['signed Android build','signed iOS build','physical-device push delivery','store upload']}
           pathlib.Path('/tmp/bil-community-qa/candidate.json').write_text(json.dumps(record,indent=2))
-          print('TESTED_CANDIDATE_COMMIT='+candidate)
+          print('TESTED_APPLICATION_TREE='+tree)
           PY
       - name: Export candidate diff and review source
         if: always()
