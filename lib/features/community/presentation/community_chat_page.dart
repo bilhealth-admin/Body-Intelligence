@@ -476,7 +476,9 @@ class _CommunityChatPageState extends State<CommunityChatPage>
                           final end = selection.isValid
                               ? selection.end
                               : text.length;
-                          if (text.length - (end - start) + emoji.length > 2000) {
+                          final nextLength =
+                              text.length - (end - start) + emoji.length;
+                          if (nextLength > 2000) {
                             return;
                           }
                           final next = text.replaceRange(start, end, emoji);
