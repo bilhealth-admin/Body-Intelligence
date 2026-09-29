@@ -43,6 +43,7 @@ jobs:
               print('PATCH_SHA256=' + hashlib.sha256(patch).hexdigest())
               subprocess.run(['git', 'apply', '--check', str(target)], check=True)
               subprocess.run(['git', 'apply', '--index', str(target)], check=True)
+              subprocess.run(['python3', '.github/community-3033-followup.py'], check=True)
           paths = subprocess.check_output(['git', 'diff', 'HEAD', '--name-only', '-z']).split(b'\0')
           pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').write_text('\n'.join(p.decode() for p in paths if p))
           PY
@@ -60,12 +61,15 @@ jobs:
           python3 - <<'PY'
           import pathlib, subprocess
           paths = [p for p in pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').read_text().splitlines() if p.endswith('.dart')]
+          paths.append('test/features/community/community_polish_visual_test.dart')
           if paths: subprocess.run(['dart','format',*paths],check=True)
           PY
           dart fix --apply --code=curly_braces_in_flow_control_structures lib/features/community
       - name: Analyze all application source
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-community-qa/analyze.log
       - name: Run affected Flutter regressions
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-community-qa/ui
         if: ${{ !cancelled() && steps.format.outcome == 'success' }}
         run: |
           set -o pipefail
@@ -102,13 +106,13 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
-          import json, os, pathlib, urllib.request
+          import json, os, pathlib, subprocess, urllib.request
           root='https://api.github.com/repos/'+os.environ['REPOSITORY']
           def api(path, payload=None):
               req=urllib.request.Request(root+path, data=None if payload is None else json.dumps(payload).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'},method='GET' if payload is None else 'POST')
               with urllib.request.urlopen(req,timeout=90) as response: return json.load(response)
           parent=os.environ['PARENT_SHA']
-          paths=pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').read_text().splitlines()
+          paths=subprocess.check_output(['git','diff','HEAD','--name-only']).decode().splitlines()
           entries=[]
           for path in paths:
               if not path.startswith(('lib/','test/','tool/','supabase/','android/','ios/','docs/release/','.github/workflows/')):
@@ -117,6 +121,8 @@ jobs:
               entries.append({'path':path,'mode':'100644','type':'blob',**({'content':file.read_text()} if file.exists() else {'sha':None})})
           for patch in pathlib.Path('.github').glob('community-3033.patch.part*.gz'):
               entries.append({'path':str(patch),'mode':'100644','type':'blob','sha':None})
+          auxiliary=pathlib.Path('.github/community-3033-followup.py')
+          if auxiliary.exists(): entries.append({'path':str(auxiliary),'mode':'100644','type':'blob','sha':None})
           candidate=parent
           if entries:
               tree=api('/git/trees',{'base_tree':api('/git/commits/'+parent)['tree']['sha'],'tree':entries})['sha']
