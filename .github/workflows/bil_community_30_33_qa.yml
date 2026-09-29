@@ -1,62 +1,43 @@
-name: BIL Community 30-33 isolated QA
-
+name: BIL Community 30-33 formatter evidence
 on:
   workflow_dispatch:
   push:
     branches: [fix/community-android30-ios33]
-    paths:
-      - '.github/workflows/bil_community_30_33_qa.yml'
-      - 'tool/community30/**'
-
+    paths: ['.github/workflows/bil_community_30_33_qa.yml']
 permissions:
   contents: read
-
-concurrency:
-  group: community-30-33-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
-  source-audit:
+  formatter:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: e04845869c9088fdf0cece80fcf1c6379ea27b27
+          persist-credentials: false
           fetch-depth: 1
-          filter: blob:none
-          sparse-checkout: |
-            lib
-            test
-            tool
-            supabase
-            android
-            ios
-            .github
-            docs/release
-            analysis_options.yaml
-            pubspec.yaml
-            pubspec.lock
-          sparse-checkout-cone-mode: false
-      - name: Export tracked source only
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Produce formatting-only patch, not a release build
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p community30-evidence
-          git rev-parse HEAD > community30-evidence/source-sha.txt
+          flutter pub get
+          dart format lib/app/localization/runtime_copy_community_review.dart test/epic9_community_release_contract_test.dart test/settings_information_architecture_contract_test.dart
+          mkdir -p /tmp/format-evidence
+          git rev-parse HEAD > /tmp/format-evidence/base-sha.txt
+          git diff -- lib/app/localization/runtime_copy_community_review.dart test/epic9_community_release_contract_test.dart test/settings_information_architecture_contract_test.dart > /tmp/format-evidence/format.patch
           python3 - <<'PY'
-          import pathlib, subprocess, zipfile
-          root = pathlib.Path('.')
-          allowed = {'.dart', '.kt', '.swift', '.sql', '.py', '.sh', '.yaml', '.yml', '.json', '.xml', '.plist', '.entitlements', '.xcconfig', '.pbxproj', '.md', '.txt', '.lock', '.kts', '.properties', '.ts'}
-          paths = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
-          with zipfile.ZipFile('community30-evidence/source.zip', 'w', zipfile.ZIP_DEFLATED) as out:
-              for name in paths:
-                  path = root / name
-                  if name and path.is_file() and path.suffix in allowed and path.stat().st_size < 4000000:
-                      out.write(path, name)
+          import pathlib,zipfile
+          paths=['lib/app/localization/runtime_copy_community_review.dart','test/epic9_community_release_contract_test.dart','test/settings_information_architecture_contract_test.dart']
+          with zipfile.ZipFile('/tmp/format-evidence/formatted.zip','w',zipfile.ZIP_DEFLATED) as out:
+              for name in paths: out.write(name,name)
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: community30-source-${{ github.sha }}
-          path: community30-evidence/
+          name: community3033-format-e048458
+          path: /tmp/format-evidence/
           if-no-files-found: error
           retention-days: 7
