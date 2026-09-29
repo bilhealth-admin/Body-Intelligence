@@ -16,6 +16,7 @@ jobs:
       contents: write
     outputs:
       source: ${{ steps.source.outputs.sha }}
+      references_ready: ${{ steps.source.outputs.references_ready }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -36,7 +37,7 @@ jobs:
           dart=[p for p in paths if p.endswith('.dart') and pathlib.Path(p).is_file()]
           if dart: subprocess.run(['dart','format',*dart],check=True)
           PY
-      - name: Commit reviewed source without force push
+      - name: Commit source without force push or store action
         id: source
         run: |
           set -euo pipefail
@@ -44,11 +45,16 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add lib test pubspec.yaml docs/release tool/sapphire
           if ! git diff --cached --quiet; then
-            git commit -m 'fix(sapphire): apply responsive welcome and legacy deletion safeguards'
+            git commit -m 'fix(sapphire): apply reviewed source corrections'
             git push origin HEAD:fix/community-sapphire-health-3033
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Export source without font files or secrets
+          if test -f tool/sapphire/reviewed_community_goldens.json; then
+            echo 'references_ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'references_ready=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Export exact source without font binaries
         if: always()
         run: |
           mkdir -p /tmp/sapphire-source
@@ -85,7 +91,7 @@ jobs:
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Verify watch, native queries and permissions remain unchanged
+      - name: Verify native Watch and current-value UI remain unchanged
         run: |
           set -euo pipefail
           git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
@@ -95,9 +101,9 @@ jobs:
           old=subprocess.check_output(['git','show','59839c7deb4d1cc860275b9e69578e299cc24d0a:'+path]).decode()
           new=pathlib.Path(path).read_text()
           def live(s): return s[s.index('class _MeasuredSignalCard'):s.index('class _SignalHistoryCard')]
-          assert live(old)==live(new),'Live Watch/current value card changed'
+          assert live(old)==live(new),'Live Watch/current-value card changed'
           PY
-      - name: Analyze and run focused regressions
+      - name: Analyze and run focused regressions and unchanged performance budgets
         run: |
           set -euo pipefail
           mkdir -p /tmp/sapphire-focused
@@ -111,15 +117,51 @@ jobs:
           name: sapphire-focused-${{ github.run_id }}
           path: /tmp/sapphire-focused/
           retention-days: 14
+  community-reference-preparation:
+    needs: [prepare, analyze-and-focused]
+    if: needs.prepare.outputs.references_ready != 'true'
+    runs-on: windows-2022
+    timeout-minutes: 25
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: Preserve committed bytes, including bounded JSON catalogs
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.prepare.outputs.source }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Prepare only Community references for visual review, NOT acceptance
+        shell: pwsh
+        run: |
+          flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tool/sapphire/prepare_community_goldens.py
+          exit $LASTEXITCODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sapphire-community-references-${{ github.run_id }}
+          path: ${{ runner.temp }}/sapphire-community-reference/
+          retention-days: 14
   full-tests:
     needs: [prepare, analyze-and-focused]
-    runs-on: ubuntu-24.04
+    if: needs.prepare.outputs.references_ready == 'true'
+    runs-on: windows-2022
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      PYTHONUTF8: '1'
     steps:
+      - name: Preserve exact committed catalog bytes
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ needs.prepare.outputs.source }}
@@ -129,15 +171,15 @@ jobs:
           flutter-version: 3.44.6
           cache: true
       - run: flutter pub get
-      - name: Run every discovered test file without path or name exclusions
+      - name: Run every discovered test with strict original comparators and no exclusions
         env:
           SHARD: ${{ matrix.shard }}
-        run: python3 tool/sapphire/run_full_shard.py
+        run: python tool/sapphire/run_full_shard.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: sapphire-full-shard-${{ matrix.shard }}-${{ github.run_id }}
-          path: /tmp/sapphire-shard/
+          path: ${{ runner.temp }}/sapphire-shard/
           retention-days: 14
   visual-and-cloud-contracts:
     needs: [prepare, analyze-and-focused]
@@ -160,7 +202,7 @@ jobs:
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Capture actual community widgets with synthetic accounts
+      - name: Capture all Community widgets with synthetic identities
         env:
           BIL_COMMUNITY_CAPTURE_DIR: /tmp/sapphire-visual/ui
         run: |
@@ -169,7 +211,7 @@ jobs:
           flutter pub get
           flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/sapphire-visual/visual.log
           cp assets/images/community/community_welcome_athletes.webp /tmp/sapphire-visual/welcome-asset.webp
-      - name: Verify existing cloud contracts without production writes
+      - name: Cloud contract tests in isolated PostgreSQL and mocked provider transports
         if: ${{ !cancelled() }}
         env:
           PGPASSWORD: isolated-fixture-only
