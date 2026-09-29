@@ -183,14 +183,15 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   }
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.symmetric(vertical: 7),
     decoration: BoxDecoration(
-      border: Border(
-        bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 12),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -198,7 +199,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               BilAccountAvatar(
-                radius: 18,
+                radius: 20,
                 networkUrl: widget.post.authorAvatarUrl,
               ),
               const SizedBox(width: 10),
@@ -339,7 +340,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                             ? Icons.favorite_rounded
                             : Icons.favorite_border_rounded,
                       ),
-                label: Text('${_stats.likeCount}'),
+                label: Text(
+                  '${_stats.likeCount}',
+                  semanticsLabel:
+                      '${communityText(context, 'Like', 'إعجاب')}: ${_stats.likeCount}',
+                ),
               ),
               TextButton.icon(
                 key: Key('community-post-comments-${widget.post.id}'),
@@ -350,7 +355,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                 ),
                 onPressed: _socialActionsAvailable ? _openDetail : null,
                 icon: const Icon(Icons.mode_comment_outlined),
-                label: Text('${_stats.commentCount}'),
+                label: Text(
+                  '${_stats.commentCount}',
+                  semanticsLabel:
+                      '${communityText(context, 'Comments', 'التعليقات')}: ${_stats.commentCount}',
+                ),
               ),
               IconButton(
                 key: Key('community-post-save-${widget.post.id}'),

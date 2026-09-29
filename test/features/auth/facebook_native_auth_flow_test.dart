@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/features/auth/native_facebook_sign_in.dart';
 import 'package:body_intelligence_log/features/auth/supabase_auth_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -286,7 +287,7 @@ void main() {
   );
 
   test(
-    'J/K Android Facebook dispatches native without browser callback',
+    'J/K iOS Facebook preserves native dispatch without a browser callback',
     () async {
       final login = _FakeFacebookLoginClient(
         LoginResult(
@@ -295,7 +296,7 @@ void main() {
         ),
       );
       final authority = _FakeFacebookSessionAuthority();
-      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       try {
         expect(
           await _service(
@@ -314,4 +315,87 @@ void main() {
       }
     },
   );
+  for (final launched in [true, false]) {
+    test(
+      'Android Facebook uses real Supabase PKCE browser boundary: $launched',
+      () async {
+        final binding = TestWidgetsFlutterBinding.ensureInitialized();
+        const channel = MethodChannel('plugins.flutter.io/url_launcher');
+        final calls = <MethodCall>[];
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+          call,
+        ) async {
+          calls.add(call);
+          return launched;
+        });
+        final storage = _MemoryPkceStorage();
+        final client = SupabaseClient(
+          'https://example.supabase.co',
+          'test-publishable-key',
+          authOptions: AuthClientOptions(
+            autoRefreshToken: false,
+            pkceAsyncStorage: storage,
+          ),
+        );
+        final login = _FakeFacebookLoginClient(
+          LoginResult(status: LoginStatus.failed),
+        );
+        final authority = _FakeFacebookSessionAuthority();
+        final service = SupabaseAuthService(
+          client,
+          nativeFacebookSignIn: BilNativeFacebookSignIn(client: login),
+          facebookSessionAuthority: authority,
+        );
+        final previousPlatform = debugDefaultTargetPlatformOverride;
+        try {
+          debugDefaultTargetPlatformOverride = TargetPlatform.android;
+          expect(
+            await service.signInWithOAuth(OAuthProvider.facebook),
+            launched,
+          );
+          expect(login.calls, 0);
+          expect(authority.exchangeCalls, 0);
+          final launch = calls.singleWhere((call) => call.method == 'launch');
+          final arguments = Map<String, dynamic>.from(launch.arguments as Map);
+          final url = Uri.parse(arguments['url'] as String);
+          expect(url.host, 'example.supabase.co');
+          expect(url.path, '/auth/v1/authorize');
+          expect(url.queryParameters['provider'], 'facebook');
+          expect(
+            url.queryParameters['redirect_to'],
+            SupabaseAuthService.oauthRedirectUri,
+          );
+          expect(url.queryParameters['code_challenge'], isNotEmpty);
+          expect(
+            url.queryParameters['code_challenge_method']?.toLowerCase(),
+            's256',
+          );
+          expect(arguments['useWebView'], isFalse);
+          expect(storage.values, isNotEmpty);
+        } finally {
+          debugDefaultTargetPlatformOverride = previousPlatform;
+          binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            channel,
+            null,
+          );
+          await client.dispose();
+        }
+      },
+    );
+  }
+}
+
+class _MemoryPkceStorage extends GotrueAsyncStorage {
+  final values = <String, String>{};
+  @override
+  Future<String?> getItem({required String key}) async => values[key];
+  @override
+  Future<void> setItem({required String key, required String value}) async {
+    values[key] = value;
+  }
+
+  @override
+  Future<void> removeItem({required String key}) async {
+    values.remove(key);
+  }
 }

@@ -129,6 +129,15 @@ export async function handler(
       continue;
     }
 
+    let badgeCount: number | undefined;
+    if (event.recipient_id && (claimed ?? []).length > 0) {
+      const { data: count, error: countError } = await client.rpc(
+        "bil_push_badge_count_v1", { p_owner_id: event.recipient_id },
+      );
+      if (!countError && typeof count === "number" && Number.isInteger(count) &&
+          count >= 0 && count <= 2147483647) badgeCount = count;
+    }
+
     // Start every bounded claim promptly so no row waits behind another
     // device's network timeout and outlives its lease.
     await Promise.all(
@@ -175,6 +184,7 @@ export async function handler(
               },
               body: JSON.stringify({
                 token: token.provider_token,
+                ...(badgeCount === undefined ? {} : { badge_count: badgeCount }),
                 title: event.title ?? "BIL",
                 body: showFullBody
                   ? event.body
@@ -185,6 +195,7 @@ export async function handler(
                   deep_link: event.deep_link,
                   category: event.category,
                   outbox_id: event.id,
+                  ...(badgeCount === undefined ? {} : { badge_count: badgeCount }),
                 },
               }),
             });

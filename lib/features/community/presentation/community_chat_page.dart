@@ -13,7 +13,8 @@ class CommunityChatPage extends StatefulWidget {
   State<CommunityChatPage> createState() => _CommunityChatPageState();
 }
 
-class _CommunityChatPageState extends State<CommunityChatPage> {
+class _CommunityChatPageState extends State<CommunityChatPage>
+    with WidgetsBindingObserver {
   CommunityRepository? _repository;
   final _composer = TextEditingController();
   final _historyScroll = ScrollController(keepScrollOffset: false);
@@ -21,9 +22,88 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   StreamSubscription<void>? _conversationChanges;
   TextDirection? _composerDirection;
   bool _sending = false;
+  final _readViewport = GlobalKey();
+  final _readMarkers = <String, GlobalKey>{};
+  final _acknowledged = <String>{};
+  List<CommunityMessage> _renderedMessages = const [];
+  bool _readScheduled = false;
+  bool _reading = false;
+  bool _readAgain = false;
+
+  void _scheduleVisibleRead() {
+    if (_readScheduled || !mounted) return;
+    _readScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _readScheduled = false;
+      if (mounted) unawaited(_markVisibleRead());
+    });
+  }
+
+  Future<void> _markVisibleRead() async {
+    if (_reading) {
+      _readAgain = true;
+      return;
+    }
+    final repository = _repository;
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    if (repository == null ||
+        !mounted ||
+        (lifecycle != null && lifecycle != AppLifecycleState.resumed) ||
+        ModalRoute.of(context)?.isCurrent == false) {
+      return;
+    }
+    final viewport = _readViewport.currentContext?.findRenderObject();
+    if (viewport is! RenderBox || !viewport.hasSize || !viewport.attached) {
+      return;
+    }
+    final visibleRect = viewport.localToGlobal(Offset.zero) & viewport.size;
+    final ids = <String>[];
+    for (final message in _renderedMessages) {
+      if (message.senderId == repository.currentUserId ||
+          message.isRead ||
+          _acknowledged.contains(message.id)) {
+        continue;
+      }
+      final box = _readMarkers[message.id]?.currentContext?.findRenderObject();
+      if (box is! RenderBox || !box.hasSize || !box.attached) continue;
+      final bounds = box.localToGlobal(Offset.zero) & box.size;
+      final intersection = bounds.intersect(visibleRect);
+      final readableHeight = bounds.height.clamp(0.0, visibleRect.height);
+      if (intersection.width > 0 &&
+          intersection.height > 0 &&
+          intersection.height >= readableHeight * .5) {
+        ids.add(message.id);
+      }
+      if (ids.length == 200) break;
+    }
+    if (ids.isEmpty) return;
+    _reading = true;
+    try {
+      await repository.markVisibleMessagesRead(ids);
+      if (!mounted) return;
+      _acknowledged.addAll(ids);
+      await CommunityAttentionScope.refresh(context);
+    } on Object {
+      // Do not remove badges or acknowledge unseen messages on a failed write.
+      // A new frame, scroll, or resume can retry the exact visible IDs.
+    } finally {
+      _reading = false;
+      if (_readAgain && mounted) {
+        _readAgain = false;
+        _scheduleVisibleRead();
+      }
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _scheduleVisibleRead();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.repository != null) {
       _repository = widget.repository;
       _messages = _loadConversation();
@@ -62,7 +142,6 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
 
   Future<List<CommunityMessage>> _loadConversation() async {
     final messages = await _repository!.loadMessages(widget.userId);
-    await _repository!.markConversationRead(widget.userId);
     return messages;
   }
 
@@ -160,6 +239,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     unawaited(_conversationChanges?.cancel());
     _historyScroll.dispose();
     _composer.dispose();
@@ -240,111 +320,134 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                       );
                     }
                     final rows = snapshot.data ?? const [];
-                    return ChatHistoryViewport(
-                      controller: _historyScroll,
-                      latestMessageId: rows.isEmpty ? null : rows.last.id,
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          setState(_reload);
-                          await _messages;
-                        },
-                        child: ListView.builder(
-                          key: const Key('community-message-history'),
+                    _renderedMessages = rows;
+                    _readMarkers.removeWhere(
+                      (id, _) => !rows.any((message) => message.id == id),
+                    );
+                    _scheduleVisibleRead();
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: (_) {
+                        _scheduleVisibleRead();
+                        return false;
+                      },
+                      child: KeyedSubtree(
+                        key: _readViewport,
+                        child: ChatHistoryViewport(
                           controller: _historyScroll,
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          findChildIndexCallback: (key) {
-                            if (key is! ValueKey<String>) return null;
-                            final position = rows.indexWhere(
-                              (message) => message.id == key.value,
-                            );
-                            return position < 0
-                                ? null
-                                : rows.length - 1 - position;
-                          },
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          reverse: true,
-                          padding: const EdgeInsets.all(16),
-                          itemCount: rows.length,
-                          itemBuilder: (context, index) {
-                            final message = rows[rows.length - 1 - index];
-                            final mine =
-                                message.senderId == _repository!.currentUserId;
-                            return Align(
-                              key: ValueKey(message.id),
-                              alignment: mine
-                                  ? AlignmentDirectional.centerEnd
-                                  : AlignmentDirectional.centerStart,
-                              child: Card(
-                                color: mine
-                                    ? Theme.of(
-                                        context,
-                                      ).colorScheme.primaryContainer
-                                    : null,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      SelectableText(
-                                        message.body,
-                                        textDirection:
-                                            BilWrittenLanguageResolver.directionFor(
+                          latestMessageId: rows.isEmpty ? null : rows.last.id,
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              setState(_reload);
+                              await _messages;
+                            },
+                            child: ListView.builder(
+                              key: const Key('community-message-history'),
+                              controller: _historyScroll,
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              findChildIndexCallback: (key) {
+                                if (key is! ValueKey<String>) return null;
+                                final position = rows.indexWhere(
+                                  (message) => message.id == key.value,
+                                );
+                                return position < 0
+                                    ? null
+                                    : rows.length - 1 - position;
+                              },
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              reverse: true,
+                              padding: const EdgeInsets.all(16),
+                              itemCount: rows.length,
+                              itemBuilder: (context, index) {
+                                final message = rows[rows.length - 1 - index];
+                                final mine =
+                                    message.senderId ==
+                                    _repository!.currentUserId;
+                                return KeyedSubtree(
+                                  key: ValueKey(message.id),
+                                  child: Align(
+                                    key: _readMarkers.putIfAbsent(
+                                      message.id,
+                                      () => GlobalKey(),
+                                    ),
+                                    alignment: mine
+                                        ? AlignmentDirectional.centerEnd
+                                        : AlignmentDirectional.centerStart,
+                                    child: Card(
+                                      color: mine
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.primaryContainer
+                                          : null,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            SelectableText(
                                               message.body,
-                                              fallback: Directionality.of(
-                                                context,
+                                              textDirection:
+                                                  BilWrittenLanguageResolver.directionFor(
+                                                    message.body,
+                                                    fallback: Directionality.of(
+                                                      context,
+                                                    ),
+                                                  ),
+                                              key: ValueKey(
+                                                'community-message-text-${message.id}',
                                               ),
                                             ),
-                                        key: ValueKey(
-                                          'community-message-text-${message.id}',
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            TimeOfDay.fromDateTime(
-                                              message.createdAt.toLocal(),
-                                            ).format(context),
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.labelSmall,
-                                          ),
-                                          if (mine) ...[
-                                            const SizedBox(width: 4),
-                                            Icon(
-                                              message.isRead
-                                                  ? Icons.done_all_rounded
-                                                  : Icons.done_rounded,
-                                              size: 15,
-                                              semanticLabel: message.isRead
-                                                  ? _copy(
-                                                      context,
-                                                      'مقروءة',
-                                                      'Read',
-                                                      'Lu',
-                                                      'Leído',
-                                                      'Okundu',
-                                                    )
-                                                  : _copy(
-                                                      context,
-                                                      'مُرسلة',
-                                                      'Sent',
-                                                      'Envoyé',
-                                                      'Enviado',
-                                                      'Gönderildi',
-                                                    ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  TimeOfDay.fromDateTime(
+                                                    message.createdAt.toLocal(),
+                                                  ).format(context),
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.labelSmall,
+                                                ),
+                                                if (mine) ...[
+                                                  const SizedBox(width: 4),
+                                                  Icon(
+                                                    message.isRead
+                                                        ? Icons.done_all_rounded
+                                                        : Icons.done_rounded,
+                                                    size: 15,
+                                                    semanticLabel:
+                                                        message.isRead
+                                                        ? _copy(
+                                                            context,
+                                                            'مقروءة',
+                                                            'Read',
+                                                            'Lu',
+                                                            'Leído',
+                                                            'Okundu',
+                                                          )
+                                                        : _copy(
+                                                            context,
+                                                            'مُرسلة',
+                                                            'Sent',
+                                                            'Envoyé',
+                                                            'Enviado',
+                                                            'Gönderildi',
+                                                          ),
+                                                  ),
+                                                ],
+                                              ],
                                             ),
                                           ],
-                                        ],
+                                        ),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     );
@@ -357,6 +460,46 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
+                      PopupMenuButton<String>(
+                        tooltip: communityText(
+                          context,
+                          'Add emoji',
+                          'إضافة إيموجي',
+                        ),
+                        icon: const Icon(Icons.emoji_emotions_outlined),
+                        onSelected: (emoji) {
+                          final text = _composer.text;
+                          final selection = _composer.selection;
+                          final start = selection.isValid
+                              ? selection.start
+                              : text.length;
+                          final end = selection.isValid
+                              ? selection.end
+                              : text.length;
+                          if (text.length - (end - start) + emoji.length > 2000) {
+                            return;
+                          }
+                          final next = text.replaceRange(start, end, emoji);
+                          _composer.value = TextEditingValue(
+                            text: next,
+                            selection: TextSelection.collapsed(
+                              offset: start + emoji.length,
+                            ),
+                          );
+                          _updateComposerDirection(next);
+                        },
+                        itemBuilder: (_) => ['👋', '👏', '💪', '🎉', '❤️', '😊']
+                            .map(
+                              (emoji) => PopupMenuItem(
+                                value: emoji,
+                                child: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
                       Expanded(
                         child: TextField(
                           key: const Key('community-message-composer'),

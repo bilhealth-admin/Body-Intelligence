@@ -1,3 +1,4 @@
+import 'community_attention_scope.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';

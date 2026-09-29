@@ -1,3 +1,4 @@
+import 'features/community/presentation/community_attention_scope.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -448,7 +449,7 @@ class BILApp extends ConsumerWidget {
                             label: AppLocalizations.of(
                               context,
                             ).get('app_title'),
-                            child: content,
+                            child: CommunityAttentionScope(child: content),
                           ),
                         ),
                       ),

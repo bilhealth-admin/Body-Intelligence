@@ -40,6 +40,7 @@ class BILFirebaseMessagingService : FirebaseMessagingService() {
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title.take(MAX_TEXT_LENGTH))
             .setContentText(body.take(MAX_TEXT_LENGTH))
+            .setNumber((message.data["badge_count"]?.toIntOrNull() ?: 0).coerceAtLeast(0))
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()

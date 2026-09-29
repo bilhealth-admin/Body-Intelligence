@@ -203,6 +203,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-settings')));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('community-nav-foods')),
+      160,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('community-navigation-sheet')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-nav-foods')));
     await tester.pumpAndSettle();
     final baseline = repository.foodLoads;

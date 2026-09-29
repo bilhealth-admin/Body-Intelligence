@@ -136,11 +136,14 @@ class _TopNavigationItem extends StatelessWidget {
     final foreground = selected
         ? colors.onPrimaryContainer
         : colors.onSurfaceVariant;
+    final attention = item.destination == BilNavigationDestination.more
+        ? CommunityAttentionScope.controllerOf(context)?.value.total ?? 0
+        : 0;
     return Semantics(
       container: true,
       button: true,
       selected: selected,
-      label: item.label,
+      label: attention > 0 ? '${item.label}: $attention' : item.label,
       onTap: onTap,
       excludeSemantics: true,
       child: Tooltip(
@@ -169,11 +172,20 @@ class _TopNavigationItem extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                BilNativeNavigationGlyph(
-                  destination: item.destination,
-                  selected: selected,
-                  color: foreground,
-                ),
+                if (item.destination == BilNavigationDestination.more)
+                  CommunityUnreadBadge(
+                    child: BilNativeNavigationGlyph(
+                      destination: item.destination,
+                      selected: selected,
+                      color: foreground,
+                    ),
+                  )
+                else
+                  BilNativeNavigationGlyph(
+                    destination: item.destination,
+                    selected: selected,
+                    color: foreground,
+                  ),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(

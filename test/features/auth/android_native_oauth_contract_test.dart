@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
-  test('Android uses native Google and native OIDC login for Meta', () {
+  test('Android uses native Google and Supabase OAuth for Meta', () {
     final service = File(
       'lib/features/auth/supabase_auth_service.dart',
     ).readAsStringSync();
@@ -58,7 +58,7 @@ void main() {
         isWeb: false,
         platform: TargetPlatform.android,
       ),
-      isTrue,
+      isFalse,
     );
     expect(nativeFacebook, contains('FacebookAuth.instance.login('));
     expect(nativeFacebook, contains('ClassicToken('));

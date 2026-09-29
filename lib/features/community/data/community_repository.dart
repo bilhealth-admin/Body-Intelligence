@@ -1,3 +1,4 @@
+import '../domain/community_attention.dart';
 import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -646,6 +647,30 @@ class CommunityRepository
     'bil_request_account_deletion',
     params: {'p_reason': reason?.trim()},
   );
+
+  Future<CommunityAttention> loadAttention() async {
+    final response = await _client.rpc('bil_community_attention_v1');
+    if (response is! Map) {
+      throw const FormatException('Invalid attention snapshot');
+    }
+    return CommunityAttention.fromJson(Map<String, dynamic>.from(response));
+  }
+
+  Future<int> markVisibleMessagesRead(List<String> messageIds) async {
+    final ids = messageIds.toSet().toList(growable: false);
+    if (ids.isEmpty) return 0;
+    if (ids.length > 200 || ids.any((id) => !_uuid.hasMatch(id))) {
+      throw ArgumentError.value(messageIds, 'messageIds');
+    }
+    final response = await _client.rpc(
+      'bil_mark_visible_messages_read_v1',
+      params: {'p_message_ids': ids},
+    );
+    if (response is! int || response < 0 || response > ids.length) {
+      throw const FormatException('Invalid read receipt response');
+    }
+    return response;
+  }
 
   Future<void> markConversationRead(String otherUserId) async {
     await _client.rpc(

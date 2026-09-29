@@ -7,6 +7,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
+import 'community_attention_scope.dart';
 
 part 'community_connections_copy.dart';
 
@@ -61,7 +62,10 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
     setState(() {});
     try {
       await _repository!.respondToFriendship(id, accept: accept);
-      if (mounted) setState(_reload);
+      if (mounted) {
+        setState(_reload);
+        await CommunityAttentionScope.refresh(context);
+      }
     } catch (_) {
       if (mounted) _showFailure();
     } finally {
@@ -74,7 +78,10 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
     setState(() {});
     try {
       await _repository!.removeFriendship(id);
-      if (mounted) setState(_reload);
+      if (mounted) {
+        setState(_reload);
+        await CommunityAttentionScope.refresh(context);
+      }
     } catch (_) {
       if (mounted) _showFailure();
     } finally {
@@ -87,7 +94,10 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
     setState(() {});
     try {
       await _repository!.blockMember(userId);
-      if (mounted) setState(_reload);
+      if (mounted) {
+        setState(_reload);
+        await CommunityAttentionScope.refresh(context);
+      }
     } catch (_) {
       if (mounted) _showFailure();
     } finally {
@@ -155,6 +165,9 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
                 child: _ConnectionTab(
                   key: const Key('community-connections-requests-tab'),
                   label: copy.requests,
+                  badge: const CommunityUnreadBadge(
+                    kind: CommunityAttentionKind.requests,
+                  ),
                   selected: _tab == 1,
                   onTap: () => setState(() => _tab = 1),
                 ),
@@ -168,7 +181,8 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
           : FutureBuilder<List<Map<String, dynamic>>>(
               future: _connections,
               builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
+                if (snapshot.connectionState != ConnectionState.done &&
+                    !snapshot.hasData) {
                   return _ConnectionsLoading(
                     label: context.strings.text('Loading...'),
                   );
@@ -367,33 +381,53 @@ class _ConnectionTab extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.badge,
   });
-
   final String label;
+  final Widget? badge;
   final bool selected;
   final VoidCallback onTap;
-
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Container(
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
-            width: 3,
+  Widget build(BuildContext context) => Semantics(
+    selected: selected,
+    button: true,
+    child: Tooltip(
+      message: label,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 48,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
+                width: 3,
+              ),
+            ),
           ),
-        ),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: selected ? Theme.of(context).colorScheme.primary : null,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: selected
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (badge != null) ...[const SizedBox(width: 8), badge!],
+            ],
+          ),
         ),
       ),
     ),

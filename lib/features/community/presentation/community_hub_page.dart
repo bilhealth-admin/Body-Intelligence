@@ -1,3 +1,4 @@
+import 'community_attention_scope.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_copy.dart';
+import 'community_connections_page.dart';
 import 'community_food_submission_sheet.dart';
 import 'community_policy_notice.dart';
 import 'community_safety_page.dart';
@@ -145,6 +147,31 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         ),
         actions: [
           IconButton(
+            key: const Key('community-messages'),
+            tooltip: communityText(context, 'Messages', 'الرسائل'),
+            onPressed: repository == null
+                ? null
+                : () => context.push('/community/messages'),
+            icon: const CommunityUnreadBadge(
+              kind: CommunityAttentionKind.messages,
+              child: Icon(Icons.chat_bubble_outline_rounded),
+            ),
+          ),
+          IconButton(
+            key: const Key('community-updates'),
+            tooltip: communityText(
+              context,
+              'Community updates',
+              'تحديثات المجتمع',
+            ),
+            onPressed: repository == null
+                ? null
+                : () => context.push('/community/notifications'),
+            icon: const CommunityUnreadBadge(
+              child: Icon(Icons.notifications_none_rounded),
+            ),
+          ),
+          IconButton(
             key: const Key('community-settings'),
             tooltip: communityText(
               context,
@@ -187,6 +214,11 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       );
       if (!context.mounted || destination == null) return;
       switch (destination) {
+        case '/community/connections':
+          await pushCommunityPage<void>(
+            context,
+            CommunityConnectionsPage(repository: repository),
+          );
         case 'account':
           await pushCommunityPage<void>(
             context,

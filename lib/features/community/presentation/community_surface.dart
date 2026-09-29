@@ -37,9 +37,9 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
-      bodyLarge: text.bodyLarge?.copyWith(fontSize: 15, height: 1.5),
+      bodyLarge: text.bodyLarge?.copyWith(fontSize: 16, height: 1.5),
       bodyMedium: text.bodyMedium?.copyWith(fontSize: 14, height: 1.45),
-      bodySmall: text.bodySmall?.copyWith(fontSize: 12, height: 1.4),
+      bodySmall: text.bodySmall?.copyWith(fontSize: 13, height: 1.4),
       labelLarge: text.labelLarge?.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,

@@ -1,3 +1,4 @@
+import 'community_attention_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -47,22 +48,10 @@ class _CommunityNotificationsPageState
   Future<_CommunityUpdates> _load() async {
     final repository = _repository;
     if (repository == null) return const _CommunityUpdates.signedOut();
-    final values = await Future.wait([
-      repository.loadFriendshipsWithProfiles(),
-      repository.loadInboxMessages(),
-    ]);
-    final friendships = values[0];
-    final messages = values[1];
-    final incomingRequests = friendships.where((row) {
-      return row['status'] == 'pending' &&
-          row['addressee_id'] == repository.currentUserId;
-    }).length;
-    final unreadMessages = messages
-        .where((row) => row['read_at'] == null)
-        .length;
+    final attention = await repository.loadAttention();
     return _CommunityUpdates(
-      incomingRequests: incomingRequests,
-      unreadMessages: unreadMessages,
+      incomingRequests: attention.incomingRequests,
+      unreadMessages: attention.unreadMessages,
     );
   }
 
@@ -75,7 +64,10 @@ class _CommunityNotificationsPageState
 
   Future<void> _openAndRefresh(String route) async {
     await context.push(route);
-    if (mounted) _retry();
+    if (mounted) {
+      await CommunityAttentionScope.refresh(context);
+      if (mounted) _retry();
+    }
   }
 
   @override
@@ -85,6 +77,11 @@ class _CommunityNotificationsPageState
         communityText(context, 'Community updates', 'تحديثات المجتمع'),
       ),
       actions: [
+        IconButton(
+          tooltip: communityText(context, 'Notifications', 'الإشعارات'),
+          onPressed: () => context.push('/notification-settings'),
+          icon: const Icon(Icons.tune_rounded),
+        ),
         if (_repository != null)
           IconButton(
             onPressed: _retry,
@@ -96,7 +93,8 @@ class _CommunityNotificationsPageState
     body: FutureBuilder<_CommunityUpdates>(
       future: _updates,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+        if (snapshot.connectionState != ConnectionState.done &&
+            !snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
@@ -119,7 +117,13 @@ class _CommunityNotificationsPageState
             ),
           );
         }
-        final updates = snapshot.requireData;
+        final live = CommunityAttentionScope.controllerOf(context);
+        final updates = live?.owner != null && !live!.stale
+            ? _CommunityUpdates(
+                incomingRequests: live.value.incomingRequests,
+                unreadMessages: live.value.unreadMessages,
+              )
+            : snapshot.requireData;
         if (updates.signedOut) {
           return _CenteredUpdatesState(
             icon: Icons.lock_person_outlined,
@@ -174,7 +178,11 @@ class _CommunityNotificationsPageState
                   communityText(context, 'Friend requests', 'طلبات الصداقة'),
                 ),
                 subtitle: Text('${updates.incomingRequests}'),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                ),
                 onTap: () => _openAndRefresh('/community/connections'),
               ),
             if (updates.unreadMessages > 0)
@@ -190,7 +198,11 @@ class _CommunityNotificationsPageState
                   ),
                 ),
                 subtitle: Text('${updates.unreadMessages}'),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                trailing: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                ),
                 onTap: () => _openAndRefresh('/community/messages'),
               ),
           ],

@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -222,6 +223,10 @@ final class _VisualCommunityRepository extends CommunityRepository {
       allowMessagesFrom: allowMessagesFrom,
     );
   }
+
+  @override
+  Future<CommunityAttention> loadAttention() async =>
+      const CommunityAttention();
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async =>

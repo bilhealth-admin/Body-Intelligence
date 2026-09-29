@@ -3,6 +3,8 @@ package com.bilhealth.bodyintelligencelog
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import android.os.Build
 import android.provider.ContactsContract
 import androidx.activity.result.ActivityResultLauncher
@@ -20,6 +22,16 @@ class MainActivity : FlutterFragmentActivity() {
     private var fitnessBleBridge: BILFitnessBleBridge? = null
     private var playIntegrityBridge: BILPlayIntegrityBridge? = null
     private var pushChannel: MethodChannel? = null
+    private var pushPermissionResult: MethodChannel.Result? = null
+    private val pushPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val pending = pushPermissionResult
+            pushPermissionResult = null
+            if (pending != null) {
+                if (granted) pushProvider.requestToken(pending)
+                else pending.error("push_permission_denied", null, null)
+            }
+        }
     private val pendingRemotePushDeepLinks = ArrayDeque<String>()
     private var remotePushDeliveryInFlight = false
     private val speechPermissionLauncher: ActivityResultLauncher<String> =
@@ -112,7 +124,20 @@ class MainActivity : FlutterFragmentActivity() {
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
                     "providerStatus" -> result.success(pushProvider.status())
-                    "requestToken" -> pushProvider.requestToken(result)
+                    "requestToken" -> {
+                        if (Build.VERSION.SDK_INT >= 33 &&
+                            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            if (pushPermissionResult != null) {
+                                result.error("push_request_in_progress", null, null)
+                            } else {
+                                pushPermissionResult = result
+                                pushPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        } else {
+                            pushProvider.requestToken(result)
+                        }
+                    }
                     "deleteToken" -> pushProvider.deleteToken(result)
                     "takeInitialPayload" -> {
                         val payloads = pendingRemotePushDeepLinks.toList()
@@ -234,6 +259,8 @@ class MainActivity : FlutterFragmentActivity() {
         healthBridge = null
         playIntegrityBridge?.dispose()
         playIntegrityBridge = null
+        pushPermissionResult?.error("activity_disposed", null, null)
+        pushPermissionResult = null
         pushChannel?.setMethodCallHandler(null)
         pushChannel = null
         pendingRemotePushDeepLinks.clear()

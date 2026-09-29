@@ -1,0 +1,90 @@
+name: BIL Community 30-33 committed candidate QA
+on:
+  push:
+    branches: [fix/community-3033-ready]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: community-candidate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  committed-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - name: Checkout committed application source without patch scripts
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Record exact source and base
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-community-candidate
+          git merge-base --is-ancestor 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD
+          git rev-parse HEAD > /tmp/bil-community-candidate/source-sha.txt
+          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --binary > /tmp/bil-community-candidate/source.patch
+          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --name-only > /tmp/bil-community-candidate/changed-paths.txt
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies and validate formatting of changed Dart files
+        run: |
+          set -euo pipefail
+          flutter pub get
+          python3 - <<'PY'
+          import pathlib, subprocess
+          paths=[p for p in pathlib.Path('/tmp/bil-community-candidate/changed-paths.txt').read_text().splitlines() if p.endswith('.dart') and pathlib.Path(p).is_file()]
+          if paths: subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*paths],check=True)
+          PY
+      - name: Analyze all application source
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-community-candidate/analyze.log
+      - name: Run complete portable code-only release suite with its existing declared exclusions
+        run: |
+          set -o pipefail
+          python3 tool/release/run_portable_release_tests.py --code-only 2>&1 | tee /tmp/bil-community-candidate/portable-release-tests.log
+      - name: Run separate Community visual and large-text matrix
+        if: ${{ !cancelled() }}
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-community-candidate/ui
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-community-candidate/community-visual-tests.log
+      - name: Test SQL with synthetic users in disposable PostgreSQL only
+        if: ${{ !cancelled() }}
+        env:
+          PGPASSWORD: isolated-fixture-only
+        run: |
+          set -o pipefail
+          psql -h 127.0.0.1 -p 5432 -U postgres -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-community-candidate/sql-tests.log
+      - name: Test provider payloads with mocked transports
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/bil-deno deno@2.5.1
+          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/bil-community-candidate/push-tests.log
+      - name: Record verification boundary
+        if: always()
+        run: |
+          printf '%s\n' 'NO_SIGNED_BUILD_CREATED' 'NO_STORE_UPLOAD' 'PHYSICAL_DEVICE_PUSH_AND_AUTH_ACCEPTANCE_NOT_RUN' 'HEADLESS_CAPTURE_FONTS_ARE_TEST_SUBSTITUTES_NOT_IOS_FONT_EQUIVALENCE' > /tmp/bil-community-candidate/boundary.txt
+      - name: Upload source diff and test evidence without bundled fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-3033-candidate-${{ github.sha }}
+          path: /tmp/bil-community-candidate
+          if-no-files-found: error
+          retention-days: 14

@@ -58,6 +58,24 @@ import UserNotifications
           "remoteTapRouting": true,
           "provider": "apns",
         ])
+      case "setBadgeCount":
+        guard let count = call.arguments as? Int, count >= 0 else {
+          result(FlutterError(code: "invalid_badge_count", message: nil, details: nil)); return
+        }
+        if #available(iOS 16.0, *) {
+          UNUserNotificationCenter.current().setBadgeCount(count) { error in
+            DispatchQueue.main.async {
+              if let error {
+                result(FlutterError(code: "badge_update_failed", message: error.localizedDescription, details: nil))
+              } else { result(nil) }
+            }
+          }
+        } else {
+          DispatchQueue.main.async {
+            UIApplication.shared.applicationIconBadgeNumber = count
+            result(nil)
+          }
+        }
       case "requestToken":
         if let token = self.pushToken { result(token); return }
         guard self.pushResult == nil else {

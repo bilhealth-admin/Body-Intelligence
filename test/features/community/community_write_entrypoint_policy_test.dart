@@ -81,7 +81,7 @@ final class _EntryPointRepository extends CommunityRepository {
       const [];
 
   @override
-  Future<void> markConversationRead(String otherUserId) async {}
+  Future<int> markVisibleMessagesRead(List<String> ids) async => ids.length;
 
   @override
   Stream<void> watchConversationChanges(String otherUserId) =>

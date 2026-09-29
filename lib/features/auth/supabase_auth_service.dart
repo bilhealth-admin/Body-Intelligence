@@ -112,7 +112,7 @@ class SupabaseAuthService {
       'https://www.bilhealth.com/auth/reset-password';
 
   /// Browser OAuth remains external-only for providers without a native BIL
-  /// route. Google and Facebook use their native SDKs on Android and iOS.
+  /// route. Android Facebook uses Supabase OAuth; iOS keeps Limited Login.
   static LaunchMode oauthLaunchModeFor(
     OAuthProvider provider, {
     required bool isWeb,
@@ -137,7 +137,7 @@ class SupabaseAuthService {
   }) =>
       provider == OAuthProvider.facebook &&
       !isWeb &&
-      (platform == TargetPlatform.android || platform == TargetPlatform.iOS);
+      platform == TargetPlatform.iOS;
 
   static bool usesNativeIosGoogleSignIn(
     OAuthProvider provider, {
@@ -171,7 +171,7 @@ class SupabaseAuthService {
       usesNativeFacebookSignIn(provider, isWeb: isWeb, platform: platform) &&
       platform == TargetPlatform.android;
 
-  /// Native Google and Facebook never use this URL. Other browser OAuth
+  /// Native Google and iOS Facebook never use this URL. Browser OAuth
   /// providers retain the verified HTTPS return route.
   static String oauthRedirectUriFor(
     OAuthProvider provider, {

@@ -1,3 +1,4 @@
+import '../../features/community/presentation/community_attention_scope.dart';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -488,11 +489,14 @@ class _GlassBottomDestination extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final foreground = selected ? colors.primary : colors.onSurfaceVariant;
+    final attention = item.destination == BilNavigationDestination.more
+        ? CommunityAttentionScope.controllerOf(context)?.value.total ?? 0
+        : 0;
     return Semantics(
       container: true,
       button: true,
       selected: selected,
-      label: item.label,
+      label: attention > 0 ? "${item.label}, $attention" : item.label,
       onTap: onTap,
       child: ExcludeSemantics(
         child: Material(
@@ -514,12 +518,22 @@ class _GlassBottomDestination extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  BilNativeNavigationGlyph(
-                    destination: item.destination,
-                    selected: selected,
-                    color: foreground,
-                    size: 22,
-                  ),
+                  if (item.destination == BilNavigationDestination.more)
+                    CommunityUnreadBadge(
+                      child: BilNativeNavigationGlyph(
+                        destination: item.destination,
+                        selected: selected,
+                        color: foreground,
+                        size: 22,
+                      ),
+                    )
+                  else
+                    BilNativeNavigationGlyph(
+                      destination: item.destination,
+                      selected: selected,
+                      color: foreground,
+                      size: 22,
+                    ),
                   const SizedBox(height: 4),
                   Flexible(
                     child: Text(

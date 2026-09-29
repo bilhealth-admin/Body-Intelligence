@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/community/domain/community_conten
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -213,6 +214,9 @@ class _ReviewRepository extends CommunityRepository {
     friendLoads++;
     return [
       {
+        'id': '88888888-8888-4888-8888-888888888888',
+        'requester_id': _me,
+        'addressee_id': _other,
         'other_user_id': _other,
         'status': 'accepted',
         'profile': {'display_name': 'BIL Training Partner'},
@@ -511,7 +515,7 @@ void main() {
           expect(find.byType(TabBar), findsNothing);
           expect(
             tester.widget<AppBar>(find.byType(AppBar)).actions,
-            hasLength(1),
+            hasLength(3),
           );
           expect(tester.takeException(), isNull);
           if ((tag == 'ar' || tag == 'en') && scale == 1) {
@@ -557,10 +561,7 @@ void main() {
           await tester.tap(find.byKey(const Key('community-nav-friends')));
           await tester.pumpAndSettle();
           expect(find.text('accepted'), findsNothing);
-          expect(
-            find.byKey(const Key('community-friends-manage')),
-            findsOneWidget,
-          );
+          expect(find.byType(CommunityConnectionsPage), findsOneWidget);
           expect(tester.testTextInput.isVisible, isFalse);
           expect(tester.takeException(), isNull);
           await tester.tap(find.byType(BackButton).last);

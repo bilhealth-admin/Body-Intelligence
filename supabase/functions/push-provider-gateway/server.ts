@@ -13,6 +13,7 @@ type GatewayPayload = {
   deep_link: string | null;
   idempotency_key: string;
   data?: Record<string, unknown>;
+  badge_count?: number;
 };
 
 const encoder = new TextEncoder();
@@ -92,10 +93,14 @@ function parsePayload(value: unknown): GatewayPayload | null {
   const deepLink = raw.deep_link == null ? null : boundedText(raw.deep_link, 512);
   if (!token || !title || !body || !idempotencyKey) return null;
   if (deepLink != null && !deepLink.startsWith("bil://")) return null;
+  const badgeCount = raw.badge_count;
+  if (badgeCount !== undefined && (typeof badgeCount !== "number" ||
+      !Number.isInteger(badgeCount) || badgeCount < 0 || badgeCount > 2147483647)) return null;
   const data = raw.data && typeof raw.data === "object"
     ? raw.data as Record<string, unknown>
     : undefined;
-  return { token, title, body, deep_link: deepLink, idempotency_key: idempotencyKey, data };
+  return { token, title, body, deep_link: deepLink, idempotency_key: idempotencyKey, data,
+    ...(badgeCount === undefined ? {} : { badge_count: badgeCount as number }) };
 }
 
 async function readRequest(request: Request): Promise<GatewayPayload | null> {
@@ -187,7 +192,12 @@ async function sendFcm(
                 Object.entries(payload.data ?? {}).map(([key, value]) => [key, String(value)]),
               ),
             },
-            android: { priority: "high" },
+            android: {
+              priority: "high",
+              ...(payload.badge_count === undefined ? {} : {
+                notification: { notification_count: payload.badge_count },
+              }),
+            },
           },
         }),
       },
@@ -247,6 +257,7 @@ async function sendApns(
           aps: {
             alert: { title: payload.title, body: payload.body },
             sound: "default",
+            ...(payload.badge_count === undefined ? {} : { badge: payload.badge_count }),
           },
           deep_link: payload.deep_link,
           data: payload.data ?? {},

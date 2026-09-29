@@ -135,7 +135,7 @@ void main() {
           isWeb: false,
           platform: TargetPlatform.android,
         ),
-        isTrue,
+        isFalse,
       );
       expect(
         SupabaseAuthService.usesNativeAndroidFacebookSignIn(

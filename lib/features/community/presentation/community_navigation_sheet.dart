@@ -28,7 +28,7 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
           padding: const EdgeInsets.only(bottom: 16),
           children: [
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 12),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 16),
               child: Text(
                 communityText(context, 'Community actions', 'إجراءات المجتمع'),
                 style: Theme.of(context).textTheme.titleMedium,
@@ -42,10 +42,18 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
               subtitle: communityText(context, 'My posts', 'منشوراتي'),
             ),
             _item(
-              'friends',
+              '/community/messages',
+              Icons.chat_bubble_outline_rounded,
+              'Messages',
+              'الرسائل',
+              key: 'community-nav-messages',
+            ),
+            _item(
+              '/community/connections',
               Icons.people_outline_rounded,
               'Friends and requests',
               'الأصدقاء والطلبات',
+              key: 'community-nav-friends',
             ),
             _item(
               '/community/code',
@@ -123,11 +131,27 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
     key: Key(key ?? 'community-nav-$value'),
     minTileHeight: 52,
     contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 4, 16, 4),
-    leading: Icon(
-      icon,
-      size: 21,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-    ),
+    leading:
+        (value == '/community/messages' ||
+            value == '/community/connections' ||
+            value == '/community/notifications')
+        ? CommunityUnreadBadge(
+            kind: value == '/community/messages'
+                ? CommunityAttentionKind.messages
+                : value == '/community/connections'
+                ? CommunityAttentionKind.requests
+                : CommunityAttentionKind.all,
+            child: Icon(
+              icon,
+              size: 22,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          )
+        : Icon(
+            icon,
+            size: 22,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
     title: Text(communityText(context, english, arabic)),
     subtitle: subtitle == null ? null : Text(subtitle),
     trailing: Icon(

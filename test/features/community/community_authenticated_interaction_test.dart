@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -89,6 +90,16 @@ final class _CommunityInteractionRepository extends CommunityRepository {
     _acceptedPolicy,
     acceptedVersion: _acceptedPolicy.version,
   );
+
+  @override
+  Future<CommunityAttention> loadAttention() async {
+    final friends = await loadFriendshipsWithProfiles();
+    final messages = await loadInboxMessages();
+    return CommunityAttention(
+      unreadMessages: messages.where((m) => m['read_at'] == null).length,
+      incomingRequests: friends.where((f) => f['status'] == 'pending').length,
+    );
+  }
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
@@ -294,9 +305,9 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   }
 
   @override
-  Future<void> markConversationRead(String otherUserId) async {
-    expect(otherUserId, otherId);
+  Future<int> markVisibleMessagesRead(List<String> ids) async {
     conversationReadCalls++;
+    return ids.length;
   }
 
   @override
@@ -506,7 +517,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Outgoing realtime message'), findsOneWidget);
     expect(repository.conversationLoadCalls, 3);
-    expect(repository.conversationReadCalls, 3);
+    expect(
+      repository.conversationReadCalls,
+      1,
+    ); // Only the visible incoming message.
 
     await tester.pumpWidget(_app(const SizedBox()));
     await tester.pump();
@@ -671,6 +685,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-settings')));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('community-nav-foods')),
+      160,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('community-navigation-sheet')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-nav-foods')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Submit food'));
@@ -719,6 +744,17 @@ void main() {
     await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-settings')));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('community-nav-foods')),
+      160,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('community-navigation-sheet')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-nav-foods')));
     await tester.pumpAndSettle();

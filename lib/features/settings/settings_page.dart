@@ -1,3 +1,4 @@
+import '../community/presentation/community_attention_scope.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -169,7 +170,7 @@ class SettingsPage extends ConsumerWidget {
               title: copy('Community'),
               children: [
                 _MoreRow(copy('Community'), '/community'),
-                _MoreRow(copy('Friends'), '/community/people'),
+                _MoreRow(copy('Friends'), '/community/connections'),
                 _MoreRow(
                   copy('Messages'),
                   '/community/messages',
@@ -519,11 +520,28 @@ class _MoreRow extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          trailing: Icon(
-            Directionality.of(context) == TextDirection.rtl
-                ? Icons.chevron_left_rounded
-                : Icons.chevron_right_rounded,
-            color: const Color(0xFF8B93A1),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (route == '/community/messages' ||
+                  route == '/community' ||
+                  route == '/community/connections') ...[
+                CommunityUnreadBadge(
+                  kind: route == '/community/messages'
+                      ? CommunityAttentionKind.messages
+                      : route == '/community/connections'
+                      ? CommunityAttentionKind.requests
+                      : CommunityAttentionKind.all,
+                ),
+                const SizedBox(width: 12),
+              ],
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
           ),
           onTap: () => context.push(route),
         ),

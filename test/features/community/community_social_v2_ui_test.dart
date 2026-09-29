@@ -258,7 +258,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TabBar), findsNothing);
-      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(1));
+      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(3));
       expect(find.byKey(const Key('community-my-bil-code')), findsNothing);
       expect(
         tester

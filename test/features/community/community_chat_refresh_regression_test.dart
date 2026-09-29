@@ -42,7 +42,7 @@ class _ChatRepository extends CommunityRepository {
               ],
       );
   @override
-  Future<void> markConversationRead(String id) async {}
+  Future<int> markVisibleMessagesRead(List<String> ids) async => ids.length;
   @override
   Future<void> sendMessage(String id, String body) =>
       pendingSend?.future ?? Future.value();
