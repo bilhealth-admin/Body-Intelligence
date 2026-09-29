@@ -19,7 +19,7 @@ jobs:
           POSTGRES_DB: community_qa
         ports: ['5432:5432']
         options: >-
-          --health-cmd pg_isready --health-interval 5s
+          --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s
           --health-timeout 5s --health-retries 10
     steps:
       - name: Checkout exact candidate
@@ -27,6 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Apply prepared source patch when present
+        id: apply
         shell: bash
         run: |
           set -euo pipefail
@@ -51,6 +52,7 @@ jobs:
           flutter-version: 3.44.6
           cache: true
       - name: Resolve and format candidate Dart changes
+        id: format
         shell: bash
         run: |
           set -euo pipefail
@@ -60,9 +62,11 @@ jobs:
           paths = [p for p in pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').read_text().splitlines() if p.endswith('.dart')]
           if paths: subprocess.run(['dart','format',*paths],check=True)
           PY
+          dart fix --apply --code=curly_braces_in_flow_control_structures lib/features/community
       - name: Analyze all application source
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-community-qa/analyze.log
       - name: Run affected Flutter regressions
+        if: ${{ !cancelled() && steps.format.outcome == 'success' }}
         run: |
           set -o pipefail
           flutter test --no-pub --reporter expanded --concurrency 4 \
@@ -75,6 +79,7 @@ jobs:
             test/platform_readiness/platform_readiness_contract_test.dart \
             --timeout 2m 2>&1 | tee /tmp/bil-community-qa/flutter-tests.log
       - name: Test SQL with synthetic users in disposable PostgreSQL only
+        if: ${{ !cancelled() && steps.apply.outcome == 'success' }}
         env:
           PGPASSWORD: isolated-fixture-only
         run: |
@@ -82,6 +87,7 @@ jobs:
           psql -h 127.0.0.1 -p 5432 -U postgres -d community_qa \
             -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-community-qa/sql-tests.log
       - name: Install pinned Deno and test provider payloads with mocked transports
+        if: ${{ !cancelled() && steps.apply.outcome == 'success' }}
         run: |
           set -euo pipefail
           npm install --prefix /tmp/bil-deno deno@2.5.1
