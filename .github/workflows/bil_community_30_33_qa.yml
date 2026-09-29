@@ -1,0 +1,62 @@
+name: BIL Community 30-33 isolated QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/community-android30-ios33]
+    paths:
+      - '.github/workflows/bil_community_30_33_qa.yml'
+      - 'tool/community30/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-30-33-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            lib
+            test
+            tool
+            supabase
+            android
+            ios
+            .github
+            docs/release
+            analysis_options.yaml
+            pubspec.yaml
+            pubspec.lock
+          sparse-checkout-cone-mode: false
+      - name: Export tracked source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p community30-evidence
+          git rev-parse HEAD > community30-evidence/source-sha.txt
+          python3 - <<'PY'
+          import pathlib, subprocess, zipfile
+          root = pathlib.Path('.')
+          allowed = {'.dart', '.kt', '.swift', '.sql', '.py', '.sh', '.yaml', '.yml', '.json', '.xml', '.plist', '.entitlements', '.xcconfig', '.pbxproj', '.md', '.txt', '.lock', '.kts', '.properties', '.ts'}
+          paths = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          with zipfile.ZipFile('community30-evidence/source.zip', 'w', zipfile.ZIP_DEFLATED) as out:
+              for name in paths:
+                  path = root / name
+                  if name and path.is_file() and path.suffix in allowed and path.stat().st_size < 4000000:
+                      out.write(path, name)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community30-source-${{ github.sha }}
+          path: community30-evidence/
+          if-no-files-found: error
+          retention-days: 7
