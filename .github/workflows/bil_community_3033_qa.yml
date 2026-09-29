@@ -1,0 +1,48 @@
+name: BIL Community 30-33 isolated QA
+
+on:
+  push:
+    branches: [fix/community-3033-20260929]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-3033-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  community-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Export reviewable source (no secrets or build binaries)
+        run: |
+          git archive --format=tar HEAD lib test integration_test tool supabase android ios .github docs/release pubspec.yaml pubspec.lock analysis_options.yaml | gzip > community-review-source.tar.gz
+          git rev-parse HEAD > community-source-sha.txt
+      - name: Upload source evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-review-source-${{ github.sha }}
+          path: |
+            community-review-source.tar.gz
+            community-source-sha.txt
+          retention-days: 7
+          if-no-files-found: error
+      - name: Install pinned Flutter for candidate regressions
+        if: ${{ hashFiles('test/features/community/community_attention_test.dart') != '' }}
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Analyze and run community regressions
+        if: ${{ hashFiles('test/features/community/community_attention_test.dart') != '' }}
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter analyze --no-pub
+          flutter test --no-pub test/features/community test/features/notifications test/features/auth test/premium_login_oauth_contract_test.dart --timeout 2m
