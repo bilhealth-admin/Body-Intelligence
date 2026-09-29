@@ -30,6 +30,38 @@ for path in ['test/features/community/community_publish_validation_regression_te
     await tester.tap(find.byKey(const Key('community-nav-foods')));""")
 replace('test/features/community/community_release_wiring_test.dart',
 "final start = source.indexOf('flutter build ');", "final start = source.indexOf(path.contains('android') ? 'flutter build appbundle --release' : 'flutter build ipa --release');")
+
+# Keep Dynamic Type intact. Labels yield width to badges rather than overflow.
+# The complete label remains available to accessibility/tooltip consumers.
+replace('lib/features/community/presentation/community_messages_page.dart',
+"Text(copy.inbox)", "Flexible(child: Text(copy.inbox, maxLines: 1, overflow: TextOverflow.ellipsis))")
+p=Path('lib/features/community/presentation/community_connections_page.dart')
+s=p.read_text(); start=s.index('class _ConnectionTab'); end=s.index('class _ConnectionsEducation', start)
+segment=s[start:end]
+old="""          Text(
+            label,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: selected ? Theme.of(context).colorScheme.primary : null,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),"""
+new="""          Flexible(
+            child: Tooltip(
+              message: label,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: selected ? Theme.of(context).colorScheme.primary : null,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ),
+          ),"""
+if old not in segment: raise SystemExit('Reviewed connections tab label missing')
+s=s[:start]+segment.replace(old,new)+s[end:]; p.write_text(s)
+
 replace('test/features/auth/facebook_native_auth_flow_test.dart',
 "import 'package:flutter/foundation.dart';", "import 'package:flutter/foundation.dart';\nimport 'package:flutter/services.dart';")
 replace('test/features/auth/facebook_native_auth_flow_test.dart',
@@ -39,38 +71,43 @@ replace('test/features/auth/facebook_native_auth_flow_test.dart',
 p=Path('test/features/auth/facebook_native_auth_flow_test.dart'); s=p.read_text(); end=s.rfind('\n}')
 s=s[:end]+'''
   for (final launched in [true, false]) {
-    testWidgets('Android Facebook uses real Supabase PKCE browser boundary: $launched', (tester) async {
+    test('Android Facebook uses real Supabase PKCE browser boundary: $launched', () async {
+      final binding = TestWidgetsFlutterBinding.ensureInitialized();
       const channel = MethodChannel('plugins.flutter.io/url_launcher');
       final calls = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
         calls.add(call);
         return launched;
       });
-      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, null));
       final storage = _MemoryPkceStorage();
       final client = SupabaseClient('https://example.supabase.co', 'test-publishable-key',
         authOptions: AuthClientOptions(autoRefreshToken: false, pkceAsyncStorage: storage));
-      addTearDown(client.dispose);
       final login = _FakeFacebookLoginClient(LoginResult(status: LoginStatus.failed));
       final authority = _FakeFacebookSessionAuthority();
       final service = SupabaseAuthService(client,
         nativeFacebookSignIn: BilNativeFacebookSignIn(client: login), facebookSessionAuthority: authority);
-      debugDefaultTargetPlatformOverride = TargetPlatform.android;
-      addTearDown(() => debugDefaultTargetPlatformOverride = null);
-      expect(await service.signInWithOAuth(OAuthProvider.facebook), launched);
-      expect(login.calls, 0);
-      expect(authority.exchangeCalls, 0);
-      final launch = calls.singleWhere((call) => call.method == 'launch');
-      final arguments = Map<String, dynamic>.from(launch.arguments as Map);
-      final url = Uri.parse(arguments['url'] as String);
-      expect(url.host, 'example.supabase.co');
-      expect(url.path, '/auth/v1/authorize');
-      expect(url.queryParameters['provider'], 'facebook');
-      expect(url.queryParameters['redirect_to'], SupabaseAuthService.oauthRedirectUri);
-      expect(url.queryParameters['code_challenge'], isNotEmpty);
-      expect(url.queryParameters['code_challenge_method']?.toLowerCase(), 's256');
-      expect(arguments['useWebView'], isFalse);
-      expect(storage.values, isNotEmpty);
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      try {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        expect(await service.signInWithOAuth(OAuthProvider.facebook), launched);
+        expect(login.calls, 0);
+        expect(authority.exchangeCalls, 0);
+        final launch = calls.singleWhere((call) => call.method == 'launch');
+        final arguments = Map<String, dynamic>.from(launch.arguments as Map);
+        final url = Uri.parse(arguments['url'] as String);
+        expect(url.host, 'example.supabase.co');
+        expect(url.path, '/auth/v1/authorize');
+        expect(url.queryParameters['provider'], 'facebook');
+        expect(url.queryParameters['redirect_to'], SupabaseAuthService.oauthRedirectUri);
+        expect(url.queryParameters['code_challenge'], isNotEmpty);
+        expect(url.queryParameters['code_challenge_method']?.toLowerCase(), 's256');
+        expect(arguments['useWebView'], isFalse);
+        expect(storage.values, isNotEmpty);
+      } finally {
+        debugDefaultTargetPlatformOverride = previousPlatform;
+        binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, null);
+        await client.dispose();
+      }
     });
   }
 '''+s[end:]
@@ -86,4 +123,4 @@ class _MemoryPkceStorage extends GotrueAsyncStorage {
 }
 '''
 p.write_text(s)
-print('Scoped compatibility, canonical navigation and PKCE regression updates applied.')
+print('Scoped compatibility, canonical navigation, accessible tabs and PKCE regression updates applied.')
