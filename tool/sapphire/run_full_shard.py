@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Every discovered test/ file; no portable allowlist and no --name filters.
-Performance is already run serially in the prerequisite, so it is not repeated.
-Device integration_test is a separate physical/native acceptance boundary.
+"""Run all test/ files once; performance runs separately in the prerequisite.
+No path exclusion or name filters. Preserve failures and exact visual diffs.
+Native integration_test remains separate device acceptance, never counted here.
 """
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -25,18 +26,24 @@ plan={'source':source,'all_files':all_files,'shard':shard,'assigned':assigned,
 command=['flutter','test','--no-pub','--concurrency','1','--timeout','90s','--reporter','json',*assigned]
 with (out/'events.jsonl').open('w') as log,(out/'stderr.log').open('w') as errors:
     code=subprocess.run(command,stdout=log,stderr=errors,check=False).returncode
-starts={};completed=[];errors=[]
+for image in Path('test').rglob('*.png'):
+    if 'failures' in image.parts:
+        target=out/'visual-diffs'/image
+        target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(image,target)
+starts={};completed=[];errors=[];suites={}
 for line in (out/'events.jsonl').read_text().splitlines():
     try:e=json.loads(line)
     except json.JSONDecodeError:continue
-    if e.get('type')=='testStart':starts[e['test']['id']]=e['test']
+    if e.get('type')=='suite':suites[e['suite']['id']]=e['suite']
+    elif e.get('type')=='testStart':starts[e['test']['id']]=e['test']
     elif e.get('type')=='testDone':
         test=starts.get(e['testID'],{})
         completed.append({'id':e['testID'],'name':test.get('name'),
             'suiteID':test.get('suiteID'),'hidden':e.get('hidden',False),
             'skipped':e.get('skipped',False),'result':e.get('result')})
     elif e.get('type')=='error':errors.append(e)
-summary={'source':source,'exit_code':code,'files':len(assigned),'tests':completed,'errors':errors}
+summary={'source':source,'exit_code':code,'files':len(assigned),'tests':completed,'errors':errors,'suites':suites}
 (out/'results.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n')
 counts={status:sum(not t['hidden'] and not t['skipped'] and t['result']==status for t in completed)
         for status in ['success','failure','error']}
