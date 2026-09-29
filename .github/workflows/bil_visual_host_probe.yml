@@ -1,0 +1,46 @@
+name: BIL strict Windows golden baseline diagnosis
+on:
+  push:
+    branches: [fix/community-sapphire-health-3033]
+    paths: ['.github/workflows/bil_visual_host_probe.yml', 'tool/sapphire/visual_host_probe.py', 'tool/sapphire/visual_host_paths.json']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  baseline-windows:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          sparse-checkout: tool/sapphire
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 59839c7deb4d1cc860275b9e69578e299cc24d0a
+          path: baseline
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Compare untouched source with original strict golden images
+        working-directory: baseline
+        shell: pwsh
+        run: |
+          flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python ../tooling/tool/sapphire/visual_host_probe.py
+          exit $LASTEXITCODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sapphire-windows-baseline-${{ github.run_id }}
+          path: ${{ runner.temp }}/sapphire-host-probe/
+          retention-days: 14
