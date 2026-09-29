@@ -1,8 +1,8 @@
-# BIL Android 1.0.0 build 30 — reviewed Sapphire source, awaiting full execution
+# BIL Android 1.0.0 build 30 — frozen Sapphire source candidate
 
-`STAGING_MANIFEST_COMPLETE: NO`
+`STAGING_MANIFEST_COMPLETE: YES`
 
-`CANDIDATE_FROZEN_OR_ACCEPTED: NO`
+`CANDIDATE_FROZEN_OR_ACCEPTED: YES`
 
 `UNRESOLVED_REVIEW_COUNT: 0`
 
@@ -10,36 +10,45 @@
 
 `RELEASE_BUILD_NUMBER: 30`
 
-## Source review
+## Source and scope
 
-Base native 29/32 source: `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
-Retained functional source: `59839c7deb4d1cc860275b9e69578e299cc24d0a`.
+Native 29/32 base: `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
+Retained Community, QR, Facebook and push corrections: `59839c7deb4d1cc860275b9e69578e299cc24d0a`.
+Verified Sapphire runtime and test source: `5da2bbf3a3fbb17a05a18106a243b865aa862aa9`.
 Working branch: `fix/community-sapphire-health-3033`.
-Source review of Community presentation, local welcome, daily energy/heart
-history, legacy tombstones and accessibility corrections is complete.
-The 120 actual-widget scenes and 14 strict Community reference images were
-visually reviewed. The first welcome capture must wait for asset decode in the
-test harness; production navigation must never wait for this test operation.
+The changes cover Community-only Sapphire presentation, local athlete welcome,
+shared unread indicators, accessible conversations, and daily energy/heart
+history projections. Raw health records, native queries, Watch permissions,
+current-value card, dashboard, purchases and native iOS/Google login are preserved.
 
-Zero means no outstanding source-review item; it does NOT mean execution is
-accepted. NO/NO remains until every full-suite shard and the complete visual/
-cloud matrix is green on the final committed source. The former 5,221-case
-portable run is not acceptance for this candidate. Existing five opt-in/skipped
-cases and physical device acceptance must remain explicitly disclosed.
-No non-Community golden is replaced and no strict comparator is relaxed.
+## Verified source acceptance
 
-## Protected behavior
+Run https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36640466225
+completed every full-suite shard successfully on the runtime source above.
+All 1,032 discovered test files were scheduled with no path exclusions or name
+filters: 5,654 visible Flutter cases passed, zero failed, six existing conditional
+cases were skipped. This total includes the two isolated performance cases and
+does not double-count the 294 focused or eight visual cases rerun separately.
+The 120 actual-widget captures and 14 scoped Community reference images were
+reviewed. Only ten intentionally changed Community masters were replaced; all
+non-Community masters and strict comparators remain intact. Isolated SQL: 22
+assertions passed. Mocked provider tests: 12 passed. See the source acceptance
+record for exact skip names, evidence provenance and platform limits.
 
-Native Health queries, Watch permissions, current-value card and dashboard remain
-unchanged. Raw health evidence is retained. The 100-bpm history marker is
-informational, not a medical or background alarm. QR privacy, native iOS/Google
-login, purchases and the prior Android Facebook/push corrections are retained.
+This freeze changes only the two source manifests and the acceptance record.
+The resulting final commit must pass its own exact-commit QA before its build
+bindings are used. YES means source frozen for signed artifact testing, not
+native build, physical-device, medical or store approval. The 100-bpm marker is
+informational, not a background alarm or a diagnosis. Completed-day summaries
+refresh on the next load/sync; no guaranteed midnight execution is claimed.
 
-## Final binding boundary
+## Immutable release bindings
 
 `BIL_ANDROID_V30_AUDITED_SOURCE_SHA` and `BIL_IOS_V33_AUDITED_SOURCE_SHA` must name
-the same final verified source. `BIL_ANDROID_V30_STAGING_MANIFEST_SHA256` must
-match this file's committed-byte SHA-256. These values are computed after freeze,
-not self-referentially guessed. Prior bindings are not valid for this candidate.
-The workflow supplies build number 30 and version 1.0.0. No signed build, store
-submission or physical notification delivery is claimed by source review.
+the same final verified freeze commit. `BIL_ANDROID_V30_STAGING_MANIFEST_SHA256`
+must match this file's committed-byte SHA-256. Values are computed after commit,
+not self-referentially embedded. A dedicated dispatch-control branch may pin
+those same immutable values in the existing signed workflows without changing
+the source checked out for compilation. Prior 29/32 or 59839 bindings are invalid.
+The workflow supplies build number 30 and version 1.0.0. No signed binary, Play
+rollout, TestFlight upload or App Review submission is authorized by this record.
