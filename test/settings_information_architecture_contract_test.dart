@@ -109,7 +109,8 @@ void main() {
     expect(
       more,
       contains("_MoreRow(copy('Friends'), '/community/connections')"),
-      reason: 'Friends opens existing connections; discovery remains inside it.',
+      reason:
+          'Friends opens existing connections; discovery remains inside it.',
     );
   });
 }

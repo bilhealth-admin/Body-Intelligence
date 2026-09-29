@@ -62,7 +62,10 @@ void main() {
       ].map(source).join('\n');
       expect(people, contains('bool _sending = false'));
       expect(people, contains('await repository.markVisibleMessagesRead(ids)'));
-      expect(people, isNot(contains('await _repository!.markConversationRead')));
+      expect(
+        people,
+        isNot(contains('await _repository!.markConversationRead')),
+      );
       expect(people, contains('AppLifecycleState.resumed'));
       expect(people, contains('ModalRoute.of(context)?.isCurrent'));
       expect(people, contains('bounds.intersect(visibleRect)'));
