@@ -31,36 +31,53 @@ for path in ['test/features/community/community_publish_validation_regression_te
 replace('test/features/community/community_release_wiring_test.dart',
 "final start = source.indexOf('flutter build ');", "final start = source.indexOf(path.contains('android') ? 'flutter build appbundle --release' : 'flutter build ipa --release');")
 
-# Keep Dynamic Type intact. Labels yield width to badges rather than overflow.
-# The complete label remains available to accessibility/tooltip consumers.
+# Dynamic Type is preserved: labels yield width to badges, never shrink fonts.
 replace('lib/features/community/presentation/community_messages_page.dart',
 "Text(copy.inbox)", "Flexible(child: Text(copy.inbox, maxLines: 1, overflow: TextOverflow.ellipsis))")
-p=Path('lib/features/community/presentation/community_connections_page.dart')
-s=p.read_text(); start=s.index('class _ConnectionTab'); end=s.index('class _ConnectionsEducation', start)
-segment=s[start:end]
-old="""          Text(
-            label,
+p=Path('lib/features/community/presentation/community_connections_page.dart'); s=p.read_text()
+start=s.index('class _ConnectionTab'); end=s.index('class _ConnectionsEducation',start)
+s=s[:start]+'''class _ConnectionTab extends StatelessWidget {
+  const _ConnectionTab({super.key, required this.label, required this.selected,
+    required this.onTap, this.badge});
+  final String label;
+  final Widget? badge;
+  final bool selected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Semantics(
+    selected: selected, button: true,
+    child: Tooltip(message: label, child: InkWell(
+      onTap: onTap,
+      child: Container(
+        height: 48, alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(
+          color: selected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+          width: 3))),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: selected ? Theme.of(context).colorScheme.primary : null,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),"""
-new="""          Flexible(
-            child: Tooltip(
-              message: label,
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: selected ? Theme.of(context).colorScheme.primary : null,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ),
-          ),"""
-if old not in segment: raise SystemExit('Reviewed connections tab label missing')
-s=s[:start]+segment.replace(old,new)+s[end:]; p.write_text(s)
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500))),
+          if (badge != null) ...[const SizedBox(width: 8), badge!],
+        ]),
+      ),
+    )),
+  );
+}
+
+'''+s[end:]; p.write_text(s)
+
+# CI uses real bundled evidence fonts; no font changes in the shipped app.
+visual='test/features/community/community_polish_visual_test.dart'
+replace(visual,"import 'package:flutter/material.dart';", "import 'package:flutter/material.dart';\nimport 'package:flutter/services.dart';")
+replace(visual,'  setUpAll(loadVisualEvidenceFont);', '''  setUpAll(() async {
+    await loadVisualEvidenceFont();
+    final icons = FontLoader('MaterialIcons')
+      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+    await icons.load();
+  });''')
+replace(visual,'theme: theme, locale: locale,', "theme: visualEvidenceTheme(theme.copyWith(textTheme: theme.textTheme.apply(fontFamilyFallback: const ['RobotoEvidence', 'NotoArabicEvidence'])), fontFamily: arabic ? 'NotoArabicEvidence' : 'RobotoEvidence'), locale: locale,")
 
 replace('test/features/auth/facebook_native_auth_flow_test.dart',
 "import 'package:flutter/foundation.dart';", "import 'package:flutter/foundation.dart';\nimport 'package:flutter/services.dart';")
@@ -123,4 +140,4 @@ class _MemoryPkceStorage extends GotrueAsyncStorage {
 }
 '''
 p.write_text(s)
-print('Scoped compatibility, canonical navigation, accessible tabs and PKCE regression updates applied.')
+print('Scoped compatibility, canonical navigation, accessible tabs, readable evidence and PKCE regression updates applied.')
