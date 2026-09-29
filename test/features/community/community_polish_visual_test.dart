@@ -327,6 +327,8 @@ void main() {
                 ),
               );
               await tester.pumpAndSettle();
+              await settleVisualAssetImages(tester);
+              await tester.pumpAndSettle();
               expect(tester.takeException(), isNull, reason: scene.key);
               await _capture(
                 tester,

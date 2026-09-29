@@ -2,9 +2,9 @@
   "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
   "scope": "Community presentation and health history only; native watch code unchanged",
   "files": {
-    "lib/features/settings/settings_page.dart": {
-      "before": "1507a45b4c62d37b71f8de1f4687d2c3c76c3487da054f26ea52551ceb74aaad",
-      "after_before_formatter": "d0ee0f7556a930b25e88a6a2ab081b7650a62aab9b3411d99a435869a2f857d5"
+    "test/features/community/community_polish_visual_test.dart": {
+      "before": "3c157d607afe7891c86099bdfd511debf8ed9ee403ade1c02cda701677ec56ad",
+      "after_before_formatter": "fb94a8f428ad59e74ba7647e644363d481d7451ec732b6760bdb9d551ef7db87"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"
