@@ -2,21 +2,9 @@
   "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
   "scope": "Community presentation and health history only; native watch code unchanged",
   "files": {
-    "lib/features/connected_health/connected_health_daily_history.dart": {
-      "before": "7d9faaa6bc2f3e89383868ddff2c278b236961a326281c8ce62e89fe409cba6f",
-      "after_before_formatter": "11a7c85cfcc80bc074441afb00f0818c6cfaa1de7c6a1b46cc0022391ad2dce7"
-    },
-    "test/features/connected_health/connected_daily_history_projection_test.dart": {
-      "before": "241e396bad8db3548e687ccfc99631e30519375c27168d2a79af8ff6e602883e",
-      "after_before_formatter": "42b17d1becebb3de1a242cd4b998e240fdb9e48f03f3c082c86b0d3a4bc3ca8c"
-    },
-    "lib/features/community/presentation/community_messages_page.dart": {
-      "before": "f0170765f9d2602052224a0d327511e6ce3bcfbe9e948479c5c5f3f567530a58",
-      "after_before_formatter": "30c01da00ee990bf72d19ee0be2cff8db2ebf23a11d2d6c856ac67c992f0b9b1"
-    },
-    "test/features/community/community_welcome_responsive_test.dart": {
-      "before": "39f207cddf4eae3430c47064d9d90e90ec553898584a2db30e59f6f4b07379fb",
-      "after_before_formatter": "28a943990912e0c81dc2b8d260e9342f3140ab4f7b6a4dcf41fcfb316db17915"
+    "lib/features/settings/settings_page.dart": {
+      "before": "1507a45b4c62d37b71f8de1f4687d2c3c76c3487da054f26ea52551ceb74aaad",
+      "after_before_formatter": "d0ee0f7556a930b25e88a6a2ab081b7650a62aab9b3411d99a435869a2f857d5"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"

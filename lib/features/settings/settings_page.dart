@@ -539,7 +539,7 @@ class _MoreRow extends StatelessWidget {
                 Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_left_rounded
                     : Icons.chevron_right_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: const Color(0xFF8B93A1),
               ),
             ],
           ),
