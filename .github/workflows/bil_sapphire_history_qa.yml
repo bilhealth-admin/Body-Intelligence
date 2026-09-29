@@ -1,0 +1,192 @@
+name: BIL Sapphire and daily history full QA
+on:
+  push:
+    branches: [fix/community-sapphire-health-3033]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sapphire-history-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      source: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 30
+          ref: fix/community-sapphire-health-3033
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Apply reviewed exact-byte edits and format the candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/sapphire/prepare.py
+          flutter pub get
+          python3 - <<'PY'
+          import pathlib,subprocess
+          base='59839c7deb4d1cc860275b9e69578e299cc24d0a'
+          paths=subprocess.check_output(['git','diff','--name-only',base]).decode().splitlines()
+          dart=[p for p in paths if p.endswith('.dart') and pathlib.Path(p).is_file()]
+          if dart: subprocess.run(['dart','format',*dart],check=True)
+          PY
+      - name: Commit source only, with no force push and no store operation
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'BIL source maintenance'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib test pubspec.yaml docs/release tool/sapphire
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat(community): apply Sapphire presentation and daily health history projections'
+            git push origin HEAD:fix/community-sapphire-health-3033
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Export source evidence, excluding font files and secrets
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/sapphire-source
+          git rev-parse HEAD > /tmp/sapphire-source/source-sha.txt
+          git status --porcelain > /tmp/sapphire-source/worktree-status.txt
+          git diff 59839c7deb4d1cc860275b9e69578e299cc24d0a --binary > /tmp/sapphire-source/source.patch
+          python3 - <<'PY'
+          import pathlib,subprocess,zipfile
+          paths=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          allowed={'.dart','.py','.yaml','.yml','.json','.sql','.ts','.md','.txt','.lock','.kt','.swift','.xml','.plist','.entitlements','.xcconfig','.pbxproj','.sh','.kts','.properties'}
+          with zipfile.ZipFile('/tmp/sapphire-source/source.zip','w',zipfile.ZIP_DEFLATED) as out:
+              for name in paths:
+                  p=pathlib.Path(name)
+                  if p.is_file() and p.stat().st_size<4000000 and (p.suffix in allowed or name.startswith('assets/images/community/')):
+                      out.write(p,name)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sapphire-source-${{ github.run_id }}
+          path: /tmp/sapphire-source/
+          retention-days: 14
+  analyze-and-focused:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.prepare.outputs.source }}
+          fetch-depth: 30
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Verify untouched watch and native permission code
+        run: |
+          set -euo pipefail
+          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
+          python3 - <<'PY'
+          import pathlib,subprocess
+          path='lib/features/connected_health/connected_health_signal_detail_page.dart'
+          old=subprocess.check_output(['git','show','59839c7deb4d1cc860275b9e69578e299cc24d0a:'+path]).decode()
+          new=pathlib.Path(path).read_text()
+          def live(s): return s[s.index('class _MeasuredSignalCard'):s.index('class _SignalHistoryCard')]
+          assert live(old)==live(new),'Live Watch/current value card changed'
+          PY
+      - name: Analyze and execute focused regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sapphire-focused
+          flutter pub get
+          flutter analyze --no-pub 2>&1 | tee /tmp/sapphire-focused/analyze.log
+          flutter test --no-pub --concurrency 1 --timeout 90s --reporter expanded test/features/connected_health test/features/community/community_sapphire_contract_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log
+          flutter test --no-pub --concurrency 1 --timeout 30s --reporter expanded test/performance_budget_test.dart 2>&1 | tee /tmp/sapphire-focused/performance.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sapphire-focused-${{ github.run_id }}
+          path: /tmp/sapphire-focused/
+          retention-days: 14
+  full-tests:
+    needs: [prepare, analyze-and-focused]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.prepare.outputs.source }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get
+      - name: Execute every test file with NO path exclusions or name filters
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: python3 tool/sapphire/run_full_shard.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sapphire-full-shard-${{ matrix.shard }}-${{ github.run_id }}
+          path: /tmp/sapphire-shard/
+          retention-days: 14
+  visual-and-cloud-contracts:
+    needs: [prepare, analyze-and-focused]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.prepare.outputs.source }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Capture production community surfaces with synthetic accounts
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/sapphire-visual/ui
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sapphire-visual
+          flutter pub get
+          flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/sapphire-visual/visual.log
+          cp assets/images/community/community_welcome_athletes.webp /tmp/sapphire-visual/welcome-asset.webp
+      - name: Verify existing cloud boundaries without production writes
+        if: ${{ !cancelled() }}
+        env:
+          PGPASSWORD: isolated-fixture-only
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sapphire-visual
+          psql -h 127.0.0.1 -U postgres -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/sapphire-visual/sql.log
+          npm install --prefix /tmp/bil-deno deno@2.5.1
+          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/sapphire-visual/push.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sapphire-visual-${{ github.run_id }}
+          path: /tmp/sapphire-visual/
+          retention-days: 14
