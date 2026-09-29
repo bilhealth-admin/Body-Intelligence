@@ -90,7 +90,8 @@ void main() {
       '/notification-settings',
       '/connected-health',
       '/community',
-      '/community/people',
+      '/community/connections',
+      '/community/messages',
       '/settings/preferences',
       '/help',
       '/settings/appearance',
@@ -101,5 +102,14 @@ void main() {
     ]) {
       expect(combined, contains("'$route'"), reason: route);
     }
+    final connections = File(
+      'lib/features/community/presentation/community_connections_page.dart',
+    ).readAsStringSync();
+    expect(connections, contains("'/community/people'"));
+    expect(
+      more,
+      contains("_MoreRow(copy('Friends'), '/community/connections')"),
+      reason: 'Friends opens existing connections; discovery remains inside it.',
+    );
   });
 }

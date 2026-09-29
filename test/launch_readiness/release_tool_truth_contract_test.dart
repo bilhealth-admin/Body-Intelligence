@@ -110,6 +110,8 @@ void main() {
       'BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true',
       'BIL_FACEBOOK_LOGIN_ENABLED=true',
       'BIL_FACEBOOK_LOGIN_READY=true',
+      'BIL_PUSH_ENABLED=true',
+      'BIL_PUSH_PROVIDER_READY=true',
       'BIL_ADS_ENABLED=false',
       'BIL_AD_PROVIDER_READY=false',
       'BIL_ENABLE_CATALOG_TEST_ACCESS=false',

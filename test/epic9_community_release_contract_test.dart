@@ -30,6 +30,8 @@ void main() {
         'loadMessages',
         'sendMessage',
         'markConversationRead',
+        'markVisibleMessagesRead',
+        'loadAttention',
         'deletePost',
         'report',
       ]) {
@@ -59,7 +61,11 @@ void main() {
         'lib/features/community/presentation/community_chat_page.dart',
       ].map(source).join('\n');
       expect(people, contains('bool _sending = false'));
-      expect(people, contains('await _repository!.markConversationRead'));
+      expect(people, contains('await repository.markVisibleMessagesRead(ids)'));
+      expect(people, isNot(contains('await _repository!.markConversationRead')));
+      expect(people, contains('AppLifecycleState.resumed'));
+      expect(people, contains('ModalRoute.of(context)?.isCurrent'));
+      expect(people, contains('bounds.intersect(visibleRect)'));
       expect(people, contains('message.isRead'));
       expect(people, contains('Your text is kept'));
       expect(people, contains('AlwaysScrollableScrollPhysics'));
