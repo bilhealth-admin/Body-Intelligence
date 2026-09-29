@@ -1,48 +1,134 @@
 name: BIL Community 30-33 isolated QA
-
 on:
   push:
     branches: [fix/community-3033-20260929]
-
 permissions:
-  contents: read
-
+  contents: write
 concurrency:
   group: community-3033-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   community-qa:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - name: Export reviewable source (no secrets or build binaries)
+      - name: Apply prepared source patch when present
+        shell: bash
         run: |
-          git archive --format=tar HEAD lib test integration_test tool supabase android ios .github docs/release pubspec.yaml pubspec.lock analysis_options.yaml | gzip > community-review-source.tar.gz
-          git rev-parse HEAD > community-source-sha.txt
-      - name: Upload source evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: community-review-source-${{ github.sha }}
-          path: |
-            community-review-source.tar.gz
-            community-source-sha.txt
-          retention-days: 7
-          if-no-files-found: error
-      - name: Install pinned Flutter for candidate regressions
-        if: ${{ hashFiles('test/features/community/community_attention_test.dart') != '' }}
+          set -euo pipefail
+          mkdir -p /tmp/bil-community-qa
+          python3 - <<'PY'
+          import gzip, hashlib, pathlib, subprocess
+          sources = sorted(pathlib.Path('.github').glob('community-3033.patch.part*.gz'))
+          if sources:
+              patch = gzip.decompress(b''.join(source.read_bytes() for source in sources))
+              assert hashlib.sha256(patch).hexdigest() == '4e40eddf6f511c36cbfb386f3885ba4c2e64ed4757efb20145a32745c1dbab89', 'Prepared patch checksum mismatch'
+              target = pathlib.Path('/tmp/bil-community-qa/prepared.patch')
+              target.write_bytes(patch)
+              print('PATCH_SHA256=' + hashlib.sha256(patch).hexdigest())
+              subprocess.run(['git', 'apply', '--check', str(target)], check=True)
+              subprocess.run(['git', 'apply', '--index', str(target)], check=True)
+          paths = subprocess.check_output(['git', 'diff', 'HEAD', '--name-only', '-z']).split(b'\0')
+          pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').write_text('\n'.join(p.decode() for p in paths if p))
+          PY
+      - name: Install pinned Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Analyze and run community regressions
-        if: ${{ hashFiles('test/features/community/community_attention_test.dart') != '' }}
+      - name: Resolve and format candidate Dart changes
+        shell: bash
         run: |
           set -euo pipefail
           flutter pub get
-          flutter analyze --no-pub
-          flutter test --no-pub test/features/community test/features/notifications test/features/auth test/premium_login_oauth_contract_test.dart --timeout 2m
+          python3 - <<'PY'
+          import pathlib, subprocess
+          paths = [p for p in pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').read_text().splitlines() if p.endswith('.dart')]
+          if paths: subprocess.run(['dart','format',*paths],check=True)
+          PY
+      - name: Analyze all application source
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-community-qa/analyze.log
+      - name: Run affected Flutter regressions
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 4 \
+            test/features/community test/features/notifications test/features/auth \
+            test/premium_login_oauth_contract_test.dart \
+            test/launch_readiness/clean_source_freeze_preparation_contract_test.dart \
+            test/launch_readiness/release_candidate_gate_contract_test.dart \
+            test/launch_readiness/release_configuration_workflow_gate_test.dart \
+            test/platform_readiness/android15_review_readiness_contract_test.dart \
+            test/platform_readiness/platform_readiness_contract_test.dart \
+            --timeout 2m 2>&1 | tee /tmp/bil-community-qa/flutter-tests.log
+      - name: Test SQL with synthetic users in disposable PostgreSQL only
+        env:
+          PGPASSWORD: isolated-fixture-only
+        run: |
+          set -o pipefail
+          psql -h 127.0.0.1 -p 5432 -U postgres -d community_qa \
+            -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-community-qa/sql-tests.log
+      - name: Install pinned Deno and test provider payloads with mocked transports
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/bil-deno deno@2.5.1
+          /tmp/bil-deno/node_modules/.bin/deno test --allow-env --allow-read --allow-net \
+            supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch \
+            2>&1 | tee /tmp/bil-community-qa/push-tests.log
+      - name: Create tested Git objects without changing any branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PARENT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          root='https://api.github.com/repos/'+os.environ['REPOSITORY']
+          def api(path, payload=None):
+              req=urllib.request.Request(root+path, data=None if payload is None else json.dumps(payload).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'},method='GET' if payload is None else 'POST')
+              with urllib.request.urlopen(req,timeout=90) as response: return json.load(response)
+          parent=os.environ['PARENT_SHA']
+          paths=pathlib.Path('/tmp/bil-community-qa/changed-paths.txt').read_text().splitlines()
+          entries=[]
+          for path in paths:
+              if not path.startswith(('lib/','test/','tool/','supabase/','android/','ios/','docs/release/','.github/workflows/')):
+                  raise SystemExit('Unexpected patch path: '+path)
+              file=pathlib.Path(path)
+              entries.append({'path':path,'mode':'100644','type':'blob',**({'content':file.read_text()} if file.exists() else {'sha':None})})
+          for patch in pathlib.Path('.github').glob('community-3033.patch.part*.gz'):
+              entries.append({'path':str(patch),'mode':'100644','type':'blob','sha':None})
+          candidate=parent
+          if entries:
+              tree=api('/git/trees',{'base_tree':api('/git/commits/'+parent)['tree']['sha'],'tree':entries})['sha']
+              candidate=api('/git/commits',{'message':'feat(community): synchronized unread badges, visible read receipts and 30/33 release preparation','tree':tree,'parents':[parent]})['sha']
+          record={'candidate_commit':candidate,'parent_commit':parent,'paths':paths,'tests':'analyzer + affected Flutter + isolated SQL + mocked push transports passed','not_run':['signed Android build','signed iOS build','physical-device push delivery','store upload']}
+          pathlib.Path('/tmp/bil-community-qa/candidate.json').write_text(json.dumps(record,indent=2))
+          print('TESTED_CANDIDATE_COMMIT='+candidate)
+          PY
+      - name: Export candidate diff and review source
+        if: always()
+        run: |
+          git diff HEAD --binary > /tmp/bil-community-qa/working-changes.patch
+          tar -czf /tmp/bil-community-qa/source.tar.gz lib test tool supabase .github docs/release android ios pubspec.yaml pubspec.lock analysis_options.yaml
+      - name: Upload test evidence (no credentials)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-3033-qa-${{ github.sha }}
+          path: /tmp/bil-community-qa
+          retention-days: 7
+          if-no-files-found: error
