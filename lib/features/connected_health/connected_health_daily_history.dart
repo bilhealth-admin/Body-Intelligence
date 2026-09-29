@@ -25,8 +25,9 @@ String connectedHistoryDay(DateTime at) {
 }
 
 DateTime? connectedHistoryDate(String? value) {
-  if (value == null || !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value))
+  if (value == null || !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) {
     return null;
+  }
   final date = DateTime.tryParse(value);
   return date != null && connectedHistoryDay(date) == value ? date : null;
 }
@@ -72,10 +73,12 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
         s.provenance.observedAt.isAfter(input.asOf) ||
         day == null ||
         day.isBefore(cutoff) ||
-        day.isAfter(today))
+        day.isAfter(today)) {
       return false;
-    if (s.key == 'activeEnergy')
+    }
+    if (s.key == 'activeEnergy') {
       return s.canonicalUnit == 'kcal' && s.canonicalValue >= 0;
+    }
     if (s.key == 'heartRate' || s.key == 'restingHeartRate') {
       return s.canonicalUnit == 'count/min' &&
           s.canonicalValue >= 20 &&
@@ -102,8 +105,9 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
         const {'native_daily', 'daily'}.contains(s.attributes['aggregation'])) {
       final previous = native[key(s)];
       if (previous == null ||
-          !s.provenance.observedAt.isBefore(previous.provenance.observedAt))
+          !s.provenance.observedAt.isBefore(previous.provenance.observedAt)) {
         native[key(s)] = s;
+      }
     } else {
       samples[s.identity] = s;
     }
@@ -115,8 +119,9 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
         s.attributes['aggregation'] == 'native_daily') {
       final previous = native[key(s)];
       if (previous == null ||
-          !s.provenance.observedAt.isBefore(previous.provenance.observedAt))
+          !s.provenance.observedAt.isBefore(previous.provenance.observedAt)) {
         native[key(s)] = s;
+      }
     }
   }
   final groups = <String, List<GlobalHealthSignal>>{};
@@ -136,8 +141,9 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
     final energy = template.key == 'activeEnergy';
     if (energy && native.containsKey(entry.key)) continue;
     if (energy &&
-        output[entry.key]?.attributes['historyAggregation'] == 'native_daily')
+        output[entry.key]?.attributes['historyAggregation'] == 'native_daily') {
       continue;
+    }
     final sum = rows.fold<double>(0, (v, s) => v + s.canonicalValue);
     final value = energy ? sum : sum / rows.length;
     if (!value.isFinite) continue;
@@ -152,9 +158,12 @@ List<GlobalHealthSignal> projectConnectedDailyHistory(
           ? 'imported_interval_sum'
           : 'recorded_sample_mean',
       'sampleCount': rows.length,
-      'sourceSessionIds': rows
-          .map((s) => s.provenance.recordId)
-          .toList(growable: false),
+      'sourceSessionIds': <String>{
+        for (final s in rows) ...[
+          s.provenance.recordId,
+          if (s.attributes['parentRecordId'] case final String parent) parent,
+        ],
+      }.toList(growable: false),
       if (!energy) ...{
         'dailyMinimum': rows
             .map((s) => s.canonicalValue)

@@ -12,8 +12,9 @@ void main() {
   for (final locale in SapphireCopy.values.keys) {
     test('Sapphire copy covers every key in $locale', () {
       expect(SapphireCopy.values[locale]!.length, SapphireCopy.keys.length);
-      for (final key in SapphireCopy.keys)
+      for (final key in SapphireCopy.keys) {
         expect(SapphireCopy.text(locale, key).trim(), isNotEmpty);
+      }
     });
   }
   Map<String, dynamic> row(

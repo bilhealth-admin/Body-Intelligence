@@ -95,6 +95,7 @@ final class NativeConnectedHealthGateway
         return const ConnectedHealthSnapshot.unavailable();
       }
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
+      final tombstones = await _loadTombstones();
       final signals = <ConnectedHealthSignalView>[];
       final stepHistory = <ConnectedHealthSignalView>[];
       final retainedSignalMaps = <Map<String, Object?>>[];
@@ -114,7 +115,7 @@ final class NativeConnectedHealthGateway
         if (!_isEvidenceFromNativeBridge(signal)) continue;
         if (signal.deleted ||
             !readTypes.contains(signal.key) ||
-            await _isTombstoned(signal)) {
+            await _isTombstoned(signal, tombstones: tombstones)) {
           removedOutOfScopeSignal = true;
           continue;
         }
@@ -132,7 +133,7 @@ final class NativeConnectedHealthGateway
           if (signal.key != 'steps' ||
               !_isEvidenceFromNativeBridge(signal) ||
               signal.deleted ||
-              await _isTombstoned(signal)) {
+              await _isTombstoned(signal, tombstones: tombstones)) {
             continue;
           }
           retainedStepHistoryMaps.add(signal.toMap());
@@ -157,7 +158,7 @@ final class NativeConnectedHealthGateway
               }.contains(signal.key) ||
               !_isEvidenceFromNativeBridge(signal) ||
               signal.deleted ||
-              await _isTombstoned(signal)) {
+              await _isTombstoned(signal, tombstones: tombstones)) {
             continue;
           }
           retainedSignalHistoryMaps.add(signal.toMap());
@@ -449,6 +450,7 @@ final class NativeConnectedHealthGateway
               types: connectedHealthReadTypesForPlatform(defaultTargetPlatform),
             );
       final persistedRows = await _flows.store.list('health_signals');
+      final tombstones = await _loadTombstones();
       final persisted = <GlobalHealthSignal>[];
       var persistedRowsSinceUiYield = 0;
       for (final row in persistedRows) {
@@ -460,7 +462,7 @@ final class NativeConnectedHealthGateway
         try {
           final signal = GlobalHealthSignal.fromMap(row);
           if (BilHealthScope.excludesKey(signal.key) ||
-              await _isTombstoned(signal)) {
+              await _isTombstoned(signal, tombstones: tombstones)) {
             await _flows.store.remove('health_signals', signal.identity);
             await _flows.store.remove('health_seen', signal.identity);
             continue;
@@ -505,7 +507,10 @@ final class NativeConnectedHealthGateway
         // Re-read after import so explicit tombstones are honored. A missing
         // aggregate is not a deletion and must not roll a verified OS total
         // back to an older raw-record projection.
-        for (final signal in await _retainedProjection('signals'))
+        for (final signal in await _retainedProjection(
+          'signals',
+          tombstones: tombstones,
+        ))
           if (!nativeTotalKeys.contains(signal.key)) signal,
         for (final signal in ordered)
           if (!nativeTotalKeys.contains(signal.key)) signal,
@@ -514,7 +519,7 @@ final class NativeConnectedHealthGateway
       final stepHistorySignals = nativeTotalKeys.contains('steps')
           ? nativeTotals!.where((signal) => signal.key == 'steps').toList()
           : preserveTrustedConnectedStepTotals(
-              await _retainedProjection('stepHistory'),
+              await _retainedProjection('stepHistory', tombstones: tombstones),
               aggregateConnectedStepSignals(graph.selectedSignals),
             );
       // Daily UI projection only; raw health_signals and live `selected`
@@ -526,7 +531,10 @@ final class NativeConnectedHealthGateway
           samples: normalizedPersisted,
           selectedEvidence: graph.selectedSignals,
           nativeTotals: nativeTotals ?? const [],
-          retained: await _retainedProjection('signalHistory'),
+          retained: await _retainedProjection(
+            'signalHistory',
+            tombstones: tombstones,
+          ),
           asOf: now,
         ),
       );

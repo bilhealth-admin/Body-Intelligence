@@ -2,69 +2,25 @@
   "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
   "scope": "Community presentation and health history only; native watch code unchanged",
   "files": {
-    "lib/features/community/domain/community_attention.dart": {
-      "before": "4436389e4bed52fe4f74a9cddf91fc2cda663cb0d4ef25749e268816db4f5657",
-      "after_before_formatter": "f3fe468966542bc3837e6e4be445316f3eb483e5a4bb345decd7daa4f6a7cb58"
+    "lib/features/community/presentation/community_surface.dart": {
+      "before": "87f23ac9e2aefd4832648118541466d0a9141762b1c73eb35915a1df70a3a4e1",
+      "after_before_formatter": "8bef5a23dbd412f84afdfe2a86215331810d12cb01f1bc5cf1f7c2ca12ede20b"
     },
-    "lib/features/community/presentation/community_chat_page.dart": {
-      "before": "421c42b7ab1cd1e6220b0c93eb620359c84d7caa1c41ad8f36b0a58f3db89868",
-      "after_before_formatter": "40764e9116fec78ce598b8fd54b832132cb9b5fa23b1f648888b1f5783e2817b"
+    "lib/features/connected_health/connected_health_daily_history.dart": {
+      "before": "52d459267420f64b88dd1d4cf069768980c40c26063212dbb294566a5f99e9c8",
+      "after_before_formatter": "7d9faaa6bc2f3e89383868ddff2c278b236961a326281c8ce62e89fe409cba6f"
     },
-    "lib/features/community/presentation/community_code_failure_widgets.dart": {
-      "before": "863c9af2007bdfd706b0a3875ca73c069a65e8c3e3ae56e57e2021ef75be0fea",
-      "after_before_formatter": "a048b677155d94686f26c0b719af9b0813d1828e2c9e84be3c16dc628ccb0746"
+    "test/features/community/community_sapphire_contract_test.dart": {
+      "before": "0a10efec4fc36048e10616be7428fd414a495fb485e715b96e039e9f0f968134",
+      "after_before_formatter": "675d3fa64165ff7ef2a9acc7fc89f4b48943a9bcd184f3b5ddfa0aad9b2c05a9"
     },
-    "lib/features/community/presentation/community_feed_pagination.dart": {
-      "before": "0cb32ed57f0846e2811d024aff4364dfb4ef5d6846ad79a9d42d39fdd2f1a112",
-      "after_before_formatter": "bc3d54e5e7841a24cb94c382fcfc31b2c810155c9b081d802fb34e6f2035f6d2"
-    },
-    "lib/features/community/presentation/community_feed_tab.dart": {
-      "before": "1ac209ba01a3add3321953597dd7cdfded1e2548922a13927e75a4524c69fbe7",
-      "after_before_formatter": "dbb43abb7e8f5fb503d9a7e60aae2a16b2d7ff100f3d7677b6dd3cb980ba8565"
-    },
-    "lib/features/community/presentation/community_hub_page.dart": {
-      "before": "7051aecef7d98c1607b09f7246261a8366e256de778b0c0e51a907a9f23dd419",
-      "after_before_formatter": "57a9d8f365ed304fd0d7dc459cf87f184993481161fd323c5a46b2a49d83a4de"
-    },
-    "lib/features/community/presentation/community_messages_page.dart": {
-      "before": "855537fa95c8811973755dd6ec511457ad9458b7c9ab656078427182120fa169",
-      "after_before_formatter": "232d0b8d7a38f2c99ebb690108a1a3e059783b362905a42e985297464fa3955b"
-    },
-    "lib/features/community/presentation/community_navigation_sheet.dart": {
-      "before": "65841143210301699aec7f7ab0fbc7d9d4da55afb134d8ccdb8121ac38cc4138",
-      "after_before_formatter": "c7e5efc982a2e070031c1434215ca95ed41196d94e6c2ca3046230afb02857ed"
-    },
-    "lib/features/community/presentation/community_people_page.dart": {
-      "before": "4e7ec4221bc8c3e5e82979ba15a3336f089a46434761e56a6fd45692827ede2e",
-      "after_before_formatter": "ca307395628a816147eba1a66b6373df2eccf522f93fd77d12af8b1258de5b85"
-    },
-    "lib/features/community/presentation/community_post_card.dart": {
-      "before": "cf8c581cdcd9cc465f7e78d67531e13c38bc4782d07f65c9fb4a01ded2e6acf1",
-      "after_before_formatter": "784a441420153d6d79145ae74c4f65e5ced4daa66ef3251d627bb7b598f20191"
-    },
-    "lib/features/connected_health/connected_health_signal_detail_page.dart": {
-      "before": "f683bda085acdb50df02ded1fa94e3328441e62fdba3bfc267c664c64e8cf6ab",
-      "after_before_formatter": "49d8ca6553bb2cd6fc87e9d4e75b0d9fd137107d6fbb840034b166d19acd68fc"
-    },
-    "lib/features/connected_health/providers/connected_health_native_daily_activity.dart": {
-      "before": "d370b86346c4d73ceaa556d3f533392d75b975181f79ecc16fc05f99f7ee18d8",
-      "after_before_formatter": "3d177aa4a8a2f54f6e9066df1674ff58075fd7ba30a7d1d8872acf3a4f7dda94"
+    "lib/features/connected_health/providers/connected_health_gateway_helpers.dart": {
+      "before": "a973702027a40e121f349fe5e4929790fc9351f00aa45c83a27b8eb76ea5bc58",
+      "after_before_formatter": "0a13c04226fbbcb281af10832581129745741d35a3b53210165f316c7cdd505e"
     },
     "lib/features/connected_health/providers/connected_health_native_gateway.dart": {
-      "before": "f0933f9229b3ad9b804f9926e547aa04076fe2c6d33bdf30b89219ce6941bda2",
-      "after_before_formatter": "b0677c63f2c2be8c40449017f2abdd6e1728483e36cf2c97b853bae8d3c6d1f9"
-    },
-    "lib/features/connected_health/providers/connected_health_provider.dart": {
-      "before": "fc9d6bf01c348d082ba9a951d080983ecafbe6b435cdf458edf1908b01bb3f44",
-      "after_before_formatter": "99f63ee8e232a109ee68714ddb68ff2d4ef3e666cebae9c54084ef3c7af83f56"
-    },
-    "pubspec.yaml": {
-      "before": "52af779ddec9b4eac668d2f781c07bc74f771761f6cd3e415219e8c6ce0bd0da",
-      "after_before_formatter": "0676e9f2e5b92fbfe1dcbf0b4a12f9728995002084622d2622914e6fb8bb50e6"
-    },
-    "test/features/connected_health/connected_health_signal_history_test.dart": {
-      "before": "fdc3bb4a99d5ca07109da7775360d415c607f8123adc19a01ed1b43fcac96813",
-      "after_before_formatter": "4e768d8a2b5e0142fc730ce50ed2dcaef7b2483496f7ff2f870d8e462ae12dcf"
+      "before": "33ab3c4a73dcd51adda61b89613a3e2ec19597b822ee21772682d822c2fbb373",
+      "after_before_formatter": "d6647d4e70dc2e1c92474300b4ca44a6122eaa821e89125b7347e8464e1c96ca"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"

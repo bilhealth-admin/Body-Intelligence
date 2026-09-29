@@ -127,10 +127,6 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
             borderRadius: BorderRadius.circular(14),
           ),
           indicatorColor: Colors.transparent,
-          indicatorPadding: const EdgeInsets.symmetric(
-            horizontal: 6,
-            vertical: 7,
-          ),
         ),
         cardTheme: base.cardTheme.copyWith(
           color: paper,
