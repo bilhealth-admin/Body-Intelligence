@@ -1,0 +1,32 @@
+{
+  "status": "VISUALLY_REVIEWED_REFERENCE_CANDIDATE",
+  "source": "826685fa80d0ea7b5dfa9b6de14817e643a75dfe",
+  "run_id": 36639144294,
+  "artifact_id": 11066835248,
+  "archive_sha256": "6cdb99209a5b2b50a09d67f16dae74ea1d210f1d2a3526831f531d88d3ba346e",
+  "review": "All 14 Community reference images visually inspected. Ten intentionally changed Community layouts are updated; four unchanged images are identical. No non-Community master or comparator changes. The complete strict unfiltered suite is still required.",
+  "input_git_objects": {
+    "lib": "da4a4bb2306f0dfa2bb1fbb6bfa5da79d25562b6",
+    "assets": "d2c744ca8259a565963fef076591fb8cb60625f4",
+    "pubspec.yaml": "ff6a88ab4aba14d16fe6a16de1bfda540265f0b7",
+    "pubspec.lock": "24a2692537ba5eaa647e9c05a1ce5db04b48005a",
+    "test/visual_closure/actual_production_pages_golden_test.dart": "59a9823b16c33f94f4dfee493535432e576f0dab",
+    "test/visual_closure/visual_evidence_font.dart": "2cbae7fc9f9cda0682a62c1ac99d7de1a2909bd2"
+  },
+  "image_sha256": {
+    "test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png": "101de32da894cb556ba988209e6a8b47d94e3a2a94bb1d9c81d54cdbfaeb4f06",
+    "test/visual_closure/goldens/visual_closure_community_connections_phone.png": "409a4f88147b62786b6b37a757139241c14823cbbbc4038ed14d291ad5c391e1",
+    "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png": "cce5334bf72fe4e2915176f10d0e271740cd575e1d3296ccf35321d71fefc04f",
+    "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png": "cd3f9c69b2c626e658001ecebbdf709d6166aa16c10f6d6b842f10485c6a36d1",
+    "test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png": "bb60187c71f53eb53a6a3572f2ccb4b4c0384d18eded002ed02a25d1f3d8683e",
+    "test/visual_closure/goldens/visual_closure_community_messages_phone.png": "4b1a61ee7a6d0305e63510cfe0aaa30308708962155042b0c8c1c75c50833856",
+    "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png": "2d7f5d562039d862bcf159cc2445b19a721b896ed8d93d097c7266b2c1083fa1",
+    "test/visual_closure/goldens/visual_closure_community_notifications_empty_authenticated_phone.png": "ce2629d9e764004f94b1fe2d3af3d603fc06669ef592ead020ac6ed8b3fb9ab8",
+    "test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png": "ffb5680fe758eafb8b106b0270eb937677e284d998dd36ffefba4b2f1983e866",
+    "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png": "e887f13d30c870b7f499ae6eea3754285a11b3ce5cdb15f63f6639404b4a13b4",
+    "test/visual_closure/goldens/visual_closure_community_profile_phone.png": "82a0e9f138ce55d188af6e24ab080273f9519e962d96a11347d2df7500f5dd4f",
+    "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png": "b8c97585d6efe0603b3ceca89ef48edc1dd82a7b50c92dde68544351be704061",
+    "test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png": "c555b7388c320bffa777a7d44606fc0b922fb0b9a51451835a9927236a328c0a",
+    "test/visual_closure/goldens/visual_closure_community_signed_out_phone.png": "bd15e0f847d0593d9bd3f3d666dca392c8b5605ddacb82547860bb8f4d416671"
+  }
+}

@@ -1,0 +1,1 @@
+{"test/features/community/community_polish_visual_test.dart":{"before":"3c157d607afe7891c86099bdfd511debf8ed9ee403ade1c02cda701677ec56ad","after":"fb94a8f428ad59e74ba7647e644363d481d7451ec732b6760bdb9d551ef7db87","edits":[[329,329,"              await settleVisualAssetImages(tester);\n              await tester.pumpAndSettle();\n"]]}}
