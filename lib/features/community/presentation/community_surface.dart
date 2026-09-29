@@ -40,7 +40,7 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
           ? const Color(0xFF263449)
           : const Color(0xFFEEF3FA),
       onSecondaryContainer: ink,
-      surface: paper,
+      surface: CommunitySapphire.canvas(context),
       surfaceContainerLow: paper,
       surfaceContainer: CommunitySapphire.canvas(context),
       onSurface: ink,

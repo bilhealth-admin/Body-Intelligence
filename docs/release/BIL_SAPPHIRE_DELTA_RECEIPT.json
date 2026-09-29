@@ -2,29 +2,25 @@
   "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
   "scope": "Community presentation and health history only; native watch code unchanged",
   "files": {
-    "lib/features/community/presentation/community_welcome.dart": {
-      "before": "75c472f9273b3aaf8bf81179ab58d2fe4243bcac6d3a729dceff17757574d215",
-      "after_before_formatter": "f9ec20ca095ee79fd8630096d978e19ec031a6ea3235a598a9ea63e072bc5a6b"
+    "lib/features/community/presentation/community_surface.dart": {
+      "before": "8bef5a23dbd412f84afdfe2a86215331810d12cb01f1bc5cf1f7c2ca12ede20b",
+      "after_before_formatter": "ce2f67e6d52552f08a3ead943071f189d012ba95b172dab708200794acc24aac"
     },
-    "lib/features/connected_health/providers/connected_health_gateway_helpers.dart": {
-      "before": "0a13c04226fbbcb281af10832581129745741d35a3b53210165f316c7cdd505e",
-      "after_before_formatter": "12e8fd13fb7b6d94dec37f8be679a273fc3515cb456c90d984e913c37bf0a46c"
+    "lib/features/community/presentation/community_post_widgets.dart": {
+      "before": "d61dbefe36b2ea7d2c8f5ed70dd87c638c31d5ba4055b0c15cdb20746bc95fdd",
+      "after_before_formatter": "19cc134ec7ba6d64162f453b8ff477d34ee40019852642a35a15210005606a32"
     },
-    "lib/features/connected_health/providers/connected_health_provider.dart": {
-      "before": "99f63ee8e232a109ee68714ddb68ff2d4ef3e666cebae9c54084ef3c7af83f56",
-      "after_before_formatter": "9ae3eff107578b44e044d532c9ab9a26e56b1d9e2063b2e224376709fa006157"
+    "test/visual_closure/visual_evidence_font.dart": {
+      "before": "f97508b0d3922107a1f65a6df0768602d62822e9575949d8c4a0b9d888ac708e",
+      "after_before_formatter": "263ed28382ada1b17c25da3e60acfc9c0ef71b6f01ba1cd73ecd31a9c1fa7561"
+    },
+    "test/architecture_source_file_size_guard_test.dart": {
+      "before": "3bad4c726a1f2dd77038b72d9b424f92182d847e0d2d8028a4300482c7c496ae",
+      "after_before_formatter": "da9e08f1e3324ae063538e1c86bd60c89686be6b2441b60453658a9754508aee"
     },
     "test/features/community/community_review_regression_test.dart": {
-      "before": "fb127d026f7283085c5707c9978ba645fbe5999cde095347731599f50efc597b",
-      "after_before_formatter": "a2e25425b4749eacb91ef6ff997fc39b487410825139673a9b3366ea86b92bd0"
-    },
-    "test/features/community/community_social_v2_ui_test.dart": {
-      "before": "805333a144778774d26b9280015099f785223d1d3aa24d83ce8b262f180840e0",
-      "after_before_formatter": "37f68c52932788d182e021f4aa6e15ebef3025ab1aef389320ff86c0d5d3c203"
-    },
-    "test/features/community/community_polish_visual_test.dart": {
-      "before": "17e30bf16898b7d6fed224eb9d6ac3b014fd764636fefa31830b9abe8b414953",
-      "after_before_formatter": "72728f366dc499214f412b448ce60b7163184b3cc130bff01235da45bcd8637c"
+      "before": "52237be288149f71b031449d267b580eb693b33f85b61dfcba43dfe35b0bf546",
+      "after_before_formatter": "cb32dbe971abd24ef988bc9f28c39e0cbbc9b5c392338f05d772bcfe380136aa"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"

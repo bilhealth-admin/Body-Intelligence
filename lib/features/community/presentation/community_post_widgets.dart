@@ -109,9 +109,11 @@ class _CommunityAuthorRelationshipActionState
       children: [
         Icon(icon, size: 15),
         const SizedBox(width: 4),
-        Text(
-          communityText(context, english, arabic),
-          style: Theme.of(context).textTheme.labelSmall,
+        Flexible(
+          child: Text(
+            communityText(context, english, arabic),
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
         ),
       ],
     );

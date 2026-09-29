@@ -29,7 +29,7 @@ Future<void> _loadRobotoIntoTestFamily() async {
     final candidate = File(
       '${cursor.path}${Platform.pathSeparator}bin${Platform.pathSeparator}'
       'cache${Platform.pathSeparator}artifacts${Platform.pathSeparator}'
-      'material_fonts${Platform.pathSeparator}roboto-regular.ttf',
+      'material_fonts${Platform.pathSeparator}Roboto-Regular.ttf',
     );
     if (candidate.existsSync()) {
       font = candidate;
@@ -39,16 +39,14 @@ Future<void> _loadRobotoIntoTestFamily() async {
     if (parent.path == cursor.path) break;
     cursor = parent;
   }
-  // Hosted Flutter caches can omit material_fonts even though the SDK itself
-  // is present. The project font keeps code-only layout assertions real and
-  // deterministic; capture runners still use SDK Roboto whenever available.
-  font ??= File(
-    '${Directory.current.path}${Platform.pathSeparator}assets'
-    '${Platform.pathSeparator}fonts${Platform.pathSeparator}'
-    'Montserrat-Bold.ttf',
-  );
-  if (!font.existsSync()) {
-    throw StateError('No deterministic visual-evidence font was found.');
+  // Match the SDK's actual case-sensitive filenames. Windows accepted the old
+  // lowercase spellings, but Linux silently fell back to Montserrat Bold and
+  // omitted Material icons. Never replace the reference typeface to pass CI.
+  if (font == null || !font.existsSync()) {
+    throw StateError(
+      'SDK Roboto-Regular.ttf is missing; run flutter precache --universal. '
+      'Visual evidence must not substitute a different font.',
+    );
   }
   Future<ByteData> bytes(File source) =>
       source.readAsBytes().then((value) => ByteData.sublistView(value));
@@ -64,8 +62,8 @@ Future<void> _loadRobotoIntoTestFamily() async {
     'NotoNaskhArabic-Bold.ttf',
   );
   final loader = FontLoader('RobotoEvidence')..addFont(bytes(font));
-  final robotoMedium = File('${fontDirectory.path}/roboto-medium.ttf');
-  final robotoBold = File('${fontDirectory.path}/roboto-bold.ttf');
+  final robotoMedium = File('${fontDirectory.path}/Roboto-Medium.ttf');
+  final robotoBold = File('${fontDirectory.path}/Roboto-Bold.ttf');
   if (robotoMedium.existsSync()) loader.addFont(bytes(robotoMedium));
   if (robotoBold.existsSync()) loader.addFont(bytes(robotoBold));
   loader
@@ -81,7 +79,7 @@ Future<void> _loadRobotoIntoTestFamily() async {
   fallback
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
-  final materialIcons = File('${fontDirectory.path}/materialicons-regular.otf');
+  final materialIcons = File('${fontDirectory.path}/MaterialIcons-Regular.otf');
   final icons = FontLoader('MaterialIcons');
   if (materialIcons.existsSync()) icons.addFont(bytes(materialIcons));
   // Platform-aware production glyphs need their real font too; without this,

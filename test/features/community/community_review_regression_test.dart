@@ -382,6 +382,8 @@ Future<void> _moreComments(WidgetTester tester) async {
         .first,
     maxScrolls: 80,
   );
+  await Scrollable.ensureVisible(tester.element(target), alignment: .5);
+  await tester.pumpAndSettle();
   await tester.tap(target);
 }
 

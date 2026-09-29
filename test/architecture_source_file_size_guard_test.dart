@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -146,9 +147,13 @@ void main() {
       if (entity is! File || !entity.path.endsWith('.dart')) continue;
 
       final path = entity.path.replaceAll(Platform.pathSeparator, '/');
+      // Only the ASCII generation marker matters in this byte prefix. Its
+      // boundary may bisect a valid UTF-8 Arabic character. Latin-1 preserves
+      // each byte for that marker check; the complete source below is still
+      // decoded as strict UTF-8 and checked against unchanged size ceilings.
       final generated = entity
           .openRead(0, 160)
-          .transform(const SystemEncoding().decoder)
+          .transform(latin1.decoder)
           .join()
           .then((header) => header.contains('GENERATED FILE'));
       if (path.endsWith('.g.dart') || await generated) {
