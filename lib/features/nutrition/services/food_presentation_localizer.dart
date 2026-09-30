@@ -13,7 +13,8 @@ part 'food_presentation_units_and_labels.dart';
 /// scientific names remain exactly as stored so the UI cannot invent identity.
 abstract final class FoodPresentationLocalizer {
   static const _maxTrustedRuntimeTranslations = 600;
-  static final Map<String, String> _trustedRuntimeTranslations = <String, String>{};
+  static final Map<String, String> _trustedRuntimeTranslations =
+      <String, String>{};
 
   static const supportedLocaleTags = <String>{
     'ar',
@@ -93,7 +94,9 @@ abstract final class FoodPresentationLocalizer {
       return;
     }
     if (_trustedRuntimeTranslations.length >= _maxTrustedRuntimeTranslations) {
-      _trustedRuntimeTranslations.remove(_trustedRuntimeTranslations.keys.first);
+      _trustedRuntimeTranslations.remove(
+        _trustedRuntimeTranslations.keys.first,
+      );
     }
     _trustedRuntimeTranslations['$locale|${_normalize(canonical)}'] = localized;
   }
