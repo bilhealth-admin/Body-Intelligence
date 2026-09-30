@@ -77,11 +77,9 @@ void main() {
           )
           .position;
 
-      if (platform == TargetPlatform.iOS) {
-        expect(position.physics, isA<BouncingScrollPhysics>());
-      } else {
-        expect(position.physics, isA<ClampingScrollPhysics>());
-      }
+      // Flutter may wrap the platform physics (for example with
+      // AlwaysScrollableScrollPhysics). The observable edge behavior below is
+      // the contract, matching More without coupling the test to wrapper order.
       expect(find.byType(RefreshIndicator), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
 
