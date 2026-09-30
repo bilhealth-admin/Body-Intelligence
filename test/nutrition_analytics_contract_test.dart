@@ -47,8 +47,11 @@ void main() {
     }
     expect(
       source,
-      isNot(contains('Directionality.of(context) == TextDirection.rtl')),
+      contains('Directionality.of(context) == TextDirection.rtl'),
+      reason: 'day navigation chevrons must mirror in RTL without mirroring numeric content',
     );
+    expect(source, contains('Icons.chevron_left_rounded'));
+    expect(source, contains('Icons.chevron_right_rounded'));
     for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
       expect(source, contains("'$locale':"));
     }
