@@ -56,9 +56,7 @@ void main() {
     expect(discover, contains('fit: BoxFit.contain'));
 
     expect(cards, contains('bil_dashboard_body_twin_hero_v1.png'));
-    final bodyTwinIndex = cards.indexOf(
-      'bil_dashboard_body_twin_hero_v1.png',
-    );
+    final bodyTwinIndex = cards.indexOf('bil_dashboard_body_twin_hero_v1.png');
     expect(bodyTwinIndex, greaterThanOrEqualTo(0));
     final bodyTwinWindow = cards.substring(
       bodyTwinIndex,
