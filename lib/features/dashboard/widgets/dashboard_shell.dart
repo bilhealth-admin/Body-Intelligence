@@ -124,7 +124,6 @@ class _DashboardShellState extends State<DashboardShell> {
                 return SingleChildScrollView(
                   key: const Key('dashboard-scroll-view'),
                   controller: _scrollController,
-                  physics: const DashboardScrollPhysics(),
                   padding: EdgeInsets.fromLTRB(
                     0,
                     16,
@@ -153,48 +152,6 @@ class _DashboardShellState extends State<DashboardShell> {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Matches More's elastic edge behavior while remaining a visual gesture only.
-/// Pulling beyond either edge never invokes HealthKit, Health Connect, device
-/// synchronization, or any provider refresh.
-class DashboardScrollPhysics extends BouncingScrollPhysics {
-  const DashboardScrollPhysics({
-    // Keep the dashboard's existing always-scrollable elastic feel, but add
-    // range maintenance so async card updates cannot make a held edge slip.
-    super.parent = const RangeMaintainingScrollPhysics(
-      parent: AlwaysScrollableScrollPhysics(),
-    ),
-  });
-
-  @override
-  DashboardScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return DashboardScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  double adjustPositionForNewDimensions({
-    required ScrollMetrics oldPosition,
-    required ScrollMetrics newPosition,
-    required bool isScrolling,
-    required double velocity,
-  }) {
-    final oldPixels = oldPosition.pixels;
-    if (oldPixels < oldPosition.minScrollExtent) {
-      final leadingOverscroll = oldPixels - oldPosition.minScrollExtent;
-      return newPosition.minScrollExtent + leadingOverscroll;
-    }
-    if (oldPixels > oldPosition.maxScrollExtent) {
-      final trailingOverscroll = oldPixels - oldPosition.maxScrollExtent;
-      return newPosition.maxScrollExtent + trailingOverscroll;
-    }
-    return super.adjustPositionForNewDimensions(
-      oldPosition: oldPosition,
-      newPosition: newPosition,
-      isScrolling: isScrolling,
-      velocity: velocity,
     );
   }
 }
