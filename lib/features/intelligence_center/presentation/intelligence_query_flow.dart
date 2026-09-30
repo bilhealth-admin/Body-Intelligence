@@ -586,7 +586,6 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         showDragHandle: true,
         isScrollControlled: true,
         builder: (sheetContext) {
-          final scheme = Theme.of(sheetContext).colorScheme;
           return SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
