@@ -165,15 +165,28 @@ class _DiscoverTile extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              imageAsset,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Center(
-                child: Icon(
-                  fallbackIcon,
-                  size: 44,
-                  color: const Color(0xFF69E5F5),
+            Opacity(
+              opacity: .34,
+              child: Image.asset(
+                imageAsset,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Center(
+                  child: Icon(
+                    fallbackIcon,
+                    size: 44,
+                    color: const Color(0xFF69E5F5),
+                  ),
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 4, 4, 30),
+              child: Image.asset(
+                imageAsset,
+                key: Key('dashboard-discover-complete-$imageAsset'),
+                fit: BoxFit.contain,
+                alignment: Alignment.topCenter,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
             ),
             const DecoratedBox(
