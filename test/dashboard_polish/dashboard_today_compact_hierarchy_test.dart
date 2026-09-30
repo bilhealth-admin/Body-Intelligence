@@ -52,6 +52,19 @@ void main() {
     ).readAsStringSync();
     expect(discover, contains('dashboard-discover-balanced-final-tile'));
     expect(discover, contains('pairedItemCount'));
+    expect(discover, contains('dashboard-discover-complete-'));
+    expect(discover, contains('fit: BoxFit.contain'));
+
+    expect(cards, contains('bil_dashboard_body_twin_hero_v1.png'));
+    final bodyTwinIndex = cards.indexOf(
+      'bil_dashboard_body_twin_hero_v1.png',
+    );
+    expect(bodyTwinIndex, greaterThanOrEqualTo(0));
+    final bodyTwinWindow = cards.substring(
+      bodyTwinIndex,
+      (bodyTwinIndex + 260).clamp(0, cards.length),
+    );
+    expect(bodyTwinWindow, contains('fit: BoxFit.contain'));
   });
 
   testWidgets('premium loading skeleton mirrors the compact Today hierarchy', (
