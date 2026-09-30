@@ -525,17 +525,19 @@ class _MemberRelationshipAction extends StatelessWidget {
       icon: const Icon(Icons.mark_email_unread_outlined),
       label: Text(communityText(context, 'Review request', 'مراجعة الطلب')),
     ),
-    CommunityRelationshipStatus.pending => const Chip(
-      avatar: Icon(Icons.schedule_rounded),
-      label: Text('Request pending'),
+    CommunityRelationshipStatus.pending => Chip(
+      avatar: const Icon(Icons.schedule_rounded),
+      label: Text(
+        communityText(context, 'Request pending', 'الطلب قيد الانتظار'),
+      ),
     ),
-    CommunityRelationshipStatus.accepted => const Chip(
-      avatar: Icon(Icons.people_rounded),
-      label: Text('Friends'),
+    CommunityRelationshipStatus.accepted => Chip(
+      avatar: const Icon(Icons.people_rounded),
+      label: Text(communityText(context, 'Friends', 'الأصدقاء')),
     ),
-    CommunityRelationshipStatus.self => const Chip(
-      avatar: Icon(Icons.person_rounded),
-      label: Text('This is you'),
+    CommunityRelationshipStatus.self => Chip(
+      avatar: const Icon(Icons.person_rounded),
+      label: Text(communityText(context, 'This is you', 'هذا أنت')),
     ),
   };
 }
