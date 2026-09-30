@@ -228,3 +228,80 @@ jobs:
           name: sapphire-visual-${{ github.run_id }}
           path: /tmp/sapphire-visual/
           retention-days: 14
+
+  reviewed-golden-refresh:
+    needs: prepare
+    if: github.event_name == 'push' && github.event.head_commit.message == 'test(goldens): refresh reviewed final UI baselines'
+    runs-on: windows-2022
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: Preserve exact committed catalog bytes
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.prepare.outputs.source }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Regenerate only visually reviewed final baselines
+        shell: pwsh
+        run: |
+          flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --concurrency 1 --timeout 180s --update-goldens test/epic8_weekly_report_golden_test.dart test/epic15_store_screenshot_golden_test.dart test/visual_closure/actual_data_pages_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $allowed = @(
+            'test/goldens/epic8_weekly_report_phone_rtl_dark.png',
+            'test/goldens/epic15_iphone_69_ar_05_weekly_report.png',
+            'test/goldens/epic15_android_phone_ar_05_weekly_report.png',
+            'test/goldens/epic15_iphone_69_en_06_privacy_settings.png',
+            'test/goldens/epic15_android_phone_en_06_privacy_settings.png',
+            'test/visual_closure/goldens/visual_closure_more_phone.png',
+            'test/visual_closure/goldens/visual_closure_more_lower_phone.png',
+            'test/visual_closure/goldens/visual_closure_settings_phone.png',
+            'test/visual_closure/goldens/visual_closure_settings_phone_2.png',
+            'test/visual_closure/goldens/visual_closure_settings_phone_3.png',
+            'test/visual_closure/goldens/visual_closure_settings_phone_4.png'
+          )
+          $changed = @(git diff --name-only)
+          $unexpected = @($changed | Where-Object { $_ -notin $allowed })
+          if ($unexpected.Count -gt 0) {
+            Write-Error ("Unexpected golden/source changes: " + ($unexpected -join ', '))
+            exit 1
+          }
+          if ($changed.Count -eq 0) {
+            Write-Host 'No golden changes required.'
+            exit 0
+          }
+          foreach ($required in $allowed) {
+            if ((Test-Path $required) -and ($changed -contains $required)) {
+              Write-Host "Reviewed baseline changed: $required"
+            }
+          }
+      - name: Commit reviewed baselines only
+        shell: pwsh
+        run: |
+          if (-not (git status --porcelain)) { exit 0 }
+          git config user.name 'BIL visual QA'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/goldens/epic8_weekly_report_phone_rtl_dark.png
+          git add test/goldens/epic15_iphone_69_ar_05_weekly_report.png
+          git add test/goldens/epic15_android_phone_ar_05_weekly_report.png
+          git add test/goldens/epic15_iphone_69_en_06_privacy_settings.png
+          git add test/goldens/epic15_android_phone_en_06_privacy_settings.png
+          git add test/visual_closure/goldens/visual_closure_more_phone.png
+          git add test/visual_closure/goldens/visual_closure_more_lower_phone.png
+          git add test/visual_closure/goldens/visual_closure_settings_phone.png
+          git add test/visual_closure/goldens/visual_closure_settings_phone_2.png
+          git add test/visual_closure/goldens/visual_closure_settings_phone_3.png
+          git add test/visual_closure/goldens/visual_closure_settings_phone_4.png
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { exit 0 }
+          git commit -m 'test(goldens): accept visually reviewed final UI baselines'
+          git push origin HEAD:fix/community-sapphire-health-3033
