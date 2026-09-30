@@ -668,6 +668,7 @@ class _GlassQuickAdd extends StatelessWidget {
             onPressed: onTap,
             icon: Icon(
               BilNavigationIcons.quickAdd(Theme.of(context).platform),
+              key: const Key('shell-quick-add-icon'),
               color: Colors.white,
               size: size >= 60 ? 31 : 28,
             ),
@@ -678,6 +679,7 @@ class _GlassQuickAdd extends StatelessWidget {
             child: ExcludeSemantics(
               child: Icon(
                 Icons.auto_awesome_rounded,
+                key: const Key('shell-quick-add-sparkle'),
                 size: size * .17,
                 color: Colors.white.withValues(alpha: .94),
               ),
