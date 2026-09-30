@@ -85,7 +85,7 @@ void main() {
               (widget) =>
                   widget is Text &&
                   widget.data == localizedTitle &&
-                  widget.style?.fontWeight == FontWeight.w800,
+                  widget.style?.fontWeight == FontWeight.w900,
               description: 'More section heading: $title',
             );
             await tester.scrollUntilVisible(heading, 250);
@@ -123,7 +123,7 @@ void main() {
               expect(row.leading, isNotNull);
               expect(
                 row.leading.runtimeType.toString(),
-                anyOf('_MoreIcon', 'BilSemanticIconBadge'),
+                anyOf('_MorePremiumIcon', 'BilSemanticIconBadge'),
               );
               expect(row.onTap, isNotNull);
             }
