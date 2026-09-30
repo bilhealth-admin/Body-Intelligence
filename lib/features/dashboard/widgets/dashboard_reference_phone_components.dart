@@ -452,13 +452,14 @@ class _BodyTwinImageCard extends StatelessWidget {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final cardHeight = (108 + (textScale - 1).clamp(0, 2) * 108).toDouble();
     return Material(
+      color: const Color(0xFF071B2A),
       borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
       child: Ink.image(
         image: const AssetImage(
           'assets/images/brand/generated/bil_dashboard_body_twin_hero_v1.png',
         ),
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         alignment: Alignment.centerRight,
         child: ConstrainedBox(
           // Longer summaries and accessibility text can grow beyond the
