@@ -322,16 +322,19 @@ void main() {
 
       // An extended canvas shows the entire real page at phone width. It is
       // not presented as a physical-device screenshot or a redesigned mockup.
-      final scroll = tester
-          .widget<SingleChildScrollView>(
-            find.byKey(const Key('dashboard-scroll-view')),
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(
+              of: find.byKey(const Key('dashboard-scroll-view')),
+              matching: find.byType(Scrollable),
+            ),
           )
-          .controller!;
-      final fullHeight = (932 + scroll.position.maxScrollExtent).ceilToDouble();
+          .position;
+      final fullHeight = (932 + position.maxScrollExtent).ceilToDouble();
       tester.view.physicalSize = Size(430, fullHeight);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(scroll.position.maxScrollExtent, lessThanOrEqualTo(1));
+      expect(position.maxScrollExtent, lessThanOrEqualTo(1));
       await _capture(tester, 'dashboard-current-full-$language');
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();

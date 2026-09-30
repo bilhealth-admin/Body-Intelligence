@@ -2,6 +2,16 @@ import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_shell
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+List<Type> _physicsChain(ScrollPhysics physics) {
+  final result = <Type>[];
+  ScrollPhysics? current = physics;
+  while (current != null) {
+    result.add(current.runtimeType);
+    current = current.parent;
+  }
+  return result;
+}
+
 void main() {
   // QA trigger: validate refreshed current UI references.
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
@@ -35,14 +45,9 @@ void main() {
             .position;
 
         expect(
-          dashboardPosition.physics.runtimeType,
-          morePosition.physics.runtimeType,
+          _physicsChain(dashboardPosition.physics),
+          _physicsChain(morePosition.physics),
         );
-        if (platform == TargetPlatform.iOS) {
-          expect(dashboardPosition.physics, isA<BouncingScrollPhysics>());
-        } else {
-          expect(dashboardPosition.physics, isA<ClampingScrollPhysics>());
-        }
         expect(tester.takeException(), isNull);
       },
     );

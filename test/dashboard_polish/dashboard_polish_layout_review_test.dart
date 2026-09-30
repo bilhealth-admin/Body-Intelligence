@@ -243,20 +243,23 @@ void main() {
 
             // Inspect the lower half too; compact tiles and the single-point
             // trend must not overflow when accessibility fonts are enabled.
-            final scroll = tester
-                .widget<SingleChildScrollView>(
-                  find.byKey(const Key('dashboard-scroll-view')),
+            final position = tester
+                .state<ScrollableState>(
+                  find.descendant(
+                    of: find.byKey(const Key('dashboard-scroll-view')),
+                    matching: find.byType(Scrollable),
+                  ),
                 )
-                .controller!;
-            scroll.jumpTo(scroll.position.maxScrollExtent);
+                .position;
+            position.jumpTo(position.maxScrollExtent);
             await tester.pumpAndSettle();
             expect(tester.takeException(), isNull);
-            expect(scroll.position.outOfRange, isFalse);
+            expect(position.outOfRange, isFalse);
 
             if (Platform.environment['BIL_CAPTURE_DASHBOARD_POLISH'] == '1' &&
                 width == 390 &&
                 scale == 1) {
-              scroll.jumpTo(0);
+              position.jumpTo(0);
               await tester.pumpAndSettle();
               await settleVisualAssetImages(tester);
               final boundary = tester.renderObject<RenderRepaintBoundary>(

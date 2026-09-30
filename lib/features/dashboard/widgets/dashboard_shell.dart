@@ -113,7 +113,10 @@ class _DashboardShellState extends State<DashboardShell> {
                         .clamp(0.0, metrics.maxContentWidth)
                         .toDouble();
 
-                return SingleChildScrollView(
+                // Use the same primary scroll primitive as More. Keeping
+                // ListView platform-default physics avoids a separate
+                // overscroll/ballistic chain while preserving this layout.
+                return ListView(
                   key: const Key('dashboard-scroll-view'),
                   padding: EdgeInsets.fromLTRB(
                     0,
@@ -123,20 +126,23 @@ class _DashboardShellState extends State<DashboardShell> {
                     // Only leave the same small gap as between cards.
                     16,
                   ),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        if (widget.leading != null)
-                          SizedBox(width: contentWidth, child: widget.leading),
-                        if (widget.edgeHeader != null)
-                          SizedBox(
-                            width: contentWidth + metrics.horizontalPadding * 2,
-                            child: widget.edgeHeader,
-                          ),
-                        SizedBox(width: contentWidth, child: widget.child),
-                      ],
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          if (widget.leading != null)
+                            SizedBox(width: contentWidth, child: widget.leading),
+                          if (widget.edgeHeader != null)
+                            SizedBox(
+                              width:
+                                  contentWidth + metrics.horizontalPadding * 2,
+                              child: widget.edgeHeader,
+                            ),
+                          SizedBox(width: contentWidth, child: widget.child),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),
