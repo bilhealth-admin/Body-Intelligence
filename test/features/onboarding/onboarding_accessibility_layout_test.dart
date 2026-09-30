@@ -362,9 +362,14 @@ void main() {
               expect(photo, findsOneWidget);
               expect(tester.getSize(photo).height, 112);
               final image = tester.widget<Image>(
-                find.descendant(of: photo, matching: find.byType(Image)).first,
+                find.descendant(
+                  of: photo,
+                  matching: find.byKey(
+                    const Key('onboarding-photo-complete-image'),
+                  ),
+                ),
               );
-              expect(image.fit, BoxFit.cover);
+              expect(image.fit, BoxFit.contain);
               expect(
                 (image.image as AssetImage).assetName,
                 expectedPhotoAssets[step],
