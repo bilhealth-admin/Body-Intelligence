@@ -262,6 +262,7 @@ jobs:
             'test/goldens/epic15_android_phone_ar_05_weekly_report.png',
             'test/goldens/epic15_iphone_69_en_06_privacy_settings.png',
             'test/goldens/epic15_android_phone_en_06_privacy_settings.png',
+            'test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png',
             'test/visual_closure/goldens/visual_closure_more_phone.png',
             'test/visual_closure/goldens/visual_closure_more_lower_phone.png',
             'test/visual_closure/goldens/visual_closure_settings_phone.png',
@@ -295,6 +296,7 @@ jobs:
           git add test/goldens/epic15_android_phone_ar_05_weekly_report.png
           git add test/goldens/epic15_iphone_69_en_06_privacy_settings.png
           git add test/goldens/epic15_android_phone_en_06_privacy_settings.png
+          git add test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png
           git add test/visual_closure/goldens/visual_closure_more_phone.png
           git add test/visual_closure/goldens/visual_closure_more_lower_phone.png
           git add test/visual_closure/goldens/visual_closure_settings_phone.png
