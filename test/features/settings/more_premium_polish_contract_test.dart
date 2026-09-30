@@ -52,7 +52,9 @@ void main() {
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
     expect(source, contains('final dockHeight = 68.0'));
-    expect(source, contains('top: -18'));
+    expect(source, contains('const quickAddRise = 18.0'));
+    expect(source, contains('final reservedHeight = dockHeight + quickAddRise'));
+    expect(source, contains('height: reservedHeight'));
     expect(source, contains('Color(0xFF08A6F7)'));
     expect(source, contains('Color(0xFF176CF5)'));
     expect(source, contains('Color(0xFF7048F6)'));
