@@ -26,13 +26,12 @@ for name, spec in operations.items():
     new = ''.join(lines).encode('utf-8')
     assert hashlib.sha256(new).hexdigest() == spec['after'], f'Delta digest mismatch: {name}'
     prepared[target] = new
-# Validate every file before writing any file.
 for target, data in prepared.items():
     target.write_bytes(data)
 receipt = root / 'docs/release/BIL_SAPPHIRE_DELTA_RECEIPT.json'
 receipt.write_text(json.dumps({
-    'base': '59839c7deb4d1cc860275b9e69578e299cc24d0a',
-    'scope': 'Community presentation and health history only; native watch code unchanged',
+    'base': '76258cea4d3cceb2195c7dae49b6b3f7e9a69cae',
+    'scope': 'Final prebuild navigation, Nutrition white-screen, RTL weekly controls, More and bottom-dock presentation fixes; routes and store identifiers unchanged',
     'files': {name: {'before': spec['before'], 'after_before_formatter': spec['after']} for name, spec in operations.items()},
     'status': 'SOURCE_APPLIED_NOT_YET_QA_ACCEPTED',
 }, indent=2) + '\n')
