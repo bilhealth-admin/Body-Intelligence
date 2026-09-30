@@ -1,0 +1,286 @@
+name: BIL premium reviewed goldens one-shot
+
+on:
+  push:
+    branches: [tmp/premium-golden-refresh-20260930]
+
+permissions:
+  contents: write
+
+jobs:
+  reviewed-golden-refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: Preserve exact repository bytes
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Apply four reviewed source regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('.')
+
+          p=root/'lib/features/daily_log/domain/food_log_meal_selector.dart'
+          s=p.read_text()
+          old="'snack' => 'Snack',"
+          new="'snack' => 'Snacks',"
+          if old not in s: raise SystemExit('Snack source contract not found')
+          p.write_text(s.replace(old,new))
+
+          p=root/'lib/features/daily_log/food_log_page.dart'
+          s=p.read_text()
+          old="""    final actions = <({IconData icon, String label, VoidCallback onTap})>[
+              (
+                icon: Icons.qr_code_scanner_rounded,
+                label: _t(context, 'Scan a barcode'),
+                onTap: _scanBarcode,
+              ),
+              (
+                icon: Icons.mic_none_rounded,
+                label: _t(context, 'Log with your voice'),
+                onTap: _voiceSearch,
+              ),
+              (
+                icon: Icons.photo_camera_outlined,
+                label: _t(context, 'Analyze a meal photo'),
+                onTap: _analyzeMealImage,
+              ),
+              (
+                icon: Icons.add_circle_outline_rounded,
+                label: _t(context, 'Quick Add'),
+                onTap: _showQuickAdd,
+              ),
+            ];
+          """
+          new="""    final actions =
+              <({String keyId, IconData icon, String label, VoidCallback onTap})>[
+                (
+                  keyId: 'Barcode scan',
+                  icon: Icons.qr_code_scanner_rounded,
+                  label: _t(context, 'Scan a barcode'),
+                  onTap: _scanBarcode,
+                ),
+                (
+                  keyId: 'Voice log',
+                  icon: Icons.mic_none_rounded,
+                  label: _t(context, 'Log with your voice'),
+                  onTap: _voiceSearch,
+                ),
+                (
+                  keyId: 'Analyze meal photo',
+                  icon: Icons.photo_camera_outlined,
+                  label: _t(context, 'Analyze a meal photo'),
+                  onTap: _analyzeMealImage,
+                ),
+                (
+                  keyId: 'Quick add',
+                  icon: Icons.add_circle_outline_rounded,
+                  label: _t(context, 'Quick Add'),
+                  onTap: _showQuickAdd,
+                ),
+              ];
+          """
+          if old not in s: raise SystemExit('Food Log action source contract not found')
+          s=s.replace(old,new)
+          old_key="key: Key('food-log-action-${action.label}'),"
+          new_key="key: Key('food-log-action-${action.keyId}'),"
+          if old_key not in s: raise SystemExit('Food Log localized key contract not found')
+          p.write_text(s.replace(old_key,new_key))
+
+          p=root/'lib/app/router/bil_quick_add_sheet.dart'
+          s=p.read_text()
+          old="""                                backgroundColor: premiumGradient == null
+                                      ? spec.accent(baseTheme.brightness)
+                                      : Colors.white.withValues(alpha: .16),
+                                  foregroundColor: premiumGradient == null
+                                      ? spec.onAccent(baseTheme.brightness)
+                                      : Colors.white,
+          """
+          new="""                                // Keep the canonical semantic badge color
+                                  // even when the surrounding Voice/Photo card
+                                  // uses the premium gradient. The gradient is
+                                  // presentation; the badge remains the stable
+                                  // accessible action identity.
+                                  backgroundColor: spec.accent(
+                                    baseTheme.brightness,
+                                  ),
+                                  foregroundColor: spec.onAccent(
+                                    baseTheme.brightness,
+                                  ),
+          """
+          if old not in s: raise SystemExit('Quick Add premium badge contract not found')
+          p.write_text(s.replace(old,new))
+
+          p=root/'lib/features/settings/sharing_privacy_settings_page.dart'
+          s=p.read_text()
+          old="        loading: _saving || !snapshot.hasData,\n"
+          new="""        // Initial consent lookup can remain pending in offline/test contexts.
+                  // Keep the control disabled through onChanged until data arrives, but
+                  // reserve the animated spinner for an actual user-initiated save.
+                  loading: _saving,
+          """
+          if old not in s: raise SystemExit('Consent initial loading contract not found')
+          p.write_text(s.replace(old,new))
+          PY
+          dart format \
+            lib/features/daily_log/domain/food_log_meal_selector.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/app/router/bil_quick_add_sheet.dart \
+            lib/features/settings/sharing_privacy_settings_page.dart
+
+      - name: Resolve dependencies
+        shell: pwsh
+        run: flutter pub get
+
+      - name: Refresh only reviewed goldens
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Run-Golden([string]$file, [string]$name) {
+            flutter test --no-pub --update-goldens --plain-name "$name" "$file"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Run-Golden 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix compact_en_dark'
+          Run-Golden 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix compact_ar_dark'
+          Run-Golden 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix large_en_dark'
+          Run-Golden 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix large_ar_dark'
+          Run-Golden 'test/premium_dashboard_benchmark_test.dart' 'phone premium dashboard golden'
+          Run-Golden 'test/premium_dashboard_benchmark_test.dart' 'tablet premium dashboard golden'
+          Run-Golden 'test/premium_dashboard_benchmark_test.dart' 'desktop premium dashboard golden'
+          Run-Golden 'test/visual_closure/quick_add_golden_test.dart' 'quick add en_light production visual'
+          Run-Golden 'test/visual_closure/quick_add_golden_test.dart' 'quick add ar_dark production visual'
+          Run-Golden 'test/visual_closure/quick_add_golden_test.dart' 'quick add ios_en_light production visual'
+          Run-Golden 'test/visual_closure/quick_add_golden_test.dart' 'quick add ios_ar_dark production visual'
+          Run-Golden 'test/visual_closure/actual_data_pages_golden_test.dart' 'sharing_privacy_phone production capture'
+          Run-Golden 'test/visual_closure/actual_production_pages_golden_test.dart' 'trust and support production page RTL dark capture'
+          Run-Golden 'test/epic15_store_screenshot_golden_test.dart' 'iphone_69 English flagship store screenshots'
+          Run-Golden 'test/epic15_store_screenshot_golden_test.dart' 'android_phone English flagship store screenshots'
+          Run-Golden 'test/epic15_store_screenshot_golden_test.dart' 'iphone_69 Arabic RTL store screenshots'
+          Run-Golden 'test/epic15_store_screenshot_golden_test.dart' 'android_phone Arabic RTL store screenshots'
+
+      - name: Reject any unreviewed golden or source change
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess
+          changed=set(subprocess.check_output(['git','diff','--name-only']).decode().splitlines())
+          source_allowed={
+            'lib/features/daily_log/domain/food_log_meal_selector.dart',
+            'lib/features/daily_log/food_log_page.dart',
+            'lib/app/router/bil_quick_add_sheet.dart',
+            'lib/features/settings/sharing_privacy_settings_page.dart',
+          }
+          golden_expected={
+            'test/goldens/epic3_compact_en_dark.png',
+            'test/goldens/epic3_compact_ar_dark.png',
+            'test/goldens/epic3_large_en_dark.png',
+            'test/goldens/epic3_large_ar_dark.png',
+            'test/goldens/premium_dashboard_phone_after.png',
+            'test/goldens/premium_dashboard_tablet_after.png',
+            'test/goldens/premium_dashboard_desktop_after.png',
+            'test/goldens/epic15_iphone_69_en_06_privacy_settings.png',
+            'test/goldens/epic15_android_phone_en_06_privacy_settings.png',
+            'test/goldens/epic15_iphone_69_ar_03_progress_dark.png',
+            'test/goldens/epic15_android_phone_ar_03_progress_dark.png',
+            'test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png',
+            'test/visual_closure/goldens/quick_add_en_light_phone.png',
+            'test/visual_closure/goldens/quick_add_ar_dark.png',
+            'test/visual_closure/goldens/quick_add_ios_en_light_phone.png',
+            'test/visual_closure/goldens/quick_add_ios_ar_dark_phone.png',
+            'test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png',
+            'test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png',
+          }
+          png_changed={p for p in changed if p.endswith('.png')}
+          unexpected=changed-(source_allowed|golden_expected)
+          missing=golden_expected-png_changed
+          extra_png=png_changed-golden_expected
+          if unexpected or missing or extra_png:
+              print('changed=',sorted(changed))
+              print('unexpected=',sorted(unexpected))
+              print('missing reviewed goldens=',sorted(missing))
+              print('extra png=',sorted(extra_png))
+              raise SystemExit(1)
+          print(f'REVIEWED_GOLDENS={len(png_changed)} SOURCE_FIXES={len(changed-png_changed)}')
+          PY
+
+      - name: Analyze and verify repaired contracts
+        shell: pwsh
+        run: |
+          flutter analyze --no-pub
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --concurrency 1 --timeout 2m `
+            test/features/daily_log/food_log_meal_selector_test.dart `
+            test/features/daily_log/food_log_page_reference_test.dart `
+            test/quick_add_semantic_colors_test.dart `
+            test/features/settings/sharing_privacy_diary_summary_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          function Run-Strict([string]$file, [string]$name) {
+            flutter test --no-pub --plain-name "$name" "$file"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Run-Strict 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix compact_en_dark'
+          Run-Strict 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix compact_ar_dark'
+          Run-Strict 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix large_en_dark'
+          Run-Strict 'test/epic3_visual_matrix_golden_test.dart' 'Epic 3 visual matrix large_ar_dark'
+          Run-Strict 'test/premium_dashboard_benchmark_test.dart' 'phone premium dashboard golden'
+          Run-Strict 'test/premium_dashboard_benchmark_test.dart' 'tablet premium dashboard golden'
+          Run-Strict 'test/premium_dashboard_benchmark_test.dart' 'desktop premium dashboard golden'
+          Run-Strict 'test/visual_closure/quick_add_golden_test.dart' 'quick add en_light production visual'
+          Run-Strict 'test/visual_closure/quick_add_golden_test.dart' 'quick add ar_dark production visual'
+          Run-Strict 'test/visual_closure/quick_add_golden_test.dart' 'quick add ios_en_light production visual'
+          Run-Strict 'test/visual_closure/quick_add_golden_test.dart' 'quick add ios_ar_dark production visual'
+          Run-Strict 'test/visual_closure/actual_data_pages_golden_test.dart' 'sharing_privacy_phone production capture'
+          Run-Strict 'test/visual_closure/actual_production_pages_golden_test.dart' 'trust and support production page RTL dark capture'
+          Run-Strict 'test/epic15_store_screenshot_golden_test.dart' 'iphone_69 English flagship store screenshots'
+          Run-Strict 'test/epic15_store_screenshot_golden_test.dart' 'android_phone English flagship store screenshots'
+          Run-Strict 'test/epic15_store_screenshot_golden_test.dart' 'iphone_69 Arabic RTL store screenshots'
+          Run-Strict 'test/epic15_store_screenshot_golden_test.dart' 'android_phone Arabic RTL store screenshots'
+
+      - name: Commit reviewed bytes to temporary branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'BIL reviewed golden refresh'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            lib/features/daily_log/domain/food_log_meal_selector.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/app/router/bil_quick_add_sheet.dart \
+            lib/features/settings/sharing_privacy_settings_page.dart \
+            test/goldens \
+            test/visual_closure/goldens
+          git commit -m 'test(visual): refresh reviewed premium goldens [skip ci]'
+          git push origin HEAD:tmp/premium-golden-refresh-20260930
+
+      - name: Upload reviewed golden evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: premium-reviewed-goldens-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            test/goldens/epic3_*_dark.png
+            test/goldens/premium_dashboard_*_after.png
+            test/goldens/epic15_*_privacy_settings*.png
+            test/goldens/epic15_*_progress_dark.png
+            test/visual_closure/goldens/quick_add_*_phone.png
+            test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png
+            test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png
