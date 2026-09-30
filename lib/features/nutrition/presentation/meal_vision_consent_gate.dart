@@ -37,34 +37,120 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
   final granted = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => AlertDialog.adaptive(
-      title: Text(
-        mealVisionConsentText(
-          dialogContext,
-          'Send this meal photo to Google Gemini?',
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Text(
-          mealVisionConsentText(
-            dialogContext,
-            'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.',
+    builder: (dialogContext) {
+      final scheme = Theme.of(dialogContext).colorScheme;
+      return Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        backgroundColor: Colors.transparent,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Material(
+            color: scheme.surface,
+            elevation: 0,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+              side: BorderSide(
+                color: scheme.outlineVariant.withValues(alpha: .72),
+              ),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [scheme.primary, scheme.tertiary],
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: scheme.primary.withValues(alpha: .20),
+                            blurRadius: 24,
+                            spreadRadius: -8,
+                          ),
+                        ],
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(13),
+                        child: Icon(
+                          Icons.auto_awesome_rounded,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    mealVisionConsentText(
+                      dialogContext,
+                      'Send this meal photo to Google Gemini?',
+                    ),
+                    style: Theme.of(dialogContext).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w800, height: 1.18),
+                  ),
+                  const SizedBox(height: 16),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: scheme.outlineVariant.withValues(alpha: .58),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        mealVisionConsentText(
+                          dialogContext,
+                          'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.',
+                        ),
+                        style: Theme.of(dialogContext).textTheme.bodyMedium
+                            ?.copyWith(
+                              height: 1.5,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  FilledButton(
+                    key: const Key('meal-vision-consent-accept'),
+                    onPressed: () => Navigator.pop(dialogContext, true),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(17),
+                      ),
+                    ),
+                    child: Text(
+                      mealVisionConsentText(dialogContext, 'Allow & Continue'),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextButton(
+                    key: const Key('meal-vision-consent-decline'),
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    child: Text(
+                      mealVisionConsentText(dialogContext, "Don't Allow"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
-      actions: [
-        TextButton(
-          key: const Key('meal-vision-consent-decline'),
-          onPressed: () => Navigator.pop(dialogContext, false),
-          child: Text(mealVisionConsentText(dialogContext, "Don't Allow")),
-        ),
-        FilledButton(
-          key: const Key('meal-vision-consent-accept'),
-          onPressed: () => Navigator.pop(dialogContext, true),
-          child: Text(mealVisionConsentText(dialogContext, 'Allow & Continue')),
-        ),
-      ],
-    ),
+      );
+    },
   );
   if (granted == null || !context.mounted) return false;
   try {

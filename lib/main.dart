@@ -43,11 +43,12 @@ Future<void> main() async {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
   } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-    // Preserve the reviewed iPhone/iPad presentation. This Android adaptive
-    // migration must not change the iOS release contract.
-    await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[
-      DeviceOrientation.portraitUp,
-    ]);
+    // Advertise every runtime orientation that the Apple target may support.
+    // Info.plist remains the platform authority: iPhone is portrait-only,
+    // while iPad exposes all four orientations for multitasking and rotation.
+    // A portrait-only runtime lock here would silently contradict the audited
+    // iPad App Store contract even though Info.plist is configured correctly.
+    await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
   }
   FlutterError.onError = (details) {
     FlutterError.presentError(details);

@@ -22,12 +22,14 @@ abstract final class BilFlagshipTokens {
   static const Color textPrimaryLight = Color(0xFF101114);
   static const Color textSecondaryLight = Color(0xFF6C6D73);
 
-  static const Color canvasDark = navy950;
-  static const Color surfaceDark = Color(0xFF0D1B33);
-  static const Color surfaceMutedDark = Color(0xFF122342);
-  static const Color outlineDark = Color(0xFF263B5D);
-  static const Color textPrimaryDark = Color(0xFFF8FAFC);
-  static const Color textSecondaryDark = Color(0xFFB8C6D9);
+  // Premium black theme: near-black canvas with subtle neutral elevation.
+  // Navy remains a brand/hero color, but no longer tints every dark surface.
+  static const Color canvasDark = Color(0xFF030405);
+  static const Color surfaceDark = Color(0xFF0B0D10);
+  static const Color surfaceMutedDark = Color(0xFF11151A);
+  static const Color outlineDark = Color(0xFF2A3038);
+  static const Color textPrimaryDark = Color(0xFFF7F9FC);
+  static const Color textSecondaryDark = Color(0xFFAEB7C4);
 
   static const double space2 = 2;
   static const double space4 = 4;

@@ -132,21 +132,54 @@ class _InfoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        border: Border.all(color: scheme.outlineVariant),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: scheme.primary),
-            const SizedBox(width: 10),
-            Expanded(child: Text(text, style: const TextStyle(height: 1.4))),
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Semantics(
+      container: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: dark
+              ? scheme.surfaceContainerLow
+              : scheme.primary.withValues(alpha: .045),
+          border: Border.all(
+            color: scheme.primary.withValues(alpha: dark ? .26 : .16),
+          ),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.shadow.withValues(alpha: dark ? .18 : .045),
+              blurRadius: 22,
+              offset: const Offset(0, 8),
+            ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 18, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: scheme.primary.withValues(alpha: dark ? .16 : .10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Icon(icon, color: scheme.primary, size: 21),
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.52,
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

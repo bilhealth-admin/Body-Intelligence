@@ -83,7 +83,12 @@ class TrustedFoodNetworkSearchResolver {
       }
       return rows
           .whereType<Map>()
-          .map((row) => _toFood(Map<String, dynamic>.from(row)))
+          .map(
+            (row) => _toFood(
+              Map<String, dynamic>.from(row),
+              displayLocale: queryLocale,
+            ),
+          )
           .whereType<UnifiedFood>()
           .take(limit)
           .toList(growable: false);
@@ -104,10 +109,18 @@ class TrustedFoodNetworkSearchResolver {
     return null;
   }
 
-  UnifiedFood? _toFood(Map<String, dynamic> row) {
+  UnifiedFood? _toFood(Map<String, dynamic> row, {String? displayLocale}) {
     final id = _text(row['fdc_id']);
     final name = _text(row['name']);
     if (id.isEmpty || name.isEmpty) return null;
+    final localizedName = _text(row['localized_name']);
+    if (displayLocale != null && localizedName.isNotEmpty) {
+      FoodPresentationLocalizer.registerRuntimeDisplayName(
+        canonicalName: name,
+        localeTag: displayLocale,
+        localizedName: localizedName,
+      );
+    }
     final nutrientRows = row['nutrients'] is List
         ? row['nutrients'] as List
         : const <Object?>[];

@@ -12,6 +12,10 @@ part 'food_presentation_units_and_labels.dart';
 /// It never translates arbitrary catalog text. Branded, custom, and unknown
 /// scientific names remain exactly as stored so the UI cannot invent identity.
 abstract final class FoodPresentationLocalizer {
+  static const _maxTrustedRuntimeTranslations = 600;
+  static final Map<String, String> _trustedRuntimeTranslations =
+      <String, String>{};
+
   static const supportedLocaleTags = <String>{
     'ar',
     'en',
@@ -67,10 +71,41 @@ abstract final class FoodPresentationLocalizer {
       }
     }
     if (isCustom || _isBranded(source)) return original;
+    final runtime = _runtimeDisplayName(original, locale);
+    if (runtime != null) return runtime;
     final normalized = _normalize(original);
     final concept = _reviewedFoodConcept(normalized);
     return _localizedFoodName(concept, locale) ?? original;
   }
+
+  static void registerRuntimeDisplayName({
+    required String canonicalName,
+    required String localeTag,
+    required String localizedName,
+  }) {
+    final canonical = canonicalName.trim();
+    final localized = localizedName.trim();
+    final locale = _canonicalLocaleTag(localeTag);
+    if (canonical.isEmpty ||
+        localized.length < 2 ||
+        localized.length > 240 ||
+        locale == 'en' ||
+        !supportedLocaleTags.contains(locale)) {
+      return;
+    }
+    if (_trustedRuntimeTranslations.length >= _maxTrustedRuntimeTranslations) {
+      _trustedRuntimeTranslations.remove(
+        _trustedRuntimeTranslations.keys.first,
+      );
+    }
+    _trustedRuntimeTranslations['$locale|${_normalize(canonical)}'] = localized;
+  }
+
+  static String? _runtimeDisplayName(String name, String locale) =>
+      _trustedRuntimeTranslations['$locale|${_normalize(name)}'];
+
+  static void clearRuntimeDisplayNamesForTesting() =>
+      _trustedRuntimeTranslations.clear();
 
   /// Food rows follow the language the user actually typed when it can be
   /// determined safely. The interface locale remains the fallback for short,
@@ -119,6 +154,7 @@ abstract final class FoodPresentationLocalizer {
     final original = name.trim();
     if (original.isEmpty) return false;
     if (isCustom || _isBranded(source)) return true;
+    if (_runtimeDisplayName(original, locale) != null) return true;
     if (locale == 'ar' && arabicName?.trim().isNotEmpty == true) return true;
     return _reviewedFoodConcept(_normalize(original)) != null;
   }
