@@ -17,7 +17,7 @@ void main() {
     expect(physics.shouldAcceptUserOffset(position), isTrue);
     expect(physics, isA<BouncingScrollPhysics>());
     expect(physics.parent, isA<RangeMaintainingScrollPhysics>());
-    expect(physics.parent, isNot(isA<AlwaysScrollableScrollPhysics>()));
+    expect(physics.parent!.parent, isA<AlwaysScrollableScrollPhysics>());
     expect(physics.createBallisticSimulation(position, 1200), isNotNull);
   });
 
