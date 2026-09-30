@@ -7,6 +7,6 @@ void main() {
     expect(normalizeFoodLogMealType(null), 'breakfast');
     expect(normalizeFoodLogMealType('lunch'), 'lunch');
     expect(normalizeFoodLogMealType('not-a-meal'), 'breakfast');
-    expect(foodLogMealTitle('snack'), 'Snacks');
+    expect(foodLogMealTitle('snack'), 'Snack');
   });
 }
