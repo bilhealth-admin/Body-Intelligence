@@ -14,12 +14,14 @@ void main() {
           ),
         );
 
-        final dashboardScrollable = tester.widget<Scrollable>(
-          find.descendant(
-            of: find.byKey(const Key('dashboard-scroll-view')),
-            matching: find.byType(Scrollable),
-          ),
-        );
+        final dashboardPosition = tester
+            .state<ScrollableState>(
+              find.descendant(
+                of: find.byKey(const Key('dashboard-scroll-view')),
+                matching: find.byType(Scrollable),
+              ),
+            )
+            .position;
 
         await tester.pumpWidget(
           MaterialApp(
@@ -27,18 +29,18 @@ void main() {
             home: ListView(children: const [SizedBox(height: 1800)]),
           ),
         );
-        final moreScrollable = tester.widget<Scrollable>(
-          find.byType(Scrollable),
-        );
+        final morePosition = tester
+            .state<ScrollableState>(find.byType(Scrollable))
+            .position;
 
         expect(
-          dashboardScrollable.physics.runtimeType,
-          moreScrollable.physics.runtimeType,
+          dashboardPosition.physics.runtimeType,
+          morePosition.physics.runtimeType,
         );
         if (platform == TargetPlatform.iOS) {
-          expect(dashboardScrollable.physics, isA<BouncingScrollPhysics>());
+          expect(dashboardPosition.physics, isA<BouncingScrollPhysics>());
         } else {
-          expect(dashboardScrollable.physics, isA<ClampingScrollPhysics>());
+          expect(dashboardPosition.physics, isA<ClampingScrollPhysics>());
         }
         expect(tester.takeException(), isNull);
       },
