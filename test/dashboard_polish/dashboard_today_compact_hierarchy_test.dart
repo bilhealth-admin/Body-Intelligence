@@ -62,7 +62,7 @@ void main() {
     expect(bodyTwinIndex, greaterThanOrEqualTo(0));
     final bodyTwinWindow = cards.substring(
       bodyTwinIndex,
-      (bodyTwinIndex + 260).clamp(0, cards.length),
+      (bodyTwinIndex + 260).clamp(0, cards.length).toInt(),
     );
     expect(bodyTwinWindow, contains('fit: BoxFit.contain'));
   });
