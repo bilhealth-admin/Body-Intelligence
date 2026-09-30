@@ -136,6 +136,7 @@ final class AppDatabaseCloudInboxApplier {
               syncStatus: const Value('synced'),
             ),
           );
+      await _restoreProfilePreferences(payload);
       return _InboxOutcome.applied;
     }
 
@@ -189,6 +190,7 @@ final class AppDatabaseCloudInboxApplier {
         syncStatus: const Value('synced'),
       ),
     );
+    await _restoreProfilePreferences(payload);
     return decision;
   }
 
@@ -346,6 +348,34 @@ final class AppDatabaseCloudInboxApplier {
       ),
     );
     return decision;
+  }
+
+  Future<void> _restoreProfilePreferences(
+    Map<String, Object?> payload,
+  ) async {
+    final values = <String, String>{
+      if ((_nullableString(payload, 'profileDateOfBirth') ?? '').trim().isNotEmpty)
+        'profileDateOfBirth':
+            _nullableString(payload, 'profileDateOfBirth')!.trim(),
+      if ((_nullableString(payload, 'countryRegion') ?? '').trim().isNotEmpty)
+        'countryRegion': _nullableString(payload, 'countryRegion')!.trim(),
+      if ((_nullableString(payload, 'onboardingGoalPriorities') ?? '')
+          .trim()
+          .isNotEmpty)
+        'onboarding.goalPriorities.v1':
+            _nullableString(payload, 'onboardingGoalPriorities')!.trim(),
+    };
+    if (values.isEmpty) return;
+    final updatedAt = DateTime.now();
+    for (final entry in values.entries) {
+      await _database.into(_database.preferences).insertOnConflictUpdate(
+        PreferencesCompanion.insert(
+          key: entry.key,
+          value: entry.value,
+          updatedAt: Value(updatedAt),
+        ),
+      );
+    }
   }
 
   _InboxOutcome _compareLocal({
