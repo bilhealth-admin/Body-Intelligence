@@ -84,8 +84,10 @@ void main() {
     expect(topNavigation, contains('height: 48'));
     expect(topNavigation, contains('alignment: Alignment.centerLeft'));
     expect(topNavigation, contains('alignment: Alignment.center'));
-    expect(shell, contains('final dockHeight = 76.0 +'));
-    expect(shell, contains('height: dockHeight'));
+    expect(shell, contains('final dockHeight = 68.0 +'));
+    expect(shell, contains('const quickAddRise = 18.0'));
+    expect(shell, contains('final reservedHeight = dockHeight + quickAddRise'));
+    expect(shell, contains('height: reservedHeight'));
     expect(shell, contains('Color(0xF20B1725)'));
     expect(shell, contains('Color(0xF7FFFFFF)'));
   });
