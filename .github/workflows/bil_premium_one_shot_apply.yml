@@ -88,6 +88,14 @@ jobs:
           set -euo pipefail
           BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
           flutter pub get
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('lib/features/intelligence_center/presentation/intelligence_query_flow.dart')
+          s=p.read_text()
+          needle="          final scheme = Theme.of(sheetContext).colorScheme;\n"
+          assert s.count(needle) == 1
+          p.write_text(s.replace(needle, '', 1))
+          PY
           mapfile -t DART_FILES < <(git diff --name-only "$BASE" -- '*.dart')
           if ((${#DART_FILES[@]})); then
             dart format "${DART_FILES[@]}"
