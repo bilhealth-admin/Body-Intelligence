@@ -1,40 +1,41 @@
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_shell.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('dashboard always accepts finger offsets with elastic momentum', () {
-    const physics = DashboardScrollPhysics();
-    final position = FixedScrollMetrics(
-      minScrollExtent: 0,
-      maxScrollExtent: 1000,
-      pixels: 400,
-      viewportDimension: 600,
-      axisDirection: AxisDirection.down,
-      devicePixelRatio: 1,
-    );
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets('$platform: dashboard resolves the same scroll physics as More', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const DashboardShell(child: SizedBox(height: 1800)),
+        ),
+      );
 
-    expect(physics.shouldAcceptUserOffset(position), isTrue);
-    expect(physics, isA<BouncingScrollPhysics>());
-    expect(physics.parent, isA<RangeMaintainingScrollPhysics>());
-    expect(physics.parent!.parent, isA<AlwaysScrollableScrollPhysics>());
-    expect(physics.createBallisticSimulation(position, 1200), isNotNull);
-  });
+      final dashboardScrollable = tester.widget<Scrollable>(
+        find.descendant(
+          of: find.byKey(const Key('dashboard-scroll-view')),
+          matching: find.byType(Scrollable),
+        ),
+      );
 
-  test('dashboard returns an overscroll smoothly to the nearest edge', () {
-    const physics = DashboardScrollPhysics();
-    final position = FixedScrollMetrics(
-      minScrollExtent: 0,
-      maxScrollExtent: 1000,
-      pixels: -42,
-      viewportDimension: 600,
-      axisDirection: AxisDirection.down,
-      devicePixelRatio: 1,
-    );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: ListView(children: const [SizedBox(height: 1800)]),
+        ),
+      );
+      final moreScrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
-    final simulation = physics.createBallisticSimulation(position, -260);
-    expect(simulation, isNotNull);
-    expect(simulation!.x(0), -42);
-    expect(simulation.x(10), closeTo(0, 0.5));
-  });
+      expect(dashboardScrollable.physics.runtimeType, moreScrollable.physics.runtimeType);
+      if (platform == TargetPlatform.iOS) {
+        expect(dashboardScrollable.physics, isA<BouncingScrollPhysics>());
+      } else {
+        expect(dashboardScrollable.physics, isA<ClampingScrollPhysics>());
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
