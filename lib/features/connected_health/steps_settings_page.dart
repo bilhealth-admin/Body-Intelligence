@@ -356,7 +356,13 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                       kind: BilSemanticIconKind.progress,
                     ),
                     title: Text(t('View step history')),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.chevron_left_rounded
+                          : Icons.chevron_right_rounded,
+                      key: const Key('steps-history-chevron'),
+                      textDirection: TextDirection.ltr,
+                    ),
                     onTap: saving
                         ? null
                         : () => context.go('/connected-health/steps/history'),
@@ -374,7 +380,13 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                           child: Text(goal?.toString() ?? '—'),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.chevron_right_rounded),
+                        Icon(
+                          Directionality.of(context) == TextDirection.rtl
+                              ? Icons.chevron_left_rounded
+                              : Icons.chevron_right_rounded,
+                          key: const Key('steps-goal-chevron'),
+                          textDirection: TextDirection.ltr,
+                        ),
                       ],
                     ),
                     onTap: saving ? null : editGoal,
