@@ -9,8 +9,10 @@ void main() {
     ).readAsStringSync();
 
     expect(shell, contains('extendBody: false'));
-    expect(shell, contains('final dockHeight = 76.0 +'));
-    expect(shell, contains('height: dockHeight'));
+    expect(shell, contains('final dockHeight = 68.0 +'));
+    expect(shell, contains('const quickAddRise = 18.0'));
+    expect(shell, contains('final reservedHeight = dockHeight + quickAddRise'));
+    expect(shell, contains('height: reservedHeight'));
     expect(shell, contains("key: const Key('shell-quick-add')"));
     expect(shell, contains('quickAdd: quickButton'));
     expect(shell, contains('Color(0xF20B1725)'));
