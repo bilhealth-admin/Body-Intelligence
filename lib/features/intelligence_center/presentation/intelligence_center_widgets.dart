@@ -8,8 +8,18 @@ class _AiCoachEntryWelcome extends StatelessWidget {
     final locale = Localizations.localeOf(context).languageCode.toLowerCase();
     final displayFamily = switch (locale) {
       'ar' || 'fa' || 'ur' => 'BILArabic',
-      'en' || 'fr' || 'es' || 'tr' || 'de' || 'it' || 'pt' || 'id' || 'ms' ||
-      'vi' || 'pl' || 'nl' => 'BILDisplay',
+      'en' ||
+      'fr' ||
+      'es' ||
+      'tr' ||
+      'de' ||
+      'it' ||
+      'pt' ||
+      'id' ||
+      'ms' ||
+      'vi' ||
+      'pl' ||
+      'nl' => 'BILDisplay',
       _ => null,
     };
     return Scaffold(
@@ -47,7 +57,9 @@ class _AiCoachEntryWelcome extends StatelessWidget {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF3C75FF).withValues(alpha: .30),
+                            color: const Color(
+                              0xFF3C75FF,
+                            ).withValues(alpha: .30),
                             blurRadius: 34,
                             spreadRadius: -8,
                           ),
@@ -69,13 +81,14 @@ class _AiCoachEntryWelcome extends StatelessWidget {
                         'مرحبًا بك في المدرب الذكي',
                       ),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontFamily: displayFamily,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: locale == 'ar' ? 0 : -.45,
-                        height: locale == 'ar' ? 1.28 : 1.12,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontFamily: displayFamily,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: locale == 'ar' ? 0 : -.45,
+                            height: locale == 'ar' ? 1.28 : 1.12,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
