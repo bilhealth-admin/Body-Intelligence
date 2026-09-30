@@ -82,11 +82,9 @@ abstract final class BilFlagshipTheme {
       inverseSurface: dark
           ? BilFlagshipTokens.surfaceLight
           : BilFlagshipTokens.navy900,
-      // The light theme inverse surface is a dark brand surface. Keep its
-      // foreground stable when the actual dark-mode text palette evolves.
       onInverseSurface: dark
           ? BilFlagshipTokens.textPrimaryLight
-          : const Color(0xFFF8FAFC),
+          : BilFlagshipTokens.textPrimaryDark,
       inversePrimary: BilFlagshipTokens.cyan400,
       surfaceTint: Colors.transparent,
     );
