@@ -24,6 +24,7 @@ import 'reference_settings_copy.dart';
 import 'cloud_sync_status_presentation.dart';
 
 part 'settings_page_actions.dart';
+part 'settings_page_polish.dart';
 
 /// The bottom-navigation "More" destination. Its hierarchy intentionally
 /// mirrors the supplied reference: account summary first, product destinations
@@ -359,29 +360,23 @@ class _MoreSection extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: dark
-                  ? theme.colorScheme.surfaceContainer
-                  : const Color(0xFFFEFFFF),
+          Material(
+            color: dark
+                ? theme.colorScheme.surfaceContainer
+                : const Color(0xFFFEFFFF),
+            elevation: dark ? 0 : 1.5,
+            shadowColor: dark
+                ? Colors.black.withValues(alpha: .18)
+                : const Color(0xFF315E9B).withValues(alpha: .10),
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(
+              side: BorderSide(
                 color: dark
                     ? Colors.white.withValues(alpha: .09)
                     : const Color(0xFFDDE7F3),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: dark
-                      ? Colors.black.withValues(alpha: .18)
-                      : const Color(0xFF315E9B).withValues(alpha: .08),
-                  blurRadius: 22,
-                  spreadRadius: -12,
-                  offset: const Offset(0, 9),
-                ),
-              ],
             ),
+            clipBehavior: Clip.antiAlias,
             child: Column(children: children),
           ),
         ],
@@ -552,9 +547,9 @@ class _MoreRow extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          minTileHeight: 61,
+          minTileHeight: 60,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          horizontalTitleGap: 13,
+          horizontalTitleGap: 12,
           leading: _MorePremiumIcon(kind: semanticKind, danger: _isDanger),
           title: Text(
             label,
@@ -602,146 +597,4 @@ class _MoreRow extends StatelessWidget {
       ],
     );
   }
-}
-
-class _MorePremiumIcon extends StatelessWidget {
-  const _MorePremiumIcon({required this.kind, this.danger = false});
-
-  final BilSemanticIconKind kind;
-  final bool danger;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
-    final healthAccent =
-        kind == BilSemanticIconKind.health ||
-        kind == BilSemanticIconKind.heartRate;
-    final foreground = danger
-        ? theme.colorScheme.error
-        : healthAccent
-        ? (dark ? const Color(0xFFFF8CAD) : const Color(0xFFD91E5B))
-        : (dark ? const Color(0xFF8FC2FF) : const Color(0xFF0869E8));
-    final background = danger
-        ? theme.colorScheme.errorContainer.withValues(alpha: dark ? .36 : .55)
-        : healthAccent
-        ? (dark ? const Color(0xFF4D1C2D) : const Color(0xFFFFEEF4))
-        : (dark ? const Color(0xFF17375F) : const Color(0xFFEAF3FF));
-    final spec = BilSemanticIcons.spec(kind);
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      alignment: Alignment.center,
-      child: Icon(
-        danger ? Icons.delete_outline_rounded : spec.iconFor(theme.platform),
-        size: 24,
-        color: foreground,
-      ),
-    );
-  }
-}
-
-class _CloudSyncRow extends ConsumerWidget {
-  const _CloudSyncRow({required this.label, required this.status});
-
-  final String label;
-  final CloudManualSyncStatus status;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) => Column(
-    children: [
-      ListTile(
-        key: const Key('settings-cloud-sync-status-row'),
-        minTileHeight: 72,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        horizontalTitleGap: 13,
-        leading: status.isSyncing
-            ? const SizedBox.square(
-                dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const _MorePremiumIcon(kind: BilSemanticIconKind.cloudSync),
-        title: Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        subtitle: CloudSyncStatusLine(status: status),
-        onTap: status.isSyncing ? null : () => _runSync(context, ref),
-      ),
-    ],
-  );
-
-  Future<void> _runSync(BuildContext context, WidgetRef ref) async {
-    if (ref.read(cloudManualSyncStatusProvider).isSyncing) return;
-    try {
-      final result = await ref
-          .read(cloudManualSyncStatusProvider.notifier)
-          .runOnce();
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text(
-              result.completed
-                  ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check Premium, consent, and internet.',
-            ),
-          ),
-        ),
-      );
-    } on Object {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text(
-              'Cloud sync could not run. Check Premium, consent, and internet.',
-            ),
-          ),
-        ),
-      );
-    }
-  }
-}
-
-class _MoreActionRow extends StatelessWidget {
-  const _MoreActionRow({
-    required this.label,
-    required this.kind,
-    required this.onTap,
-    super.key,
-  });
-
-  final String label;
-  final BilSemanticIconKind kind;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      ListTile(
-        minTileHeight: 61,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        horizontalTitleGap: 13,
-        leading: _MorePremiumIcon(kind: kind),
-        title: Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        trailing: Icon(
-          Directionality.of(context) == TextDirection.rtl
-              ? Icons.chevron_left_rounded
-              : Icons.chevron_right_rounded,
-          size: 22,
-          color: const Color(0xFF61738D),
-        ),
-        onTap: onTap,
-      ),
-      const Divider(height: 1, indent: 72, endIndent: 16),
-    ],
-  );
 }
