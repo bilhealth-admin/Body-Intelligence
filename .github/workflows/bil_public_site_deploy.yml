@@ -24,7 +24,6 @@ jobs:
     timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -32,12 +31,45 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Require Cloudflare deployment credentials
+      - name: Resolve Cloudflare account from scoped API token
         shell: bash
         run: |
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'OWNER_INPUT_REQUIRED: CLOUDFLARE_API_TOKEN'; exit 1; }
-          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: CLOUDFLARE_ACCOUNT_ID'; exit 1; }
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import urllib.request
+
+          token = os.environ['CLOUDFLARE_API_TOKEN']
+          request = urllib.request.Request(
+              'https://api.cloudflare.com/client/v4/accounts',
+              headers={
+                  'Authorization': f'Bearer {token}',
+                  'Content-Type': 'application/json',
+              },
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              payload = json.load(response)
+
+          accounts = payload.get('result') or []
+          if not payload.get('success') or len(accounts) != 1:
+              raise SystemExit(
+                  f'CLOUDFLARE_ACCOUNT_RESOLUTION_FAILED: expected exactly '
+                  f'one account visible to the token, got {len(accounts)}'
+              )
+          account_id = str(accounts[0].get('id') or '').strip()
+          if not account_id:
+              raise SystemExit('CLOUDFLARE_ACCOUNT_ID_MISSING_FROM_API')
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as handle:
+              handle.write(f'CLOUDFLARE_ACCOUNT_ID={account_id}\n')
+          pathlib.Path('/tmp/cloudflare-account-name.txt').write_text(
+              str(accounts[0].get('name') or '') + '\n',
+              encoding='utf-8',
+          )
+          print('CLOUDFLARE_ACCOUNT_RESOLUTION=PASS')
+          PY
 
       - name: Validate app-ads authorization
         shell: bash
