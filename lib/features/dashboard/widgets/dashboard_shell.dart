@@ -131,7 +131,10 @@ class _DashboardShellState extends State<DashboardShell> {
                       child: Column(
                         children: [
                           if (widget.leading != null)
-                            SizedBox(width: contentWidth, child: widget.leading),
+                            SizedBox(
+                              width: contentWidth,
+                              child: widget.leading,
+                            ),
                           if (widget.edgeHeader != null)
                             SizedBox(
                               width:
