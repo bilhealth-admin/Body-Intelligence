@@ -38,17 +38,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('fills the hero without a card or tint frame', (tester) async {
+  testWidgets('shows the complete artwork without a hard crop', (tester) async {
     await pumpScaffold(tester);
 
     final photo = find.byKey(const Key('photo'));
-    final imageFinder = find.descendant(
-      of: photo,
-      matching: find.byType(Image),
+    final completeImage = tester.widget<Image>(
+      find.byKey(const Key('onboarding-photo-complete-image')),
     );
-    final image = tester.widget<Image>(imageFinder);
 
-    expect(image.fit, BoxFit.cover);
+    expect(completeImage.fit, BoxFit.contain);
     expect(tester.getSize(photo).height, 120);
     expect(
       find.descendant(of: photo, matching: find.byType(DecoratedBox)),
