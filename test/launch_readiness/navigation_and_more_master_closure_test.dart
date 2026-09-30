@@ -64,9 +64,10 @@ void main() {
   });
 
   test('More keeps routes, authority gates, RTL and sync boundaries', () {
-    final source = File(
+    final source = [
       'lib/features/settings/settings_page.dart',
-    ).readAsStringSync();
+      'lib/features/settings/settings_page_polish.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     for (final route in <String>[
       '/profile-summary',
       '/plans',
@@ -98,8 +99,10 @@ void main() {
     expect(source, contains("Key('settings-connected-health-entry')"));
     expect(source, contains('Directionality.of(context) == TextDirection.rtl'));
     expect(source, isNot(contains("Key('more-devices-sync-card')")));
-    expect(source, contains('size: 30'));
-    expect(source, contains('iconSize: 18'));
+    expect(source, contains('width: 44'));
+    expect(source, contains('height: 44'));
+    expect(source, contains('size: 24'));
+    expect(source, contains("Key('more-premium-icon-${kind.name}')"));
     expect(source, contains('PremiumCrownEmblem'));
   });
 }
