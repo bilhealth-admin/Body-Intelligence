@@ -109,10 +109,7 @@ class TrustedFoodNetworkSearchResolver {
     return null;
   }
 
-  UnifiedFood? _toFood(
-    Map<String, dynamic> row, {
-    String? displayLocale,
-  }) {
+  UnifiedFood? _toFood(Map<String, dynamic> row, {String? displayLocale}) {
     final id = _text(row['fdc_id']);
     final name = _text(row['name']);
     if (id.isEmpty || name.isEmpty) return null;
