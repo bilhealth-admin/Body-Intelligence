@@ -35,6 +35,12 @@ final class AppDatabaseCloudOutboxProducer {
   final LocalDataAccountBoundary _accountBoundary;
   final CloudRecordOutboxSink _sink;
 
+  static const _profilePreferenceKeys = <String>{
+    'profileDateOfBirth',
+    'countryRegion',
+    'onboarding.goalPriorities.v1',
+  };
+
   Future<CloudOutboxProductionReport> produce({int maxRecords = 500}) async {
     if (maxRecords <= 0) {
       throw ArgumentError.value(maxRecords, 'maxRecords', 'Must be positive');
@@ -68,9 +74,19 @@ final class AppDatabaseCloudOutboxProducer {
               ..where((row) => _dirty(row.syncStatus))
               ..orderBy([(row) => OrderingTerm.asc(row.updatedAt)]))
             .get();
+    final profilePreferenceRows =
+        await (_database.select(_database.preferences)
+              ..where((row) => row.key.isIn(_profilePreferenceKeys)))
+            .get();
+    final profilePreferences = <String, String>{
+      for (final row in profilePreferenceRows) row.key: row.value,
+    };
     for (final row in profileRows) {
       if (remaining <= 0) break;
-      await handle(_profileEnvelope(row), () => _markProfileQueued(row));
+      await handle(
+        _profileEnvelope(row, profilePreferences),
+        () => _markProfileQueued(row),
+      );
     }
 
     final weightRows =
@@ -170,7 +186,10 @@ final class AppDatabaseCloudOutboxProducer {
       status.equals('pending') |
       status.equals('pendingDelete');
 
-  CloudRecordEnvelope _profileEnvelope(UserProfileData row) =>
+  CloudRecordEnvelope _profileEnvelope(
+    UserProfileData row,
+    Map<String, String> preferences,
+  ) =>
       CloudRecordEnvelope(
         entityKind: CloudEntityKind.profile,
         recordId: row.uuid,
@@ -197,6 +216,10 @@ final class AppDatabaseCloudOutboxProducer {
                 'chest': row.chest,
                 'arm': row.arm,
                 'thigh': row.thigh,
+                'profileDateOfBirth': preferences['profileDateOfBirth'],
+                'countryRegion': preferences['countryRegion'],
+                'onboardingGoalPriorities':
+                    preferences['onboarding.goalPriorities.v1'],
                 'createdAt': row.createdAt.toUtc().toIso8601String(),
               },
       );
