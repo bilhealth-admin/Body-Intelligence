@@ -50,8 +50,9 @@ void main() {
         'lib/features/dashboard/widgets/dashboard_shell.dart',
       ).readAsStringSync();
 
-      expect(shell, contains('extends BouncingScrollPhysics'));
-      expect(shell, contains('AlwaysScrollableScrollPhysics'));
+      expect(shell, isNot(contains('DashboardScrollPhysics')));
+      expect(shell, isNot(contains('AlwaysScrollableScrollPhysics')));
+      expect(shell, isNot(contains('BouncingScrollPhysics')));
       expect(shell, isNot(contains('onRefresh')));
       expect(shell, isNot(contains('_ElasticDashboardRefresh')));
       expect(page, isNot(contains('refreshDailyActivity(force: true)')));
