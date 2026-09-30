@@ -307,6 +307,10 @@ void main() {
           File(
             'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
           ).readAsStringSync(),
+        if (path.endsWith('features/settings/settings_page.dart'))
+          File(
+            'lib/features/settings/settings_page_polish.dart',
+          ).readAsStringSync(),
       ].join('\n');
       expect(
         source,
