@@ -24,14 +24,6 @@ class DashboardShell extends StatefulWidget {
 }
 
 class _DashboardShellState extends State<DashboardShell> {
-  final _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,7 +115,6 @@ class _DashboardShellState extends State<DashboardShell> {
 
                 return SingleChildScrollView(
                   key: const Key('dashboard-scroll-view'),
-                  controller: _scrollController,
                   padding: EdgeInsets.fromLTRB(
                     0,
                     16,
