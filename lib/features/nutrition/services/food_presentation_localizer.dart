@@ -12,6 +12,9 @@ part 'food_presentation_units_and_labels.dart';
 /// It never translates arbitrary catalog text. Branded, custom, and unknown
 /// scientific names remain exactly as stored so the UI cannot invent identity.
 abstract final class FoodPresentationLocalizer {
+  static const _maxTrustedRuntimeTranslations = 600;
+  static final Map<String, String> _trustedRuntimeTranslations = <String, String>{};
+
   static const supportedLocaleTags = <String>{
     'ar',
     'en',
