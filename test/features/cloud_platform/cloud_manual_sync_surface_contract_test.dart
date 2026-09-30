@@ -7,9 +7,10 @@ void main() {
     final settings = File(
       'lib/features/settings/sharing_privacy_settings_page.dart',
     ).readAsStringSync();
-    final more = File(
+    final more = [
       'lib/features/settings/settings_page.dart',
-    ).readAsStringSync();
+      'lib/features/settings/settings_page_polish.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final providers = File(
       'lib/features/cloud_platform/providers/cloud_sync_providers.dart',
     ).readAsStringSync();
