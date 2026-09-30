@@ -1,4 +1,4 @@
-name: BIL Premium One Shot Apply
+name: BIL Premium One Shot Finalize
 
 on:
   push:
@@ -8,120 +8,170 @@ permissions:
   contents: write
 
 jobs:
-  apply-premium-source:
+  finalize-premium-source:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
 
-      - name: Reassemble and verify exact premium source patch
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat             tool/premium_one_shot/part-00             tool/premium_one_shot/part-01             tool/premium_one_shot/part-02             tool/premium_one_shot/part-03             tool/premium_one_shot/part-04             tool/premium_one_shot/part-05             tool/premium_one_shot/part-06a             tool/premium_one_shot/part-06b1a             tool/premium_one_shot/part-06b1b-a1             tool/premium_one_shot/part-06b1b-a2-correct             tool/premium_one_shot/part-06b1b-b             tool/premium_one_shot/part-06b2             tool/premium_one_shot/part-07a             tool/premium_one_shot/part-07b             tool/premium_one_shot/part-07c             > /tmp/premium.diff.gz.b64
-          test "$(wc -c < /tmp/premium.diff.gz.b64)" = "58156"
-          echo "5c36fee224912ca60b4a370f14dab0aeec8191d2b41e4e1d0ed81c5ba230d16b  /tmp/premium.diff.gz.b64" | sha256sum -c -
-          base64 --decode /tmp/premium.diff.gz.b64 > /tmp/premium.diff.gz
-          gzip -t /tmp/premium.diff.gz
-          gunzip -c /tmp/premium.diff.gz > /tmp/premium.diff
-
-      - name: Require unchanged accepted 30/33 branch head
+      - name: Require exact current premium head
         shell: bash
         run: |
           set -euo pipefail
           BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
+          EXPECTED='46cc4a3b4120ffaeaf3342b275cfb58f79bbed78'
           git fetch origin fix/community-sapphire-health-3033
-          test "$(git rev-parse FETCH_HEAD)" = "$BASE" || {
-            echo "Release branch moved; refusing to apply premium patch." >&2
+          test "$(git rev-parse FETCH_HEAD)" = "$EXPECTED" || {
+            echo "Release branch moved; refusing rewrite." >&2
             exit 1
           }
-          git reset --hard "$BASE"
-          patch -p1 < /tmp/premium.diff
-          git diff --check
+          git reset --hard "$EXPECTED"
+          test "$(git rev-parse HEAD^)" = "$BASE"
+          test "$(git rev-list --count "$BASE"..HEAD)" = "1"
 
-      - name: Extend existing Sapphire QA for approved premium/native surfaces
+      - name: Apply exact final test corrections and restore clean Sapphire QA
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('.github/workflows/bil_sapphire_history_qa.yml')
-          s=p.read_text()
-          old="          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart\n"
-          new="""          changed="$(
-            git diff --name-only 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- \
-              ios/Runner android/app/src lib/features/dashboard \
-              lib/features/global_platform/health_data \
-              lib/features/global_platform/intelligence/global_health_evidence_graph.dart \
-            | grep -Ev '^(android/app/src/main/AndroidManifest\.xml|android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity\.kt|android/app/src/main/res/values[^/]*/(strings|styles)\.xml)$' \
-            || true
-          )"
-          if [ -n "$changed" ]; then
-            printf '%s\n' "$changed"
-            echo 'Protected native Watch/current-value scope changed outside approved Android permission rationale polish.' >&2
-            exit 1
-          fi
-          """
-          assert old in s
-          s=s.replace(old,new,1)
-          needle=" test/responsive_shell_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log"
-          add=" test/responsive_shell_test.dart test/app/localization/food_log_runtime_copy_test.dart test/app/router/quick_add_premium_capture_actions_contract_test.dart test/app/theme/premium_black_dark_theme_contract_test.dart test/features/intelligence_center/ai_coach_premium_welcome_contract_test.dart test/features/nutrition/food_presentation_localizer_test.dart test/features/onboarding/premium_consent_surface_contract_test.dart test/launch_readiness/trusted_food_search_backend_contract_test.dart test/platform_readiness/android_health_permission_premium_contract_test.dart test/platform_readiness/premium_global_native_parity_contract_test.dart test/shared/widgets/premium_trust_and_clinical_surface_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log"
-          assert needle in s
-          s=s.replace(needle,add,1)
-          needle2="supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/sapphire-visual/push.log"
-          repl2="supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch supabase/functions/food-search 2>&1 | tee /tmp/sapphire-visual/push.log"
-          assert needle2 in s
-          s=s.replace(needle2,repl2,1)
-          p.write_text(s)
-          PY
+          import subprocess
 
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-
-      - name: Format and run strict premium preflight
-        shell: bash
-        run: |
-          set -euo pipefail
-          BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
-          flutter pub get
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('lib/features/intelligence_center/presentation/intelligence_query_flow.dart')
-          s=p.read_text()
-          needle="          final scheme = Theme.of(sheetContext).colorScheme;\n"
-          assert s.count(needle) == 1
-          p.write_text(s.replace(needle, '', 1))
+          base='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
 
           p=Path('test/features/nutrition/food_presentation_localizer_test.dart')
           s=p.read_text()
-          replacements = [
+          replacements=[
               ("const canonical = 'Turkey breast, roasted';", "const canonical = 'Acerola puree, unsweetened';"),
               ("localizedName: 'صدر ديك رومي مشوي',", "localizedName: 'هريس أسيرولا غير محلى',"),
-              ("      'صدر ديك رومي مشوي',", "      'هريس أسيرولا غير محلى',"),
+              ("        'صدر ديك رومي مشوي',", "        'هريس أسيرولا غير محلى',"),
           ]
-          for old, new in replacements:
+          for old,new in replacements:
               assert s.count(old) == 1, old
               s=s.replace(old,new,1)
           p.write_text(s)
 
           p=Path('test/launch_readiness/trusted_food_search_backend_contract_test.dart')
           s=p.read_text()
-          replacements = [
-              ("      'name': 'Turkey breast, roasted',", "      'name': 'Acerola puree, unsweetened',"),
-              ("      'localized_name': 'صدر ديك رومي مشوي',", "      'localized_name': 'هريس أسيرولا غير محلى',"),
-              ("    expect(food!.name, 'Turkey breast, roasted');", "    expect(food!.name, 'Acerola puree, unsweetened');\n    expect(food.keywords, isNot(contains('هريس أسيرولا غير محلى')));"),
-              ("      'صدر ديك رومي مشوي',", "      'هريس أسيرولا غير محلى',"),
+          replacements=[
+              ("        'name': 'Turkey breast, roasted',", "        'name': 'Acerola puree, unsweetened',"),
+              ("        'localized_name': 'صدر ديك رومي مشوي',", "        'localized_name': 'هريس أسيرولا غير محلى',"),
+              ("      expect(food!.name, 'Turkey breast, roasted');", "      expect(food!.name, 'Acerola puree, unsweetened');\n      expect(food.keywords, isNot(contains('هريس أسيرولا غير محلى')));"),
+              ("        'صدر ديك رومي مشوي',", "        'هريس أسيرولا غير محلى',"),
           ]
-          for old, new in replacements:
+          for old,new in replacements:
               assert s.count(old) == 1, old
               s=s.replace(old,new,1)
           p.write_text(s)
+
+          qa=subprocess.check_output([
+              'git','show',base+':.github/workflows/bil_sapphire_history_qa.yml'
+          ]).decode()
+
+          old="""      - name: Commit exact prepared source before reference verification
+        id: source
+        run: |
+          set -euo pipefail
+          git config user.name 'BIL source maintenance'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib test pubspec.yaml docs/release tool/sapphire
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix(prebuild): apply final guarded navigation and presentation fixes'
+            git push origin HEAD:fix/community-sapphire-health-3033
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          # The final prebuild polish intentionally changes presentation outside
+          # the previously reviewed Community source hash. Run the strict full
+          # suite against committed masters and collect any visual diffs; never
+          # regenerate a reference here.
+          echo 'references_ready=true' >> "$GITHUB_OUTPUT"
+"""
+          new="""      - name: Verify source is already prepared and immutable
+        id: source
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            echo 'Committed release source is not formatter/prepare clean.' >&2
+            git status --short
+            git diff --check
+            exit 1
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo 'references_ready=true' >> "$GITHUB_OUTPUT"
+"""
+          assert old in qa
+          qa=qa.replace(old,new,1)
+
+          old_guard="          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart\n"
+          new_guard="""          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
+          python3 - <<'PY'
+          import pathlib,re,subprocess
+          base='59839c7deb4d1cc860275b9e69578e299cc24d0a'
+          android_changed=subprocess.check_output([
+              'git','diff','--name-only',base,'HEAD','--','android/app/src'
+          ]).decode().splitlines()
+          allowed_exact={
+              'android/app/src/main/AndroidManifest.xml',
+              'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt',
+          }
+          allowed_patterns=(
+              re.compile(r'^android/app/src/main/res/values(?:-[^/]+)?/strings[.]xml$'),
+              re.compile(r'^android/app/src/main/res/values(?:-[^/]+)?/styles[.]xml$'),
+          )
+          unexpected=[
+              p for p in android_changed
+              if p not in allowed_exact and not any(rx.match(p) for rx in allowed_patterns)
+          ]
+          assert not unexpected, f'Unexpected native Android/Watch change: {unexpected}'
+          path='lib/features/connected_health/connected_health_signal_detail_page.dart'
+          old=subprocess.check_output(['git','show',base+':'+path]).decode()
+          new=pathlib.Path(path).read_text()
+          def live(s): return s[s.index('class _MeasuredSignalCard'):s.index('class _SignalHistoryCard')]
+          assert live(old)==live(new),'Live Watch/current-value card changed'
           PY
-          mapfile -t DART_FILES < <(git diff --name-only "$BASE" -- '*.dart')
+"""
+          assert old_guard in qa
+          qa=qa.replace(old_guard,new_guard,1)
+          duplicate="""          python3 - <<'PY'
+          import pathlib,subprocess
+          path='lib/features/connected_health/connected_health_signal_detail_page.dart'
+          old=subprocess.check_output(['git','show','59839c7deb4d1cc860275b9e69578e299cc24d0a:'+path]).decode()
+          new=pathlib.Path(path).read_text()
+          def live(s): return s[s.index('class _MeasuredSignalCard'):s.index('class _SignalHistoryCard')]
+          assert live(old)==live(new),'Live Watch/current-value card changed'
+          PY
+"""
+          assert duplicate in qa
+          qa=qa.replace(duplicate,'',1)
+
+          needle=" test/responsive_shell_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log"
+          add=" test/responsive_shell_test.dart test/app/localization/food_log_runtime_copy_test.dart test/app/router/quick_add_premium_capture_actions_contract_test.dart test/app/theme/premium_black_dark_theme_contract_test.dart test/features/intelligence_center/ai_coach_premium_welcome_contract_test.dart test/features/nutrition/food_presentation_localizer_test.dart test/features/onboarding/premium_consent_surface_contract_test.dart test/launch_readiness/trusted_food_search_backend_contract_test.dart test/platform_readiness/android_health_permission_premium_contract_test.dart test/platform_readiness/mobile_release_configuration_contract_test.dart test/platform_readiness/premium_global_native_parity_contract_test.dart test/shared/widgets/premium_trust_and_clinical_surface_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log"
+          assert needle in qa
+          qa=qa.replace(needle,add,1)
+
+          needle="supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch 2>&1 | tee /tmp/sapphire-visual/push.log"
+          repl="supabase/functions/push-provider-gateway supabase/functions/community-push-dispatch supabase/functions/food-search 2>&1 | tee /tmp/sapphire-visual/push.log"
+          assert needle in qa
+          qa=qa.replace(needle,repl,1)
+          Path('.github/workflows/bil_sapphire_history_qa.yml').write_text(qa)
+          PY
+          ruby -e "require 'yaml'; YAML.load_file('.github/workflows/bil_sapphire_history_qa.yml'); puts 'SAPPHIRE_YAML_PASS'"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Prepare format analyze and run premium preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
+          python3 tool/sapphire/prepare.py
+          flutter pub get
+          mapfile -t DART_FILES < <(git diff --name-only 59839c7deb4d1cc860275b9e69578e299cc24d0a -- '*.dart')
           if ((${#DART_FILES[@]})); then
             dart format "${DART_FILES[@]}"
           fi
@@ -133,22 +183,30 @@ jobs:
           flutter test --no-pub --concurrency 1 --timeout 90s --reporter expanded             test/app/localization/food_log_runtime_copy_test.dart             test/app/router/quick_add_premium_capture_actions_contract_test.dart             test/app/theme/premium_black_dark_theme_contract_test.dart             test/features/intelligence_center/ai_coach_premium_welcome_contract_test.dart             test/features/nutrition/food_presentation_localizer_test.dart             test/features/onboarding/premium_consent_surface_contract_test.dart             test/launch_readiness/trusted_food_search_backend_contract_test.dart             test/platform_readiness/android_health_permission_premium_contract_test.dart             test/platform_readiness/mobile_release_configuration_contract_test.dart             test/platform_readiness/premium_global_native_parity_contract_test.dart             test/shared/widgets/premium_trust_and_clinical_surface_test.dart
           "$DENO" test --allow-env --allow-read --allow-net supabase/functions/food-search
 
-      - name: Verify immutable release identities and create exactly one source commit
+      - name: Create one replacement commit and move release branch once
         shell: bash
         run: |
           set -euo pipefail
           BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
+          EXPECTED='46cc4a3b4120ffaeaf3342b275cfb58f79bbed78'
           git diff --exit-code "$BASE" --             lib/app/router/app_router.dart             android/app/build.gradle.kts             ios/Runner.xcodeproj/project.pbxproj             store_assets
           grep -Fq 'applicationId = "com.bilhealth.bodyintelligencelog"' android/app/build.gradle.kts
           grep -Fq 'PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog' ios/Runner.xcodeproj/project.pbxproj
-          git config user.name 'BIL release polish'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           if git diff --cached --name-only | grep -q '^tool/premium_one_shot/'; then
-            echo 'Transport files must never enter the release commit.' >&2
+            echo 'Transport files must never enter release tree.' >&2
             exit 1
           fi
-          git commit -m 'feat(release): premium global experience and native parity polish'
-          test "$(git rev-parse HEAD^)" = "$BASE"
-          test "$(git rev-list --count "$BASE"..HEAD)" = "1"
-          git push origin HEAD:fix/community-sapphire-health-3033
+          git config user.name 'bilhealth-admin'
+          git config user.email 'bilhealth.app@gmail.com'
+          TREE="$(git write-tree)"
+          NEW="$(printf '%s\n' 'feat(release): premium global polish for Android 30 and iOS 33' | git commit-tree "$TREE" -p "$BASE")"
+          test "$(git rev-parse "$NEW^")" = "$BASE"
+          test "$(git rev-list --count "$BASE".."$NEW")" = "1"
+          git fetch origin fix/community-sapphire-health-3033
+          test "$(git rev-parse FETCH_HEAD)" = "$EXPECTED" || {
+            echo 'Release branch moved during preflight; refusing force update.' >&2
+            exit 1
+          }
+          git push --force-with-lease=refs/heads/fix/community-sapphire-health-3033:$EXPECTED             origin "$NEW":refs/heads/fix/community-sapphire-health-3033
+          echo "FINAL_SHA=$NEW"
