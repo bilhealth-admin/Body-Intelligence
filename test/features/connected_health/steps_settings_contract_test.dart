@@ -131,6 +131,28 @@ void main() {
     await database.close();
   });
 
+  testWidgets('step drill-in chevrons respect RTL direction', (tester) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    final repository = PreferencesRepository(database);
+    await _pump(tester, repository, locale: const Locale('ar'));
+
+    expect(
+      tester.widget<Icon>(
+        find.byKey(const Key('steps-history-chevron')),
+      ).icon,
+      Icons.chevron_left_rounded,
+    );
+    expect(
+      tester.widget<Icon>(
+        find.byKey(const Key('steps-goal-chevron')),
+      ).icon,
+      Icons.chevron_left_rounded,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await database.close();
+  });
+
   testWidgets('source persists and connected-health error has a retry', (
     tester,
   ) async {
@@ -170,6 +192,7 @@ Future<void> _pump(
   WidgetTester tester,
   PreferencesRepository repository, {
   ConnectedHealthGateway? gateway,
+  Locale locale = const Locale('en'),
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -179,7 +202,7 @@ Future<void> _pump(
           connectedHealthGatewayProvider.overrideWithValue(gateway),
       ],
       child: MaterialApp(
-        locale: const Locale('en'),
+        locale: locale,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
