@@ -1,122 +1,133 @@
-# Sapphire Community and daily history — source acceptance evidence
+# BIL final prebuild source acceptance — Android 30 / iOS 33
 
 ## Provenance
 
-Native Android 29 / iOS 32 base: 9f439cae97d72b784880a1b1ac4ef1d33ede30c1.
-Retained functional fixes: 59839c7deb4d1cc860275b9e69578e299cc24d0a.
-Verified runtime/test source: 5da2bbf3a3fbb17a05a18106a243b865aa862aa9.
-Run: https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36640466225
-Its staging commit is 1ccd8b8a263bdd54489406905a48cb67b7e55d47. The prepare job
-commits reviewed images and test edits; every later job explicitly checks out
-5da2bbf, recorded in its plan. The final docs-only freeze must additionally pass
-its own exact-commit QA before build dispatch. Parent results are not inherited.
+Native Android 29 / iOS 32 base: `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
+Retained Facebook, QR, Community and push fixes: `59839c7deb4d1cc860275b9e69578e299cc24d0a`.
+Previously frozen Sapphire source: `927dce3f21f5984f4533c20296fc335b796ee8bd`.
+Final audited application/test source: `960bead1d24ffea38d963b9e5f58fac0963a2579`.
+Working branch: `fix/community-sapphire-health-3033`.
 
-## Complete discovery and actual counts
+Final exhaustive QA run:
+https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36664811378
 
-1,032 test/**/*_test.dart files discovered. One performance file runs serially
-first on Linux; all other 1,031 files run exactly once in eight Windows 2022
-shards using Flutter 3.44.6. Zero path exclusions and zero test-name filters.
-The assigned-file union equals discovery, no duplicates, all exit codes zero.
+## Final fixes included
 
-| Shard | Files | Passed visible cases | Conditional skips |
-| --- | ---: | ---: | ---: |
-| 0 | 129 | 599 | 0 |
-| 1 | 129 | 716 | 1 |
-| 2 | 129 | 738 | 0 |
-| 3 | 129 | 942 | 1 |
-| 4 | 129 | 645 | 3 |
-| 5 | 129 | 839 | 0 |
-| 6 | 129 | 549 | 0 |
-| 7 | 128 | 624 | 1 |
-| Performance | 1 | 2 | 0 |
-| Total | 1,032 | 5,654 | 6 |
+The accepted source retains the previously reviewed Community, QR, Facebook,
+push, daily active-energy and completed-day heart-history work, then adds the
+final prebuild corrections requested during visual review:
 
-Zero failed cases and zero error events. Hidden loader/setup/teardown events are
-not cases. The separately rerun 294 focused and eight visual matrix cases are
-already represented in the full selection; do not add them again. SQL and Deno
-are separate. The user's earlier local 5,530 has no matching per-case log here;
-do not claim a precise reconciliation based only on arithmetic totals.
+- Weekly Report previous/next controls are direction-aware in RTL/LTR.
+- Nutrition empty-day "Log food" opens the existing real FoodLogPage inside the
+  active navigator instead of entering the blank shell-child path; a direct
+  widget navigation regression test covers open and return.
+- Nutrition day navigation chevrons use the same direction-aware contract.
+- More keeps every existing route and action, but uses the reviewed premium card,
+  typography, spacing and semantic-icon presentation.
+- The compact bottom dock preserves Dashboard / Quick Add / More only; Quick Add
+  owns the reviewed blue-to-violet premium treatment and reserves physical space
+  so it cannot overlap content.
+- Quick Add's decorative sparkle is excluded from semantics and separately keyed
+  from the real action glyph.
+- Steps drill-in chevrons are direction-aware without changing health settings,
+  native reads or Watch UI.
+- The More implementation is split into a presentation part so the source-size
+  architecture ceiling stays enforced rather than weakened.
+- Reviewed golden masters were refreshed only for the intentionally changed
+  Weekly RTL / More / affected settings review surfaces, then the one-shot
+  refresh workflow was removed.
 
-## Explicitly NOT executed conditional cases
+No store route, package/bundle identifier, purchase flow, native Watch settings,
+native health permission surface, iOS/Google native login path, or Community
+route was renamed by these changes.
 
-1. test/launch_readiness/deferred_ios_google_mobile_ads_plugin_test.dart:
-   symlinked override parent is rejected (existing Windows host condition).
-2. test/features/meal_planner/existing_recipe_canonical_seeds_test.dart:
-   content and image fingerprints reject all duplicate seeds.
-3. test/features/meal_planner/generated_recipe_assets_test.dart:
-   every catalog image is fail-closed or points to a present exact asset.
-4. test/features/meal_planner/generated_recipe_assets_test.dart:
-   generated image hashes are unique.
-5. test/launch_readiness/visual_reference_evidence_truth_contract_test.dart:
-   visual evidence check is truthful and read-only.
-6. test/features/wellness/wellness_video_stream_live_test.dart:
-   live public BIL stream supports pinned native range delivery.
+## Complete unfiltered Flutter QA
 
-Items 2-6 retain their pre-existing opt-in conditions; no new skip was added.
-These files ran, but the conditional cases are not passed. Physical/native
-integration_test remains separate from host tests and is not counted here.
+Run `36664811378` completed successfully on exact source
+`960bead1d24ffea38d963b9e5f58fac0963a2579`.
 
-## Test environment correction, not weaker assertions
+All `1,033` discovered `test/**/*_test.dart` files were assigned exactly once
+across eight Windows 2022 shards with no path exclusions and no test-name
+filters. Final visible case totals:
 
-Untouched 59839 was tested on Linux and Windows. Existing image references were
-Windows raster output. On Linux the old helper used wrong-case Roboto and
-MaterialIcons names and could silently substitute Montserrat. The helper now
-loads exact SDK names and rejects silent substitution. Windows checkout uses
-core.autocrlf=false to retain bounded/hash-addressed JSON bytes. No asset bound,
-pixel tolerance or assertion was relaxed. The architecture marker-prefix scan
-is byte-safe; full UTF-8 decoding and all source-size ceilings remain strict.
+| Shard | Files | Passed | Failed | Errors | Conditional skips |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 0 | 130 | 618 | 0 | 0 | 0 |
+| 1 | 129 | 507 | 0 | 0 | 1 |
+| 2 | 129 | 709 | 0 | 0 | 0 |
+| 3 | 129 | 841 | 0 | 0 | 1 |
+| 4 | 129 | 886 | 0 | 0 | 1 |
+| 5 | 129 | 714 | 0 | 0 | 2 |
+| 6 | 129 | 651 | 0 | 0 | 1 |
+| 7 | 129 | 730 | 0 | 0 | 0 |
+| **Total** | **1,033** | **5,656** | **0** | **0** | **6** |
 
-Only ten intentionally redesigned Community masters changed. Four additional
-scoped Community images stayed identical. All other masters, including Watch,
-are unchanged. The 14 images were individually reviewed and imported by exact
-archive/PNG hashes, never regenerated during acceptance. The import record is
-in tool/sapphire/reviewed_community_goldens.json with immutable input objects.
+The six skips are the existing host/opt-in conditional cases; no skip was added
+to hide a regression.
 
-## Evidence artifacts for 5da2bbf
+The focused suite also passed `363` cases, and the two explicit performance
+budget cases passed. `flutter analyze --no-pub` reported no issues.
 
-| Artifact | ID | Archive SHA-256 |
-| --- | --- | --- |
-| Source | 11066406318 | 44eb542611531c289a077302a7bd56ba400dfda0ec1f6454615ae244f55dc16d |
-| Focus/performance | 11066711576 | 32a5b426963f7a7f51dbedbe142796b65a0dee878444ecec629bfb3422e6ede6 |
-| Visual/SQL/provider | 11066592000 | ee3eb356968171a8aac2f7df77756242c067ac59be0d3159cb65abcd422cfdae |
-| Shard 0 | 11066912488 | 240a9fccabc972b13142257a46e686013fe429090a924fc63b34ffbbf579c5eb |
-| Shard 1 | 11067125407 | f397b45515a92ef052b33e188e1b9e562e2f7b238b11b20997f949117d9d5d91 |
-| Shard 2 | 11066702452 | 84a98da4c1fd3dad83e5f2b7e5c20f083252fdea30b5643b7a85e262603fe721 |
-| Shard 3 | 11066288105 | 991fea9537b999c520e0028e775ff2bd09bad5d9a4716c237246717e4ab4cf16 |
-| Shard 4 | 11067040774 | f2e3ffbff6c174c8d1d5613ba31ec215f36a7f27bacf41a41dce36e4a6e015b3 |
-| Shard 5 | 11067230560 | d765c48f0f18c22ddf96494b473b115c9d74d1ab117dc660848a241911d258c5 |
-| Shard 6 | 11066213115 | 45fb5f81db53a0eecb8e7e33f8bee7fad3f77dadcb0fd3dcbd30ac1e909a508b |
-| Shard 7 | 11067295222 | 04cde4fcd5993d63427df5c5fcaaf6b19686933a21028132b862adaa380d2111 |
+## Visual, RTL/LTR, accessibility and Community acceptance
 
-## Implemented changes and boundaries
+The final run passed the Community visual matrix in Arabic and English, light
+and dark, normal and enlarged text. Eight final Community visual cases passed.
+The reviewed Weekly RTL and More/settings baselines are strict byte/pixel
+comparators again; the temporary one-shot baseline updater was removed before
+this accepted source.
 
-Community-only Sapphire palette/type/spacing, accessible content-driven inbox,
-blue outgoing bubbles, cursor emoji insertion, Messages/action entries and shared
-own-account unread badges. The local athlete welcome is scrollable, escapable,
-indeterminate and reduced-motion-aware, without a forced timer. Its bundled
-existing project athlete asset does not require a network request at entry.
-No fake presence, calls, mutual-friend totals or activity is introduced.
-120 actual-widget images cover 15 scenes in Arabic/English, light/dark, scale1/2.
-Focused tests also cover 320px at scale3. Captures use test fonts and synthetic
-accounts, not a real-device accessibility certification. Font files are not exported.
+Focused and full-suite coverage includes RTL/LTR navigation, 25-locale copy
+contracts, compact/wide shell navigation, enlarged text, Quick Add semantics,
+More semantic icon spacing, Weekly Report history navigation, Nutrition entry
+and return, and connected-health/Steps directionality.
 
-History has one daily energy total, preferring authoritative native day totals
-and never adding cumulative snapshots; the imported-interval fallback is labeled.
-Heart history shows one recorded-sample mean for completed days, separate from
-resting rate, with a >100 informational day marker and first/peak timestamps.
-It is not a medical diagnosis or continuous/background alarm. Completed days
-refresh on next load/sync, not a guaranteed midnight job. Calendar/DST, repeated
-sync, source correction, deletion provenance and raw-data preservation are tested.
-Native Watch settings, queries, dashboard and current cards are byte-guarded.
-Purchases, iOS/Google native login, Android Facebook/push fixes and QR privacy remain.
+## Cloud and data-integrity acceptance
 
-The live QR migration 20260929050616 and attention/read migration 20260929074359
-were checked read-only. Counts/read RPCs are authenticated own-user only; the
-arbitrary-owner badge RPC is service-role-only. No production health records,
-messages, friendships or permissions were modified by this verification.
-Disposable PostgreSQL:22 passed assertions. Mocked provider transports:12 passed.
+The final visual/cloud job passed the isolated PostgreSQL Community contract and
+12 Deno push-provider/community-dispatch tests with zero failures.
 
-No signed Android30 AAB/iOS33 IPA, store upload, repeated physical Facebook login,
-real push registration/delivery or terminated-app tap is claimed. These remain
-artifact/device acceptance after source freeze. Provider success alone does not
-prove that a notification appeared on a phone.
+Production Supabase was also inspected read-only after the source fixes:
+
+- every public table has RLS enabled;
+- private/bil_admin_private tables expose no client DML grants;
+- public RLS tables with no policy also have no client table grant;
+- current production migrations include the QR visibility and Community
+  attention/read migrations;
+- `bil_rls_auth_initplan_optimization` replaced per-row auth.uid evaluation in
+  the reviewed own-row policies without changing row authority;
+- `bil_foreign_key_index_hardening` added advisor-requested FK covering indexes;
+- database logs showed no sampled >=500 ms PostgreSQL duration event in the
+  inspected window;
+- push/community Edge Functions retain explicit auth/custom-secret boundaries.
+
+The Supabase advisor still reports generic security-definer warnings for
+authenticated RPCs. These RPCs were reviewed as an intentional API boundary:
+the normal user-facing functions resolve `auth.uid()` directly or delegate to
+gated helpers; the moderator wrapper delegates to the moderator-authority check.
+The remaining leaked-password-protection warning is a project Auth setting, not
+an application-source defect. The product login UI is passwordless/social; this
+setting is not changed by SQL migrations.
+
+Four performance warnings remain for duplicate permissive policies
+(`bil_cloud_records` x3 and `bil_follows` SELECT). Removing those redundant
+policies requires destructive policy replacement and was not forced through the
+connector safeguard. They do not change correctness or authorization and are
+not a source-build blocker.
+
+## Health/Watch integrity boundaries
+
+Native Watch settings, native health queries, dashboard/current-value UI and the
+reviewed health permission surface remained byte-guarded in the final focused
+run. Daily Active Energy remains one authoritative local-day total where
+available. Heart history remains one completed-day recorded-sample mean, with
+the >100 bpm day marker informational only; it is not a diagnosis or a
+background/continuous alarm.
+
+## Acceptance boundary
+
+This record proves source-level, host-runtime, isolated SQL/Deno, visual
+regression and cloud-contract acceptance for the final prebuild source. It does
+not claim a signed AAB/IPA, real-device Facebook session, real FCM/APNs delivery,
+terminated-app notification tap, physical HealthKit/Health Connect behavior, or
+store approval. Those remain signed-artifact / physical-device acceptance after
+source freeze.
