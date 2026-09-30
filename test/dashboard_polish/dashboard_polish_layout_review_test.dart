@@ -245,10 +245,12 @@ void main() {
             // trend must not overflow when accessibility fonts are enabled.
             final position = tester
                 .state<ScrollableState>(
-                  find.descendant(
-                    of: find.byKey(const Key('dashboard-scroll-view')),
-                    matching: find.byType(Scrollable),
-                  ),
+                  find
+                      .descendant(
+                        of: find.byKey(const Key('dashboard-scroll-view')),
+                        matching: find.byType(Scrollable),
+                      )
+                      .first,
                 )
                 .position;
             position.jumpTo(position.maxScrollExtent);
