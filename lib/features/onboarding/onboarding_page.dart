@@ -10,6 +10,7 @@ import '../../app/localization/bil_locale_policy.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/database_provider.dart';
 import '../../shared/widgets/bil_coach_identity.dart';
+import '../../shared/widgets/bil_premium_trust_surface.dart';
 import '../connected_health/connected_health_model.dart';
 import '../connected_health/providers/connected_health_provider.dart';
 import '../connected_health/widgets/apple_health_permission_review.dart';

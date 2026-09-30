@@ -130,7 +130,7 @@ class BilQuickAddSheet extends StatelessWidget {
                         begin: AlignmentDirectional.topStart,
                         end: AlignmentDirectional.bottomEnd,
                         colors: dark
-                            ? const [Color(0xFF0B1220), Color(0xFF111E35)]
+                            ? const [Color(0xFF030405), Color(0xFF0C1016)]
                             : const [Color(0xFFF8FAFF), Color(0xFFEAF1FF)],
                       ),
                     ),
@@ -206,17 +206,29 @@ class BilQuickAddSheet extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final action = primaryActions[index];
                               final spec = BilSemanticIcons.spec(action.kind);
+                              final premiumGradient = switch (action.kind) {
+                                BilSemanticIconKind.voice => const <Color>[
+                                  Color(0xFF243B8F),
+                                  Color(0xFF6D4AE8),
+                                ],
+                                BilSemanticIconKind.mealPhoto => const <Color>[
+                                  Color(0xFF075A8C),
+                                  Color(0xFF0A84FF),
+                                ],
+                                _ => null,
+                              };
                               return _PrimaryQuickAction(
                                 actionKey: Key('quick-add-primary-$index'),
                                 badgeKey: Key('quick-add-primary-badge-$index'),
                                 iconKey: Key('quick-add-primary-icon-$index'),
                                 icon: spec.iconFor(baseTheme.platform),
-                                backgroundColor: spec.accent(
-                                  baseTheme.brightness,
-                                ),
-                                foregroundColor: spec.onAccent(
-                                  baseTheme.brightness,
-                                ),
+                                backgroundColor: premiumGradient == null
+                                    ? spec.accent(baseTheme.brightness)
+                                    : Colors.white.withValues(alpha: .16),
+                                foregroundColor: premiumGradient == null
+                                    ? spec.onAccent(baseTheme.brightness)
+                                    : Colors.white,
+                                premiumGradient: premiumGradient,
                                 label: action.label,
                                 onTap: action.onTap,
                               );
@@ -291,6 +303,7 @@ class _PrimaryQuickAction extends StatelessWidget {
     required this.foregroundColor,
     required this.label,
     required this.onTap,
+    this.premiumGradient,
   });
 
   final Key actionKey;
@@ -301,6 +314,7 @@ class _PrimaryQuickAction extends StatelessWidget {
   final Color foregroundColor;
   final String label;
   final VoidCallback onTap;
+  final List<Color>? premiumGradient;
 
   @override
   Widget build(BuildContext context) => _GlassActionSurface(
@@ -308,6 +322,7 @@ class _PrimaryQuickAction extends StatelessWidget {
     semanticLabel: label.replaceAll('\n', ' '),
     radius: 19,
     onTap: onTap,
+    premiumGradient: premiumGradient,
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       child: Column(
@@ -332,8 +347,11 @@ class _PrimaryQuickAction extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
+                color: premiumGradient == null
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Colors.white,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -.08,
               ),
             ),
           ),
@@ -417,6 +435,7 @@ class _GlassActionSurface extends StatelessWidget {
     required this.radius,
     required this.onTap,
     required this.child,
+    this.premiumGradient,
   });
 
   final Key actionKey;
@@ -424,6 +443,7 @@ class _GlassActionSurface extends StatelessWidget {
   final double radius;
   final VoidCallback onTap;
   final Widget child;
+  final List<Color>? premiumGradient;
 
   @override
   Widget build(BuildContext context) {
@@ -435,21 +455,39 @@ class _GlassActionSurface extends StatelessWidget {
       onTap: onTap,
       excludeSemantics: true,
       child: Material(
-        color: scheme.surface.withValues(alpha: .94),
+        color: premiumGradient == null
+            ? scheme.surface.withValues(alpha: .94)
+            : Colors.transparent,
         elevation: 0,
+        shadowColor: const Color(0xFF4D62FF).withValues(alpha: .24),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius),
-          side: BorderSide(color: scheme.outlineVariant),
+          side: BorderSide(
+            color: premiumGradient == null
+                ? scheme.outlineVariant
+                : Colors.white.withValues(alpha: .16),
+          ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          // Semantics owns the single accessible tap action above; InkWell
-          // remains the visual/pointer target for touch and mouse input.
-          excludeFromSemantics: true,
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: child,
+        child: Ink(
+          decoration: premiumGradient == null
+              ? null
+              : BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: AlignmentDirectional.topStart,
+                    end: AlignmentDirectional.bottomEnd,
+                    colors: premiumGradient!,
+                  ),
+                ),
+          child: InkWell(
+            // Semantics owns the single accessible tap action above; InkWell
+            // remains the visual/pointer target for touch and mouse input.
+            excludeFromSemantics: true,
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: child,
+            ),
           ),
         ),
       ),

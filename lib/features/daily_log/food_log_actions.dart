@@ -24,7 +24,7 @@ extension _FoodLogActions on _FoodLogPageState {
                 ),
                 decoration: InputDecoration(
                   labelText:
-                      '${food.servingUnit} ${_t(dialogContext, 'quantity')}',
+                      '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
                 ),
               ),
               actions: [

@@ -8,6 +8,7 @@ import 'connected_health_model.dart';
 import 'connected_health_daily_history.dart';
 import 'connected_health_daily_history_view.dart';
 import '../../app/localization/sapphire_copy.dart';
+import '../../shared/widgets/bil_clinical_note.dart';
 import 'providers/connected_health_provider.dart';
 
 /// Truthful detail surface for a measured connected-health signal.
@@ -99,11 +100,10 @@ class ConnectedHealthSignalDetailPage extends ConsumerWidget {
                   ],
                 ],
                 const SizedBox(height: 16),
-                Text(
-                  context.strings.text(
+                BilClinicalNote(
+                  text: context.strings.text(
                     'Connected-health values are wellness records, not a diagnosis. Seek medical care for concerning symptoms.',
                   ),
-                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),

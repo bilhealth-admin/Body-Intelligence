@@ -1,9 +1,14 @@
 part of '../food_page.dart';
 
 class _FoodTile extends ConsumerStatefulWidget {
-  const _FoodTile({required this.food, required this.onChanged});
+  const _FoodTile({
+    required this.food,
+    required this.onChanged,
+    this.displayLocaleTag,
+  });
   final Food food;
   final Future<void> Function() onChanged;
+  final String? displayLocaleTag;
 
   @override
   ConsumerState<_FoodTile> createState() => _FoodTileState();
@@ -162,7 +167,9 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
   Widget build(BuildContext context) {
     final t = context.strings.text;
     final food = widget.food;
-    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final localeTag =
+        widget.displayLocaleTag ??
+        Localizations.localeOf(context).toLanguageTag();
     final displayName = FoodPresentationLocalizer.foodName(
       name: food.name,
       arabicName: food.arabicName,

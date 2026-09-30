@@ -42,13 +42,10 @@ Future<void> main() async {
     // as well; BIL's Flutter surfaces already consume system-bar insets.
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
-  } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-    // Preserve the reviewed iPhone/iPad presentation. This Android adaptive
-    // migration must not change the iOS release contract.
-    await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[
-      DeviceOrientation.portraitUp,
-    ]);
   }
+  // iOS orientation support is owned by Info.plist: iPhone stays portrait,
+  // while iPad supports all four orientations for multitasking and Stage
+  // Manager. Do not override that native per-device contract at runtime.
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     AppObservability.crashes.record(

@@ -77,15 +77,21 @@ class _ContextFocusCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 5),
-          Text(
-            t(
+          BilClinicalNote(
+            title: t(
+              'Health guidance boundary',
+              'حدود الإرشاد الصحي',
+              'Limites des conseils de santé',
+              'Límite de orientación de salud',
+              'Sağlık rehberliği sınırı',
+            ),
+            text: t(
               'AI Coach is optional, is not a doctor, and receives text context only after explicit consent. Voice recognition remains separate from this consent.',
               'مدرب AI اختياري وليس طبيبًا، ولا يتلقى السياق النصي إلا بعد موافقة صريحة. يظل التعرف على الكلام منفصلًا عن هذه الموافقة.',
               'Le Coach IA est facultatif, ne remplace pas un médecin et ne reçoit le contexte textuel qu’après un consentement explicite. La reconnaissance vocale reste distincte.',
               'El Coach con IA es opcional, no es un médico y solo recibe contexto de texto tras tu consentimiento explícito. El reconocimiento de voz es independiente.',
               'AI Koç isteğe bağlıdır, doktor değildir ve metin bağlamını yalnızca açık onaydan sonra alır. Konuşma tanıma bu onaydan ayrıdır.',
             ),
-            style: const TextStyle(color: Color(0xFF536873), height: 1.4),
           ),
           const SizedBox(height: 4),
           for (final option in options)
@@ -188,7 +194,7 @@ class _BoostCard extends StatelessWidget {
                         'BIL AI Boost',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                              color: const Color(0xFF071923),
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w800,
                             ),
                       ),
@@ -197,7 +203,7 @@ class _BoostCard extends StatelessWidget {
                         '+2,500 BIL AI Tokens',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
-                              color: const Color(0xFF071923),
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w900,
                             ),
                       ),
@@ -217,7 +223,10 @@ class _BoostCard extends StatelessWidget {
             'Saldo verificado sin caducidad. Tu tienda muestra el precio.',
             'Metin, ses ve görüntü için süresiz bakiye. Fiyatı mağazanız gösterir.',
           ),
-          style: const TextStyle(color: Color(0xFF536873), height: 1.4),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
         ),
         if (boost.displayPrice != null) ...[
           const SizedBox(height: 7),

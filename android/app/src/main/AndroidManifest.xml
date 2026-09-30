@@ -89,10 +89,10 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${bilAdMobAndroidAppId}" />
-        <!-- Meta's SDK completes its own native Android sign-in and returns a
-             short-lived token directly to BIL. No Supabase browser callback is
-             used for Facebook on Android. Keep all automatic event and ad-ID
-             collection disabled: BIL uses contextual ads only. -->
+        <!-- Android Facebook sign-in intentionally uses Supabase's external
+             browser OAuth callback. The Meta SDK metadata remains packaged for
+             the audited iOS/native integration surface and compatibility, while
+             automatic event and ad-ID collection stays disabled. -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -108,7 +108,7 @@
         <activity
             android:name=".PermissionsRationaleActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar">
+            android:theme="@style/HealthPermissionRationaleTheme">
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
             </intent-filter>

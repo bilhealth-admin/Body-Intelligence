@@ -10,6 +10,8 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
+import '../../../shared/widgets/bil_clinical_note.dart';
+import '../../../shared/widgets/bil_premium_trust_surface.dart';
 import '../../commerce/presentation/ai_boost_coach_artwork.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../onboarding/onboarding_runtime_copy.dart';
@@ -227,13 +229,13 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         usage = _loadUsage();
       });
     });
-    const navy = Color(0xFF071923);
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F7F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF3F7F9),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
-        foregroundColor: navy,
+        foregroundColor: scheme.onSurface,
         title: Text(
           t(
             'Coach access',
@@ -361,9 +363,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
                   'BIL reserva una pequeña cantidad y cobra solo el coste real. Las respuestas locales no gastan tokens.',
                   'BIL önce küçük bir tutar ayırır, sonra yalnızca gerçek maliyeti düşer. Yerel yanıtlar ücretsizdir.',
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   height: 1.45,
-                  color: Color(0xFF536873),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -402,9 +404,11 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF3F8FA),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFD7E4E9)),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
           child: ListTile(
             leading: const BilSemanticIconBadge(

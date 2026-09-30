@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/runtime_copy_food_log.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/services/recoverable_image_picker.dart';
@@ -254,7 +255,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
                     Text(
-                      '${_t(context, 'Analyze meal photo')}…',
+                      '${_t(context, 'Analyze a meal photo')}…',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],
@@ -274,7 +275,15 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final browseFoods = rankedFoods != null && rankedFoods.isNotEmpty
         ? rankedFoods
         : foods;
-    final query = search.text.trim().toLowerCase();
+    final rawQuery = search.text.trim();
+    final query = rawQuery.toLowerCase();
+    final interfaceLocale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
+    final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(
+      query: rawQuery,
+      interfaceLocaleTag: interfaceLocale,
+    );
     final browseResults = browseFoods
         .where((food) {
           if (query.isEmpty) return true;
@@ -285,7 +294,17 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         .toList(growable: false);
     final filtered = query.isEmpty
         ? browseResults
-        : (searchResults ?? const <Food>[]);
+        : (searchResults ?? const <Food>[])
+              .where(
+                (food) => FoodPresentationLocalizer.hasSafeSearchDisplayName(
+                  name: food.name,
+                  arabicName: food.arabicName,
+                  localeTag: resultLocale,
+                  isCustom: food.isCustom,
+                  source: food.source,
+                ),
+              )
+              .toList(growable: false);
     return ListView(
       key: const Key('food-log-reference-page'),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
@@ -338,7 +357,12 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         ),
         if (filtered.isEmpty) _buildEmptyState(context),
         if (filtered.isNotEmpty)
-          for (final food in filtered) _buildFoodTile(context, food),
+          for (final food in filtered)
+            _buildFoodTile(
+              context,
+              food,
+              localeTag: query.isEmpty ? interfaceLocale : resultLocale,
+            ),
         if (filtered.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 40),
@@ -351,7 +375,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     );
   }
 
-  String _searchHintKey() => 'Search foods, brands, flavors…';
+  String _searchHintKey() => FoodLogRuntimeCopy.searchHint;
 
   void _scheduleSearch(String value) {
     _searchDebounce?.cancel();
@@ -393,22 +417,22 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final actions = <({IconData icon, String label, VoidCallback onTap})>[
       (
         icon: Icons.qr_code_scanner_rounded,
-        label: _t(context, 'Barcode scan'),
+        label: _t(context, 'Scan a barcode'),
         onTap: _scanBarcode,
       ),
       (
         icon: Icons.mic_none_rounded,
-        label: _t(context, 'Voice log'),
+        label: _t(context, 'Log with your voice'),
         onTap: _voiceSearch,
       ),
       (
         icon: Icons.photo_camera_outlined,
-        label: _t(context, 'Analyze meal photo'),
+        label: _t(context, 'Analyze a meal photo'),
         onTap: _analyzeMealImage,
       ),
       (
         icon: Icons.add_circle_outline_rounded,
-        label: _t(context, 'Quick add'),
+        label: _t(context, 'Quick Add'),
         onTap: _showQuickAdd,
       ),
     ];
@@ -467,16 +491,17 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     );
   }
 
-  Widget _buildFoodTile(BuildContext context, Food food) {
+  Widget _buildFoodTile(
+    BuildContext context,
+    Food food, {
+    required String localeTag,
+  }) {
     final scheme = Theme.of(context).colorScheme;
     final accent = scheme.primary;
-    final locale = BilLocalePolicy.canonicalTag(
-      Localizations.localeOf(context),
-    );
     final name = FoodPresentationLocalizer.foodName(
       name: food.name,
       arabicName: food.arabicName,
-      localeTag: locale,
+      localeTag: localeTag,
       isCustom: food.isCustom,
       source: food.source,
     );

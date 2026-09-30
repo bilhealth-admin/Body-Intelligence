@@ -395,6 +395,8 @@ class FoodSearchAssistance {
 
   String? arabicNameFor(String description) {
     final normalized = FoodSearchNormalizer.normalize(description);
+    final reviewedPhrase = _reviewedEnglishPhraseToArabic[normalized];
+    if (reviewedPhrase != null) return reviewedPhrase;
     final result = <String>[];
     var meaningfulTokens = 0;
     var translatedTokens = 0;
@@ -419,6 +421,9 @@ class FoodSearchAssistance {
     if (coverage < 0.75) return null;
     return result.join(' ');
   }
+
+  static const Map<String, String> _reviewedEnglishPhraseToArabic =
+      <String, String>{'turkey breast roasted': 'صدر ديك رومي مشوي'};
 
   static const Set<String> _englishStopWords = <String>{
     'a',

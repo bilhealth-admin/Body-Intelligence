@@ -8,6 +8,7 @@ import '../../app/localization/app_localizations.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../app/localization/runtime_copy_cloud_sync.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../shared/widgets/bil_premium_trust_surface.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_summary.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
@@ -419,26 +420,17 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
   Widget build(BuildContext context) => FutureBuilder<bool>(
     future: _current,
     builder: (context, snapshot) {
-      return SwitchListTile.adaptive(
-        key: const Key('meal-vision-ai-consent'),
+      return BilPremiumConsentToggle(
+        controlKey: const Key('meal-vision-ai-consent'),
+        icon: Icons.image_search_rounded,
         value: snapshot.data ?? false,
         onChanged: snapshot.hasData && !_saving ? _setConsent : null,
-        title: Text(_privacyText(context, 'Google Gemini meal-photo consent')),
-        subtitle: Text(
-          _privacyText(
-            context,
-            'Only when enabled, a selected photo, app language, and technical request metadata may be sent to Google’s third-party AI service to suggest food. Turn it off to stop new uploads.',
-          ),
+        loading: _saving || !snapshot.hasData,
+        title: _privacyText(context, 'Google Gemini meal-photo consent'),
+        subtitle: _privacyText(
+          context,
+          'Only when enabled, a selected photo, app language, and technical request metadata may be sent to Google’s third-party AI service to suggest food. Turn it off to stop new uploads.',
         ),
-        secondary: _saving
-            ? const SizedBox.square(
-                dimension: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.privacy,
-                iconOverride: Icons.image_search_rounded,
-              ),
       );
     },
   );

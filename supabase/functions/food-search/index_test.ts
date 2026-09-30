@@ -237,3 +237,67 @@ Deno.test("non-numeric USDA values remain unknown instead of becoming zero", asy
   expectEqual(nutrients[1].amount, null, "boolean nutrient amount");
   expectEqual(nutrients[2].amount, 0, "real numeric zero");
 });
+
+Deno.test("localized food label is display-only and preserves canonical USDA identity", async () => {
+  const response = await handleFoodSearchRequest(
+    new Request("https://example.test/food-search", {
+      method: "POST",
+      body: JSON.stringify({ query: "دجاج", locale: "ar", limit: 5 }),
+    }),
+    {
+      authorize: () => Promise.resolve({
+        ok: true,
+        consumeQuota: () => Promise.resolve("allowed" as const),
+      }),
+      apiKey: () => "test-key",
+      fetch: (() => Promise.resolve(new Response(JSON.stringify({
+        foods: [{ fdcId: 171077, description: "Chicken breast, roasted" }],
+      })))) as typeof fetch,
+      translate: () => Promise.resolve("chicken"),
+      localizeFoodNames: (names, target) => {
+        expectEqual(target, "ar", "target locale");
+        expectEqual(names[0], "Chicken breast, roasted", "canonical input");
+        return Promise.resolve(new Map([
+          ["Chicken breast, roasted", "صدر دجاج مشوي"],
+        ]));
+      },
+    },
+  );
+
+  expectEqual(response.status, 200, "status");
+  const body = await response.json() as Record<string, unknown>;
+  const foods = body.foods as Array<Record<string, unknown>>;
+  expectEqual(foods[0].name, "Chicken breast, roasted", "canonical name");
+  expectEqual(foods[0].localized_name, "صدر دجاج مشوي", "display label");
+  expectEqual(foods[0].localized_locale, "ar", "display locale");
+});
+
+Deno.test("all shipped locale variants remain canonical through the food gateway", async () => {
+  for (const locale of ["pt-BR", "pt-PT", "zh-Hans", "zh-Hant"]) {
+    let localizedTarget = "";
+    const response = await handleFoodSearchRequest(
+      new Request("https://example.test/food-search", {
+        method: "POST",
+        body: JSON.stringify({ query: "apple", locale, limit: 1 }),
+      }),
+      {
+        authorize: () => Promise.resolve({
+          ok: true,
+          consumeQuota: () => Promise.resolve("allowed" as const),
+        }),
+        apiKey: () => "test-key",
+        fetch: (() => Promise.resolve(new Response(JSON.stringify({
+          foods: [{ fdcId: 1, description: "Apple" }],
+        })))) as typeof fetch,
+        localizeFoodNames: (_names, target) => {
+          localizedTarget = target;
+          return Promise.resolve(new Map([["Apple", `localized-${target}`]]));
+        },
+      },
+    );
+    expectEqual(response.status, 200, `${locale} status`);
+    expectEqual(localizedTarget, locale, `${locale} localization target`);
+    const body = await response.json() as Record<string, unknown>;
+    expectEqual(body.locale, locale, `${locale} response locale`);
+  }
+});
