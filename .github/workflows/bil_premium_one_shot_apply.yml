@@ -95,6 +95,31 @@ jobs:
           needle="          final scheme = Theme.of(sheetContext).colorScheme;\n"
           assert s.count(needle) == 1
           p.write_text(s.replace(needle, '', 1))
+
+          p=Path('test/features/nutrition/food_presentation_localizer_test.dart')
+          s=p.read_text()
+          replacements = [
+              ("const canonical = 'Turkey breast, roasted';", "const canonical = 'Acerola puree, unsweetened';"),
+              ("localizedName: 'صدر ديك رومي مشوي',", "localizedName: 'هريس أسيرولا غير محلى',"),
+              ("      'صدر ديك رومي مشوي',", "      'هريس أسيرولا غير محلى',"),
+          ]
+          for old, new in replacements:
+              assert s.count(old) == 1, old
+              s=s.replace(old,new,1)
+          p.write_text(s)
+
+          p=Path('test/launch_readiness/trusted_food_search_backend_contract_test.dart')
+          s=p.read_text()
+          replacements = [
+              ("      'name': 'Turkey breast, roasted',", "      'name': 'Acerola puree, unsweetened',"),
+              ("      'localized_name': 'صدر ديك رومي مشوي',", "      'localized_name': 'هريس أسيرولا غير محلى',"),
+              ("    expect(food!.name, 'Turkey breast, roasted');", "    expect(food!.name, 'Acerola puree, unsweetened');\n    expect(food.keywords, isNot(contains('هريس أسيرولا غير محلى')));"),
+              ("      'صدر ديك رومي مشوي',", "      'هريس أسيرولا غير محلى',"),
+          ]
+          for old, new in replacements:
+              assert s.count(old) == 1, old
+              s=s.replace(old,new,1)
+          p.write_text(s)
           PY
           mapfile -t DART_FILES < <(git diff --name-only "$BASE" -- '*.dart')
           if ((${#DART_FILES[@]})); then
