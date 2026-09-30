@@ -61,5 +61,62 @@ void main() {
       expect(position.pixels, closeTo(position.maxScrollExtent, .5));
       expect(tester.takeException(), isNull);
     });
+
+  testWidgets('iOS: live dashboard resize preserves held bottom overscroll', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    var contentHeight = 1600.0;
+    late StateSetter updateContent;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            updateContent = setState;
+            return DashboardShell(
+              child: SizedBox(height: contentHeight),
+            );
+          },
+        ),
+      ),
+    );
+
+    final viewport = find.byKey(const Key('dashboard-scroll-view'));
+    final position = tester
+        .state<ScrollableState>(
+          find.descendant(of: viewport, matching: find.byType(Scrollable)),
+        )
+        .position;
+
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pump();
+
+    final gesture = await tester.startGesture(tester.getCenter(viewport));
+    await gesture.moveBy(const Offset(0, -220));
+    await tester.pump();
+
+    final heldOverscroll = position.pixels - position.maxScrollExtent;
+    expect(heldOverscroll, greaterThan(0));
+
+    updateContent(() => contentHeight += 240);
+    await tester.pump();
+
+    expect(
+      position.pixels - position.maxScrollExtent,
+      closeTo(heldOverscroll, 1),
+      reason:
+          'Async dashboard card growth must not make a held elastic edge slip.',
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(position.pixels, closeTo(position.maxScrollExtent, .5));
+    expect(tester.takeException(), isNull);
+  });
+
   }
 }
