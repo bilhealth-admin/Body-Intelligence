@@ -172,6 +172,84 @@ Deno.test("translated query reaches USDA while canonical identity is preserved",
   expectEqual(foods[0].name, "Teff, cooked", "canonical USDA name");
 });
 
+Deno.test("localized display labels preserve canonical USDA identity", async () => {
+  let translatedTarget = "";
+  const testRuntime = runtime({
+    fetchImpl: ((_input, init) => {
+      const body = JSON.parse(String(init?.body)) as { query?: string };
+      expectEqual(body.query, "apple", "USDA query");
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            foods: [{ fdcId: 1, description: "Apple, raw" }],
+          }),
+          { status: 200 },
+        ),
+      );
+    }) as typeof fetch,
+  });
+  testRuntime.translateMany = (values, source, target) => {
+    expectEqual(values.join("|"), "Apple, raw", "display translation values");
+    expectEqual(source, "en", "display translation source");
+    translatedTarget = target;
+    return Promise.resolve(["تفاح نيء"]);
+  };
+
+  const response = await handleFoodSearchRequest(
+    new Request("https://example.test/food-search", {
+      method: "POST",
+      body: JSON.stringify({
+        query: "تفاح",
+        search_hint: "apple",
+        locale: "ar",
+      }),
+    }),
+    testRuntime,
+  );
+
+  expectEqual(response.status, 200, "status");
+  expectEqual(translatedTarget, "ar", "display translation target");
+  const body = await response.json() as Record<string, unknown>;
+  expectEqual(body.locale, "ar", "response locale");
+  const foods = body.foods as Array<Record<string, unknown>>;
+  expectEqual(foods[0].name, "Apple, raw", "canonical USDA name");
+  expectEqual(foods[0].localized_name, "تفاح نيء", "localized display name");
+});
+
+Deno.test("locale variants remain distinct in the response contract", async () => {
+  let translatedTarget = "";
+  const testRuntime = runtime({
+    fetchImpl: (() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            foods: [{ fdcId: 1, description: "Apple" }],
+          }),
+          { status: 200 },
+        ),
+      )) as typeof fetch,
+  });
+  testRuntime.translateMany = (_values, _source, target) => {
+    translatedTarget = target;
+    return Promise.resolve(["蘋果"]);
+  };
+
+  const response = await handleFoodSearchRequest(
+    new Request("https://example.test/food-search", {
+      method: "POST",
+      body: JSON.stringify({
+        query: "蘋果",
+        search_hint: "apple",
+        locale: "zh-Hant",
+      }),
+    }),
+    testRuntime,
+  );
+  const body = await response.json() as Record<string, unknown>;
+  expectEqual(body.locale, "zh-Hant", "response locale");
+  expectEqual(translatedTarget, "zh-Hant", "runtime target");
+});
+
 Deno.test("unsafe client search hint cannot replace the typed query", async () => {
   let usdaQuery = "";
   const response = await handleFoodSearchRequest(
