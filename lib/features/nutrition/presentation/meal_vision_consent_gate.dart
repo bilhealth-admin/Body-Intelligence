@@ -95,17 +95,6 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
                       height: 1.18,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    mealVisionConsentText(
-                      dialogContext,
-                      'Your choice stays in your control.',
-                    ),
-                    style: Theme.of(dialogContext).textTheme.titleSmall?.copyWith(
-                      color: scheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   DecoratedBox(
                     decoration: BoxDecoration(
