@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
+import '../../../shared/widgets/bil_clinical_note.dart';
 import '../dashboard_five_locale_copy.dart';
 import '../domain/dashboard_decision_explanation.dart';
 
@@ -112,14 +113,11 @@ class DashboardDecisionExplanationPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                  Text(
-                    tr(
+                  BilClinicalNote(
+                    key: const Key('decision-explanation-safety-note'),
+                    text: tr(
                       'BIL explains local deterministic evidence. It does not diagnose disease or claim medical certainty.',
                       'يشرح BIL الأدلة المحلية الحتمية، ولا يشخّص الأمراض أو يدّعي يقينًا طبيًا.',
-                    ),
-                    key: const Key('decision-explanation-safety-note'),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

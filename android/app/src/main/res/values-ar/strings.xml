@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">خصوصية البيانات الصحية</string>
     <string name="health_permissions_rationale_body">يقرأ BIL الخطوات والمسافة والسعرات النشطة من Health Connect لعرض ملخص نشاطك. الوصول للقراءة فقط وأثناء استخدام BIL. يمكنك منح كل إذن أو رفضه أو إلغاؤه من إعدادات Health Connect. لا يبيع BIL بياناتك الصحية ولا يستخدمها للإعلانات.</string>
     <string name="health_permissions_privacy_policy_action">اقرأ سياسة الخصوصية الكاملة لـ BIL</string>
+    <string name="health_permissions_release_scope_note">نطاق هذا الإصدار للقراءة فقط: الخطوات والمسافة والسعرات النشطة.</string>
 </resources>

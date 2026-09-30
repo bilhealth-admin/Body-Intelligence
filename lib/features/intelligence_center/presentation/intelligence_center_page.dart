@@ -23,6 +23,7 @@ import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
+import '../../../shared/widgets/bil_premium_trust_surface.dart';
 import '../../../shared/widgets/chat_history_viewport.dart';
 import '../../../shared/widgets/bil_camera_capture_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';

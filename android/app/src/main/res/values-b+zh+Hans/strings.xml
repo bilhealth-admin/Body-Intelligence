@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">健康数据隐私</string>
     <string name="health_permissions_rationale_body">BIL 仅请求您选择使用的功能所需的 Health Connect 数据类型。默认情况下，您的健康数据在本地处理。您可以随时从 Health Connect 设置授予、拒绝或撤销个人权限。 BIL 不出售健康数据或将其用于广告。</string>
     <string name="health_permissions_privacy_policy_action">阅读完整的 BIL 隐私政策</string>
+    <string name="health_permissions_release_scope_note">此版本的只读范围：步数、距离和活动消耗热量。</string>
 </resources>

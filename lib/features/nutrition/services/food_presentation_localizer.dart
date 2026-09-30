@@ -12,6 +12,10 @@ part 'food_presentation_units_and_labels.dart';
 /// It never translates arbitrary catalog text. Branded, custom, and unknown
 /// scientific names remain exactly as stored so the UI cannot invent identity.
 abstract final class FoodPresentationLocalizer {
+  static const _maxTrustedRuntimeTranslations = 600;
+  static final Map<String, String> _trustedRuntimeTranslations =
+      <String, String>{};
+
   static const supportedLocaleTags = <String>{
     'ar',
     'en',
@@ -67,10 +71,49 @@ abstract final class FoodPresentationLocalizer {
       }
     }
     if (isCustom || _isBranded(source)) return original;
+    final trusted = _trustedRuntimeTranslation(original, locale);
+    if (trusted != null) return trusted;
     final normalized = _normalize(original);
     final concept = _reviewedFoodConcept(normalized);
     return _localizedFoodName(concept, locale) ?? original;
   }
+
+  /// Registers a display-only label returned by BIL's authenticated food
+  /// gateway. The canonical food identity and nutrient authority are never
+  /// replaced by this value. Entries are process-local and bounded; the server
+  /// owns durable caching.
+  static void registerTrustedRuntimeTranslation({
+    required String canonicalName,
+    required String localeTag,
+    required String localizedName,
+  }) {
+    final canonical = canonicalName.trim();
+    final localized = localizedName.trim();
+    final locale = _canonicalLocaleTag(localeTag);
+    if (canonical.isEmpty ||
+        localized.length < 2 ||
+        localized.length > 240 ||
+        locale == 'en' ||
+        !supportedLocaleTags.contains(locale)) {
+      return;
+    }
+    if (_trustedRuntimeTranslations.length >= _maxTrustedRuntimeTranslations) {
+      _trustedRuntimeTranslations.remove(
+        _trustedRuntimeTranslations.keys.first,
+      );
+    }
+    _trustedRuntimeTranslations[_runtimeTranslationKey(canonical, locale)] =
+        localized;
+  }
+
+  static String? _trustedRuntimeTranslation(String name, String locale) =>
+      _trustedRuntimeTranslations[_runtimeTranslationKey(name, locale)];
+
+  static String _runtimeTranslationKey(String name, String locale) =>
+      '$locale\u0000${_normalize(name)}';
+
+  static void clearTrustedRuntimeTranslationsForTesting() =>
+      _trustedRuntimeTranslations.clear();
 
   /// Food rows follow the language the user actually typed when it can be
   /// determined safely. The interface locale remains the fallback for short,
@@ -121,6 +164,37 @@ abstract final class FoodPresentationLocalizer {
     if (isCustom || _isBranded(source)) return true;
     if (locale == 'ar' && arabicName?.trim().isNotEmpty == true) return true;
     return _reviewedFoodConcept(_normalize(original)) != null;
+  }
+
+  /// Whether an explicit search result can be shown without leaking an
+  /// unrelated English fallback into a non-English search experience.
+  ///
+  /// Branded products and user-created foods keep their authoritative proper
+  /// names. Generic catalog foods must own a reviewed native identity for the
+  /// requested locale; otherwise the UI fails closed instead of inventing or
+  /// exposing a mixed-language label.
+  static bool hasSafeSearchDisplayName({
+    required String name,
+    required String localeTag,
+    String? arabicName,
+    bool isCustom = false,
+    String source = '',
+  }) {
+    final locale = _canonicalLocaleTag(localeTag);
+    if (locale == 'en') return true;
+    final original = name.trim();
+    if (original.isEmpty) return false;
+    if (isCustom || _isBranded(source)) return true;
+    if (_trustedRuntimeTranslation(original, locale) != null) return true;
+    if (locale == 'ar') {
+      final reviewedArabic = const FoodSearchAssistance().arabicNameFor(
+        original,
+      );
+      if (reviewedArabic != null) return true;
+      if (arabicName?.trim().isNotEmpty == true) return true;
+    }
+    final concept = _reviewedFoodConcept(_normalize(original));
+    return concept != null && _localizedFoodName(concept, locale) != null;
   }
 
   static String servingUnit(String raw, String localeTag) {

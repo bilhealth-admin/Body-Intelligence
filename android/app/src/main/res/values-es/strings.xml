@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">Privacidad de los datos de salud</string>
     <string name="health_permissions_rationale_body">BIL lee los pasos, la distancia y las calorías activas de Health Connect para mostrar tu actividad. El acceso es de solo lectura y únicamente mientras usas BIL. Puedes conceder, denegar o revocar cada permiso en Health Connect. BIL no vende datos de salud ni los utiliza para publicidad.</string>
     <string name="health_permissions_privacy_policy_action">Leer la política de privacidad completa de BIL</string>
+    <string name="health_permissions_release_scope_note">Alcance de solo lectura de esta versión: pasos, distancia y calorías activas.</string>
 </resources>

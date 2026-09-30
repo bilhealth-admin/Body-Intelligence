@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">Datenschutz im Gesundheitsbereich</string>
     <string name="health_permissions_rationale_body">BIL fordert nur die Health Connect-Datentypen an, die für die von Ihnen ausgewählten Funktionen erforderlich sind. Ihre Gesundheitsdaten werden standardmäßig lokal verarbeitet. Sie können jederzeit über die Health Connect-Einstellungen einzelne Berechtigungen erteilen, verweigern oder widerrufen. BIL verkauft keine Gesundheitsdaten und nutzt sie nicht für Werbung.</string>
     <string name="health_permissions_privacy_policy_action">Vollständige Datenschutzrichtlinie von BIL lesen</string>
+    <string name="health_permissions_release_scope_note">Nur-Lese-Umfang dieser Version: Schritte, Distanz und aktive Kalorien.</string>
 </resources>

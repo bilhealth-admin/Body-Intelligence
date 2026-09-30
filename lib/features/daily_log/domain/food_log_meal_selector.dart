@@ -14,7 +14,7 @@ String foodLogMealTitle(String type) {
     'breakfast' => 'Breakfast',
     'lunch' => 'Lunch',
     'dinner' => 'Dinner',
-    'snack' => 'Snacks',
+    'snack' => 'Snack',
     _ => 'Breakfast',
   };
 }

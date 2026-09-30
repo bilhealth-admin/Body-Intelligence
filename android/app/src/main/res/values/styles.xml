@@ -19,4 +19,11 @@
         <item name="android:windowBackground">@color/bil_launch_background</item>
         <item name="android:windowDisablePreview">false</item>
     </style>
+    <style name="HealthPermissionRationaleTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">#F6F8FC</item>
+        <item name="android:colorAccent">#0A84FF</item>
+    </style>
 </resources>

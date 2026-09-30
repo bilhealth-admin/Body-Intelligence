@@ -430,4 +430,90 @@ void main() {
       'خبز أبيض محضر',
     );
   });
+  test(
+    'trusted gateway display translation never replaces canonical identity',
+    () {
+      FoodPresentationLocalizer.clearTrustedRuntimeTranslationsForTesting();
+      addTearDown(
+        FoodPresentationLocalizer.clearTrustedRuntimeTranslationsForTesting,
+      );
+
+      const canonical = 'Turkey breast, roasted';
+      expect(
+        FoodPresentationLocalizer.hasSafeSearchDisplayName(
+          name: canonical,
+          localeTag: 'ar',
+          source: 'USDA FoodData Central — verified',
+        ),
+        isFalse,
+      );
+
+      FoodPresentationLocalizer.registerTrustedRuntimeTranslation(
+        canonicalName: canonical,
+        localeTag: 'ar',
+        localizedName: 'صدر ديك رومي مشوي',
+      );
+
+      expect(
+        FoodPresentationLocalizer.foodName(
+          name: canonical,
+          localeTag: 'ar',
+          source: 'USDA FoodData Central — verified',
+        ),
+        'صدر ديك رومي مشوي',
+      );
+      expect(
+        FoodPresentationLocalizer.hasSafeSearchDisplayName(
+          name: canonical,
+          localeTag: 'ar',
+          source: 'USDA FoodData Central — verified',
+        ),
+        isTrue,
+      );
+      expect(
+        FoodPresentationLocalizer.foodName(
+          name: canonical,
+          localeTag: 'en',
+          source: 'USDA FoodData Central — verified',
+        ),
+        canonical,
+        reason: 'The canonical USDA identity must remain available in English.',
+      );
+    },
+  );
+
+  test(
+    'explicit non-English search fails closed for generic untranslated food',
+    () {
+      for (final tag in tags.where((tag) => tag != 'en')) {
+        expect(
+          FoodPresentationLocalizer.hasSafeSearchDisplayName(
+            name: 'Apples, dried, sulfured, uncooked',
+            localeTag: tag,
+            source: 'USDA FoodData Central',
+          ),
+          isFalse,
+          reason: 'Mixed-language generic food leaked in $tag',
+        );
+        expect(
+          FoodPresentationLocalizer.hasSafeSearchDisplayName(
+            name: 'Chicken breast, roasted, skinless',
+            localeTag: tag,
+            source: 'USDA FoodData Central',
+          ),
+          isTrue,
+          reason: 'Reviewed food unexpectedly hidden in $tag',
+        );
+      }
+      expect(
+        FoodPresentationLocalizer.hasSafeSearchDisplayName(
+          name: 'Apple Cinnamon Crunch™',
+          localeTag: 'ar',
+          source: 'branded barcode product',
+        ),
+        isTrue,
+        reason: 'Brand identity is a proper name, not an invented translation.',
+      );
+    },
+  );
 }

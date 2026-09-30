@@ -86,11 +86,15 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     final uniqueResults = <Food>[];
     final identities = <String>{};
     for (final food in results) {
-      // This is an explicit typed search, not the anonymous/popular browse
-      // surface. A trusted USDA hit must remain selectable even when BIL has
-      // no reviewed native display alias yet; hiding it turns a real cloud
-      // answer into a false "no result" state. The canonical provider name is
-      // preserved by [foodName] until a reviewed localization exists.
+      if (!FoodPresentationLocalizer.hasSafeSearchDisplayName(
+        name: food.name,
+        arabicName: food.arabicName,
+        localeTag: resultLocale,
+        isCustom: food.isCustom,
+        source: food.source,
+      )) {
+        continue;
+      }
       final displayName = _displayFoodName(food, resultLocale);
       final identity = _mealFoodDisplayIdentity(food, displayName);
       if (identities.add(identity)) uniqueResults.add(food);

@@ -194,15 +194,19 @@ class _PremiumCard extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.white,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(22),
-      side: const BorderSide(color: Color(0xFFE2EBEF)),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: Padding(padding: const EdgeInsets.all(18), child: child),
-  );
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: dark ? const Color(0xFF0B0D10) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(padding: const EdgeInsets.all(18), child: child),
+    );
+  }
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -211,30 +215,32 @@ class _SectionTitle extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F5FB),
-          borderRadius: BorderRadius.circular(12),
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: scheme.primary.withValues(alpha: .10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: scheme.primary),
         ),
-        child: Icon(icon, color: const Color(0xFF12394E)),
-      ),
-      const SizedBox(width: 11),
-      Expanded(
-        child: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF071923),
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
+        const SizedBox(width: 11),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class _CapabilityChip extends StatelessWidget {
@@ -243,21 +249,25 @@ class _CapabilityChip extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF2F7FA),
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 17, color: const Color(0xFF1D8ACB)),
-        const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: scheme.primary.withValues(alpha: .08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: scheme.primary.withValues(alpha: .12)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 17, color: scheme.primary),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
 }
 
 class _ConsentTile extends StatelessWidget {
@@ -278,26 +288,12 @@ class _ConsentTile extends StatelessWidget {
   final String subtitle;
 
   @override
-  Widget build(BuildContext context) => _PremiumCard(
-    child: SwitchListTile.adaptive(
-      contentPadding: EdgeInsets.zero,
-      value: value,
-      onChanged: enabled ? onChanged : null,
-      activeTrackColor: const Color(0xFF1D8ACB),
-      secondary: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F5FB),
-          borderRadius: BorderRadius.circular(13),
-        ),
-        child: Icon(icon, color: const Color(0xFF12394E)),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 5),
-        child: Text(subtitle, style: const TextStyle(height: 1.4)),
-      ),
-    ),
+  Widget build(BuildContext context) => BilPremiumConsentToggle(
+    icon: icon,
+    title: title,
+    subtitle: subtitle,
+    value: value,
+    onChanged: enabled ? onChanged : null,
+    loading: !enabled,
   );
 }

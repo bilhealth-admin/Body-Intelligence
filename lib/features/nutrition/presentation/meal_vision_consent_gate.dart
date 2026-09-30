@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/runtime_copy.dart';
+import '../../../shared/widgets/bil_premium_trust_surface.dart';
 
 const mealVisionConsentPurpose = 'meal_vision_ai';
 const mealVisionConsentPolicyVersion = '1';
@@ -38,15 +39,15 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => AlertDialog.adaptive(
-      title: Text(
-        mealVisionConsentText(
-          dialogContext,
-          'Send this meal photo to Google Gemini?',
-        ),
-      ),
+      contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
       content: SingleChildScrollView(
-        child: Text(
-          mealVisionConsentText(
+        child: BilPremiumTrustSurface(
+          icon: Icons.image_search_rounded,
+          title: mealVisionConsentText(
+            dialogContext,
+            'Send this meal photo to Google Gemini?',
+          ),
+          body: mealVisionConsentText(
             dialogContext,
             'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.',
           ),

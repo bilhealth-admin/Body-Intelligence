@@ -593,35 +593,15 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.auto_awesome, color: scheme.primary),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    tr(
+                  BilPremiumTrustSurface(
+                    icon: Icons.auto_awesome_rounded,
+                    title: tr(
                       'Send selected personal data to Google Gemini?',
                       'إرسال بيانات شخصية محددة إلى Google Gemini؟',
                     ),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(sheetContext).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 9),
-                  Text(
-                    tr(
+                    body: tr(
                       'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.',
                       'إذا وافقت، يرسل BIL سؤالك والسياق الذي اخترته فقط—مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ وما يصل إلى آخر 12 رسالة—إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، لإنشاء الإجابة التي طلبتها. لا يُرسل صوت الميكروفون الخام إلى BIL أو Google Gemini. يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، وسحب الموافقة لاحقًا من إعدادات مدرب BIL.',
-                    ),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: scheme.onSurfaceVariant,
-                      height: 1.4,
                     ),
                   ),
                   const SizedBox(height: 18),

@@ -127,6 +127,15 @@ class TrustedFoodNetworkSearchResolver {
     final calories = nutrient('Energy');
     if (calories == null) return null;
     final brand = _text(row['brand']);
+    final localizedName = _text(row['localized_name']);
+    final localizedLocale = _text(row['localized_locale']);
+    if (localizedName.isNotEmpty && localizedLocale.isNotEmpty) {
+      FoodPresentationLocalizer.registerTrustedRuntimeTranslation(
+        canonicalName: name,
+        localeTag: localizedLocale,
+        localizedName: localizedName,
+      );
+    }
 
     return UnifiedFood(
       id: 'usda:$id',

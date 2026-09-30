@@ -65,7 +65,20 @@ void main() {
       expect(main, contains('SystemUiMode.edgeToEdge'));
       expect(main, contains('defaultTargetPlatform == TargetPlatform.android'));
       expect(main, contains('DeviceOrientation.values'));
-      expect(main, contains('defaultTargetPlatform == TargetPlatform.iOS'));
+      expect(
+        main,
+        isNot(
+          matches(
+            RegExp(
+              r'TargetPlatform\.iOS[\s\S]{0,320}'
+              r'SystemChrome\.setPreferredOrientations',
+            ),
+          ),
+        ),
+        reason:
+            'iOS must defer to Info.plist so iPhone can stay portrait while '
+            'iPad remains fully rotatable and multitasking-safe.',
+      );
       expect(manifest, isNot(contains('android:required="true"')));
     },
   );
