@@ -1,4 +1,5 @@
 name: BIL targeted visual golden refresh
+# Refresh trigger: current complete-image UI references.
 
 on:
   push:
