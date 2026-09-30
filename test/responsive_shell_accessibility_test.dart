@@ -66,10 +66,8 @@ void main() {
                     ? CupertinoIcons.square_grid_2x2_fill
                     : Icons.dashboard_rounded,
               );
-              final plus = find.descendant(
-                of: find.byKey(const Key('shell-quick-add')),
-                matching: find.byType(Icon),
-              );
+              final plus = find.byKey(const Key('shell-quick-add-icon'));
+              expect(plus, findsOneWidget);
               expect(
                 tester.widget<Icon>(plus).icon,
                 platform == TargetPlatform.iOS
