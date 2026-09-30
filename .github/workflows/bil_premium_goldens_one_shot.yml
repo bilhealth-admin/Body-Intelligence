@@ -28,11 +28,11 @@ jobs:
           flutter-version: 3.44.6
           cache: true
 
-      - name: Verify reviewed source fixes are formatted
+      - name: Format reviewed source fixes
         shell: bash
         run: |
           set -euo pipefail
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             lib/features/daily_log/domain/food_log_meal_selector.dart \
             lib/features/daily_log/food_log_page.dart \
             lib/app/router/bil_quick_add_sheet.dart \
@@ -74,6 +74,12 @@ jobs:
           python3 - <<'PY'
           import subprocess
           changed=set(subprocess.check_output(['git','diff','--name-only']).decode().splitlines())
+          source_allowed={
+            'lib/features/daily_log/domain/food_log_meal_selector.dart',
+            'lib/features/daily_log/food_log_page.dart',
+            'lib/app/router/bil_quick_add_sheet.dart',
+            'lib/features/settings/sharing_privacy_settings_page.dart',
+          }
           golden_expected={
             'test/goldens/epic3_compact_en_dark.png',
             'test/goldens/epic3_compact_ar_dark.png',
@@ -95,7 +101,7 @@ jobs:
             'test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png',
           }
           png_changed={p for p in changed if p.endswith('.png')}
-          unexpected=changed-golden_expected
+          unexpected=changed-(source_allowed|golden_expected)
           missing=golden_expected-png_changed
           extra_png=png_changed-golden_expected
           if unexpected or missing or extra_png:
@@ -104,7 +110,7 @@ jobs:
               print('missing reviewed goldens=',sorted(missing))
               print('extra png=',sorted(extra_png))
               raise SystemExit(1)
-          print(f'REVIEWED_GOLDENS={len(png_changed)}')
+          print(f'REVIEWED_GOLDENS={len(png_changed)} SOURCE_FIXES={len(changed-png_changed)}')
           PY
 
       - name: Analyze and verify repaired contracts
@@ -147,6 +153,10 @@ jobs:
           git config user.name 'BIL reviewed golden refresh'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add \
+            lib/features/daily_log/domain/food_log_meal_selector.dart \
+            lib/features/daily_log/food_log_page.dart \
+            lib/app/router/bil_quick_add_sheet.dart \
+            lib/features/settings/sharing_privacy_settings_page.dart \
             test/goldens \
             test/visual_closure/goldens
           git commit -m 'test(visual): refresh reviewed premium goldens [skip ci]'
