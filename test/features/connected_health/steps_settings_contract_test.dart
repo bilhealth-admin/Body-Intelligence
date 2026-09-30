@@ -137,15 +137,11 @@ void main() {
     await _pump(tester, repository, locale: const Locale('ar'));
 
     expect(
-      tester.widget<Icon>(
-        find.byKey(const Key('steps-history-chevron')),
-      ).icon,
+      tester.widget<Icon>(find.byKey(const Key('steps-history-chevron'))).icon,
       Icons.chevron_left_rounded,
     );
     expect(
-      tester.widget<Icon>(
-        find.byKey(const Key('steps-goal-chevron')),
-      ).icon,
+      tester.widget<Icon>(find.byKey(const Key('steps-goal-chevron'))).icon,
       Icons.chevron_left_rounded,
     );
 
