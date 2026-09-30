@@ -222,12 +222,14 @@ class BilQuickAddSheet extends StatelessWidget {
                                 badgeKey: Key('quick-add-primary-badge-$index'),
                                 iconKey: Key('quick-add-primary-icon-$index'),
                                 icon: spec.iconFor(baseTheme.platform),
-                                backgroundColor: premiumGradient == null
-                                    ? spec.accent(baseTheme.brightness)
-                                    : Colors.white.withValues(alpha: .16),
-                                foregroundColor: premiumGradient == null
-                                    ? spec.onAccent(baseTheme.brightness)
-                                    : Colors.white,
+                                // Keep the canonical semantic badge identity
+                                // even when Voice/Photo uses a premium card gradient.
+                                backgroundColor: spec.accent(
+                                  baseTheme.brightness,
+                                ),
+                                foregroundColor: spec.onAccent(
+                                  baseTheme.brightness,
+                                ),
                                 premiumGradient: premiumGradient,
                                 label: action.label,
                                 onTap: action.onTap,
