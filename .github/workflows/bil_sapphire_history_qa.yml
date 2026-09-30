@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
-      contents: write
+      contents: read
       actions: read
     outputs:
       source: ${{ steps.source.outputs.sha }}
@@ -38,22 +38,16 @@ jobs:
           dart=[p for p in paths if p.endswith('.dart') and pathlib.Path(p).is_file()]
           if dart: subprocess.run(['dart','format',*dart],check=True)
           PY
-      - name: Commit exact prepared source before reference verification
+      - name: Enforce immutable prepared source before reference verification
         id: source
         run: |
           set -euo pipefail
-          git config user.name 'BIL source maintenance'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add lib test pubspec.yaml docs/release tool/sapphire
-          if ! git diff --cached --quiet; then
-            git commit -m 'fix(prebuild): apply final guarded navigation and presentation fixes'
-            git push origin HEAD:fix/community-sapphire-health-3033
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            echo 'Sapphire prepare would modify the frozen source; create a new RC instead of mutating this one.' >&2
+            git status --short
+            exit 1
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-          # The final prebuild polish intentionally changes presentation outside
-          # the previously reviewed Community source hash. Run the strict full
-          # suite against committed masters and collect any visual diffs; never
-          # regenerate a reference here.
           echo 'references_ready=true' >> "$GITHUB_OUTPUT"
       - name: Export exact source evidence without font binaries
         if: always()

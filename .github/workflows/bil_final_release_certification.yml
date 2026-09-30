@@ -1,0 +1,431 @@
+name: BIL Final Release Certification
+
+on:
+  push:
+    branches: [fix/community-sapphire-health-3033]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-final-release-certification-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  BIL_RC_BRANCH: fix/community-sapphire-health-3033
+  BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+  FLUTTER_VERSION: 3.44.6
+
+jobs:
+  freeze:
+    name: Freeze exact RC and manifest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      manifest_sha: ${{ steps.manifest.outputs.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prove branch and worktree are immutable
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          REMOTE="$(git ls-remote origin "refs/heads/$BIL_RC_BRANCH" | awk '{print $1}')"
+          test "$REMOTE" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+      - name: Generate deterministic RC manifest
+        id: manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-cert-freeze"
+          python3 tool/release_certification/generate_manifest.py --expected-sha "$GITHUB_SHA" --output-dir "$OUT"
+          echo "sha=$(awk '{print $1}' "$OUT/BIL_RC_MANIFEST.sha256")" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-cert-freeze-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-freeze/
+          if-no-files-found: error
+          retention-days: 30
+
+  static_pass_1:
+    name: Static/security/dependency pass 1
+    needs: freeze
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: bash tool/release_certification/run_static_gate.sh 1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-static-pass1-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-static-1/
+          retention-days: 30
+
+  full_tests_pass_1:
+    name: Full tests pass 1 — shard ${{ matrix.shard }}
+    needs: static_pass_1
+    runs-on: windows-2022
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - env:
+          SHARD: ${{ matrix.shard }}
+        run: python tool/sapphire/run_full_shard.py
+      - name: Reject unexplained skips
+        shell: pwsh
+        run: python tool/release_certification/validate_shard.py "$env:RUNNER_TEMP/sapphire-shard/results.json" --evidence "$env:RUNNER_TEMP/sapphire-shard/skip-policy.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-full-pass1-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: ${{ runner.temp }}/sapphire-shard/
+          retention-days: 30
+
+  visual_pass_1:
+    name: Visual + isolated cloud pass 1
+    needs: static_pass_1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - env:
+          PGPASSWORD: isolated-fixture-only
+        run: bash tool/release_certification/run_visual_gate.sh 1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-visual-pass1-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-visual-1/
+          retention-days: 30
+
+  live_pass_1:
+    name: Disposable live backend core pass 1
+    needs: static_pass_1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    outputs:
+      gate_status: ${{ steps.status.outputs.value }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - id: live
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: bash tool/release_certification/run_live_gate.sh 1
+      - id: status
+        if: always()
+        shell: bash
+        env:
+          STEP_OUTCOME: ${{ steps.live.outcome }}
+        run: |
+          VALUE=FAIL
+          FILE="$RUNNER_TEMP/bil-cert-live-1/status.txt"
+          if [[ -f "$FILE" ]]; then VALUE="$(cut -d= -f2- "$FILE")"; fi
+          if [[ "$STEP_OUTCOME" != "success" ]]; then VALUE=FAIL; fi
+          echo "value=$VALUE" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-live-pass1-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-live-1/
+          retention-days: 30
+
+  store_readonly:
+    name: Apple + Google Store read-only audit
+    needs: freeze
+    runs-on: windows-2022
+    timeout-minutes: 25
+    outputs:
+      gate_status: ${{ steps.status.outputs.value }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - id: audit
+        shell: pwsh
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+        run: pwsh -NoProfile -File tool/release_certification/run_store_readonly.ps1 -OutputDir "$env:RUNNER_TEMP/bil-store-evidence"
+      - id: status
+        if: always()
+        shell: pwsh
+        run: |
+          $value='FAIL'
+          $path=Join-Path $env:RUNNER_TEMP 'bil-store-evidence/status.txt'
+          if(Test-Path $path){ $value=((Get-Content $path -Raw).Trim() -split '=',2)[1] }
+          if('${{ steps.audit.outcome }}' -ne 'success'){ $value='FAIL' }
+          "value=$value" >> $env:GITHUB_OUTPUT
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-store-readonly-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-store-evidence/
+          retention-days: 30
+
+  pass_1_barrier:
+    name: Pass 1 barrier
+    if: always()
+    needs: [static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly]
+    runs-on: ubuntu-24.04
+    steps:
+      - env:
+          STATIC: ${{ needs.static_pass_1.result }}
+          FULL: ${{ needs.full_tests_pass_1.result }}
+          VISUAL: ${{ needs.visual_pass_1.result }}
+          LIVE: ${{ needs.live_pass_1.result }}
+          STORE: ${{ needs.store_readonly.result }}
+        run: |
+          for VALUE in "$STATIC" "$FULL" "$VISUAL" "$LIVE" "$STORE"; do
+            test "$VALUE" = success
+          done
+
+  static_pass_2:
+    name: Static/security/dependency pass 2
+    needs: pass_1_barrier
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: bash tool/release_certification/run_static_gate.sh 2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-static-pass2-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-static-2/
+          retention-days: 30
+
+  full_tests_pass_2:
+    name: Full tests pass 2 — shard ${{ matrix.shard }}
+    needs: static_pass_2
+    runs-on: windows-2022
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - run: flutter pub get
+      - env:
+          SHARD: ${{ matrix.shard }}
+        run: python tool/sapphire/run_full_shard.py
+      - name: Reject unexplained skips
+        shell: pwsh
+        run: python tool/release_certification/validate_shard.py "$env:RUNNER_TEMP/sapphire-shard/results.json" --evidence "$env:RUNNER_TEMP/sapphire-shard/skip-policy.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-full-pass2-shard-${{ matrix.shard }}-${{ github.sha }}
+          path: ${{ runner.temp }}/sapphire-shard/
+          retention-days: 30
+
+  visual_pass_2:
+    name: Visual + isolated cloud pass 2
+    needs: static_pass_2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - env:
+          PGPASSWORD: isolated-fixture-only
+        run: bash tool/release_certification/run_visual_gate.sh 2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-visual-pass2-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-visual-2/
+          retention-days: 30
+
+  live_pass_2:
+    name: Disposable live backend core pass 2
+    needs: static_pass_2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    outputs:
+      gate_status: ${{ steps.status.outputs.value }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - id: live
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: bash tool/release_certification/run_live_gate.sh 2
+      - id: status
+        if: always()
+        shell: bash
+        env:
+          STEP_OUTCOME: ${{ steps.live.outcome }}
+        run: |
+          VALUE=FAIL
+          FILE="$RUNNER_TEMP/bil-cert-live-2/status.txt"
+          if [[ -f "$FILE" ]]; then VALUE="$(cut -d= -f2- "$FILE")"; fi
+          if [[ "$STEP_OUTCOME" != "success" ]]; then VALUE=FAIL; fi
+          echo "value=$VALUE" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-cert-live-pass2-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-cert-live-2/
+          retention-days: 30
+
+  report:
+    name: Final fail-closed report
+    if: always()
+    needs: [freeze, static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly, pass_1_barrier, static_pass_2, full_tests_pass_2, visual_pass_2, live_pass_2]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: stable
+        shell: bash
+        env:
+          FROZEN_MANIFEST_SHA: ${{ needs.freeze.outputs.manifest_sha }}
+        run: |
+          STABLE=true
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || STABLE=false
+          REMOTE="$(git ls-remote origin "refs/heads/$BIL_RC_BRANCH" | awk '{print $1}')"
+          [[ "$REMOTE" == "$GITHUB_SHA" ]] || STABLE=false
+          test -z "$(git status --porcelain=v1 --untracked-files=all)" || STABLE=false
+          OUT="$RUNNER_TEMP/bil-final-report"
+          mkdir -p "$OUT"
+          python3 tool/release_certification/generate_manifest.py --expected-sha "$GITHUB_SHA" --output-dir "$OUT"
+          CURRENT="$(awk '{print $1}' "$OUT/BIL_RC_MANIFEST.sha256")"
+          [[ "$CURRENT" == "$FROZEN_MANIFEST_SHA" ]] || STABLE=false
+          echo "stable=$STABLE" >> "$GITHUB_OUTPUT"
+      - id: write
+        shell: bash
+        env:
+          BIL_RC_SHA: ${{ github.sha }}
+          BIL_MANIFEST_SHA256: ${{ needs.freeze.outputs.manifest_sha }}
+          BIL_BRANCH_STABLE: ${{ steps.stable.outputs.stable }}
+          BIL_FREEZE_STATUS: ${{ needs.freeze.result }}
+          BIL_STATIC_1: ${{ needs.static_pass_1.result }}
+          BIL_FULL_1: ${{ needs.full_tests_pass_1.result }}
+          BIL_VISUAL_1: ${{ needs.visual_pass_1.result }}
+          BIL_LIVE_1: ${{ needs.live_pass_1.outputs.gate_status }}
+          BIL_STATIC_2: ${{ needs.static_pass_2.result }}
+          BIL_FULL_2: ${{ needs.full_tests_pass_2.result }}
+          BIL_VISUAL_2: ${{ needs.visual_pass_2.result }}
+          BIL_LIVE_2: ${{ needs.live_pass_2.outputs.gate_status }}
+          BIL_STORE_READONLY: ${{ needs.store_readonly.outputs.gate_status }}
+        run: |
+          set +e
+          python3 tool/release_certification/write_report.py --output "$RUNNER_TEMP/bil-final-report/BIL_RELEASE_CERTIFICATION_REPORT.md"
+          CODE=$?
+          set -e
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: BIL_RELEASE_CERTIFICATION_REPORT-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-final-report/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Enforce READY gate
+        env:
+          CODE: ${{ steps.write.outputs.code }}
+        run: |
+          if [[ "$CODE" != "0" ]]; then
+            echo "BIL is NOT READY while any required gate is FAIL or NOT RUN." >&2
+            exit "$CODE"
+          fi
