@@ -49,28 +49,34 @@ void main() {
       expect(row.progressPhotoPath, isNull);
     });
 
-    test('profile restore also restores onboarding identity preferences', () async {
-      final updatedAt = DateTime.utc(2026, 8, 23, 10);
-      final record = _profileRecord(updatedAt, includeOnboardingIdentity: true);
+    test(
+      'profile restore also restores onboarding identity preferences',
+      () async {
+        final updatedAt = DateTime.utc(2026, 8, 23, 10);
+        final record = _profileRecord(
+          updatedAt,
+          includeOnboardingIdentity: true,
+        );
 
-      final report = await applier.apply(
-        ownerId: 'owner-a',
-        localDeviceId: 'startup-read-only-restore',
-        records: [record],
-      );
+        final report = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'startup-read-only-restore',
+          records: [record],
+        );
 
-      expect(report.applied, 1);
-      final preferences = await database.select(database.preferences).get();
-      final values = <String, String>{
-        for (final row in preferences) row.key: row.value,
-      };
-      expect(values['profileDateOfBirth'], '1990-05-17T00:00:00.000');
-      expect(values['countryRegion'], 'Egypt');
-      expect(
-        values['onboarding.goalPriorities.v1'],
-        '{"version":1,"goals":["improveNutrition","loseWeight"]}',
-      );
-    });
+        expect(report.applied, 1);
+        final preferences = await database.select(database.preferences).get();
+        final values = <String, String>{
+          for (final row in preferences) row.key: row.value,
+        };
+        expect(values['profileDateOfBirth'], '1990-05-17T00:00:00.000');
+        expect(values['countryRegion'], 'Egypt');
+        expect(
+          values['onboarding.goalPriorities.v1'],
+          '{"version":1,"goals":["improveNutrition","loseWeight"]}',
+        );
+      },
+    );
 
     test(
       'selective startup batch rolls back when one payload is invalid',
