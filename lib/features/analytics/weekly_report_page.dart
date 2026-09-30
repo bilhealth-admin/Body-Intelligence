@@ -513,8 +513,10 @@ class WeeklyReportPage extends ConsumerWidget {
               ref.read(selectedWeeklyReportDateProvider.notifier).state =
                   selected.subtract(const Duration(days: 7));
             },
-            icon: const Icon(
-              Icons.chevron_left_rounded,
+            icon: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_right_rounded
+                  : Icons.chevron_left_rounded,
               textDirection: TextDirection.ltr,
             ),
           ),
@@ -531,8 +533,10 @@ class WeeklyReportPage extends ConsumerWidget {
                         candidate.isAfter(today) ? today : candidate;
                   }
                 : null,
-            icon: const Icon(
-              Icons.chevron_right_rounded,
+            icon: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
               textDirection: TextDirection.ltr,
             ),
           ),

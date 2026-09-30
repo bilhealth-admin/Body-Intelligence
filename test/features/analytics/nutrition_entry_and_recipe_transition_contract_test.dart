@@ -11,11 +11,20 @@ void main() {
       'lib/features/analytics/nutrition_analytics_components.dart',
     ).readAsStringSync();
 
-    expect(page, contains('/daily-log?foodLog=1&from=%2Fanalytics'));
+    expect(page, contains("Key('nutrition-empty-log-food')"));
+    expect(page, contains('Navigator.of(context).push<void>('));
+    expect(page, contains('FoodLogPage(preferNavigatorPop: true)'));
+    expect(
+      page,
+      contains("name: '/daily-log?foodLog=1&from=/analytics/nutrition'"),
+    );
     expect(components, contains('Icons.chevron_left_rounded'));
     expect(components, contains('Icons.chevron_right_rounded'));
     expect(components, contains('textDirection: TextDirection.ltr'));
-    expect(components, isNot(contains('rtl ? Icons.chevron')));
+    expect(
+      components,
+      contains('Directionality.of(context) == TextDirection.rtl'),
+    );
   });
 
   test('recipe library route does not expose dashboard during transition', () {

@@ -196,7 +196,7 @@ void main() {
             ),
           )
           .icon,
-      Icons.chevron_left_rounded,
+      Icons.chevron_right_rounded,
     );
     await tester.tap(find.byKey(const Key('weekly-report-previous')));
     expect(rtl.read(selectedWeeklyReportDateProvider), DateTime(2026, 8, 4));
@@ -210,7 +210,7 @@ void main() {
             ),
           )
           .icon,
-      Icons.chevron_right_rounded,
+      Icons.chevron_left_rounded,
     );
     await tester.tap(find.byKey(const Key('weekly-report-next')));
     expect(rtl.read(selectedWeeklyReportDateProvider), today);

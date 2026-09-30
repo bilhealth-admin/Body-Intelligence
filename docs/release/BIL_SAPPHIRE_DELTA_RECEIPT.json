@@ -1,10 +1,42 @@
 {
-  "base": "59839c7deb4d1cc860275b9e69578e299cc24d0a",
-  "scope": "Community presentation and health history only; native watch code unchanged",
+  "base": "76258cea4d3cceb2195c7dae49b6b3f7e9a69cae",
+  "scope": "Final prebuild navigation, Nutrition white-screen, RTL weekly controls, More and bottom-dock presentation fixes; routes and store identifiers unchanged",
   "files": {
-    "test/features/community/community_polish_visual_test.dart": {
-      "before": "3c157d607afe7891c86099bdfd511debf8ed9ee403ade1c02cda701677ec56ad",
-      "after_before_formatter": "fb94a8f428ad59e74ba7647e644363d481d7451ec732b6760bdb9d551ef7db87"
+    "lib/features/analytics/weekly_report_page.dart": {
+      "before": "f2d3037546d9fe81ebc9496c26859b2f8634fd32fa21bd2f3d71a6b3c82b03a1",
+      "after_before_formatter": "c9c213f098d931ba9f50df57b722e8bba789ea6df6294d0544837371c77aa6c4"
+    },
+    "lib/features/analytics/nutrition_analytics_page.dart": {
+      "before": "db7cfa6c70022b80d4b71933412286cd826d9dfc55afd09bbd9ac8ecf80839e7",
+      "after_before_formatter": "eb7f8c2c5d9a04bb3510ad9e9d96320323877a94664f5ec07cad0a41b6b087d0"
+    },
+    "lib/features/daily_log/food_log_page.dart": {
+      "before": "671782b707fbe6e6742d3fc9bb7d2e122d24d6932538c6ac41fc29caf85ef7f7",
+      "after_before_formatter": "0259d97e28a00a528277e2ab9c907a87c70484b0e6745cb7f3e6bd638abbef0d"
+    },
+    "lib/features/settings/settings_page.dart": {
+      "before": "d0ee0f7556a930b25e88a6a2ab081b7650a62aab9b3411d99a435869a2f857d5",
+      "after_before_formatter": "db7c56acacd0793407cf065a3ae6fa403c67296666510dfc041a9b23066a8895"
+    },
+    "lib/app/router/responsive_app_shell.dart": {
+      "before": "89f9107c9f6c9b2a2db6c40a7dfc4d76835b9b6c816906cb1a952ec4590b9f70",
+      "after_before_formatter": "b42cb73688b2190cb21f9784bc5eb08f18d1e96f4a6501de625900650cb733c8"
+    },
+    "test/features/analytics/weekly_report_history_navigation_test.dart": {
+      "before": "c0b80fe68d572f75a90429d69e1642c23d04cdd72990d04ac077694b20fa5cd2",
+      "after_before_formatter": "2ccf507abc3e28cea5d0f09b05076912a3b3e376a5dfe8296e7275bcbc0c234f"
+    },
+    "test/features/analytics/nutrition_entry_and_recipe_transition_contract_test.dart": {
+      "before": "47c8265a88a211eb3bf56d9a70b4eeb2e3ffbaca4cd507f52a7a67c60992be11",
+      "after_before_formatter": "b37c5312a7b5213cf16f1225369204e992eb9bf04bceac636a3cfa39f9b8d92d"
+    },
+    "test/quick_add_routing_contract_test.dart": {
+      "before": "dd41ed3263d87d4701eb57b2f1111cf6be35758e0a886a57d77b52df064dc031",
+      "after_before_formatter": "7d19d6f5380bca7f68d51767b9575cf4bf357a335e0daf031190ec953f87eeca"
+    },
+    "lib/features/analytics/nutrition_analytics_components.dart": {
+      "before": "7fae84a17aeab27b25e5508ae8514e0ecd5e945672d8fe8f3825a561a7558b3b",
+      "after_before_formatter": "e97bc252130f4421d2c556c2d098bda8b3bb1d2f411f45451ad95c849c342411"
     }
   },
   "status": "SOURCE_APPLIED_NOT_YET_QA_ACCEPTED"

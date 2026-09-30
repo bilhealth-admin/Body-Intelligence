@@ -63,171 +63,195 @@ class SettingsPage extends ConsumerWidget {
     );
     final unit = copy(UnitConverter.weightUnit(system));
 
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text(copy('More'))),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 112),
-        children: [
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: _ProfileSummary(
-              name: name,
-              photo: photo,
-              photoUrl: photoUrl,
-              currentWeight: _displayWeight(current, system),
-              goalWeight: _displayWeight(target, system),
-              remainingWeight: goalProgress.value,
-              remainingLabel: copy(
-                goalProgress.reached ? 'Already at goal' : 'Remaining',
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          copy('More'),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: -.35,
+          ),
+        ),
+      ),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: dark
+              ? null
+              : const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFF9FBFF), Color(0xFFF3F7FC)],
+                ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 96),
+          children: [
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: _ProfileSummary(
+                name: name,
+                photo: photo,
+                photoUrl: photoUrl,
+                currentWeight: _displayWeight(current, system),
+                goalWeight: _displayWeight(target, system),
+                remainingWeight: goalProgress.value,
+                remainingLabel: copy(
+                  goalProgress.reached ? 'Already at goal' : 'Remaining',
+                ),
+                unit: unit,
+                copy: copy,
+                onTap: () => context.push('/profile-summary'),
               ),
-              unit: unit,
-              copy: copy,
-              onTap: () => context.push('/profile-summary'),
             ),
-          ),
-          const SizedBox(height: 12),
-          subscription.when(
-            loading: () =>
-                _PremiumMembershipCard(label: copy('Checking subscription')),
-            error: (_, _) => _PremiumMembershipCard(
-              label: copy('Retry subscription check'),
-              onTap: () => ref.invalidate(verifiedSubscriptionStateProvider),
+            const SizedBox(height: 12),
+            subscription.when(
+              loading: () =>
+                  _PremiumMembershipCard(label: copy('Checking subscription')),
+              error: (_, _) => _PremiumMembershipCard(
+                label: copy('Retry subscription check'),
+                onTap: () => ref.invalidate(verifiedSubscriptionStateProvider),
+              ),
+              data: (value) => _PremiumMembershipCard(
+                label: value.plan == CommercePlan.free
+                    ? copy('Start 7-day free trial')
+                    : copy('Active'),
+                onTap: () => context.push('/plans'),
+              ),
             ),
-            data: (value) => _PremiumMembershipCard(
-              label: value.plan == CommercePlan.free
-                  ? copy('Start 7-day free trial')
-                  : copy('Active'),
-              onTap: () => context.push('/plans'),
-            ),
-          ),
-          const SizedBox(height: 20),
-          _MoreSection(
-            title: copy('Account & profile'),
-            children: [
-              _MoreRow(copy('My Profile'), '/profile-summary'),
-              _MoreRow(
-                copy('Language'),
-                '/settings/language',
-                key: const Key('more-language-entry'),
-              ),
-              _MoreRow(
-                copy('Location & local time'),
-                '/location-settings',
-                key: const Key('more-location-settings-entry'),
-                showDivider: false,
-              ),
-            ],
-          ),
-          _MoreSection(
-            title: copy('Diary & goals'),
-            children: [
-              _MoreRow(copy('Goals'), '/goals'),
-              _MoreRow(copy('Progress'), '/history'),
-              _MoreRow(
-                copy('Weekly Report'),
-                '/weekly-report',
-                key: const Key('settings-weekly-report-entry'),
-              ),
-              _MoreRow(copy('Challenges'), '/challenges'),
-              _MoreRow(copy('Nutrition'), '/analytics/nutrition'),
-              _MoreRow(
-                copy('My Meals, Recipes & Foods'),
-                '/nutrition?from=settings',
-                showDivider: false,
-              ),
-            ],
-          ),
-          _MoreSection(
-            title: copy('Health preferences'),
-            children: [
-              _MoreRow(
-                copy('AI Coach'),
-                '/intelligence-center',
-                key: const Key('more-ai-coach-entry'),
-              ),
-              _MoreRow(copy('AI Coach settings'), '/settings/ai-coach'),
-              _MoreRow(copy('Intermittent Fasting'), '/wellness/fasting'),
-              _MoreRow(copy('Sleep'), '/wellness/sleep'),
-              _MoreRow(copy('Recipe Discovery'), '/wellness/recipes'),
-              _MoreRow(
-                wellnessWorkoutVideosAndRoutinesTitle(context),
-                '/wellness/workouts/routines',
-              ),
-              _MoreRow(
-                copy('Apps & Devices'),
-                '/connected-health',
-                key: const Key('settings-connected-health-entry'),
-              ),
-              _MoreRow(copy('Steps'), '/connected-health/steps'),
-            ],
-          ),
-          const SafeFreeAdAnchor(
-            key: Key('more-free-ad-slot'),
-            surface: SafeFreeAdSurface.more,
-          ),
-          if (AppEnvironment.communityConfigured) ...[
+            const SizedBox(height: 20),
             _MoreSection(
-              title: copy('Community'),
+              title: copy('Account & profile'),
               children: [
-                _MoreRow(copy('Community'), '/community'),
-                _MoreRow(copy('Friends'), '/community/connections'),
+                _MoreRow(copy('My Profile'), '/profile-summary'),
                 _MoreRow(
-                  copy('Messages'),
-                  '/community/messages',
+                  copy('Language'),
+                  '/settings/language',
+                  key: const Key('more-language-entry'),
+                ),
+                _MoreRow(
+                  copy('Location & local time'),
+                  '/location-settings',
+                  key: const Key('more-location-settings-entry'),
                   showDivider: false,
                 ),
               ],
             ),
+            _MoreSection(
+              title: copy('Diary & goals'),
+              children: [
+                _MoreRow(copy('Goals'), '/goals'),
+                _MoreRow(copy('Progress'), '/history'),
+                _MoreRow(
+                  copy('Weekly Report'),
+                  '/weekly-report',
+                  key: const Key('settings-weekly-report-entry'),
+                ),
+                _MoreRow(copy('Challenges'), '/challenges'),
+                _MoreRow(copy('Nutrition'), '/analytics/nutrition'),
+                _MoreRow(
+                  copy('My Meals, Recipes & Foods'),
+                  '/nutrition?from=settings',
+                  showDivider: false,
+                ),
+              ],
+            ),
+            _MoreSection(
+              title: copy('Health preferences'),
+              children: [
+                _MoreRow(
+                  copy('AI Coach'),
+                  '/intelligence-center',
+                  key: const Key('more-ai-coach-entry'),
+                ),
+                _MoreRow(copy('AI Coach settings'), '/settings/ai-coach'),
+                _MoreRow(copy('Intermittent Fasting'), '/wellness/fasting'),
+                _MoreRow(copy('Sleep'), '/wellness/sleep'),
+                _MoreRow(copy('Recipe Discovery'), '/wellness/recipes'),
+                _MoreRow(
+                  wellnessWorkoutVideosAndRoutinesTitle(context),
+                  '/wellness/workouts/routines',
+                ),
+                _MoreRow(
+                  copy('Apps & Devices'),
+                  '/connected-health',
+                  key: const Key('settings-connected-health-entry'),
+                ),
+                _MoreRow(copy('Steps'), '/connected-health/steps'),
+              ],
+            ),
+            const SafeFreeAdAnchor(
+              key: Key('more-free-ad-slot'),
+              surface: SafeFreeAdSurface.more,
+            ),
+            if (AppEnvironment.communityConfigured) ...[
+              _MoreSection(
+                title: copy('Community'),
+                children: [
+                  _MoreRow(copy('Community'), '/community'),
+                  _MoreRow(copy('Friends'), '/community/connections'),
+                  _MoreRow(
+                    copy('Messages'),
+                    '/community/messages',
+                    showDivider: false,
+                  ),
+                ],
+              ),
+            ],
+            _MoreSection(
+              title: copy('Privacy & notifications'),
+              children: [
+                _MoreRow(copy('Settings'), '/settings/preferences'),
+                _MoreRow(
+                  copy('Reminders'),
+                  '/notification-settings',
+                  key: const Key('settings-notifications-entry'),
+                ),
+                _MoreActionRow(
+                  key: const Key('settings-review-onboarding'),
+                  label: copy('Review initial setup'),
+                  kind: BilSemanticIconKind.notes,
+                  onTap: () => _reviewSetupAgain(context, ref),
+                ),
+                _MoreRow(
+                  copy('Sharing & Privacy'),
+                  '/settings/sharing-privacy',
+                ),
+                _MoreRow(
+                  copy('Advertising privacy'),
+                  '/advertising-privacy',
+                  key: const Key('settings-advertising-privacy-entry'),
+                  showDivider: false,
+                ),
+              ],
+            ),
+            _MoreSection(
+              title: copy('Help'),
+              children: [
+                _MoreRow(
+                  context.strings.text('Health sources & methodology'),
+                  '/health-information-sources',
+                  key: const Key('settings-health-sources-entry'),
+                ),
+                _MoreRow(copy('Help'), '/help'),
+                _CloudSyncRow(label: copy('Sync now'), status: cloudSyncStatus),
+              ],
+            ),
+            if (adminAccess.asData?.value == true)
+              _MoreSection(
+                title: copy('Administration'),
+                children: [
+                  _MoreRow(
+                    copy('BIL Administration'),
+                    '/admin/ai-coach',
+                    key: const Key('settings-ai-coach-admin-entry'),
+                    showDivider: false,
+                  ),
+                ],
+              ),
           ],
-          _MoreSection(
-            title: copy('Privacy & notifications'),
-            children: [
-              _MoreRow(copy('Settings'), '/settings/preferences'),
-              _MoreRow(
-                copy('Reminders'),
-                '/notification-settings',
-                key: const Key('settings-notifications-entry'),
-              ),
-              _MoreActionRow(
-                key: const Key('settings-review-onboarding'),
-                label: copy('Review initial setup'),
-                kind: BilSemanticIconKind.notes,
-                onTap: () => _reviewSetupAgain(context, ref),
-              ),
-              _MoreRow(copy('Sharing & Privacy'), '/settings/sharing-privacy'),
-              _MoreRow(
-                copy('Advertising privacy'),
-                '/advertising-privacy',
-                key: const Key('settings-advertising-privacy-entry'),
-                showDivider: false,
-              ),
-            ],
-          ),
-          _MoreSection(
-            title: copy('Help'),
-            children: [
-              _MoreRow(
-                context.strings.text('Health sources & methodology'),
-                '/health-information-sources',
-                key: const Key('settings-health-sources-entry'),
-              ),
-              _MoreRow(copy('Help'), '/help'),
-              _CloudSyncRow(label: copy('Sync now'), status: cloudSyncStatus),
-            ],
-          ),
-          if (adminAccess.asData?.value == true)
-            _MoreSection(
-              title: copy('Administration'),
-              children: [
-                _MoreRow(
-                  copy('BIL Administration'),
-                  '/admin/ai-coach',
-                  key: const Key('settings-ai-coach-admin-entry'),
-                  showDivider: false,
-                ),
-              ],
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -314,27 +338,56 @@ class _MoreSection extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 8),
-          child: Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 9),
+            child: Text(
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -.25,
+                color: dark
+                    ? theme.colorScheme.onSurface
+                    : const Color(0xFF101C33),
+              ),
+            ),
           ),
-        ),
-        Card(
-          clipBehavior: Clip.antiAlias,
-          child: Column(children: children),
-        ),
-      ],
-    ),
-  );
+          Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: dark
+                  ? theme.colorScheme.surfaceContainer
+                  : const Color(0xFFFEFFFF),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: dark
+                    ? Colors.white.withValues(alpha: .09)
+                    : const Color(0xFFDDE7F3),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: dark
+                      ? Colors.black.withValues(alpha: .18)
+                      : const Color(0xFF315E9B).withValues(alpha: .08),
+                  blurRadius: 22,
+                  spreadRadius: -12,
+                  offset: const Offset(0, 9),
+                ),
+              ],
+            ),
+            child: Column(children: children),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 ({String value, bool reached}) _goalProgress({
@@ -488,36 +541,28 @@ class _MoreRow extends StatelessWidget {
 
   bool get _isDanger => route == '/help/delete-account';
 
+  BilSemanticIconKind get _fallbackKind => switch (Uri.parse(route).path) {
+    '/admin/ai-coach' => BilSemanticIconKind.moderation,
+    _ => BilSemanticIconKind.preferences,
+  };
+
   @override
   Widget build(BuildContext context) {
-    final semanticKind = BilSemanticIcons.kindForRoute(route);
+    final semanticKind = BilSemanticIcons.kindForRoute(route) ?? _fallbackKind;
     return Column(
       children: [
         ListTile(
-          minTileHeight: 56,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 18),
-          horizontalTitleGap: 12,
-          leading: _isDanger
-              ? Icon(
-                  Icons.delete_outline_rounded,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.error,
-                )
-              : semanticKind == null
-              ? const _MoreIcon(icon: Icons.arrow_forward_rounded)
-              : BilSemanticIconBadge(
-                  key: Key('more-semantic-icon-${semanticKind.name}'),
-                  kind: semanticKind,
-                  size: 30,
-                  iconSize: 18,
-                  shape: BoxShape.rectangle,
-                ),
+          minTileHeight: 61,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          horizontalTitleGap: 13,
+          leading: _MorePremiumIcon(kind: semanticKind, danger: _isDanger),
           title: Text(
             label,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: _isDanger ? Theme.of(context).colorScheme.error : null,
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.w700,
+              letterSpacing: -.12,
             ),
           ),
           trailing: Row(
@@ -533,39 +578,71 @@ class _MoreRow extends StatelessWidget {
                       ? CommunityAttentionKind.requests
                       : CommunityAttentionKind.all,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
               ],
               Icon(
                 Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_left_rounded
                     : Icons.chevron_right_rounded,
-                color: const Color(0xFF8B93A1),
+                size: 22,
+                color: const Color(0xFF61738D),
               ),
             ],
           ),
           onTap: () => context.push(route),
         ),
-        if (showDivider) const Divider(height: 1, indent: 60),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: .7,
+            indent: 72,
+            endIndent: 16,
+            color: Theme.of(context).dividerColor.withValues(alpha: .42),
+          ),
       ],
     );
   }
 }
 
-class _MoreIcon extends StatelessWidget {
-  const _MoreIcon({required this.icon});
-  final IconData icon;
+class _MorePremiumIcon extends StatelessWidget {
+  const _MorePremiumIcon({required this.kind, this.danger = false});
+
+  final BilSemanticIconKind kind;
+  final bool danger;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: SizedBox.square(
-      dimension: 30,
-      child: Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final healthAccent =
+        kind == BilSemanticIconKind.health ||
+        kind == BilSemanticIconKind.heartRate;
+    final foreground = danger
+        ? theme.colorScheme.error
+        : healthAccent
+        ? (dark ? const Color(0xFFFF8CAD) : const Color(0xFFD91E5B))
+        : (dark ? const Color(0xFF8FC2FF) : const Color(0xFF0869E8));
+    final background = danger
+        ? theme.colorScheme.errorContainer.withValues(alpha: dark ? .36 : .55)
+        : healthAccent
+        ? (dark ? const Color(0xFF4D1C2D) : const Color(0xFFFFEEF4))
+        : (dark ? const Color(0xFF17375F) : const Color(0xFFEAF3FF));
+    final spec = BilSemanticIcons.spec(kind);
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        danger ? Icons.delete_outline_rounded : spec.iconFor(theme.platform),
+        size: 24,
+        color: foreground,
+      ),
+    );
+  }
 }
 
 class _CloudSyncRow extends ConsumerWidget {
@@ -579,23 +656,18 @@ class _CloudSyncRow extends ConsumerWidget {
     children: [
       ListTile(
         key: const Key('settings-cloud-sync-status-row'),
-        minTileHeight: 70,
+        minTileHeight: 72,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        horizontalTitleGap: 12,
+        horizontalTitleGap: 13,
         leading: status.isSyncing
             ? const SizedBox.square(
                 dimension: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : BilSemanticIconBadge(
-                kind: BilSemanticIconKind.cloudSync,
-                size: 30,
-                iconSize: 18,
-                shape: BoxShape.rectangle,
-              ),
+            : const _MorePremiumIcon(kind: BilSemanticIconKind.cloudSync),
         title: Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         subtitle: CloudSyncStatusLine(status: status),
         onTap: status.isSyncing ? null : () => _runSync(context, ref),
@@ -652,28 +724,24 @@ class _MoreActionRow extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       ListTile(
-        minTileHeight: 60,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 22),
-        horizontalTitleGap: 12,
-        leading: BilSemanticIconBadge(
-          kind: kind,
-          size: 30,
-          iconSize: 18,
-          shape: BoxShape.rectangle,
-        ),
+        minTileHeight: 61,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        horizontalTitleGap: 13,
+        leading: _MorePremiumIcon(kind: kind),
         title: Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         trailing: Icon(
           Directionality.of(context) == TextDirection.rtl
               ? Icons.chevron_left_rounded
               : Icons.chevron_right_rounded,
-          color: const Color(0xFFB7B9BD),
+          size: 22,
+          color: const Color(0xFF61738D),
         ),
         onTap: onTap,
       ),
-      const Divider(height: 1, indent: 22),
+      const Divider(height: 1, indent: 72, endIndent: 16),
     ],
   );
 }

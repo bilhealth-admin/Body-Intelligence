@@ -12,6 +12,7 @@ import '../../engine/body_profile.dart';
 import '../../engine/daily_targets.dart';
 import '../../engine/plan_engine.dart';
 import '../../shared/widgets/secondary_page_app_bar.dart';
+import '../daily_log/food_log_page.dart';
 import '../daily_log/providers/daily_log_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -227,9 +228,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                   final evidence = _dashboardEvidence(value);
                   if (value.every((meal) => meal.items.isEmpty)) {
                     return _NutritionEmptyDay(
-                      onLogFood: () => context.push(
-                        '/daily-log?foodLog=1&from=%2Fanalytics',
-                      ),
+                      onLogFood: () => _openNutritionFoodLog(context),
                     );
                   }
                   return TabBarView(
@@ -266,6 +265,16 @@ class NutritionAnalyticsPage extends ConsumerWidget {
   }
 }
 
+Future<void> _openNutritionFoodLog(BuildContext context) =>
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(
+          name: '/daily-log?foodLog=1&from=/analytics/nutrition',
+        ),
+        builder: (_) => const FoodLogPage(preferNavigatorPop: true),
+      ),
+    );
+
 class _NutritionEmptyDay extends StatelessWidget {
   const _NutritionEmptyDay({required this.onLogFood});
 
@@ -295,6 +304,7 @@ class _NutritionEmptyDay extends StatelessWidget {
       ),
       const SizedBox(height: 20),
       FilledButton.icon(
+        key: const Key('nutrition-empty-log-food'),
         onPressed: onLogFood,
         icon: const Icon(Icons.add_rounded),
         label: Text(_t(context, 'Log food')),

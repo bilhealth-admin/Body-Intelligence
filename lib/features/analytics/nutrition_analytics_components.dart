@@ -24,8 +24,10 @@ class _DayHeader extends ConsumerWidget {
           IconButton(
             tooltip: _t(context, 'Previous day'),
             onPressed: () => select(day.subtract(const Duration(days: 1))),
-            icon: const Icon(
-              Icons.chevron_left_rounded,
+            icon: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_right_rounded
+                  : Icons.chevron_left_rounded,
               textDirection: TextDirection.ltr,
             ),
           ),
@@ -67,8 +69,10 @@ class _DayHeader extends ConsumerWidget {
             onPressed: isToday
                 ? null
                 : () => select(day.add(const Duration(days: 1))),
-            icon: const Icon(
-              Icons.chevron_right_rounded,
+            icon: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
               textDirection: TextDirection.ltr,
             ),
           ),

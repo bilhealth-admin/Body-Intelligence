@@ -251,7 +251,7 @@ class ResponsiveAppShell extends StatelessWidget {
     final quickButton = _GlassQuickAdd(
       key: const Key('shell-quick-add'),
       onTap: quickAdd,
-      size: wide ? 62 : 48,
+      size: wide ? 62 : 64,
     );
 
     void handleSystemBack(bool didPop) {
@@ -393,11 +393,11 @@ class _GlassBottomNavigation extends StatelessWidget {
     final colors = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final dockHeight = 76.0 + (textScale - 1).clamp(0.0, 1.0) * 34;
-    final radius = BorderRadius.circular(28);
+    final dockHeight = 68.0 + (textScale - 1).clamp(0.0, 1.0) * 28;
+    final radius = BorderRadius.circular(30);
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(12, 6, 12, 10),
+      minimum: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: radius,
@@ -410,56 +410,81 @@ class _GlassBottomNavigation extends StatelessWidget {
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: radius,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-            child: Container(
-              height: dockHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: dark
-                      ? const [Color(0xF20B1725), Color(0xEA0C2234)]
-                      : const [Color(0xF7FFFFFF), Color(0xEEF2F8FC)],
-                ),
-                borderRadius: radius,
-                border: Border.all(
-                  color: dark
-                      ? Colors.white.withValues(alpha: .13)
-                      : colors.outlineVariant.withValues(alpha: .7),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _GlassBottomDestination(
-                      key: const Key('shell-dashboard-destination'),
-                      item: items[0],
-                      selected: selectedIndex == 0,
-                      onTap: () => onSelected(0),
+        child: SizedBox(
+          height: dockHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: radius,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: dark
+                              ? const [Color(0xF20B1725), Color(0xEA0C2234)]
+                              : const [Color(0xFBFFFFFF), Color(0xF4F8FBFF)],
+                        ),
+                        borderRadius: radius,
+                        border: Border.all(
+                          color: dark
+                              ? Colors.white.withValues(alpha: .13)
+                              : const Color(0xFFDCE7F4),
+                        ),
+                      ),
                     ),
                   ),
-                  Expanded(
+                ),
+              ),
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: _GlassBottomDestination(
+                          key: const Key('shell-dashboard-destination'),
+                          item: items[0],
+                          selected: selectedIndex == 0,
+                          onTap: () => onSelected(0),
+                        ),
+                      ),
+                      const SizedBox(width: 96),
+                      Expanded(
+                        child: _GlassBottomDestination(
+                          key: const Key('shell-more-destination'),
+                          item: items[1],
+                          selected: selectedIndex == 1,
+                          onTap: () => onSelected(1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -18,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: SizedBox(
+                    width: 104,
                     child: _GlassBottomQuickAdd(
                       label: context.strings.text('Quick Add'),
                       child: quickAdd,
                     ),
                   ),
-                  Expanded(
-                    child: _GlassBottomDestination(
-                      key: const Key('shell-more-destination'),
-                      item: items[1],
-                      selected: selectedIndex == 1,
-                      onTap: () => onSelected(1),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -508,11 +533,9 @@ class _GlassBottomDestination extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
               constraints: const BoxConstraints(minHeight: 48),
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               decoration: BoxDecoration(
-                color: selected
-                    ? colors.primary.withValues(alpha: .11)
-                    : Colors.transparent,
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(22),
               ),
               child: Column(
@@ -524,7 +547,7 @@ class _GlassBottomDestination extends StatelessWidget {
                         destination: item.destination,
                         selected: selected,
                         color: foreground,
-                        size: 22,
+                        size: 23,
                       ),
                     )
                   else
@@ -532,7 +555,7 @@ class _GlassBottomDestination extends StatelessWidget {
                       destination: item.destination,
                       selected: selected,
                       color: foreground,
-                      size: 22,
+                      size: 23,
                     ),
                   const SizedBox(height: 4),
                   Flexible(
@@ -569,37 +592,20 @@ class _GlassBottomQuickAdd extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: .28),
-                blurRadius: 22,
-                spreadRadius: -5,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: child,
-        ),
-        const SizedBox(height: 3),
-        Flexible(
-          child: ExcludeSemantics(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w800,
-                height: 1.05,
-              ),
+        child,
+        const SizedBox(height: 2),
+        ExcludeSemantics(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w800,
+              height: 1,
             ),
           ),
         ),
@@ -616,22 +622,61 @@ class _GlassQuickAdd extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: const Color(0xFF087FCE),
-        boxShadow: const [],
-      ),
-      child: IconButton(
-        tooltip: context.strings.text('Quick Add'),
-        onPressed: onTap,
-        icon: Icon(
-          BilNavigationIcons.quickAdd(Theme.of(context).platform),
-          color: Colors.white,
-          size: size >= 60 ? 30 : 28,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF08A6F7), Color(0xFF176CF5), Color(0xFF7048F6)],
+          stops: [0, .56, 1],
         ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: dark ? .55 : .92),
+          width: 1.6,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF126CF5).withValues(alpha: dark ? .38 : .30),
+            blurRadius: 22,
+            spreadRadius: -4,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: const Color(0xFF7048F6).withValues(alpha: dark ? .24 : .18),
+            blurRadius: 16,
+            spreadRadius: -6,
+            offset: const Offset(7, 3),
+          ),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          IconButton(
+            tooltip: context.strings.text('Quick Add'),
+            onPressed: onTap,
+            icon: Icon(
+              BilNavigationIcons.quickAdd(Theme.of(context).platform),
+              color: Colors.white,
+              size: size >= 60 ? 31 : 28,
+            ),
+          ),
+          Positioned(
+            top: size * .16,
+            right: size * .14,
+            child: ExcludeSemantics(
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                size: size * .17,
+                color: Colors.white.withValues(alpha: .94),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

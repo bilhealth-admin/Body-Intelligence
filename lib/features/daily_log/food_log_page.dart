@@ -59,6 +59,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
     this.directPhotoCapture = false,
     this.initialImage,
     this.returnPath,
+    this.preferNavigatorPop = false,
   });
 
   final String? initialMealType;
@@ -66,6 +67,7 @@ class FoodLogPage extends ConsumerStatefulWidget {
   final bool directPhotoCapture;
   final XFile? initialImage;
   final String? returnPath;
+  final bool preferNavigatorPop;
 
   @override
   ConsumerState<FoodLogPage> createState() => _FoodLogPageState();
@@ -543,6 +545,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   );
 
   void _close(BuildContext context) {
+    if (widget.preferNavigatorPop && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+      return;
+    }
     context.go(widget.returnPath ?? '/dashboard');
   }
 }

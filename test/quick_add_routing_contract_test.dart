@@ -64,6 +64,14 @@ void main() {
         ),
       );
       expect(router, contains('return FoodLogPage('));
+      final nutritionAnalytics = File(
+        'lib/features/analytics/nutrition_analytics_page.dart',
+      ).readAsStringSync();
+      expect(
+        nutritionAnalytics,
+        contains('FoodLogPage(preferNavigatorPop: true)'),
+      );
+      expect(nutritionAnalytics, contains('Navigator.of(context).push<void>('));
       expect(
         router,
         contains('initialAction: state.uri.queryParameters[\'action\']'),
