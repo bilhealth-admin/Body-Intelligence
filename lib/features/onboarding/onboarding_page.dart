@@ -76,7 +76,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     'height',
     'currentWeight',
     'targetWeight',
-    'pace',
+    if (_draft.primaryWeightGoal != 'maintain') 'pace',
     'waist',
     'neck',
     if (_draft.sex == 'female') 'hips',
@@ -119,10 +119,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _load() async {
     try {
       final draftRepository = ref.read(onboardingDraftRepositoryProvider);
+      final savedDraft = await draftRepository.load();
       var value = widget.reviewMode
-          ? await _loadCanonicalDraft(reviewMode: true)
-          : await draftRepository.load();
-      value ??= await _loadCanonicalDraft();
+          ? await _loadCanonicalDraft(
+              reviewMode: true,
+              fallbackDraft: savedDraft,
+            )
+          : savedDraft;
+      value ??= await _loadCanonicalDraft(fallbackDraft: savedDraft);
+      value = _normalizeDraftForSelectedWeightGoal(value);
 
       final remoteResult = await ref
           .read(onboardingRemoteAiGatewayProvider)
@@ -159,7 +164,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     }
   }
 
-  Future<OnboardingDraft> _loadCanonicalDraft({bool reviewMode = false}) async {
+  Future<OnboardingDraft> _loadCanonicalDraft({
+    bool reviewMode = false,
+    OnboardingDraft? fallbackDraft,
+  }) async {
     final preferences = ref.read(preferencesRepositoryProvider);
     final profile = await ref.read(userProfileRepositoryProvider).getProfile();
     final latestWeights = await ref.read(weightRepositoryProvider).getAll();
@@ -193,12 +201,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     };
     final goalSet = storedGoals.isNotEmpty
         ? storedGoals
+        : fallbackDraft?.goals.isNotEmpty == true
+        ? fallbackDraft!.goals
         : profile == null
         ? const <OnboardingGoal>{}
         : <OnboardingGoal>{inferredGoal};
-    final birthDate = DateTime.tryParse(
-      await preferences.get('profileDateOfBirth') ?? '',
-    );
+    final birthDate =
+        DateTime.tryParse(await preferences.get('profileDateOfBirth') ?? '') ??
+        fallbackDraft?.birthDate;
+    final storedCountry = (await preferences.get('countryRegion'))?.trim();
     final currentWeight = latestWeights.isNotEmpty
         ? latestWeights.first.weight
         : profile?.currentWeight;
@@ -209,7 +220,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       regularExercise: profile?.exercises ?? false,
       birthDate: birthDate,
       sex: profile?.gender,
-      countryRegion: await preferences.get('countryRegion') ?? '',
+      countryRegion: storedCountry?.isNotEmpty == true
+          ? storedCountry!
+          : fallbackDraft?.countryRegion ?? '',
       localeTag:
           BilLocalePolicy.canonicalSupportedTag(
             await preferences.get('locale'),
@@ -242,6 +255,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       ),
       remoteAiConsent: storedConsent,
       estimatesAcknowledged: reviewMode,
+    );
+  }
+
+  OnboardingDraft _normalizeDraftForSelectedWeightGoal(
+    OnboardingDraft draft,
+  ) {
+    if (draft.primaryWeightGoal != 'maintain') return draft;
+    final current = draft.currentWeightKg;
+    if (current == null) return draft.copyWith(weeklyPaceKg: 0);
+    return draft.copyWith(
+      targetWeightKg: current,
+      weeklyPaceKg: 0,
     );
   }
 
