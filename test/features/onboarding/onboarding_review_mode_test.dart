@@ -286,6 +286,123 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Review normalizes maintenance target and skips weekly pace',
+    (tester) async {
+      final profiles = UserProfileRepository(database);
+      await profiles.save(
+        gender: 'male',
+        age: 36,
+        height: 178,
+        currentWeight: 82.1,
+        targetWeight: 79,
+        activityLevel: 'moderate',
+        exercises: true,
+        waist: 94,
+        neck: 42,
+      );
+      final profile = await profiles.getProfile();
+      await WeightRepository(database).addWeight(
+        82.1,
+        date: DateTime(2026, 9, 30),
+        measurementContext: 'unspecified',
+      );
+      await GoalRepository(database).save(
+        profileUuid: profile!.uuid,
+        type: 'maintain',
+        targetWeight: 79,
+        targetDate: null,
+      );
+      await preferences.set('countryRegion', 'Egypt');
+      await preferences.set('locale', 'en');
+      await preferences.set('units', 'metric');
+      await preferences.set('profileDateOfBirth', '1990-05-17T00:00:00.000');
+      await preferences.set(
+        OnboardingGoalBindings.storageKey,
+        OnboardingGoalBindings.encode(
+          const <OnboardingGoal>{OnboardingGoal.maintainWeight},
+        ),
+      );
+      await preferences.set('onboarding.remoteAiConsent', 'declined');
+
+      await mountReview(tester);
+
+      for (var i = 0; i < 6; i++) {
+        await tester.tap(find.byKey(const Key('onboarding-next')));
+        await tester.pumpAndSettle();
+      }
+
+      final targetField = tester.widget<TextField>(
+        find.byKey(const Key('onboarding-target-weight')),
+      );
+      expect(targetField.controller!.text, '82.1');
+
+      await tester.tap(find.byKey(const Key('onboarding-next')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Choose a weekly pace'), findsNothing);
+      expect(find.byKey(const Key('onboarding-waist')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'Review falls back to saved draft for missing goals country and birth date',
+    (tester) async {
+      await UserProfileRepository(database).save(
+        gender: 'male',
+        age: 36,
+        height: 178,
+        currentWeight: 82.1,
+        targetWeight: 79,
+        activityLevel: 'moderate',
+        exercises: true,
+      );
+      await WeightRepository(database).addWeight(
+        82.1,
+        date: DateTime(2026, 9, 30),
+        measurementContext: 'unspecified',
+      );
+      await drafts.save(
+        OnboardingDraft(
+          stepId: 'review',
+          goals: const <OnboardingGoal>{
+            OnboardingGoal.loseWeight,
+            OnboardingGoal.improveNutrition,
+          },
+          activity: 'moderate',
+          birthDate: DateTime(1990, 5, 17),
+          sex: 'male',
+          countryRegion: 'Egypt',
+          localeTag: 'en',
+          heightCm: 178,
+          currentWeightKg: 82.1,
+          targetWeightKg: 79,
+          weeklyPaceKg: .5,
+          remoteAiConsent: OnboardingRemoteAiConsent.declined,
+          estimatesAcknowledged: true,
+        ),
+      );
+      await preferences.set('locale', 'en');
+      await preferences.set('units', 'metric');
+      await preferences.set('onboarding.remoteAiConsent', 'declined');
+
+      await mountReview(tester);
+
+      await tester.tap(find.byKey(const Key('onboarding-next')));
+      await tester.pumpAndSettle();
+      expect(find.text('What is your baseline activity?'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('onboarding-next')));
+      await tester.pumpAndSettle();
+
+      final country = tester.widget<TextField>(
+        find.byKey(const Key('onboarding-country')),
+      );
+      expect(country.controller!.text, 'Egypt');
+      expect(find.text('Choose date of birth'), findsNothing);
+    },
+  );
+
   testWidgets('leaving Review without finishing does not write its draft', (
     tester,
   ) async {
