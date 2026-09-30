@@ -260,8 +260,8 @@ class ModernOnboardingScaffold extends StatelessWidget {
 
 /// Responsive, decorative photo slot for approved BIL-owned onboarding
 /// photography. It is intentionally absent from semantics: every instruction
-/// remains available as real text. The image fills the page-width hero without
-/// a card, border, inset frame, or tint layer.
+/// remains available as real text. The complete source image is always visible;
+/// a subdued cover layer fills any spare aspect-ratio space behind it.
 class ModernOnboardingPhotoHero extends StatelessWidget {
   const ModernOnboardingPhotoHero({
     super.key,
@@ -290,11 +290,29 @@ class ModernOnboardingPhotoHero extends StatelessWidget {
       child: SizedBox(
         height: resolvedHeight,
         width: double.infinity,
-        child: Image(
-          image: image,
-          fit: BoxFit.cover,
-          alignment: alignment,
-          filterQuality: FilterQuality.high,
+        child: ColoredBox(
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: .16,
+                child: Image(
+                  image: image,
+                  fit: BoxFit.cover,
+                  alignment: alignment,
+                  filterQuality: FilterQuality.medium,
+                ),
+              ),
+              Image(
+                key: const Key('onboarding-photo-complete-image'),
+                image: image,
+                fit: BoxFit.contain,
+                alignment: Alignment.center,
+                filterQuality: FilterQuality.high,
+              ),
+            ],
+          ),
         ),
       ),
     );
