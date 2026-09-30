@@ -498,7 +498,6 @@ class _GlassBottomNavigation extends StatelessWidget {
           ],
         ),
       ),
-      ),
     );
   }
 }
