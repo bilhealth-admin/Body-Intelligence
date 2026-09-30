@@ -4,9 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('More premium polish preserves every registered destination', () {
-    final source = File(
+    final source = [
       'lib/features/settings/settings_page.dart',
-    ).readAsStringSync();
+      'lib/features/settings/settings_page_polish.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     for (final route in const [
       '/profile-summary',
       '/settings/language',
