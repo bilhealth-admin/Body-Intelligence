@@ -19,6 +19,7 @@ abstract final class FoodLogRuntimeCopy {
   static const searchHint = 'Search foods, brands, flavors…';
   static const notNow = 'Not now';
   static const loadingNutrition = 'Loading nutrition';
+  static const snack = 'Snack';
 
   static const sources = <String>[
     mostPopular,
@@ -33,6 +34,7 @@ abstract final class FoodLogRuntimeCopy {
     searchHint,
     notNow,
     loadingNutrition,
+    snack,
   ];
 
   static const supported = <String>{
@@ -77,6 +79,7 @@ abstract final class FoodLogRuntimeCopy {
       'ابحث عن أطعمة أو علامات تجارية أو نكهات…',
       'ليس الآن',
       'جارٍ تحميل بيانات التغذية',
+      'وجبة خفيفة',
     ],
     'en': sources,
     'fr': <String>[
@@ -92,6 +95,7 @@ abstract final class FoodLogRuntimeCopy {
       'Rechercher des aliments, marques, saveurs…',
       'Pas maintenant',
       'Chargement des données nutritionnelles',
+      'En-cas',
     ],
     'es': <String>[
       'Más populares',
@@ -106,6 +110,7 @@ abstract final class FoodLogRuntimeCopy {
       'Busca alimentos, marcas, sabores…',
       'Ahora no',
       'Cargando datos de nutrición',
+      'Tentempié',
     ],
     'tr': <String>[
       'En popüler',
@@ -120,6 +125,7 @@ abstract final class FoodLogRuntimeCopy {
       'Yiyecek, marka veya lezzet ara…',
       'Şimdi değil',
       'Beslenme verileri yükleniyor',
+      'Ara öğün',
     ],
     'de': <String>[
       'Am beliebtesten',
@@ -134,6 +140,7 @@ abstract final class FoodLogRuntimeCopy {
       'Lebensmittel, Marken, Geschmacksrichtungen suchen…',
       'Nicht jetzt',
       'Ernährungsdaten werden geladen',
+      'Zwischenmahlzeit',
     ],
     'it': <String>[
       'Più popolari',
@@ -148,6 +155,7 @@ abstract final class FoodLogRuntimeCopy {
       'Cerca alimenti, marche, gusti…',
       'Non ora',
       'Caricamento dei dati nutrizionali',
+      'Spuntino',
     ],
     'pt-BR': <String>[
       'Mais populares',
@@ -162,6 +170,7 @@ abstract final class FoodLogRuntimeCopy {
       'Pesquise alimentos, marcas, sabores…',
       'Agora não',
       'Carregando dados de nutrição',
+      'Lanche',
     ],
     'pt-PT': <String>[
       'Mais populares',
@@ -176,6 +185,7 @@ abstract final class FoodLogRuntimeCopy {
       'Pesquise alimentos, marcas, sabores…',
       'Agora não',
       'A carregar dados de nutrição',
+      'Lanche',
     ],
     'ur': <String>[
       'سب سے مقبول',
@@ -190,6 +200,7 @@ abstract final class FoodLogRuntimeCopy {
       'غذا، برانڈ یا ذائقہ تلاش کریں…',
       'ابھی نہیں',
       'غذائیت کا ڈیٹا لوڈ ہو رہا ہے',
+      'ہلکی غذا',
     ],
     'fa': <String>[
       'محبوب‌ترین‌ها',
@@ -204,6 +215,7 @@ abstract final class FoodLogRuntimeCopy {
       'جستجوی غذا، برند یا طعم…',
       'الان نه',
       'در حال بارگذاری داده‌های تغذیه',
+      'میان‌وعده',
     ],
     'hi': <String>[
       'सबसे लोकप्रिय',
@@ -218,6 +230,7 @@ abstract final class FoodLogRuntimeCopy {
       'भोजन, ब्रांड, स्वाद खोजें…',
       'अभी नहीं',
       'पोषण डेटा लोड हो रहा है',
+      'स्नैक',
     ],
     'id': <String>[
       'Paling populer',
@@ -232,6 +245,7 @@ abstract final class FoodLogRuntimeCopy {
       'Cari makanan, merek, rasa…',
       'Jangan sekarang',
       'Memuat data nutrisi',
+      'Camilan',
     ],
     'ms': <String>[
       'Paling popular',
@@ -246,6 +260,7 @@ abstract final class FoodLogRuntimeCopy {
       'Cari makanan, jenama, perisa…',
       'Bukan sekarang',
       'Memuatkan data pemakanan',
+      'Snek',
     ],
     'ja': <String>[
       '人気の食品',
@@ -260,6 +275,7 @@ abstract final class FoodLogRuntimeCopy {
       '食品、ブランド、味を検索…',
       '今はしない',
       '栄養データを読み込んでいます',
+      '間食',
     ],
     'ko': <String>[
       '인기 음식',
@@ -274,6 +290,7 @@ abstract final class FoodLogRuntimeCopy {
       '음식, 브랜드, 맛 검색…',
       '나중에',
       '영양 데이터를 불러오는 중',
+      '간식',
     ],
     'zh-Hans': <String>[
       '最常用',
@@ -288,6 +305,7 @@ abstract final class FoodLogRuntimeCopy {
       '搜索食物、品牌、口味…',
       '暂不',
       '正在加载营养数据',
+      '加餐',
     ],
     'zh-Hant': <String>[
       '最常用',
@@ -302,6 +320,7 @@ abstract final class FoodLogRuntimeCopy {
       '搜尋食物、品牌、口味…',
       '暫時不要',
       '正在載入營養資料',
+      '加餐',
     ],
     'ru': <String>[
       'Самые популярные',
@@ -316,6 +335,7 @@ abstract final class FoodLogRuntimeCopy {
       'Искать продукты, бренды, вкусы…',
       'Не сейчас',
       'Загрузка данных о питании',
+      'Перекус',
     ],
     'bn': <String>[
       'সবচেয়ে জনপ্রিয়',
@@ -330,6 +350,7 @@ abstract final class FoodLogRuntimeCopy {
       'খাবার, ব্র্যান্ড, স্বাদ খুঁজুন…',
       'এখন নয়',
       'পুষ্টি তথ্য লোড হচ্ছে',
+      'হালকা খাবার',
     ],
     'vi': <String>[
       'Phổ biến nhất',
@@ -344,6 +365,7 @@ abstract final class FoodLogRuntimeCopy {
       'Tìm thực phẩm, thương hiệu, hương vị…',
       'Để sau',
       'Đang tải dữ liệu dinh dưỡng',
+      'Bữa phụ',
     ],
     'th': <String>[
       'ยอดนิยม',
@@ -358,6 +380,7 @@ abstract final class FoodLogRuntimeCopy {
       'ค้นหาอาหาร แบรนด์ หรือรสชาติ…',
       'ไว้ก่อน',
       'กำลังโหลดข้อมูลโภชนาการ',
+      'ของว่าง',
     ],
     'pl': <String>[
       'Najpopularniejsze',
@@ -372,6 +395,7 @@ abstract final class FoodLogRuntimeCopy {
       'Szukaj produktów, marek, smaków…',
       'Nie teraz',
       'Ładowanie danych żywieniowych',
+      'Przekąska',
     ],
     'nl': <String>[
       'Populairst',
@@ -386,6 +410,7 @@ abstract final class FoodLogRuntimeCopy {
       'Zoek voedingsmiddelen, merken, smaken…',
       'Niet nu',
       'Voedingsgegevens laden',
+      'Tussendoortje',
     ],
     'uk': <String>[
       'Найпопулярніше',
@@ -400,6 +425,7 @@ abstract final class FoodLogRuntimeCopy {
       'Шукайте продукти, бренди, смаки…',
       'Не зараз',
       'Завантаження даних про харчування',
+      'Перекус',
     ],
   };
 
