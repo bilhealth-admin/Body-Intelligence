@@ -96,6 +96,7 @@ abstract final class FoodPresentationLocalizer {
     _trustedRuntimeTranslations['$locale|${_normalize(canonical)}'] = localized;
   }
 
+  // ignore: unused_element
   static String? _runtimeDisplayName(String name, String locale) =>
       _trustedRuntimeTranslations['$locale|${_normalize(name)}'];
 
