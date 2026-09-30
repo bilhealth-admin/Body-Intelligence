@@ -1,0 +1,110 @@
+name: BIL reviewed premium goldens
+
+on:
+  push:
+    branches: [tmp/premium-golden-refresh2-20260930]
+
+permissions:
+  contents: write
+
+jobs:
+  reviewed-goldens:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: Preserve repository bytes
+        shell: pwsh
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve and verify source repairs
+        shell: pwsh
+        run: |
+          flutter pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter analyze --no-pub
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --concurrency 1 --timeout 2m `
+            test/features/daily_log/food_log_meal_selector_test.dart `
+            test/features/daily_log/food_log_page_reference_test.dart `
+            test/quick_add_semantic_colors_test.dart `
+            test/features/settings/sharing_privacy_diary_summary_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Refresh reviewed premium goldens
+        shell: pwsh
+        run: |
+          flutter test --no-pub --update-goldens test/epic3_visual_matrix_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --update-goldens test/premium_dashboard_benchmark_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --update-goldens test/visual_closure/quick_add_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --update-goldens --plain-name "sharing_privacy_phone production capture" test/visual_closure/actual_data_pages_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --update-goldens --plain-name "trust and support production page RTL dark capture" test/visual_closure/actual_production_pages_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --update-goldens test/epic15_store_screenshot_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Reject unreviewed visual changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re, subprocess
+          changed=subprocess.check_output(['git','diff','--name-only']).decode().splitlines()
+          patterns=[
+            re.compile(r'^test/goldens/epic3_(compact|large)_(en|ar)_dark[.]png$'),
+            re.compile(r'^test/goldens/premium_dashboard_(phone|tablet|desktop)_after[.]png$'),
+            re.compile(r'^test/goldens/epic15_(iphone_69|android_phone)_(en_06_privacy_settings|ar_03_progress_dark|ar_08_privacy_settings_dark)[.]png$'),
+            re.compile(r'^test/visual_closure/goldens/quick_add_(en_light|ar_dark|ios_en_light|ios_ar_dark)_phone[.]png$'),
+            re.compile(r'^test/visual_closure/goldens/visual_closure_sharing_privacy_phone[.]png$'),
+            re.compile(r'^test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone[.]png$'),
+          ]
+          unexpected=[p for p in changed if not any(rx.match(p) for rx in patterns)]
+          if unexpected:
+              print('UNREVIEWED_CHANGED_FILES=',unexpected)
+              raise SystemExit(1)
+          if not changed:
+              raise SystemExit('No golden changes were produced')
+          print('REVIEWED_CHANGED_GOLDENS=',len(changed))
+          print('\n'.join(changed))
+          PY
+
+      - name: Strictly verify refreshed visual suites
+        shell: pwsh
+        run: |
+          flutter test --no-pub test/epic3_visual_matrix_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub test/premium_dashboard_benchmark_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub test/visual_closure/quick_add_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --plain-name "sharing_privacy_phone production capture" test/visual_closure/actual_data_pages_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub --plain-name "trust and support production page RTL dark capture" test/visual_closure/actual_production_pages_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          flutter test --no-pub test/epic15_store_screenshot_golden_test.dart
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Commit only reviewed goldens
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'BIL reviewed golden refresh'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add test/goldens test/visual_closure/goldens
+          git commit -m 'test(visual): refresh reviewed premium goldens [skip ci]'
+          git push origin HEAD:tmp/premium-golden-refresh2-20260930
