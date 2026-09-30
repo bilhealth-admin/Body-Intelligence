@@ -56,11 +56,18 @@ type TranslationFunction = (
   targetLocale: string,
 ) => Promise<string | null>;
 
+type TranslationBatchFunction = (
+  values: string[],
+  sourceLocale: string,
+  targetLocale: string,
+) => Promise<Array<string | null>>;
+
 export interface FoodSearchRuntime {
   authorize(request: Request): Promise<AccessResult>;
   apiKey(): string;
   fetch: typeof fetch;
   translate?: TranslationFunction;
+  translateMany?: TranslationBatchFunction;
 }
 
 type BoundedJsonResult =
@@ -165,6 +172,13 @@ const productionRuntime: FoodSearchRuntime = {
       targetLocale,
       fetch,
     ),
+  translateMany: (values, sourceLocale, targetLocale) =>
+    translateManyWithGoogle(
+      values,
+      sourceLocale,
+      targetLocale,
+      fetch,
+    ),
 };
 
 const supportedLocales = new Set([
@@ -175,7 +189,8 @@ const supportedLocales = new Set([
   "tr",
   "de",
   "it",
-  "pt",
+  "pt-BR",
+  "pt-PT",
   "ur",
   "fa",
   "hi",
@@ -183,7 +198,8 @@ const supportedLocales = new Set([
   "ms",
   "ja",
   "ko",
-  "zh",
+  "zh-Hans",
+  "zh-Hant",
   "ru",
   "bn",
   "vi",
@@ -192,6 +208,26 @@ const supportedLocales = new Set([
   "nl",
   "uk",
 ]);
+
+function canonicalLocale(value: string) {
+  const normalized = value.trim().replaceAll("_", "-");
+  const lower = normalized.toLowerCase();
+  if (lower === "pt-br") return "pt-BR";
+  if (lower.startsWith("pt")) return "pt-PT";
+  if (lower === "zh-hant" || lower === "zh-tw" || lower === "zh-hk") {
+    return "zh-Hant";
+  }
+  if (lower.startsWith("zh")) return "zh-Hans";
+  const language = lower.split("-")[0];
+  return supportedLocales.has(language) ? language : "en";
+}
+
+function providerLocale(locale: string) {
+  if (locale === "pt-BR" || locale === "pt-PT") return "pt";
+  if (locale === "zh-Hans") return "zh-CN";
+  if (locale === "zh-Hant") return "zh-TW";
+  return locale;
+}
 
 function normalizedUsda(food: Record<string, unknown>) {
   const nutrients = Array.isArray(food.foodNutrients) ? food.foodNutrients : [];
@@ -220,6 +256,65 @@ function normalizedUsda(food: Record<string, unknown>) {
 /// authority and its stored food name is never replaced by an unreviewed
 /// translation. This keeps the search multilingual without pretending that a
 /// machine translation is a canonical food identity.
+async function translateManyWithGoogle(
+  values: string[],
+  sourceLocale: string,
+  targetLocale: string,
+  fetcher: typeof fetch,
+): Promise<Array<string | null>> {
+  const key = firstEnv("BIL_TRANSLATION_API_KEY", "Translation");
+  const clean = values.map((value) => value.trim()).filter(Boolean).slice(0, 20);
+  if (!key || clean.length === 0 || sourceLocale === targetLocale) {
+    return clean.map(() => null);
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3500);
+  try {
+    const response = await fetcher(
+      `https://translation.googleapis.com/language/translate/v2?key=${
+        encodeURIComponent(key)
+      }`,
+      {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          q: clean,
+          source: providerLocale(sourceLocale),
+          target: providerLocale(targetLocale),
+          format: "text",
+        }),
+      },
+    );
+    if (!response.ok) return clean.map(() => null);
+    const root = await response.json() as Record<string, unknown>;
+    const data = root.data;
+    const translations =
+      data != null && typeof data === "object" && !Array.isArray(data)
+        ? (data as Record<string, unknown>).translations
+        : null;
+    if (!Array.isArray(translations) || translations.length !== clean.length) {
+      return clean.map(() => null);
+    }
+    return translations.map((entry) => {
+      if (entry == null || typeof entry !== "object" || Array.isArray(entry)) {
+        return null;
+      }
+      const translated = text(
+        (entry as Record<string, unknown>).translatedText,
+      );
+      return translated.length >= 2 && translated.length <= 240
+        ? translated
+        : null;
+    });
+  } catch {
+    return clean.map(() => null);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function translateWithGoogle(
   value: string,
   sourceLocale: string,
@@ -306,8 +401,7 @@ export async function handleFoodSearchRequest(
   }
   const requestedLimit = Math.trunc(finite(body.limit) ?? 10);
   const limit = Math.max(1, Math.min(requestedLimit, 20));
-  const requestedLocale = text(body.locale).toLowerCase().split(/[-_]/)[0];
-  const locale = supportedLocales.has(requestedLocale) ? requestedLocale : "en";
+  const locale = canonicalLocale(text(body.locale));
 
   const quota = await access.consumeQuota();
   if (quota === "rate_limited") return json({ error: "rate_limited" }, 429);
@@ -367,14 +461,26 @@ export async function handleFoodSearchRequest(
     >)
       .map(normalizedUsda)
       .filter((food) => food.fdc_id !== null && food.name.length > 0);
+    let localizedFoods = foods;
+    if (locale !== "en" && foods.length > 0 && runtime.translateMany != null) {
+      const translatedNames = await runtime.translateMany(
+        foods.map((food) => food.name),
+        "en",
+        locale,
+      );
+      localizedFoods = foods.map((food, index) => ({
+        ...food,
+        localized_name: translatedNames[index] ?? null,
+      }));
+    }
     return json({
-      status: foods.length === 0 ? "unresolved" : "found",
+      status: localizedFoods.length === 0 ? "unresolved" : "found",
       source: "usda",
       query,
       search_query: translatedQuery,
       locale,
-      foods,
-    }, foods.length === 0 ? 404 : 200);
+      foods: localizedFoods,
+    }, localizedFoods.length === 0 ? 404 : 200);
   } catch {
     return json({ error: "food_provider_unavailable" }, 503);
   } finally {
