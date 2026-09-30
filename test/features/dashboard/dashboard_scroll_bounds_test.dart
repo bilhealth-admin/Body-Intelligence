@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // QA trigger: validate the current More-matched platform scroll contract.
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     testWidgets(
       '$platform: both edges settle cleanly without synchronization or duplicate dock space',
