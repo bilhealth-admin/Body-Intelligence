@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
@@ -32,6 +33,12 @@ void main() {
     test(
       'adopted guest health data becomes durable owner-scoped envelopes',
       () async {
+        await PreferencesRepository(database).setMany({
+          'profileDateOfBirth': '1990-05-17T00:00:00.000',
+          'countryRegion': 'Egypt',
+          'onboarding.goalPriorities.v1':
+              '{"version":1,"goals":["improveNutrition","loseWeight"]}',
+        });
         await UserProfileRepository(database).save(
           gender: 'male',
           age: 36,
@@ -109,6 +116,19 @@ void main() {
         expect(water.syncStatus, 'queued');
         expect(meal.syncStatus, 'queued');
         expect(item.syncStatus, 'queued');
+
+        final profileEnvelope = sink.records.singleWhere(
+          (record) => record.entityKind == CloudEntityKind.profile,
+        );
+        expect(
+          profileEnvelope.payload['profileDateOfBirth'],
+          '1990-05-17T00:00:00.000',
+        );
+        expect(profileEnvelope.payload['countryRegion'], 'Egypt');
+        expect(
+          profileEnvelope.payload['onboardingGoalPriorities'],
+          '{"version":1,"goals":["improveNutrition","loseWeight"]}',
+        );
 
         final weightEnvelope = sink.records.singleWhere(
           (record) => record.entityKind == CloudEntityKind.weight,
