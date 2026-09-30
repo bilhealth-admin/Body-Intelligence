@@ -65,27 +65,24 @@ jobs:
 
           p=root/'lib/app/router/bil_quick_add_sheet.dart'
           s=p.read_text()
-          old="""                                backgroundColor: premiumGradient == null
-                                      ? spec.accent(baseTheme.brightness)
-                                      : Colors.white.withValues(alpha: .16),
-                                  foregroundColor: premiumGradient == null
-                                      ? spec.onAccent(baseTheme.brightness)
-                                      : Colors.white,
-          """
-          new="""                                // Keep the canonical semantic badge color
-                                  // even when the surrounding Voice/Photo card
-                                  // uses the premium gradient. The gradient is
-                                  // presentation; the badge remains the stable
-                                  // accessible action identity.
-                                  backgroundColor: spec.accent(
-                                    baseTheme.brightness,
-                                  ),
-                                  foregroundColor: spec.onAccent(
-                                    baseTheme.brightness,
-                                  ),
-          """
-          if old not in s: raise SystemExit('Quick Add premium badge contract not found')
-          p.write_text(s.replace(old,new))
+          old_bg="""                                backgroundColor: premiumGradient == null
+                                    ? spec.accent(baseTheme.brightness)
+                                    : Colors.white.withValues(alpha: .16),"""
+          new_bg="""                                // Keep the semantic badge identity even when
+                                // the Voice/Photo surface uses a premium gradient.
+                                backgroundColor: spec.accent(
+                                  baseTheme.brightness,
+                                ),"""
+          old_fg="""                                foregroundColor: premiumGradient == null
+                                    ? spec.onAccent(baseTheme.brightness)
+                                    : Colors.white,"""
+          new_fg="""                                foregroundColor: spec.onAccent(
+                                  baseTheme.brightness,
+                                ),"""
+          if old_bg not in s: raise SystemExit('Quick Add premium badge background contract not found')
+          if old_fg not in s: raise SystemExit('Quick Add premium badge foreground contract not found')
+          s=s.replace(old_bg,new_bg,1).replace(old_fg,new_fg,1)
+          p.write_text(s)
 
           p=root/'lib/features/settings/sharing_privacy_settings_page.dart'
           s=p.read_text()
