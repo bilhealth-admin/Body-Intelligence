@@ -86,7 +86,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ needs.prepare.outputs.source }}
-          fetch-depth: 30
+          fetch-depth: 0
           persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
@@ -110,7 +110,7 @@ jobs:
           mkdir -p /tmp/sapphire-focused
           flutter pub get
           flutter analyze --no-pub 2>&1 | tee /tmp/sapphire-focused/analyze.log
-          flutter test --no-pub --concurrency 1 --timeout 90s --reporter expanded test/features/connected_health test/connected_health test/features/community/community_sapphire_contract_test.dart test/features/community/community_welcome_responsive_test.dart test/features/community/community_review_regression_test.dart test/features/community/community_social_v2_ui_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log
+          flutter test --no-pub --concurrency 1 --timeout 90s --reporter expanded test/features/connected_health test/connected_health test/features/community/community_sapphire_contract_test.dart test/features/community/community_welcome_responsive_test.dart test/features/community/community_review_regression_test.dart test/features/community/community_social_v2_ui_test.dart test/features/analytics/weekly_report_history_navigation_test.dart test/features/analytics/nutrition_entry_and_recipe_transition_contract_test.dart test/features/analytics/nutrition_empty_log_food_navigation_test.dart test/features/settings/more_premium_polish_contract_test.dart test/features/settings/more_section_headings_test.dart test/semantic_icon_badge_spacing_test.dart test/responsive_shell_test.dart 2>&1 | tee /tmp/sapphire-focused/focused.log
           flutter test --no-pub --concurrency 1 --timeout 30s --reporter expanded test/performance_budget_test.dart 2>&1 | tee /tmp/sapphire-focused/performance.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
