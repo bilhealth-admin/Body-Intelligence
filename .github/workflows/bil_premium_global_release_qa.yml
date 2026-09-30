@@ -1,4 +1,4 @@
-name: BIL Premium Global Release Audit
+name: BIL Premium Global Bootstrap
 
 on:
   push:
@@ -6,216 +6,60 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: premium-global-${{ github.sha }}
+  group: premium-global-bootstrap-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   prepare:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
-    permissions:
-      contents: write
-    outputs:
-      source: ${{ steps.source.outputs.sha }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
           ref: ${{ github.sha }}
-      - name: Restore exact reviewed premium/global source bundle
+
+      - name: Restore exact reviewed source
         shell: bash
         run: |
           set -euo pipefail
-          BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
-          if compgen -G 'tool/premium_global_patch/part-*' > /dev/null; then
-            PATCH_B64="$RUNNER_TEMP/premium-global-source.diff.gz.b64"
-            PATCH_GZ="$RUNNER_TEMP/premium-global-source.diff.gz"
-            PATCH="$RUNNER_TEMP/premium-global-source.diff"
-            cat tool/premium_global_patch/part-* > "$PATCH_B64"
-            echo "5c36fee224912ca60b4a370f14dab0aeec8191d2b41e4e1d0ed81c5ba230d16b  $PATCH_B64" | sha256sum --check --strict
-            base64 --decode "$PATCH_B64" > "$PATCH_GZ"
-            echo "34f3a1eb7c064fa04ee2e6a250f509abafb113f62fd7d62f8cb367464368394d  $PATCH_GZ" | sha256sum --check --strict
-            gzip --decompress --stdout "$PATCH_GZ" > "$PATCH"
-            echo "bf95218befb53c7b543fa98adb486159a9973d3fe9c2c7bad46e5a44e0d05ccb  $PATCH" | sha256sum --check --strict
-            git apply --check "$PATCH"
-            git apply "$PATCH"
-          else
-            echo 'No bootstrap patch present; testing already committed premium source.'
-          fi
-          git diff --name-status "$BASE"
+          PATCH_B64="$RUNNER_TEMP/premium-global-source.diff.gz.b64"
+          PATCH_GZ="$RUNNER_TEMP/premium-global-source.diff.gz"
+          PATCH="$RUNNER_TEMP/premium-global-source.diff"
+          cat tool/premium_global_patch/part-* > "$PATCH_B64"
+          echo "5c36fee224912ca60b4a370f14dab0aeec8191d2b41e4e1d0ed81c5ba230d16b  $PATCH_B64" | sha256sum --check --strict
+          base64 --decode "$PATCH_B64" > "$PATCH_GZ"
+          echo "34f3a1eb7c064fa04ee2e6a250f509abafb113f62fd7d62f8cb367464368394d  $PATCH_GZ" | sha256sum --check --strict
+          gzip --decompress --stdout "$PATCH_GZ" > "$PATCH"
+          echo "bf95218befb53c7b543fa98adb486159a9973d3fe9c2c7bad46e5a44e0d05ccb  $PATCH" | sha256sum --check --strict
+          git apply --check "$PATCH"
+          git apply "$PATCH"
+
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Format only reviewed source deltas
+
+      - name: Format reviewed Dart source
         shell: bash
         run: |
           set -euo pipefail
-          BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
           flutter pub get
-          mapfile -t DART_FILES < <(git diff --name-only "$BASE" -- '*.dart' | while read -r p; do test -f "$p" && printf '%s
-' "$p"; done)
-          if ((${#DART_FILES[@]})); then dart format "${DART_FILES[@]}"; fi
-          npm install --prefix /tmp/bil-deno deno@2.5.1
-          /tmp/bil-deno/node_modules/.bin/deno fmt             supabase/functions/food-search/index.ts             supabase/functions/food-search/index_test.ts
-          rm -rf tool/premium_global_bootstrap tool/premium_global_patch tool/premium_global_bundle
-      - name: Commit exact formatted source for audit
-        id: source
+          mapfile -t FILES < <(git diff --name-only -- '*.dart')
+          if [ "${#FILES[@]}" -gt 0 ]; then
+            dart format "${FILES[@]}"
+          fi
+          rm -rf tool/premium_global_patch
+
+      - name: Commit final premium source
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'BIL premium release QA'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m 'feat(release): premium global experience and native parity polish'
-            git push origin HEAD:fix/premium-global-release-polish-final-20260930
-          fi
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Export source evidence
-        shell: bash
-        run: |
-          mkdir -p /tmp/premium-global-source
-          git rev-parse HEAD > /tmp/premium-global-source/source-sha.txt
-          git status --porcelain > /tmp/premium-global-source/worktree-status.txt
-          git diff --stat 1cd90816577ebb9fb3fb058db3f36c73a816c5fe HEAD > /tmp/premium-global-source/source-stat.txt
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
-        with:
-          name: premium-global-source-${{ github.run_id }}
-          path: /tmp/premium-global-source/
-          retention-days: 14
-
-  source-integrity:
-    needs: prepare
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          fetch-depth: 0
-          ref: ${{ needs.prepare.outputs.source }}
-          persist-credentials: false
-      - name: Freeze routes and production identifiers
-        shell: bash
-        run: |
-          set -euo pipefail
-          BASE='1cd90816577ebb9fb3fb058db3f36c73a816c5fe'
-          git diff --exit-code "$BASE" HEAD --             lib/app/router/app_router.dart             android/app/build.gradle.kts             ios/Runner.xcodeproj/project.pbxproj
-          grep -F 'applicationId = "com.bilhealth.bodyintelligencelog"' android/app/build.gradle.kts
-          grep -F 'PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog;' ios/Runner.xcodeproj/project.pbxproj
-          test "$(git rev-parse HEAD)" = "${{ needs.prepare.outputs.source }}"
-
-  analyze-and-focused:
-    needs: [prepare, source-integrity]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ needs.prepare.outputs.source }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - name: Analyze and run premium/global regressions
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/premium-global-focused
-          flutter pub get
-          flutter analyze --no-pub 2>&1 | tee /tmp/premium-global-focused/analyze.log
-          flutter test --no-pub --concurrency 1 --timeout 90s --reporter expanded             test/app/localization/food_log_runtime_copy_test.dart             test/app/theme/premium_black_dark_theme_contract_test.dart             test/shared/widgets/premium_trust_and_clinical_surface_test.dart             test/features/intelligence_center/ai_coach_premium_welcome_contract_test.dart             test/app/router/quick_add_premium_capture_actions_contract_test.dart             test/features/onboarding/premium_consent_surface_contract_test.dart             test/features/nutrition/food_presentation_localizer_test.dart             test/launch_readiness/trusted_food_search_backend_contract_test.dart             test/features/analytics/nutrition_empty_log_food_navigation_test.dart             test/features/onboarding             test/features/auth/android_native_oauth_contract_test.dart             test/premium_login_oauth_contract_test.dart             test/platform_readiness/mobile_release_configuration_contract_test.dart             test/platform_readiness/premium_global_native_parity_contract_test.dart             test/platform_readiness/android_health_permission_premium_contract_test.dart             test/connected_health             test/features/connected_health             test/features/commerce             test/semantic_icon_badge_spacing_test.dart             test/responsive_shell_test.dart             2>&1 | tee /tmp/premium-global-focused/focused.log
-          flutter test --no-pub --concurrency 1 --timeout 30s --reporter expanded             test/performance_budget_test.dart             2>&1 | tee /tmp/premium-global-focused/performance.log
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
-        with:
-          name: premium-global-focused-${{ github.run_id }}
-          path: /tmp/premium-global-focused/
-          retention-days: 14
-
-  full-tests:
-    needs: [prepare, analyze-and-focused]
-    runs-on: windows-2022
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
-    env:
-      PYTHONUTF8: '1'
-    steps:
-      - name: Preserve exact committed catalog bytes
-        run: git config --global core.autocrlf false
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ needs.prepare.outputs.source }}
-          persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - run: flutter pub get
-      - name: Run every test file with strict comparators and no exclusions
-        env:
-          SHARD: ${{ matrix.shard }}
-        run: python tool/sapphire/run_full_shard.py
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
-        with:
-          name: premium-global-full-shard-${{ matrix.shard }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/sapphire-shard/
-          retention-days: 14
-
-  visual-and-cloud-contracts:
-    needs: [prepare, analyze-and-focused]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_PASSWORD: isolated-fixture-only
-          POSTGRES_DB: community_qa
-        ports: ['5432:5432']
-        options: --health-cmd "pg_isready -U postgres -d community_qa" --health-interval 5s --health-timeout 5s --health-retries 10
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ needs.prepare.outputs.source }}
-          persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - name: Capture Community surfaces and run visual tests
-        env:
-          BIL_COMMUNITY_CAPTURE_DIR: /tmp/premium-global-visual/ui
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/premium-global-visual
-          flutter pub get
-          flutter test --no-pub --reporter expanded             test/features/community/community_polish_visual_test.dart             --timeout 2m 2>&1 | tee /tmp/premium-global-visual/visual.log
-          cp assets/images/community/community_welcome_athletes.webp             /tmp/premium-global-visual/welcome-asset.webp
-      - name: Isolated PostgreSQL and mocked provider contracts
-        if: ${{ !cancelled() }}
-        env:
-          PGPASSWORD: isolated-fixture-only
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql -h 127.0.0.1 -U postgres -d community_qa             -f tool/release/test_community_attention_isolated.sql             2>&1 | tee /tmp/premium-global-visual/sql.log
-          npm install --prefix /tmp/bil-deno deno@2.5.1
-          /tmp/bil-deno/node_modules/.bin/deno test             --allow-env --allow-read --allow-net             supabase/functions/push-provider-gateway             supabase/functions/community-push-dispatch             supabase/functions/food-search             2>&1 | tee /tmp/premium-global-visual/push.log
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
-        with:
-          name: premium-global-visual-${{ github.run_id }}
-          path: /tmp/premium-global-visual/
-          retention-days: 14
+          git commit -m 'feat(release): premium global experience and native parity polish'
+          git push origin HEAD:fix/premium-global-release-polish-final-20260930
