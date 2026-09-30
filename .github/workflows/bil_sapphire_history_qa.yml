@@ -231,7 +231,7 @@ jobs:
 
   reviewed-golden-refresh:
     needs: prepare
-    if: github.event_name == 'push' && github.event.head_commit.message == 'test(goldens): refresh reviewed final UI baselines'
+    if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'test(goldens): refresh reviewed final UI baselines' }}"
     runs-on: windows-2022
     timeout-minutes: 35
     permissions:
