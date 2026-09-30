@@ -1,54 +1,84 @@
-# BIL Android 1.0.0 build 30 — frozen Sapphire source candidate
+# BIL Android 1.0.0 build 30 — final prebuild source manifest
 
 `STAGING_MANIFEST_COMPLETE: YES`
 
 `CANDIDATE_FROZEN_OR_ACCEPTED: YES`
 
-`UNRESOLVED_REVIEW_COUNT: 0`
+`UNRESOLVED_SOURCE_REVIEW_COUNT: 0`
 
 `RELEASE_VERSION: 1.0.0`
 
 `RELEASE_BUILD_NUMBER: 30`
 
-## Source and scope
+## Accepted application source
 
-Native 29/32 base: `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
-Retained Community, QR, Facebook and push corrections: `59839c7deb4d1cc860275b9e69578e299cc24d0a`.
-Verified Sapphire runtime and test source: `5da2bbf3a3fbb17a05a18106a243b865aa862aa9`.
-Working branch: `fix/community-sapphire-health-3033`.
-The changes cover Community-only Sapphire presentation, local athlete welcome,
-shared unread indicators, accessible conversations, and daily energy/heart
-history projections. Raw health records, native queries, Watch permissions,
-current-value card, dashboard, purchases and native iOS/Google login are preserved.
+Native Android 29 / iOS 32 base: `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
+Retained Facebook/QR/Community/push functional base:
+`59839c7deb4d1cc860275b9e69578e299cc24d0a`.
+Final exhaustive application/test source:
+`960bead1d24ffea38d963b9e5f58fac0963a2579`.
 
-## Verified source acceptance
+Final exhaustive QA:
+https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36664811378
 
-Run https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36640466225
-completed every full-suite shard successfully on the runtime source above.
-All 1,032 discovered test files were scheduled with no path exclusions or name
-filters: 5,654 visible Flutter cases passed, zero failed, six existing conditional
-cases were skipped. This total includes the two isolated performance cases and
-does not double-count the 294 focused or eight visual cases rerun separately.
-The 120 actual-widget captures and 14 scoped Community reference images were
-reviewed. Only ten intentionally changed Community masters were replaced; all
-non-Community masters and strict comparators remain intact. Isolated SQL: 22
-assertions passed. Mocked provider tests: 12 passed. See the source acceptance
-record for exact skip names, evidence provenance and platform limits.
+The run completed Flutter analyze, the focused regression/performance gate,
+visual + isolated cloud contracts, and all eight full-suite shards successfully.
 
-This freeze changes only the two source manifests and the acceptance record.
-The resulting final commit must pass its own exact-commit QA before its build
-bindings are used. YES means source frozen for signed artifact testing, not
-native build, physical-device, medical or store approval. The 100-bpm marker is
-informational, not a background alarm or a diagnosis. Completed-day summaries
-refresh on the next load/sync; no guaranteed midnight execution is claimed.
+## Final verified counts
+
+- Test files discovered and scheduled exactly once: **1,033**
+- Visible Flutter cases passed: **5,656**
+- Failed cases: **0**
+- Error events: **0**
+- Existing conditional skips: **6**
+- Focused regression cases: **363 passed**
+- Explicit performance budget cases: **2 passed**
+- Community visual matrix: **8 passed**
+- Deno push/community provider tests: **12 passed**
+- Final visual/cloud contract job: **SUCCESS**
+
+No path exclusion or test-name filter was used in the eight full-suite shards.
+
+## Included final corrections
+
+The accepted source includes the reviewed premium More presentation and compact
+three-item bottom dock; the Quick Add action itself retains its existing routes
+and behavior. Weekly Report and Nutrition/Steps directional controls are
+RTL/LTR-aware. Nutrition empty-day Log food opens the existing real FoodLogPage
+and is covered by an open/return widget regression. The More split preserves all
+existing destinations while keeping architecture size limits strict.
+
+Previously accepted Community, QR, Android Facebook, push, daily Active Energy
+and completed-day heart history behavior is retained. Native Watch settings,
+native health query surfaces, dashboard/current-value UI, package/bundle IDs,
+store routes, purchase logic and native iOS/Google login routes remain outside
+the visual polish changes.
+
+The reviewed Weekly RTL and More/settings golden baselines were refreshed only
+for the intentionally changed UI and then the one-shot refresh mechanism was
+removed.
+
+## Production cloud review
+
+Production Supabase includes the reviewed QR and Community attention/read
+migrations plus the final RLS auth-initplan and FK-index performance
+hardening migrations. Public-table RLS and private-schema client isolation were
+rechecked. Remaining advisor items are documented in
+`docs/release/BIL_SAPPHIRE_SOURCE_ACCEPTANCE_2026-09-30.md`; they are not
+unresolved application-source defects.
 
 ## Immutable release bindings
 
-`BIL_ANDROID_V30_AUDITED_SOURCE_SHA` and `BIL_IOS_V33_AUDITED_SOURCE_SHA` must name
-the same final verified freeze commit. `BIL_ANDROID_V30_STAGING_MANIFEST_SHA256`
-must match this file's committed-byte SHA-256. Values are computed after commit,
-not self-referentially embedded. A dedicated dispatch-control branch may pin
-those same immutable values in the existing signed workflows without changing
-the source checked out for compilation. Prior 29/32 or 59839 bindings are invalid.
-The workflow supplies build number 30 and version 1.0.0. No signed binary, Play
-rollout, TestFlight upload or App Review submission is authorized by this record.
+`BIL_ANDROID_V30_AUDITED_SOURCE_SHA` and
+`BIL_IOS_V33_AUDITED_SOURCE_SHA` must both name the same final frozen source commit chosen
+after the final docs-only freeze QA.
+
+`BIL_ANDROID_V30_STAGING_MANIFEST_SHA256` must equal the committed-byte SHA-256 of this manifest in
+that frozen source commit.
+
+A later dispatch-control commit may pin the existing signed workflow to that
+already-audited source without changing the source checked out for compilation.
+
+No AAB/IPA build, Play rollout, TestFlight upload or store submission is
+authorized merely by this manifest. Signed artifact and real-device acceptance
+remain separate.
