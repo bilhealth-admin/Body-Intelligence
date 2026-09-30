@@ -162,7 +162,11 @@ class _DashboardShellState extends State<DashboardShell> {
 /// synchronization, or any provider refresh.
 class DashboardScrollPhysics extends BouncingScrollPhysics {
   const DashboardScrollPhysics({
-    super.parent = const AlwaysScrollableScrollPhysics(),
+    // Match iOS/More's range-stability behavior while preserving the
+    // dashboard's existing elastic edge feel. Dashboard cards can change
+    // height after async health/provider updates; keeping the old overscroll
+    // distance prevents the surface from slipping under the user's finger.
+    super.parent = const RangeMaintainingScrollPhysics(),
   });
 
   @override
