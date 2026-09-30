@@ -13,6 +13,7 @@ List<Type> _physicsChain(ScrollPhysics physics) {
 }
 
 void main() {
+  // Final QA trigger after approved golden refresh.
   // QA trigger: validate refreshed visual references with current UI.
   // QA trigger: validate refreshed current UI references.
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
