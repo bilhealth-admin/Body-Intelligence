@@ -417,7 +417,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final actions = <({IconData icon, String label, VoidCallback onTap})>[
       (
         icon: Icons.qr_code_scanner_rounded,
-        label: _t(context, 'Barcode scan'),
+        label: _t(context, 'Scan a barcode'),
         onTap: _scanBarcode,
       ),
       (

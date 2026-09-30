@@ -47,7 +47,9 @@ jobs:
         if: always()
         with:
           name: premium-global-focused-${{ github.run_id }}
-          path: /tmp/premium-global-focused/
+          path: |
+            /tmp/premium-global-focused/
+            test/**/failures/**
           retention-days: 14
 
   full-tests:

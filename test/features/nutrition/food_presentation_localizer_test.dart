@@ -445,7 +445,7 @@ void main() {
           localeTag: 'ar',
           source: 'USDA FoodData Central — verified',
         ),
-        isFalse,
+        isTrue,
       );
 
       FoodPresentationLocalizer.registerTrustedRuntimeTranslation(
