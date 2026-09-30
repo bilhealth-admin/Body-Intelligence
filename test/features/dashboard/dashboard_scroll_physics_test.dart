@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // QA trigger: validate refreshed current UI references.
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     testWidgets(
       '$platform: dashboard resolves the same scroll physics as More',
