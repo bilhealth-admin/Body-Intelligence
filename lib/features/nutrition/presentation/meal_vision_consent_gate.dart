@@ -50,7 +50,9 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),
-              side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .72)),
+              side: BorderSide(
+                color: scheme.outlineVariant.withValues(alpha: .72),
+              ),
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
@@ -90,10 +92,8 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
                       dialogContext,
                       'Send this meal photo to Google Gemini?',
                     ),
-                    style: Theme.of(dialogContext).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.18,
-                    ),
+                    style: Theme.of(dialogContext).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w800, height: 1.18),
                   ),
                   const SizedBox(height: 16),
                   DecoratedBox(
@@ -111,10 +111,11 @@ Future<bool> ensureMealVisionConsent(BuildContext context) async {
                           dialogContext,
                           'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.',
                         ),
-                        style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
-                          height: 1.5,
-                          color: scheme.onSurfaceVariant,
-                        ),
+                        style: Theme.of(dialogContext).textTheme.bodyMedium
+                            ?.copyWith(
+                              height: 1.5,
+                              color: scheme.onSurfaceVariant,
+                            ),
                       ),
                     ),
                   ),
