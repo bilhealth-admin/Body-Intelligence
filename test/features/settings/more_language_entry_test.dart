@@ -6,9 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('More language entry is explicit and routes to exact selector', () {
-    final source = File(
+    final source = [
       'lib/features/settings/settings_page.dart',
-    ).readAsStringSync();
+      'lib/features/settings/settings_page_polish.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(source, contains("Key('more-language-entry')"));
     final entry = source.substring(
       source.indexOf("Key('more-language-entry')") - 120,
