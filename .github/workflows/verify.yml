@@ -57,8 +57,7 @@ jobs:
               exit 0
             }
             Write-Host "Format-checking $($targets.Count) changed Dart files."
-            dart format --output=write @targets
-            git diff --exit-code -- @targets
+            dart format --output=none --set-exit-if-changed @targets
           } else {
             $targets = @('lib', 'test')
             if (Test-Path integration_test) { $targets += 'integration_test' }
