@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">Конфіденційність даних про здоров\'я</string>
     <string name="health_permissions_rationale_body">BIL запитує лише типи даних Health Connect, необхідні для функцій, які ви вирішите використовувати. Дані про стан вашого здоров’я за замовчуванням обробляються локально. Ви можете будь-коли надати, заборонити або скасувати окремі дозволи в налаштуваннях Health Connect. BIL не продає дані про здоров’я та не використовує їх для реклами.</string>
     <string name="health_permissions_privacy_policy_action">Прочитати повну політику конфіденційності BIL</string>
+    <string name="health_permissions_release_scope_note">Обсяг лише для читання в цьому випуску: кроки, відстань і активні калорії.</string>
 </resources>

@@ -521,10 +521,14 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(t('Send selected personal data to Google Gemini?')),
-          content: Text(
-            t(
-              'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
+          contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
+          content: SingleChildScrollView(
+            child: BilPremiumTrustSurface(
+              icon: Icons.auto_awesome_rounded,
+              title: t('Send selected personal data to Google Gemini?'),
+              body: t(
+                'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
+              ),
             ),
           ),
           actions: [

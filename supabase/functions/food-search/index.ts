@@ -56,11 +56,17 @@ type TranslationFunction = (
   targetLocale: string,
 ) => Promise<string | null>;
 
+type FoodNameLocalizationFunction = (
+  values: string[],
+  targetLocale: string,
+) => Promise<Map<string, string>>;
+
 export interface FoodSearchRuntime {
   authorize(request: Request): Promise<AccessResult>;
   apiKey(): string;
   fetch: typeof fetch;
   translate?: TranslationFunction;
+  localizeFoodNames?: FoodNameLocalizationFunction;
 }
 
 type BoundedJsonResult =
@@ -165,6 +171,8 @@ const productionRuntime: FoodSearchRuntime = {
       targetLocale,
       fetch,
     ),
+  localizeFoodNames: (values, targetLocale) =>
+    localizeFoodNamesWithCache(values, targetLocale, fetch),
 };
 
 const supportedLocales = new Set([
@@ -175,7 +183,8 @@ const supportedLocales = new Set([
   "tr",
   "de",
   "it",
-  "pt",
+  "pt-BR",
+  "pt-PT",
   "ur",
   "fa",
   "hi",
@@ -183,7 +192,8 @@ const supportedLocales = new Set([
   "ms",
   "ja",
   "ko",
-  "zh",
+  "zh-Hans",
+  "zh-Hant",
   "ru",
   "bn",
   "vi",
@@ -192,6 +202,28 @@ const supportedLocales = new Set([
   "nl",
   "uk",
 ]);
+
+const canonicalLocale = (raw: string) => {
+  const normalized = raw.trim().replaceAll("_", "-").toLowerCase();
+  if (normalized === "pt-br") return "pt-BR";
+  if (normalized === "pt-pt") return "pt-PT";
+  if (normalized === "zh-hans" || normalized === "zh-cn") return "zh-Hans";
+  if (normalized === "zh-hant" || normalized === "zh-tw" || normalized === "zh-hk") {
+    return "zh-Hant";
+  }
+  const base = normalized.split("-")[0];
+  return supportedLocales.has(base) ? base : "en";
+};
+
+const providerLocale = (locale: string) => {
+  if (locale === "pt-BR" || locale === "pt-PT") return "pt";
+  if (locale === "zh-Hans") return "zh-CN";
+  if (locale === "zh-Hant") return "zh-TW";
+  return locale;
+};
+
+const cacheLocale = (locale: string) =>
+  locale === "pt-BR" || locale === "pt-PT" ? "pt" : locale;
 
 function normalizedUsda(food: Record<string, unknown>) {
   const nutrients = Array.isArray(food.foodNutrients) ? food.foodNutrients : [];
@@ -275,6 +307,150 @@ async function translateWithGoogle(
   }
 }
 
+
+const decodeTranslatedText = (value: string) =>
+  value
+    .replaceAll("&quot;", '"')
+    .replaceAll("&#39;", "'")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">");
+
+const secretApiKey = () => {
+  const modern = env("SUPABASE_SECRET_KEYS");
+  if (modern) {
+    try {
+      const parsed = JSON.parse(modern) as Record<string, unknown>;
+      const selected = text(parsed.default);
+      if (selected) return selected;
+    } catch {
+      // Fall through to the legacy key while the project completes the 2026
+      // key migration. This value never leaves the Edge Function.
+    }
+  }
+  return env("SUPABASE_SERVICE_ROLE_KEY");
+};
+
+async function translateManyWithGoogle(
+  values: string[],
+  targetLocale: string,
+  fetcher: typeof fetch,
+): Promise<Map<string, string>> {
+  const unique = [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  const result = new Map<string, string>();
+  if (unique.length === 0 || targetLocale === "en") return result;
+  const key = firstEnv("BIL_TRANSLATION_API_KEY", "Translation");
+  if (!key) return result;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3500);
+  try {
+    const response = await fetcher(
+      `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(key)}`,
+      {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          q: unique,
+          source: "en",
+          target: providerLocale(targetLocale),
+          format: "text",
+        }),
+      },
+    );
+    if (!response.ok) return result;
+    const root = await response.json() as Record<string, unknown>;
+    const data = root.data;
+    if (data == null || typeof data !== "object" || Array.isArray(data)) {
+      return result;
+    }
+    const translations = (data as Record<string, unknown>).translations;
+    if (!Array.isArray(translations) || translations.length !== unique.length) {
+      return result;
+    }
+    translations.forEach((raw, index) => {
+      if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return;
+      const translated = decodeTranslatedText(
+        text((raw as Record<string, unknown>).translatedText),
+      ).trim();
+      if (translated.length < 2 || translated.length > 240) return;
+      result.set(unique[index], translated);
+    });
+    return result;
+  } catch {
+    return result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function localizeFoodNamesWithCache(
+  values: string[],
+  targetLocale: string,
+  fetcher: typeof fetch,
+): Promise<Map<string, string>> {
+  const unique = [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+  const result = new Map<string, string>();
+  if (unique.length === 0 || targetLocale === "en") return result;
+
+  const url = env("SUPABASE_URL");
+  const secret = secretApiKey();
+  const locale = cacheLocale(targetLocale);
+  const admin = url && secret
+    ? createClient(url, secret, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    : null;
+
+  if (admin != null) {
+    try {
+      const { data } = await admin
+        .from("bil_food_translation_cache")
+        .select("source_text,translated_text")
+        .eq("source_locale", "en")
+        .eq("target_locale", locale)
+        .in("source_text", unique);
+      for (const row of data ?? []) {
+        const source = text(row.source_text);
+        const translated = text(row.translated_text);
+        if (source && translated) result.set(source, translated);
+      }
+    } catch {
+      // Cache failure must never turn a valid nutrition search into an outage.
+    }
+  }
+
+  const missing = unique.filter((value) => !result.has(value));
+  if (missing.length === 0) return result;
+  const translated = await translateManyWithGoogle(
+    missing,
+    targetLocale,
+    fetcher,
+  );
+  for (const [source, localized] of translated) result.set(source, localized);
+
+  if (admin != null && translated.size > 0) {
+    try {
+      await admin.from("bil_food_translation_cache").upsert(
+        [...translated].map(([source, localized]) => ({
+          source_locale: "en",
+          target_locale: locale,
+          source_text: source,
+          translated_text: localized,
+          provider: "google-translate-v2-display-only",
+          updated_at: new Date().toISOString(),
+        })),
+        { onConflict: "source_locale,target_locale,source_text" },
+      );
+    } catch {
+      // The display label is still safe for this response; only persistence
+      // failed. The canonical USDA identity remains unchanged.
+    }
+  }
+  return result;
+}
+
 export async function handleFoodSearchRequest(
   request: Request,
   runtime: FoodSearchRuntime = productionRuntime,
@@ -306,8 +482,7 @@ export async function handleFoodSearchRequest(
   }
   const requestedLimit = Math.trunc(finite(body.limit) ?? 10);
   const limit = Math.max(1, Math.min(requestedLimit, 20));
-  const requestedLocale = text(body.locale).toLowerCase().split(/[-_]/)[0];
-  const locale = supportedLocales.has(requestedLocale) ? requestedLocale : "en";
+  const locale = canonicalLocale(text(body.locale));
 
   const quota = await access.consumeQuota();
   if (quota === "rate_limited") return json({ error: "rate_limited" }, 429);
@@ -334,7 +509,11 @@ export async function handleFoodSearchRequest(
     ? searchHint
     : isSafeSearchHint(serverReviewedHint)
     ? serverReviewedHint
-    : ((await runtime.translate?.(query, locale, "en"))?.trim() || query);
+    : ((await runtime.translate?.(
+      query,
+      providerLocale(locale),
+      "en",
+    ))?.trim() || query);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
@@ -367,13 +546,24 @@ export async function handleFoodSearchRequest(
     >)
       .map(normalizedUsda)
       .filter((food) => food.fdc_id !== null && food.name.length > 0);
+    const localizedNames = locale === "en" || foods.length === 0
+      ? new Map<string, string>()
+      : await runtime.localizeFoodNames?.(
+        foods.map((food) => food.name),
+        locale,
+      ) ?? new Map<string, string>();
+    const localizedFoods = foods.map((food) => ({
+      ...food,
+      localized_name: localizedNames.get(food.name) ?? null,
+      localized_locale: localizedNames.has(food.name) ? locale : null,
+    }));
     return json({
       status: foods.length === 0 ? "unresolved" : "found",
       source: "usda",
       query,
       search_query: translatedQuery,
       locale,
-      foods,
+      foods: localizedFoods,
     }, foods.length === 0 ? 404 : 200);
   } catch {
     return json({ error: "food_provider_unavailable" }, 503);

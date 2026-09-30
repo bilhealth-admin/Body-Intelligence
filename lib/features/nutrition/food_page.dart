@@ -370,8 +370,27 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                   _CatalogView.favorites => favorites.value ?? const <Food>[],
                   _CatalogView.recent => recent.value ?? const <Food>[],
                 });
-                final visible = search.text.trim().isNotEmpty
+                final activeQuery = search.text.trim();
+                final resultLocale =
+                    FoodPresentationLocalizer.resultLocaleForQuery(
+                      query: activeQuery,
+                      interfaceLocaleTag: Localizations.localeOf(
+                        context,
+                      ).toLanguageTag(),
+                    );
+                final visible = activeQuery.isNotEmpty
                     ? _foodsInScope(results ?? const <Food>[])
+                          .where(
+                            (food) =>
+                                FoodPresentationLocalizer.hasSafeSearchDisplayName(
+                                  name: food.name,
+                                  arabicName: food.arabicName,
+                                  localeTag: resultLocale,
+                                  isCustom: food.isCustom,
+                                  source: food.source,
+                                ),
+                          )
+                          .toList(growable: false)
                     : selectedRows;
                 if (search.text.trim().isNotEmpty &&
                     runtimeSearchState == _RuntimeSearchUiState.searching) {
@@ -433,6 +452,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                   itemCount: visible.length,
                   itemBuilder: (_, index) => _FoodTile(
                     food: visible[index],
+                    displayLocaleTag: activeQuery.isEmpty ? null : resultLocale,
                     onChanged: () => _runSearch(search.text),
                   ),
                 );

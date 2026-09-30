@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
 import 'package:body_intelligence_log/features/nutrition/services/trusted_food_network_search_resolver.dart';
+import 'package:body_intelligence_log/features/nutrition/services/food_presentation_localizer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -15,9 +16,19 @@ void main() {
 
     expect(backend, contains('BIL_USDA_API_KEY'));
     expect(backend, contains('SUPABASE_ANON_KEY'));
+    expect(backend, contains('SUPABASE_SECRET_KEYS'));
     expect(backend, contains('auth.auth.getUser(token)'));
     expect(backend, contains('Authorization: `Bearer \${token}`'));
-    expect(backend, isNot(contains('SUPABASE_SERVICE_ROLE_KEY')));
+    expect(
+      backend,
+      contains('return env("SUPABASE_SERVICE_ROLE_KEY")'),
+      reason:
+          'Legacy server-key fallback remains Edge-only during key migration.',
+    );
+    expect(backend, contains('bil_food_translation_cache'));
+    expect(backend, contains('google-translate-v2-display-only'));
+    expect(backend, contains('localized_name'));
+    expect(backend, contains('localized_locale'));
     expect(backend, contains('request.body.getReader()'));
     expect(backend, contains('total > maxRequestBytes'));
     expect(backend, contains('food_search_minute'));
@@ -35,8 +46,42 @@ void main() {
     expect(client, contains("'food-search'"));
     expect(client, contains('Duration(seconds: 16)'));
     expect(client, isNot(contains('BIL_USDA_API_KEY')));
+    expect(client, isNot(contains('SUPABASE_SECRET_KEYS')));
+    expect(client, isNot(contains('SUPABASE_SERVICE_ROLE_KEY')));
     expect(client, isNot(contains('api.nal.usda.gov')));
   });
+
+  test(
+    'trusted localized label is registered without changing USDA identity',
+    () {
+      FoodPresentationLocalizer.clearTrustedRuntimeTranslationsForTesting();
+      addTearDown(
+        FoodPresentationLocalizer.clearTrustedRuntimeTranslationsForTesting,
+      );
+      const resolver = TrustedFoodNetworkSearchResolver();
+
+      final food = resolver.decodeServerFoodForTesting(<String, dynamic>{
+        'fdc_id': 321,
+        'name': 'Turkey breast, roasted',
+        'localized_name': 'صدر ديك رومي مشوي',
+        'localized_locale': 'ar',
+        'nutrients': <Map<String, Object>>[
+          <String, Object>{'name': 'Energy', 'unit': 'KCAL', 'amount': 135},
+        ],
+      });
+
+      expect(food, isNotNull);
+      expect(food!.name, 'Turkey breast, roasted');
+      expect(
+        FoodPresentationLocalizer.foodName(
+          name: food.name,
+          localeTag: 'ar',
+          source: food.sourceLabel,
+        ),
+        'صدر ديك رومي مشوي',
+      );
+    },
+  );
 
   test('USDA search nutrients stay on their documented 100 gram basis', () {
     const resolver = TrustedFoodNetworkSearchResolver();

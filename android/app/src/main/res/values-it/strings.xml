@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">La riservatezza dei dati sanitari</string>
     <string name="health_permissions_rationale_body">BIL richiede solo i tipi di dati Health Connect necessari per le funzionalità che scegli di utilizzare. I tuoi dati sanitari vengono elaborati localmente per impostazione predefinita. Puoi concedere, negare o revocare le singole autorizzazioni in qualsiasi momento dalle impostazioni di Health Connect. BIL non vende dati sanitari né li utilizza per la pubblicità.</string>
     <string name="health_permissions_privacy_policy_action">Leggi l\'informativa sulla privacy completa di BIL</string>
+    <string name="health_permissions_release_scope_note">Ambito di sola lettura di questa versione: passi, distanza e calorie attive.</string>
 </resources>

@@ -95,7 +95,7 @@ jobs:
       - name: Verify native Watch and current-value UI remain unchanged
         run: |
           set -euo pipefail
-          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
+          git diff --exit-code 59839c7deb4d1cc860275b9e69578e299cc24d0a HEAD -- ios/Runner android/app/src ':(exclude)android/app/src/main/AndroidManifest.xml' ':(exclude)android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt' ':(exclude)android/app/src/main/res/values*/strings.xml' ':(exclude)android/app/src/main/res/values*/styles.xml' lib/features/dashboard lib/features/global_platform/health_data lib/features/global_platform/intelligence/global_health_evidence_graph.dart
           python3 - <<'PY'
           import pathlib,subprocess
           path='lib/features/connected_health/connected_health_signal_detail_page.dart'

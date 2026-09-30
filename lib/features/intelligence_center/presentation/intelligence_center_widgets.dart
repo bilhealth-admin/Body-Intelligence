@@ -5,39 +5,118 @@ class _AiCoachEntryWelcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const navy = Color(0xFF071923);
-    const accent = Color(0xFFC8F3FF);
+    final locale = Localizations.localeOf(context).languageCode.toLowerCase();
+    final displayFamily = switch (locale) {
+      'ar' || 'fa' || 'ur' => 'BILArabic',
+      'en' ||
+      'fr' ||
+      'es' ||
+      'tr' ||
+      'de' ||
+      'it' ||
+      'pt' ||
+      'id' ||
+      'ms' ||
+      'vi' ||
+      'pl' ||
+      'nl' => 'BILDisplay',
+      _ => null,
+    };
     return Scaffold(
-      backgroundColor: navy,
+      backgroundColor: const Color(0xFF030405),
       body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                intelligenceText(
-                  context,
-                  'Welcome to AI Coach',
-                  'مرحبًا بك في المدرب الذكي',
-                ),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: .2,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0, -.18),
+                  radius: .86,
+                  colors: [Color(0xFF173A62), Color(0xFF030405)],
+                  stops: [0, 1],
                 ),
               ),
-              const SizedBox(height: 24),
-              const SizedBox.square(
-                dimension: 34,
-                child: CircularProgressIndicator(
-                  color: accent,
-                  strokeWidth: 3,
-                  strokeCap: StrokeCap.round,
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 104,
+                      height: 104,
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF64D8FF), Color(0xFF7568FF)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF3C75FF,
+                            ).withValues(alpha: .30),
+                            blurRadius: 34,
+                            spreadRadius: -8,
+                          ),
+                        ],
+                      ),
+                      child: const ClipOval(
+                        child: BilCoachPortrait(
+                          width: 98,
+                          height: 98,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      intelligenceText(
+                        context,
+                        'Welcome to AI Coach',
+                        'مرحبًا بك في المدرب الذكي',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontFamily: displayFamily,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: locale == 'ar' ? 0 : -.45,
+                            height: locale == 'ar' ? 1.28 : 1.12,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      intelligenceText(
+                        context,
+                        'Speak your language',
+                        'أتكلم لغتك',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: const Color(0xFFC5D2E3),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    const SizedBox.square(
+                      dimension: 28,
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF7BDFFF),
+                        strokeWidth: 2.4,
+                        strokeCap: StrokeCap.round,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

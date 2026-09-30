@@ -7,4 +7,5 @@
     <string name="health_permissions_rationale_body">BIL reads steps, distance, and active calories from Health Connect to show your activity summary. Access is read-only and only while BIL is in use. You can grant, deny, or revoke each permission in Health Connect settings. BIL does not sell health data or use it for advertising.</string>
     <string name="health_permissions_privacy_policy_action">Read the full BIL privacy policy</string>
     <string name="health_privacy_policy_url" translatable="false">https://www.bilhealth.com/privacy</string>
+    <string name="health_permissions_release_scope_note">Read-only release scope: steps, distance, and active calories.</string>
 </resources>

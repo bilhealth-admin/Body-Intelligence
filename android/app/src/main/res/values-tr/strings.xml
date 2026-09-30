@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">Sağlık verisi gizliliği</string>
     <string name="health_permissions_rationale_body">BIL, etkinlik özetinizi göstermek için Health Connect’ten adım, mesafe ve aktif kalori verilerini okur. Erişim salt okunurdur ve yalnızca BIL kullanılırken gerçekleşir. Her izni Health Connect ayarlarından verebilir, reddedebilir veya kaldırabilirsiniz. BIL sağlık verilerini satmaz veya reklam için kullanmaz.</string>
     <string name="health_permissions_privacy_policy_action">BIL\'in tam gizlilik politikasını okuyun</string>
+    <string name="health_permissions_release_scope_note">Bu sürümün salt okunur kapsamı: adımlar, mesafe ve aktif kaloriler.</string>
 </resources>

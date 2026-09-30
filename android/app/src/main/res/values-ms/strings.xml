@@ -4,4 +4,5 @@
     <string name="health_permissions_rationale_title">Privasi data kesihatan</string>
     <string name="health_permissions_rationale_body">BIL hanya meminta jenis data Health Connect yang diperlukan untuk ciri yang anda pilih untuk digunakan. Data kesihatan anda diproses secara setempat secara lalai. Anda boleh memberikan, menafikan atau membatalkan kebenaran individu pada bila-bila masa daripada tetapan Health Connect. BIL tidak menjual data kesihatan atau menggunakannya untuk pengiklanan.</string>
     <string name="health_permissions_privacy_policy_action">Baca dasar privasi penuh BIL</string>
+    <string name="health_permissions_release_scope_note">Skop baca sahaja keluaran ini: langkah, jarak dan kalori aktif.</string>
 </resources>
