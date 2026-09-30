@@ -131,15 +131,18 @@ void main() {
         final tile = find.ancestor(of: title, matching: find.byType(ListTile));
         final badge = find.descendant(
           of: tile,
-          matching: find.byType(BilSemanticIconBadge),
+          matching: find.byWidgetPredicate((widget) {
+            final key = widget.key;
+            return key is ValueKey<String> &&
+                key.value.startsWith('more-premium-icon-');
+          }),
         );
 
         expect(tile, findsOneWidget);
         expect(badge, findsOneWidget);
         expect(tester.widget<ListTile>(tile).horizontalTitleGap, 12);
-        expect(tester.widget<BilSemanticIconBadge>(badge).size, 30);
-        expect(tester.widget<BilSemanticIconBadge>(badge).iconSize, 18);
-        expect(tester.widget<Text>(title).style?.fontSize, 14);
+        expect(tester.getSize(badge), const Size(44, 44));
+        expect(tester.widget<Text>(title).style?.fontSize, 16);
         expect(tester.widget<Text>(title).style?.fontWeight, FontWeight.w700);
         expect(Directionality.of(tester.element(tile)), direction);
         expect(
