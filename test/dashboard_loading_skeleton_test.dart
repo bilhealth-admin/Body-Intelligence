@@ -77,19 +77,31 @@ void main() {
           )
           .position;
 
-      expect(position.physics, isA<DashboardScrollPhysics>());
+      if (platform == TargetPlatform.iOS) {
+        expect(position.physics, isA<BouncingScrollPhysics>());
+      } else {
+        expect(position.physics, isA<ClampingScrollPhysics>());
+      }
       expect(find.byType(RefreshIndicator), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
 
       await tester.drag(target, const Offset(0, 300));
       await tester.pump();
-      expect(position.pixels, lessThan(position.minScrollExtent));
+      if (platform == TargetPlatform.iOS) {
+        expect(position.pixels, lessThan(position.minScrollExtent));
+      } else {
+        expect(position.pixels, closeTo(position.minScrollExtent, .5));
+      }
       await tester.pumpAndSettle();
 
       position.jumpTo(position.maxScrollExtent);
       await tester.drag(target, const Offset(0, -300));
       await tester.pump();
-      expect(position.pixels, greaterThan(position.maxScrollExtent));
+      if (platform == TargetPlatform.iOS) {
+        expect(position.pixels, greaterThan(position.maxScrollExtent));
+      } else {
+        expect(position.pixels, closeTo(position.maxScrollExtent, .5));
+      }
       await tester.pumpAndSettle();
     });
   }
