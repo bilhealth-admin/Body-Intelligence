@@ -70,6 +70,8 @@ abstract final class FoodPresentationLocalizer {
       }
     }
     if (isCustom || _isBranded(source)) return original;
+    final runtime = _runtimeDisplayName(original, locale);
+    if (runtime != null) return runtime;
     final normalized = _normalize(original);
     final concept = _reviewedFoodConcept(normalized);
     return _localizedFoodName(concept, locale) ?? original;
@@ -96,7 +98,6 @@ abstract final class FoodPresentationLocalizer {
     _trustedRuntimeTranslations['$locale|${_normalize(canonical)}'] = localized;
   }
 
-  // ignore: unused_element
   static String? _runtimeDisplayName(String name, String locale) =>
       _trustedRuntimeTranslations['$locale|${_normalize(name)}'];
 
@@ -150,6 +151,7 @@ abstract final class FoodPresentationLocalizer {
     final original = name.trim();
     if (original.isEmpty) return false;
     if (isCustom || _isBranded(source)) return true;
+    if (_runtimeDisplayName(original, locale) != null) return true;
     if (locale == 'ar' && arabicName?.trim().isNotEmpty == true) return true;
     return _reviewedFoodConcept(_normalize(original)) != null;
   }
