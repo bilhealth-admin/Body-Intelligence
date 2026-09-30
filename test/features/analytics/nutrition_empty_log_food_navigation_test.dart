@@ -19,7 +19,6 @@ void main() {
     tester,
   ) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -74,5 +73,11 @@ void main() {
     expect(find.byType(NutritionAnalyticsPage), findsOneWidget);
     expect(find.byKey(const Key('nutrition-empty-log-food')), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    await database.close();
+    await tester.pump();
   });
 }
