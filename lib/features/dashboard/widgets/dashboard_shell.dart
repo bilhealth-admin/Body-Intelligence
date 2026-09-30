@@ -162,16 +162,40 @@ class _DashboardShellState extends State<DashboardShell> {
 /// synchronization, or any provider refresh.
 class DashboardScrollPhysics extends BouncingScrollPhysics {
   const DashboardScrollPhysics({
-    // Match iOS/More's range-stability behavior while preserving the
-    // dashboard's existing elastic edge feel. Dashboard cards can change
-    // height after async health/provider updates; keeping the old overscroll
-    // distance prevents the surface from slipping under the user's finger.
-    super.parent = const RangeMaintainingScrollPhysics(),
+    // Keep the dashboard's existing always-scrollable elastic feel, but add
+    // range maintenance so async card updates cannot make a held edge slip.
+    super.parent = const RangeMaintainingScrollPhysics(
+      parent: AlwaysScrollableScrollPhysics(),
+    ),
   });
 
   @override
   DashboardScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return DashboardScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double adjustPositionForNewDimensions({
+    required ScrollMetrics oldPosition,
+    required ScrollMetrics newPosition,
+    required bool isScrolling,
+    required double velocity,
+  }) {
+    final oldPixels = oldPosition.pixels;
+    if (oldPixels < oldPosition.minScrollExtent) {
+      final leadingOverscroll = oldPixels - oldPosition.minScrollExtent;
+      return newPosition.minScrollExtent + leadingOverscroll;
+    }
+    if (oldPixels > oldPosition.maxScrollExtent) {
+      final trailingOverscroll = oldPixels - oldPosition.maxScrollExtent;
+      return newPosition.maxScrollExtent + trailingOverscroll;
+    }
+    return super.adjustPositionForNewDimensions(
+      oldPosition: oldPosition,
+      newPosition: newPosition,
+      isScrolling: isScrolling,
+      velocity: velocity,
+    );
   }
 }
 
