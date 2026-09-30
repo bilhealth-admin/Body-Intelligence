@@ -28,79 +28,15 @@ jobs:
           flutter-version: 3.44.6
           cache: true
 
-      - name: Apply four reviewed source regressions
+      - name: Verify reviewed source fixes are formatted
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          root=Path('.')
-
-          p=root/'lib/features/daily_log/domain/food_log_meal_selector.dart'
-          s=p.read_text()
-          old="'snack' => 'Snack',"
-          new="'snack' => 'Snacks',"
-          if old not in s: raise SystemExit('Snack source contract not found')
-          p.write_text(s.replace(old,new))
-
-          p=root/'lib/features/daily_log/food_log_page.dart'
-          s=p.read_text()
-          old="    final actions = <({IconData icon, String label, VoidCallback onTap})>["
-          new="    final actions = <({String keyId, IconData icon, String label, VoidCallback onTap})>["
-          if old not in s: raise SystemExit('Food Log action type contract not found')
-          s=s.replace(old,new,1)
-          replacements=[
-            ("        icon: Icons.qr_code_scanner_rounded,","        keyId: 'Barcode scan',\n        icon: Icons.qr_code_scanner_rounded,"),
-            ("        icon: Icons.mic_none_rounded,","        keyId: 'Voice log',\n        icon: Icons.mic_none_rounded,"),
-            ("        icon: Icons.photo_camera_outlined,","        keyId: 'Analyze meal photo',\n        icon: Icons.photo_camera_outlined,"),
-            ("        icon: Icons.add_circle_outline_rounded,","        keyId: 'Quick add',\n        icon: Icons.add_circle_outline_rounded,"),
-          ]
-          for old_line,new_line in replacements:
-              if old_line not in s: raise SystemExit(f'Food Log action line missing: {old_line}')
-              s=s.replace(old_line,new_line,1)
-          old_key="key: Key('food-log-action-${action.label}'),"
-          new_key="key: Key('food-log-action-${action.keyId}'),"
-          if old_key not in s: raise SystemExit('Food Log localized key contract not found')
-          p.write_text(s.replace(old_key,new_key,1))
-
-          p=root/'lib/app/router/bil_quick_add_sheet.dart'
-          s=p.read_text()
-          old_bg="""                                backgroundColor: premiumGradient == null
-                                    ? spec.accent(baseTheme.brightness)
-                                    : Colors.white.withValues(alpha: .16),"""
-          new_bg="""                                // Keep the semantic badge identity even when
-                                // the Voice/Photo surface uses a premium gradient.
-                                backgroundColor: spec.accent(
-                                  baseTheme.brightness,
-                                ),"""
-          old_fg="""                                foregroundColor: premiumGradient == null
-                                    ? spec.onAccent(baseTheme.brightness)
-                                    : Colors.white,"""
-          new_fg="""                                foregroundColor: spec.onAccent(
-                                  baseTheme.brightness,
-                                ),"""
-          if old_bg not in s: raise SystemExit('Quick Add premium badge background contract not found')
-          if old_fg not in s: raise SystemExit('Quick Add premium badge foreground contract not found')
-          s=s.replace(old_bg,new_bg,1).replace(old_fg,new_fg,1)
-          p.write_text(s)
-
-          p=root/'lib/features/settings/sharing_privacy_settings_page.dart'
-          s=p.read_text()
-          old="        loading: _saving || !snapshot.hasData,\n"
-          new="""        // Initial consent lookup can remain pending in offline/test contexts.
-                  // Keep the control disabled through onChanged until data arrives, but
-                  // reserve the animated spinner for an actual user-initiated save.
-                  loading: _saving,
-          """
-          if old not in s: raise SystemExit('Consent initial loading contract not found')
-          p.write_text(s.replace(old,new))
-          PY
-          dart format \
+          dart format --output=none --set-exit-if-changed \
             lib/features/daily_log/domain/food_log_meal_selector.dart \
             lib/features/daily_log/food_log_page.dart \
             lib/app/router/bil_quick_add_sheet.dart \
             lib/features/settings/sharing_privacy_settings_page.dart
-
       - name: Resolve dependencies
         shell: pwsh
         run: flutter pub get
@@ -138,12 +74,6 @@ jobs:
           python3 - <<'PY'
           import subprocess
           changed=set(subprocess.check_output(['git','diff','--name-only']).decode().splitlines())
-          source_allowed={
-            'lib/features/daily_log/domain/food_log_meal_selector.dart',
-            'lib/features/daily_log/food_log_page.dart',
-            'lib/app/router/bil_quick_add_sheet.dart',
-            'lib/features/settings/sharing_privacy_settings_page.dart',
-          }
           golden_expected={
             'test/goldens/epic3_compact_en_dark.png',
             'test/goldens/epic3_compact_ar_dark.png',
@@ -165,7 +95,7 @@ jobs:
             'test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png',
           }
           png_changed={p for p in changed if p.endswith('.png')}
-          unexpected=changed-(source_allowed|golden_expected)
+          unexpected=changed-golden_expected
           missing=golden_expected-png_changed
           extra_png=png_changed-golden_expected
           if unexpected or missing or extra_png:
@@ -174,7 +104,7 @@ jobs:
               print('missing reviewed goldens=',sorted(missing))
               print('extra png=',sorted(extra_png))
               raise SystemExit(1)
-          print(f'REVIEWED_GOLDENS={len(png_changed)} SOURCE_FIXES={len(changed-png_changed)}')
+          print(f'REVIEWED_GOLDENS={len(png_changed)}')
           PY
 
       - name: Analyze and verify repaired contracts
@@ -217,10 +147,6 @@ jobs:
           git config user.name 'BIL reviewed golden refresh'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add \
-            lib/features/daily_log/domain/food_log_meal_selector.dart \
-            lib/features/daily_log/food_log_page.dart \
-            lib/app/router/bil_quick_add_sheet.dart \
-            lib/features/settings/sharing_privacy_settings_page.dart \
             test/goldens \
             test/visual_closure/goldens
           git commit -m 'test(visual): refresh reviewed premium goldens [skip ci]'

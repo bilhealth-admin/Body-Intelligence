@@ -425,7 +425,8 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
         icon: Icons.image_search_rounded,
         value: snapshot.data ?? false,
         onChanged: snapshot.hasData && !_saving ? _setConsent : null,
-        loading: _saving || !snapshot.hasData,
+        // Initial lookup stays disabled through onChanged; animate only a real save.
+        loading: _saving,
         title: _privacyText(context, 'Google Gemini meal-photo consent'),
         subtitle: _privacyText(
           context,

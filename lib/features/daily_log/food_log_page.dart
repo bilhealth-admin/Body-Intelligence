@@ -414,23 +414,27 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   }
 
   Widget _buildActions(BuildContext context) {
-    final actions = <({IconData icon, String label, VoidCallback onTap})>[
+    final actions = <({String keyId, IconData icon, String label, VoidCallback onTap})>[
       (
+        keyId: 'Barcode scan',
         icon: Icons.qr_code_scanner_rounded,
         label: _t(context, 'Scan a barcode'),
         onTap: _scanBarcode,
       ),
       (
+        keyId: 'Voice log',
         icon: Icons.mic_none_rounded,
         label: _t(context, 'Log with your voice'),
         onTap: _voiceSearch,
       ),
       (
+        keyId: 'Analyze meal photo',
         icon: Icons.photo_camera_outlined,
         label: _t(context, 'Analyze a meal photo'),
         onTap: _analyzeMealImage,
       ),
       (
+        keyId: 'Quick add',
         icon: Icons.add_circle_outline_rounded,
         label: _t(context, 'Quick Add'),
         onTap: _showQuickAdd,
@@ -445,7 +449,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       children: [
         for (final action in actions)
           _buildActionTile(
-            key: Key('food-log-action-${action.label}'),
+            key: Key('food-log-action-${action.keyId}'),
             icon: action.icon,
             label: action.label,
             onTap: action.onTap,
