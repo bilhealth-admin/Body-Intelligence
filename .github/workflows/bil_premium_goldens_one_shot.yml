@@ -45,63 +45,23 @@ jobs:
 
           p=root/'lib/features/daily_log/food_log_page.dart'
           s=p.read_text()
-          old="""    final actions = <({IconData icon, String label, VoidCallback onTap})>[
-              (
-                icon: Icons.qr_code_scanner_rounded,
-                label: _t(context, 'Scan a barcode'),
-                onTap: _scanBarcode,
-              ),
-              (
-                icon: Icons.mic_none_rounded,
-                label: _t(context, 'Log with your voice'),
-                onTap: _voiceSearch,
-              ),
-              (
-                icon: Icons.photo_camera_outlined,
-                label: _t(context, 'Analyze a meal photo'),
-                onTap: _analyzeMealImage,
-              ),
-              (
-                icon: Icons.add_circle_outline_rounded,
-                label: _t(context, 'Quick Add'),
-                onTap: _showQuickAdd,
-              ),
-            ];
-          """
-          new="""    final actions =
-              <({String keyId, IconData icon, String label, VoidCallback onTap})>[
-                (
-                  keyId: 'Barcode scan',
-                  icon: Icons.qr_code_scanner_rounded,
-                  label: _t(context, 'Scan a barcode'),
-                  onTap: _scanBarcode,
-                ),
-                (
-                  keyId: 'Voice log',
-                  icon: Icons.mic_none_rounded,
-                  label: _t(context, 'Log with your voice'),
-                  onTap: _voiceSearch,
-                ),
-                (
-                  keyId: 'Analyze meal photo',
-                  icon: Icons.photo_camera_outlined,
-                  label: _t(context, 'Analyze a meal photo'),
-                  onTap: _analyzeMealImage,
-                ),
-                (
-                  keyId: 'Quick add',
-                  icon: Icons.add_circle_outline_rounded,
-                  label: _t(context, 'Quick Add'),
-                  onTap: _showQuickAdd,
-                ),
-              ];
-          """
-          if old not in s: raise SystemExit('Food Log action source contract not found')
-          s=s.replace(old,new)
+          old="    final actions = <({IconData icon, String label, VoidCallback onTap})>["
+          new="    final actions = <({String keyId, IconData icon, String label, VoidCallback onTap})>["
+          if old not in s: raise SystemExit('Food Log action type contract not found')
+          s=s.replace(old,new,1)
+          replacements=[
+            ("        icon: Icons.qr_code_scanner_rounded,","        keyId: 'Barcode scan',\n        icon: Icons.qr_code_scanner_rounded,"),
+            ("        icon: Icons.mic_none_rounded,","        keyId: 'Voice log',\n        icon: Icons.mic_none_rounded,"),
+            ("        icon: Icons.photo_camera_outlined,","        keyId: 'Analyze meal photo',\n        icon: Icons.photo_camera_outlined,"),
+            ("        icon: Icons.add_circle_outline_rounded,","        keyId: 'Quick add',\n        icon: Icons.add_circle_outline_rounded,"),
+          ]
+          for old_line,new_line in replacements:
+              if old_line not in s: raise SystemExit(f'Food Log action line missing: {old_line}')
+              s=s.replace(old_line,new_line,1)
           old_key="key: Key('food-log-action-${action.label}'),"
           new_key="key: Key('food-log-action-${action.keyId}'),"
           if old_key not in s: raise SystemExit('Food Log localized key contract not found')
-          p.write_text(s.replace(old_key,new_key))
+          p.write_text(s.replace(old_key,new_key,1))
 
           p=root/'lib/app/router/bil_quick_add_sheet.dart'
           s=p.read_text()
@@ -201,7 +161,7 @@ jobs:
             'test/goldens/epic15_android_phone_ar_03_progress_dark.png',
             'test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png',
             'test/visual_closure/goldens/quick_add_en_light_phone.png',
-            'test/visual_closure/goldens/quick_add_ar_dark.png',
+            'test/visual_closure/goldens/quick_add_ar_dark_phone.png',
             'test/visual_closure/goldens/quick_add_ios_en_light_phone.png',
             'test/visual_closure/goldens/quick_add_ios_ar_dark_phone.png',
             'test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png',
