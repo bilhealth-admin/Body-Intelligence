@@ -25,6 +25,7 @@ class _MorePremiumIcon extends StatelessWidget {
         : (dark ? const Color(0xFF17375F) : const Color(0xFFEAF3FF));
     final spec = BilSemanticIcons.spec(kind);
     return Container(
+      key: Key('more-premium-icon-${kind.name}'),
       width: 44,
       height: 44,
       decoration: BoxDecoration(
