@@ -102,7 +102,7 @@ void main() {
     expect(source, contains('width: 44'));
     expect(source, contains('height: 44'));
     expect(source, contains('size: 24'));
-    expect(source, contains("Key('more-premium-icon-${kind.name}')"));
+    expect(source, contains(r"Key('more-premium-icon-${kind.name}')"));
     expect(source, contains('PremiumCrownEmblem'));
   });
 }
