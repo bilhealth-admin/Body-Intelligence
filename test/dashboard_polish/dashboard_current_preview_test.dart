@@ -324,10 +324,12 @@ void main() {
       // not presented as a physical-device screenshot or a redesigned mockup.
       final position = tester
           .state<ScrollableState>(
-            find.descendant(
-              of: find.byKey(const Key('dashboard-scroll-view')),
-              matching: find.byType(Scrollable),
-            ),
+            find
+                .descendant(
+                  of: find.byKey(const Key('dashboard-scroll-view')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
           )
           .position;
       final fullHeight = (932 + position.maxScrollExtent).ceilToDouble();
