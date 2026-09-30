@@ -394,28 +394,34 @@ class _GlassBottomNavigation extends StatelessWidget {
     final dark = theme.brightness == Brightness.dark;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final dockHeight = 68.0 + (textScale - 1).clamp(0.0, 1.0) * 28;
+    const quickAddRise = 18.0;
+    final reservedHeight = dockHeight + quickAddRise;
     final radius = BorderRadius.circular(30);
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow.withValues(alpha: dark ? .26 : .12),
-              blurRadius: 30,
-              spreadRadius: -10,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          height: dockHeight,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned.fill(
+      child: SizedBox(
+        height: reservedHeight,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: quickAddRise,
+              bottom: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: radius,
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.shadow.withValues(alpha: dark ? .26 : .12),
+                      blurRadius: 30,
+                      spreadRadius: -10,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
+                ),
                 child: ClipRRect(
                   borderRadius: radius,
                   child: BackdropFilter(
@@ -427,7 +433,7 @@ class _GlassBottomNavigation extends StatelessWidget {
                           end: Alignment.bottomRight,
                           colors: dark
                               ? const [Color(0xF20B1725), Color(0xEA0C2234)]
-                              : const [Color(0xFBFFFFFF), Color(0xF4F8FBFF)],
+                              : const [Color(0xF7FFFFFF), Color(0xF4F8FBFF)],
                         ),
                         borderRadius: radius,
                         border: Border.all(
@@ -440,53 +446,58 @@ class _GlassBottomNavigation extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned.fill(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: _GlassBottomDestination(
-                          key: const Key('shell-dashboard-destination'),
-                          item: items[0],
-                          selected: selectedIndex == 0,
-                          onTap: () => onSelected(0),
-                        ),
-                      ),
-                      const SizedBox(width: 96),
-                      Expanded(
-                        child: _GlassBottomDestination(
-                          key: const Key('shell-more-destination'),
-                          item: items[1],
-                          selected: selectedIndex == 1,
-                          onTap: () => onSelected(1),
-                        ),
-                      ),
-                    ],
-                  ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: quickAddRise,
+              bottom: 0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
                 ),
-              ),
-              Positioned(
-                top: -18,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: SizedBox(
-                    width: 104,
-                    child: _GlassBottomQuickAdd(
-                      label: context.strings.text('Quick Add'),
-                      child: quickAdd,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _GlassBottomDestination(
+                        key: const Key('shell-dashboard-destination'),
+                        item: items[0],
+                        selected: selectedIndex == 0,
+                        onTap: () => onSelected(0),
+                      ),
                     ),
+                    const SizedBox(width: 96),
+                    Expanded(
+                      child: _GlassBottomDestination(
+                        key: const Key('shell-more-destination'),
+                        item: items[1],
+                        selected: selectedIndex == 1,
+                        onTap: () => onSelected(1),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 104,
+                  child: _GlassBottomQuickAdd(
+                    label: context.strings.text('Quick Add'),
+                    child: quickAdd,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
       ),
     );
   }
