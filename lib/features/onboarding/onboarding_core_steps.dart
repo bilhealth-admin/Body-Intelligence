@@ -174,10 +174,8 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
               title: value.$2,
               subtitle: value.$3,
               selected: _draft.activity == value.$1,
-              onTap: () => _setDraft(
-                _draft.copyWith(activity: value.$1),
-                persist: true,
-              ),
+              onTap: () =>
+                  _setDraft(_draft.copyWith(activity: value.$1), persist: true),
             ),
             const SizedBox(height: 10),
           ],

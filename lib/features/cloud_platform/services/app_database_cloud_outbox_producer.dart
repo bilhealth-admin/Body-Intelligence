@@ -74,10 +74,9 @@ final class AppDatabaseCloudOutboxProducer {
               ..where((row) => _dirty(row.syncStatus))
               ..orderBy([(row) => OrderingTerm.asc(row.updatedAt)]))
             .get();
-    final profilePreferenceRows =
-        await (_database.select(_database.preferences)
-              ..where((row) => row.key.isIn(_profilePreferenceKeys)))
-            .get();
+    final profilePreferenceRows = await (_database.select(
+      _database.preferences,
+    )..where((row) => row.key.isIn(_profilePreferenceKeys))).get();
     final profilePreferences = <String, String>{
       for (final row in profilePreferenceRows) row.key: row.value,
     };
@@ -189,40 +188,36 @@ final class AppDatabaseCloudOutboxProducer {
   CloudRecordEnvelope _profileEnvelope(
     UserProfileData row,
     Map<String, String> preferences,
-  ) =>
-      CloudRecordEnvelope(
-        entityKind: CloudEntityKind.profile,
-        recordId: row.uuid,
-        ownerId: _sink.ownerId,
-        revision: CloudRevision(
-          deviceId: _sink.deviceId,
-          sequence: row.revision,
-        ),
-        updatedAt: row.updatedAt,
-        deletedAt: row.deletedAt,
-        payload: row.deletedAt != null
-            ? const <String, Object?>{}
-            : <String, Object?>{
-                'gender': row.gender,
-                'age': row.age,
-                'height': row.height,
-                'currentWeight': row.currentWeight,
-                'targetWeight': row.targetWeight,
-                'activityLevel': row.activityLevel,
-                'exercises': row.exercises,
-                'medicalConditions': row.medicalConditions,
-                'waist': row.waist,
-                'neck': row.neck,
-                'chest': row.chest,
-                'arm': row.arm,
-                'thigh': row.thigh,
-                'profileDateOfBirth': preferences['profileDateOfBirth'],
-                'countryRegion': preferences['countryRegion'],
-                'onboardingGoalPriorities':
-                    preferences['onboarding.goalPriorities.v1'],
-                'createdAt': row.createdAt.toUtc().toIso8601String(),
-              },
-      );
+  ) => CloudRecordEnvelope(
+    entityKind: CloudEntityKind.profile,
+    recordId: row.uuid,
+    ownerId: _sink.ownerId,
+    revision: CloudRevision(deviceId: _sink.deviceId, sequence: row.revision),
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+    payload: row.deletedAt != null
+        ? const <String, Object?>{}
+        : <String, Object?>{
+            'gender': row.gender,
+            'age': row.age,
+            'height': row.height,
+            'currentWeight': row.currentWeight,
+            'targetWeight': row.targetWeight,
+            'activityLevel': row.activityLevel,
+            'exercises': row.exercises,
+            'medicalConditions': row.medicalConditions,
+            'waist': row.waist,
+            'neck': row.neck,
+            'chest': row.chest,
+            'arm': row.arm,
+            'thigh': row.thigh,
+            'profileDateOfBirth': preferences['profileDateOfBirth'],
+            'countryRegion': preferences['countryRegion'],
+            'onboardingGoalPriorities':
+                preferences['onboarding.goalPriorities.v1'],
+            'createdAt': row.createdAt.toUtc().toIso8601String(),
+          },
+  );
 
   CloudRecordEnvelope _weightEnvelope(WeightEntry row) => CloudRecordEnvelope(
     entityKind: CloudEntityKind.weight,

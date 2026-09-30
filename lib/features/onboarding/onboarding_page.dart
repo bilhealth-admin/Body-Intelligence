@@ -258,16 +258,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
-  OnboardingDraft _normalizeDraftForSelectedWeightGoal(
-    OnboardingDraft draft,
-  ) {
+  OnboardingDraft _normalizeDraftForSelectedWeightGoal(OnboardingDraft draft) {
     if (draft.primaryWeightGoal != 'maintain') return draft;
     final current = draft.currentWeightKg;
     if (current == null) return draft.copyWith(weeklyPaceKg: 0);
-    return draft.copyWith(
-      targetWeightKg: current,
-      weeklyPaceKg: 0,
-    );
+    return draft.copyWith(targetWeightKg: current, weeklyPaceKg: 0);
   }
 
   static double? _restoredPace(
