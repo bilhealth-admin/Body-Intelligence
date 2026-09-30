@@ -133,6 +133,7 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
         weeklyPaceKg: pace,
         aiFocuses: OnboardingGoalBindings.suggestedAiFocuses(goals),
       ),
+      persist: true,
     );
     _targetWeight.text = _displayWeight(target);
   }
@@ -173,7 +174,10 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
               title: value.$2,
               subtitle: value.$3,
               selected: _draft.activity == value.$1,
-              onTap: () => _setDraft(_draft.copyWith(activity: value.$1)),
+              onTap: () => _setDraft(
+                _draft.copyWith(activity: value.$1),
+                persist: true,
+              ),
             ),
             const SizedBox(height: 10),
           ],
@@ -184,8 +188,10 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
               t('Exercise remains separate from baseline activity.'),
             ),
             value: _draft.regularExercise,
-            onChanged: (value) =>
-                _setDraft(_draft.copyWith(regularExercise: value)),
+            onChanged: (value) => _setDraft(
+              _draft.copyWith(regularExercise: value),
+              persist: true,
+            ),
           ),
         ],
       ),
@@ -254,7 +260,7 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
           onTap: _pickCountry,
           decoration: InputDecoration(
             labelText: t('Country or region'),
-            helperText: '${t('App language')}: ${_draft.localeTag}',
+            helperText: null,
             suffixIcon: IconButton(
               tooltip: t('Country or region'),
               onPressed: _pickCountry,
@@ -318,7 +324,9 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
       lastDate: latest,
       helpText: t('Date of birth'),
     );
-    if (selected != null) _setDraft(_draft.copyWith(birthDate: selected));
+    if (selected != null) {
+      _setDraft(_draft.copyWith(birthDate: selected), persist: true);
+    }
   }
 
   _StepView _unitsStep() => _StepView(
