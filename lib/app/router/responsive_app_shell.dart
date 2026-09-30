@@ -453,10 +453,7 @@ class _GlassBottomNavigation extends StatelessWidget {
               top: quickAddRise,
               bottom: 0,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

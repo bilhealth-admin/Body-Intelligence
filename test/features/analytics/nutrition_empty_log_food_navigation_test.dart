@@ -65,7 +65,9 @@ void main() {
     expect(find.byType(FoodLogPage), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
+    final navigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
     navigator.pop();
     await tester.pumpAndSettle();
 

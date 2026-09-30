@@ -48,7 +48,8 @@ void main() {
     expect(
       source,
       contains('Directionality.of(context) == TextDirection.rtl'),
-      reason: 'day navigation chevrons must mirror in RTL without mirroring numeric content',
+      reason:
+          'day navigation chevrons must mirror in RTL without mirroring numeric content',
     );
     expect(source, contains('Icons.chevron_left_rounded'));
     expect(source, contains('Icons.chevron_right_rounded'));
