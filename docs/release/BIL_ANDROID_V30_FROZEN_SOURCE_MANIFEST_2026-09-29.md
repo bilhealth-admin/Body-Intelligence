@@ -73,7 +73,7 @@ unresolved application-source defects.
 `BIL_IOS_V33_AUDITED_SOURCE_SHA` must both name the same final frozen source commit chosen
 after the final docs-only freeze QA.
 
-`BIL_ANDROID_V30_STAGING_MANIFEST_SHA256` must equal the committed-byte SHA-256 of this manifest in
+`BIL_ANDROID_V30_STAGING_MANIFEST_SHA256` must equal this file's committed-byte SHA-256 in
 that frozen source commit.
 
 A later dispatch-control commit may pin the existing signed workflow to that
