@@ -58,7 +58,9 @@ jobs:
               $path.StartsWith('test/features/onboarding/goldens/onboarding_2026/') -or
               $path.StartsWith('test/goldens/premium_dashboard_') -or
               $path.StartsWith('test/visual_closure/goldens/visual_closure_dashboard_') -or
-              ($path.StartsWith('test/goldens/epic15_') -and $path.EndsWith('_00_onboarding.png'))
+              ($path.StartsWith('test/goldens/epic15_') -and
+                ($path.EndsWith('_00_onboarding.png') -or
+                 $path.EndsWith('_01_dashboard.png')))
             if (-not $allowed) { $bad += $path }
           }
           if ($bad.Count -gt 0) {
@@ -77,6 +79,7 @@ jobs:
           git add test/goldens/premium_dashboard_*.png
           git add test/visual_closure/goldens/visual_closure_dashboard_*.png
           git add test/goldens/epic15_*_00_onboarding.png
+          git add test/goldens/epic15_*_01_dashboard.png
           if (git diff --cached --quiet) {
             Write-Host 'No golden changes required.'
             exit 0
