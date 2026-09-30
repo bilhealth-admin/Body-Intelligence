@@ -1,0 +1,5 @@
+BIL Premium Global Release Audit
+Requested source SHA: 280275851fd2e8c5c0f62b663a0116bdb4eb5803
+Base audited SHA: 1cd90816577ebb9fb3fb058db3f36c73a816c5fe
+Scope: premium UI, 25-locale food presentation, Android/iOS native parity, auth, purchases, permissions, health safety copy, visual and cloud contracts.
+Builds and store uploads are explicitly out of scope.
