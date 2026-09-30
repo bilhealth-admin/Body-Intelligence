@@ -38,15 +38,7 @@ jobs:
           dart=[p for p in paths if p.endswith('.dart') and pathlib.Path(p).is_file()]
           if dart: subprocess.run(['dart','format',*dart],check=True)
           PY
-      - name: Verify and import only reviewed Community references
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          if test -f tool/sapphire/reviewed_community_goldens.json; then
-            python3 tool/sapphire/import_reviewed_community_goldens.py
-          fi
-      - name: Commit exact source without force push or store operation
+      - name: Commit exact prepared source before reference verification
         id: source
         run: |
           set -euo pipefail
@@ -54,7 +46,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add lib test pubspec.yaml docs/release tool/sapphire
           if ! git diff --cached --quiet; then
-            git commit -m 'test(sapphire): commit visually reviewed Community references and deterministic captures'
+            git commit -m 'fix(prebuild): apply final guarded navigation and presentation fixes'
             git push origin HEAD:fix/community-sapphire-health-3033
           fi
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -62,6 +54,14 @@ jobs:
             echo 'references_ready=true' >> "$GITHUB_OUTPUT"
           else
             echo 'references_ready=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verify reviewed Community references against committed source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if test -f tool/sapphire/reviewed_community_goldens.json; then
+            python3 tool/sapphire/import_reviewed_community_goldens.py
           fi
       - name: Export exact source evidence without font binaries
         if: always()
