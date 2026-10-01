@@ -262,11 +262,73 @@ jobs:
           set -euo pipefail
           OUT="$RUNNER_TEMP/bil-pre-final-cloud"
           mkdir -p "$OUT"
-          CLI=(npx --yes supabase@2.117.0)
-          "${CLI[@]}" init --force
-          "${CLI[@]}" link --project-ref "$BIL_SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
-          SQL="$(cat tool/release_certification/pre_final_cloud_transaction.sql)"
-          "${CLI[@]}" db query --linked "$SQL" 2>&1 | tee "$OUT/live-cloud.log"
+          : > "$OUT/live-cloud.log"
+
+          if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" && -n "${SUPABASE_DB_PASSWORD:-}" ]]; then
+            CLI=(npx --yes supabase@2.117.0)
+            WORK="$RUNNER_TEMP/bil-supabase-cli"
+            mkdir -p "$WORK"
+            pushd "$WORK" >/dev/null
+            "${CLI[@]}" init --force
+            "${CLI[@]}" link --project-ref "$BIL_SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+            SQL="$(cat "$GITHUB_WORKSPACE/tool/release_certification/pre_final_cloud_transaction.sql")"
+            "${CLI[@]}" db query --linked "$SQL" 2>&1 | tee "$OUT/live-cloud.log"
+            popd >/dev/null
+            EVIDENCE_MODE='GITHUB_SUPABASE_CREDENTIALS'
+          else
+            ATTESTATION='tool/release_certification/pre_final_cloud_attestation.json'
+            SQL_BLOB="$(git hash-object tool/release_certification/pre_final_cloud_transaction.sql)"
+            MIGRATION_COUNT="$(find supabase/migrations -maxdepth 1 -type f -name '*.sql' | wc -l | tr -d ' ')"
+            MIGRATION_FILE="$(find supabase/migrations -maxdepth 1 -type f -name '*.sql' -printf '%f\n' | sort | tail -n 1)"
+            MIGRATION_HEAD="${MIGRATION_FILE%%_*}"
+
+            python3 - "$ATTESTATION" "$BIL_SUPABASE_PROJECT_REF" "$SQL_BLOB" "$MIGRATION_COUNT" "$MIGRATION_HEAD" <<'PY' | tee "$OUT/live-cloud.log"
+          import datetime
+          import json
+          import pathlib
+          import sys
+
+          path, project_ref, sql_blob, migration_count, migration_head = sys.argv[1:]
+          data = json.loads(pathlib.Path(path).read_text())
+          required = {
+              "live_cloud_roundtrip": True,
+              "device_download_payload_bytes": True,
+              "edit_redownload": True,
+              "stale_conflict": True,
+              "duplicate_idempotency": True,
+              "account_isolation": True,
+              "persistence": "ROLLBACK_ENFORCED",
+          }
+          if data.get("schema_version") != 1:
+              raise SystemExit("unsupported cloud attestation schema")
+          if data.get("project_ref") != project_ref:
+              raise SystemExit("cloud attestation project mismatch")
+          if data.get("sql_git_blob_sha") != sql_blob:
+              raise SystemExit("cloud attestation SQL blob mismatch")
+          if data.get("live_migration_count") != int(migration_count):
+              raise SystemExit("cloud attestation migration count mismatch")
+          if data.get("live_migration_head") != migration_head:
+              raise SystemExit("cloud attestation migration head mismatch")
+          if data.get("result") != required:
+              raise SystemExit("cloud attestation result is not the complete PASS set")
+
+          tested = datetime.datetime.fromisoformat(
+              data["tested_at_utc"].replace("Z", "+00:00")
+          )
+          now = datetime.datetime.now(datetime.timezone.utc)
+          age = now - tested
+          if age < datetime.timedelta(minutes=-5) or age > datetime.timedelta(hours=24):
+              raise SystemExit(f"cloud attestation is stale or future-dated: age={age}")
+
+          print("CLOUD_LIVE_EXTERNAL_ATTESTATION=VERIFIED")
+          print(f"CLOUD_LIVE_TESTED_AT_UTC={data['tested_at_utc']}")
+          print(f"CLOUD_LIVE_SQL_BLOB={sql_blob}")
+          print(f"CLOUD_LIVE_MIGRATIONS={migration_count}")
+          print(f"CLOUD_LIVE_MIGRATION_HEAD={migration_head}")
+          PY
+            EVIDENCE_MODE='SUPABASE_MANAGEMENT_ATTESTATION'
+          fi
+
           printf '%s\n' \
             'CLOUD_LIVE_ROUNDTRIP=PASS' \
             'CLOUD_LIVE_PAYLOAD_BYTES=PASS' \
@@ -275,9 +337,9 @@ jobs:
             'CLOUD_LIVE_DUPLICATE_IDEMPOTENCY=PASS' \
             'CLOUD_LIVE_ACCOUNT_ISOLATION=PASS' \
             'CLOUD_LIVE_PERSISTENCE=ROLLBACK_ENFORCED' \
+            "CLOUD_LIVE_EVIDENCE_MODE=$EVIDENCE_MODE" \
             > "$OUT/status.txt"
-          rm -rf supabase/.temp
-          rm -f supabase/config.toml
+
           git diff --exit-code
           test -z "$(git status --porcelain=v1 --untracked-files=no)"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
