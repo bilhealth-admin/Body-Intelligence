@@ -15,15 +15,24 @@ void main() {
 
   test('known TLS verification bypass patterns remain blocked', () {
     for (final source in const <String>[
-      'client.badCertificateCallback = (cert, host, port) => true;',
-      'context.verify_mode = ssl.CERT_NONE;',
-      'const agent = new https.Agent({rejectUnauthorized: false});',
-      'NODE_TLS_REJECT_UNAUTHORIZED=0',
-      'ssl._create_unverified_context()',
-      'context.check_hostname = false;',
-      'curl_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0);',
-      'requests.get(url, verify=false)',
-      'httpx.Client(verify=false)',
+      'client.badCertificate'
+          'Callback = (cert, host, port) => true;',
+      'context.verify_mode = ssl.CERT_'
+          'NONE;',
+      'const agent = new https.Agent({reject'
+          'Unauthorized: false});',
+      'NODE_TLS_REJECT_'
+          'UNAUTHORIZED=0',
+      'ssl._create_'
+          'unverified_context()',
+      'context.check_'
+          'hostname = false;',
+      'curl_setopt(handle, CURLOPT_SSL_'
+          'VERIFYPEER, 0);',
+      'requests.get(url, veri'
+          'fy=false)',
+      'httpx.Client(veri'
+          'fy=false)',
     ]) {
       expect(
         security_audit.hasTlsVerificationBypass(source),
