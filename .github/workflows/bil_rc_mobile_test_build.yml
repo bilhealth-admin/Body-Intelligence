@@ -245,23 +245,25 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$(uname -m)" = 'arm64'
           mkdir -p "$RUNNER_TEMP/bil-idb-bin"
           curl --fail --location --retry 3 \
             --proto '=https' --tlsv1.2 \
-            https://github.com/facebook/idb/releases/download/v1.1.8/idb-companion.universal.tar.gz \
+            https://github.com/facebook/idb/releases/download/v1.6.4/idb-companion.macos-arm64.tar.gz \
             --output "$RUNNER_TEMP/idb-companion.tar.gz"
           test "$(shasum -a 256 "$RUNNER_TEMP/idb-companion.tar.gz" | awk '{print $1}')" \
-            = '3b72cc6a9a5b1a22a188205a84090d3a294347a846180efd755cf1a3c848e3e7'
+            = '8c33fb82c7a6ecc58ef95c65671bd3fc4d36347afdbf594f7fd79fe2ae499ddd'
           tar -xzf "$RUNNER_TEMP/idb-companion.tar.gz" -C "$RUNNER_TEMP/bil-idb-bin"
-          chmod +x "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin/idb_companion"
+          chmod +x "$RUNNER_TEMP/bil-idb-bin/idb_companion"
           brew install python@3.11
           "$(brew --prefix python@3.11)/bin/python3.11" -m venv "$RUNNER_TEMP/bil-idb-venv"
           "$RUNNER_TEMP/bil-idb-venv/bin/python" -m pip install \
             --disable-pip-version-check --no-deps --require-hashes \
-            -r tool/release/ios_plus8_idb_requirements.lock
+            -r tool/release/ios_tahoe_idb_requirements.lock
           "$RUNNER_TEMP/bil-idb-venv/bin/python" -m pip check
           "$RUNNER_TEMP/bil-idb-venv/bin/idb" --help >/dev/null
-          echo "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bil-idb-bin/idb_companion" --version
+          echo "$RUNNER_TEMP/bil-idb-bin" >> "$GITHUB_PATH"
           echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
 
       - name: Create iPhone and iPad simulator sessions
@@ -376,17 +378,75 @@ jobs:
           LIFECYCLE_START="$RUNNER_TEMP/bil-rc-lifecycle-start"
           touch "$LIFECYCLE_START"
 
-          exact_open_button_center() {
+          scheme_tree_for() {
             local udid="$1"
-            tree_for "$udid"
-            python3 - "$PRIVATE_UI_DIR/$udid.json" <<'PY'
+            local target="$PRIVATE_UI_DIR/$udid-scheme.json"
+            local attempt
+            for attempt in 1 2 3; do
+              if idb ui describe-all --udid "$udid" \
+                --api axbridge --json > "$target" && test -s "$target"; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+
+          scheme_confirmation_state() {
+            local udid="$1"
+            local state
+            if ! scheme_tree_for "$udid"; then
+              return 2
+            fi
+            state="$(python3 - "$PRIVATE_UI_DIR/$udid-scheme.json" <<'PY'
           import json
           import sys
 
           with open(sys.argv[1], encoding='utf-8') as handle:
               payload = json.load(handle)
           stack = list(payload if isinstance(payload, list) else [payload])
-          matches = []
+          while stack:
+              item = stack.pop()
+              if not isinstance(item, dict):
+                  continue
+              text = ' '.join(str(item.get(key) or '') for key in (
+                  'AXLabel', 'AXValue', 'title', 'placeholder', 'help', 'value', 'label',
+              )).casefold()
+              if 'open in' in text:
+                  print('visible')
+                  raise SystemExit(0)
+              for value in item.values():
+                  if isinstance(value, dict):
+                      stack.append(value)
+                  elif isinstance(value, list):
+                      stack.extend(value)
+          print('absent')
+          PY
+          )" || return 2
+            if [[ "$state" == 'visible' ]]; then
+              return 0
+            fi
+            if [[ "$state" == 'absent' ]]; then
+              return 1
+            fi
+            return 2
+          }
+
+          exact_open_button_probe() {
+            local udid="$1"
+            local evidence="$2"
+            scheme_tree_for "$udid"
+            python3 - "$PRIVATE_UI_DIR/$udid-scheme.json" "$evidence" <<'PY'
+          import json
+          import sys
+
+          source, evidence = sys.argv[1:]
+          with open(source, encoding='utf-8') as handle:
+              payload = json.load(handle)
+
+          stack = list(payload if isinstance(payload, list) else [payload])
+          prompt_markers = []
+          buttons = []
           while stack:
               item = stack.pop()
               if not isinstance(item, dict):
@@ -396,44 +456,216 @@ jobs:
                       stack.append(value)
                   elif isinstance(value, list):
                       stack.extend(value)
-              values = [
-                  str(item.get(key) or '').strip()
-                  for key in ('AXLabel', 'AXValue', 'title', 'value', 'label')
-              ]
+
+              text_fields = {
+                  key: str(item.get(key) or '').strip()
+                  for key in ('AXLabel', 'AXValue', 'title', 'placeholder', 'help', 'value', 'label')
+              }
+              if any('open in' in value.casefold() for value in text_fields.values()):
+                  prompt_markers.append({
+                      'text': {key: value for key, value in text_fields.items() if value},
+                      'type': item.get('type'),
+                      'role': item.get('role'),
+                      'role_description': item.get('role_description'),
+                      'frame': item.get('frame'),
+                  })
+
               frame = item.get('frame')
-              if 'Open' not in values or not isinstance(frame, dict):
+              if not isinstance(frame, dict):
                   continue
-              width = float(frame.get('width', 0))
-              height = float(frame.get('height', 0))
+              try:
+                  x = float(frame.get('x', 0))
+                  y = float(frame.get('y', 0))
+                  width = float(frame.get('width', 0))
+                  height = float(frame.get('height', 0))
+              except (TypeError, ValueError):
+                  continue
               if width <= 0 or height <= 0:
                   continue
-              matches.append((
-                  float(frame.get('x', 0)) + width / 2,
-                  float(frame.get('y', 0)) + height / 2,
-                  width * height,
-              ))
-          if not matches:
-              raise SystemExit('exact_open_button_missing')
-          x, y, _ = min(matches, key=lambda item: item[2])
-          print(round(x), round(y))
+
+              role_text = ' '.join(str(item.get(key) or '') for key in (
+                  'type', 'role', 'role_description',
+              )).casefold()
+              if 'button' not in role_text:
+                  continue
+
+              expected_key = next((
+                  key for key in ('AXLabel', 'title', 'AXValue')
+                  if str(item.get(key) or '').strip() == 'Open'
+              ), None)
+              if expected_key is None:
+                  continue
+              buttons.append({
+                  'expected_key': expected_key,
+                  'AXLabel': item.get('AXLabel'),
+                  'title': item.get('title'),
+                  'AXValue': item.get('AXValue'),
+                  'AXUniqueId': item.get('AXUniqueId'),
+                  'type': item.get('type'),
+                  'role': item.get('role'),
+                  'role_description': item.get('role_description'),
+                  'enabled': item.get('enabled'),
+                  'frame': {'x': x, 'y': y, 'width': width, 'height': height},
+                  'center': {'x': x + width / 2, 'y': y + height / 2},
+              })
+
+          unique = {}
+          for button in buttons:
+              frame = button['frame']
+              key = tuple(round(float(frame[name]), 4) for name in ('x', 'y', 'width', 'height'))
+              unique.setdefault(key, button)
+          candidates = list(unique.values())
+          report = {
+              'system_prompt_markers': prompt_markers,
+              'exact_open_button_candidates': candidates,
+          }
+          if len(candidates) == 1:
+              report['selected'] = candidates[0]
+          with open(evidence, 'w', encoding='utf-8') as handle:
+              json.dump(report, handle, indent=2, sort_keys=True)
+
+          if len(candidates) != 1:
+              raise SystemExit(f'exact_open_button_count={len(candidates)}')
+          selected = candidates[0]
+          print(
+              round(selected['center']['x']),
+              round(selected['center']['y']),
+              selected['expected_key'],
+          )
           PY
+          }
+
+          validate_open_button_hit() {
+            local path="$1"
+            local expected_key="$2"
+            python3 - "$path" "$expected_key" <<'PY'
+          import json
+          import sys
+
+          path, expected_key = sys.argv[1:]
+          with open(path, encoding='utf-8') as handle:
+              payload = json.load(handle)
+          stack = list(payload if isinstance(payload, list) else [payload])
+          while stack:
+              item = stack.pop()
+              if not isinstance(item, dict):
+                  continue
+              for value in item.values():
+                  if isinstance(value, dict):
+                      stack.append(value)
+                  elif isinstance(value, list):
+                      stack.extend(value)
+              role_text = ' '.join(str(item.get(key) or '') for key in (
+                  'type', 'role', 'role_description',
+              )).casefold()
+              if (
+                  'button' in role_text
+                  and str(item.get(expected_key) or '').strip() == 'Open'
+              ):
+                  raise SystemExit(0)
+          raise SystemExit('open_button_hit_test_mismatch')
+          PY
+          }
+
+          write_scheme_result() {
+            local target="$1"
+            local status="$2"
+            local center="$3"
+            local expected_key="$4"
+            {
+              printf 'SYSTEM_CONFIRMATION=%s\n' "$status"
+              if [[ -n "$center" ]]; then
+                printf 'OPEN_BUTTON_CENTER=%s\n' "$center"
+              fi
+              if [[ -n "$expected_key" ]]; then
+                printf 'OPEN_EXPECTED_KEY=%s\n' "$expected_key"
+              fi
+              printf 'ACCESSIBILITY_ACTION_BACKEND=axbridge\n'
+            } > "$target"
           }
 
           dismiss_scheme_confirmation() {
             local udid="$1"
-            if has_marker "$udid" 'Open in'; then
-              local point
-              point="$(exact_open_button_center "$udid")"
-              read -r x y <<< "$point"
-              idb ui tap --udid "$udid" "$x" "$y"
-              sleep 4
-            fi
-            if has_marker "$udid" 'Open in'; then
-              echo 'iOS custom-scheme confirmation remained visible after Open.' >&2
-              return 1
-            fi
-          }
+            local dir="$2"
+            local stem="$3"
+            local state attempt poll point x y expected_key action_log
+            local pressed=0
 
+            mkdir -p "$dir"
+            for attempt in 1 2 3; do
+              if scheme_confirmation_state "$udid"; then
+                state=0
+              else
+                state=$?
+              fi
+              if [[ "$state" -eq 1 ]]; then
+                if [[ "$pressed" -eq 1 ]]; then
+                  write_scheme_result \
+                    "$dir/$stem-scheme-confirmation-result.txt" \
+                    'HANDLED' "$x,$y" "$expected_key"
+                else
+                  write_scheme_result \
+                    "$dir/$stem-scheme-confirmation-result.txt" \
+                    'NOT_PRESENT' '' ''
+                fi
+                return 0
+              fi
+              if [[ "$state" -eq 2 ]]; then
+                sleep 1
+                continue
+              fi
+
+              xcrun simctl io "$udid" \
+                screenshot "$dir/$stem-scheme-confirmation-$attempt.png" || true
+
+              point="$(exact_open_button_probe \
+                "$udid" "$dir/$stem-scheme-confirmation-$attempt.json")"
+              read -r x y expected_key <<< "$point"
+
+              if ! idb ui describe-point --udid "$udid" "$x" "$y" \
+                --api axbridge --json \
+                > "$dir/$stem-open-hit-$attempt.json"; then
+                echo 'Could not hit-test the exact iOS Open button.' >&2
+                return 1
+              fi
+              validate_open_button_hit \
+                "$dir/$stem-open-hit-$attempt.json" "$expected_key"
+
+              action_log="$dir/$stem-open-action-$attempt.log"
+              pressed=1
+              if ! idb ui tap --udid "$udid" "$x" "$y" \
+                --api axbridge \
+                --expected-value Open \
+                --expected-key "$expected_key" \
+                > "$action_log" 2>&1; then
+                cat "$action_log" >&2
+              fi
+
+              for poll in 1 2 3 4 5 6 7 8 9 10; do
+                if scheme_confirmation_state "$udid"; then
+                  state=0
+                else
+                  state=$?
+                fi
+                if [[ "$state" -eq 1 ]]; then
+                  write_scheme_result \
+                    "$dir/$stem-scheme-confirmation-result.txt" \
+                    'HANDLED' "$x,$y" "$expected_key"
+                  return 0
+                fi
+                sleep 1
+              done
+            done
+
+            xcrun simctl io "$udid" \
+              screenshot "$dir/$stem-scheme-confirmation-final.png" || true
+            if scheme_tree_for "$udid"; then
+              cp "$PRIVATE_UI_DIR/$udid-scheme.json" \
+                "$dir/$stem-scheme-confirmation-final-accessibility.json" || true
+            fi
+            echo 'iOS custom-scheme confirmation remained visible after verified accessibility Open press.' >&2
+            return 1
+          }
           save_accessibility() {
             local udid="$1"
             local target="$2"
@@ -479,9 +711,11 @@ jobs:
           open_verified_link() {
             local udid="$1"
             local url="$2"
+            local dir="$3"
+            local stem="$4"
             xcrun simctl openurl "$udid" "$url"
             sleep 3
-            dismiss_scheme_confirmation "$udid"
+            dismiss_scheme_confirmation "$udid" "$dir" "$stem"
           }
 
           exercise_device() {
@@ -495,12 +729,12 @@ jobs:
             wait_gateway "$udid" "$dir" '01-cold-account-gateway'
             capture_verified "$udid" "$dir" '01-cold-account-gateway'
 
-            open_verified_link "$udid" 'bil://login'
+            open_verified_link "$udid" 'bil://login' "$dir" '02-login-deep-link'
             wait_marker "$udid" 'Store reviewer access' 30
             wait_marker "$udid" 'Email address' 30
             capture_verified "$udid" "$dir" '02-login-deep-link'
 
-            open_verified_link "$udid" 'bil://connected-health'
+            open_verified_link "$udid" 'bil://connected-health' "$dir" '03-connected-health-deep-link'
             wait_marker "$udid" 'Apps & Devices' 30
             wait_marker "$udid" 'Health Hub' 30
             capture_verified "$udid" "$dir" '03-connected-health-deep-link'

@@ -1,0 +1,12 @@
+# Exact immutable wheels for the macOS 26/Tahoe mobile QA bridge.
+# The fb-idb client and native companion are both pinned to Meta idb v1.6.4.
+# Keep --no-deps and --require-hashes in the workflow so this remains the
+# complete executable dependency closure for the Python client.
+fb-idb @ https://github.com/facebook/idb/releases/download/v1.6.4/fb_idb-1.6.4-py3-none-any.whl#sha256=5c24ab0e933e55c6a78d50c633b0df111c4b0e71018c9e306fe0618eaea506a5
+aiofiles @ https://files.pythonhosted.org/packages/ca/e4/b78d049f7cc7ed053ddbfdd59b2dcc7bd387458e2c2869b602975685d65e/aiofiles-0.8.0-py3-none-any.whl#sha256=7a973fc22b29e9962d0897805ace5856e6a566ab1f0c8e5c91ff6c866519c937
+grpclib @ https://files.pythonhosted.org/packages/5c/90/b0cbbd9efcc82816c58f31a34963071aa19fb792a212a5d9caf8e0fc3097/grpclib-0.4.9-py3-none-any.whl#sha256=7762ec1c8ed94dfad597475152dd35cbd11aecaaca2f243e29702435ca24cf0e
+protobuf @ https://files.pythonhosted.org/packages/19/c7/5f7c636ec43e0c545e28d1f1db71990108306f7bdcb89f069ba97e428e7f/protobuf-7.35.1-py3-none-any.whl#sha256=4bc97768d8fe4ad6743c8a19403e314511ed9f6d13205b687e52421c023ac1b9
+h2 @ https://files.pythonhosted.org/packages/2a/e5/db6d438da759efbb488c4f3fbdab7764492ff3c3f953132efa6b9f0e9e53/h2-4.1.0-py3-none-any.whl#sha256=03a46bcf682256c95b5fd9e9a99c1323584c3eec6440d379b9903d709476bc6d
+hpack @ https://files.pythonhosted.org/packages/d5/34/e8b383f35b77c402d28563d2b8f83159319b509bc5f760b15d60b0abf165/hpack-4.0.0-py3-none-any.whl#sha256=84a076fad3dc9a9f8063ccb8041ef100867b1878b25ef0ee63847a5d53818a6c
+hyperframe @ https://files.pythonhosted.org/packages/d7/de/85a784bcc4a3779d1753a7ec2dee5de90e18c7bcf402e71b51fcf150b129/hyperframe-6.0.1-py3-none-any.whl#sha256=0ec6bafd80d8ad2195c4f03aacba3a8265e57bc4cff261e802bf39970ed02a15
+multidict @ https://files.pythonhosted.org/packages/fa/a2/17e1e23c6be0a916219c5292f509360c345b5fa6beeb50d743203c27532c/multidict-6.0.5-py3-none-any.whl#sha256=0d63c74e3d7ab26de115c49bffc92cc77ed23395303d496eae515d4204a625e7
