@@ -21,7 +21,8 @@
   "overrides": {
     "miniflare": {
       "sharp": "0.35.4"
-    }
+    },
+    "undici": "7.29.1"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.0.0",
