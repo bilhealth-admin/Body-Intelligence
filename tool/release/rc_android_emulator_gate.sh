@@ -158,6 +158,28 @@ adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
 sleep 4
 adb exec-out screencap -p > "$EVIDENCE/08-network-recovered.png"
 
+SLOW_NETWORK_GATE='NOT_CONFIRMED_EMULATOR_NETWORK'
+if adb emu network speed gsm >/dev/null 2>&1 && adb emu network delay gprs >/dev/null 2>&1; then
+  adb shell am force-stop "$BIL_APP_ID"
+  adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+  sleep 5
+  adb exec-out screencap -p > "$EVIDENCE/08b-slow-network.png"
+  SLOW_NETWORK_GATE='PASS'
+fi
+adb emu network speed full >/dev/null 2>&1 || true
+adb emu network delay none >/dev/null 2>&1 || true
+
+for iteration in $(seq 1 20); do
+  if (( iteration % 2 == 0 )); then URL='bil://login'; else URL='bil://connected-health'; fi
+  adb shell am start -W -a android.intent.action.VIEW -d "$URL" >/dev/null
+done
+for iteration in $(seq 1 10); do
+  adb shell am force-stop "$BIL_APP_ID"
+  adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1 >/dev/null
+  sleep 1
+done
+adb exec-out screencap -p > "$EVIDENCE/08c-repeated-navigation.png"
+
 for PERM in \
   android.permission.CAMERA \
   android.permission.RECORD_AUDIO \
@@ -167,6 +189,16 @@ for PERM in \
 done
 
 adb logcat -d > "$EVIDENCE/logcat.txt"
+PID="$(adb shell pidof "$BIL_APP_ID" | tr -d '\r' || true)"
+if [[ -n "$PID" ]]; then
+  adb logcat -d --pid="$PID" > "$EVIDENCE/app-logcat.txt" || true
+else
+  : > "$EVIDENCE/app-logcat.txt"
+fi
+if grep -Eiq 'authorization:.*bearer[[:space:]]+[A-Za-z0-9._~-]{20,}|access[_ -]?token[=:]["'"'"' ]*[A-Za-z0-9._~-]{20,}|refresh[_ -]?token[=:]["'"'"' ]*[A-Za-z0-9._~-]{20,}|service_role.*eyJ|sb_secret_' "$EVIDENCE/app-logcat.txt"; then
+  echo 'Sensitive token value found in Android app logs.' >&2
+  exit 1
+fi
 if grep -Eiq 'FATAL EXCEPTION|AndroidRuntime.*FATAL|Process: com\.bilhealth\.bodyintelligencelog.*has died' "$EVIDENCE/logcat.txt"; then
   echo 'Android runtime fatal marker detected.' >&2
   exit 1
@@ -181,8 +213,11 @@ printf '%s\n' \
   'ANDROID_DARK_LIGHT=PASS' \
   'ANDROID_LARGE_TEXT_200_PERCENT=PASS' \
   "ANDROID_NETWORK_OFFLINE_RECOVERY=${NETWORK_GATE}" \
+  "ANDROID_SLOW_NETWORK_RUNTIME=${SLOW_NETWORK_GATE}" \
+  'ANDROID_REPEATED_NAVIGATION_20_AND_RELAUNCH_10=PASS' \
   'ANDROID_PERMISSION_GRANT_REVOKE=PASS' \
   'ANDROID_RUNTIME_CRASH_SCAN=PASS' \
+  'ANDROID_RUNTIME_SECRET_LOG_SCAN=PASS' \
   'ANDROID_NATIVE_CRYPTO=PASS' \
   'ANDROID_NATIVE_SETTINGS_UI=PASS' \
   "ANDROID_ADMOB_OFFICIAL_TEST_BANNER=${ADMOB_GATE}" \

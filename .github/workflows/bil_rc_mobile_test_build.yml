@@ -752,6 +752,21 @@ jobs:
             capture_verified "$udid" "$dir" '05-dark-account-gateway'
 
             xcrun simctl ui "$udid" appearance light
+            xcrun simctl terminate "$udid" "$BIL_APP_ID"
+            xcrun simctl spawn "$udid" launchctl setenv TZ Africa/Cairo
+            xcrun simctl launch "$udid" "$BIL_APP_ID" \
+              -AppleLanguages '(ar)' -AppleLocale 'ar_EG' \
+              | tee "$dir/arabic-cairo-launch.txt"
+            sleep 8
+            capture_verified "$udid" "$dir" '06-arabic-cairo-runtime'
+
+            xcrun simctl terminate "$udid" "$BIL_APP_ID"
+            xcrun simctl spawn "$udid" launchctl unsetenv TZ
+            xcrun simctl launch "$udid" "$BIL_APP_ID" \
+              -AppleLanguages '(en)' -AppleLocale 'en_US' \
+              | tee "$dir/post-locale-relaunch.txt"
+            wait_gateway "$udid" "$dir" '06b-post-locale-account-gateway'
+
             xcrun simctl ui "$udid" content_size accessibility-extra-extra-extra-large
             sleep 2
             wait_gateway "$udid" "$dir" '06-large-text-account-gateway'
@@ -766,6 +781,12 @@ jobs:
               'Unhandled Exception|RenderFlex overflowed|EXC_CRASH|SIGABRT|fatal error' \
               "$dir/runner.log"; then
               echo "Runner runtime error marker found for $name." >&2
+              return 1
+            fi
+            if grep -Eiq \
+              'authorization:.*bearer[[:space:]]+[A-Za-z0-9._~-]{20,}|access[_ -]?token[=:]["'"'"' ]*[A-Za-z0-9._~-]{20,}|refresh[_ -]?token[=:]["'"'"' ]*[A-Za-z0-9._~-]{20,}|service_role.*eyJ|sb_secret_' \
+              "$dir/runner.log"; then
+              echo "Sensitive token value found in iOS Runner logs for $name." >&2
               return 1
             fi
           }
@@ -798,8 +819,11 @@ jobs:
             'IOS_TERMINATE_RELAUNCH_ACTUAL_PAGE=PASS' \
             'IOS_DARK_MODE_ACTUAL_APP_UI=PASS' \
             'IOS_LARGE_TEXT_ACTUAL_APP_UI=PASS' \
+            'IOS_ARABIC_LOCALE_RUNTIME=PASS' \
+            'IOS_CAIRO_TIMEZONE_RUNTIME=PASS' \
             'IOS_ACCESSIBILITY_TREES=PASS' \
             'IOS_RUNTIME_CRASH_SCAN=PASS' \
+            'IOS_RUNTIME_SECRET_LOG_SCAN=PASS' \
             'IOS_NATIVE_CRYPTO=PASS' \
             'IOS_NATIVE_SETTINGS_UI=PASS' \
             'IOS_SCREENSHOT_DISPLAY=DEFAULT_LCD' \

@@ -218,10 +218,80 @@ jobs:
           path: ${{ runner.temp }}/bil-store-evidence/
           retention-days: 30
 
+  pre_final_automated_gates:
+    name: Pre-final fault/stress/store/security gates
+    needs: freeze
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
+        with:
+          deno-version: v2.9.7
+      - run: bash tool/release_certification/run_pre_final_automated_gate.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-pre-final-automated-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-pre-final-automated/
+          if-no-files-found: error
+          retention-days: 30
+
+  pre_final_cloud_live:
+    name: Transactional live cloud roundtrip
+    needs: freeze
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-pre-final-cloud"
+          mkdir -p "$OUT"
+          CLI=(npx --yes supabase@2.117.0)
+          "${CLI[@]}" init --force
+          "${CLI[@]}" link --project-ref "$BIL_SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+          SQL="$(cat tool/release_certification/pre_final_cloud_transaction.sql)"
+          "${CLI[@]}" db query --linked "$SQL" 2>&1 | tee "$OUT/live-cloud.log"
+          printf '%s\n' \
+            'CLOUD_LIVE_ROUNDTRIP=PASS' \
+            'CLOUD_LIVE_PAYLOAD_BYTES=PASS' \
+            'CLOUD_LIVE_EDIT_REDOWNLOAD=PASS' \
+            'CLOUD_LIVE_STALE_CONFLICT=PASS' \
+            'CLOUD_LIVE_DUPLICATE_IDEMPOTENCY=PASS' \
+            'CLOUD_LIVE_ACCOUNT_ISOLATION=PASS' \
+            'CLOUD_LIVE_PERSISTENCE=ROLLBACK_ENFORCED' \
+            > "$OUT/status.txt"
+          rm -rf supabase/.temp
+          rm -f supabase/config.toml
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=no)"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-pre-final-cloud-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-pre-final-cloud/
+          if-no-files-found: error
+          retention-days: 30
+
   pass_1_barrier:
     name: Pass 1 barrier
     if: always()
-    needs: [static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly]
+    needs: [static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly, pre_final_automated_gates, pre_final_cloud_live]
     runs-on: ubuntu-24.04
     steps:
       - env:
@@ -230,8 +300,10 @@ jobs:
           VISUAL: ${{ needs.visual_pass_1.result }}
           LIVE: ${{ needs.live_pass_1.result }}
           STORE: ${{ needs.store_readonly.result }}
+          PRE_FINAL: ${{ needs.pre_final_automated_gates.result }}
+          CLOUD_LIVE: ${{ needs.pre_final_cloud_live.result }}
         run: |
-          for VALUE in "$STATIC" "$FULL" "$VISUAL" "$LIVE" "$STORE"; do
+          for VALUE in "$STATIC" "$FULL" "$VISUAL" "$LIVE" "$STORE" "$PRE_FINAL" "$CLOUD_LIVE"; do
             test "$VALUE" = success
           done
 
@@ -367,7 +439,7 @@ jobs:
   report:
     name: Final certification report
     if: always()
-    needs: [freeze, static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly, pass_1_barrier, static_pass_2, full_tests_pass_2, visual_pass_2, live_pass_2]
+    needs: [freeze, static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly, pre_final_automated_gates, pre_final_cloud_live, pass_1_barrier, static_pass_2, full_tests_pass_2, visual_pass_2, live_pass_2]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -424,7 +496,13 @@ jobs:
       - name: Enforce actual failure gate
         env:
           CODE: ${{ steps.write.outputs.code }}
+          PRE_FINAL: ${{ needs.pre_final_automated_gates.result }}
+          CLOUD_LIVE: ${{ needs.pre_final_cloud_live.result }}
         run: |
+          if [[ "$PRE_FINAL" != "success" || "$CLOUD_LIVE" != "success" ]]; then
+            echo "Pre-final automated or live cloud gate failed." >&2
+            exit 1
+          fi
           if [[ "$CODE" != "0" ]]; then
             echo "BIL certification contains an actual FAIL. See the report artifact." >&2
             exit "$CODE"
