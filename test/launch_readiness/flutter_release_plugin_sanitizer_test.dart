@@ -205,6 +205,72 @@ void main() {
   );
 
   test(
+    'iOS excludes Windows-only barcode native code while preserving test plugins',
+    () {
+      final root = Directory.systemTemp.createTempSync('bil-plugin-sanitizer-');
+      addTearDown(() => root.deleteSync(recursive: true));
+      final metadata = File('${root.path}/.flutter-plugins-dependencies')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          jsonEncode(
+            _document(
+              android: <Map<String, Object?>>[
+                _plugin('simple_barcode_scanner', dev: false),
+              ],
+              ios: <Map<String, Object?>>[
+                _plugin('production_plugin', dev: false),
+                _plugin('simple_barcode_scanner', dev: false),
+                _plugin('integration_test', dev: true),
+              ],
+              graph: <Map<String, Object?>>[
+                _graph('production_plugin'),
+                _graph('simple_barcode_scanner'),
+                _graph('integration_test'),
+              ],
+            ),
+          ),
+        );
+      File('${root.path}/ios/Runner/GeneratedPluginRegistrant.h')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_iosRegistrantHeader);
+      final implementation =
+          File('${root.path}/ios/Runner/GeneratedPluginRegistrant.m')
+            ..createSync(recursive: true)
+            ..writeAsStringSync(_iosRegistrantWithWindowsOnlyBarcode);
+
+      sanitizeFlutterReleaseProject(
+        projectRoot: root,
+        platform: 'ios',
+        excludedNativePluginNames: iosWindowsOnlyNativePluginNames,
+        removeDevOnlyPlugins: false,
+      );
+
+      final persisted =
+          jsonDecode(metadata.readAsStringSync()) as Map<String, Object?>;
+      final plugins = persisted['plugins']! as Map<String, Object?>;
+      final ios = (plugins['ios']! as List<Object?>)
+          .cast<Map<String, Object?>>()
+          .map((entry) => entry['name'])
+          .toList();
+      final android = (plugins['android']! as List<Object?>)
+          .cast<Map<String, Object?>>()
+          .map((entry) => entry['name'])
+          .toList();
+      expect(ios, <Object?>['production_plugin', 'integration_test']);
+      expect(android, contains('simple_barcode_scanner'));
+      expect(
+        implementation.readAsStringSync(),
+        allOf(
+          contains('ProductionPlugin'),
+          contains('IntegrationTestPlugin'),
+          isNot(contains('simple_barcode_scanner')),
+          isNot(contains('SimpleBarcodeScannerPlugin')),
+        ),
+      );
+    },
+  );
+
+  test(
     'missing runtime registrant fails before plugin metadata is changed',
     () {
       final root = Directory.systemTemp.createTempSync('bil-plugin-sanitizer-');
@@ -233,6 +299,24 @@ void main() {
       expect(metadata.readAsStringSync(), contains('integration_test'));
     },
   );
+
+  test('RC iOS excludes Windows-only barcode native code before build', () {
+    final rc = File(
+      '.github/workflows/bil_rc_mobile_test_build.yml',
+    ).readAsStringSync();
+    final contracts = rc.indexOf('Resolve dependencies and iOS contracts');
+    final sanitizer = rc.indexOf(
+      'dart run tool/release/sanitize_flutter_release_plugins.dart '
+      '--platform=ios --preserve-dev-native-plugins',
+    );
+    final build = rc.indexOf('flutter build ios --simulator');
+    expect(contracts, greaterThanOrEqualTo(0));
+    expect(sanitizer, greaterThan(contracts));
+    expect(sanitizer, lessThan(build));
+    expect(iosWindowsOnlyNativePluginNames, <String>{
+      'simple_barcode_scanner',
+    });
+  });
 
   test('signed workflows sanitize after tests and before release build', () {
     final android = File(
@@ -292,6 +376,35 @@ Map<String, Object?> _graph(
   String name, {
   List<String> dependencies = const <String>[],
 }) => <String, Object?>{'name': name, 'dependencies': dependencies};
+
+const _iosRegistrantWithWindowsOnlyBarcode = r'''#import "GeneratedPluginRegistrant.h"
+
+#if __has_include(<production_plugin/ProductionPlugin.h>)
+#import <production_plugin/ProductionPlugin.h>
+#else
+@import production_plugin;
+#endif
+
+#if __has_include(<simple_barcode_scanner/SimpleBarcodeScannerPlugin.h>)
+#import <simple_barcode_scanner/SimpleBarcodeScannerPlugin.h>
+#else
+@import simple_barcode_scanner;
+#endif
+
+#if __has_include(<integration_test/IntegrationTestPlugin.h>)
+#import <integration_test/IntegrationTestPlugin.h>
+#else
+@import integration_test;
+#endif
+
+@implementation GeneratedPluginRegistrant
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+  [ProductionPlugin registerWithRegistrar:[registry registrarForPlugin:@"ProductionPlugin"]];
+  [SimpleBarcodeScannerPlugin registerWithRegistrar:[registry registrarForPlugin:@"SimpleBarcodeScannerPlugin"]];
+  [IntegrationTestPlugin registerWithRegistrar:[registry registrarForPlugin:@"IntegrationTestPlugin"]];
+}
+@end
+''';
 
 const _androidRegistrant = r'''package io.flutter.plugins;
 

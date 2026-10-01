@@ -222,6 +222,12 @@ jobs:
           plutil -lint ios/Runner/Runner.entitlements
           plutil -lint ios/Runner/RunnerDebug.entitlements
 
+      - name: Exclude Windows-only barcode plugin from iOS native graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+
       - name: Build iOS simulator application
         shell: bash
         run: |
