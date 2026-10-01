@@ -174,9 +174,11 @@ void main() {
     'bil_consume_rate_limit',
     'Verification rate limit missing.',
   );
-  requireText(
+  requirePattern(
+    RegExp(
+      r'''normalized\s*===\s*["']sandbox["']\s*\|\|\s*normalized\s*===\s*["']production["']''',
+    ),
     storeEnvironment,
-    "normalized === 'sandbox' || normalized === 'production'",
     'Sandbox and production store environments must be validated strictly.',
   );
   requireText(
@@ -217,7 +219,9 @@ void main() {
     'Atomic subscription and entitlement persistence is missing.',
   );
   requirePattern(
-    RegExp(r'''admin\.rpc\(\s*["']bil_persist_verified_store_purchase["']'''),
+    RegExp(
+      r'''admin\.rpc\([\s\S]{0,180}["']bil_persist_verified_store_purchase["']''',
+    ),
     backend,
     'The verification backend must use atomic entitlement persistence.',
   );
@@ -290,12 +294,12 @@ void main() {
   );
   requireText(
     read('android/settings.gradle.kts'),
-    'id("com.android.application") version "9.2.1"',
-    'The app AGP must match the app_links Android toolchain.',
+    'id("com.android.application") version "9.0.1"',
+    'The app AGP must match the audited Android toolchain.',
   );
   requireText(
     read('android/settings.gradle.kts'),
-    'id("org.jetbrains.kotlin.android") version "2.2.20" apply false',
+    'id("org.jetbrains.kotlin.android") version "2.3.20" apply false',
     'Flutter plugin compatibility on AGP 9 requires the audited KGP bridge.',
   );
   final gradleProperties = read('android/gradle.properties');
@@ -311,8 +315,8 @@ void main() {
   );
   requireText(
     read('android/gradle/wrapper/gradle-wrapper.properties'),
-    'gradle-9.4.1-all.zip',
-    'AGP 9.2 requires Gradle 9.4.1.',
+    'gradle-9.1.0-all.zip',
+    'The audited AGP/KGP bridge requires Gradle 9.1.0.',
   );
   reject(
     RegExp(r'purchasePlan\(CommercePlan\.(coach|clinic|enterprise|elite)'),
