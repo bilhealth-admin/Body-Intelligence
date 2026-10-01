@@ -144,9 +144,9 @@ void main() {
       }, skip: Platform.isLinux);
   }
 
-  testWidgets(
-    'corrected light morning premium dashboard golden',
-    (tester) async {
+  testWidgets('corrected light morning premium dashboard golden', (
+    tester,
+  ) async {
       tester.view.physicalSize = const Size(1024, 1366);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
