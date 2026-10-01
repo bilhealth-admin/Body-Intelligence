@@ -25,6 +25,40 @@ flutter test --no-pub \
   integration_test/native_settings_polish_test.dart \
   -d emulator-5554 --timeout 10m
 
+BIL_ADMOB_ANDROID_APP_ID='ca-app-pub-3940256099942544~3347511713' \
+flutter test --no-pub \
+  integration_test/admob_native_banner_integration_test.dart \
+  -d emulator-5554 --timeout 10m
+ADMOB_GATE='PASS'
+
+BARCODE_GATE='NOT_RUN_MISSING_QA_CREDENTIALS'
+if [[ -n "${BIL_BARCODE_GATE_EMAIL:-}" && -n "${BIL_BARCODE_GATE_PASSWORD:-}" ]]; then
+  flutter test --no-pub \
+    integration_test/real_barcode_photo_integration_test.dart \
+    -d emulator-5554 --timeout 12m \
+    --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
+    --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
+    --dart-define=BIL_BARCODE_GATE_EMAIL="${BIL_BARCODE_GATE_EMAIL}" \
+    --dart-define=BIL_BARCODE_GATE_PASSWORD="${BIL_BARCODE_GATE_PASSWORD}"
+  BARCODE_GATE='PASS'
+fi
+
+TWO_ACCOUNT_GATE='NOT_RUN_MISSING_QA_CREDENTIALS'
+if [[ -n "${BIL_EPIC9_ACCOUNT_A_EMAIL:-}" && -n "${BIL_EPIC9_ACCOUNT_A_PASSWORD:-}" && \
+      -n "${BIL_EPIC9_ACCOUNT_B_EMAIL:-}" && -n "${BIL_EPIC9_ACCOUNT_B_PASSWORD:-}" ]]; then
+  flutter test --no-pub \
+    integration_test/epic9_two_account_cloud_test.dart \
+    --timeout 12m \
+    --dart-define=BIL_RUN_EPIC9_CLOUD_INTEGRATION=true \
+    --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
+    --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
+    --dart-define=BIL_EPIC9_ACCOUNT_A_EMAIL="${BIL_EPIC9_ACCOUNT_A_EMAIL}" \
+    --dart-define=BIL_EPIC9_ACCOUNT_A_PASSWORD="${BIL_EPIC9_ACCOUNT_A_PASSWORD}" \
+    --dart-define=BIL_EPIC9_ACCOUNT_B_EMAIL="${BIL_EPIC9_ACCOUNT_B_EMAIL}" \
+    --dart-define=BIL_EPIC9_ACCOUNT_B_PASSWORD="${BIL_EPIC9_ACCOUNT_B_PASSWORD}"
+  TWO_ACCOUNT_GATE='PASS'
+fi
+
 APK=build/app/outputs/flutter-apk/app-debug.apk
 test -s "$APK"
 adb install -r "$APK"
@@ -53,6 +87,41 @@ sleep 2
 adb exec-out screencap -p > "$EVIDENCE/04-landscape.png"
 adb shell settings put system user_rotation 0
 
+adb shell cmd uimode night yes
+adb shell am force-stop "$BIL_APP_ID"
+adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+sleep 4
+adb exec-out screencap -p > "$EVIDENCE/05-dark-mode.png"
+
+adb shell cmd uimode night no
+adb shell settings put system font_scale 2.0
+adb shell am force-stop "$BIL_APP_ID"
+adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+sleep 4
+adb exec-out screencap -p > "$EVIDENCE/06-large-text-200.png"
+adb shell settings put system font_scale 1.0
+
+NETWORK_GATE='NOT_CONFIRMED_EMULATOR_NETWORK'
+adb shell cmd connectivity airplane-mode enable >/dev/null 2>&1 || true
+adb shell svc wifi disable >/dev/null 2>&1 || true
+adb shell svc data disable >/dev/null 2>&1 || true
+sleep 4
+if ! adb shell dumpsys connectivity | grep -q 'NET_CAPABILITY_VALIDATED'; then
+  adb shell am force-stop "$BIL_APP_ID"
+  adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+  sleep 4
+  adb exec-out screencap -p > "$EVIDENCE/07-offline-launch.png"
+  NETWORK_GATE='PASS'
+fi
+adb shell cmd connectivity airplane-mode disable >/dev/null 2>&1 || true
+adb shell svc wifi enable >/dev/null 2>&1 || true
+adb shell svc data enable >/dev/null 2>&1 || true
+sleep 6
+adb shell am force-stop "$BIL_APP_ID"
+adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+sleep 4
+adb exec-out screencap -p > "$EVIDENCE/08-network-recovered.png"
+
 for PERM in \
   android.permission.CAMERA \
   android.permission.RECORD_AUDIO \
@@ -73,8 +142,14 @@ printf '%s\n' \
   'ANDROID_DEEP_LINK=PASS' \
   'ANDROID_BACKGROUND_FORCE_STOP_RELAUNCH=PASS' \
   'ANDROID_ROTATION=PASS' \
+  'ANDROID_DARK_LIGHT=PASS' \
+  'ANDROID_LARGE_TEXT_200_PERCENT=PASS' \
+  "ANDROID_NETWORK_OFFLINE_RECOVERY=${NETWORK_GATE}" \
   'ANDROID_PERMISSION_GRANT_REVOKE=PASS' \
   'ANDROID_RUNTIME_CRASH_SCAN=PASS' \
   'ANDROID_NATIVE_CRYPTO=PASS' \
   'ANDROID_NATIVE_SETTINGS_UI=PASS' \
+  "ANDROID_ADMOB_OFFICIAL_TEST_BANNER=${ADMOB_GATE}" \
+  "ANDROID_REAL_BARCODE_PHOTO=${BARCODE_GATE}" \
+  "ANDROID_TWO_ACCOUNT_CLOUD=${TWO_ACCOUNT_GATE}" \
   > "$EVIDENCE/gate-status.txt"
