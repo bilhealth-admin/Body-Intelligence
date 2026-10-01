@@ -213,8 +213,8 @@ void main() {
     publicPages.contains('bilhealth.app@gmail.com') &&
         publicPages.contains('support@bilhealth.com') &&
         publicPages.contains('privacy@bilhealth.com') &&
-        RegExp(r'inbound\\s+forwarding').hasMatch(publicPages) &&
-        RegExp(r'outbound\\s+sending').hasMatch(publicPages),
+        RegExp(r'inbound\s+forwarding').hasMatch(publicPages) &&
+        RegExp(r'outbound\s+sending').hasMatch(publicPages),
     'Public-page source does not distinguish inbound forwarding from outbound sending',
   );
   _require(
