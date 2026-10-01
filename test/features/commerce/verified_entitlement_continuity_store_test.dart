@@ -116,15 +116,12 @@ void main() {
       final restored = await store.read(ownerId: 'owner-a', now: now);
 
       expect(restored?.lifecycle, lifecycle);
-      expect(
-        switch (lifecycle) {
-          SubscriptionLifecycle.trial => restored?.trialEndsAt,
-          SubscriptionLifecycle.gracePeriod => restored?.gracePeriodEndsAt,
-          SubscriptionLifecycle.cancelled => restored?.currentPeriodEndsAt,
-          _ => null,
-        },
-        until,
-      );
+      expect(switch (lifecycle) {
+        SubscriptionLifecycle.trial => restored?.trialEndsAt,
+        SubscriptionLifecycle.gracePeriod => restored?.gracePeriodEndsAt,
+        SubscriptionLifecycle.cancelled => restored?.currentPeriodEndsAt,
+        _ => null,
+      }, until);
     });
   }
 

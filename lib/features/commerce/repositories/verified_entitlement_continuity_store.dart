@@ -14,9 +14,8 @@ import 'admin_entitlement_continuity_store.dart';
 /// boundary carried by that state. A later authoritative Free or terminal
 /// response clears the stored snapshot immediately.
 final class VerifiedEntitlementContinuityStore {
-  VerifiedEntitlementContinuityStore({
-    AdminEntitlementSecureStore? secureStore,
-  }) : _secureStore = secureStore ?? FlutterAdminEntitlementSecureStore();
+  VerifiedEntitlementContinuityStore({AdminEntitlementSecureStore? secureStore})
+    : _secureStore = secureStore ?? FlutterAdminEntitlementSecureStore();
 
   static const _prefix = 'bil.verified-entitlement.v1.';
 
@@ -107,8 +106,8 @@ final class VerifiedEntitlementContinuityStore {
         provider: provider,
         startedAt: startedAt,
         currentPeriodEndsAt: switch (lifecycle) {
-          SubscriptionLifecycle.active || SubscriptionLifecycle.cancelled =>
-            accessUntil,
+          SubscriptionLifecycle.active ||
+          SubscriptionLifecycle.cancelled => accessUntil,
           _ => null,
         },
         trialEndsAt: lifecycle == SubscriptionLifecycle.trial
@@ -131,8 +130,8 @@ final class VerifiedEntitlementContinuityStore {
   DateTime? _boundaryFor(SubscriptionState state) => switch (state.lifecycle) {
     SubscriptionLifecycle.trial => state.trialEndsAt,
     SubscriptionLifecycle.gracePeriod => state.gracePeriodEndsAt,
-    SubscriptionLifecycle.active || SubscriptionLifecycle.cancelled =>
-      state.currentPeriodEndsAt,
+    SubscriptionLifecycle.active ||
+    SubscriptionLifecycle.cancelled => state.currentPeriodEndsAt,
     _ => null,
   };
 

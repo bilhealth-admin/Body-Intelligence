@@ -112,8 +112,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
                 label: item.$3,
                 subtitle: item.$4,
                 route: item.$5,
-                premium:
-                    item.$6 && premiumAccessResolved && !premiumUnlocked,
+                premium: item.$6 && premiumAccessResolved && !premiumUnlocked,
                 checking: item.$6 && !premiumAccessResolved,
               );
             },
@@ -130,9 +129,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
                 subtitle: items.last.$4,
                 route: items.last.$5,
                 premium:
-                    items.last.$6 &&
-                    premiumAccessResolved &&
-                    !premiumUnlocked,
+                    items.last.$6 && premiumAccessResolved && !premiumUnlocked,
                 checking: items.last.$6 && !premiumAccessResolved,
               ),
             ),

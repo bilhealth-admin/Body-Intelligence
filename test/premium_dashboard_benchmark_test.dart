@@ -54,9 +54,7 @@ void main() {
   testWidgets(
     'unresolved entitlement keeps local dashboard visible without false Free',
     (tester) async {
-      await tester.pumpWidget(
-        const _Harness(premiumAccessResolved: false),
-      );
+      await tester.pumpWidget(const _Harness(premiumAccessResolved: false));
       await tester.pumpAndSettle();
 
       expect(

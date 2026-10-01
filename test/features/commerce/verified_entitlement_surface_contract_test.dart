@@ -65,15 +65,10 @@ void main() {
     expect(source, contains('verifiedSubscriptionAccessProvider'));
     expect(
       source,
-      contains(
-        'final premiumAccessResolved = verifiedSubscription.hasValue;',
-      ),
+      contains('final premiumAccessResolved = verifiedSubscription.hasValue;'),
     );
     expect(source, isNot(contains('verifiedSubscription.isLoading &&')));
-    expect(
-      source,
-      contains('premiumAccessResolved: premiumAccessResolved'),
-    );
+    expect(source, contains('premiumAccessResolved: premiumAccessResolved'));
   });
 
   test('closed-test grant is a server-owned Premium AI Coach overlay', () {

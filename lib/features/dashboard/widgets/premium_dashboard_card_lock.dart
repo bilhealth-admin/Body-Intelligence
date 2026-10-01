@@ -70,7 +70,9 @@ class PremiumDashboardCardLock extends StatelessWidget {
                             ? const SizedBox.square(
                                 key: Key('dashboard-premium-checking-spinner'),
                                 dimension: 22,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : showLabel
                             ? const PremiumLabelBadge(

@@ -36,8 +36,7 @@ final class ServerEntitlementRepository {
       AdminEntitlementContinuityStore();
   AdminEntitlementContinuityStore get _adminContinuityStore =>
       _adminContinuityStoreOverride ?? _defaultAdminContinuityStore;
-  static final _defaultSubscriptionStore =
-      VerifiedEntitlementContinuityStore();
+  static final _defaultSubscriptionStore = VerifiedEntitlementContinuityStore();
   VerifiedEntitlementContinuityStore get _subscriptionStore =>
       _subscriptionStoreOverride ?? _defaultSubscriptionStore;
   static final VerifiedEntitlementSessionCache _sessionCache =
@@ -307,11 +306,7 @@ final class ServerEntitlementRepository {
         return FreePlan.createState();
       }
       if (persisted != null) {
-        _sessionCache.remember(
-          ownerId: ownerId,
-          state: persisted,
-          now: now,
-        );
+        _sessionCache.remember(ownerId: ownerId, state: persisted, now: now);
         return persisted;
       }
     } on Object {
