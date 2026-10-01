@@ -28,7 +28,14 @@ TEXT = {".dart", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".kt", ".java",
         ".cc", ".rc", ".bat", ".deps", ".csv", ".example"}
 CODE = {".dart", ".ts", ".js", ".mjs", ".kt", ".java", ".swift", ".sql", ".py", ".ps1"}
 SECRETS = {
-    "private_key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
+    # Markers are normal in parsers and generated-key tests. Flag only a
+    # PEM-shaped block that contains multiple Base64 payload lines.
+    "private_key": re.compile(
+        r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"
+        r"(?:\\r?\\n|\\\\n)"
+        r"(?:[A-Za-z0-9+/=]{16,}(?:\\r?\\n|\\\\n)){2,}"
+        r"-----END (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"
+    ),
     "github_token": re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{60,})\b"),
     "aws_access_key": re.compile(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b"),
     "supabase_secret_key": re.compile(r"\bsb_secret_[A-Za-z0-9_-]{20,}\b"),
@@ -85,6 +92,7 @@ def main() -> int:
     hashes: dict[str, list[str]] = defaultdict(list)
     todos = []
     secrets = []
+    publishable_configs = []
     conflicts = []
     syntax_errors = []
     graph: dict[str, set[str]] = {}
@@ -115,7 +123,17 @@ def main() -> int:
             hashes[item["sha256"]].append(relative)
         for kind, pattern in SECRETS.items():
             for match in pattern.finditer(source):
-                secrets.append({"path": relative, "line": source.count("\n", 0, match.start()) + 1,
+                line = source.count("\n", 0, match.start()) + 1
+                if kind == "google_api_key" and relative == "android/app/google-services.json":
+                    publishable_configs.append({
+                        "path": relative,
+                        "line": line,
+                        "kind": "firebase_android_api_key",
+                        "classification": "publishable_client_config",
+                        "value": "REDACTED",
+                    })
+                    continue
+                secrets.append({"path": relative, "line": line,
                                 "kind": kind, "value": "REDACTED"})
         for match in re.finditer(r"(?m)^(?:<{7}|>{7}|\|{7})(?: |$)", source):
             conflicts.append({"path": relative, "line": source.count("\n", 0, match.start()) + 1})
@@ -156,7 +174,9 @@ def main() -> int:
         "exact_code_duplicates": [v for v in hashes.values() if len(v) > 1],
         "duplicate_public_class_names": {k: v for k, v in classes.items() if len(v) > 1},
         "dart_import_cycles": cycles(graph), "todo_candidates": todos,
-        "secret_candidates": secrets, "conflict_candidates": conflicts,
+        "secret_candidates": secrets,
+        "publishable_config_candidates": publishable_configs,
+        "conflict_candidates": conflicts,
         "syntax_errors": syntax_errors,
     }
     EVIDENCE.mkdir(parents=True, exist_ok=True)
@@ -167,6 +187,7 @@ def main() -> int:
                       "duplicate_class_names": len(report["duplicate_public_class_names"]),
                       "import_cycle_groups": len(report["dart_import_cycles"]),
                       "todo_candidates": len(todos), "redacted_secret_candidates": len(secrets),
+                      "publishable_config_candidates": len(publishable_configs),
                       "conflict_candidates": len(conflicts), "syntax_errors": syntax_errors}))
     return int(bool(syntax_errors or conflicts))
 
