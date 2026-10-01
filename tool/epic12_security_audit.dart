@@ -84,7 +84,6 @@ Iterable<File> _walkReadableFiles(Directory directory) sync* {
   }
 }
 
-
 bool hasTlsVerificationBypass(String text) {
   const patterns = <String>[
     r'badCertificateCallback\s*=',
