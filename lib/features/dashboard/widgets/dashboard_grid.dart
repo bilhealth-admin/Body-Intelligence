@@ -87,15 +87,16 @@ class DashboardGrid extends ConsumerWidget {
     final allContextsAsync = ref.watch(insightLifeContextProvider);
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final clock = ref.watch(dashboardClockProvider);
-    final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
-    // An unresolved server entitlement is not a verified Free decision. Keep
-    // the neutral dashboard loading state until the signed-in owner's result
-    // arrives so Premium/Admin members never see a false locked-card flash.
-    if (verifiedSubscription.isLoading && !verifiedSubscription.hasValue) {
-      return const DashboardLoadingSkeleton();
-    }
-    final verifiedPlan = verifiedSubscription.value?.plan ?? CommercePlan.free;
-    final premiumUnlocked = verifiedPlan != CommercePlan.free;
+    final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
+    // Today is local-first. A slow/offline commerce refresh must never hide
+    // weight, meals, water, goals, or other SQLite-backed dashboard truth.
+    // Unresolved access is kept neutral instead of being rendered as Free.
+    final premiumAccessResolved = verifiedSubscription.hasValue;
+    final verifiedPlan = verifiedSubscription.value?.plan;
+    final premiumUnlocked =
+        premiumAccessResolved &&
+        verifiedPlan != null &&
+        verifiedPlan != CommercePlan.free;
     final visibleSections = DashboardSectionIds.all
         .where(
           (section) =>
@@ -617,6 +618,7 @@ class DashboardGrid extends ConsumerWidget {
             weightUnit: UnitConverter.weightUnit(system),
             visibleSections: visibleSections,
             premiumUnlocked: premiumUnlocked,
+            premiumAccessResolved: premiumAccessResolved,
           ),
         ),
         if (visibleNutrientGoalCards.isNotEmpty)

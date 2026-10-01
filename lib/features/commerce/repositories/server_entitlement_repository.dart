@@ -10,6 +10,7 @@ import '../domain/subscription_provider.dart';
 import '../domain/subscription_record.dart';
 import '../domain/subscription_state.dart';
 import 'admin_entitlement_continuity_store.dart';
+import 'verified_entitlement_continuity_store.dart';
 
 /// Reads only the server-owned subscription snapshot.
 ///
@@ -23,15 +24,22 @@ final class ServerEntitlementRepository {
   const ServerEntitlementRepository({
     EntitlementResolver? resolver,
     AdminEntitlementContinuityStore? adminContinuityStore,
+    VerifiedEntitlementContinuityStore? subscriptionContinuityStore,
   }) : _resolver = resolver ?? const EntitlementResolver(),
-       _adminContinuityStoreOverride = adminContinuityStore;
+       _adminContinuityStoreOverride = adminContinuityStore,
+       _subscriptionStoreOverride = subscriptionContinuityStore;
 
   final EntitlementResolver _resolver;
   final AdminEntitlementContinuityStore? _adminContinuityStoreOverride;
+  final VerifiedEntitlementContinuityStore? _subscriptionStoreOverride;
   static final AdminEntitlementContinuityStore _defaultAdminContinuityStore =
       AdminEntitlementContinuityStore();
   AdminEntitlementContinuityStore get _adminContinuityStore =>
       _adminContinuityStoreOverride ?? _defaultAdminContinuityStore;
+  static final _defaultSubscriptionStore =
+      VerifiedEntitlementContinuityStore();
+  VerifiedEntitlementContinuityStore get _subscriptionStore =>
+      _subscriptionStoreOverride ?? _defaultSubscriptionStore;
   static final VerifiedEntitlementSessionCache _sessionCache =
       VerifiedEntitlementSessionCache();
   static final VerifiedEntitlementSessionCache _adminSessionCache =
@@ -48,21 +56,38 @@ final class ServerEntitlementRepository {
     // per owner so the observed provider's next scheduled refresh reaches the
     // server and renews or revokes the lease normally.
     if (_startupContinuityConsumed.add(ownerId)) {
+      final now = DateTime.now().toUtc();
       try {
-        final persisted = await _adminContinuityStore.read(
+        final persistedAdmin = await _adminContinuityStore.read(
           ownerId: ownerId,
-          now: DateTime.now().toUtc(),
+          now: now,
         );
         if (client.auth.currentUser?.id != ownerId) {
           return FreePlan.createState();
         }
-        if (persisted != null) {
+        if (persistedAdmin != null) {
           _adminSessionCache.remember(
             ownerId: ownerId,
-            state: persisted,
-            now: DateTime.now().toUtc(),
+            state: persistedAdmin,
+            now: now,
           );
-          return persisted;
+          return persistedAdmin;
+        }
+
+        final persistedSubscription = await _subscriptionStore.read(
+          ownerId: ownerId,
+          now: now,
+        );
+        if (client.auth.currentUser?.id != ownerId) {
+          return FreePlan.createState();
+        }
+        if (persistedSubscription != null) {
+          _sessionCache.remember(
+            ownerId: ownerId,
+            state: persistedSubscription,
+            now: now,
+          );
+          return persistedSubscription;
         }
       } on Object {
         // Continue to the authoritative network path when secure storage is
@@ -156,7 +181,7 @@ final class ServerEntitlementRepository {
           closedTestExpiresAt != null &&
           closedTestExpiresAt.isAfter(now);
       if (closedTestActive) {
-        return _remember(
+        return await _remember(
           user.id,
           _closedTestState(now: now, expiresAt: closedTestExpiresAt),
           now,
@@ -172,7 +197,7 @@ final class ServerEntitlementRepository {
         // An empty response can be produced while a just-verified purchase is
         // still replicating through Supabase. Do not erase the short-lived
         // verified continuity cache on that transient read.
-        return _transientFallback(user.id, now);
+        return await _transientFallback(user.id, now);
       }
       final row = rows.first;
       final providerValue = row['provider']?.toString().trim().toLowerCase();
@@ -184,15 +209,15 @@ final class ServerEntitlementRepository {
         // A malformed/future timestamp is not an authoritative revocation;
         // it is an unreadable snapshot. Keep a previously verified member
         // visible for the bounded continuity window instead.
-        return _transientFallback(user.id, now);
+        return await _transientFallback(user.id, now);
       }
       final plan = _planOrNull('${row['plan_id']}');
-      if (plan == null) return _transientFallback(user.id, now);
+      if (plan == null) return await _transientFallback(user.id, now);
       if (plan == CommercePlan.free) {
-        return _remember(user.id, _verifiedFree(), now);
+        return await _remember(user.id, _verifiedFree(), now);
       }
       final lifecycle = _lifecycleOrNull('${row['lifecycle']}');
-      if (lifecycle == null) return _transientFallback(user.id, now);
+      if (lifecycle == null) return await _transientFallback(user.id, now);
       final expiresAt = DateTime.tryParse('${row['expires_at']}')?.toUtc();
       final gracePeriodEndsAt = DateTime.tryParse(
         '${row['grace_period_ends_at']}',
@@ -202,7 +227,7 @@ final class ServerEntitlementRepository {
           : providerValue == 'google'
           ? SubscriptionProvider.google
           : null;
-      if (provider == null) return _transientFallback(user.id, now);
+      if (provider == null) return await _transientFallback(user.id, now);
       final accessBoundary = lifecycle == SubscriptionLifecycle.gracePeriod
           ? gracePeriodEndsAt
           : expiresAt;
@@ -210,11 +235,11 @@ final class ServerEntitlementRepository {
         // A paid lifecycle without its boundary is malformed, not a verified
         // cancellation. Treat it like a transient read so the last valid
         // entitlement can carry the UI through replication/schema lag.
-        return _transientFallback(user.id, now);
+        return await _transientFallback(user.id, now);
       }
       if (lifecycle.mayGrantPaidAccess && !accessBoundary!.isAfter(now)) {
         // Expiration at the boundary is an authoritative loss of access.
-        return _remember(user.id, _verifiedFree(), now);
+        return await _remember(user.id, _verifiedFree(), now);
       }
       final resolved = _resolver.resolve(
         record: SubscriptionRecord(
@@ -235,32 +260,65 @@ final class ServerEntitlementRepository {
       // snapshot. Preserve the last valid paid state instead of converting
       // that unreadable response into a visible Free flicker.
       if (lifecycle.mayGrantPaidAccess && resolved.plan == CommercePlan.free) {
-        return _transientFallback(user.id, now);
+        return await _transientFallback(user.id, now);
       }
-      return _remember(user.id, resolved, now);
+      return await _remember(user.id, resolved, now);
     } on Object {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return FreePlan.createState();
-      return _sessionCache.fallbackFor(
-            ownerId: user.id,
-            now: DateTime.now().toUtc(),
-          ) ??
-          FreePlan.createState();
+      return await _transientFallback(user.id, DateTime.now().toUtc());
     }
   }
 
-  SubscriptionState _remember(
+  Future<SubscriptionState> _remember(
     String ownerId,
     SubscriptionState state,
     DateTime now,
-  ) {
+  ) async {
     _sessionCache.remember(ownerId: ownerId, state: state, now: now);
+    try {
+      await _subscriptionStore.remember(
+        ownerId: ownerId,
+        state: state,
+        now: now,
+      );
+    } on Object {
+      // Secure continuity is an optimization. The verified in-memory result
+      // remains authoritative for this process when secure storage is absent.
+    }
     return state;
   }
 
-  SubscriptionState _transientFallback(String ownerId, DateTime now) =>
-      _sessionCache.fallbackFor(ownerId: ownerId, now: now) ??
-      FreePlan.createState();
+  Future<SubscriptionState> _transientFallback(
+    String ownerId,
+    DateTime now,
+  ) async {
+    if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
+      return FreePlan.createState();
+    }
+    final inMemory = _sessionCache.fallbackFor(ownerId: ownerId, now: now);
+    if (inMemory != null) return inMemory;
+    try {
+      final persisted = await _subscriptionStore.read(
+        ownerId: ownerId,
+        now: now,
+      );
+      if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
+        return FreePlan.createState();
+      }
+      if (persisted != null) {
+        _sessionCache.remember(
+          ownerId: ownerId,
+          state: persisted,
+          now: now,
+        );
+        return persisted;
+      }
+    } on Object {
+      // A failed secure read cannot create access.
+    }
+    return FreePlan.createState();
+  }
 
   SubscriptionState _verifiedFree() => SubscriptionState(
     plan: CommercePlan.free,

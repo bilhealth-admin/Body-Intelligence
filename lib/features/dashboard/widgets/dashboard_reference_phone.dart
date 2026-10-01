@@ -41,6 +41,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     required this.onExplain,
     required this.visibleSections,
     required this.premiumUnlocked,
+    required this.premiumAccessResolved,
   });
 
   final bool arabic;
@@ -82,6 +83,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final VoidCallback? onExplain;
   final Set<String> visibleSections;
   final bool premiumUnlocked;
+  final bool premiumAccessResolved;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +133,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
       overviewCards.add(
         PremiumDashboardCardLock(
           key: const Key('dashboard-macros-premium-lock'),
-          locked: !premiumUnlocked,
+          locked: premiumAccessResolved && !premiumUnlocked,
+          checking: !premiumAccessResolved,
           title: tr('Nutrient goals', 'أهداف المغذيات'),
           detail: tr(
             'See protein, carbs, and fat progress at a glance.',
@@ -168,7 +171,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
       overviewCards.add(
         PremiumDashboardCardLock(
           key: const Key('dashboard-heart-premium-lock'),
-          locked: !premiumUnlocked,
+          locked: premiumAccessResolved && !premiumUnlocked,
+          checking: !premiumAccessResolved,
           title: tr('Heart health', 'صحة القلب'),
           detail: tr(
             'Heart, sodium, fiber, and custom targets',
@@ -224,7 +228,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
       key: const Key('premium-dashboard-benchmark'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (!premiumUnlocked &&
+        if (premiumAccessResolved &&
+            !premiumUnlocked &&
             (visibleSections.contains(DashboardSectionIds.macros) ||
                 visibleSections.contains(
                   DashboardSectionIds.connectedHealth,
@@ -365,6 +370,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
           _ReferenceDiscoverGrid(
             arabic: arabic,
             premiumUnlocked: premiumUnlocked,
+            premiumAccessResolved: premiumAccessResolved,
           ),
         ],
       ],

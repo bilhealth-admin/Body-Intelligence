@@ -100,6 +100,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       DashboardSectionIds.bodyTwin,
     },
     this.premiumUnlocked = false,
+    this.premiumAccessResolved = true,
   });
 
   final bool arabic;
@@ -159,6 +160,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String weightUnit;
   final Set<String> visibleSections;
   final bool premiumUnlocked;
+  final bool premiumAccessResolved;
 
   String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
 
@@ -213,6 +215,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       onExplain: onExplain,
       visibleSections: visibleSections,
       premiumUnlocked: premiumUnlocked,
+      premiumAccessResolved: premiumAccessResolved,
     );
     return LayoutBuilder(
       key: const Key('dashboard-unified-adaptive-layout'),

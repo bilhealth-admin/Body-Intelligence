@@ -4,9 +4,11 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
   const _ReferenceDiscoverGrid({
     required this.arabic,
     required this.premiumUnlocked,
+    required this.premiumAccessResolved,
   });
   final bool arabic;
   final bool premiumUnlocked;
+  final bool premiumAccessResolved;
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +112,9 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
                 label: item.$3,
                 subtitle: item.$4,
                 route: item.$5,
-                premium: item.$6 && !premiumUnlocked,
+                premium:
+                    item.$6 && premiumAccessResolved && !premiumUnlocked,
+                checking: item.$6 && !premiumAccessResolved,
               );
             },
           ),
@@ -125,7 +129,11 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
                 label: items.last.$3,
                 subtitle: items.last.$4,
                 route: items.last.$5,
-                premium: items.last.$6 && !premiumUnlocked,
+                premium:
+                    items.last.$6 &&
+                    premiumAccessResolved &&
+                    !premiumUnlocked,
+                checking: items.last.$6 && !premiumAccessResolved,
               ),
             ),
           ],
@@ -143,6 +151,7 @@ class _DiscoverTile extends StatelessWidget {
     required this.subtitle,
     required this.route,
     required this.premium,
+    required this.checking,
   });
 
   final String imageAsset;
@@ -151,6 +160,7 @@ class _DiscoverTile extends StatelessWidget {
   final String subtitle;
   final String route;
   final bool premium;
+  final bool checking;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -161,7 +171,7 @@ class _DiscoverTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.push(route),
+        onTap: checking ? null : () => context.push(route),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -245,13 +255,22 @@ class _DiscoverTile extends StatelessWidget {
                         : const Color(0x33FFFFFF),
                   ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 15,
-                    color: Colors.white,
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: checking
+                      ? const SizedBox.square(
+                          key: Key('dashboard-discover-access-checking'),
+                          dimension: 15,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.8,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 15,
+                          color: Colors.white,
+                        ),
                 ),
               ),
             ),

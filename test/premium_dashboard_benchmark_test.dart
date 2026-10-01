@@ -51,6 +51,31 @@ void main() {
     );
   });
 
+  testWidgets(
+    'unresolved entitlement keeps local dashboard visible without false Free',
+    (tester) async {
+      await tester.pumpWidget(
+        const _Harness(premiumAccessResolved: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('dashboard-reference-calories-card')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('dashboard-premium-page-label')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('dashboard-premium-label')), findsNothing);
+      expect(
+        find.byKey(const Key('dashboard-premium-access-checking')),
+        findsWidgets,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('light unified dashboard retains readable theme contrast', (
     tester,
   ) async {
@@ -180,6 +205,7 @@ class _Harness extends StatelessWidget {
     this.textScaler = TextScaler.noScaling,
     this.light = false,
     this.showRecommendation = true,
+    this.premiumAccessResolved = true,
   });
 
   final bool arabic;
@@ -188,6 +214,7 @@ class _Harness extends StatelessWidget {
   final TextScaler textScaler;
   final bool light;
   final bool showRecommendation;
+  final bool premiumAccessResolved;
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +309,7 @@ class _Harness extends StatelessWidget {
                       trendEvidence: arabic
                           ? 'ظروف القياس مختلفة'
                           : 'Measurement conditions differed',
+                      premiumAccessResolved: premiumAccessResolved,
                       loggingItems: [
                         DashboardLoggingItem(
                           label: arabic ? 'الوزن' : 'Weight',

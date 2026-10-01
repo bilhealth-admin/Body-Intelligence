@@ -57,22 +57,22 @@ void main() {
     expect(source, contains('ref.watch(verifiedEntitlementOwnerProvider)'));
   });
 
-  test('dashboard never renders an unresolved entitlement as locked Free', () {
+  test('dashboard keeps local truth visible while entitlement resolves', () {
     final source = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
 
+    expect(source, contains('verifiedSubscriptionAccessProvider'));
     expect(
       source,
       contains(
-        'verifiedSubscription.isLoading && '
-        '!verifiedSubscription.hasValue',
+        'final premiumAccessResolved = verifiedSubscription.hasValue;',
       ),
     );
-    expect(source, contains('return const DashboardLoadingSkeleton();'));
+    expect(source, isNot(contains('verifiedSubscription.isLoading &&')));
     expect(
-      source.indexOf('verifiedSubscription.isLoading'),
-      lessThan(source.indexOf('final verifiedPlan =')),
+      source,
+      contains('premiumAccessResolved: premiumAccessResolved'),
     );
   });
 

@@ -19,6 +19,7 @@ class PremiumDashboardCardLock extends StatelessWidget {
     this.borderRadius = 24,
     this.revealPreview = false,
     this.showLabel = true,
+    this.checking = false,
     super.key,
   });
 
@@ -30,10 +31,11 @@ class PremiumDashboardCardLock extends StatelessWidget {
   final double borderRadius;
   final bool revealPreview;
   final bool showLabel;
+  final bool checking;
 
   @override
   Widget build(BuildContext context) {
-    if (!locked) return child;
+    if (!locked && !checking) return child;
     return Stack(
       fit: StackFit.passthrough,
       children: [
@@ -53,14 +55,24 @@ class PremiumDashboardCardLock extends StatelessWidget {
                     ? const Color(0x2AFFFFFF)
                     : const Color(0x42000000),
                 child: InkWell(
-                  key: const Key('dashboard-premium-lock'),
-                  onTap: onTap,
+                  key: Key(
+                    checking
+                        ? 'dashboard-premium-access-checking'
+                        : 'dashboard-premium-lock',
+                  ),
+                  onTap: checking ? null : onTap,
                   child: Center(
                     child: Semantics(
-                      button: true,
+                      button: !checking,
                       label: title,
                       child: ExcludeSemantics(
-                        child: showLabel
+                        child: checking
+                            ? const SizedBox.square(
+                                key: Key('dashboard-premium-checking-spinner'),
+                                dimension: 22,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : showLabel
                             ? const PremiumLabelBadge(
                                 key: Key('dashboard-premium-label'),
                               )

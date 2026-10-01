@@ -20,7 +20,10 @@ flutter test --no-pub --concurrency 1 --timeout 180s --reporter expanded \
   test/features/cloud_platform/durable_cloud_runtime_test.dart \
   test/features/cloud_platform/offline_first_cloud_platform_test.dart \
   test/features/commerce/store_transaction_queue_test.dart \
+  test/features/commerce/verified_entitlement_continuity_store_test.dart \
+  test/features/commerce/verified_entitlement_surface_contract_test.dart \
   test/features/commerce/subscription_lifecycle_test.dart \
+  test/premium_dashboard_benchmark_test.dart \
   test/features/commerce/billing_release_hardening_contract_test.dart \
   test/mobile_integrity_payload_test.dart \
   test/runtime_permission_design_contract_test.dart \
