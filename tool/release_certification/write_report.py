@@ -116,7 +116,7 @@ def main() -> int:
         (
             "9. Independent OWASP MASVS/MASTG security review",
             external("BIL_MASVS_MASTG"),
-            "Automated source/security/CVE checks are sub-evidence only. Full open-book mobile/backend review and triage of live Supabase advisor warnings are still required.",
+            "Automated source/security/CVE checks are sub-evidence only. The Supabase Leaked Password Protection advisor warning is an owner-accepted Free-plan limitation and is explicitly non-blocking; it is not a BIL High/Critical security finding. Full open-book mobile/backend review and triage of all other live security findings are still required.",
         ),
         (
             "10. Performance + stress certification",
@@ -185,6 +185,10 @@ def main() -> int:
         lines.append(f"| {name} | **{status}** |")
 
     lines += [
+        "",
+        "## Accepted non-blocking limitations",
+        "",
+        "- **Supabase Leaked Password Protection:** intentionally not enabled because it is a paid-plan feature the owner has chosen not to purchase. This advisor warning remains documented but does not block BIL READY by itself. Password/authentication controls and all other security findings remain subject to the normal fail-closed security gate.",
         "",
         "## Final certification gates",
         "",

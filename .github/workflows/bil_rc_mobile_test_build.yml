@@ -71,48 +71,6 @@ jobs:
           set -euo pipefail
           flutter build apk --debug --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
 
-      - name: Sanitize dev-only Android plugins for release
-        shell: bash
-        run: |
-          set -euo pipefail
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
-
-      - name: Build Android release AAB for offline inspection only
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter build appbundle --release --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
-
-      - name: Inspect Android artifacts
-        shell: bash
-        env:
-          SIGNING_AVAILABLE: ${{ steps.signing.outputs.available }}
-        run: |
-          set -euo pipefail
-          EVIDENCE=artifacts/release/rc_mobile_test/android
-          mkdir -p "$EVIDENCE"
-          APK=build/app/outputs/flutter-apk/app-debug.apk
-          AAB=build/app/outputs/bundle/release/app-release.aab
-          test -s "$APK"
-          test -s "$AAB"
-          sha256sum "$APK" "$AAB" > "$EVIDENCE/SHA256SUMS.txt"
-          stat --printf='%n %s\n' "$APK" "$AAB" > "$EVIDENCE/sizes.txt"
-          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
-          printf 'ANDROID_RELEASE_SIGNING=%s\n' "$SIGNING_AVAILABLE" > "$EVIDENCE/signing-status.txt"
-          if [[ "$SIGNING_AVAILABLE" == 'true' ]]; then
-            jarsigner -verify -verbose -certs "$AAB" > "$EVIDENCE/jarsigner.txt"
-            echo 'SIGNED_AAB_VERIFY=PASS' >> "$EVIDENCE/signing-status.txt"
-          else
-            echo 'SIGNED_AAB_VERIFY=NOT_RUN_MISSING_SIGNING_SECRETS' >> "$EVIDENCE/signing-status.txt"
-          fi
-
-      - name: Restore dev plugin graph for emulator tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          git checkout -- android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-          flutter pub get
-
       - name: Enable KVM
         shell: bash
         run: |
@@ -163,6 +121,41 @@ jobs:
             done
             adb logcat -d > "$EVIDENCE/logcat.txt"
             printf '%s\n'               'ANDROID_EMULATOR_INSTALL=PASS'               'ANDROID_COLD_LAUNCH=PASS'               'ANDROID_DEEP_LINK=PASS'               'ANDROID_BACKGROUND_FORCE_STOP_RELAUNCH=PASS'               'ANDROID_ROTATION=PASS'               'ANDROID_NATIVE_CRYPTO=PASS'               'ANDROID_NATIVE_SETTINGS_UI=PASS'               > "$EVIDENCE/gate-status.txt"
+
+      - name: Sanitize dev-only Android plugins for release
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
+      - name: Build Android release AAB for offline inspection only
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build appbundle --release --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Inspect Android artifacts
+        shell: bash
+        env:
+          SIGNING_AVAILABLE: ${{ steps.signing.outputs.available }}
+        run: |
+          set -euo pipefail
+          EVIDENCE=artifacts/release/rc_mobile_test/android
+          mkdir -p "$EVIDENCE"
+          APK=build/app/outputs/flutter-apk/app-debug.apk
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$APK"
+          test -s "$AAB"
+          sha256sum "$APK" "$AAB" > "$EVIDENCE/SHA256SUMS.txt"
+          stat --printf='%n %s\n' "$APK" "$AAB" > "$EVIDENCE/sizes.txt"
+          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
+          printf 'ANDROID_RELEASE_SIGNING=%s\n' "$SIGNING_AVAILABLE" > "$EVIDENCE/signing-status.txt"
+          if [[ "$SIGNING_AVAILABLE" == 'true' ]]; then
+            jarsigner -verify -verbose -certs "$AAB" > "$EVIDENCE/jarsigner.txt"
+            echo 'SIGNED_AAB_VERIFY=PASS' >> "$EVIDENCE/signing-status.txt"
+          else
+            echo 'SIGNED_AAB_VERIFY=NOT_RUN_MISSING_SIGNING_SECRETS' >> "$EVIDENCE/signing-status.txt"
+          fi
 
       - name: Upload Android test artifacts
         if: always()
@@ -294,6 +287,20 @@ jobs:
           set -euo pipefail
           flutter test --no-pub             integration_test/system_crypto_bridge_integration_test.dart             -d "$IPHONE_UDID" --timeout 10m
           flutter test --no-pub             integration_test/native_settings_polish_test.dart             -d "$IPHONE_UDID" --timeout 10m
+
+      - name: Reinstall QA app after integration harness
+        shell: bash
+        env:
+          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
+          IPAD_UDID: ${{ steps.sims.outputs.ipad }}
+        run: |
+          set -euo pipefail
+          for UDID in "$IPHONE_UDID" "$IPAD_UDID"; do
+            xcrun simctl bootstatus "$UDID" -b
+            xcrun simctl uninstall "$UDID" "$BIL_APP_ID" >/dev/null 2>&1 || true
+            xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
+            xcrun simctl get_app_container "$UDID" "$BIL_APP_ID" app >/dev/null
+          done
 
       - name: Run iPhone and iPad lifecycle/deep-link matrix
         shell: bash
