@@ -41,9 +41,7 @@ void main() {
     ).hasMatch(text)) {
       findings.add('$relative: probable embedded secret');
     }
-    if (RegExp(
-      r'badCertificateCallback\s*=|CERT_NONE|verify\s*=\s*false',
-    ).hasMatch(text)) {
+    if (hasTlsVerificationBypass(text)) {
       findings.add('$relative: TLS verification disabled');
     }
     if (RegExp(
@@ -84,4 +82,22 @@ Iterable<File> _walkReadableFiles(Directory directory) sync* {
       yield* _walkReadableFiles(entity);
     }
   }
+}
+
+
+bool hasTlsVerificationBypass(String text) {
+  const patterns = <String>[
+    r'badCertificateCallback\s*=',
+    r'\bCERT_NONE\b',
+    r'\brejectUnauthorized\s*:\s*false\b',
+    r'''\bNODE_TLS_REJECT_UNAUTHORIZED\b\s*[:=]\s*["']?0''',
+    r'\bssl\._create_unverified_context\s*\(',
+    r'\bcheck_hostname\s*=\s*false\b',
+    r'\bCURLOPT_SSL_VERIFYPEER\b[^\n;]*(?:0|false)',
+    r'\b(?:requests|httpx)\.(?:get|post|put|delete|patch|request)\s*\([\s\S]{0,600}?\bverify\s*=\s*false\b',
+    r'\bhttpx\.(?:Client|AsyncClient)\s*\([\s\S]{0,400}?\bverify\s*=\s*false\b',
+  ];
+  return patterns.any(
+    (pattern) => RegExp(pattern, caseSensitive: false).hasMatch(text),
+  );
 }
