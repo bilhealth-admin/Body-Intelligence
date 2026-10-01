@@ -34,7 +34,22 @@ node tool/release/bilhealth_site_worker.test.mjs 2>&1 | tee "$OUT/public-site-wo
 npm ci --prefix supabase/tests
 npm --prefix supabase/tests test 2>&1 | tee "$OUT/supabase-contracts.log"
 npm --prefix supabase/tests audit --audit-level=low | tee "$OUT/supabase-npm-audit.log"
-(cd android && ./gradlew app:dependencies --configuration releaseRuntimeClasspath) > "$OUT/android-release-dependencies.txt"
+GRADLE_BOOTSTRAP="${RUNNER_TEMP:-/tmp}/bil-gradle-bootstrap"
+mkdir -p "$GRADLE_BOOTSTRAP/gradle/wrapper"
+cp tool/vendor_app_links/example/android/gradlew "$GRADLE_BOOTSTRAP/gradlew"
+cp tool/vendor_app_links/example/android/gradle/wrapper/gradle-wrapper.jar "$GRADLE_BOOTSTRAP/gradle/wrapper/gradle-wrapper.jar"
+cp android/gradle/wrapper/gradle-wrapper.properties "$GRADLE_BOOTSTRAP/gradle/wrapper/gradle-wrapper.properties"
+chmod +x "$GRADLE_BOOTSTRAP/gradlew"
+LOCAL_PROPERTIES_CREATED=0
+if [[ ! -f android/local.properties ]]; then
+  {
+    printf 'flutter.sdk=%s\n' "${FLUTTER_ROOT:?FLUTTER_ROOT required}"
+    if [[ -n "${ANDROID_HOME:-}" ]]; then printf 'sdk.dir=%s\n' "$ANDROID_HOME"; fi
+  } > android/local.properties
+  LOCAL_PROPERTIES_CREATED=1
+fi
+"$GRADLE_BOOTSTRAP/gradlew" --no-daemon -p "$PWD/android" app:dependencies --configuration releaseRuntimeClasspath > "$OUT/android-release-dependencies.txt"
+if [[ "$LOCAL_PROPERTIES_CREATED" = 1 ]]; then rm -f android/local.properties; fi
 node tool/prebuild/audit_locked_advisories.mjs Maven "$OUT/android-release-dependencies.txt" | tee "$OUT/android-maven-osv.json"
 git diff --exit-code
 test -z "$(git status --porcelain=v1 --untracked-files=no)"
