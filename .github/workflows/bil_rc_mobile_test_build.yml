@@ -87,6 +87,12 @@ jobs:
           target: google_apis
           profile: pixel_6
           disable-animations: true
+          emulator-boot-timeout: 900
+          pre-emulator-launch-script: |
+            adb kill-server || true
+            adb start-server
+            adb version
+            adb devices
           script: |
             bash -lc '
               set -euo pipefail
