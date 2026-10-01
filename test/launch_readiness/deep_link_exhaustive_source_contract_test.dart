@@ -90,7 +90,9 @@ void main() {
           runtimeSource.contains('"$prefix');
     }
 
-    final unlinked = routerPaths.where((path) => !isRuntimeLinked(path)).toSet();
+    final unlinked = routerPaths
+        .where((path) => !isRuntimeLinked(path))
+        .toSet();
 
     expect(unlinked, explicitlyUnlinked.keys.toSet());
     for (final reason in explicitlyUnlinked.values) {
