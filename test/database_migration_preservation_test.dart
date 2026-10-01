@@ -194,10 +194,12 @@ Future<void> _expectNoDuplicateStableIds(AppDatabase database) async {
     'challenges',
   ];
   for (final table in tables) {
-    final duplicates = await database.customSelect(
-      'SELECT uuid, COUNT(*) AS row_count FROM $table '
-      'WHERE uuid IS NOT NULL GROUP BY uuid HAVING COUNT(*) > 1',
-    ).get();
+    final duplicates = await database
+        .customSelect(
+          'SELECT uuid, COUNT(*) AS row_count FROM $table '
+          'WHERE uuid IS NOT NULL GROUP BY uuid HAVING COUNT(*) > 1',
+        )
+        .get();
     expect(duplicates, isEmpty, reason: 'Duplicate stable IDs in $table');
   }
 }
