@@ -57,6 +57,10 @@ void main() {
           'experiments_active_started_idx',
         ]),
       );
+      final integrity = await database
+          .customSelect('PRAGMA integrity_check')
+          .get();
+      expect(integrity.single.read<String>('integrity_check'), 'ok');
     },
   );
 
@@ -166,5 +170,14 @@ void main() {
       isTrue,
     );
     expect(preservedItem.nutrientEvidenceMask, 0);
+
+    final foreignKeyViolations = await database
+        .customSelect('PRAGMA foreign_key_check')
+        .get();
+    expect(foreignKeyViolations, isEmpty);
+    final integrity = await database
+        .customSelect('PRAGMA integrity_check')
+        .get();
+    expect(integrity.single.read<String>('integrity_check'), 'ok');
   });
 }

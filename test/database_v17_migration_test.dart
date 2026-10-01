@@ -98,6 +98,10 @@ void main() {
           .customSelect('PRAGMA foreign_key_check')
           .get();
       expect(foreignKeys, isEmpty);
+      final integrity = await database
+          .customSelect('PRAGMA integrity_check')
+          .get();
+      expect(integrity.single.read<String>('integrity_check'), 'ok');
       final indexes = await database
           .customSelect("SELECT name FROM sqlite_master WHERE type = 'index'")
           .get();

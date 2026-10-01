@@ -34,5 +34,14 @@ void main() {
         )
         .getSingle();
     expect(proof.read<String>('value'), 'kept');
+
+    final foreignKeyViolations = await database
+        .customSelect('PRAGMA foreign_key_check')
+        .get();
+    expect(foreignKeyViolations, isEmpty);
+    final integrity = await database
+        .customSelect('PRAGMA integrity_check')
+        .get();
+    expect(integrity.single.read<String>('integrity_check'), 'ok');
   });
 }

@@ -29,6 +29,8 @@ void main() {
           await _expectUserOwnedRowsPreserved(database);
           await _expectSchema16Defaults(database);
           await _expectRequiredIndexes(database);
+          await _expectNoDuplicateStableIds(database);
+          await _expectIntegrityCheck(database);
         },
       );
     }
@@ -173,6 +175,38 @@ Future<void> _expectRequiredIndexes(AppDatabase database) async {
       'challenges_active_started_idx',
       'experiments_active_started_idx',
     ]),
+  );
+}
+
+Future<void> _expectNoDuplicateStableIds(AppDatabase database) async {
+  const tables = <String>[
+    'user_profile',
+    'weight_entries',
+    'daily_logs',
+    'foods',
+    'meals',
+    'meal_items',
+    'water_entries',
+    'life_context_entries',
+    'decision_memories',
+    'plan_settings',
+    'personal_experiments',
+    'challenges',
+  ];
+  for (final table in tables) {
+    final duplicates = await database.customSelect(
+      'SELECT uuid, COUNT(*) AS row_count FROM $table '
+      'WHERE uuid IS NOT NULL GROUP BY uuid HAVING COUNT(*) > 1',
+    ).get();
+    expect(duplicates, isEmpty, reason: 'Duplicate stable IDs in $table');
+  }
+}
+
+Future<void> _expectIntegrityCheck(AppDatabase database) async {
+  final rows = await database.customSelect('PRAGMA integrity_check').get();
+  expect(
+    rows.map((row) => row.read<String>('integrity_check')),
+    everyElement('ok'),
   );
 }
 
