@@ -4,9 +4,22 @@ set -euo pipefail
 EVIDENCE=artifacts/release/rc_mobile_test/android
 mkdir -p "$EVIDENCE"
 
-flutter test --no-pub \
-  integration_test/system_crypto_bridge_integration_test.dart \
-  -d emulator-5554 --timeout 10m
+PHASE="${BIL_ANDROID_EMULATOR_PHASE:-all}"
+
+if [[ "$PHASE" == "crypto" || "$PHASE" == "all" ]]; then
+  flutter test --no-pub \
+    integration_test/system_crypto_bridge_integration_test.dart \
+    -d emulator-5554 --timeout 10m
+fi
+
+if [[ "$PHASE" == "crypto" ]]; then
+  exit 0
+fi
+
+if [[ "$PHASE" != "ui" && "$PHASE" != "all" ]]; then
+  echo "Unknown BIL_ANDROID_EMULATOR_PHASE: $PHASE" >&2
+  exit 2
+fi
 
 flutter test --no-pub \
   integration_test/native_settings_polish_test.dart \

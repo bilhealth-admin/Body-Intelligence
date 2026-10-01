@@ -79,7 +79,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run Android native integration and lifecycle matrix
+      - name: Run Android native crypto on a clean emulator
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
         with:
           api-level: 35
@@ -93,7 +93,23 @@ jobs:
             adb start-server
             adb version
             adb devices
-          script: bash tool/release/rc_android_emulator_gate.sh
+          script: BIL_ANDROID_EMULATOR_PHASE=crypto bash tool/release/rc_android_emulator_gate.sh
+
+      - name: Run Android native UI and lifecycle on a fresh emulator
+        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 900
+          pre-emulator-launch-script: |
+            adb kill-server || true
+            adb start-server
+            adb version
+            adb devices
+          script: BIL_ANDROID_EMULATOR_PHASE=ui bash tool/release/rc_android_emulator_gate.sh
 
       - name: Sanitize dev-only Android plugins for release
         shell: bash
@@ -399,11 +415,24 @@ jobs:
           }
 
           wait_gateway() {
-            wait_marker "$1" 'Continue without an account' 60
-            if has_marker "$1" 'BODY INTELLIGENCE LOG' && ! has_marker "$1" 'Continue without an account'; then
-              echo 'Startup remained on the splash surface.' >&2
-              return 1
+            local udid="$1"
+            local dir="$2"
+            local stem="$3"
+            if wait_marker "$udid" 'Continue without an account' 60; then
+              return 0
             fi
+            mkdir -p "$dir"
+            xcrun simctl io "$udid" screenshot "$dir/$stem-timeout.png" || true
+            if tree_for "$udid"; then
+              cp "$PRIVATE_UI_DIR/$udid.json" "$dir/$stem-timeout-accessibility.json" || true
+            fi
+            xcrun simctl spawn "$udid" log show               --style compact --last 8m               --predicate 'process == "Runner"'               > "$dir/$stem-timeout-runner.log" || true
+            if has_marker "$udid" 'BODY INTELLIGENCE LOG'; then
+              echo 'Startup remained on the splash surface; timeout evidence captured.' >&2
+            else
+              echo 'Account gateway marker was not reached; timeout evidence captured.' >&2
+            fi
+            return 1
           }
 
           open_verified_link() {
