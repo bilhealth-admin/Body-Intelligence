@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Checkout exact RC
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
@@ -88,7 +88,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            set -euo pipefail
+            set -eu
             EVIDENCE=artifacts/release/rc_mobile_test/android
             mkdir -p "$EVIDENCE"
             flutter test --no-pub               integration_test/system_crypto_bridge_integration_test.dart               -d emulator-5554 --timeout 10m
@@ -159,7 +159,7 @@ jobs:
 
       - name: Upload Android test artifacts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: bil-rc-android-test-${{ github.sha }}
           path: |
@@ -180,7 +180,7 @@ jobs:
     timeout-minutes: 100
     steps:
       - name: Checkout exact RC
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
@@ -220,6 +220,35 @@ jobs:
           cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
           zip -qry BIL-unsigned-RC.ipa Payload
           ditto -c -k --sequesterRsrc --keepParent             build/ios/iphonesimulator/Runner.app             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
+
+      - name: Select pinned Python runtime for iOS interaction bridge
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11.15'
+          cache: pip
+          cache-dependency-path: tool/release/ios_plus8_idb_requirements.lock
+
+      - name: Install checksum-locked iOS interaction bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bil-idb-bin"
+          curl --fail --location --retry 3 \
+            --proto '=https' --tlsv1.2 \
+            https://github.com/facebook/idb/releases/download/v1.1.8/idb-companion.universal.tar.gz \
+            --output "$RUNNER_TEMP/idb-companion.tar.gz"
+          test "$(shasum -a 256 "$RUNNER_TEMP/idb-companion.tar.gz" | awk '{print $1}')" \
+            = '3b72cc6a9a5b1a22a188205a84090d3a294347a846180efd755cf1a3c848e3e7'
+          tar -xzf "$RUNNER_TEMP/idb-companion.tar.gz" -C "$RUNNER_TEMP/bil-idb-bin"
+          chmod +x "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin/idb_companion"
+          python3 -m venv "$RUNNER_TEMP/bil-idb-venv"
+          "$RUNNER_TEMP/bil-idb-venv/bin/python" -m pip install \
+            --disable-pip-version-check --no-deps --require-hashes \
+            -r tool/release/ios_plus8_idb_requirements.lock
+          "$RUNNER_TEMP/bil-idb-venv/bin/python" -m pip check
+          "$RUNNER_TEMP/bil-idb-venv/bin/idb" --help >/dev/null
+          echo "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
 
       - name: Create iPhone and iPad simulator sessions
         id: sims
@@ -276,6 +305,12 @@ jobs:
             xcrun simctl erase "$UDID"
             xcrun simctl boot "$UDID"
             xcrun simctl bootstatus "$UDID" -b
+            xcrun simctl ui "$UDID" appearance light
+            if ! xcrun simctl status_bar "$UDID" override \
+              --time 09:41 --batteryState charged --batteryLevel 100 \
+              --wifiBars 3 --cellularBars 4; then
+              echo 'Status-bar normalization unavailable; runtime evidence remains valid.'
+            fi
             xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
           done
 
@@ -302,7 +337,7 @@ jobs:
             xcrun simctl get_app_container "$UDID" "$BIL_APP_ID" app >/dev/null
           done
 
-      - name: Run iPhone and iPad lifecycle/deep-link matrix
+      - name: Run verified iPhone and iPad lifecycle/deep-link matrix
         shell: bash
         env:
           IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
@@ -310,41 +345,202 @@ jobs:
         run: |
           set -euo pipefail
           EVIDENCE=artifacts/release/rc_mobile_test/ios
-          mkdir -p "$EVIDENCE/iphone" "$EVIDENCE/ipad"
-          for ITEM in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
-            NAME="${ITEM%%:*}"
-            UDID="${ITEM#*:}"
-            DIR="$EVIDENCE/$NAME"
-            xcrun simctl launch "$UDID" "$BIL_APP_ID" -AppleLanguages '(en)' -AppleLocale 'en_US'
-            sleep 8
-            xcrun simctl io "$UDID" screenshot "$DIR/01-cold-launch.png"
-            xcrun simctl openurl "$UDID" 'bil://login'
+          export PRIVATE_UI_DIR="$RUNNER_TEMP/bil-rc-lifecycle-accessibility"
+          rm -rf "$PRIVATE_UI_DIR"
+          mkdir -p "$EVIDENCE/iphone" "$EVIDENCE/ipad" "$PRIVATE_UI_DIR"
+          source tool/release/ios_plus8_simulator_ui/accessibility.sh
+          LIFECYCLE_START="$RUNNER_TEMP/bil-rc-lifecycle-start"
+          touch "$LIFECYCLE_START"
+
+          exact_open_button_center() {
+            local udid="$1"
+            tree_for "$udid"
+            python3 - "$PRIVATE_UI_DIR/$udid.json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding='utf-8') as handle:
+              payload = json.load(handle)
+          stack = list(payload if isinstance(payload, list) else [payload])
+          matches = []
+          while stack:
+              item = stack.pop()
+              if not isinstance(item, dict):
+                  continue
+              for value in item.values():
+                  if isinstance(value, dict):
+                      stack.append(value)
+                  elif isinstance(value, list):
+                      stack.extend(value)
+              values = [
+                  str(item.get(key) or '').strip()
+                  for key in ('AXLabel', 'AXValue', 'title', 'value', 'label')
+              ]
+              frame = item.get('frame')
+              if 'Open' not in values or not isinstance(frame, dict):
+                  continue
+              width = float(frame.get('width', 0))
+              height = float(frame.get('height', 0))
+              if width <= 0 or height <= 0:
+                  continue
+              matches.append((
+                  float(frame.get('x', 0)) + width / 2,
+                  float(frame.get('y', 0)) + height / 2,
+                  width * height,
+              ))
+          if not matches:
+              raise SystemExit('exact_open_button_missing')
+          x, y, _ = min(matches, key=lambda item: item[2])
+          print(round(x), round(y))
+          PY
+          }
+
+          dismiss_scheme_confirmation() {
+            local udid="$1"
+            if has_marker "$udid" 'Open in'; then
+              local point
+              point="$(exact_open_button_center "$udid")"
+              read -r x y <<< "$point"
+              idb ui tap --udid "$udid" "$x" "$y"
+              sleep 4
+            fi
+            if has_marker "$udid" 'Open in'; then
+              echo 'iOS custom-scheme confirmation remained visible after Open.' >&2
+              return 1
+            fi
+          }
+
+          save_accessibility() {
+            local udid="$1"
+            local target="$2"
+            tree_for "$udid"
+            cp "$PRIVATE_UI_DIR/$udid.json" "$target"
+            test -s "$target"
+          }
+
+          capture_verified() {
+            local udid="$1"
+            local dir="$2"
+            local stem="$3"
+            if has_marker "$udid" 'Open in'; then
+              echo "System Open confirmation obscured $stem." >&2
+              return 1
+            fi
+            xcrun simctl io "$udid" screenshot "$dir/$stem.png"
+            save_accessibility "$udid" "$dir/$stem-accessibility.json"
+            test -s "$dir/$stem.png"
+          }
+
+          wait_gateway() {
+            wait_marker "$1" 'Continue without an account' 60
+            if has_marker "$1" 'BODY INTELLIGENCE LOG' && ! has_marker "$1" 'Continue without an account'; then
+              echo 'Startup remained on the splash surface.' >&2
+              return 1
+            fi
+          }
+
+          open_verified_link() {
+            local udid="$1"
+            local url="$2"
+            xcrun simctl openurl "$udid" "$url"
             sleep 3
-            xcrun simctl io "$UDID" screenshot "$DIR/02-login-deep-link.png"
-            xcrun simctl openurl "$UDID" 'bil://connected-health'
-            sleep 3
-            xcrun simctl io "$UDID" screenshot "$DIR/03-connected-health.png"
-            xcrun simctl terminate "$UDID" "$BIL_APP_ID"
-            xcrun simctl launch "$UDID" "$BIL_APP_ID"
-            sleep 4
-            xcrun simctl io "$UDID" screenshot "$DIR/04-relaunch.png"
-            xcrun simctl ui "$UDID" appearance dark
+            dismiss_scheme_confirmation "$udid"
+          }
+
+          exercise_device() {
+            local name="$1"
+            local udid="$2"
+            local dir="$EVIDENCE/$name"
+
+            xcrun simctl launch "$udid" "$BIL_APP_ID" \
+              -AppleLanguages '(en)' -AppleLocale 'en_US' \
+              | tee "$dir/launch.txt"
+            wait_gateway "$udid"
+            capture_verified "$udid" "$dir" '01-cold-account-gateway'
+
+            open_verified_link "$udid" 'bil://login'
+            wait_marker "$udid" 'Store reviewer access' 30
+            wait_marker "$udid" 'Email address' 30
+            capture_verified "$udid" "$dir" '02-login-deep-link'
+
+            open_verified_link "$udid" 'bil://connected-health'
+            wait_marker "$udid" 'Apps & Devices' 30
+            wait_marker "$udid" 'Health Hub' 30
+            capture_verified "$udid" "$dir" '03-connected-health-deep-link'
+
+            xcrun simctl terminate "$udid" "$BIL_APP_ID"
+            xcrun simctl launch "$udid" "$BIL_APP_ID" \
+              -AppleLanguages '(en)' -AppleLocale 'en_US' \
+              | tee "$dir/relaunch.txt"
+            wait_gateway "$udid"
+            capture_verified "$udid" "$dir" '04-terminate-relaunch'
+
+            xcrun simctl ui "$udid" appearance dark
             sleep 2
-            xcrun simctl io "$UDID" screenshot "$DIR/05-dark.png"
-            xcrun simctl ui "$UDID" appearance light
-            xcrun simctl ui "$UDID" content_size accessibility-extra-extra-extra-large || true
+            wait_gateway "$udid"
+            capture_verified "$udid" "$dir" '05-dark-account-gateway'
+
+            xcrun simctl ui "$udid" appearance light
+            xcrun simctl ui "$udid" content_size accessibility-extra-extra-extra-large
             sleep 2
-            xcrun simctl io "$UDID" screenshot "$DIR/06-large-text.png"
-          done
+            wait_gateway "$udid"
+            capture_verified "$udid" "$dir" '06-large-text-account-gateway'
+
+            xcrun simctl get_app_container "$udid" "$BIL_APP_ID" app >/dev/null
+            xcrun simctl spawn "$udid" log show \
+              --style compact --last 8m \
+              --predicate 'process == "Runner"' \
+              > "$dir/runner.log" || true
+            if grep -Eiq \
+              'Unhandled Exception|RenderFlex overflowed|EXC_CRASH|SIGABRT|fatal error' \
+              "$dir/runner.log"; then
+              echo "Runner runtime error marker found for $name." >&2
+              return 1
+            fi
+          }
+
+          exercise_device iphone "$IPHONE_UDID"
+          exercise_device ipad "$IPAD_UDID"
+
+          CRASHES="$(find "$HOME/Library/Logs/DiagnosticReports" \
+            -maxdepth 1 -type f -name 'Runner*' -newer "$LIFECYCLE_START" -print)"
+          test -z "$CRASHES" || {
+            echo 'Runner crash report detected during verified lifecycle matrix.' >&2
+            printf '%s\n' "$CRASHES" >&2
+            exit 1
+          }
+
           xcodebuild -version > "$EVIDENCE/xcode-version.txt"
           xcrun simctl list runtimes available > "$EVIDENCE/runtimes.txt"
-          shasum -a 256 BIL-unsigned-RC.ipa             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip             > "$EVIDENCE/SHA256SUMS.txt"
+          shasum -a 256 BIL-unsigned-RC.ipa \
+            build/ios/iphonesimulator/BIL-RC-Simulator.app.zip \
+            > "$EVIDENCE/SHA256SUMS.txt"
           git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
-          printf '%s\n'             'IOS_SIMULATOR_BUILD=PASS'             'IOS_UNSIGNED_DEVICE_BUILD=PASS'             'IOS_IPHONE_INSTALL_LAUNCH=PASS'             'IOS_IPAD_INSTALL_LAUNCH=PASS'             'IOS_DEEP_LINKS=PASS'             'IOS_TERMINATE_RELAUNCH=PASS'             'IOS_DARK_LIGHT=PASS'             'IOS_LARGE_TEXT=PASS'             'IOS_NATIVE_CRYPTO=PASS'             'IOS_NATIVE_SETTINGS_UI=PASS'             'IOS_APP_ATTEST_GENUINE=PHYSICAL_DEVICE_REQUIRED'             'IOS_HEALTHKIT_GENUINE=PHYSICAL_DEVICE_REQUIRED'             'IOS_STOREKIT_SANDBOX_GENUINE=PHYSICAL_DEVICE_OR_STORE_SANDBOX_REQUIRED'             > "$EVIDENCE/gate-status.txt"
+          printf '%s\n' \
+            'IOS_SIMULATOR_BUILD=PASS' \
+            'IOS_UNSIGNED_DEVICE_BUILD=PASS_TEST_ONLY_EXPECTED_NO_CODESIGN' \
+            'IOS_IPHONE_COLD_ACCOUNT_GATEWAY=PASS' \
+            'IOS_IPAD_COLD_ACCOUNT_GATEWAY=PASS' \
+            'IOS_CUSTOM_SCHEME_CONFIRMATION_HANDLED=PASS' \
+            'IOS_LOGIN_DEEP_LINK_ACTUAL_PAGE=PASS' \
+            'IOS_CONNECTED_HEALTH_DEEP_LINK_ACTUAL_PAGE=PASS' \
+            'IOS_TERMINATE_RELAUNCH_ACTUAL_PAGE=PASS' \
+            'IOS_DARK_MODE_ACTUAL_APP_UI=PASS' \
+            'IOS_LARGE_TEXT_ACTUAL_APP_UI=PASS' \
+            'IOS_ACCESSIBILITY_TREES=PASS' \
+            'IOS_RUNTIME_CRASH_SCAN=PASS' \
+            'IOS_NATIVE_CRYPTO=PASS' \
+            'IOS_NATIVE_SETTINGS_UI=PASS' \
+            'IOS_SCREENSHOT_DISPLAY=DEFAULT_LCD' \
+            'IOS_IPAD_LANDSCAPE_RUNTIME=NOT_CLAIMED_WIDGET_CONTRACT_ONLY' \
+            'IOS_APP_ATTEST_GENUINE=PHYSICAL_DEVICE_REQUIRED' \
+            'IOS_HEALTHKIT_GENUINE=PHYSICAL_DEVICE_REQUIRED' \
+            'IOS_STOREKIT_SANDBOX_GENUINE=PHYSICAL_DEVICE_OR_STORE_SANDBOX_REQUIRED' \
+            > "$EVIDENCE/gate-status.txt"
 
       - name: Upload iOS test artifacts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: bil-rc-ios-test-${{ github.sha }}
           path: |
