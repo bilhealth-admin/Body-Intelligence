@@ -13,10 +13,7 @@ void main() {
       sql,
       contains("v_role text := coalesce((select auth.jwt()->>'role'), '')"),
     );
-    expect(
-      sql,
-      contains('p_excluded_user_id is distinct from v_actor_id'),
-    );
+    expect(sql, contains('p_excluded_user_id is distinct from v_actor_id'));
     expect(sql, contains('community_moderator_lookup_scope_denied'));
     expect(sql, contains("using errcode = '42501'"));
 

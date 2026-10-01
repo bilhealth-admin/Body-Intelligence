@@ -8,9 +8,11 @@ void main() {
         .listSync()
         .whereType<File>()
         .where(
-          (file) => file.path.replaceAll('\\', '/').endsWith(
-            '_final_hardening_cloud_consent_community_authority.sql',
-          ),
+          (file) => file.path
+              .replaceAll('\\', '/')
+              .endsWith(
+                '_final_hardening_cloud_consent_community_authority.sql',
+              ),
         )
         .toList(growable: false);
     expect(
