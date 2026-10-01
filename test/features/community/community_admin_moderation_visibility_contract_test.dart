@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final migration = File(
-    'supabase/migrations/20260925123000_community_admin_moderation_visibility.sql',
+    'supabase/migrations/20260924223453_community_admin_moderation_visibility.sql',
   ).readAsStringSync();
   final repository = File(
     'lib/features/community/data/community_repository.dart',

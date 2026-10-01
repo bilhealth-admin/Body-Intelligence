@@ -54,7 +54,7 @@ void main() {
 
   test('create-capable cloud-key RPC fails closed without current consent', () {
     final source = File(
-      'supabase/migrations/20260925005205_final_hardening_cloud_consent_community_authority.sql',
+      'supabase/migrations/20260925005354_final_hardening_cloud_consent_community_authority.sql',
     ).readAsStringSync();
 
     expect(source, contains('public.bil_get_or_create_cloud_key()'));
