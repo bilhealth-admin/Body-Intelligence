@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('all privileged Community RPCs use canonical server authority', () {
     final source = File(
-      'supabase/migrations/20260925005205_final_hardening_cloud_consent_community_authority.sql',
+      'supabase/migrations/20260925005354_final_hardening_cloud_consent_community_authority.sql',
     ).readAsStringSync();
 
     const privilegedRpcs = <String>[
