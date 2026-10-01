@@ -145,18 +145,18 @@ void main() {
   testWidgets('corrected light morning premium dashboard golden', (
     tester,
   ) async {
-      tester.view.physicalSize = const Size(1024, 1366);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(const _Harness(light: true));
-      await tester.pumpAndSettle();
-      await settleVisualAssetImages(tester);
-      await tester.pumpAndSettle();
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile('goldens/premium_dashboard_light_corrected.png'),
-      );
-    }, skip: Platform.isLinux);
+    tester.view.physicalSize = const Size(1024, 1366);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const _Harness(light: true));
+    await tester.pumpAndSettle();
+    await settleVisualAssetImages(tester);
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/premium_dashboard_light_corrected.png'),
+    );
+  }, skip: Platform.isLinux);
 
   testWidgets(
     'corrected light dashboard supports Arabic large text semantics',
