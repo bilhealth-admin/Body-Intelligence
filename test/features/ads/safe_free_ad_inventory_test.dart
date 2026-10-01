@@ -112,15 +112,23 @@ void main() {
         closedTestBranch,
         subscriptionQuery,
       );
-      expect(closedTestBody, contains('return _remember('));
+      expect(closedTestBody, contains('return await _remember('));
       expect(closedTestBody, contains('_closedTestState('));
       expect(repository, contains('_remember(user.id, _verifiedFree(), now)'));
       expect(
         repository,
         contains('authority: EntitlementAuthority.verifiedServer'),
       );
-      expect(repository, contains('return _sessionCache.fallbackFor('));
-      expect(repository, contains('??\n          FreePlan.createState();'));
+      expect(
+        repository,
+        contains('final inMemory = _sessionCache.fallbackFor('),
+      );
+      expect(repository, contains('if (inMemory != null) return inMemory;'));
+      expect(
+        repository,
+        contains('final persisted = await _subscriptionStore.read('),
+      );
+      expect(repository, contains('return FreePlan.createState();'));
     });
   });
 

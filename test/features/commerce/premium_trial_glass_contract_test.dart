@@ -98,7 +98,10 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
     ).readAsStringSync();
 
-    expect(source, contains('onTap: () => context.push(route)'));
+    expect(
+      source,
+      contains('onTap: checking ? null : () => context.push(route)'),
+    );
     expect(source, isNot(contains('onTap: () => context.go(route)')));
   });
 }

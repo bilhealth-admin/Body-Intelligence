@@ -31,7 +31,11 @@ void main() {
       expect(phoneSource, contains('_OverviewCardsCarousel('));
       expect(phoneSource, contains('cards: overviewCards'));
       expect(cardAssembly, contains('PremiumDashboardCardLock('));
-      expect(cardAssembly, contains('locked: !premiumUnlocked'));
+      expect(
+        cardAssembly,
+        contains('locked: premiumAccessResolved && !premiumUnlocked'),
+      );
+      expect(cardAssembly, contains('checking: !premiumAccessResolved'));
       expect(phoneSource, isNot(contains('_ReferenceStatusCard(')));
       expect(
         componentSource,
