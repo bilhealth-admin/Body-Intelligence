@@ -28,9 +28,11 @@ void main() {
   final configuration = read(
     'lib/features/commerce/domain/store_catalog_configuration.dart',
   );
-  final client = read(
+  final client = [
     'lib/features/commerce/services/verified_store_purchase_service.dart',
-  );
+    'lib/features/commerce/services/verified_store_purchase_processing.dart',
+    'lib/features/commerce/services/verified_store_purchase_restore.dart',
+  ].map(read).join('\n');
   final environment = read('lib/app/environment/app_environment.dart');
   final backend = read(
     'supabase/functions/verify-store-purchase/store_backend.ts',
