@@ -12,7 +12,9 @@ void main() {
   test(
     'pre-final large-data and lifecycle stress stays inside CI budgets',
     () async {
-      final root = await Directory.systemTemp.createTemp('bil-pre-final-stress-');
+      final root = await Directory.systemTemp.createTemp(
+        'bil-pre-final-stress-',
+      );
       final file = File('${root.path}/stress.sqlite');
       AppDatabase? activeDatabase;
 
@@ -102,7 +104,9 @@ void main() {
               'SELECT COUNT(*) AS c FROM meal_items WHERE deleted_at IS NULL',
             )
             .getSingle();
-        final search = await FoodRepository(seeded).search('Stress recipe 1499');
+        final search = await FoodRepository(
+          seeded,
+        ).search('Stress recipe 1499');
         query.stop();
 
         expect(weightCount.read<int>('c'), 1000);
