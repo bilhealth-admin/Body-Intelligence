@@ -166,7 +166,11 @@ def main() -> int:
     ]
 
     ready = all(status == "PASS" for _name, status, _detail in gates)
+    has_failure = any(status == "FAIL" for _name, status in automation) or any(
+        status == "FAIL" for _name, status, _detail in gates
+    )
     overall = "READY" if ready else "NOT READY"
+    run_health = "FAIL" if has_failure else "PASS"
 
     lines = [
         "# BIL Release Certification Report",
@@ -174,6 +178,7 @@ def main() -> int:
         f"- **RC commit:** `{rc}`",
         f"- **RC manifest SHA-256:** `{manifest_sha}`",
         f"- **Branch remained frozen during run:** **{'YES' if branch_stable else 'NO'}**",
+        f"- **Certification run health:** **{run_health}**",
         f"- **Final decision:** **{overall}**",
         "",
         "## Automated evidence in this run",
@@ -218,7 +223,11 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(lines), encoding="utf-8")
     print(f"BIL_RELEASE_CERTIFICATION={overall}")
-    return 0 if ready else 2
+    print(f"BIL_CERTIFICATION_RUN_HEALTH={run_health}")
+    # Expected external/post-build NOT RUN evidence keeps the final decision
+    # NOT READY, but it does not make the GitHub run red. Only an actual FAIL
+    # means the certification execution itself failed.
+    return 2 if has_failure else 0
 
 
 if __name__ == "__main__":

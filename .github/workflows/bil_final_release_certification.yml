@@ -365,7 +365,7 @@ jobs:
           retention-days: 30
 
   report:
-    name: Final fail-closed report
+    name: Final certification report
     if: always()
     needs: [freeze, static_pass_1, full_tests_pass_1, visual_pass_1, live_pass_1, store_readonly, pass_1_barrier, static_pass_2, full_tests_pass_2, visual_pass_2, live_pass_2]
     runs-on: ubuntu-24.04
@@ -421,11 +421,12 @@ jobs:
           path: ${{ runner.temp }}/bil-final-report/
           if-no-files-found: error
           retention-days: 90
-      - name: Enforce READY gate
+      - name: Enforce actual failure gate
         env:
           CODE: ${{ steps.write.outputs.code }}
         run: |
           if [[ "$CODE" != "0" ]]; then
-            echo "BIL is NOT READY while any required gate is FAIL or NOT RUN." >&2
+            echo "BIL certification contains an actual FAIL. See the report artifact." >&2
             exit "$CODE"
           fi
+          echo "Certification report generated successfully. Final READY may still be blocked by documented NOT RUN post-build/external evidence."

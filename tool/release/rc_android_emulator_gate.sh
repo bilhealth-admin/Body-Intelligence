@@ -16,6 +16,42 @@ if [[ "$PHASE" == "crypto" ]]; then
   exit 0
 fi
 
+if [[ "$PHASE" == "api26" ]]; then
+  APK=build/app/outputs/flutter-apk/app-debug.apk
+  test -s "$APK"
+  adb install -r "$APK"
+  adb shell pm clear "$BIL_APP_ID"
+  adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+  sleep 8
+  adb exec-out screencap -p > "$EVIDENCE/09-api26-cold-launch.png"
+  adb logcat -d > "$EVIDENCE/api26-logcat.txt"
+  if grep -Eiq 'FATAL EXCEPTION|AndroidRuntime.*FATAL|Process: com\.bilhealth\.bodyintelligencelog.*has died' "$EVIDENCE/api26-logcat.txt"; then
+    echo 'Android API 26 runtime fatal marker detected.' >&2
+    exit 1
+  fi
+  echo 'ANDROID_API26_MINSDK_INSTALL_LAUNCH=PASS' >> "$EVIDENCE/gate-status.txt"
+  exit 0
+fi
+
+if [[ "$PHASE" == "api36" ]]; then
+  APK=build/app/outputs/flutter-apk/app-debug.apk
+  test -s "$APK"
+  adb install -r "$APK"
+  adb shell pm clear "$BIL_APP_ID"
+  adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+  sleep 8
+  adb shell am start -W -a android.intent.action.VIEW -d 'bil://login'
+  sleep 3
+  adb exec-out screencap -p > "$EVIDENCE/10-api36-login-deep-link.png"
+  adb logcat -d > "$EVIDENCE/api36-logcat.txt"
+  if grep -Eiq 'FATAL EXCEPTION|AndroidRuntime.*FATAL|Process: com\.bilhealth\.bodyintelligencelog.*has died' "$EVIDENCE/api36-logcat.txt"; then
+    echo 'Android API 36 runtime fatal marker detected.' >&2
+    exit 1
+  fi
+  echo 'ANDROID_API36_TARGETSDK_INSTALL_DEEPLINK=PASS' >> "$EVIDENCE/gate-status.txt"
+  exit 0
+fi
+
 if [[ "$PHASE" != "ui" && "$PHASE" != "all" ]]; then
   echo "Unknown BIL_ANDROID_EMULATOR_PHASE: $PHASE" >&2
   exit 2

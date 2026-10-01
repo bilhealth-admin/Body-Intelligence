@@ -129,22 +129,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-boot-timeout: 900
-          script: |
-            set -euo pipefail
-            EVIDENCE=artifacts/release/rc_mobile_test/android
-            APK=build/app/outputs/flutter-apk/app-debug.apk
-            test -s "$APK"
-            adb install -r "$APK"
-            adb shell pm clear "$BIL_APP_ID"
-            adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
-            sleep 8
-            adb exec-out screencap -p > "$EVIDENCE/09-api26-cold-launch.png"
-            adb logcat -d > "$EVIDENCE/api26-logcat.txt"
-            if grep -Eiq 'FATAL EXCEPTION|AndroidRuntime.*FATAL|Process: com\.bilhealth\.bodyintelligencelog.*has died' "$EVIDENCE/api26-logcat.txt"; then
-              echo 'Android API 26 runtime fatal marker detected.' >&2
-              exit 1
-            fi
-            echo 'ANDROID_API26_MINSDK_INSTALL_LAUNCH=PASS' >> "$EVIDENCE/gate-status.txt"
+          script: BIL_ANDROID_EMULATOR_PHASE=api26 bash tool/release/rc_android_emulator_gate.sh
 
       - name: Run Android API 36 current-target install/deep-link smoke
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
@@ -155,24 +140,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-boot-timeout: 900
-          script: |
-            set -euo pipefail
-            EVIDENCE=artifacts/release/rc_mobile_test/android
-            APK=build/app/outputs/flutter-apk/app-debug.apk
-            test -s "$APK"
-            adb install -r "$APK"
-            adb shell pm clear "$BIL_APP_ID"
-            adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
-            sleep 8
-            adb shell am start -W -a android.intent.action.VIEW -d 'bil://login'
-            sleep 3
-            adb exec-out screencap -p > "$EVIDENCE/10-api36-login-deep-link.png"
-            adb logcat -d > "$EVIDENCE/api36-logcat.txt"
-            if grep -Eiq 'FATAL EXCEPTION|AndroidRuntime.*FATAL|Process: com\.bilhealth\.bodyintelligencelog.*has died' "$EVIDENCE/api36-logcat.txt"; then
-              echo 'Android API 36 runtime fatal marker detected.' >&2
-              exit 1
-            fi
-            echo 'ANDROID_API36_TARGETSDK_INSTALL_DEEPLINK=PASS' >> "$EVIDENCE/gate-status.txt"
+          script: BIL_ANDROID_EMULATOR_PHASE=api36 bash tool/release/rc_android_emulator_gate.sh
 
       - name: Sanitize dev-only Android plugins for release
         shell: bash
@@ -369,13 +337,23 @@ jobs:
           flutter test --no-pub             integration_test/system_crypto_bridge_integration_test.dart             -d "$IPHONE_UDID" --timeout 10m
           flutter test --no-pub             integration_test/native_settings_polish_test.dart             -d "$IPHONE_UDID" --timeout 10m
 
-      - name: Reinstall QA app after integration harness
+      - name: Rebuild and reinstall QA app after integration harness
         shell: bash
         env:
           IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
           IPAD_UDID: ${{ steps.sims.outputs.ipad }}
         run: |
           set -euo pipefail
+          # flutter test integration_test may replace the simulator Runner.app
+          # with a test-harness build. Rebuild the real QA app before lifecycle
+          # evidence so startup/navigation is measured on the intended bundle.
+          flutter build ios --simulator --debug --no-codesign --no-pub \
+            --build-number "$BIL_TEST_BUILD_NUMBER" \
+            --dart-define=BIL_ENVIRONMENT=qa \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
+            --dart-define=BIL_PAYMENTS_ENABLED=false \
+            --dart-define=BIL_ADS_ENABLED=false
+          test -d build/ios/iphonesimulator/Runner.app
           for UDID in "$IPHONE_UDID" "$IPAD_UDID"; do
             xcrun simctl bootstatus "$UDID" -b
             xcrun simctl uninstall "$UDID" "$BIL_APP_ID" >/dev/null 2>&1 || true
