@@ -5,7 +5,11 @@ OUT="${RUNNER_TEMP:-/tmp}/bil-cert-visual-${PASS}"
 mkdir -p "$OUT"
 test "$(git rev-parse HEAD)" = "${GITHUB_SHA:?GITHUB_SHA required}"
 flutter pub get
-flutter test --no-pub --reporter expanded   test/features/community/community_polish_visual_test.dart   test/dashboard_polish/dashboard_current_preview_test.dart   test/epic15_store_screenshot_golden_test.dart   2>&1 | tee "$OUT/visual.log"
+printf '%s\n' \
+  'EPIC15_STRICT_GOLDENS=WINDOWS_FULL_SHARDS_PASS_1_AND_PASS_2' \
+  'UBUNTU_VISUAL_GATE=COMMUNITY_DASHBOARD_PLUS_ISOLATED_CLOUD_ONLY' \
+  > "$OUT/visual-host-policy.txt"
+flutter test --no-pub --reporter expanded   test/features/community/community_polish_visual_test.dart   test/dashboard_polish/dashboard_current_preview_test.dart   2>&1 | tee "$OUT/visual.log"
 : "${PGPASSWORD:?PGPASSWORD required}"
 psql -h 127.0.0.1 -U postgres -d community_qa   -f tool/release/test_community_attention_isolated.sql   2>&1 | tee "$OUT/postgres.log"
 npm install --prefix "$RUNNER_TEMP/bil-deno-${PASS}" deno@2.5.1
