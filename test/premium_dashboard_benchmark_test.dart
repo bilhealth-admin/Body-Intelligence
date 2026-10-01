@@ -125,9 +125,7 @@ void main() {
     ('tablet', Size(1024, 1366)),
     ('desktop', Size(1440, 1000)),
   ]) {
-    testWidgets(
-      '${configuration.$1} premium dashboard golden',
-      (tester) async {
+    testWidgets('${configuration.$1} premium dashboard golden', (tester) async {
         tester.view.physicalSize = configuration.$2;
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
