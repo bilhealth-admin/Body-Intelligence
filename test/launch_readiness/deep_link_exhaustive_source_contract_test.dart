@@ -35,6 +35,60 @@ void main() {
     expect(routerPaths.length, declarations.length);
   });
 
+  test('every router path is runtime-linked or explicitly classified', () {
+    const explicitlyUnlinked = <String, String>{
+      '/meal-image-guide':
+          'The released feature opens MealImageGuidePage through '
+          'openMealImageGuide/Navigator instead of a GoRouter literal.',
+      '/premium-logging-intro':
+          'No current runtime literal entry point; keep this dormant route '
+          'explicit until it is either wired or removed.',
+      '/settings/account-connections/facebook':
+          'No current runtime literal entry point; provider-specific settings '
+          'remain an explicitly tracked dormant route.',
+      '/settings/account-connections/google':
+          'No current runtime literal entry point; provider-specific settings '
+          'remain an explicitly tracked dormant route.',
+      '/settings/account-password':
+          'No current runtime literal entry point; password recovery uses its '
+          'separate reset-password flow.',
+      '/settings/analytics':
+          'No current runtime literal entry point; released analytics '
+          'navigation uses the analytics routes outside settings.',
+    };
+
+    final runtimeSource = Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart'))
+        .where(
+          (file) =>
+              !file.path.replaceAll('\\\\', '/').endsWith(
+                'lib/app/router/app_router.dart',
+              ) &&
+              !file.path.replaceAll('\\\\', '/').endsWith(
+                'lib/app/router/app_wellness_routes.dart',
+              ),
+        )
+        .map((file) => file.readAsStringSync())
+        .join('\n');
+
+    final unlinked = routerPaths
+        .where(
+          (path) =>
+              !runtimeSource.contains("'$path'") &&
+              !runtimeSource.contains('"$path"'),
+        )
+        .toSet();
+
+    expect(unlinked, explicitlyUnlinked.keys.toSet());
+    for (final reason in explicitlyUnlinked.values) {
+      expect(reason.trim(), isNotEmpty);
+    }
+    expect(runtimeSource, contains('openMealImageGuide'));
+    expect(runtimeSource, contains('MealImageGuidePage'));
+  });
+
   test('every external alias resolves to a real production route', () {
     expect(aliases.length, greaterThanOrEqualTo(50));
     for (final entry in aliases.entries) {
