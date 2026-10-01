@@ -49,7 +49,7 @@ class PermissionsRationaleActivity : Activity() {
         val isDark =
             resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
                 Configuration.UI_MODE_NIGHT_YES
-        val background = Color.parseColor(if (isDark) "#030405" else "#F6F8FC")
+        val pageBackground = Color.parseColor(if (isDark) "#030405" else "#F6F8FC")
         val surface = Color.parseColor(if (isDark) "#0B0D10" else "#FFFFFF")
         val primaryText = Color.parseColor(if (isDark) "#F7F9FC" else "#101828")
         val secondaryText = Color.parseColor(if (isDark) "#AEB7C4" else "#536170")
@@ -58,8 +58,8 @@ class PermissionsRationaleActivity : Activity() {
         val accentEnd = Color.parseColor("#6D4AE8")
         val padding = dp(24)
 
-        window.statusBarColor = background
-        window.navigationBarColor = background
+        window.statusBarColor = pageBackground
+        window.navigationBarColor = pageBackground
 
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -150,7 +150,7 @@ class PermissionsRationaleActivity : Activity() {
         }, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val scrollView = ScrollView(this).apply {
-            setBackgroundColor(background)
+            setBackgroundColor(pageBackground)
             isFillViewport = true
             addView(content)
         }
