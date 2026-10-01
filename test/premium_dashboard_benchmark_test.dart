@@ -126,20 +126,20 @@ void main() {
     ('desktop', Size(1440, 1000)),
   ]) {
     testWidgets('${configuration.$1} premium dashboard golden', (tester) async {
-        tester.view.physicalSize = configuration.$2;
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.reset);
-        await tester.pumpWidget(const _Harness());
-        await tester.pumpAndSettle();
-        await settleVisualAssetImages(tester);
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byType(MaterialApp),
-          matchesGoldenFile(
-            'goldens/premium_dashboard_${configuration.$1}_after.png',
-          ),
-        );
-      }, skip: Platform.isLinux);
+      tester.view.physicalSize = configuration.$2;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(const _Harness());
+      await tester.pumpAndSettle();
+      await settleVisualAssetImages(tester);
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile(
+          'goldens/premium_dashboard_${configuration.$1}_after.png',
+        ),
+      );
+    }, skip: Platform.isLinux);
   }
 
   testWidgets('corrected light morning premium dashboard golden', (

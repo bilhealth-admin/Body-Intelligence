@@ -49,11 +49,9 @@ deno test -A --frozen --lock=deno.lock \
   verify-store-purchase/mobile_integrity_test.ts \
   _shared/account_deletion_storage_test.ts \
   2>&1 | tee "$OUT/deno-fault-matrix.log"
-pushd ai-coach >/dev/null
-deno test -A --frozen --lock=../deno.lock \
-  server_test.ts mobile_integrity_test.ts \
+deno test -A --frozen --lock=deno.lock \
+  ai-coach/server_test.ts ai-coach/mobile_integrity_test.ts \
   2>&1 | tee "$OUT/deno-ai-coach-faults.log"
-popd >/dev/null
 popd >/dev/null
 
 printf '%s\n' \
