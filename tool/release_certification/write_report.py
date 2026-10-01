@@ -110,8 +110,8 @@ def main() -> int:
         ),
         (
             "8. Database migration certification",
-            external("BIL_DATABASE_MIGRATION_FULL"),
-            "Automated migration tests run in both static passes, but PASS requires representative historical DB fixtures, installed-version upgrade, row/duplicate/FK comparison and PRAGMA integrity_check evidence.",
+            both("BIL_STATIC_1", "BIL_STATIC_2"),
+            "PASS requires both static passes to complete the migration certification suite: representative v4/v12/v15/v16/v19 historical fixtures, file-backed installed-version upgrade coverage, preserved user rows, duplicate stable-ID checks, foreign_key_check, required-index checks and PRAGMA integrity_check.",
         ),
         (
             "9. Independent OWASP MASVS/MASTG security review",
