@@ -49,9 +49,30 @@ deno test -A --frozen --lock=deno.lock \
   verify-store-purchase/mobile_integrity_test.ts \
   _shared/account_deletion_storage_test.ts \
   2>&1 | tee "$OUT/deno-fault-matrix.log"
-deno test -A --frozen --lock=deno.lock \
-  ai-coach/server_test.ts ai-coach/mobile_integrity_test.ts \
+AI_COACH_LOCK="$RUNNER_TEMP/bil-ai-coach-deno.lock"
+python3 - "$AI_COACH_LOCK" <<'PY'
+import json
+import pathlib
+import sys
+
+root_lock = json.loads(pathlib.Path("deno.lock").read_text())
+coach_config = json.loads(pathlib.Path("ai-coach/deno.json").read_text())
+dependencies = sorted(set(coach_config.get("imports", {}).values()))
+if not dependencies:
+    raise SystemExit("AI Coach deno.json has no imports to lock")
+missing = [value for value in dependencies if value not in root_lock.get("specifiers", {})]
+if missing:
+    raise SystemExit(f"AI Coach lock dependencies missing from root lock: {missing}")
+root_lock["workspace"] = {"dependencies": dependencies}
+pathlib.Path(sys.argv[1]).write_text(
+    json.dumps(root_lock, indent=2, ensure_ascii=False) + "\n"
+)
+PY
+pushd ai-coach >/dev/null
+deno test -A --frozen --lock="$AI_COACH_LOCK" \
+  server_test.ts mobile_integrity_test.ts \
   2>&1 | tee "$OUT/deno-ai-coach-faults.log"
+popd >/dev/null
 popd >/dev/null
 
 printf '%s\n' \
