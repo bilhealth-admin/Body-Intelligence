@@ -50,6 +50,7 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'آپ کا BIL کوڈ اس وقت دستیاب نہیں۔ دوبارہ کوشش کریں۔',
     'آپ کا BIL کوڈ دستیاب نہیں۔ سائن اِن کریں، اپنا کمیونٹی پروفائل مکمل کریں، پھر دوبارہ کوشش کریں۔',
     'آپ کا پرانا کوڈ کام کرنا بند کر دے گا۔ دوستوں کو نیا کوڈ درکار ہوگا۔',
+    'یہ آپ ہیں',
   ],
   'fa': <String>[
     '@{handle} را در BIL اضافه کنید: {uri}',
@@ -100,6 +101,7 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'کد BIL شما اکنون در دسترس نیست. دوباره امتحان کنید.',
     'کد BIL شما در دسترس نیست. وارد حساب شوید، نمایه انجمن خود را تکمیل کنید و دوباره امتحان کنید.',
     'کد قدیمی شما از کار خواهد افتاد. دوستانتان به کد جدید نیاز خواهند داشت.',
+    'این شما هستید',
   ],
   'hi': <String>[
     'BIL पर @{handle} को जोड़ें: {uri}',
@@ -150,6 +152,7 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'आपका BIL कोड अभी उपलब्ध नहीं है। फिर कोशिश करें।',
     'आपका BIL कोड उपलब्ध नहीं है। साइन इन करें, अपनी समुदाय प्रोफ़ाइल पूरी करें और फिर कोशिश करें।',
     'आपका पुराना कोड काम करना बंद कर देगा। मित्रों को नए कोड की आवश्यकता होगी।',
+    'यह आप हैं',
   ],
   'id': <String>[
     'Tambahkan @{handle} di BIL: {uri}',
@@ -200,6 +203,7 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'Kode BIL Anda sedang tidak tersedia. Coba lagi.',
     'Kode BIL Anda tidak tersedia. Masuk, lengkapi profil Komunitas Anda, lalu coba lagi.',
     'Kode lama Anda akan berhenti berfungsi. Teman perlu menggunakan kode yang baru.',
+    'Ini Anda',
   ],
   'ms': <String>[
     'Tambah @{handle} di BIL: {uri}',
@@ -250,6 +254,7 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'Kod BIL anda tidak tersedia sekarang. Cuba lagi.',
     'Kod BIL anda tidak tersedia. Log masuk, lengkapkan profil Komuniti anda dan cuba lagi.',
     'Kod lama anda akan berhenti berfungsi. Rakan perlu menggunakan kod baharu.',
+    'Ini anda',
   ],
   'bn': <String>[
     'BIL-এ @{handle}-কে যোগ করুন: {uri}',
@@ -300,5 +305,6 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'আপনার BIL কোড এখন অনুপলভ্য। আবার চেষ্টা করুন।',
     'আপনার BIL কোড অনুপলভ্য। সাইন ইন করুন, কমিউনিটি প্রোফাইল সম্পূর্ণ করুন এবং আবার চেষ্টা করুন।',
     'আপনার পুরোনো কোড কাজ করা বন্ধ করবে। বন্ধুদের নতুন কোডটি লাগবে।',
+    'এটি আপনি',
   ],
 };

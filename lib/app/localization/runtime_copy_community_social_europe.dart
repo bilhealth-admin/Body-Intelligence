@@ -50,6 +50,7 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Il tuo codice BIL non è disponibile al momento. Riprova.',
     'Il tuo codice BIL non è disponibile. Accedi, completa il profilo della Community e riprova.',
     'Il tuo vecchio codice smetterà di funzionare. Gli amici dovranno usare quello nuovo.',
+    'Sei tu',
   ],
   'pt-BR': <String>[
     'Adicione @{handle} no BIL: {uri}',
@@ -100,6 +101,7 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Seu código BIL está indisponível no momento. Tente novamente.',
     'Seu código BIL está indisponível. Entre na conta, complete seu perfil da Comunidade e tente novamente.',
     'Seu código antigo deixará de funcionar. Seus amigos precisarão do novo.',
+    'Este é você',
   ],
   'pt-PT': <String>[
     'Adicione @{handle} no BIL: {uri}',
@@ -150,6 +152,7 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'O seu código BIL está indisponível neste momento. Tente novamente.',
     'O seu código BIL está indisponível. Inicie sessão, complete o perfil da Comunidade e tente novamente.',
     'O seu código antigo deixará de funcionar. Os amigos precisarão do novo.',
+    'És tu',
   ],
   'pl': <String>[
     'Dodaj @{handle} w BIL: {uri}',
@@ -200,6 +203,7 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Twój kod BIL jest teraz niedostępny. Spróbuj ponownie.',
     'Twój kod BIL jest niedostępny. Zaloguj się, uzupełnij profil społeczności i spróbuj ponownie.',
     'Twój stary kod przestanie działać. Znajomi będą potrzebować nowego.',
+    'To Ty',
   ],
   'nl': <String>[
     'Voeg @{handle} toe op BIL: {uri}',
@@ -250,6 +254,7 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Je BIL-code is momenteel niet beschikbaar. Probeer het opnieuw.',
     'Je BIL-code is niet beschikbaar. Meld je aan, voltooi je communityprofiel en probeer het opnieuw.',
     'Je oude code werkt niet meer. Vrienden hebben de nieuwe nodig.',
+    'Dit ben jij',
   ],
   'uk': <String>[
     'Додати @{handle} у BIL: {uri}',
@@ -300,5 +305,6 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Ваш код BIL зараз недоступний. Повторіть спробу.',
     'Ваш код BIL недоступний. Увійдіть, заповніть профіль спільноти й повторіть спробу.',
     'Старий код перестане працювати. Друзям знадобиться новий.',
+    'Це ви',
   ],
 };

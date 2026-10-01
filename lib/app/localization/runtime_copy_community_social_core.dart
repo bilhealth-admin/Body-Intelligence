@@ -50,6 +50,7 @@ const _communitySocialCoreRows = <String, List<String>>{
     'رمز BIL غير متاح الآن. حاول مجددًا.',
     'رمز BIL غير متاح. سجّل الدخول وأكمل ملف المجتمع ثم حاول مجددًا.',
     'سيتوقف الرمز القديم عن العمل. سيحتاج الأصدقاء إلى الرمز الجديد.',
+    'هذا أنت',
   ],
   'en': CommunitySocialRuntimeCopy.sources,
   'fr': <String>[
@@ -101,6 +102,7 @@ const _communitySocialCoreRows = <String, List<String>>{
     'Votre code BIL est momentanément indisponible. Réessayez.',
     'Votre code BIL est indisponible. Connectez-vous, complétez votre profil Communauté, puis réessayez.',
     'Votre ancien code cessera de fonctionner. Vos amis devront utiliser le nouveau.',
+    'C’est vous',
   ],
   'es': <String>[
     'Añade a @{handle} en BIL: {uri}',
@@ -151,6 +153,7 @@ const _communitySocialCoreRows = <String, List<String>>{
     'Tu código BIL no está disponible ahora. Inténtalo de nuevo.',
     'Tu código BIL no está disponible. Inicia sesión, completa tu perfil de la Comunidad y vuelve a intentarlo.',
     'Tu código anterior dejará de funcionar. Tus amigos necesitarán el nuevo.',
+    'Eres tú',
   ],
   'tr': <String>[
     'BIL’de @{handle} kişisini ekleyin: {uri}',
@@ -201,6 +204,7 @@ const _communitySocialCoreRows = <String, List<String>>{
     'BIL Kodunuz şu anda kullanılamıyor. Tekrar deneyin.',
     'BIL Kodunuz kullanılamıyor. Oturum açın, Topluluk profilinizi tamamlayın ve tekrar deneyin.',
     'Eski kodunuz çalışmayı durduracak. Arkadaşlarınızın yeni koda ihtiyacı olacak.',
+    'Bu sensin',
   ],
   'de': <String>[
     'Füge @{handle} auf BIL hinzu: {uri}',
@@ -251,5 +255,6 @@ const _communitySocialCoreRows = <String, List<String>>{
     'Dein BIL-Code ist derzeit nicht verfügbar. Versuche es erneut.',
     'Dein BIL-Code ist nicht verfügbar. Melde dich an, vervollständige dein Community-Profil und versuche es erneut.',
     'Dein alter Code funktioniert danach nicht mehr. Freunde benötigen den neuen Code.',
+    'Das bist du',
   ],
 };
