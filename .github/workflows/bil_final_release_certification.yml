@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: bil-final-release-certification-${{ github.sha }}
-  cancel-in-progress: false
+  group: bil-final-release-certification-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   BIL_RC_BRANCH: fix/community-sapphire-health-3033

@@ -6,8 +6,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: sapphire-history-${{ github.sha }}
-  cancel-in-progress: false
+  group: sapphire-history-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   prepare:
     runs-on: ubuntu-24.04
