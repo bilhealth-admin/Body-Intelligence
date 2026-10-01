@@ -66,12 +66,12 @@ void main() {
         .where((file) => file.path.endsWith('.dart'))
         .where(
           (file) =>
-              !file.path.replaceAll('\\', '/').endsWith(
-                'lib/app/router/app_router.dart',
-              ) &&
-              !file.path.replaceAll('\\', '/').endsWith(
-                'lib/app/router/app_wellness_routes.dart',
-              ),
+              !file.path
+                  .replaceAll('\\', '/')
+                  .endsWith('lib/app/router/app_router.dart') &&
+              !file.path
+                  .replaceAll('\\', '/')
+                  .endsWith('lib/app/router/app_wellness_routes.dart'),
         )
         .map((file) => file.readAsStringSync())
         .join('\n');
