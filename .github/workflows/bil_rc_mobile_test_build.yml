@@ -1,0 +1,332 @@
+name: BIL RC mobile test builds
+
+on:
+  push:
+    branches: [fix/community-sapphire-health-3033]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-rc-mobile-test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.44.6
+  BIL_APP_ID: com.bilhealth.bodyintelligencelog
+  BIL_TEST_BUILD_NUMBER: '8'
+
+jobs:
+  android-emulator-artifact:
+    name: Android APK/AAB + emulator evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact RC
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve dependencies and release build contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test --no-pub             test/launch_readiness/android_release_build_contract_test.dart             test/launch_readiness/system_crypto_export_compliance_contract_test.dart             test/platform_readiness/native_permission_dialog_contract_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             --timeout 5m
+
+      - name: Prepare optional release signing
+        id: signing
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${KEYSTORE_BASE64:-}" && -n "${STORE_PASSWORD:-}" && -n "${KEY_ALIAS:-}" && -n "${KEY_PASSWORD:-}" ]]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            {
+              echo 'storeFile=app/upload-keystore.jks'
+              echo "storePassword=$STORE_PASSWORD"
+              echo "keyAlias=$KEY_ALIAS"
+              echo "keyPassword=$KEY_PASSWORD"
+            } > android/key.properties
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build installable Android debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk --debug --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
+
+      - name: Build Android release AAB for offline inspection only
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build appbundle --release --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Inspect Android artifacts
+        shell: bash
+        env:
+          SIGNING_AVAILABLE: ${{ steps.signing.outputs.available }}
+        run: |
+          set -euo pipefail
+          EVIDENCE=artifacts/release/rc_mobile_test/android
+          mkdir -p "$EVIDENCE"
+          APK=build/app/outputs/flutter-apk/app-debug.apk
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$APK"
+          test -s "$AAB"
+          sha256sum "$APK" "$AAB" > "$EVIDENCE/SHA256SUMS.txt"
+          stat --printf='%n %s\n' "$APK" "$AAB" > "$EVIDENCE/sizes.txt"
+          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
+          printf 'ANDROID_RELEASE_SIGNING=%s\n' "$SIGNING_AVAILABLE" > "$EVIDENCE/signing-status.txt"
+          if [[ "$SIGNING_AVAILABLE" == 'true' ]]; then
+            jarsigner -verify -verbose -certs "$AAB" > "$EVIDENCE/jarsigner.txt"
+            echo 'SIGNED_AAB_VERIFY=PASS' >> "$EVIDENCE/signing-status.txt"
+          else
+            echo 'SIGNED_AAB_VERIFY=NOT_RUN_MISSING_SIGNING_SECRETS' >> "$EVIDENCE/signing-status.txt"
+          fi
+
+      - name: Enable KVM
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"'             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Android native integration and lifecycle matrix
+        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            EVIDENCE=artifacts/release/rc_mobile_test/android
+            mkdir -p "$EVIDENCE"
+            flutter test --no-pub               integration_test/system_crypto_bridge_integration_test.dart               -d emulator-5554 --timeout 10m
+            flutter test --no-pub               integration_test/native_settings_polish_test.dart               -d emulator-5554 --timeout 10m
+            APK=build/app/outputs/flutter-apk/app-debug.apk
+            adb install -r "$APK"
+            adb shell pm clear "$BIL_APP_ID"
+            adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+            sleep 8
+            adb exec-out screencap -p > "$EVIDENCE/01-cold-launch.png"
+            adb shell uiautomator dump /sdcard/bil-ui.xml >/dev/null
+            adb pull /sdcard/bil-ui.xml "$EVIDENCE/01-cold-launch.xml" >/dev/null
+            adb shell am start -W -a android.intent.action.VIEW -d 'bil://login'
+            sleep 3
+            adb exec-out screencap -p > "$EVIDENCE/02-login-deep-link.png"
+            adb shell input keyevent 3
+            sleep 2
+            adb shell am force-stop "$BIL_APP_ID"
+            adb shell monkey -p "$BIL_APP_ID" -c android.intent.category.LAUNCHER 1
+            sleep 5
+            adb exec-out screencap -p > "$EVIDENCE/03-relaunch.png"
+            adb shell settings put system accelerometer_rotation 0
+            adb shell settings put system user_rotation 1
+            sleep 2
+            adb exec-out screencap -p > "$EVIDENCE/04-landscape.png"
+            adb shell settings put system user_rotation 0
+            for PERM in android.permission.CAMERA android.permission.RECORD_AUDIO android.permission.POST_NOTIFICATIONS; do
+              adb shell pm revoke "$BIL_APP_ID" "$PERM" || true
+              adb shell pm grant "$BIL_APP_ID" "$PERM" || true
+            done
+            adb logcat -d > "$EVIDENCE/logcat.txt"
+            printf '%s\n'               'ANDROID_EMULATOR_INSTALL=PASS'               'ANDROID_COLD_LAUNCH=PASS'               'ANDROID_DEEP_LINK=PASS'               'ANDROID_BACKGROUND_FORCE_STOP_RELAUNCH=PASS'               'ANDROID_ROTATION=PASS'               'ANDROID_NATIVE_CRYPTO=PASS'               'ANDROID_NATIVE_SETTINGS_UI=PASS'               > "$EVIDENCE/gate-status.txt"
+
+      - name: Upload Android test artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-rc-android-test-${{ github.sha }}
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            build/app/outputs/bundle/release/app-release.aab
+            artifacts/release/rc_mobile_test/android
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove Android signing material
+        if: always()
+        shell: bash
+        run: rm -f android/app/upload-keystore.jks android/key.properties
+
+  ios-simulator-artifact:
+    name: iOS simulator + unsigned IPA evidence
+    runs-on: macos-15
+    timeout-minutes: 100
+    steps:
+      - name: Checkout exact RC
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve dependencies and iOS contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test --no-pub             test/platform_readiness/native_permission_dialog_contract_test.dart             test/connected_health/apple_health_permission_flow_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             --timeout 10m
+          plutil -lint ios/Runner/Info.plist
+          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
+          plutil -lint ios/Runner/Runner.entitlements
+          plutil -lint ios/Runner/RunnerDebug.entitlements
+
+      - name: Build iOS simulator application
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ios --simulator --debug --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
+          test -d build/ios/iphonesimulator/Runner.app
+
+      - name: Build unsigned production-shaped iOS device application
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ios --release --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+          test -d build/ios/iphoneos/Runner.app
+          rm -rf Payload BIL-unsigned-RC.ipa
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -qry BIL-unsigned-RC.ipa Payload
+          ditto -c -k --sequesterRsrc --keepParent             build/ios/iphonesimulator/Runner.app             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
+
+      - name: Create iPhone and iPad simulator sessions
+        id: sims
+        shell: bash
+        run: |
+          set -euo pipefail
+          read -r RUNTIME IPHONE_TYPE IPAD_TYPE < <(python3 - <<'PY'
+          import json, re, subprocess
+          runtimes=json.loads(subprocess.check_output(
+              ['xcrun','simctl','list','runtimes','available','-j']
+          ))['runtimes']
+          ios=[r for r in runtimes if r.get('isAvailable') and
+               r.get('identifier','').startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
+          if not ios:
+              raise SystemExit('No available iOS Simulator runtime')
+          def version(r):
+              return tuple(int(x) for x in re.findall(r'\d+', r.get('version','0')))
+          runtime=max(ios,key=version)
+          types=json.loads(subprocess.check_output(
+              ['xcrun','simctl','list','devicetypes','-j']
+          ))['devicetypes']
+          iphones=[d for d in types if d['name'].startswith('iPhone')]
+          ipads=[d for d in types if d['name'].startswith('iPad')]
+          if not iphones or not ipads:
+              raise SystemExit('iPhone and iPad simulator device types required')
+          print(runtime['identifier'], iphones[-1]['identifier'], ipads[-1]['identifier'])
+          PY
+          )
+          IPHONE="$(xcrun simctl create "BIL-RC-iPhone-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME")"
+          IPAD="$(xcrun simctl create "BIL-RC-iPad-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME")"
+          echo "iphone=$IPHONE" >> "$GITHUB_OUTPUT"
+          echo "ipad=$IPAD" >> "$GITHUB_OUTPUT"
+          for UDID in "$IPHONE" "$IPAD"; do
+            xcrun simctl erase "$UDID"
+            xcrun simctl boot "$UDID"
+            xcrun simctl bootstatus "$UDID" -b
+            xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
+          done
+
+      - name: Run iOS native integration tests
+        shell: bash
+        env:
+          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
+        run: |
+          set -euo pipefail
+          flutter test --no-pub             integration_test/system_crypto_bridge_integration_test.dart             -d "$IPHONE_UDID" --timeout 10m
+          flutter test --no-pub             integration_test/native_settings_polish_test.dart             -d "$IPHONE_UDID" --timeout 10m
+
+      - name: Run iPhone and iPad lifecycle/deep-link matrix
+        shell: bash
+        env:
+          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
+          IPAD_UDID: ${{ steps.sims.outputs.ipad }}
+        run: |
+          set -euo pipefail
+          EVIDENCE=artifacts/release/rc_mobile_test/ios
+          mkdir -p "$EVIDENCE/iphone" "$EVIDENCE/ipad"
+          for ITEM in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
+            NAME="${ITEM%%:*}"
+            UDID="${ITEM#*:}"
+            DIR="$EVIDENCE/$NAME"
+            xcrun simctl launch "$UDID" "$BIL_APP_ID" -AppleLanguages '(en)' -AppleLocale 'en_US'
+            sleep 8
+            xcrun simctl io "$UDID" screenshot "$DIR/01-cold-launch.png"
+            xcrun simctl openurl "$UDID" 'bil://login'
+            sleep 3
+            xcrun simctl io "$UDID" screenshot "$DIR/02-login-deep-link.png"
+            xcrun simctl openurl "$UDID" 'bil://connected-health'
+            sleep 3
+            xcrun simctl io "$UDID" screenshot "$DIR/03-connected-health.png"
+            xcrun simctl terminate "$UDID" "$BIL_APP_ID"
+            xcrun simctl launch "$UDID" "$BIL_APP_ID"
+            sleep 4
+            xcrun simctl io "$UDID" screenshot "$DIR/04-relaunch.png"
+            xcrun simctl ui "$UDID" appearance dark
+            sleep 2
+            xcrun simctl io "$UDID" screenshot "$DIR/05-dark.png"
+            xcrun simctl ui "$UDID" appearance light
+            xcrun simctl ui "$UDID" content_size accessibility-extra-extra-extra-large || true
+            sleep 2
+            xcrun simctl io "$UDID" screenshot "$DIR/06-large-text.png"
+          done
+          xcodebuild -version > "$EVIDENCE/xcode-version.txt"
+          xcrun simctl list runtimes available > "$EVIDENCE/runtimes.txt"
+          shasum -a 256 BIL-unsigned-RC.ipa             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip             > "$EVIDENCE/SHA256SUMS.txt"
+          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
+          printf '%s\n'             'IOS_SIMULATOR_BUILD=PASS'             'IOS_UNSIGNED_DEVICE_BUILD=PASS'             'IOS_IPHONE_INSTALL_LAUNCH=PASS'             'IOS_IPAD_INSTALL_LAUNCH=PASS'             'IOS_DEEP_LINKS=PASS'             'IOS_TERMINATE_RELAUNCH=PASS'             'IOS_DARK_LIGHT=PASS'             'IOS_LARGE_TEXT=PASS'             'IOS_NATIVE_CRYPTO=PASS'             'IOS_NATIVE_SETTINGS_UI=PASS'             'IOS_APP_ATTEST_GENUINE=PHYSICAL_DEVICE_REQUIRED'             'IOS_HEALTHKIT_GENUINE=PHYSICAL_DEVICE_REQUIRED'             'IOS_STOREKIT_SANDBOX_GENUINE=PHYSICAL_DEVICE_OR_STORE_SANDBOX_REQUIRED'             > "$EVIDENCE/gate-status.txt"
+
+      - name: Upload iOS test artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-rc-ios-test-${{ github.sha }}
+          path: |
+            BIL-unsigned-RC.ipa
+            build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
+            artifacts/release/rc_mobile_test/ios
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove disposable simulators
+        if: always()
+        shell: bash
+        env:
+          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
+          IPAD_UDID: ${{ steps.sims.outputs.ipad }}
+        run: |
+          set +e
+          for UDID in "$IPHONE_UDID" "$IPAD_UDID"; do
+            [[ -z "${UDID:-}" ]] && continue
+            xcrun simctl terminate "$UDID" "$BIL_APP_ID"
+            xcrun simctl uninstall "$UDID" "$BIL_APP_ID"
+            xcrun simctl shutdown "$UDID"
+            xcrun simctl delete "$UDID"
+          done
+          rm -rf Payload
