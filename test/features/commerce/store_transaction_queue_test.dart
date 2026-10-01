@@ -985,25 +985,27 @@ void main() {
     },
   );
 
-
   for (final status in <int>[409, 429, 500, 503]) {
-    test('verification HTTP $status stays fail closed and unacknowledged', () async {
-      await ready();
-      native.updates.add([_receipt(purchaseId: 'fault-$status')]);
-      await verificationStarted.future;
-      verification.complete(
-        http.Response(
-          '{"verified":false,"error":"injected_http_$status"}',
-          status,
-          headers: {'content-type': 'application/json'},
-        ),
-      );
-      await waitForStoreIdle();
-      expect(store.state, VerifiedStoreState.failed);
-      expect(store.entitlement, isNull);
-      expect(native.completionCalls, 0);
-      expect(verificationCalls, 1);
-    });
+    test(
+      'verification HTTP $status stays fail closed and unacknowledged',
+      () async {
+        await ready();
+        native.updates.add([_receipt(purchaseId: 'fault-$status')]);
+        await verificationStarted.future;
+        verification.complete(
+          http.Response(
+            '{"verified":false,"error":"injected_http_$status"}',
+            status,
+            headers: {'content-type': 'application/json'},
+          ),
+        );
+        await waitForStoreIdle();
+        expect(store.state, VerifiedStoreState.failed);
+        expect(store.entitlement, isNull);
+        expect(native.completionCalls, 0);
+        expect(verificationCalls, 1);
+      },
+    );
   }
 
   test(

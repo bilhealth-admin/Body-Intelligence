@@ -47,7 +47,7 @@ deno test -A --frozen --lock=deno.lock \
   _shared/account_deletion_storage_test.ts \
   2>&1 | tee "$OUT/deno-fault-matrix.log"
 pushd ai-coach >/dev/null
-deno test -A --frozen --config deno.json --lock=../deno.lock \
+deno test -A --frozen --lock=../deno.lock \
   server_test.ts mobile_integrity_test.ts \
   2>&1 | tee "$OUT/deno-ai-coach-faults.log"
 popd >/dev/null
