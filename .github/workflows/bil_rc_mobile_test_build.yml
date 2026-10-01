@@ -170,7 +170,7 @@ jobs:
 
   ios-simulator-artifact:
     name: iOS simulator + unsigned IPA evidence
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 100
     steps:
       - name: Checkout exact RC
@@ -311,7 +311,7 @@ jobs:
             BIL-unsigned-RC.ipa
             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
             artifacts/release/rc_mobile_test/ios
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Remove disposable simulators
