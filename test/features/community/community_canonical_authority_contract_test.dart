@@ -4,9 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('all privileged Community RPCs use canonical server authority', () {
-    final source = File(
-      'supabase/migrations/20260925005354_final_hardening_cloud_consent_community_authority.sql',
-    ).readAsStringSync();
+    final migrations = Directory('supabase/migrations')
+        .listSync()
+        .whereType<File>()
+        .where(
+          (file) => file.path.replaceAll('\\', '/').endsWith(
+            '_final_hardening_cloud_consent_community_authority.sql',
+          ),
+        )
+        .toList(growable: false);
+    expect(
+      migrations,
+      hasLength(1),
+      reason: 'Community authority must have one canonical migration source.',
+    );
+    final source = migrations.single.readAsStringSync();
 
     const privilegedRpcs = <String>[
       'bil_list_pending_community_posts',
