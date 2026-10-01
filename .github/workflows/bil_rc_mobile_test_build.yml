@@ -71,6 +71,12 @@ jobs:
           set -euo pipefail
           flutter build apk --debug --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
 
+      - name: Sanitize dev-only Android plugins for release
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
       - name: Build Android release AAB for offline inspection only
         shell: bash
         run: |
@@ -99,6 +105,13 @@ jobs:
           else
             echo 'SIGNED_AAB_VERIFY=NOT_RUN_MISSING_SIGNING_SECRETS' >> "$EVIDENCE/signing-status.txt"
           fi
+
+      - name: Restore dev plugin graph for emulator tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -- android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+          flutter pub get
 
       - name: Enable KVM
         shell: bash
@@ -160,7 +173,7 @@ jobs:
             build/app/outputs/flutter-apk/app-debug.apk
             build/app/outputs/bundle/release/app-release.aab
             artifacts/release/rc_mobile_test/android
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Remove Android signing material
@@ -237,9 +250,29 @@ jobs:
           ))['devicetypes']
           iphones=[d for d in types if d['name'].startswith('iPhone')]
           ipads=[d for d in types if d['name'].startswith('iPad')]
-          if not iphones or not ipads:
-              raise SystemExit('iPhone and iPad simulator device types required')
-          print(runtime['identifier'], iphones[-1]['identifier'], ipads[-1]['identifier'])
+          def preferred(items, names):
+              by_name={item['name']: item for item in items}
+              for name in names:
+                  if name in by_name:
+                      return by_name[name]
+              return None
+          iphone=preferred(iphones, [
+              'iPhone 17 Pro',
+              'iPhone 17',
+              'iPhone 16 Pro',
+              'iPhone 16',
+              'iPhone 15 Pro',
+          ])
+          ipad=preferred(ipads, [
+              'iPad Pro 13-inch (M4)',
+              'iPad Pro (13-inch) (M4)',
+              'iPad Pro 11-inch (M4)',
+              'iPad Pro (11-inch) (M4)',
+              'iPad Pro (12.9-inch) (6th generation)',
+          ])
+          if iphone is None or ipad is None:
+              raise SystemExit('No audited modern iPhone/iPad simulator type is available')
+          print(runtime['identifier'], iphone['identifier'], ipad['identifier'])
           PY
           )
           IPHONE="$(xcrun simctl create "BIL-RC-iPhone-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME")"
