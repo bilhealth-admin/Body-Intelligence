@@ -37,6 +37,9 @@ void main() {
 
   test('every router path is runtime-linked or explicitly classified', () {
     const explicitlyUnlinked = <String, String>{
+      '/context':
+          'LifeContextPage is declared in the production router but has no '
+          'current runtime literal entry point; keep it explicitly tracked.',
       '/meal-image-guide':
           'The released feature opens MealImageGuidePage through '
           'openMealImageGuide/Navigator instead of a GoRouter literal.',
@@ -73,13 +76,21 @@ void main() {
         .map((file) => file.readAsStringSync())
         .join('\n');
 
-    final unlinked = routerPaths
-        .where(
-          (path) =>
-              !runtimeSource.contains("'$path'") &&
-              !runtimeSource.contains('"$path"'),
-        )
-        .toSet();
+    bool isRuntimeLinked(String path) {
+      if (runtimeSource.contains("'$path'") ||
+          runtimeSource.contains('"$path"') ||
+          runtimeSource.contains("'$path?") ||
+          runtimeSource.contains('"$path?')) {
+        return true;
+      }
+      final parameterIndex = path.indexOf('/:');
+      if (parameterIndex < 0) return false;
+      final prefix = path.substring(0, parameterIndex + 1);
+      return runtimeSource.contains("'$prefix") ||
+          runtimeSource.contains('"$prefix');
+    }
+
+    final unlinked = routerPaths.where((path) => !isRuntimeLinked(path)).toSet();
 
     expect(unlinked, explicitlyUnlinked.keys.toSet());
     for (final reason in explicitlyUnlinked.values) {
