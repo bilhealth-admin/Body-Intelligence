@@ -74,11 +74,37 @@ final verifiedEntitlementOwnerIdProvider = Provider<String?>((ref) {
 /// the entitlement authority. Keeping it above the plans route prevents closing
 /// and reopening that route from re-enabling a second purchase attempt.
 final class PurchaseOwnershipConflictStore {
-  bool blocked = false;
+  final Set<BilStoreProductKind> _blockedKinds = <BilStoreProductKind>{};
 
-  void recordConflict() => blocked = true;
+  bool get blocked => _blockedKinds.isNotEmpty;
+  Set<BilStoreProductKind> get blockedKinds =>
+      Set<BilStoreProductKind>.unmodifiable(_blockedKinds);
 
-  void clearAfterVerifiedOwnership() => blocked = false;
+  bool blockedFor(BilStoreProductKind kind) => _blockedKinds.contains(kind);
+
+  void recordConflict(String? productId) {
+    final kind = _kindForProduct(productId);
+    if (kind != null) _blockedKinds.add(kind);
+  }
+
+  void clearAfterVerifiedOwnership(String? productId) {
+    final kind = _kindForProduct(productId);
+    if (kind != null) _blockedKinds.remove(kind);
+  }
+
+  BilStoreProductKind? _kindForProduct(String? productId) {
+    if (productId == null || productId.isEmpty) return null;
+    if (productId == StoreCatalogConfiguration.aiBoost) {
+      return BilStoreProductKind.aiBoostConsumable;
+    }
+    final binding = StoreCatalogConfiguration.bindingForProduct(productId);
+    return switch (binding?.plan) {
+      CommercePlan.premium => BilStoreProductKind.premiumSubscription,
+      CommercePlan.premiumAiCoach =>
+        BilStoreProductKind.premiumAiCoachSubscription,
+      _ => null,
+    };
+  }
 }
 
 final purchaseOwnershipConflictStoreProvider =
