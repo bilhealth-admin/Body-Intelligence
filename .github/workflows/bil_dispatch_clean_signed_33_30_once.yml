@@ -1,0 +1,71 @@
+name: BIL dispatch clean signed 33/30 once
+
+on:
+  push:
+    branches: [cleanup/ios-spm-android-builtin-kotlin-20261002]
+    paths:
+      - .github/workflows/bil_dispatch_clean_signed_33_30_once.yml
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  verify-and-dispatch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: 0be412776c4ba02f4fce63d9a381f4206c1dd941
+      TARGET_REF: cleanup/ios-spm-android-builtin-kotlin-20261002
+      IOS_SOURCE: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
+      ANDROID_SOURCE: ${{ vars.BIL_ANDROID_V30_AUDITED_SOURCE_SHA }}
+      IOS_MANIFEST_EXPECTED: ${{ vars.BIL_IOS_V33_STAGING_MANIFEST_SHA256 }}
+      ANDROID_MANIFEST_EXPECTED: ${{ vars.BIL_ANDROID_V30_STAGING_MANIFEST_SHA256 }}
+    steps:
+      - name: Checkout exact clean source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: 0be412776c4ba02f4fce63d9a381f4206c1dd941
+          persist-credentials: false
+
+      - name: Verify clean release variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$IOS_SOURCE" = "$SOURCE_SHA" || { echo 'iOS audited source variable mismatch.' >&2; exit 1; }
+          test "$ANDROID_SOURCE" = "$SOURCE_SHA" || { echo 'Android audited source variable mismatch.' >&2; exit 1; }
+          IOS_ACTUAL="$(sha256sum docs/release/BIL_IOS_V33_FROZEN_SOURCE_MANIFEST_2026-09-29.md | awk '{print $1}')"
+          ANDROID_ACTUAL="$(sha256sum docs/release/BIL_ANDROID_V30_FROZEN_SOURCE_MANIFEST_2026-09-29.md | awk '{print $1}')"
+          test "$IOS_MANIFEST_EXPECTED" = "$IOS_ACTUAL" || { echo 'iOS manifest digest variable mismatch.' >&2; exit 1; }
+          test "$ANDROID_MANIFEST_EXPECTED" = "$ANDROID_ACTUAL" || { echo 'Android manifest digest variable mismatch.' >&2; exit 1; }
+          echo 'CLEAN_RELEASE_VARIABLE_BINDING_GATE=PASS'
+
+      - name: Dispatch signed iOS 33 to TestFlight
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg ref "$TARGET_REF" '{ref:$ref,inputs:{upload_to_testflight:"true",build_number:"33",run_native_crypto_checks:"true"}}')"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/bil_ios_signed_release.yml/dispatches" \
+            -d "$payload"
+
+      - name: Dispatch signed Android 30 artifact build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg ref "$TARGET_REF" '{ref:$ref,inputs:{build_number:"30",run_native_crypto_checks:"true"}}')"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/bil_android_release_candidate.yml/dispatches" \
+            -d "$payload"
