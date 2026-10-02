@@ -59,6 +59,10 @@ jobs:
           if destination.exists():
               shutil.rmtree(destination)
           shutil.copytree(source, destination, symlinks=False)
+          for unused in ('example', 'test'):
+              candidate = destination / unused
+              if candidate.exists():
+                  shutil.rmtree(candidate)
           PY
 
           cat > tool/vendor_in_app_review/android/build.gradle <<'GRADLE'
