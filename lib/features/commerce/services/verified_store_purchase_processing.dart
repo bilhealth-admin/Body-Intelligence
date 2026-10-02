@@ -156,15 +156,16 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       switch (verification) {
         case _StoreReceiptVerificationResult.ownershipConflict:
-          // Do not acknowledge, transfer, or retry billing for another owner.
-          // Keep this result through the rest of a multi-receipt restore.
+          ownershipConflictProductId = purchase.productID;
           if (_restoring) _restoreOwnershipConflict = true;
           state = VerifiedStoreState.failed;
           messageCode = 'purchase_owned_by_another_account';
         case _StoreReceiptVerificationResult.verifiedActive:
+          lastVerifiedProductId = purchase.productID;
           state = VerifiedStoreState.verified;
           messageCode = boost ? 'ai_boost_verified' : 'subscription_verified';
         case _StoreReceiptVerificationResult.verifiedInactive:
+          lastVerifiedProductId = purchase.productID;
           // An authentic but expired/refunded/revoked transaction must stop
           // replaying without granting paid access.
           state = products.isEmpty
