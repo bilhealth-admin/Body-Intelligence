@@ -199,8 +199,7 @@ if (!builtInKotlin) {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_17
     }
-}
-"""
+}"""
     new_kotlin = """def configureBILKotlin = {
     extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension) { kotlinExtension ->
         kotlinExtension.compilerOptions { options ->
