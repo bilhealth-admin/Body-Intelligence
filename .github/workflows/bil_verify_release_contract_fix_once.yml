@@ -1,0 +1,36 @@
+name: BIL verify release contract fix once
+
+on:
+  push:
+    branches: [ops/verify-release-contract-fix-20261002]
+    paths:
+      - .github/workflows/bil_verify_release_contract_fix_once.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: d64d7e8c15fcf838ecd2f8fef4e260675f8d93a3
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Run corrected release contract only
+        run: >-
+          flutter test --no-pub
+          test/features/commerce/billing_release_hardening_contract_test.dart
+          --timeout 5m
