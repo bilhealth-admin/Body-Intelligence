@@ -35,6 +35,8 @@ class BilDynamicStoreOffers extends StatefulWidget {
     this.purchaseInProgress = false,
     this.restoreInProgress = false,
     this.purchaseEnabled = true,
+    this.blockedPurchaseKinds = const <BilStoreProductKind>{},
+    this.blockedPurchaseMessage,
     this.purchaseStatusMessage,
     this.purchaseStatusIsError = false,
     this.currentPlan = CommercePlan.free,
@@ -60,6 +62,8 @@ class BilDynamicStoreOffers extends StatefulWidget {
   /// The verified store service owns this gate. The display surface never
   /// guesses that a stale product can be purchased.
   final bool purchaseEnabled;
+  final Set<BilStoreProductKind> blockedPurchaseKinds;
+  final String? blockedPurchaseMessage;
 
   /// Plain-language feedback from the verified purchase boundary. This is
   /// deliberately separate from entitlement state: a local callback grants
@@ -159,6 +163,9 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
           ];
 
     final selectedOffer = _selectedOffer;
+    final selectedOwnershipBlocked =
+        selectedOffer != null &&
+        widget.blockedPurchaseKinds.contains(selectedOffer.kind);
     final controlsLocked = widget.loading || widget.purchaseInProgress;
     return Stack(
       children: [
@@ -326,9 +333,13 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
               loading: controlsLocked,
-              enabled: widget.purchaseEnabled,
-              statusMessage: widget.purchaseStatusMessage,
-              statusIsError: widget.purchaseStatusIsError,
+              enabled: widget.purchaseEnabled && !selectedOwnershipBlocked,
+              statusMessage: selectedOwnershipBlocked
+                  ? widget.blockedPurchaseMessage
+                  : widget.purchaseStatusMessage,
+              statusIsError: selectedOwnershipBlocked
+                  ? true
+                  : widget.purchaseStatusIsError,
               onPressed: () => widget.onPurchaseRequested(selectedOffer),
             ),
           ),
