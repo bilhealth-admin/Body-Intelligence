@@ -23,7 +23,9 @@ import 'package:go_router/go_router.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('profile edit recovers the owner-scoped database instead of retrying a stale stream', () {
+  test(
+    'profile edit recovers the owner-scoped database instead of retrying a stale stream',
+    () {
     final page = File(
       'lib/features/profile/premium_profile_page.dart',
     ).readAsStringSync();
@@ -34,11 +36,12 @@ void main() {
     expect(page, contains('profileStorageFailure()'));
     expect(actions, contains('ref.invalidate(databaseProvider)'));
     expect(actions, contains('repo.localOwnerId != authIdentity.ownerId'));
-    expect(
-      actions,
-      isNot(contains('Profile storage owner does not match auth owner.')),
-    );
-  });
+      expect(
+        actions,
+        isNot(contains('Profile storage owner does not match auth owner.')),
+      );
+    },
+  );
 
   testWidgets(
     'profile changes autosave profile goal and preferences together',
