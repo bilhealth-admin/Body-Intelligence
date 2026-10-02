@@ -215,15 +215,17 @@ jobs:
 
           root_build = Path('android/build.gradle.kts')
           root_text = root_build.read_text()
-          kotlin_runtime = '''buildscript {
-    dependencies {
-        // AGP 9 built-in Kotlin defaults to 2.2.10, while Flutter 3.47+
-        // requires at least 2.2.20. Keep BIL's already-audited 2.3.20.
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
-    }
-}
-
-'''
+          kotlin_runtime = "\n".join([
+              "buildscript {",
+              "    dependencies {",
+              "        // AGP 9 built-in Kotlin defaults to 2.2.10, while Flutter 3.47+",
+              "        // requires at least 2.2.20. Keep BIL's already-audited 2.3.20.",
+              "        classpath(\"org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20\")",
+              "    }",
+              "}",
+              "",
+              "",
+          ])
           if 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20' not in root_text:
               root_text = kotlin_runtime + root_text
           root_build.write_text(root_text)
