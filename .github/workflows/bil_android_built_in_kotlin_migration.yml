@@ -23,7 +23,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
-          flutter-version: 3.44.6
+          flutter-version: 3.47.2
           cache: true
 
       - name: Resolve current dependencies
@@ -150,6 +150,14 @@ jobs:
 
           pubspec = Path('pubspec.yaml')
           source = pubspec.read_text()
+          if '  flutter: ">=3.47.0"' not in source:
+              marker = 'environment:\n  sdk: ^3.12.2\n'
+              if source.count(marker) != 1:
+                  raise SystemExit('Expected app SDK environment block exactly once.')
+              source = source.replace(
+                  marker,
+                  marker + '  flutter: ">=3.47.0"\n',
+              )
           old_scanner = '  mobile_scanner: ^7.4.0'
           if source.count(old_scanner) != 1:
               raise SystemExit('Expected exact mobile_scanner 7.4.0 constraint once.')
@@ -184,6 +192,25 @@ jobs:
           if 'android.builtInKotlin=false' in gradle:
               raise SystemExit('Failed to enable built-in Kotlin.')
           properties.write_text(gradle)
+
+          settings = Path('android/settings.gradle.kts')
+          settings_text = settings.read_text()
+          kotlin_decl = '    id("org.jetbrains.kotlin.android") version "2.3.20" apply false\n'
+          if settings_text.count(kotlin_decl) != 1:
+              raise SystemExit('Expected root Kotlin plugin declaration exactly once.')
+          settings_text = settings_text.replace(kotlin_decl, '')
+          settings_text = settings_text.replace(
+              '    // Keep this trio aligned with the Flutter 3.44 stable template. AGP 9.2\n'
+              '    // requires Gradle 9.4.1, which is outside Kotlin 2.2.20\'s supported range.\n',
+              '    // AGP 9.0.1 is retained for this release; Kotlin compilation is provided\n'
+              '    // by AGP built-in Kotlin under Flutter 3.47+.\n',
+          )
+          settings_text = settings_text.replace(
+              '    // Flutter versions before 3.47 still use the temporary legacy-KGP bridge\n'
+              '    // for plugins that have not completed their built-in Kotlin migration.\n',
+              '',
+          )
+          settings.write_text(settings_text)
           PY
 
           flutter pub get
@@ -214,6 +241,7 @@ jobs:
           flutter test --no-pub --concurrency 1 --timeout 2m \
             test/app/services/store_review_prompt_service_test.dart \
             test/platform_readiness/android15_review_readiness_contract_test.dart \
+            test/launch_readiness/release_configuration_workflow_gate_test.dart \
             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart \
             test/features/nutrition/p5_001_barcode_foundation_test.dart
 
@@ -267,13 +295,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          changed = []
+          for workflow in Path('.github/workflows').glob('*.y*ml'):
+              source = workflow.read_text()
+              if '3.44.6' in source:
+                  workflow.write_text(source.replace('3.44.6', '3.47.2'))
+                  changed.append(str(workflow))
+          if not changed:
+              raise SystemExit('Expected at least one release workflow pinned to Flutter 3.44.6.')
+          print('Updated Flutter workflow pins:', *changed, sep='\n- ')
+          PY
           rm -f .github/workflows/bil_android_built_in_kotlin_migration.yml
           git add \
             pubspec.yaml \
             pubspec.lock \
             android/gradle.properties \
+            android/settings.gradle.kts \
             tool/vendor_in_app_review \
-            .github/workflows/bil_android_built_in_kotlin_migration.yml
+            .github/workflows
           git diff --cached --check
           python3 - <<'PY'
           import subprocess
@@ -281,8 +322,9 @@ jobs:
               'pubspec.yaml',
               'pubspec.lock',
               'android/gradle.properties',
+              'android/settings.gradle.kts',
               'tool/vendor_in_app_review/',
-              '.github/workflows/bil_android_built_in_kotlin_migration.yml',
+              '.github/workflows/',
           )
           files = subprocess.check_output(
               ['git', 'diff', '--cached', '--name-only'], text=True
