@@ -2,7 +2,7 @@ name: BIL Final Release Certification
 
 on:
   push:
-    branches: [fix/community-sapphire-health-3033]
+    branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BIL_RC_BRANCH: fix/community-sapphire-health-3033
+  BIL_RC_BRANCH: ${{ github.ref_name }}
   BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
   FLUTTER_VERSION: 3.44.6
 
