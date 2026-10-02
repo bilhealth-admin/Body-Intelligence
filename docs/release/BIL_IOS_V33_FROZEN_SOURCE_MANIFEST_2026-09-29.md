@@ -1,4 +1,4 @@
-# BIL iOS 1.0.0 build 33 — final prebuild source manifest
+# BIL iOS 1.0.0 build 33 — final frozen source manifest
 
 `STAGING_MANIFEST_COMPLETE: YES`
 
@@ -10,75 +10,84 @@
 
 `RELEASE_BUILD_NUMBER: 33`
 
-## Accepted application source
+## Frozen application source
 
-Native Android 29 / iOS 32 base: `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
-Retained Facebook/QR/Community/push functional base:
-`59839c7deb4d1cc860275b9e69578e299cc24d0a`.
-Final exhaustive application/test source:
-`960bead1d24ffea38d963b9e5f58fac0963a2579`.
+Production baseline shared by iOS 32 / Android 29:
+`9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
 
-Final exhaustive QA:
-https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36664811378
+Final certified application/test source:
+`2184f772468fb36c6ab633c8b79591e3472ebb64`.
 
-The run completed Flutter analyze, the focused regression/performance gate,
-visual + isolated cloud contracts, and all eight full-suite shards successfully.
+The release freeze commit that contains this manifest is documentation-only and
+must not change application, native, dependency, or build inputs from the
+application/test source above.
 
-## Final verified counts
+## Final automated certification
 
-- Test files discovered and scheduled exactly once: **1,033**
-- Visible Flutter cases passed: **5,656**
-- Failed cases: **0**
-- Error events: **0**
-- Existing conditional skips: **6**
-- Focused regression cases: **363 passed**
-- Explicit performance budget cases: **2 passed**
-- Community visual matrix: **8 passed**
-- Deno push/community provider tests: **12 passed**
-- Final visual/cloud contract job: **SUCCESS**
+BIL Final Release Certification #89:
+https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36966056579
 
-No path exclusion or test-name filter was used in the eight full-suite shards.
+Result: **SUCCESS** on `2184f772468fb36c6ab633c8b79591e3472ebb64`.
 
-## Included final corrections
+The run completed the immutable-source gate, both static/security/dependency
+passes, both complete eight-shard Flutter test passes, visual + isolated-cloud
+passes, pre-final fault/stress/store/security gates, and the Apple + Google
+read-only store audit successfully.
 
-The accepted source includes the reviewed premium More presentation and compact
-three-item bottom dock; the Quick Add action itself retains its existing routes
-and behavior. Weekly Report and Nutrition/Steps directional controls are
-RTL/LTR-aware. Nutrition empty-day Log food opens the existing real FoodLogPage
-and is covered by an open/return widget regression. The More split preserves all
-existing destinations while keeping architecture size limits strict.
+BIL RC mobile test builds #55:
+https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36966056600
 
-Previously accepted Community, QR, Android Facebook, push, daily Active Energy
-and completed-day heart history behavior is retained. Native Watch settings,
-native health query surfaces, dashboard/current-value UI, package/bundle IDs,
-store routes, purchase logic and native iOS/Google login routes remain outside
-the visual polish changes.
+Result: **SUCCESS** on `2184f772468fb36c6ab633c8b79591e3472ebb64`.
 
-The reviewed Weekly RTL and More/settings golden baselines were refreshed only
-for the intentionally changed UI and then the one-shot refresh mechanism was
-removed.
+- Android APK/AAB + emulator evidence: **SUCCESS**
+- iOS simulator + unsigned production-shaped device evidence: **SUCCESS**
+- iOS native integration tests: **SUCCESS**
+- iPhone/iPad lifecycle and deep-link evidence: **SUCCESS**
 
-## Production cloud review
+Sapphire #203 executed its test shard successfully (665 success, 0 failure,
+0 error in the affected shard) but GitHub returned `ECONNRESET` while uploading
+that shard's artifact. That infrastructure upload error is not treated as an
+application/test failure; Final Release Certification #89 independently ran
+both complete eight-shard suites successfully on the same source.
 
-Production Supabase includes the reviewed QR and Community attention/read
-migrations plus the final RLS auth-initplan and FK-index performance
-hardening migrations. Public-table RLS and private-schema client isolation were
-rechecked. Remaining advisor items are documented in
-`docs/release/BIL_SAPPHIRE_SOURCE_ACCEPTANCE_2026-09-30.md`; they are not
-unresolved application-source defects.
+## Included release corrections
+
+This source retains all accepted changes after iOS 32 / Android 29, including
+local-first dashboard continuity when offline, verified paid-entitlement
+continuity through transient network failures, prevention of false temporary
+Free locks, Community/message unread-count corrections, onboarding/profile
+persistence fixes, RTL/navigation polish, connected-health daily history,
+explicit user-initiated Apple Health permission timing, and the iOS native
+plugin-graph isolation that keeps Windows-only barcode native code out of the
+iOS build while preserving iPhone barcode scanning.
+
+## Accepted non-blocking cleanup items
+
+The following are intentionally deferred to a separate post-release cleanup
+branch and are not unresolved product defects for build 33:
+
+- The existing iOS CocoaPods integration remains alongside Swift Packages.
+  Flutter reports this only as a build-time cleanup opportunity.
+- The current Android/Flutter toolchain reports future built-in-Kotlin migration
+  advisories for legacy plugin build scripts. Android 30 currently builds and
+  passes its release-candidate evidence; cleanup is deferred until after the
+  frozen 33/30 release is safely delivered.
+- Supabase Leaked Password Protection remains owner-deferred because it requires
+  the paid plan; the final certification records this as an accepted
+  non-blocking limitation.
 
 ## Immutable release bindings
 
 `BIL_IOS_V33_AUDITED_SOURCE_SHA` and
-`BIL_ANDROID_V30_AUDITED_SOURCE_SHA` must both name the same final frozen source commit chosen
-after the final docs-only freeze QA.
+`BIL_ANDROID_V30_AUDITED_SOURCE_SHA` must both name the exact same documentation-only
+release freeze commit containing this manifest.
 
-`BIL_IOS_V33_STAGING_MANIFEST_SHA256` must equal this file's committed-byte SHA-256 in
-that frozen source commit.
+`BIL_IOS_V33_STAGING_MANIFEST_SHA256` must equal the SHA-256 of this exact file
+in that frozen commit.
 
-A later dispatch-control commit may pin the existing signed workflow to that
-already-audited source without changing the source checked out for compilation.
+A later dispatch-control commit may update only the signed release workflow
+binding to that already-frozen source. The signed iOS build must check out the
+frozen source, not the dispatch-control commit.
 
-No AAB/IPA build, Play rollout, TestFlight upload or store submission is
-authorized merely by this manifest. Signed artifact and real-device acceptance
-remain separate.
+Signed-binary, TestFlight/store-sandbox, and physical-device acceptance remain
+separate release gates and are intentionally performed after this source freeze.
