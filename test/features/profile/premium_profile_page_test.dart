@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/services/runtime_permission_policy.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_native_settings_icon.dart';
