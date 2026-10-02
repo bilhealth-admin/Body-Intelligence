@@ -338,10 +338,12 @@ void _expectWorkflowOrder(
   required String build,
 }) {
   final tests = workflow.lastIndexOf('flutter test');
-  final sanitizer = workflow.indexOf(
-    'dart run tool/release/sanitize_flutter_release_plugins.dart '
-    '--platform=$platform',
-  );
+  final releaseSanitizer = platform == 'ios'
+      ? 'dart run tool/release/sanitize_flutter_release_plugins.dart '
+            '--platform=ios --defer-ios-google-mobile-ads'
+      : 'dart run tool/release/sanitize_flutter_release_plugins.dart '
+            '--platform=android';
+  final sanitizer = workflow.indexOf(releaseSanitizer);
   final releaseBuild = workflow.indexOf(build);
   expect(tests, greaterThanOrEqualTo(0));
   expect(sanitizer, greaterThan(tests));

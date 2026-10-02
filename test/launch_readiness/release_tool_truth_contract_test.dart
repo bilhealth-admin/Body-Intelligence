@@ -126,6 +126,7 @@ void main() {
             String verifyMode,
             String productionMarker,
             String nativeMarker,
+            String releaseSanitizer,
           })
         >{
           'Android': (
@@ -141,6 +142,8 @@ void main() {
                 'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED',
             nativeMarker:
                 'ADMOB_ANDROID_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
+            releaseSanitizer:
+                'dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android',
           ),
           'iOS': (
             source: ios,
@@ -150,6 +153,8 @@ void main() {
             productionMarker:
                 'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED',
             nativeMarker: 'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
+            releaseSanitizer:
+                'dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --defer-ios-google-mobile-ads',
           ),
         };
     for (final entry in expectedByPlatform.entries) {
@@ -215,7 +220,7 @@ void main() {
         'integration_test/system_crypto_bridge_integration_test.dart',
       );
       final sanitizer = entry.value.source.indexOf(
-        'dart run tool/release/sanitize_flutter_release_plugins.dart',
+        entry.value.releaseSanitizer,
       );
       final helperTests = entry.value.source.indexOf(
         'python3 tool/release/test_configure_deferred_admob.py',
