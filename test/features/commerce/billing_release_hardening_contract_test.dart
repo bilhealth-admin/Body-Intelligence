@@ -192,7 +192,10 @@ void main() {
 
     expect(service, contains("defaultTargetPlatform == TargetPlatform.iOS"));
     expect(service, contains("storekit_duplicate_product_object"));
+    expect(service, contains("_reconcileAppleUnfinishedBeforePurchase"));
+    expect(service, contains("SK2Transaction.unfinishedTransactions()"));
     expect(service, contains("await restore();"));
+    expect(service, contains("_appleDuplicateRetryInFlight"));
     expect(service, contains("queryProductDetails({displayed.id})"));
     expect(processing, contains("_recoverVerifiedStoreKit2Completion"));
     expect(processing, contains("SK2Transaction.unfinishedTransactions()"));
