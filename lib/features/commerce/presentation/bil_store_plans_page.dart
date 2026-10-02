@@ -392,7 +392,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         purchaseStatusMessage: purchaseFeedbackKey == null
             ? null
             : BilStoreCopy.text(locale, purchaseFeedbackKey),
-        purchaseStatusIsError: ownershipBlocked || _purchaseFeedbackIsError,
+        purchaseStatusIsError:
+            blockedPurchaseKinds.isNotEmpty || _purchaseFeedbackIsError,
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
         onPurchaseRequested: _requestPurchase,
