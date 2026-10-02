@@ -194,7 +194,6 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     }
   }
 
-
   Future<bool> _recoverVerifiedStoreKit2Completion(
     PurchaseDetails purchase,
   ) async {
