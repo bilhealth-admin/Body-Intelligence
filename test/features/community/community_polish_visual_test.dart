@@ -326,6 +326,10 @@ void main() {
                   ),
                 ),
               );
+              await tester.pump();
+              if (scene.key == 'feed') {
+                await tester.pump(const Duration(milliseconds: 2200));
+              }
               await tester.pumpAndSettle();
               await settleVisualAssetImages(tester);
               await tester.pumpAndSettle();
