@@ -229,7 +229,9 @@ void main() {
     expect(ios, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));
     expect(
       android,
-      contains('--android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml"'),
+      contains(
+        '--android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml"',
+      ),
     );
     expect(ios, contains('--ios-info-plist "$SIGNED_APP/Info.plist"'));
     expect(ios, contains('ReleaseAdMob.xcconfig'));
