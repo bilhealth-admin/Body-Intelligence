@@ -28,7 +28,7 @@ jobs:
           IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
         run: |
           set -euo pipefail
-          EXPECTED='65df51e265c7119bbdfc6f8ec867949097156b6c'
+          EXPECTED='c059f552495cbff69ce4ff7cf88ba547b5742d6f'
           test "$ANDROID_AUDITED_SOURCE" = "$EXPECTED" || { echo 'BIL_ANDROID_V30_AUDITED_SOURCE_SHA is not the accepted Sapphire source.' >&2; exit 1; }
           test "$IOS_AUDITED_SOURCE" = "$EXPECTED" || { echo 'BIL_IOS_V33_AUDITED_SOURCE_SHA must match Android 30.' >&2; exit 1; }
 
