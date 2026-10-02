@@ -58,33 +58,42 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
 
-    test('passive startup never requests or probes Apple Health access', () async {
-      expect(await gateway.requestStartupPermissions(), isNull);
-      expect(calls, isEmpty);
-      expect(
-        await host.productFlows!.store.get(
-          'connected_health_consent',
-          'Apple Health',
-        ),
-        isNull,
-      );
-    });
+    test(
+      'passive startup never requests or probes Apple Health access',
+      () async {
+        expect(await gateway.requestStartupPermissions(), isNull);
+        expect(calls, isEmpty);
+        expect(
+          await host.productFlows!.store.get(
+            'connected_health_consent',
+            'Apple Health',
+          ),
+          isNull,
+        );
+      },
+    );
 
-    test('explicit user action requests unanswered Apple Health access', () async {
-      final result = await gateway.requestPermissions();
-      expect(calls.where((call) => call == 'requestPermissions'), hasLength(1));
-      expect(result.status, ConnectedHealthStatus.authorizationRequested);
-      expect(result.failureCode, isNull);
-      expect(calls, isNot(contains('readChanges')));
-      expect(calls, isNot(contains('openSettings')));
-      expect(
-        (await host.productFlows!.store.get(
-          'connected_health_consent',
-          'Apple Health',
-        ))!['readRequested'],
-        isTrue,
-      );
-    });
+    test(
+      'explicit user action requests unanswered Apple Health access',
+      () async {
+        final result = await gateway.requestPermissions();
+        expect(
+          calls.where((call) => call == 'requestPermissions'),
+          hasLength(1),
+        );
+        expect(result.status, ConnectedHealthStatus.authorizationRequested);
+        expect(result.failureCode, isNull);
+        expect(calls, isNot(contains('readChanges')));
+        expect(calls, isNot(contains('openSettings')));
+        expect(
+          (await host.productFlows!.store.get(
+            'connected_health_consent',
+            'Apple Health',
+          ))!['readRequested'],
+          isTrue,
+        );
+      },
+    );
 
     test(
       'manual review opens guidance and preserves existing read anchors',
