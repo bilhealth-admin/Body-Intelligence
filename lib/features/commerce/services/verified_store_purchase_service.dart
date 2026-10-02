@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
@@ -233,7 +234,10 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     required String ownerId,
     required int generation,
   }) async {
-    if (defaultTargetPlatform != TargetPlatform.android) return displayed;
+    if (defaultTargetPlatform != TargetPlatform.android &&
+        defaultTargetPlatform != TargetPlatform.iOS) {
+      return displayed;
+    }
     _checkoutPreflightInFlight = true;
     try {
       final response = await _purchase
@@ -245,30 +249,52 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         messageCode = 'authentication_required';
         return null;
       }
-      if (response.error != null) {
+      if (response.error != null || response.notFoundIDs.contains(displayed.id)) {
         throw StateError('catalog_refresh_failed');
       }
-      ProductDetails? preferred;
-      ProductDetails? matching;
-      for (final candidate in response.productDetails) {
-        if (candidate.id != displayed.id ||
-            response.notFoundIDs.contains(candidate.id) ||
-            candidate is! GooglePlayProductDetails ||
-            !releaseEligibleStoreProduct(candidate)) {
-          continue;
+
+      ProductDetails? refreshed;
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        ProductDetails? preferred;
+        ProductDetails? matching;
+        for (final candidate in response.productDetails) {
+          if (candidate.id != displayed.id ||
+              candidate is! GooglePlayProductDetails ||
+              !releaseEligibleStoreProduct(candidate)) {
+            continue;
+          }
+          preferred = preferredStoreProduct(preferred, candidate);
+          if (sameGooglePlayCheckoutTerms(displayed, candidate)) {
+            matching ??= candidate;
+          }
         }
-        preferred = preferredStoreProduct(preferred, candidate);
-        if (sameGooglePlayCheckoutTerms(displayed, candidate)) {
-          matching ??= candidate;
+        refreshed = matching ?? preferred;
+        products = Map.unmodifiable({
+          for (final entry in products.entries)
+            if (entry.key != displayed.id) entry.key: entry.value,
+          displayed.id: ?refreshed,
+        });
+        if (matching != null) return matching;
+      } else {
+        for (final candidate in response.productDetails) {
+          if (candidate.id == displayed.id &&
+              releaseEligibleStoreProduct(candidate)) {
+            refreshed = candidate;
+            break;
+          }
+        }
+        products = Map.unmodifiable({
+          for (final entry in products.entries)
+            if (entry.key != displayed.id) entry.key: entry.value,
+          displayed.id: ?refreshed,
+        });
+        if (refreshed != null &&
+            refreshed.currencyCode == displayed.currencyCode &&
+            (refreshed.rawPrice - displayed.rawPrice).abs() < 0.000001) {
+          return refreshed;
         }
       }
-      final refreshed = matching ?? preferred;
-      products = Map.unmodifiable({
-        for (final entry in products.entries)
-          if (entry.key != displayed.id) entry.key: entry.value,
-        displayed.id: ?refreshed,
-      });
-      if (matching != null) return matching;
+
       state = products.isEmpty
           ? VerifiedStoreState.unavailable
           : VerifiedStoreState.ready;
@@ -322,7 +348,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
-    if (defaultTargetPlatform == TargetPlatform.android) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
       product = await _freshCheckoutProduct(
         product,
         ownerId: user.id,
@@ -387,6 +414,25 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
       _clearPurchaseInitiation();
+      notifyListeners();
+    } on PlatformException catch (error) {
+      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
+      _clearPurchaseInitiation();
+      if (defaultTargetPlatform == TargetPlatform.iOS &&
+          error.code == 'storekit_duplicate_product_object') {
+        // StoreKit 2 refuses a second checkout while an older transaction for
+        // this product is still unfinished. Reconcile that transaction instead
+        // of leaving App Review at a generic purchase failure.
+        state = products.isEmpty
+            ? VerifiedStoreState.unavailable
+            : VerifiedStoreState.ready;
+        messageCode = 'purchase_reconciliation_pending';
+        notifyListeners();
+        await restore();
+        return;
+      }
+      state = VerifiedStoreState.failed;
+      messageCode = 'purchase_failed';
       notifyListeners();
     } on Object {
       if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
