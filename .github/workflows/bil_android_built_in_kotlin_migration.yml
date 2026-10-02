@@ -214,6 +214,13 @@ jobs:
           PY
 
           flutter pub get
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('analysis_options.yaml')
+          text = path.read_text()
+          normalized = '\n'.join(line.rstrip() for line in text.splitlines()) + '\n'
+          path.write_text(normalized)
+          PY
           git diff --check
 
       - name: Verify dependency bindings
@@ -311,6 +318,7 @@ jobs:
           git add \
             pubspec.yaml \
             pubspec.lock \
+            analysis_options.yaml \
             android/gradle.properties \
             android/settings.gradle.kts \
             tool/vendor_in_app_review \
@@ -321,6 +329,7 @@ jobs:
           allowed_prefixes = (
               'pubspec.yaml',
               'pubspec.lock',
+              'analysis_options.yaml',
               'android/gradle.properties',
               'android/settings.gradle.kts',
               'tool/vendor_in_app_review/',
