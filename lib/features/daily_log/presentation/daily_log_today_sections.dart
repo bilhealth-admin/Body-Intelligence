@@ -169,17 +169,20 @@ class DailyLogWeekStrip extends StatelessWidget {
                           width: selected ? 2 : 1.5,
                         ),
                       ),
-                      child: selected
-                          ? Center(
-                              child: Text(
-                                '${day.day}',
-                                style: TextStyle(
-                                  color: scheme.onPrimaryContainer,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            )
-                          : null,
+                      child: Center(
+                        child: Text(
+                          '${day.day}',
+                          style: TextStyle(
+                            color: selected
+                                ? scheme.onPrimaryContainer
+                                : scheme.onSurfaceVariant,
+                            fontSize: 12,
+                            fontWeight: selected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
