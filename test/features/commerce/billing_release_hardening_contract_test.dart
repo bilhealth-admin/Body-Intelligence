@@ -181,4 +181,22 @@ void main() {
     expect(source, contains("provider in ('google', 'apple')"));
     expect(source, contains('Closed-test grants are a separate'));
   });
+
+  test('iOS subscription checkout refreshes and recovers StoreKit2 duplicates', () {
+    final service = File(
+      'lib/features/commerce/services/verified_store_purchase_service.dart',
+    ).readAsStringSync();
+    final processing = File(
+      'lib/features/commerce/services/verified_store_purchase_processing.dart',
+    ).readAsStringSync();
+
+    expect(service, contains("defaultTargetPlatform == TargetPlatform.iOS"));
+    expect(service, contains("storekit_duplicate_product_object"));
+    expect(service, contains("await restore();"));
+    expect(service, contains("queryProductDetails({displayed.id})"));
+    expect(processing, contains("_recoverVerifiedStoreKit2Completion"));
+    expect(processing, contains("SK2Transaction.unfinishedTransactions()"));
+    expect(processing, contains("SK2Transaction.finish("));
+  });
+
 }
