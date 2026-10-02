@@ -378,17 +378,21 @@ jobs:
 
           rc = Path('.github/workflows/bil_rc_mobile_test_build.yml')
           rc_text = rc.read_text()
-          rc_install = '''      - name: Install Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.47.5
-          cache: true
-
-'''
-          rc_patch = rc_install + '''      - name: Apply pinned Flutter built-in Kotlin validation fix
-        run: python3 tool/release/patch_flutter_builtin_kotlin_validation.py
-
-'''
+          rc_install = "\n".join([
+              "      - name: Install Flutter",
+              "        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+              "        with:",
+              "          flutter-version: 3.47.5",
+              "          cache: true",
+              "",
+              "",
+          ])
+          rc_patch = rc_install + "\n".join([
+              "      - name: Apply pinned Flutter built-in Kotlin validation fix",
+              "        run: python3 tool/release/patch_flutter_builtin_kotlin_validation.py",
+              "",
+              "",
+          ])
           if rc_text.count(rc_install) < 1:
               raise SystemExit('Android RC Flutter install block was not found.')
           rc.write_text(rc_text.replace(rc_install, rc_patch, 1))
@@ -397,17 +401,21 @@ jobs:
 
           android_release = Path('.github/workflows/bil_android_release_candidate.yml')
           release_text = android_release.read_text()
-          release_install = '''      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.47.5
-          cache: true
-
-'''
-          release_patch = release_install + '''      - name: Apply pinned Flutter built-in Kotlin validation fix
-        run: python3 tool/release/patch_flutter_builtin_kotlin_validation.py
-
-'''
+          release_install = "\n".join([
+              "      - name: Install Flutter stable",
+              "        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+              "        with:",
+              "          flutter-version: 3.47.5",
+              "          cache: true",
+              "",
+              "",
+          ])
+          release_patch = release_install + "\n".join([
+              "      - name: Apply pinned Flutter built-in Kotlin validation fix",
+              "        run: python3 tool/release/patch_flutter_builtin_kotlin_validation.py",
+              "",
+              "",
+          ])
           if release_text.count(release_install) != 1:
               raise SystemExit('Signed Android Flutter install block was not found exactly once.')
           android_release.write_text(release_text.replace(release_install, release_patch, 1))
