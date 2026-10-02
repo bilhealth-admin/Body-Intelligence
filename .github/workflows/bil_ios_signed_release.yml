@@ -251,7 +251,10 @@ jobs:
           BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V33_STAGING_MANIFEST_SHA256 }}
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
+          set -euo pipefail
           flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          python3 tool/release/remove_generated_cocoapods_integration.py
           flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
           python3 tool/release/run_portable_release_tests.py --code-only
@@ -433,7 +436,16 @@ jobs:
             --dart-define=BIL_PUSH_PROVIDER_READY=true \
             --dart-define=BIL_ADS_ENABLED=false \
             --dart-define=BIL_AD_PROVIDER_READY=false \
-            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false \
+            2>&1 | tee BIL-ios-signed-build.log
+          if grep -Fq 'All plugins found for ios are Swift Packages, but your project still has CocoaPods integration' BIL-ios-signed-build.log; then
+            echo 'CocoaPods integration warning reappeared in the signed iOS build.' >&2
+            exit 1
+          fi
+          if grep -Fq 'Running pod install' BIL-ios-signed-build.log; then
+            echo 'Signed iOS build unexpectedly invoked CocoaPods.' >&2
+            exit 1
+          fi
 
       - name: Verify regenerated iOS native plugin graph
         shell: bash

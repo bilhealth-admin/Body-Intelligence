@@ -97,6 +97,9 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Apply warning-free Android plugin Gradle cleanup
+        run: python3 tool/release/patch_android_legacy_kgp_plugins.py
+
       - name: Analyze release source
         run: flutter analyze --no-pub
 
@@ -181,25 +184,32 @@ jobs:
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
           PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
-        run: >-
-          flutter build appbundle --release --no-pub
-          --build-number "$BUILD_NUMBER"
-          --dart-define=BIL_ENVIRONMENT=production
-          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true
-          --dart-define=BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER"
-          --dart-define=BIL_PAYMENTS_ENABLED=true
-          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
-          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
-          --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal
-          --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json
-          --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true
-          --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true
-          --dart-define=BIL_FACEBOOK_LOGIN_READY=true
-          --dart-define=BIL_PUSH_ENABLED=true
-          --dart-define=BIL_PUSH_PROVIDER_READY=true
-          --dart-define=BIL_ADS_ENABLED=false
-          --dart-define=BIL_AD_PROVIDER_READY=false
-          --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build appbundle --release --no-pub \
+            --build-number "$BUILD_NUMBER" \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
+            --dart-define=BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER" \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
+            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
+            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
+            --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json \
+            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
+            --dart-define=BIL_PUSH_ENABLED=true \
+            --dart-define=BIL_PUSH_PROVIDER_READY=true \
+            --dart-define=BIL_ADS_ENABLED=false \
+            --dart-define=BIL_AD_PROVIDER_READY=false \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false \
+            2>&1 | tee BIL-android-signed-build.log
+          if grep -Fq 'Your app uses the following plugins that apply Kotlin Gradle Plugin' BIL-android-signed-build.log; then
+            echo 'KGP plugin warning reappeared in the signed Android build.' >&2
+            exit 1
+          fi
 
       - name: Verify final AAB SDK, optional hardware, 16 KB packaging, and ELF alignment
         id: android_16k_gate
