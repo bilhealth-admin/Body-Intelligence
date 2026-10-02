@@ -1,4 +1,4 @@
-# BIL iOS 1.0.0 build 33 — final frozen source manifest
+# BIL iOS 1.0.0 build 33 — warning-clean final frozen source manifest
 
 `STAGING_MANIFEST_COMPLETE: YES`
 
@@ -15,24 +15,38 @@
 Production baseline shared by iOS 32 / Android 29:
 `9f439cae97d72b784880a1b1ac4ef1d33ede30c1`.
 
-Final certified application/test source:
+Last exhaustive application/test certification source:
 `2184f772468fb36c6ab633c8b79591e3472ebb64`.
 
-The release freeze commit that contains this manifest is documentation-only and
-must not change application, native, dependency, or build inputs from the
-application/test source above.
+Warning-clean release source:
+`7ab4da5f991f9bbfab986c333af66af553133066`.
 
-## Final automated certification
+The warning-clean source preserves the certified application/runtime behavior and
+adds only release/build hygiene around the already-reviewed plugin graph:
+- iOS removes only Flutter-generated CocoaPods scaffolding after the Windows-only
+  simple_barcode_scanner native plugin is excluded from the iOS graph.
+- Android keeps mobile_scanner 7.4.0 runtime bytes unchanged and removes direct
+  legacy KGP application from hosted plugin Gradle scripts while Flutter 3.44's
+  compatibility bridge remains authoritative.
+- The signed iOS/Android release workflows apply those same fail-closed cleanup
+  steps before the real signed builds.
+
+The release freeze commit containing this manifest is documentation-only and must
+not change application, native runtime, dependency, or signed-build logic from
+the warning-clean release source above.
+
+## Certification and cleanup evidence
 
 BIL Final Release Certification #89:
 https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36966056579
 
 Result: **SUCCESS** on `2184f772468fb36c6ab633c8b79591e3472ebb64`.
 
-The run completed the immutable-source gate, both static/security/dependency
-passes, both complete eight-shard Flutter test passes, visual + isolated-cloud
-passes, pre-final fault/stress/store/security gates, and the Apple + Google
-read-only store audit successfully.
+Its complete full-test pass contains **5,698 successful tests across 1,046 test
+files**, with 0 failures, 0 errors, and 6 documented skips. The certification
+runs the full suite twice and also includes static/security/dependency,
+visual/cloud, live backend, fault/stress, and Apple + Google store read-only
+gates.
 
 BIL RC mobile test builds #55:
 https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36966056600
@@ -44,11 +58,25 @@ Result: **SUCCESS** on `2184f772468fb36c6ab633c8b79591e3472ebb64`.
 - iOS native integration tests: **SUCCESS**
 - iPhone/iPad lifecycle and deep-link evidence: **SUCCESS**
 
-Sapphire #203 executed its test shard successfully (665 success, 0 failure,
-0 error in the affected shard) but GitHub returned `ECONNRESET` while uploading
-that shard's artifact. That infrastructure upload error is not treated as an
-application/test failure; Final Release Certification #89 independently ran
-both complete eight-shard suites successfully on the same source.
+Warning-clean iOS evidence:
+https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36976851791
+
+The iOS SwiftPM-only job completed **SUCCESS**. It built both the simulator app
+and the unsigned production-shaped device app after fail-closed removal of only
+the generated CocoaPods scaffolding; the workflow rejects the former CocoaPods
+warning and any `Running pod install` marker.
+
+Warning-clean Android evidence:
+https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/36978238064
+
+The Android cleanup job completed **SUCCESS**. It resolved the unchanged locked
+dependency graph, applied the fail-closed Gradle cleanup, passed focused release
+contracts, built both the debug APK and production-shaped release AAB, rejected
+the legacy KGP warning, and confirmed the lockfile did not move.
+
+Changes after those cleanup evidence commits are restricted to cleanup/release
+workflow wiring; no BIL application runtime file, iOS Runner source, Android app
+source, or barcode runtime implementation changed.
 
 ## Included release corrections
 
@@ -57,24 +85,14 @@ local-first dashboard continuity when offline, verified paid-entitlement
 continuity through transient network failures, prevention of false temporary
 Free locks, Community/message unread-count corrections, onboarding/profile
 persistence fixes, RTL/navigation polish, connected-health daily history,
-explicit user-initiated Apple Health permission timing, and the iOS native
-plugin-graph isolation that keeps Windows-only barcode native code out of the
-iOS build while preserving iPhone barcode scanning.
+explicit user-initiated Apple Health permission timing, and the existing iOS
+barcode native-graph isolation while preserving iPhone barcode scanning.
 
-## Accepted non-blocking cleanup items
+## Accepted non-blocking limitation
 
-The following are intentionally deferred to a separate post-release cleanup
-branch and are not unresolved product defects for build 33:
+Supabase Leaked Password Protection remains owner-deferred because it requires
+the paid plan. It is not an unresolved build defect.
 
-- The existing iOS CocoaPods integration remains alongside Swift Packages.
-  Flutter reports this only as a build-time cleanup opportunity.
-- The current Android/Flutter toolchain reports future built-in-Kotlin migration
-  advisories for legacy plugin build scripts. Android 30 currently builds and
-  passes its release-candidate evidence; cleanup is deferred until after the
-  frozen 33/30 release is safely delivered.
-- Supabase Leaked Password Protection remains owner-deferred because it requires
-  the paid plan; the final certification records this as an accepted
-  non-blocking limitation.
 
 ## Immutable release bindings
 
@@ -89,5 +107,5 @@ A later dispatch-control commit may update only the signed release workflow
 binding to that already-frozen source. The signed iOS build must check out the
 frozen source, not the dispatch-control commit.
 
-Signed-binary, TestFlight/store-sandbox, and physical-device acceptance remain
-separate release gates and are intentionally performed after this source freeze.
+Signed IPA validation, TestFlight upload, and physical/store-device acceptance
+remain the next release gates.
