@@ -38,7 +38,7 @@ jobs:
           test "$ANDROID_AUDITED_SOURCE" = "$EXPECTED" || { echo 'BIL_ANDROID_V30_AUDITED_SOURCE_SHA must match iOS 33.' >&2; exit 1; }
 
       - name: Checkout accepted source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           ref: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
 

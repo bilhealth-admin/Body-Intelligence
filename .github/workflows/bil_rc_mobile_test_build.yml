@@ -200,7 +200,7 @@ jobs:
     timeout-minutes: 100
     steps:
       - name: Checkout exact RC
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
