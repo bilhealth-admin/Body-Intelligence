@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../app/localization/sapphire_copy.dart';
 import 'community_sapphire.dart';
 
-/// Local first paint, not a forced-delay splash. Existing feed content is never
-/// covered during a refresh. Back/messages remain reachable in the parent bar.
+/// Branded first paint for Community entry.
+///
+/// The feed starts loading immediately behind this surface, while the caller
+/// keeps the welcome visible for the same 2.2-second minimum used by AI Coach.
+/// Refreshes after entry never re-show it. Back/messages remain reachable in
+/// the parent bar.
 class CommunityWelcome extends StatelessWidget {
   const CommunityWelcome({super.key});
   static const imageAsset =
