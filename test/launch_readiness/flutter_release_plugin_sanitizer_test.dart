@@ -313,9 +313,7 @@ void main() {
     expect(contracts, greaterThanOrEqualTo(0));
     expect(sanitizer, greaterThan(contracts));
     expect(sanitizer, lessThan(build));
-    expect(iosWindowsOnlyNativePluginNames, <String>{
-      'simple_barcode_scanner',
-    });
+    expect(iosWindowsOnlyNativePluginNames, <String>{'simple_barcode_scanner'});
   });
 
   test('signed workflows sanitize after tests and before release build', () {
@@ -377,7 +375,8 @@ Map<String, Object?> _graph(
   List<String> dependencies = const <String>[],
 }) => <String, Object?>{'name': name, 'dependencies': dependencies};
 
-const _iosRegistrantWithWindowsOnlyBarcode = r'''#import "GeneratedPluginRegistrant.h"
+const _iosRegistrantWithWindowsOnlyBarcode =
+    r'''#import "GeneratedPluginRegistrant.h"
 
 #if __has_include(<production_plugin/ProductionPlugin.h>)
 #import <production_plugin/ProductionPlugin.h>
