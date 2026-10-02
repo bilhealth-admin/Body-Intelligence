@@ -35,6 +35,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   Map<String, ProductDetails> products = const {};
   VerifiedStoreEntitlement? entitlement;
   String? messageCode;
+  String? ownershipConflictProductId;
+  String? lastVerifiedProductId;
   GooglePlayPurchaseDetails? _activeGooglePurchase;
   Future<void>? _initialization;
   Future<void> _purchaseUpdates = Future<void>.value();
