@@ -1,4 +1,5 @@
 name: BIL Android cleanup verification once
+# Final exact-state Android verification after EOF-safe mobile_scanner 7.4.0 patch.
 
 on:
   push:
