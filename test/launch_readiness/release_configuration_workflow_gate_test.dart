@@ -28,10 +28,7 @@ void main() {
     expect(ios, isNot(contains('--defer-ios-google-mobile-ads')));
     expect(ios, contains("grep -Fq 'google_mobile_ads'"));
     expect(ios, contains("grep -Fq 'FLTGoogleMobileAdsPlugin'"));
-    expect(
-      ios,
-      contains('validate_admob_production_configuration.py'),
-    );
+    expect(ios, contains('validate_admob_production_configuration.py'));
   });
 
   const workflows = <String>[
