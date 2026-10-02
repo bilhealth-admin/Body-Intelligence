@@ -18,18 +18,27 @@ void main() {
     final workflows =
         <
           String,
-          ({String prepareMode, String verifyMode, String nativeMarker})
+          ({
+            String prepareMode,
+            String verifyMode,
+            String nativeMarker,
+            String releaseSanitizer,
+          })
         >{
           '.github/workflows/bil_android_release_candidate.yml': (
             prepareMode: '--prepare-android-source-manifest',
             verifyMode: '--verify-android-merged-manifest',
             nativeMarker:
                 'ADMOB_ANDROID_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
+            releaseSanitizer:
+                'dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android',
           ),
           '.github/workflows/bil_ios_signed_release.yml': (
             prepareMode: '--prepare-ios-source-plist',
             verifyMode: '--verify-ios-final-plist',
             nativeMarker: 'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
+            releaseSanitizer:
+                'dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --defer-ios-google-mobile-ads',
           ),
         };
 
@@ -106,9 +115,7 @@ void main() {
       final nativeSourceTests = source.indexOf(
         'integration_test/system_crypto_bridge_integration_test.dart',
       );
-      final sanitizer = source.indexOf(
-        'dart run tool/release/sanitize_flutter_release_plugins.dart',
-      );
+      final sanitizer = source.indexOf(entry.value.releaseSanitizer);
       final helperTests = source.indexOf(
         'python3 tool/release/test_configure_deferred_admob.py',
       );
