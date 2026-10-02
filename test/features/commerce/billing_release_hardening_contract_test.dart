@@ -14,32 +14,22 @@ void main() {
     expect(source, contains('StoreCatalogConfiguration.privacyUrl'));
   });
 
-  test('signed workflows preserve commerce and owner-defer ads', () {
-    final workflows =
-        <
-          String,
-          ({String prepareMode, String verifyMode, String nativeMarker})
-        >{
-          '.github/workflows/bil_android_release_candidate.yml': (
-            prepareMode: '--prepare-android-source-manifest',
-            verifyMode: '--verify-android-merged-manifest',
-            nativeMarker:
-                'ADMOB_ANDROID_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
-          ),
-          '.github/workflows/bil_ios_signed_release.yml': (
-            prepareMode: '--prepare-ios-source-plist',
-            verifyMode: '--verify-ios-final-plist',
-            nativeMarker: 'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
-          ),
-        };
+  test('signed workflows preserve commerce and production AdMob', () {
+    const workflows = <String, String>{
+      '.github/workflows/bil_android_release_candidate.yml':
+          'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=PASS',
+      '.github/workflows/bil_ios_signed_release.yml':
+          'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS',
+    };
 
     for (final entry in workflows.entries) {
       final path = entry.key;
       final source = File(path).readAsStringSync();
       expect(source, contains('--dart-define=BIL_PAYMENTS_ENABLED=true'));
       expect(source, contains('--dart-define=BIL_ENVIRONMENT=production'));
-      expect(source, contains('BIL_ADS_ENABLED: false'));
-      expect(source, contains('BIL_AD_PROVIDER_READY: false'));
+      expect(source, contains('BIL_ADS_ENABLED: true'));
+      expect(source, contains('BIL_AD_PROVIDER_READY: true'));
+      expect(source, contains('BIL_ADMOB_PRODUCTION_READY: true'));
       expect(
         source,
         contains('--dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms'),
@@ -66,8 +56,9 @@ void main() {
         'BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true',
         'BIL_FACEBOOK_LOGIN_ENABLED=true',
         'BIL_FACEBOOK_LOGIN_READY=true',
-        'BIL_ADS_ENABLED=false',
-        'BIL_AD_PROVIDER_READY=false',
+        'BIL_ADS_ENABLED=true',
+        'BIL_AD_PROVIDER_READY=true',
+        'BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509',
         'BIL_ENABLE_CATALOG_TEST_ACCESS=false',
       ]) {
         expect(
@@ -76,62 +67,39 @@ void main() {
           reason: '$path: $define',
         );
       }
-      expect(
-        source,
-        contains('tool/release/configure_deferred_admob.py'),
-        reason: '$path must prepare and verify the deferred native state',
-      );
-      expect(
-        source,
-        contains('python3 tool/release/test_configure_deferred_admob.py'),
-        reason: '$path must run the deferred native helper regressions',
-      );
-      for (final productionToken in <String>[
-        'BIL_ADMOB_PRODUCTION_READY',
-        'BIL_ADMOB_PUBLISHER_ID',
+      for (final token in <String>[
         'BIL_ADMOB_ANDROID_APP_ID',
         'BIL_ADMOB_ANDROID_BANNER_ID',
         'BIL_ADMOB_IOS_APP_ID',
         'BIL_ADMOB_IOS_BANNER_ID',
         'validate_admob_production_configuration.py',
       ]) {
-        expect(
-          source,
-          isNot(contains(productionToken)),
-          reason: '$path must not consume deferred production AdMob input',
-        );
+        expect(source, contains(token), reason: path);
       }
-
-      final portableTests = source.indexOf('run_portable_release_tests.py');
-      final nativeSourceTests = source.indexOf(
-        'integration_test/system_crypto_bridge_integration_test.dart',
-      );
-      final sanitizer = source.indexOf(
-        'dart run tool/release/sanitize_flutter_release_plugins.dart',
-      );
-      final helperTests = source.indexOf(
-        'python3 tool/release/test_configure_deferred_admob.py',
-      );
-      final prepare = source.indexOf(entry.value.prepareMode);
-      final build = source.indexOf('flutter build');
-      final verify = source.indexOf(entry.value.verifyMode);
-      final nativeMarker = source.indexOf(entry.value.nativeMarker);
-      expect(portableTests, greaterThanOrEqualTo(0), reason: path);
-      expect(nativeSourceTests, greaterThanOrEqualTo(0), reason: path);
-      expect(prepare, greaterThan(nativeSourceTests), reason: path);
-      expect(prepare, greaterThan(portableTests), reason: path);
-      expect(sanitizer, greaterThan(nativeSourceTests), reason: path);
-      expect(helperTests, greaterThan(sanitizer), reason: path);
-      expect(prepare, greaterThan(helperTests), reason: path);
-      expect(prepare, lessThan(build), reason: path);
-      expect(verify, greaterThan(build), reason: path);
-      expect(nativeMarker, greaterThan(verify), reason: path);
       expect(
         source,
-        contains('ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED'),
+        isNot(contains('configure_deferred_admob.py')),
+        reason: '$path must not strip AdMob from the production candidate',
+      );
+      expect(
+        source,
+        contains('ADS_COMPILED_GATE=ENABLED_PRODUCTION'),
         reason: path,
       );
+      expect(source, contains(entry.value), reason: path);
     }
+
+    final ios = File(
+      '.github/workflows/bil_ios_signed_release.yml',
+    ).readAsStringSync();
+    expect(
+      ios,
+      contains(
+        'dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios',
+      ),
+    );
+    expect(ios, isNot(contains('--defer-ios-google-mobile-ads')));
+    expect(ios, contains("grep -Fq 'FLTGoogleMobileAdsPlugin'"));
   });
 
   test('AI and Boost access providers are scoped to the current owner', () {
