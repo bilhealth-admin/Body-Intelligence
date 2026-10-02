@@ -407,6 +407,7 @@ void main() {
           CommercePlan.premium,
           term: SubscriptionTerm.oneMonth,
         );
+        await drain();
         expect(native.launches, 1);
         native.updates.add([
           _receipt(
