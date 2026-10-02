@@ -45,8 +45,10 @@ int _indent(String line) {
   return line.length - line.trimLeft().length;
 }
 
-bool _isBareKey(String line, String key) =>
-    RegExp('^' + RegExp.escape(key) + r':\s*(?:#.*)?$').hasMatch(line.trim());
+bool _isBareKey(String line, String key) => RegExp(
+  '^${RegExp.escape(key)}'
+  r':\s*(?:#.*)?$',
+).hasMatch(line.trim());
 
 List<_YamlKey> _directKeys(List<String> lines, String key, {_YamlKey? parent}) {
   final start = parent == null ? 0 : parent.line + 1;
@@ -88,9 +90,7 @@ _YamlKey _directKey(List<String> lines, String key, {_YamlKey? parent}) {
   final matches = _directKeys(lines, key, parent: parent);
   if (matches.length != 1) {
     throw FormatException(
-      'simple_barcode_scanner pubspec must contain exactly one direct ' +
-          key +
-          ' mapping key.',
+      'simple_barcode_scanner pubspec must contain exactly one direct $key mapping key.',
     );
   }
   return matches.single;
@@ -193,17 +193,13 @@ String removeIosPlatformFromSimpleBarcodeScannerPubspec(String source) {
 Map<String, Object?> _readJsonMap(File file, String description) {
   final decoded = jsonDecode(file.readAsStringSync());
   if (decoded is! Map<String, Object?>) {
-    throw FormatException(description + ' root must be a JSON object.');
+    throw FormatException('$description root must be a JSON object.');
   }
   return decoded;
 }
 
 File _packageConfig(Directory projectRoot) => File(
-  projectRoot.absolute.path +
-      Platform.pathSeparator +
-      '.dart_tool' +
-      Platform.pathSeparator +
-      'package_config.json',
+  '${projectRoot.absolute.path}${Platform.pathSeparator}.dart_tool${Platform.pathSeparator}package_config.json',
 );
 
 Map<String, Object?> _packageEntry(Map<String, Object?> packageConfig) {
@@ -259,11 +255,11 @@ bool _isWithin(String child, String parent) =>
 void _assertDirectoryIsNotLink(Directory directory, String description) {
   final type = FileSystemEntity.typeSync(directory.path, followLinks: false);
   if (type == FileSystemEntityType.link) {
-    throw StateError(description + ' must not be a symbolic link.');
+    throw StateError('$description must not be a symbolic link.');
   }
   if (type != FileSystemEntityType.notFound &&
       type != FileSystemEntityType.directory) {
-    throw StateError(description + ' must be a directory.');
+    throw StateError('$description must be a directory.');
   }
 }
 
@@ -271,15 +267,14 @@ void _assertCopyTreeHasNoLinks(Directory source) {
   for (final entity in source.listSync(followLinks: false)) {
     if (entity is Link) {
       throw StateError(
-        'Symlinks are forbidden in the package override source: ' + entity.path,
+        'Symlinks are forbidden in the package override source: ${entity.path}',
       );
     }
     if (entity is Directory) {
       _assertCopyTreeHasNoLinks(entity);
     } else if (entity is! File) {
       throw StateError(
-        'Special files are forbidden in the package override source: ' +
-            entity.path,
+        'Special files are forbidden in the package override source: ${entity.path}',
       );
     }
   }
@@ -288,8 +283,7 @@ void _assertCopyTreeHasNoLinks(Directory source) {
 void _copyDirectory(Directory source, Directory destination) {
   if (destination.existsSync()) {
     throw StateError(
-      'Refusing to overwrite an existing package override directory: ' +
-          destination.path,
+      'Refusing to overwrite an existing package override directory: ${destination.path}',
     );
   }
   _assertCopyTreeHasNoLinks(source);
@@ -314,12 +308,12 @@ Directory _validatedOverrideDirectory(
   bool createParent = false,
 }) {
   if (!projectRoot.existsSync()) {
-    throw StateError('Project root does not exist: ' + projectRoot.path);
+    throw StateError('Project root does not exist: ${projectRoot.path}');
   }
   _assertDirectoryIsNotLink(projectRoot, 'Project root');
   final resolvedRoot = _canonical(projectRoot);
   final dartTool = Directory(
-    projectRoot.absolute.path + Platform.pathSeparator + '.dart_tool',
+    '${projectRoot.absolute.path}${Platform.pathSeparator}.dart_tool',
   );
   if (!dartTool.existsSync()) {
     throw StateError('.dart_tool is missing. Run flutter pub get first.');
@@ -386,7 +380,7 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
   final source = _entryRoot(packageConfigFile, entry);
   if (!source.existsSync()) {
     throw StateError(
-      'simple_barcode_scanner package root does not exist: ' + source.path,
+      'simple_barcode_scanner package root does not exist: ${source.path}',
     );
   }
   _assertDirectoryIsNotLink(source, 'simple_barcode_scanner package root');
@@ -411,7 +405,7 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
       );
     }
     final pubspec = File(
-      destination.path + Platform.pathSeparator + 'pubspec.yaml',
+      '${destination.path}${Platform.pathSeparator}pubspec.yaml',
     ).readAsStringSync();
     _verifyPackageIdentity(pubspec);
     _verifySupportedPlatforms(_lines(pubspec));
@@ -422,11 +416,11 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
   }
 
   final sourcePubspec = File(
-    source.path + Platform.pathSeparator + 'pubspec.yaml',
+    '${source.path}${Platform.pathSeparator}pubspec.yaml',
   );
   if (!sourcePubspec.existsSync()) {
     throw StateError(
-      'simple_barcode_scanner pubspec is missing: ' + sourcePubspec.path,
+      'simple_barcode_scanner pubspec is missing: ${sourcePubspec.path}',
     );
   }
   final sanitizedPubspec = removeIosPlatformFromSimpleBarcodeScannerPubspec(
@@ -456,26 +450,17 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
 
   _copyDirectory(source, destination);
   File(
-    destination.path + Platform.pathSeparator + 'pubspec.yaml',
+    '${destination.path}${Platform.pathSeparator}pubspec.yaml',
   ).writeAsStringSync(sanitizedPubspec, flush: true);
   marker.writeAsStringSync(
-    jsonEncode(<String, Object?>{
-          'status': 'ios-native-platform-removed',
-          'plugin': deferredIosSimpleBarcodeScannerPlugin,
-          'version': _expectedVersion,
-          'source_root_uri': source.uri.toString(),
-        }) +
-        '\n',
+    '${jsonEncode(<String, Object?>{'status': 'ios-native-platform-removed', 'plugin': deferredIosSimpleBarcodeScannerPlugin, 'version': _expectedVersion, 'source_root_uri': source.uri.toString()})}\n',
     flush: true,
   );
 
   entry['rootUri'] =
-      _overrideDirectoryName +
-      '/' +
-      deferredIosSimpleBarcodeScannerPlugin +
-      '/';
+      '$_overrideDirectoryName/$deferredIosSimpleBarcodeScannerPlugin/';
   packageConfigFile.writeAsStringSync(
-    jsonEncode(packageConfig) + '\n',
+    '${jsonEncode(packageConfig)}\n',
     flush: true,
   );
   final written = _readJsonMap(packageConfigFile, 'package_config.json');
@@ -506,16 +491,14 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
   }
 
   final pubspec = File(
-    root.path + Platform.pathSeparator + 'pubspec.yaml',
+    '${root.path}${Platform.pathSeparator}pubspec.yaml',
   ).readAsStringSync();
   _verifyPackageIdentity(pubspec);
   _verifySupportedPlatforms(_lines(pubspec));
 
   final dependencies = _readJsonMap(
     File(
-      projectRoot.absolute.path +
-          Platform.pathSeparator +
-          '.flutter-plugins-dependencies',
+      '${projectRoot.absolute.path}${Platform.pathSeparator}.flutter-plugins-dependencies',
     ),
     '.flutter-plugins-dependencies',
   );
@@ -551,13 +534,7 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
   }
 
   final registrant = File(
-    projectRoot.absolute.path +
-        Platform.pathSeparator +
-        'ios' +
-        Platform.pathSeparator +
-        'Runner' +
-        Platform.pathSeparator +
-        'GeneratedPluginRegistrant.m',
+    '${projectRoot.absolute.path}${Platform.pathSeparator}ios${Platform.pathSeparator}Runner${Platform.pathSeparator}GeneratedPluginRegistrant.m',
   ).readAsStringSync();
   if (registrant.contains('simple_barcode_scanner') ||
       registrant.contains('SwiftFlutterBarcodeScannerPlugin')) {

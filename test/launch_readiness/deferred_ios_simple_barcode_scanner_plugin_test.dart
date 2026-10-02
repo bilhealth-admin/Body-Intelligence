@@ -38,75 +38,66 @@ void main() {
     );
   });
 
-  test(
-    'deferred override controls Flutter discovery and preserves Android',
-    () {
-      final fixture = _Fixture.create();
-      addTearDown(fixture.dispose);
+  test('deferred override controls Flutter discovery and preserves Android', () {
+    final fixture = _Fixture.create();
+    addTearDown(fixture.dispose);
 
-      final prepared = prepareDeferredIosSimpleBarcodeScannerPackage(
-        fixture.root,
-      );
-      expect(prepared.alreadyPrepared, isFalse);
+    final prepared = prepareDeferredIosSimpleBarcodeScannerPackage(
+      fixture.root,
+    );
+    expect(prepared.alreadyPrepared, isFalse);
 
-      sanitizeFlutterReleaseProject(
-        projectRoot: fixture.root,
-        platform: 'ios',
-        excludedNativePluginNames: const <String>{
-          deferredIosSimpleBarcodeScannerPlugin,
-        },
-      );
-      verifyDeferredIosSimpleBarcodeScannerDiscovery(fixture.root);
+    sanitizeFlutterReleaseProject(
+      projectRoot: fixture.root,
+      platform: 'ios',
+      excludedNativePluginNames: const <String>{
+        deferredIosSimpleBarcodeScannerPlugin,
+      },
+    );
+    verifyDeferredIosSimpleBarcodeScannerDiscovery(fixture.root);
 
-      expect(fixture.sourcePubspec.readAsStringSync(), contains('      ios:'));
-      final copiedPubspec = File(
-        prepared.overrideDirectory.path +
-            Platform.pathSeparator +
-            'pubspec.yaml',
-      ).readAsStringSync();
-      expect(copiedPubspec, contains('  windows:'));
-      expect(copiedPubspec, contains('FlutterBarcodeScannerPlugin'));
-      expect(
-        copiedPubspec,
+    expect(fixture.sourcePubspec.readAsStringSync(), contains('      ios:'));
+    final copiedPubspec = File(
+      '${prepared.overrideDirectory.path}${Platform.pathSeparator}pubspec.yaml',
+    ).readAsStringSync();
+    expect(copiedPubspec, contains('  windows:'));
+    expect(copiedPubspec, contains('FlutterBarcodeScannerPlugin'));
+    expect(copiedPubspec, isNot(contains('SwiftFlutterBarcodeScannerPlugin')));
+
+    final packageConfig =
+        jsonDecode(fixture.packageConfig.readAsStringSync())
+            as Map<String, Object?>;
+    final packages = packageConfig['packages']! as List<Object?>;
+    final entry = packages.cast<Map<String, Object?>>().singleWhere(
+      (item) => item['name'] == deferredIosSimpleBarcodeScannerPlugin,
+    );
+    final discovered = Directory.fromUri(
+      fixture.packageConfig.uri.resolve(entry['rootUri']! as String),
+    );
+    expect(
+      discovered.resolveSymbolicLinksSync(),
+      prepared.overrideDirectory.resolveSymbolicLinksSync(),
+    );
+
+    final metadata =
+        jsonDecode(fixture.metadata.readAsStringSync()) as Map<String, Object?>;
+    final plugins = metadata['plugins']! as Map<String, Object?>;
+    expect(_pluginNames(plugins['ios']! as List<Object?>), <String>[
+      'production_plugin',
+    ]);
+    expect(
+      _pluginNames(plugins['android']! as List<Object?>),
+      contains(deferredIosSimpleBarcodeScannerPlugin),
+    );
+    expect(
+      fixture.registrant.readAsStringSync(),
+      allOf(
+        contains('ProductionPlugin'),
+        isNot(contains('simple_barcode_scanner')),
         isNot(contains('SwiftFlutterBarcodeScannerPlugin')),
-      );
-
-      final packageConfig =
-          jsonDecode(fixture.packageConfig.readAsStringSync())
-              as Map<String, Object?>;
-      final packages = packageConfig['packages']! as List<Object?>;
-      final entry = packages.cast<Map<String, Object?>>().singleWhere(
-        (item) => item['name'] == deferredIosSimpleBarcodeScannerPlugin,
-      );
-      final discovered = Directory.fromUri(
-        fixture.packageConfig.uri.resolve(entry['rootUri']! as String),
-      );
-      expect(
-        discovered.resolveSymbolicLinksSync(),
-        prepared.overrideDirectory.resolveSymbolicLinksSync(),
-      );
-
-      final metadata =
-          jsonDecode(fixture.metadata.readAsStringSync())
-              as Map<String, Object?>;
-      final plugins = metadata['plugins']! as Map<String, Object?>;
-      expect(_pluginNames(plugins['ios']! as List<Object?>), <String>[
-        'production_plugin',
-      ]);
-      expect(
-        _pluginNames(plugins['android']! as List<Object?>),
-        contains(deferredIosSimpleBarcodeScannerPlugin),
-      );
-      expect(
-        fixture.registrant.readAsStringSync(),
-        allOf(
-          contains('ProductionPlugin'),
-          isNot(contains('simple_barcode_scanner')),
-          isNot(contains('SwiftFlutterBarcodeScannerPlugin')),
-        ),
-      );
-    },
-  );
+      ),
+    );
+  });
 }
 
 List<String> _pluginNames(List<Object?> entries) => entries
@@ -126,32 +117,20 @@ final class _Fixture {
   factory _Fixture.create() {
     final root = Directory.systemTemp.createTempSync('bil-ios-barcode-defer-');
     final source = Directory(
-      root.path +
-          Platform.pathSeparator +
-          'cache' +
-          Platform.pathSeparator +
-          'simple_barcode_scanner-0.6.0',
+      '${root.path}${Platform.pathSeparator}cache${Platform.pathSeparator}simple_barcode_scanner-0.6.0',
     )..createSync(recursive: true);
     final sourcePubspec = File(
-      source.path + Platform.pathSeparator + 'pubspec.yaml',
+      '${source.path}${Platform.pathSeparator}pubspec.yaml',
     )..writeAsStringSync(_barcodePubspec);
     File(
-        source.path +
-            Platform.pathSeparator +
-            'lib' +
-            Platform.pathSeparator +
-            'simple_barcode_scanner.dart',
+        '${source.path}${Platform.pathSeparator}lib${Platform.pathSeparator}simple_barcode_scanner.dart',
       )
       ..createSync(recursive: true)
       ..writeAsStringSync('library simple_barcode_scanner;\n');
 
     final packageConfig =
         File(
-            root.path +
-                Platform.pathSeparator +
-                '.dart_tool' +
-                Platform.pathSeparator +
-                'package_config.json',
+            '${root.path}${Platform.pathSeparator}.dart_tool${Platform.pathSeparator}package_config.json',
           )
           ..createSync(recursive: true)
           ..writeAsStringSync(
@@ -170,14 +149,14 @@ final class _Fixture {
 
     Map<String, Object?> plugin(String name) => <String, Object?>{
       'name': name,
-      'path': root.path + '/generated/' + name,
+      'path': '${root.path}/generated/$name',
       'native_build': true,
       'dependencies': const <String>[],
       'dev_dependency': false,
     };
     final metadata =
         File(
-          root.path + Platform.pathSeparator + '.flutter-plugins-dependencies',
+          '${root.path}${Platform.pathSeparator}.flutter-plugins-dependencies',
         )..writeAsStringSync(
           jsonEncode(<String, Object?>{
             'plugins': <String, Object?>{
@@ -204,24 +183,12 @@ final class _Fixture {
         );
 
     File(
-        root.path +
-            Platform.pathSeparator +
-            'ios' +
-            Platform.pathSeparator +
-            'Runner' +
-            Platform.pathSeparator +
-            'GeneratedPluginRegistrant.h',
+        '${root.path}${Platform.pathSeparator}ios${Platform.pathSeparator}Runner${Platform.pathSeparator}GeneratedPluginRegistrant.h',
       )
       ..createSync(recursive: true)
       ..writeAsStringSync(_registrantHeader);
     final registrant = File(
-      root.path +
-          Platform.pathSeparator +
-          'ios' +
-          Platform.pathSeparator +
-          'Runner' +
-          Platform.pathSeparator +
-          'GeneratedPluginRegistrant.m',
+      '${root.path}${Platform.pathSeparator}ios${Platform.pathSeparator}Runner${Platform.pathSeparator}GeneratedPluginRegistrant.m',
     )..writeAsStringSync(_registrant);
 
     return _Fixture(
