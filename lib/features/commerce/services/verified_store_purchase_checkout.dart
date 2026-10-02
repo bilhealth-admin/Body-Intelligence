@@ -154,6 +154,7 @@ extension _VerifiedStorePurchaseCheckout on VerifiedStorePurchaseService {
       return true;
     }
   }
+
   Future<bool> _recoverVerifiedStoreKit2Completion(
     PurchaseDetails purchase,
   ) async {
