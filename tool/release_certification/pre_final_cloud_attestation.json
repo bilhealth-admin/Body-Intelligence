@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "project_ref": "tgmanzhqulksykhslrzb",
-  "tested_at_utc": "2026-10-01T18:01:10.712002Z",
+  "tested_at_utc": "2026-10-02T19:16:56.742797Z",
   "verifier": "supabase_management_execute_sql",
   "sql_git_blob_sha": "ba50488e724cd4e936e9a623d94b4104c08b87af",
-  "live_migration_count": 168,
-  "live_migration_head": "20261001032338",
-  "live_migration_name": "deduplicate_rls_write_policies",
+  "live_migration_count": 169,
+  "live_migration_head": "20261002133802",
+  "live_migration_name": "fix_friend_request_visibility_without_public_profile_20261002",
   "result": {
     "live_cloud_roundtrip": true,
     "device_download_payload_bytes": true,
