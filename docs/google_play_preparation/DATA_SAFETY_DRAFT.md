@@ -1,5 +1,12 @@
 # Google Play Data Safety — BLOCKED DRAFT
 
+> **SUPERSEDED FOR CURRENT RELEASE PREPARATION.** Keep this file only as
+> historical context. The current working matrix is
+> [DATA_SAFETY_RELEASE_MATRIX_2026-10-02.md](DATA_SAFETY_RELEASE_MATRIX_2026-10-02.md).
+> Play Console readback and exact signed-AAB reconciliation are still required;
+> the new matrix is not itself a Console submission receipt.
+
+
 > **DO NOT SUBMIT THIS FILE TO PLAY CONSOLE.** The earlier local-only answers in
 > this draft are obsolete for the current build. The app now initializes
 > Supabase-backed account/cloud features, can send user-authorized content to
