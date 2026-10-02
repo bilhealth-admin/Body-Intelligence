@@ -97,7 +97,7 @@ void main() {
     expect(script, contains('fitness-only connected-device source asset'));
   });
 
-  test('current signed workflows carry the reviewed deferred-ad contract', () {
+  test('current signed workflows carry the reviewed production-ad contract', () {
     final android = read('.github/workflows/bil_android_release_candidate.yml');
     final ios = read('.github/workflows/bil_ios_signed_release.yml');
     const baseDefines = <String>{
@@ -112,8 +112,13 @@ void main() {
       'BIL_FACEBOOK_LOGIN_READY=true',
       'BIL_PUSH_ENABLED=true',
       'BIL_PUSH_PROVIDER_READY=true',
-      'BIL_ADS_ENABLED=false',
-      'BIL_AD_PROVIDER_READY=false',
+      'BIL_ADS_ENABLED=true',
+      'BIL_AD_PROVIDER_READY=true',
+      'BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509',
+      'BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410',
+      'BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211',
+      'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347',
+      'BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944',
       'BIL_ENABLE_CATALOG_TEST_ACCESS=false',
     };
     final expectedByPlatform =
@@ -122,8 +127,6 @@ void main() {
           ({
             String source,
             Set<String> defines,
-            String prepareMode,
-            String verifyMode,
             String productionMarker,
             String nativeMarker,
           })
@@ -135,21 +138,17 @@ void main() {
               'BIL_MOBILE_INTEGRITY_REQUIRED=true',
               r'BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER"',
             },
-            prepareMode: '--prepare-android-source-manifest',
-            verifyMode: '--verify-android-merged-manifest',
             productionMarker:
-                'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED',
+                'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=PASS',
             nativeMarker:
-                'ADMOB_ANDROID_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
+                'ADMOB_ANDROID_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED',
           ),
           'iOS': (
             source: ios,
             defines: {...baseDefines, 'BIL_MOBILE_INTEGRITY_REQUIRED=true'},
-            prepareMode: '--prepare-ios-source-plist',
-            verifyMode: '--verify-ios-final-plist',
-            productionMarker:
-                'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED',
-            nativeMarker: 'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS',
+            productionMarker: 'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS',
+            nativeMarker:
+                'ADMOB_IOS_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED',
           ),
         };
     for (final entry in expectedByPlatform.entries) {
@@ -160,12 +159,27 @@ void main() {
       expect(defines, unorderedEquals(entry.value.defines), reason: entry.key);
       expect(
         entry.value.source,
-        contains('BIL_ADS_ENABLED: false'),
+        contains('BIL_ADS_ENABLED: true'),
         reason: entry.key,
       );
       expect(
         entry.value.source,
-        contains('BIL_AD_PROVIDER_READY: false'),
+        contains('BIL_AD_PROVIDER_READY: true'),
+        reason: entry.key,
+      );
+      expect(
+        entry.value.source,
+        contains('BIL_ADMOB_PRODUCTION_READY: true'),
+        reason: entry.key,
+      );
+      expect(
+        entry.value.source,
+        contains('validate_admob_production_configuration.py'),
+        reason: entry.key,
+      );
+      expect(
+        entry.value.source,
+        isNot(contains('configure_deferred_admob.py')),
         reason: entry.key,
       );
       expect(
@@ -180,62 +194,19 @@ void main() {
       );
       expect(
         entry.value.source,
-        contains('ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED'),
+        contains('ADS_COMPILED_GATE=ENABLED_PRODUCTION'),
         reason: entry.key,
       );
       expect(
         entry.value.source,
-        contains('tool/release/configure_deferred_admob.py'),
+        contains(entry.value.productionMarker),
         reason: entry.key,
       );
       expect(
         entry.value.source,
-        contains('python3 tool/release/test_configure_deferred_admob.py'),
+        contains(entry.value.nativeMarker),
         reason: entry.key,
       );
-      for (final productionToken in <String>[
-        'BIL_ADMOB_PRODUCTION_READY',
-        'BIL_ADMOB_PUBLISHER_ID',
-        'BIL_ADMOB_ANDROID_APP_ID',
-        'BIL_ADMOB_ANDROID_BANNER_ID',
-        'BIL_ADMOB_IOS_APP_ID',
-        'BIL_ADMOB_IOS_BANNER_ID',
-        'validate_admob_production_configuration.py',
-      ]) {
-        expect(
-          entry.value.source,
-          isNot(contains(productionToken)),
-          reason: '${entry.key}: $productionToken',
-        );
-      }
-      final portableTests = entry.value.source.indexOf(
-        'run_portable_release_tests.py',
-      );
-      final nativeSourceTests = entry.value.source.indexOf(
-        'integration_test/system_crypto_bridge_integration_test.dart',
-      );
-      final sanitizer = entry.value.source.indexOf(
-        'dart run tool/release/sanitize_flutter_release_plugins.dart',
-      );
-      final helperTests = entry.value.source.indexOf(
-        'python3 tool/release/test_configure_deferred_admob.py',
-      );
-      final prepare = entry.value.source.indexOf(entry.value.prepareMode);
-      final build = entry.value.source.indexOf('flutter build');
-      final verify = entry.value.source.indexOf(entry.value.verifyMode);
-      final productionMarker = entry.value.source.indexOf(
-        entry.value.productionMarker,
-      );
-      final nativeMarker = entry.value.source.indexOf(entry.value.nativeMarker);
-      expect(prepare, greaterThan(portableTests), reason: entry.key);
-      expect(prepare, greaterThan(nativeSourceTests), reason: entry.key);
-      expect(sanitizer, greaterThan(nativeSourceTests), reason: entry.key);
-      expect(helperTests, greaterThan(sanitizer), reason: entry.key);
-      expect(prepare, greaterThan(helperTests), reason: entry.key);
-      expect(prepare, lessThan(build), reason: entry.key);
-      expect(verify, greaterThan(build), reason: entry.key);
-      expect(productionMarker, greaterThan(verify), reason: entry.key);
-      expect(nativeMarker, greaterThan(verify), reason: entry.key);
     }
     expect(
       android,
@@ -258,32 +229,14 @@ void main() {
     expect(ios, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));
     expect(
       android,
-      contains(
-        r'--verify-android-merged-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml"',
-      ),
+      contains('--android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml"'),
     );
-    expect(ios, contains(r'--verify-ios-final-plist "$SIGNED_APP/Info.plist"'));
-    expect(ios, isNot(contains('ReleaseAdMob.xcconfig')));
+    expect(ios, contains('--ios-info-plist "$SIGNED_APP/Info.plist"'));
+    expect(ios, contains('ReleaseAdMob.xcconfig'));
+    expect(ios, contains("grep -Fq 'FLTGoogleMobileAdsPlugin'"));
     expect(
       read('ios/Flutter/Release.xcconfig'),
       contains('#include? "ReleaseAdMob.xcconfig"'),
-    );
-    final deferredHelper = read('tool/release/configure_deferred_admob.py');
-    for (final mode in <String>[
-      '--prepare-android-source-manifest',
-      '--prepare-ios-source-plist',
-      '--verify-android-merged-manifest',
-      '--verify-ios-final-plist',
-    ]) {
-      expect(deferredHelper, contains(mode));
-    }
-    expect(
-      deferredHelper,
-      contains('ADMOB_DEFERRED_ANDROID_FINAL_MANIFEST_GATE=PASS'),
-    );
-    expect(
-      deferredHelper,
-      contains('ADMOB_DEFERRED_IOS_FINAL_PLIST_GATE=PASS'),
     );
     expect(
       read('.github/workflows/bil_ios_unsigned_release.yml'),
