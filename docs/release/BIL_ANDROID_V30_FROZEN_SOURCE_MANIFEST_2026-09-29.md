@@ -82,8 +82,8 @@ branch and are not unresolved product defects for build 30:
 `BIL_IOS_V33_AUDITED_SOURCE_SHA` must both name the exact same documentation-only
 release freeze commit containing this manifest.
 
-`BIL_ANDROID_V30_STAGING_MANIFEST_SHA256` must equal the SHA-256 of this exact
-file in that frozen commit.
+`BIL_ANDROID_V30_STAGING_MANIFEST_SHA256` must equal this file's committed-byte
+SHA-256 in that frozen commit.
 
 A later dispatch-control commit may update only the signed release workflow
 binding to that already-frozen source. The signed Android build must check out
