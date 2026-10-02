@@ -318,21 +318,49 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   ) async {
     if (defaultTargetPlatform != TargetPlatform.iOS) return true;
     try {
-      final before = await SK2Transaction.unfinishedTransactions().timeout(
+      final unfinished = await SK2Transaction.unfinishedTransactions().timeout(
         const Duration(seconds: 4),
       );
-      if (!before.any((transaction) => transaction.productId == productId)) {
-        return true;
-      }
+      final matching = unfinished
+          .where((transaction) => transaction.productId == productId)
+          .toList(growable: false);
+      if (matching.isEmpty) return true;
 
-      // StoreKit refuses a new transaction for the same product while an
-      // earlier one is unfinished. Run the existing verified restore path
-      // first so the old JWS is server-verified before it can be finished.
-      await restore();
-      if (_disposed) return false;
-      if (state == VerifiedStoreState.verified ||
-          state == VerifiedStoreState.failed) {
-        return false;
+      // Reconcile the exact unfinished StoreKit 2 transaction before asking
+      // Apple to create another transaction for the same subscription. The
+      // signed JWS still goes through BIL's normal server verification and
+      // ownership binding; only a verified active/inactive receipt may finish.
+      for (final transaction in matching) {
+        final receipt = transaction.receiptData?.trim() ?? '';
+        if (receipt.isEmpty) {
+          state = VerifiedStoreState.failed;
+          messageCode = 'reconciliation_verification_failed';
+          notifyListeners();
+          return false;
+        }
+        final details = SK2PurchaseDetails(
+          productID: transaction.productId,
+          purchaseID: transaction.id,
+          verificationData: PurchaseVerificationData(
+            localVerificationData: transaction.jsonRepresentation ?? '',
+            serverVerificationData: receipt,
+            source: 'app_store',
+          ),
+          transactionDate: transaction.purchaseDate,
+          status: PurchaseStatus.purchased,
+          appAccountToken: transaction.appAccountToken,
+          expirationDate: transaction.expirationDate,
+        );
+        await _handleVerifiedPurchase(
+          details,
+          origin: _StorePurchaseEventOrigin.reconciliation,
+          transactionAttempt: null,
+        );
+        if (_disposed ||
+            state == VerifiedStoreState.failed ||
+            state == VerifiedStoreState.verified) {
+          return false;
+        }
       }
 
       final after = await SK2Transaction.unfinishedTransactions().timeout(
@@ -346,9 +374,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       }
       return true;
     } on Object {
-      // This is a diagnostic preflight. If native enumeration itself is
-      // unavailable, let StoreKit own the normal checkout result rather than
-      // inventing a client-side purchase denial.
+      // Enumeration is diagnostic before checkout. If StoreKit cannot expose
+      // unfinished state, let the actual purchase call return the native
+      // result; the duplicate-product catch below performs one final recovery.
       return true;
     }
   }
@@ -489,11 +517,14 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
             : VerifiedStoreState.ready;
         messageCode = 'purchase_reconciliation_pending';
         notifyListeners();
-        await restore();
+        final reconciled = await _reconcileAppleUnfinishedBeforePurchase(
+          product.id,
+        );
         if (!_disposed &&
+            reconciled &&
             !_appleDuplicateRetryInFlight &&
-            state == VerifiedStoreState.ready &&
-            messageCode == 'no_restorable_purchases') {
+            state != VerifiedStoreState.verified &&
+            state != VerifiedStoreState.failed) {
           _appleDuplicateRetryInFlight = true;
           try {
             await purchasePlan(
