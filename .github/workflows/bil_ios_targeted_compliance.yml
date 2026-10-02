@@ -10,6 +10,8 @@ on:
       - 'test/connected_health/**'
       - 'test/launch_readiness/flutter_release_plugin_sanitizer_test.dart'
       - 'tool/release/sanitize_flutter_release_plugins.dart'
+      - 'tool/release/defer_ios_simple_barcode_scanner.dart'
+      - 'test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart'
       - 'tool/release/ios_plus8_simulator_ui/accessibility.sh'
       - 'pubspec.yaml'
       - 'pubspec.lock'
@@ -33,10 +35,19 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout exact verification source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Initialize targeted evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "SOURCE_SHA=${GITHUB_SHA}"
+            echo 'TARGETED_VERIFICATION=STARTED'
+          } > BIL-ios-targeted-compliance.txt
 
       - name: Install Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -54,7 +65,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          flutter test --no-pub             test/connected_health/apple_health_permission_flow_test.dart             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             --timeout 10m
+          flutter test --no-pub             test/connected_health/apple_health_permission_flow_test.dart             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             --timeout 10m
 
       - name: Validate iOS property lists
         shell: bash
@@ -127,6 +138,7 @@ jobs:
           echo 'IOS_UNSIGNED_RELEASE_SPM_WARNING_GATE=PASS'
 
       - name: Write targeted verification summary
+        if: success()
         shell: bash
         run: |
           set -euo pipefail
@@ -147,5 +159,5 @@ jobs:
           name: bil-ios-targeted-compliance-${{ github.sha }}
           path: |
             BIL-ios-targeted-compliance.txt
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14

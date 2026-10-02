@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'defer_ios_google_mobile_ads.dart';
+import 'defer_ios_simple_barcode_scanner.dart';
 
-const iosWindowsOnlyNativePluginNames = <String>{'simple_barcode_scanner'};
+const iosWindowsOnlyNativePluginNames = <String>{
+  deferredIosSimpleBarcodeScannerPlugin,
+};
 
 final class ReleasePluginSanitizationResult {
   const ReleasePluginSanitizationResult({
@@ -599,6 +602,11 @@ void main(List<String> arguments) {
         '--preserve-dev-native-plugins is valid only with --platform=ios.',
       );
     }
+    DeferredIosSimpleBarcodeScannerResult? deferredBarcode;
+    if (platform == 'ios') {
+      deferredBarcode =
+          prepareDeferredIosSimpleBarcodeScannerPackage(Directory.current);
+    }
     DeferredIosGoogleMobileAdsResult? deferredAds;
     if (deferIosGoogleMobileAds == 1) {
       deferredAds = prepareDeferredIosGoogleMobileAdsPackage(Directory.current);
@@ -613,11 +621,17 @@ void main(List<String> arguments) {
       projectRoot: Directory.current,
       platform: platform,
       excludedNativePluginNames: excludedPlugins,
-      alreadyExcludedNativePluginNames: deferredAds?.alreadyPrepared == true
-          ? const <String>{deferredIosGoogleMobileAdsPlugin}
-          : const <String>{},
+      alreadyExcludedNativePluginNames: <String>{
+        if (deferredBarcode?.alreadyPrepared == true)
+          deferredIosSimpleBarcodeScannerPlugin,
+        if (deferredAds?.alreadyPrepared == true)
+          deferredIosGoogleMobileAdsPlugin,
+      },
       removeDevOnlyPlugins: preserveDevNativePlugins == 0,
     );
+    if (deferredBarcode != null) {
+      verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory.current);
+    }
     if (deferredAds != null) {
       verifyDeferredIosGoogleMobileAdsDiscovery(Directory.current);
     }
@@ -629,6 +643,9 @@ void main(List<String> arguments) {
         'removed_dev_native_plugins': removed,
         'excluded_ios_native_plugins': excludedPlugins.toList()..sort(),
         'preserved_dev_native_plugins': preserveDevNativePlugins == 1,
+        if (deferredBarcode != null)
+          'deferred_windows_only_override':
+              deferredBarcode.overrideDirectory.path,
         if (deferredAds != null)
           'deferred_package_override': deferredAds.overrideDirectory.path,
       }),
