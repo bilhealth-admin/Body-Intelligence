@@ -11,20 +11,18 @@ rewrite historical evidence.
   - Sapphire #179: SUCCESS
   - Final Release Certification #65: SUCCESS
   - RC mobile #31: SUCCESS on retry (Android and iOS jobs both SUCCESS)
-- Current candidate before this documentation-only commit:
-  `c77721e756bfbafc29535d498f4bcb2ec30f6baa`
-- Current candidate is exactly **2 commits ahead** of the fully certified source
-  and 0 behind it.
-- Those two commits are intentionally narrow:
-  1. iOS native graph excludes Windows-only `simple_barcode_scanner` while
-     preserving its Windows path.
-  2. HealthKit permission becomes explicitly user-initiated, and iOS
-     accessibility evidence rejects invalid JSON instead of emitting transient
-     parse tracebacks.
+- Current code/test parent candidate:
+  `02f5a5fe6dd16b05bcbd9a0ac651051867f32316`
+- The post-certification delta keeps the previously certified application
+  behavior and adds only the reviewed iOS HealthKit permission hardening,
+  Windows-only barcode-package discovery isolation, accessibility evidence
+  hardening, their regression tests, and canonical formatter closure.
+- This documentation-only commit intentionally triggers one unified final
+  revalidation so Sapphire, Final Release Certification, Android RC and iOS RC
+  all bind to one exact candidate SHA before release freeze.
 
-The two narrow deltas require targeted iOS revalidation before the source is
-bound as the final 33/30 audited SHA. They do **not** justify re-running already
-green Android, Sapphire or Final suites.
+Do not bind 33/30 to a final audited SHA until that unified revalidation is
+green. No signed build or store upload is authorized by this handoff.
 
 ## Baseline lineage
 
