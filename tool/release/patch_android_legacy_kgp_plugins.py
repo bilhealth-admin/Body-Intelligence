@@ -92,9 +92,9 @@ if (agpMajor < 9 || !builtInKotlinEnabled) {
 }
 """
     new_kotlin = """def configureBILKotlin = {
-    extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension) {
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension) { kotlinExtension ->
+        kotlinExtension.compilerOptions { options ->
+            options.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 }
@@ -142,9 +142,9 @@ def _patch_in_app_review() -> None:
 
     deferred = """
 def configureBILKotlin = {
-    extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension) {
-        compilerOptions {
-            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension) { kotlinExtension ->
+        kotlinExtension.compilerOptions { options ->
+            options.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
 }
