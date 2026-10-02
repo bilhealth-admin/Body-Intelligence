@@ -1,6 +1,36 @@
 part of 'premium_profile_page.dart';
 
 extension _PremiumProfileActions on _PremiumProfilePageState {
+  Widget profileStorageFailure() {
+    if (!profileStorageRecoveryAttempted) {
+      profileStorageRecoveryAttempted = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) retryProfileStorage();
+      });
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Center(
+      child: FilledButton(
+        onPressed: retryProfileStorage,
+        child: Text(tr('Try again', 'إعادة المحاولة')),
+      ),
+    );
+  }
+
+  void retryProfileStorage() {
+    if (!mounted) return;
+    _updateState(() {
+      loaded = false;
+      hydrating = false;
+      hydrateError = null;
+      hydrationIdentityKey = null;
+    });
+    // The profile, goal, photo and preference providers all depend on this
+    // owner-scoped database. Reopen the current auth namespace as one unit
+    // instead of retrying a stream that may belong to a database being closed.
+    ref.invalidate(databaseProvider);
+  }
+
   Future<void> hydrate(
     UserProfileData profile,
     double effectiveCurrentWeight,
@@ -17,7 +47,13 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     try {
       final repo = ref.read(preferencesRepositoryProvider);
       if (repo.localOwnerId != authIdentity.ownerId) {
-        throw StateError('Profile storage owner does not match auth owner.');
+        if (!profileStorageRecoveryAttempted) {
+          profileStorageRecoveryAttempted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) retryProfileStorage();
+          });
+        }
+        return;
       }
       final values = await Future.wait([
         repo.get('displayName'),
@@ -41,6 +77,13 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           repo.localOwnerId != authIdentity.ownerId ||
           (AppEnvironment.supabaseRuntimeReady &&
               liveOwner != authIdentity.ownerId)) {
+        if (repo.localOwnerId != authIdentity.ownerId &&
+            !profileStorageRecoveryAttempted) {
+          profileStorageRecoveryAttempted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) retryProfileStorage();
+          });
+        }
         return;
       }
       _updateState(() {
