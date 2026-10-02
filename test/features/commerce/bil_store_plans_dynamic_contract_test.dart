@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
+import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
@@ -23,7 +24,7 @@ void main() {
     addTearDown(container.dispose);
 
     final firstOwner = container.read(purchaseOwnershipConflictStoreProvider);
-    firstOwner.recordConflict();
+    firstOwner.recordConflict(StoreCatalogConfiguration.premiumMonthly);
     expect(firstOwner.blocked, isTrue);
     expect(
       identical(
