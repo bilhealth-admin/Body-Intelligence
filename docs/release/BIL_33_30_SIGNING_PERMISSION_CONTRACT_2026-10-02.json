@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "generated_date": "2026-10-02",
+  "application_id": "com.bilhealth.bodyintelligencelog",
+  "release": {
+    "ios_build": 33,
+    "android_build": 30
+  },
+  "source_authority": {
+    "last_full_certified_sha": "5c8efb4c246c8473eda18177a60e8beece7d6cb7",
+    "candidate_parent_sha": "c77721e756bfbafc29535d498f4bcb2ec30f6baa",
+    "status": "TARGETED_IOS_REVALIDATION_REQUIRED",
+    "final_binding_rule": "BIL_IOS_V33_AUDITED_SOURCE_SHA == BIL_ANDROID_V30_AUDITED_SOURCE_SHA == final certified source SHA"
+  },
+  "apple": {
+    "required_secrets": [
+      "APPLE_TEAM_ID",
+      "APPLE_DISTRIBUTION_CERTIFICATE_BASE64",
+      "APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD",
+      "APPLE_PROVISIONING_PROFILE_BASE64",
+      "APP_STORE_CONNECT_KEY_ID",
+      "APP_STORE_CONNECT_ISSUER_ID",
+      "APP_STORE_CONNECT_PRIVATE_KEY_BASE64",
+      "BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID"
+    ],
+    "required_repository_variables": [
+      "BIL_IOS_V33_AUDITED_SOURCE_SHA",
+      "BIL_ANDROID_V30_AUDITED_SOURCE_SHA",
+      "BIL_IOS_V33_STAGING_MANIFEST_SHA256"
+    ],
+    "required_entitlements": [
+      "aps-environment=production",
+      "com.apple.developer.applesignin includes Default",
+      "com.apple.developer.associated-domains includes applinks:www.bilhealth.com",
+      "com.apple.developer.devicecheck.appattest-environment=production",
+      "com.apple.developer.healthkit=true"
+    ],
+    "required_usage_descriptions": [
+      "NSCameraUsageDescription",
+      "NSPhotoLibraryUsageDescription",
+      "NSMicrophoneUsageDescription",
+      "NSSpeechRecognitionUsageDescription",
+      "NSBluetoothAlwaysUsageDescription",
+      "NSHealthShareUsageDescription",
+      "NSHealthUpdateUsageDescription"
+    ],
+    "signed_artifact_gates": [
+      "codesign --verify --deep --strict",
+      "embedded provisioning profile matches Team ID and bundle ID",
+      "signed entitlements verified",
+      "PrivacyInfo.xcprivacy present and valid",
+      "aggregate Xcode privacy report reviewed",
+      "forbidden bundled crypto markers = 0",
+      "App Store Connect validation passes"
+    ]
+  },
+  "android": {
+    "required_secrets": [
+      "ANDROID_KEYSTORE_BASE64",
+      "ANDROID_KEYSTORE_PASSWORD",
+      "ANDROID_KEY_ALIAS",
+      "ANDROID_KEY_PASSWORD",
+      "ANDROID_UPLOAD_CERTIFICATE_SHA256",
+      "BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID",
+      "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64"
+    ],
+    "required_repository_variables": [
+      "BIL_ANDROID_V30_AUDITED_SOURCE_SHA",
+      "BIL_IOS_V33_AUDITED_SOURCE_SHA",
+      "BIL_ANDROID_V30_STAGING_MANIFEST_SHA256",
+      "BIL_PLAY_INTEGRITY_PROJECT_NUMBER"
+    ],
+    "sdk_contract": {
+      "compile_sdk": 36,
+      "target_sdk": 36,
+      "min_sdk": 26
+    },
+    "health_connect_permissions": [
+      "android.permission.health.READ_STEPS",
+      "android.permission.health.READ_DISTANCE",
+      "android.permission.health.READ_ACTIVE_CALORIES_BURNED"
+    ],
+    "signed_artifact_gates": [
+      "AAB jarsigner verification",
+      "upload certificate SHA-256 match",
+      "final merged manifest inspection",
+      "target SDK 36 verification",
+      "16 KB package/ELF alignment verification",
+      "forbidden bundled crypto markers = 0",
+      "final Data Safety and Health declarations reconciled to the exact AAB"
+    ]
+  },
+  "external_gates": {
+    "console_required": [
+      "App Store Connect App Privacy",
+      "App Store subscriptions metadata/prices/availability",
+      "Google Play Data Safety",
+      "Google Play Health Apps/Health Connect declaration",
+      "Google Play target audience/content rating/contains ads",
+      "Google Play subscriptions/base plans/offers"
+    ],
+    "physical_or_store_sandbox_required": [
+      "App Attest",
+      "Play Integrity",
+      "HealthKit",
+      "Health Connect",
+      "StoreKit",
+      "Play Billing",
+      "push delivery",
+      "native social sign-in"
+    ]
+  },
+  "prohibited_claims": [
+    "Do not call current candidate fully certified until targeted iOS delta verification passes.",
+    "Do not treat source code as proof of live Console answers.",
+    "Do not upload signed builds without owner approval."
+  ]
+}
