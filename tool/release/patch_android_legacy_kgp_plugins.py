@@ -163,20 +163,68 @@ if (extensions.findByName('kotlin') != null) {
     print("ANDROID_KGP_PATCH_in_app_review=PASS")
 
 
-def _verify_mobile_scanner() -> None:
+def _patch_mobile_scanner() -> None:
     root = _package_root("mobile_scanner")
-    _verify_pubspec(root, "mobile_scanner", "7.4.2")
-    path = root / "android" / "build.gradle.kts"
+    _verify_pubspec(root, "mobile_scanner", "7.4.0")
+    path = root / "android" / "build.gradle"
     source = path.read_text(encoding="utf-8")
-    if 'id("org.jetbrains.kotlin.android")' in source or 'id("kotlin-android")' in source:
-        raise SystemExit("mobile_scanner 7.4.2 unexpectedly declares KGP in its plugins block.")
-    if "builtInKotlin" not in source:
-        raise SystemExit("mobile_scanner 7.4.2 built-in-Kotlin compatibility marker is missing.")
-    print("ANDROID_KGP_PATCH_mobile_scanner=UPSTREAM_PASS")
+    if "BIL_HOST_KGP_BRIDGE" in source:
+        print("mobile_scanner already patched.")
+        return
+
+    old_apply = """apply plugin: 'com.android.library'
+
+// AGP 9+ compiles Kotlin itself when built-in Kotlin is enabled (the default),
+// but apps migrated by the Flutter tool disable it via android.builtInKotlin=false.
+// Apply KGP whenever built-in Kotlin is not active, so the kotlin {} extension
+// below exists in both configurations.
+def agpMajor = Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
+def builtInKotlin = agpMajor >= 9 &&
+    (findProperty('android.builtInKotlin') ?: 'true').toString().toBoolean()
+if (!builtInKotlin) {
+    apply plugin: 'kotlin-android'
+}
+"""
+    source = _replace_once(
+        source,
+        old_apply,
+        """apply plugin: 'com.android.library'
+// BIL_HOST_KGP_BRIDGE: Flutter 3.44 owns KGP application while the app keeps
+// android.builtInKotlin=false. Keep mobile_scanner 7.4.0 runtime bytes intact.
+""",
+        "mobile_scanner KGP application",
+    )
+
+    old_kotlin = """kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+"""
+    new_kotlin = """def configureBILKotlin = {
+    extensions.configure(org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension) { kotlinExtension ->
+        kotlinExtension.compilerOptions { options ->
+            options.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+}
+if (extensions.findByName('kotlin') != null) {
+    configureBILKotlin()
+} else {
+    pluginManager.withPlugin('org.jetbrains.kotlin.android') {
+        configureBILKotlin()
+    }
+}
+"""
+    source = _replace_once(source, old_kotlin, new_kotlin, "mobile_scanner Kotlin compiler config")
+    if re.search(r"apply\s+plugin\s*:\s*['\"](?:kotlin-android|org\.jetbrains\.kotlin\.android)['\"]", source):
+        raise SystemExit("mobile_scanner still applies KGP after patch.")
+    path.write_text(source, encoding="utf-8")
+    print("ANDROID_KGP_PATCH_mobile_scanner=PASS")
 
 
 def main() -> None:
-    _verify_mobile_scanner()
+    _patch_mobile_scanner()
     _patch_flutter_timezone()
     _patch_in_app_review()
     print("ANDROID_LEGACY_PLUGIN_KGP_CLEANUP=PASS")
