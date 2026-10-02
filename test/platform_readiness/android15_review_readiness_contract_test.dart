@@ -6,7 +6,7 @@ String _read(String path) => File(path).readAsStringSync();
 
 void main() {
   test(
-    'Android 30 release identity and modern Android package gates are exact',
+    'Android 31 release identity and modern Android package gates are exact',
     () {
       final gradle = _read('android/app/build.gradle.kts');
       final workflow = _read(
@@ -20,18 +20,18 @@ void main() {
       expect(gradle, contains('isShrinkResources = true'));
       expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
 
-      expect(workflow, contains('(( BUILD_NUMBER == 30 ))'));
+      expect(workflow, contains('(( BUILD_NUMBER == 31 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 29 ))')));
-      expect(workflow, contains('BIL_ANDROID_V30_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V30_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
+      expect(workflow, contains('BIL_ANDROID_V31_STAGING_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V30_FROZEN_SOURCE_MANIFEST_2026-09-29.md'),
+        contains('BIL_ANDROID_V31_FROZEN_SOURCE_MANIFEST_2026-10-02.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));
       expect(workflow, contains('BIL_PAYMENTS_ENABLED=true'));
-      expect(workflow, contains('BIL_ADS_ENABLED=false'));
+      expect(workflow, contains('BIL_ADS_ENABLED=true'));
       expect(workflow, contains('BIL_FACEBOOK_REQUIRED: true'));
       expect(
         workflow,
