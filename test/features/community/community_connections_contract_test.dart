@@ -22,7 +22,7 @@ void main() {
       'lib/features/community/data/community_repository.dart',
     ).readAsStringSync();
     final migration = File(
-      'supabase/migrations/20261002163500_fix_friend_request_visibility_without_public_profile.sql',
+      'supabase/migrations/20261002133802_fix_friend_request_visibility_without_public_profile_20261002.sql',
     ).readAsStringSync();
 
     expect(migration, contains('left join public.bil_public_profiles'));
