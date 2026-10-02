@@ -26,7 +26,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 75
     steps:
-      - name: Require exact audited 30/33 source bindings
+      - name: Require exact audited 31/34 source bindings
         shell: bash
         env:
           IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
