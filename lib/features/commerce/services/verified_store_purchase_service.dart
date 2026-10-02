@@ -349,7 +349,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           transactionDate: transaction.purchaseDate,
           status: PurchaseStatus.purchased,
           appAccountToken: transaction.appAccountToken,
-          expirationDate: transaction.expirationDate,
         );
         await _handleVerifiedPurchase(
           details,
