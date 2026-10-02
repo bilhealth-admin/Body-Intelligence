@@ -256,10 +256,11 @@ class CommunityRepository
               const {'pending', 'accepted'}.contains(status) &&
               otherUserId is String &&
               _uuid.hasMatch(otherUserId) &&
-              displayName is String &&
-              displayName.trim().length >= 2 &&
-              displayName.trim().length <= 60 &&
-              !_unsafeText.hasMatch(displayName) &&
+              (displayName == null ||
+                  (displayName is String &&
+                      displayName.trim().length >= 2 &&
+                      displayName.trim().length <= 60 &&
+                      !_unsafeText.hasMatch(displayName))) &&
               (avatarUrl == null || avatarUrl is String);
         })
         .map((row) {
