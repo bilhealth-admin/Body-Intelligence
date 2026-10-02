@@ -194,7 +194,9 @@ void main() {
     expect(service, contains("storekit_duplicate_product_object"));
     expect(service, contains("_reconcileAppleUnfinishedBeforePurchase"));
     expect(service, contains("SK2Transaction.unfinishedTransactions()"));
-    expect(service, contains("await restore();"));
+    expect(service, contains("SK2PurchaseDetails("));
+    expect(service, contains("_handleVerifiedPurchase("));
+    expect(service, contains("source: 'app_store'"));
     expect(service, contains("_appleDuplicateRetryInFlight"));
     expect(service, contains("queryProductDetails({displayed.id})"));
     expect(processing, contains("_recoverVerifiedStoreKit2Completion"));
