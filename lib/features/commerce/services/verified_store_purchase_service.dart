@@ -250,7 +250,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         messageCode = 'authentication_required';
         return null;
       }
-      if (response.error != null || response.notFoundIDs.contains(displayed.id)) {
+      if (response.error != null ||
+          response.notFoundIDs.contains(displayed.id)) {
         throw StateError('catalog_refresh_failed');
       }
 
