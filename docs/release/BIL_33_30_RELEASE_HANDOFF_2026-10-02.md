@@ -12,11 +12,13 @@ rewrite historical evidence.
   - Final Release Certification #65: SUCCESS
   - RC mobile #31: SUCCESS on retry (Android and iOS jobs both SUCCESS)
 - Current code/test parent candidate:
-  `02f5a5fe6dd16b05bcbd9a0ac651051867f32316`
+  `f8861019d99fb8444148d8f009765b61f7d03a15`
 - The post-certification delta keeps the previously certified application
   behavior and adds only the reviewed iOS HealthKit permission hardening,
   Windows-only barcode-package discovery isolation, accessibility evidence
-  hardening, their regression tests, and canonical formatter closure.
+  hardening, their regression tests, canonical formatter closure, and the
+  final analyzer lint closure. Full `flutter analyze --no-pub` passed before
+  that lint-only commit was created.
 - This documentation-only commit intentionally triggers one unified final
   revalidation so Sapphire, Final Release Certification, Android RC and iOS RC
   all bind to one exact candidate SHA before release freeze.
