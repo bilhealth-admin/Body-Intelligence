@@ -42,7 +42,7 @@ reviewed 2026-10-02 stabilization changes carried by the audited source SHA.
 
 Production Supabase contains the forward Community connection RPC correction
 corresponding to
-`20261002163500_fix_friend_request_visibility_without_public_profile.sql`.
+`20261002133802_fix_friend_request_visibility_without_public_profile_20261002.sql`.
 
 The deployed `verify-store-purchase` function was read back against the
 repository source before freeze. The Apple StoreKit verification backend,
