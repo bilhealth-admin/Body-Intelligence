@@ -1,4 +1,5 @@
 name: BIL cleanup verification once
+# Final exact-state verification: preserve mobile_scanner 7.4.0 runtime bytes.
 
 on:
   push:
