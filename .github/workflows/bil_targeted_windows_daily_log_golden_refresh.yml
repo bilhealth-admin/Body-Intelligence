@@ -34,6 +34,10 @@ jobs:
           flutter test --no-pub --update-goldens test/visual_closure/actual_data_pages_golden_test.dart --plain-name "daily log reference premium goal capture"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+          # flutter pub get refreshes platform registrants on this checkout.
+          # They are generated noise, not part of this tightly-scoped golden update.
+          git restore --worktree --source=HEAD -- linux/flutter/generated_plugin_registrant.cc linux/flutter/generated_plugin_registrant.h linux/flutter/generated_plugins.cmake macos/Flutter/GeneratedPluginRegistrant.swift windows/flutter/generated_plugin_registrant.cc windows/flutter/generated_plugin_registrant.h windows/flutter/generated_plugins.cmake
+
           $expected = @(
             'test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png',
             'test/visual_closure/goldens/visual_closure_daily_log_reference_premium_phone.png'
