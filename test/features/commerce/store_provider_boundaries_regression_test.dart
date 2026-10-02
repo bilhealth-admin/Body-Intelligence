@@ -35,7 +35,10 @@ void main() {
     final conflict = PurchaseOwnershipConflictStore();
 
     conflict.recordConflict(StoreCatalogConfiguration.premiumMonthly);
-    expect(conflict.blockedFor(BilStoreProductKind.premiumSubscription), isTrue);
+    expect(
+      conflict.blockedFor(BilStoreProductKind.premiumSubscription),
+      isTrue,
+    );
     expect(conflict.blockedFor(BilStoreProductKind.aiBoostConsumable), isFalse);
 
     conflict.recordConflict(StoreCatalogConfiguration.aiBoost);
@@ -43,7 +46,10 @@ void main() {
 
     conflict.clearAfterVerifiedOwnership(StoreCatalogConfiguration.aiBoost);
     expect(conflict.blockedFor(BilStoreProductKind.aiBoostConsumable), isFalse);
-    expect(conflict.blockedFor(BilStoreProductKind.premiumSubscription), isTrue);
+    expect(
+      conflict.blockedFor(BilStoreProductKind.premiumSubscription),
+      isTrue,
+    );
   });
 
   test('future provider and validation contracts remain abstract', () {
