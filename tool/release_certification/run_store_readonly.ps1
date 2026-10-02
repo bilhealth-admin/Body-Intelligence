@@ -23,7 +23,7 @@ try {
   node tool/google_play/google_play_release_surface_readonly_audit.mjs --credentials 'G:\\secret\\google.json' --output 'G:\\evidence\\google-release.json'
   if($LASTEXITCODE -ne 0){ throw 'Google read-only audit failed' }
   Remove-Item -LiteralPath 'G:\\secret' -Recurse -Force
-  Copy-Item -LiteralPath 'G:\\evidence\\*' -Destination $OutputDir -Force
+  Copy-Item -Path 'G:\\evidence\\*' -Destination $OutputDir -Force
   'STORE_READONLY=PASS' | Set-Content (Join-Path $OutputDir 'status.txt')
 } finally {
   Remove-Item -LiteralPath 'G:\\secret' -Recurse -Force -ErrorAction SilentlyContinue
