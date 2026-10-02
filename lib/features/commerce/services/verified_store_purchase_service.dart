@@ -314,9 +314,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     }
   }
 
-  Future<bool> _reconcileAppleUnfinishedBeforePurchase(
-    String productId,
-  ) async {
+  Future<bool> _reconcileAppleUnfinishedBeforePurchase(String productId) async {
     if (defaultTargetPlatform != TargetPlatform.iOS) return true;
     try {
       final unfinished = await SK2Transaction.unfinishedTransactions().timeout(
