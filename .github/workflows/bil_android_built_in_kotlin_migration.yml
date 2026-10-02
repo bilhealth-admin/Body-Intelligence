@@ -1,0 +1,289 @@
+name: BIL one-shot Android built-in Kotlin migration
+
+on:
+  push:
+    branches: [fix/community-sapphire-health-3033]
+    paths:
+      - .github/workflows/bil_android_built_in_kotlin_migration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: fix/community-sapphire-health-3033
+          fetch-depth: 0
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve current dependencies
+        run: flutter pub get
+
+      - name: Prepare deterministic in_app_review 2.0.12 compatibility copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import shutil
+
+          root = pathlib.Path.cwd()
+          config_path = root / '.dart_tool' / 'package_config.json'
+          config = json.loads(config_path.read_text())
+          entry = next((p for p in config['packages'] if p['name'] == 'in_app_review'), None)
+          if entry is None:
+              raise SystemExit('in_app_review is missing from package_config.json')
+          source = (config_path.parent / entry['rootUri']).resolve()
+          pubspec = (source / 'pubspec.yaml').read_text()
+          if 'version: 2.0.12' not in pubspec:
+              raise SystemExit(f'Expected in_app_review 2.0.12, got package at {source}')
+          destination = root / 'tool' / 'vendor_in_app_review'
+          if destination.exists():
+              shutil.rmtree(destination)
+          shutil.copytree(source, destination, symlinks=False)
+          PY
+
+          cat > tool/vendor_in_app_review/android/build.gradle <<'GRADLE'
+          group = "dev.britannio.in_app_review"
+          version = "1.0-SNAPSHOT"
+
+          buildscript {
+              ext.kotlin_version = "2.2.0"
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+
+              dependencies {
+                  classpath("com.android.tools.build:gradle:8.12.1")
+                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+              }
+          }
+
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          apply plugin: "com.android.library"
+
+          def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0] as int
+          if (agpMajor < 9) {
+              pluginManager.apply("kotlin-android")
+          }
+
+          android {
+              namespace = "dev.britannio.in_app_review"
+              compileSdk = 36
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_11
+                  targetCompatibility = JavaVersion.VERSION_11
+              }
+
+              sourceSets {
+                  main.java.srcDirs += "src/main/kotlin"
+                  test.java.srcDirs += "src/test/kotlin"
+              }
+
+              defaultConfig {
+                  minSdk = 21
+              }
+
+              dependencies {
+                  testImplementation("org.jetbrains.kotlin:kotlin-test")
+                  testImplementation("org.mockito:mockito-core:5.0.0")
+                  implementation 'com.google.android.play:review:2.0.2'
+                  implementation 'com.google.android.play:review-ktx:2.0.2'
+                  implementation 'com.google.android.gms:play-services-base:18.7.2'
+              }
+
+              testOptions {
+                  unitTests.all {
+                      useJUnitPlatform()
+                      testLogging {
+                         events "passed", "skipped", "failed", "standardOut", "standardError"
+                         outputs.upToDateWhen {false}
+                         showStandardStreams = true
+                      }
+                  }
+              }
+          }
+
+          kotlin {
+              compilerOptions {
+                  jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+              }
+          }
+          GRADLE
+
+      - name: Switch BIL to built-in Kotlin and current scanner
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          pubspec = Path('pubspec.yaml')
+          source = pubspec.read_text()
+          old_scanner = '  mobile_scanner: ^7.4.0'
+          if source.count(old_scanner) != 1:
+              raise SystemExit('Expected exact mobile_scanner 7.4.0 constraint once.')
+          source = source.replace(old_scanner, '  mobile_scanner: 7.4.2')
+
+          marker = 'dependency_overrides:\n'
+          if source.count(marker) != 1:
+              raise SystemExit('Expected one dependency_overrides section.')
+          if '  in_app_review:\n    path: tool/vendor_in_app_review\n' in source:
+              raise SystemExit('in_app_review override already exists unexpectedly.')
+          source = source.replace(
+              marker,
+              marker + '  # Upstream 2.0.12 still applies legacy Kotlin on AGP 9.\n'
+                       '  # Keep the exact released package locally with the reviewed built-in-Kotlin patch.\n'
+                       '  in_app_review:\n'
+                       '    path: tool/vendor_in_app_review\n',
+          )
+          pubspec.write_text(source)
+
+          properties = Path('android/gradle.properties')
+          gradle = properties.read_text()
+          if gradle.count('android.builtInKotlin=false') != 1:
+              raise SystemExit('Expected android.builtInKotlin=false exactly once.')
+          gradle = gradle.replace(
+              '# Flutter\'s built-in Kotlin path requires Flutter 3.47+. Keep the official\n'
+              '# AGP 9 compatibility bridge until every transitive plugin has migrated.\n'
+              'android.builtInKotlin=false',
+              '# All Android plugins in this release are compatible with AGP 9 built-in Kotlin.\n'
+              '# Keep this enabled so no plugin applies the legacy Kotlin Gradle Plugin.\n'
+              'android.builtInKotlin=true',
+          )
+          if 'android.builtInKotlin=false' in gradle:
+              raise SystemExit('Failed to enable built-in Kotlin.')
+          properties.write_text(gradle)
+          PY
+
+          flutter pub get
+          git diff --check
+
+      - name: Verify dependency bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          lock = Path('pubspec.lock').read_text()
+          if 'mobile_scanner:' not in lock or 'version: "7.4.2"' not in lock:
+              raise SystemExit('mobile_scanner 7.4.2 was not locked.')
+          config = json.loads(Path('.dart_tool/package_config.json').read_text())
+          review = next(p for p in config['packages'] if p['name'] == 'in_app_review')
+          if 'vendor_in_app_review' not in review['rootUri']:
+              raise SystemExit('in_app_review is not bound to the local reviewed copy.')
+          PY
+
+      - name: Analyze and focused regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub
+          flutter test --no-pub --concurrency 1 --timeout 2m \
+            test/app/services/store_review_prompt_service_test.dart \
+            test/platform_readiness/android15_review_readiness_contract_test.dart \
+            test/launch_readiness/flutter_release_plugin_sanitizer_test.dart \
+            test/features/nutrition/p5_001_barcode_foundation_test.dart
+
+      - name: Build Android debug and reject legacy Kotlin warning
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk --debug --no-pub \
+            --build-number 30 \
+            --dart-define=BIL_ENVIRONMENT=qa \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
+            --dart-define=BIL_PAYMENTS_ENABLED=false \
+            --dart-define=BIL_ADS_ENABLED=false \
+            2>&1 | tee /tmp/bil-android-debug.log
+          if grep -Fq 'Your app uses the following plugins that apply Kotlin Gradle Plugin' /tmp/bil-android-debug.log; then
+            echo 'Legacy Kotlin Gradle Plugin warning is still present.' >&2
+            grep -F 'Your app uses the following plugins that apply Kotlin Gradle Plugin' /tmp/bil-android-debug.log >&2
+            exit 1
+          fi
+
+      - name: Build production-shaped Android bundle and reject legacy Kotlin warning
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+          flutter build appbundle --release --no-pub \
+            --build-number 30 \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
+            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
+            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
+            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
+            --dart-define=BIL_PUSH_ENABLED=true \
+            --dart-define=BIL_PUSH_PROVIDER_READY=true \
+            --dart-define=BIL_ADS_ENABLED=false \
+            --dart-define=BIL_AD_PROVIDER_READY=false \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false \
+            2>&1 | tee /tmp/bil-android-release.log
+          test -s build/app/outputs/bundle/release/app-release.aab
+          if grep -Fq 'Your app uses the following plugins that apply Kotlin Gradle Plugin' /tmp/bil-android-release.log; then
+            echo 'Legacy Kotlin Gradle Plugin warning is still present in release build.' >&2
+            grep -F 'Your app uses the following plugins that apply Kotlin Gradle Plugin' /tmp/bil-android-release.log >&2
+            exit 1
+          fi
+
+      - name: Commit only verified migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/bil_android_built_in_kotlin_migration.yml
+          git add \
+            pubspec.yaml \
+            pubspec.lock \
+            android/gradle.properties \
+            tool/vendor_in_app_review \
+            .github/workflows/bil_android_built_in_kotlin_migration.yml
+          git diff --cached --check
+          python3 - <<'PY'
+          import subprocess
+          allowed_prefixes = (
+              'pubspec.yaml',
+              'pubspec.lock',
+              'android/gradle.properties',
+              'tool/vendor_in_app_review/',
+              '.github/workflows/bil_android_built_in_kotlin_migration.yml',
+          )
+          files = subprocess.check_output(
+              ['git', 'diff', '--cached', '--name-only'], text=True
+          ).splitlines()
+          unexpected = [p for p in files if not any(
+              p == prefix or (prefix.endswith('/') and p.startswith(prefix))
+              for prefix in allowed_prefixes
+          )]
+          if unexpected:
+              raise SystemExit(f'Unexpected staged files: {unexpected}')
+          PY
+          git config user.name 'bil-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'fix(android): migrate release plugins to built-in Kotlin'
+          git push origin HEAD:fix/community-sapphire-health-3033
