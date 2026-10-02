@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
-      FREEZE_SHA: 661cc6aecda468ee4f2e7f51c380d2a725bc89fc
-      TARGET_REF: fix/community-sapphire-health-3033
+      FREEZE_SHA: 65df51e265c7119bbdfc6f8ec867949097156b6c
+      TARGET_REF: cleanup/ios-spm-android-builtin-kotlin-20261002
       IOS_SOURCE: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
       ANDROID_SOURCE: ${{ vars.BIL_ANDROID_V30_AUDITED_SOURCE_SHA }}
       IOS_MANIFEST_EXPECTED: ${{ vars.BIL_IOS_V33_STAGING_MANIFEST_SHA256 }}
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout frozen release source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
-          ref: 661cc6aecda468ee4f2e7f51c380d2a725bc89fc
+          ref: 65df51e265c7119bbdfc6f8ec867949097156b6c
           persist-credentials: false
 
       - name: Verify all four release variables
