@@ -1,0 +1,72 @@
+name: BIL Android cleanup verification once
+
+on:
+  push:
+    branches: [cleanup/ios-spm-android-builtin-kotlin-20261002]
+    paths:
+      - .github/workflows/bil_cleanup_android_verify_once.yml
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.44.6
+
+jobs:
+  android-clean-build:
+    name: Android clean plugin build final
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Checkout cleanup source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve exact dependencies
+        run: flutter pub get
+
+      - name: Apply fail-closed hosted plugin Gradle cleanup
+        run: python3 tool/release/patch_android_legacy_kgp_plugins.py
+
+      - name: Run focused release contracts
+        run: >-
+          flutter test --no-pub
+          test/launch_readiness/clean_source_freeze_preparation_contract_test.dart
+          test/app/services/store_review_prompt_service_test.dart
+          test/features/nutrition/p5_001_barcode_foundation_test.dart
+          --timeout 5m
+
+      - name: Build clean Android debug APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build apk --debug --no-pub             --build-number 30             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false             2>&1 | tee /tmp/bil-clean-android-debug.log
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+          if grep -Fq 'Your app uses the following plugins that apply Kotlin Gradle Plugin' /tmp/bil-clean-android-debug.log; then
+            echo 'KGP plugin warning remains in Android debug build.' >&2
+            exit 1
+          fi
+
+      - name: Build clean production-shaped Android AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+          flutter build appbundle --release --no-pub             --build-number 30             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false             2>&1 | tee /tmp/bil-clean-android-release.log
+          test -s build/app/outputs/bundle/release/app-release.aab
+          if grep -Fq 'Your app uses the following plugins that apply Kotlin Gradle Plugin' /tmp/bil-clean-android-release.log; then
+            echo 'KGP plugin warning remains in Android release build.' >&2
+            exit 1
+          fi
+
+      - name: Confirm lockfile did not move
+        shell: bash
+        run: git diff --exit-code -- pubspec.lock
