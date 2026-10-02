@@ -115,16 +115,13 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       return;
     }
     if (store.messageCode == 'purchase_owned_by_another_account') {
-      conflict.recordConflict();
-    } else if (store.state == VerifiedStoreState.verified &&
-        const {
-          'subscription_verified',
-          'ai_boost_verified',
-        }.contains(store.messageCode)) {
-      // Clear only after the current BIL owner has passed server verification.
-      // A local StoreKit/Play callback, empty restore, or retryable error is not
-      // sufficient to erase a proven ownership conflict.
-      conflict.clearAfterVerifiedOwnership();
+      conflict.recordConflict(store.ownershipConflictProductId);
+    } else if (const {
+      'subscription_verified',
+      'ai_boost_verified',
+      'no_restorable_purchases',
+    }.contains(store.messageCode)) {
+      conflict.clearAfterVerifiedOwnership(store.lastVerifiedProductId);
     }
   }
 
@@ -275,7 +272,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     try {
       ownershipBlocked = ref
           .read(purchaseOwnershipConflictStoreProvider)
-          .blocked;
+          .blockedFor(offer.kind);
     } on StateError {
       // Production is always mounted below ProviderScope. Preview-only pages
       // have no authenticated owner state to retain.
@@ -352,10 +349,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     } on StateError {
       ownershipConflict = null;
     }
-    final ownershipBlocked = ownershipConflict?.blocked ?? false;
-    final purchaseFeedbackKey = ownershipBlocked
-        ? 'purchase_owned_by_another_account'
-        : _purchaseFeedbackKey == 'purchase_owned_by_another_account'
+    final blockedPurchaseKinds =
+        ownershipConflict?.blockedKinds ?? const <BilStoreProductKind>{};
+    final purchaseFeedbackKey =
+        _purchaseFeedbackKey == 'purchase_owned_by_another_account'
         ? null
         : _purchaseFeedbackKey;
     return Scaffold(
@@ -386,7 +383,12 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         loading: _loading,
         purchaseInProgress: _purchaseInProgress,
         restoreInProgress: _restoring,
-        purchaseEnabled: !ownershipBlocked && (store?.canStartPurchase ?? true),
+        purchaseEnabled: store?.canStartPurchase ?? true,
+        blockedPurchaseKinds: blockedPurchaseKinds,
+        blockedPurchaseMessage: BilStoreCopy.text(
+          locale,
+          'purchase_owned_by_another_account',
+        ),
         purchaseStatusMessage: purchaseFeedbackKey == null
             ? null
             : BilStoreCopy.text(locale, purchaseFeedbackKey),
