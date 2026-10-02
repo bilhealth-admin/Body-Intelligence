@@ -195,44 +195,6 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     }
   }
 
-  Future<bool> _recoverVerifiedStoreKit2Completion(
-    PurchaseDetails purchase,
-  ) async {
-    if (defaultTargetPlatform != TargetPlatform.iOS ||
-        purchase is! SK2PurchaseDetails) {
-      return false;
-    }
-    final purchaseId = purchase.purchaseID;
-    final numericId = int.tryParse(purchaseId ?? '');
-    if (purchaseId == null || numericId == null) return false;
-
-    Future<List<SK2Transaction>> readUnfinished() =>
-        SK2Transaction.unfinishedTransactions().timeout(
-          const Duration(seconds: 4),
-        );
-
-    try {
-      final before = await readUnfinished();
-      if (!before.any((transaction) => transaction.id == purchaseId)) {
-        // Native StoreKit already considers it finished; only the plugin
-        // completion callback failed to settle.
-        return true;
-      }
-      try {
-        await SK2Transaction.finish(
-          numericId,
-        ).timeout(const Duration(seconds: 4));
-      } on Object {
-        // Re-read native state below. StoreKit may have completed the finish
-        // even when the wrapper Future reported or timed out.
-      }
-      final after = await readUnfinished();
-      return !after.any((transaction) => transaction.id == purchaseId);
-    } on Object {
-      return false;
-    }
-  }
-
   Future<void> _consumePurchaseUpdates(
     List<_QueuedStorePurchaseUpdate> updates,
   ) async {
