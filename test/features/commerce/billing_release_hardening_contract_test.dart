@@ -162,7 +162,16 @@ void main() {
 
       expect(service, contains("storekit_duplicate_product_object"));
       expect(service, contains("_appleDuplicateRetryInFlight"));
-      expect(checkout, contains("defaultTargetPlatform == TargetPlatform.iOS"));
+      expect(
+        service,
+        contains("if (defaultTargetPlatform == TargetPlatform.iOS)"),
+      );
+      expect(
+        checkout,
+        contains(
+          "if (defaultTargetPlatform != TargetPlatform.iOS) return true;",
+        ),
+      );
       expect(checkout, contains("_reconcileAppleUnfinishedBeforePurchase"));
       expect(checkout, contains("SK2Transaction.unfinishedTransactions()"));
       expect(checkout, contains("SK2PurchaseDetails("));
