@@ -169,9 +169,10 @@ String removeIosPlatformFromSimpleBarcodeScannerPubspec(String source) {
   final plugin = _directKey(lines, 'plugin', parent: flutter);
   final pluginPlatforms = _directKey(lines, 'platforms', parent: plugin);
   final pluginIos = _directKey(lines, 'ios', parent: pluginPlatforms);
-  if (!_mappingText(lines, pluginIos).contains(
-    'SwiftFlutterBarcodeScannerPlugin',
-  )) {
+  if (!_mappingText(
+    lines,
+    pluginIos,
+  ).contains('SwiftFlutterBarcodeScannerPlugin')) {
     throw const FormatException(
       'Unexpected simple_barcode_scanner iOS plugin declaration.',
     );
@@ -394,9 +395,7 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
     projectRoot,
     createParent: true,
   );
-  final marker = File(
-    destination.path + Platform.pathSeparator + _markerName,
-  );
+  final marker = File(destination.path + Platform.pathSeparator + _markerName);
   if (_sameDirectory(source, destination)) {
     if (!marker.existsSync()) {
       throw StateError(
@@ -430,10 +429,9 @@ prepareDeferredIosSimpleBarcodeScannerPackage(Directory projectRoot) {
       'simple_barcode_scanner pubspec is missing: ' + sourcePubspec.path,
     );
   }
-  final sanitizedPubspec =
-      removeIosPlatformFromSimpleBarcodeScannerPubspec(
-        sourcePubspec.readAsStringSync(),
-      );
+  final sanitizedPubspec = removeIosPlatformFromSimpleBarcodeScannerPubspec(
+    sourcePubspec.readAsStringSync(),
+  );
 
   if (destination.existsSync()) {
     throw StateError(
@@ -535,10 +533,7 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
 
   bool containsPlugin(List<Object?> entries) => entries
       .whereType<Map<String, Object?>>()
-      .any(
-        (entry) =>
-            entry['name'] == deferredIosSimpleBarcodeScannerPlugin,
-      );
+      .any((entry) => entry['name'] == deferredIosSimpleBarcodeScannerPlugin);
   if (containsPlugin(ios) || !containsPlugin(android)) {
     throw StateError(
       'Deferred metadata must remove simple_barcode_scanner only from iOS.',
@@ -548,8 +543,7 @@ void verifyDeferredIosSimpleBarcodeScannerDiscovery(Directory projectRoot) {
   final graph = dependencies['dependencyGraph'];
   if (graph is! List<Object?> ||
       !graph.whereType<Map<String, Object?>>().any(
-        (entry) =>
-            entry['name'] == deferredIosSimpleBarcodeScannerPlugin,
+        (entry) => entry['name'] == deferredIosSimpleBarcodeScannerPlugin,
       )) {
     throw StateError(
       'Deferred metadata must preserve the Dart dependency graph entry.',
