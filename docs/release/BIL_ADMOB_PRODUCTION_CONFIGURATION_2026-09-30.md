@@ -35,24 +35,28 @@ BIL's reviewed advertising boundary remains unchanged:
 
 ## Release state
 
-The identifiers above are the current production ownership inputs, but **production
-ad serving is not yet authorized** because both apps are still unpublished and
-cannot yet be linked to their public store listings in AdMob.
+On 2026-10-02 the owner explicitly authorized the next signed Android/iOS
+candidate to compile the reviewed AdMob/UMP integration with the production
+publisher, app IDs, and Banner unit IDs above **before public store launch**.
 
-Keep the production release gates fail-closed until all of the following are true:
-1. the Android and iOS public store listings are live and linked in AdMob,
-2. AdMob app review no longer reports `Requires review`,
-3. the public `https://www.bilhealth.com/app-ads.txt` endpoint serves the exact
-   publisher record above,
-4. UMP/privacy configuration is verified on real Android and iOS builds.
+The apps are still unpublished and cannot yet be linked to public store
+listings in AdMob. Ad serving may therefore remain limited or absent until the
+store-link and AdMob app-review gates complete. That external limitation does
+not require BIL to remove the SDK or substitute test IDs in the signed
+candidate.
 
-Until those conditions are satisfied:
-- `BIL_ADS_ENABLED=false`
-- `BIL_AD_PROVIDER_READY=false`
-- `BIL_ADMOB_PRODUCTION_READY=false`
+For the next signed candidate:
+- `BIL_ADS_ENABLED=true`
+- `BIL_AD_PROVIDER_READY=true`
+- `BIL_ADMOB_PRODUCTION_READY=true`
+- production IDs must match the single publisher above
+- UMP remains mandatory before any ad request
+- Premium/Premium AI Coach and sensitive logging surfaces remain ad-free
 
-Development/integration testing must continue to use Google's official test ad
-units rather than the production banner IDs.
+Development and automated integration tests continue to use Google's official
+test ad units unless a test is explicitly validating the production identifier
+format.
 
-This file records configuration ownership only. It does not authorize a store
-upload or production rollout.
+After the apps become public, link both store listings in AdMob and complete
+the remaining AdMob app-review/app-ads.txt verification gates before treating
+normal production serving as available.
