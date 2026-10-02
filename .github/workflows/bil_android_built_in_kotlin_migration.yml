@@ -37,6 +37,7 @@ jobs:
           import json
           import pathlib
           import shutil
+          import urllib.parse
 
           root = pathlib.Path.cwd()
           config_path = root / '.dart_tool' / 'package_config.json'
@@ -44,7 +45,13 @@ jobs:
           entry = next((p for p in config['packages'] if p['name'] == 'in_app_review'), None)
           if entry is None:
               raise SystemExit('in_app_review is missing from package_config.json')
-          source = (config_path.parent / entry['rootUri']).resolve()
+          root_uri = entry['rootUri']
+          parsed = urllib.parse.urlparse(root_uri)
+          source = (
+              pathlib.Path(urllib.parse.unquote(parsed.path))
+              if parsed.scheme == 'file'
+              else (config_path.parent / root_uri).resolve()
+          )
           pubspec = (source / 'pubspec.yaml').read_text()
           if 'version: 2.0.12' not in pubspec:
               raise SystemExit(f'Expected in_app_review 2.0.12, got package at {source}')
