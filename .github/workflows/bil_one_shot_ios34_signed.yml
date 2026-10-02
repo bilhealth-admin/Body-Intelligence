@@ -1,0 +1,631 @@
+name: BIL one-shot iOS signed release candidate (build 34)
+
+on:
+  push:
+    branches:
+      - ops/release-dispatch-31-34-555496eb
+
+permissions:
+  contents: read
+
+jobs:
+  signed-ios-release:
+    runs-on: macos-26
+    timeout-minutes: 75
+    steps:
+      - name: Lock exact audited release bindings
+        shell: bash
+        env:
+          ANDROID_SOURCE: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
+          IOS_SOURCE: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          ANDROID_MANIFEST: ${{ vars.BIL_ANDROID_V31_STAGING_MANIFEST_SHA256 }}
+          IOS_MANIFEST: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
+        run: |
+          set -euo pipefail
+          test "$ANDROID_SOURCE" = "555496ebb6d6d3952c9e69e7bb6b9788269b39fa"
+          test "$IOS_SOURCE" = "555496ebb6d6d3952c9e69e7bb6b9788269b39fa"
+          test "$ANDROID_MANIFEST" = "d24a4f3cb58ada3c29228f253085106cf61a84f032615d37144125558bd5de01"
+          test "$IOS_MANIFEST" = "05307d1bb5860eabb56c01c0b82d1d4bad73144e5a38f396380559e61c5f3413"
+          echo 'FINAL_RELEASE_BINDINGS=PASS'
+
+      - name: Require exact audited 31/34 source bindings
+        shell: bash
+        env:
+          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
+        run: |
+          set -euo pipefail
+          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V34_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
+          [[ "$ANDROID_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_ANDROID_V31_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
+          test "$IOS_AUDITED_SOURCE" = "$ANDROID_AUDITED_SOURCE" || { echo 'iOS 34 and Android 31 must use the same audited source SHA.' >&2; exit 1; }
+
+      - name: Checkout accepted source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+
+      - name: Verify frozen iOS manifest digest binding
+        shell: bash
+        env:
+          EXPECTED_MANIFEST_SHA: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
+        run: |
+          set -euo pipefail
+          ACTUAL="$(shasum -a 256 docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md | awk '{print $1}')"
+          test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_IOS_V34_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
+
+      - name: Verify selected Xcode 26+ and iOS SDK 26+
+        id: apple_toolchain_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Do not guess or switch Xcode installations. The runner-selected
+          # toolchain itself must satisfy the store gate.
+          python3 tool/release/verify_apple_release_toolchain.py \
+            --text-evidence BIL-apple-release-toolchain.txt \
+            --json-evidence BIL-apple-release-toolchain.json
+
+      - name: Upload Apple toolchain version evidence
+        if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Validate release build number and Apple team
+        shell: bash
+        env:
+          BUILD_NUMBER: 34
+          UPLOAD_TO_TESTFLIGHT: true
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER == 34 )) || {
+            echo 'build_number must be exactly 34 for the iOS release candidate; build 33 and earlier must never be selected.' >&2
+            exit 1
+          }
+          [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
+            echo 'upload_to_testflight must be a boolean.' >&2
+            exit 1
+          }
+          test -n "${APPLE_TEAM_ID:-}" || {
+            echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID' >&2
+            exit 1
+          }
+          grep -Eq "DEVELOPMENT_TEAM = \"?${APPLE_TEAM_ID}\"?;" \
+            ios/Runner.xcodeproj/project.pbxproj || {
+              echo 'Xcode DEVELOPMENT_TEAM does not match APPLE_TEAM_ID.' >&2
+              exit 1
+            }
+
+      - name: Require Apple signing inputs
+        shell: bash
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CERTIFICATE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_BASE64'; exit 1; }
+          test -n "${CERTIFICATE_PASSWORD:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD'; exit 1; }
+          test -n "${PROVISIONING_PROFILE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_PROVISIONING_PROFILE_BASE64'; exit 1; }
+          test -n "${APPLE_TEAM_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID'; exit 1; }
+          if [[ "true" == 'true' ]]; then
+            test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
+            test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
+            test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
+          fi
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
+
+      - name: Import distribution certificate
+        uses: apple-actions/import-codesign-certs@63fff01cd422d4b7b855d40ca1e9d34d2de9427d
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+
+      - name: Install provisioning profile
+        shell: bash
+        env:
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE="$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
+          python3 - "$PROFILE" <<'PY'
+          import base64
+          import binascii
+          import os
+          import pathlib
+          import sys
+
+          try:
+              decoded = base64.b64decode(os.environ['PROFILE_BASE64'], validate=True)
+          except (KeyError, ValueError, binascii.Error) as error:
+              raise SystemExit(f'Invalid provisioning-profile Base64: {error}')
+          pathlib.Path(sys.argv[1]).write_bytes(decoded)
+          PY
+          security cms -D -i "$PROFILE" > "$RUNNER_TEMP/BIL-profile.plist"
+          python3 - "$RUNNER_TEMP/BIL-profile.plist" "$APPLE_TEAM_ID" <<'PY'
+          import datetime as dt
+          import plistlib
+          import sys
+
+          profile_path, team_id = sys.argv[1:]
+          with open(profile_path, 'rb') as handle:
+              profile = plistlib.load(handle)
+          entitlements = profile.get('Entitlements', {})
+          expected_app_id = f'{team_id}.com.bilhealth.bodyintelligencelog'
+          if entitlements.get('application-identifier') != expected_app_id:
+              raise SystemExit('Provisioning profile has the wrong application identifier.')
+          if entitlements.get('com.apple.developer.healthkit') is not True:
+              raise SystemExit('Provisioning profile does not authorize HealthKit.')
+          if 'Default' not in entitlements.get('com.apple.developer.applesignin', []):
+              raise SystemExit('Provisioning profile does not authorize Sign in with Apple.')
+          associated_domains = entitlements.get(
+              'com.apple.developer.associated-domains',
+              [],
+          )
+          if isinstance(associated_domains, str):
+              associated_domain_values = {associated_domains}
+          elif isinstance(associated_domains, list):
+              associated_domain_values = {
+                  value for value in associated_domains if isinstance(value, str)
+              }
+          else:
+              associated_domain_values = set()
+          if not (
+              '*' in associated_domain_values
+              or 'applinks:www.bilhealth.com' in associated_domain_values
+          ):
+              raise SystemExit(
+                  'Provisioning profile does not authorize '
+                  'applinks:www.bilhealth.com.'
+              )
+          if entitlements.get('aps-environment') != 'production':
+              raise SystemExit('Provisioning profile does not authorize production push.')
+          app_attest = entitlements.get(
+              'com.apple.developer.devicecheck.appattest-environment'
+          )
+          if isinstance(app_attest, str):
+              app_attest_environments = {app_attest}
+          elif isinstance(app_attest, list):
+              app_attest_environments = {
+                  value for value in app_attest if isinstance(value, str)
+              }
+          else:
+              app_attest_environments = set()
+          if 'production' not in app_attest_environments:
+              raise SystemExit(
+                  'Provisioning profile does not authorize production App Attest.'
+              )
+          if entitlements.get('get-task-allow', False) is not False:
+              raise SystemExit('Provisioning profile unexpectedly enables get-task-allow.')
+          expiry = profile.get('ExpirationDate')
+          now = dt.datetime.now(dt.timezone.utc)
+          if expiry is None or expiry.replace(tzinfo=dt.timezone.utc) <= now:
+              raise SystemExit('Provisioning profile is expired.')
+          print('APPLE_PROVISIONING_PROFILE_GATE=PASS')
+          PY
+
+      - name: Resolve and validate source
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: ios
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+          BIL_PUSH_ENABLED: true
+          BIL_PUSH_PROVIDER_READY: true
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: 34
+        run: |
+          flutter pub get
+          flutter analyze --no-pub
+          dart run tool/release/validate_release_configuration.dart
+          python3 tool/release/run_portable_release_tests.py --code-only
+          flutter test --no-pub \
+            test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
+            --timeout 2m
+          plutil -lint ios/Runner/Info.plist
+          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
+          plutil -lint ios/Runner/Runner.entitlements
+          plutil -lint ios/Runner/RunnerDebug.entitlements
+
+      - name: Boot iOS Simulator for the system-crypto release gate
+        id: crypto_simulator
+        if: false
+        shell: bash
+        run: |
+          set -euo pipefail
+          UDID="$(xcrun simctl list devices available \
+            | awk -F '[()]' '/iPhone/ {print $2; exit}')"
+          test -n "$UDID" || {
+            echo 'No available iPhone Simulator was found.' >&2
+            exit 1
+          }
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Run native AES-GCM gate on iOS Simulator
+        id: native_crypto_runtime_gate
+        if: false
+        shell: bash
+        run: >-
+          flutter test --no-pub
+          integration_test/system_crypto_bridge_integration_test.dart
+          -d "${{ steps.crypto_simulator.outputs.udid }}"
+          --timeout 10m
+
+      - name: Remove system-crypto iOS Simulator
+        if: always() && steps.crypto_simulator.outputs.udid != ''
+        shell: bash
+        env:
+          UDID: ${{ steps.crypto_simulator.outputs.udid }}
+        run: |
+          xcrun simctl shutdown "$UDID" 2>/dev/null || true
+
+      - name: Record native crypto runtime gate decision
+        if: ${{ always() }}
+        shell: bash
+        env:
+          RUN_NATIVE_CRYPTO_CHECKS: false
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "$RUN_NATIVE_CRYPTO_CHECKS" == 'true' ]]; then
+            NATIVE_CRYPTO_GATE="$(printf '%s' "$NATIVE_CRYPTO_OUTCOME" | tr '[:lower:]' '[:upper:]')"
+            printf '%s\n' \
+              "NATIVE_CRYPTO_RUNTIME_GATE=$NATIVE_CRYPTO_GATE" \
+              'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=NOT_USED'
+          else
+            printf '%s\n' \
+              'NATIVE_CRYPTO_RUNTIME_GATE=NOT_RUN_OWNER_WAIVED' \
+              'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=EXPLICIT_WORKFLOW_INPUT'
+          fi | tee BIL-ios-native-crypto-gate.txt
+
+      - name: Preserve production AdMob plugin and validate configuration
+        shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-ios-production-admob-source.txt
+          printf '%s\n' \
+            'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
+            > ios/Flutter/ReleaseAdMob.xcconfig
+          grep -Fqx '<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
+          grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
+          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
+          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
+
+      - name: Configure manual App Store distribution signing
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          PROFILE_PLIST="$RUNNER_TEMP/BIL-profile.plist"
+          EXPORT_OPTIONS="$RUNNER_TEMP/BIL-export-options.plist"
+          test -s "$PROFILE_PLIST" || {
+            echo 'Decoded provisioning-profile metadata is missing.' >&2
+            exit 1
+          }
+          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST")"
+          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST")"
+          test -n "$PROFILE_NAME" || {
+            echo 'Provisioning profile name is missing.' >&2
+            exit 1
+          }
+          test -n "$PROFILE_UUID" || {
+            echo 'Provisioning profile UUID is missing.' >&2
+            exit 1
+          }
+
+          {
+            printf '\n// CI App Store distribution signing\n'
+            printf 'CODE_SIGN_STYLE = Manual\n'
+            printf 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution\n'
+            printf 'DEVELOPMENT_TEAM = %s\n' "$APPLE_TEAM_ID"
+            printf 'PROVISIONING_PROFILE_SPECIFIER = %s\n' "$PROFILE_NAME"
+            printf 'PROVISIONING_PROFILE = %s\n' "$PROFILE_UUID"
+          } >> ios/Flutter/Release.xcconfig
+
+          python3 - "$EXPORT_OPTIONS" "$APPLE_TEAM_ID" "$PROFILE_UUID" <<'PY'
+          import pathlib
+          import plistlib
+          import sys
+
+          output_path, team_id, profile_uuid = sys.argv[1:]
+          options = {
+              'method': 'app-store-connect',
+              'signingStyle': 'manual',
+              'teamID': team_id,
+              'signingCertificate': 'Apple Distribution',
+              'provisioningProfiles': {
+                  'com.bilhealth.bodyintelligencelog': profile_uuid,
+              },
+              'manageAppVersionAndBuildNumber': False,
+              'uploadSymbols': True,
+              'stripSwiftSymbols': True,
+          }
+          with pathlib.Path(output_path).open('wb') as handle:
+              plistlib.dump(options, handle, sort_keys=True)
+          PY
+          plutil -lint "$EXPORT_OPTIONS"
+
+          # Do not invoke `xcodebuild -showBuildSettings` here. Immediately
+          # before this step the deferred-plugin graph is intentionally
+          # sanitized; Xcode 26 aborts while resolving that transient graph.
+          # `flutter build ipa` regenerates the graph in the next step and is
+          # the authoritative resolved-settings and signing gate.
+          grep -Fqx 'CODE_SIGN_STYLE = Manual' ios/Flutter/Release.xcconfig
+          grep -Fqx 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution' ios/Flutter/Release.xcconfig
+          grep -Fqx "DEVELOPMENT_TEAM = $APPLE_TEAM_ID" ios/Flutter/Release.xcconfig
+          grep -Fqx "PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME" ios/Flutter/Release.xcconfig
+          grep -Fqx "PROVISIONING_PROFILE = $PROFILE_UUID" ios/Flutter/Release.xcconfig
+          test "$(/usr/libexec/PlistBuddy -c 'Print :signingStyle' "$EXPORT_OPTIONS")" = 'manual'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :teamID' "$EXPORT_OPTIONS")" = "$APPLE_TEAM_ID"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :provisioningProfiles:com.bilhealth.bodyintelligencelog' "$EXPORT_OPTIONS")" = "$PROFILE_UUID"
+          printf '%s\n' 'IOS_MANUAL_DISTRIBUTION_SIGNING_GATE=PASS'
+
+      - name: Build signed archive
+        env:
+          BUILD_NUMBER: 34
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ipa --release --no-pub \
+            --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
+            --build-number "$BUILD_NUMBER" \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
+            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
+            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
+            --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json \
+            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
+            --dart-define=BIL_PUSH_ENABLED=true \
+            --dart-define=BIL_PUSH_PROVIDER_READY=true \
+            --dart-define=BIL_ADS_ENABLED=true \
+            --dart-define=BIL_AD_PROVIDER_READY=true \
+            --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+            --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+            --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+            --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+            --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Verify regenerated iOS production AdMob plugin graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
+          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
+          printf '%s\n' 'ADMOB_IOS_NATIVE_SDK_GRAPH_GATE=PASS' \
+            | tee BIL-ios-production-admob-plugin-graph.txt
+
+      - name: Capture signed IPA evidence
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUILD_NUMBER: 34
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -s "$IPA"
+
+          SIGNED_IPA_DIR="$(mktemp -d "$RUNNER_TEMP/bil-final-signed-ipa.XXXXXX")"
+          unzip -qq "$IPA" -d "$SIGNED_IPA_DIR"
+          SIGNED_APP_COUNT="$(find "$SIGNED_IPA_DIR/Payload" \
+            -mindepth 1 -maxdepth 1 -type d -name '*.app' | wc -l | tr -d '[:space:]')"
+          test "$SIGNED_APP_COUNT" = 1 || {
+            echo "Expected exactly one application in final IPA Payload; found $SIGNED_APP_COUNT." >&2
+            exit 1
+          }
+          SIGNED_APP="$(find "$SIGNED_IPA_DIR/Payload" \
+            -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
+          test -d "$SIGNED_APP"
+
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --ios-info-plist "$SIGNED_APP/Info.plist" \
+            | tee BIL-ios-production-admob.txt
+
+          codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
+            2>&1 | tee BIL-ios-codesign-verify.txt
+          printf '%s\n' 'SIGNED_IPA_CODESIGN_GATE=PASS' \
+            | tee -a BIL-ios-codesign-verify.txt
+          codesign -dv --verbose=4 "$SIGNED_APP" 2> BIL-ios-codesign.txt
+          codesign --display --entitlements - --xml \
+            "$SIGNED_APP" \
+            | plutil -convert xml1 -o BIL-ios-entitlements.plist -
+          test -s BIL-ios-entitlements.plist
+
+          EMBEDDED_PROFILE="$SIGNED_APP/embedded.mobileprovision"
+          test -s "$EMBEDDED_PROFILE" || {
+            echo 'Final IPA app has no embedded provisioning profile.' >&2
+            exit 1
+          }
+          security cms -D -i "$EMBEDDED_PROFILE" \
+            > BIL-ios-embedded-profile.plist
+          plutil -lint BIL-ios-embedded-profile.plist
+          python3 tool/release/verify_signed_ios_entitlements.py \
+            --entitlements BIL-ios-entitlements.plist \
+            --embedded-profile BIL-ios-embedded-profile.plist \
+            --team-id "$APPLE_TEAM_ID" \
+            --bundle-id com.bilhealth.bodyintelligencelog
+          shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
+          stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          SCAN_DIR="$RUNNER_TEMP/bil-ios-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$IPA" -d "$SCAN_DIR"
+          if find "$SCAN_DIR/Payload" -type f -perm -0111 \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed IPA.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-ios-crypto-scan.txt
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        run: |
+          printf '%s\n' \
+            'CODE_GATE=PASS' \
+            'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_IOS_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED' \
+            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=PRESENT_VERIFIED' \
+            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_OWNER_INSTALL_OR_UPLOAD' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=Meta native Facebook authorization and Supabase token exchange,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
+            > BIL-ios-gate-status.txt
+
+      - name: Validate candidate with App Store Connect
+        if: true
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          ASC_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          python3 - "$ASC_KEY_PATH" <<'PY'
+          import base64
+          import binascii
+          import os
+          import pathlib
+          import sys
+
+          try:
+              decoded = base64.b64decode(
+                  os.environ['ASC_PRIVATE_KEY_BASE64'],
+                  validate=True,
+              )
+          except (KeyError, ValueError, binascii.Error) as error:
+              raise SystemExit(f'Invalid App Store Connect key Base64: {error}')
+          pathlib.Path(sys.argv[1]).write_bytes(decoded)
+          PY
+          chmod 600 "$ASC_KEY_PATH"
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Upload validated build to TestFlight
+        if: true
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          xcrun altool --upload-app -f "$IPA" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Upload signed IPA and validation evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/ios/ipa/*.ipa
+            BIL-ios-codesign.txt
+            BIL-ios-codesign-verify.txt
+            BIL-ios-entitlements.plist
+            BIL-ios-embedded-profile.plist
+            BIL-ios-ipa.sha256
+            BIL-ios-ipa.size
+            BIL-ios-crypto-scan.txt
+            BIL-ios-native-crypto-gate.txt
+            BIL-ios-production-admob-source.txt
+            BIL-ios-production-admob.txt
+            BIL-ios-production-admob-plugin-graph.txt
+            BIL-ios-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
+
+      - name: Remove ephemeral release inputs
+        if: always()
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        run: |
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
