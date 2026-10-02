@@ -34,6 +34,76 @@ jobs:
         run: |
           set -euo pipefail
           dart fix --apply --code=prefer_interpolation_to_compose_strings
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('tool/release/defer_ios_simple_barcode_scanner.dart')
+          source = path.read_text()
+          old = "RegExp('^' + RegExp.escape(key) + r':\\s*(?:#.*)?
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              'test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart',
+              'tool/release/defer_ios_simple_barcode_scanner.dart',
+          }
+          changed = set(filter(None, subprocess.check_output(
+              ['git', 'diff', '--name-only'], text=True
+          ).splitlines()))
+          unexpected = changed - allowed
+          if unexpected:
+              raise SystemExit(f'Unexpected dart fix files: {sorted(unexpected)}')
+          if not changed:
+              raise SystemExit('Expected interpolation fixes were not produced.')
+          PY
+          flutter analyze --no-pub
+
+      - name: Commit lint-only closure and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/bil_finalize_lint.yml
+          git add             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             tool/release/defer_ios_simple_barcode_scanner.dart             .github/workflows/bil_finalize_lint.yml
+          git diff --cached --check
+          git config user.name 'bil-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'style: close final release lint findings'
+          git push origin HEAD:fix/community-sapphire-health-3033
+)"
+          new = "RegExp('^${RegExp.escape(key)}' r':\\s*(?:#.*)?
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              'test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart',
+              'tool/release/defer_ios_simple_barcode_scanner.dart',
+          }
+          changed = set(filter(None, subprocess.check_output(
+              ['git', 'diff', '--name-only'], text=True
+          ).splitlines()))
+          unexpected = changed - allowed
+          if unexpected:
+              raise SystemExit(f'Unexpected dart fix files: {sorted(unexpected)}')
+          if not changed:
+              raise SystemExit('Expected interpolation fixes were not produced.')
+          PY
+          flutter analyze --no-pub
+
+      - name: Commit lint-only closure and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/bil_finalize_lint.yml
+          git add             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             tool/release/defer_ios_simple_barcode_scanner.dart             .github/workflows/bil_finalize_lint.yml
+          git diff --cached --check
+          git config user.name 'bil-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'style: close final release lint findings'
+          git push origin HEAD:fix/community-sapphire-health-3033
+)"
+          if source.count(old) != 1:
+              raise SystemExit('Expected exactly one remaining regex concatenation.')
+          path.write_text(source.replace(old, new))
+          PY
           dart format             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             tool/release/defer_ios_simple_barcode_scanner.dart
           git diff --check
           python3 - <<'PY'
