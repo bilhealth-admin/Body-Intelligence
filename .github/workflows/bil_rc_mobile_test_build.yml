@@ -216,7 +216,7 @@ jobs:
         run: |
           set -euo pipefail
           flutter pub get
-          flutter test --no-pub             test/platform_readiness/native_permission_dialog_contract_test.dart             test/connected_health/apple_health_permission_flow_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             --timeout 10m
+          flutter test --no-pub             test/platform_readiness/native_permission_dialog_contract_test.dart             test/connected_health/apple_health_permission_flow_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart             --timeout 10m
           plutil -lint ios/Runner/Info.plist
           plutil -lint ios/Runner/PrivacyInfo.xcprivacy
           plutil -lint ios/Runner/Runner.entitlements
