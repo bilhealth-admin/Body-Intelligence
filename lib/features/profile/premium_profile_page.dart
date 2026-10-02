@@ -106,6 +106,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
   bool exercises = true;
   String? hydrationIdentityKey;
   bool recoveredPhotoResumeScheduled = false;
+  bool profileStorageRecoveryAttempted = false;
 
   void _updateState(VoidCallback update) => setState(update);
 
@@ -139,12 +140,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
         ),
         body: profileAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(
-            child: FilledButton(
-              onPressed: () => ref.invalidate(userProfileProvider),
-              child: Text(tr('Try again', 'إعادة المحاولة')),
-            ),
-          ),
+          error: (_, _) => profileStorageFailure(),
           data: (profile) {
             final authIdentity = authIdentityAsync.value;
             if (authIdentity == null) {
@@ -161,35 +157,16 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
               return const Center(child: CircularProgressIndicator());
             }
             if (goalAsync.hasError) {
-              return Center(
-                child: FilledButton(
-                  onPressed: () => ref.invalidate(activeGoalProvider),
-                  child: Text(tr('Try again', 'إعادة المحاولة')),
-                ),
-              );
+              return profileStorageFailure();
             }
             if (photoAsync.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
             if (photoAsync.hasError) {
-              return Center(
-                child: FilledButton(
-                  onPressed: () => ref.invalidate(profilePhotoProvider),
-                  child: Text(tr('Try again', 'إعادة المحاولة')),
-                ),
-              );
+              return profileStorageFailure();
             }
             if (hydrateError != null) {
-              return Center(
-                child: FilledButton(
-                  onPressed: () => hydrate(
-                    profile,
-                    effectiveCurrentWeight ?? profile.currentWeight,
-                    authIdentity,
-                  ),
-                  child: Text(tr('Try again', 'إعادة المحاولة')),
-                ),
-              );
+              return profileStorageFailure();
             }
             final expectedHydrationKey = authIdentity.hydrationKey(
               profile.uuid,
