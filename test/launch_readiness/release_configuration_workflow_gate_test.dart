@@ -140,7 +140,7 @@ void main() {
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
     const checkout =
-        'actions/checkout@11d5960a326750d5838078e36cf38b85af677262';
+        'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803';
     const flutter =
         'subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2';
     const artifact =
