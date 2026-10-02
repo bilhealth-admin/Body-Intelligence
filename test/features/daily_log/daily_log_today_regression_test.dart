@@ -155,12 +155,25 @@ void main() {
     final summary = tester.widget<DailyLogSnapshot>(
       find.byKey(const Key('daily-log-today-summary')),
     );
-    expect(summary.loading, isTrue);
+    expect(summary.loading, isFalse);
     expect(
       summary.meals,
       isEmpty,
       reason: 'Never label old totals as new date',
     );
+    expect(
+      find.byKey(const Key('daily-summary-calories-loading')),
+      findsNothing,
+      reason: 'Date arrows must not flash the calorie loading placeholder.',
+    );
+    expect(
+      find.byKey(const Key('daily-meal-loading-skeleton')),
+      findsNothing,
+      reason: 'Date arrows must keep the real meal-card shell mounted.',
+    );
+    for (final type in const ['breakfast', 'lunch', 'dinner', 'snack']) {
+      expect(find.byKey(Key('daily-meal-card-$type')), findsOneWidget);
+    }
     expect(find.byType(CircularProgressIndicator), findsNothing);
     requests[finalDate]!.add([]);
     await tester.pumpAndSettle();
@@ -354,6 +367,47 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('week strip shows a date number inside every circle', (
+    tester,
+  ) async {
+    final selected = DateTime(2026, 10, 14);
+    await tester.pumpWidget(
+      _localizedApp(
+        Scaffold(
+          body: DailyLogWeekStrip(
+            date: selected,
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2027),
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final material = MaterialLocalizations.of(
+      tester.element(find.byType(DailyLogWeekStrip)),
+    );
+    final first = material.firstDayOfWeekIndex;
+    final offset = (selected.weekday % 7 - first + 7) % 7;
+    for (var index = 0; index < 7; index++) {
+      final day = DateTime(
+        selected.year,
+        selected.month,
+        selected.day - offset + index,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(
+            ValueKey('daily-log-week-${day.toIso8601String()}'),
+          ),
+          matching: find.text('${day.day}'),
+        ),
+        findsOneWidget,
+      );
+    }
   });
 
   testWidgets('empty day still exposes all four meal entry points', (
