@@ -156,22 +156,21 @@ void main() {
       final service = File(
         'lib/features/commerce/services/verified_store_purchase_service.dart',
       ).readAsStringSync();
-      final processing = File(
-        'lib/features/commerce/services/verified_store_purchase_processing.dart',
+      final checkout = File(
+        'lib/features/commerce/services/verified_store_purchase_checkout.dart',
       ).readAsStringSync();
 
-      expect(service, contains("defaultTargetPlatform == TargetPlatform.iOS"));
       expect(service, contains("storekit_duplicate_product_object"));
-      expect(service, contains("_reconcileAppleUnfinishedBeforePurchase"));
-      expect(service, contains("SK2Transaction.unfinishedTransactions()"));
-      expect(service, contains("SK2PurchaseDetails("));
-      expect(service, contains("_handleVerifiedPurchase("));
-      expect(service, contains("source: 'app_store'"));
       expect(service, contains("_appleDuplicateRetryInFlight"));
-      expect(service, contains("queryProductDetails({displayed.id})"));
-      expect(processing, contains("_recoverVerifiedStoreKit2Completion"));
-      expect(processing, contains("SK2Transaction.unfinishedTransactions()"));
-      expect(processing, contains("SK2Transaction.finish("));
+      expect(checkout, contains("defaultTargetPlatform == TargetPlatform.iOS"));
+      expect(checkout, contains("_reconcileAppleUnfinishedBeforePurchase"));
+      expect(checkout, contains("SK2Transaction.unfinishedTransactions()"));
+      expect(checkout, contains("SK2PurchaseDetails("));
+      expect(checkout, contains("_handleVerifiedPurchase("));
+      expect(checkout, contains("source: 'app_store'"));
+      expect(checkout, contains("queryProductDetails({displayed.id})"));
+      expect(checkout, contains("_recoverVerifiedStoreKit2Completion"));
+      expect(checkout, contains("SK2Transaction.finish("));
     },
   );
 }
