@@ -63,9 +63,20 @@ class _FeedTabState extends State<_FeedTab>
     final locale = Localizations.localeOf(context).toLanguageTag();
     if (_policyState == null || _policyLocale != locale) {
       _policyLocale = locale;
-      _policyState = widget.repository.loadCommunityPolicyState(
+      _policyState = _loadInitialPolicyState(locale);
+    }
+  }
+
+  Future<CommunityPolicyState> _loadInitialPolicyState(String locale) async {
+    try {
+      return await widget.repository.loadCommunityPolicyState(
         localeCode: locale,
       );
+    } on Object {
+      // Entry splash can temporarily cover the feed while this request
+      // finishes. Keep the policy boundary fail-closed without allowing a
+      // rejected Future to escape before CommunityPolicyNotice can observe it.
+      return const CommunityPolicyState.unavailable();
     }
   }
 
