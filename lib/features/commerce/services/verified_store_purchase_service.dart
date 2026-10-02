@@ -49,6 +49,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   String? _purchaseInitiatedProductId;
   Timer? _purchaseWatchdog;
   bool _storeStartupFaultBeforeCatalog = false;
+  bool _appleDuplicateRetryInFlight = false;
   Completer<void>? _restoreEventObserved;
   String? _entitlementOwnerId;
   // A server-verified inactive lifecycle is authoritative over a briefly
@@ -312,6 +313,46 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     }
   }
 
+  Future<bool> _reconcileAppleUnfinishedBeforePurchase(
+    String productId,
+  ) async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return true;
+    try {
+      final before = await SK2Transaction.unfinishedTransactions().timeout(
+        const Duration(seconds: 4),
+      );
+      if (!before.any((transaction) => transaction.productId == productId)) {
+        return true;
+      }
+
+      // StoreKit refuses a new transaction for the same product while an
+      // earlier one is unfinished. Run the existing verified restore path
+      // first so the old JWS is server-verified before it can be finished.
+      await restore();
+      if (_disposed) return false;
+      if (state == VerifiedStoreState.verified ||
+          state == VerifiedStoreState.failed) {
+        return false;
+      }
+
+      final after = await SK2Transaction.unfinishedTransactions().timeout(
+        const Duration(seconds: 4),
+      );
+      if (after.any((transaction) => transaction.productId == productId)) {
+        state = VerifiedStoreState.failed;
+        messageCode = 'reconciliation_verification_failed';
+        notifyListeners();
+        return false;
+      }
+      return true;
+    } on Object {
+      // This is a diagnostic preflight. If native enumeration itself is
+      // unavailable, let StoreKit own the normal checkout result rather than
+      // inventing a client-side purchase denial.
+      return true;
+    }
+  }
+
   Future<void> purchasePlan(
     CommercePlan plan, {
     required SubscriptionTerm term,
@@ -344,6 +385,26 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final reconciled = await _reconcileAppleUnfinishedBeforePurchase(
+        product.id,
+      );
+      if (!reconciled ||
+          _disposed ||
+          Supabase.instance.client.auth.currentUser?.id != user.id) {
+        return;
+      }
+      // Restore may refresh state and native catalog ownership. Re-read the
+      // selected product before opening a new transaction.
+      product = productFor(plan, term: term);
+      if (product == null) {
+        state = VerifiedStoreState.failed;
+        messageCode = 'purchase_unavailable';
+        notifyListeners();
+        return;
+      }
+    }
+
     final purchaseGeneration = _purchaseEventGeneration;
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
@@ -429,6 +490,31 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         messageCode = 'purchase_reconciliation_pending';
         notifyListeners();
         await restore();
+        if (!_disposed &&
+            !_appleDuplicateRetryInFlight &&
+            state == VerifiedStoreState.ready &&
+            messageCode == 'no_restorable_purchases') {
+          _appleDuplicateRetryInFlight = true;
+          try {
+            await purchasePlan(
+              plan,
+              term: term,
+              replacesGooglePurchase: replacesGooglePurchase,
+              downgradeAtRenewal: downgradeAtRenewal,
+              expectedGoogleOfferToken: expectedGoogleOfferToken,
+            );
+          } finally {
+            _appleDuplicateRetryInFlight = false;
+          }
+          return;
+        }
+        if (!_disposed &&
+            state != VerifiedStoreState.verified &&
+            state != VerifiedStoreState.failed) {
+          state = VerifiedStoreState.failed;
+          messageCode = 'reconciliation_verification_failed';
+          notifyListeners();
+        }
         return;
       }
       state = VerifiedStoreState.failed;
