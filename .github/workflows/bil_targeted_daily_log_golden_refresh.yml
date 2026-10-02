@@ -1,0 +1,49 @@
+name: BIL targeted Daily Log golden refresh
+
+on:
+  push:
+    branches: [fix/admob-clean-production-2026-10-02]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bil-targeted-daily-log-golden-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    if: ${{ !contains(github.event.head_commit.message, 'goldens: refresh Daily Log date strip') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve packages
+        run: flutter pub get
+      - name: Refresh only the two intentionally changed Daily Log references
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --update-goldens             test/visual_closure/actual_data_pages_golden_test.dart             --plain-name "daily log production empty day capture"
+          flutter test --no-pub --update-goldens             test/visual_closure/actual_data_pages_golden_test.dart             --plain-name "daily log reference premium goal capture"
+          mapfile -t changed < <(git status --porcelain=v1 | sed -E 's/^.. //')
+          printf '%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 2
+          printf '%s\n' "${changed[@]}" | grep -Fx 'test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png'
+          printf '%s\n' "${changed[@]}" | grep -Fx 'test/visual_closure/goldens/visual_closure_daily_log_reference_premium_phone.png'
+      - name: Commit exact reviewed references
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "bilhealth-admin"
+          git config user.email "bilhealth.app@gmail.com"
+          git add             test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png             test/visual_closure/goldens/visual_closure_daily_log_reference_premium_phone.png
+          git commit -m "goldens: refresh Daily Log date strip"
+          git push origin HEAD:fix/admob-clean-production-2026-10-02
