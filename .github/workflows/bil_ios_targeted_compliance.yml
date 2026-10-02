@@ -1,0 +1,151 @@
+name: BIL iOS targeted compliance verification
+
+on:
+  push:
+    branches:
+      - qa/ios-targeted-compliance-20261002
+    paths:
+      - '.github/workflows/bil_ios_targeted_compliance.yml'
+      - 'lib/features/connected_health/**'
+      - 'test/connected_health/**'
+      - 'test/launch_readiness/flutter_release_plugin_sanitizer_test.dart'
+      - 'tool/release/sanitize_flutter_release_plugins.dart'
+      - 'tool/release/ios_plus8_simulator_ui/accessibility.sh'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'ios/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-ios-targeted-compliance
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.44.6
+  BIL_TEST_BUILD_NUMBER: '8'
+
+jobs:
+  ios-targeted:
+    name: iOS HealthKit + plugin graph + build warnings
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact verification source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Resolve dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+
+      - name: Run only affected source contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub             test/connected_health/apple_health_permission_flow_test.dart             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             --timeout 10m
+
+      - name: Validate iOS property lists
+        shell: bash
+        run: |
+          set -euo pipefail
+          plutil -lint ios/Runner/Info.plist
+          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
+          plutil -lint ios/Runner/Runner.entitlements
+          plutil -lint ios/Runner/RunnerDebug.entitlements
+
+      - name: Exclude Windows-only barcode plugin while preserving integration harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart             --platform=ios --preserve-dev-native-plugins             | tee "$RUNNER_TEMP/bil-ios-plugin-sanitizer.json"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          metadata = json.loads(Path('.flutter-plugins-dependencies').read_text())
+          ios = {
+              entry['name']
+              for entry in metadata['plugins']['ios']
+              if entry.get('native_build')
+          }
+          if 'simple_barcode_scanner' in ios:
+              raise SystemExit('simple_barcode_scanner remains in the iOS native plugin graph')
+          if 'integration_test' not in ios:
+              raise SystemExit('integration_test was removed from the RC iOS native plugin graph')
+          registrant = Path('ios/Runner/GeneratedPluginRegistrant.m').read_text()
+          if 'simple_barcode_scanner' in registrant or 'SimpleBarcodeScanner' in registrant:
+              raise SystemExit('simple_barcode_scanner remains in GeneratedPluginRegistrant.m')
+          if 'IntegrationTestPlugin' not in registrant:
+              raise SystemExit('IntegrationTestPlugin missing after targeted sanitization')
+          print('IOS_WINDOWS_ONLY_BARCODE_EXCLUSION=PASS')
+          PY
+
+      - name: Build iOS simulator and reject deprecated barcode-plugin warning
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG="$RUNNER_TEMP/bil-ios-simulator-build.log"
+          flutter build ios --simulator --debug --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false             2>&1 | tee "$LOG"
+          test -d build/ios/iphonesimulator/Runner.app
+          if grep -Fq 'simple_barcode_scanner' "$LOG"; then
+            echo 'simple_barcode_scanner warning leaked into iOS simulator build.' >&2
+            exit 1
+          fi
+          if grep -Fq 'do not support Swift Package Manager for ios' "$LOG"; then
+            echo 'An unsupported iOS Swift Package Manager plugin warning remains.' >&2
+            exit 1
+          fi
+          echo 'IOS_SIMULATOR_SPM_WARNING_GATE=PASS'
+
+      - name: Build unsigned production-shaped iOS app and reject deprecated barcode-plugin warning
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG="$RUNNER_TEMP/bil-ios-device-build.log"
+          flutter build ios --release --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false             2>&1 | tee "$LOG"
+          test -d build/ios/iphoneos/Runner.app
+          if grep -Fq 'simple_barcode_scanner' "$LOG"; then
+            echo 'simple_barcode_scanner warning leaked into iOS release build.' >&2
+            exit 1
+          fi
+          if grep -Fq 'do not support Swift Package Manager for ios' "$LOG"; then
+            echo 'An unsupported iOS Swift Package Manager plugin warning remains.' >&2
+            exit 1
+          fi
+          echo 'IOS_UNSIGNED_RELEASE_SPM_WARNING_GATE=PASS'
+
+      - name: Write targeted verification summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "SOURCE_SHA=${GITHUB_SHA}"
+            echo 'HEALTHKIT_EXPLICIT_PERMISSION_CONTRACT=PASS'
+            echo 'IOS_WINDOWS_ONLY_BARCODE_EXCLUSION=PASS'
+            echo 'IOS_SIMULATOR_BUILD=PASS'
+            echo 'IOS_UNSIGNED_RELEASE_BUILD=PASS'
+            echo 'IOS_SIMPLE_BARCODE_SPM_WARNING=ABSENT'
+            echo 'IOS_CODESIGN=NOT_RUN_TARGETED_UNSIGNED_QA'
+          } | tee BIL-ios-targeted-compliance.txt
+
+      - name: Upload targeted logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: bil-ios-targeted-compliance-${{ github.sha }}
+          path: |
+            BIL-ios-targeted-compliance.txt
+          if-no-files-found: warn
+          retention-days: 14
