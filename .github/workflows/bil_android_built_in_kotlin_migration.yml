@@ -212,6 +212,21 @@ jobs:
               '',
           )
           settings.write_text(settings_text)
+
+          root_build = Path('android/build.gradle.kts')
+          root_text = root_build.read_text()
+          kotlin_runtime = '''buildscript {
+    dependencies {
+        // AGP 9 built-in Kotlin defaults to 2.2.10, while Flutter 3.47+
+        // requires at least 2.2.20. Keep BIL's already-audited 2.3.20.
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
+    }
+}
+
+'''
+          if 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20' not in root_text:
+              root_text = kotlin_runtime + root_text
+          root_build.write_text(root_text)
           PY
 
           flutter pub get
@@ -322,6 +337,7 @@ jobs:
             analysis_options.yaml \
             android/gradle.properties \
             android/settings.gradle.kts \
+            android/build.gradle.kts \
             tool/vendor_in_app_review \
             .github/workflows
           git diff --cached --check
@@ -333,6 +349,7 @@ jobs:
               'analysis_options.yaml',
               'android/gradle.properties',
               'android/settings.gradle.kts',
+              'android/build.gradle.kts',
               'tool/vendor_in_app_review/',
               '.github/workflows/',
           )
