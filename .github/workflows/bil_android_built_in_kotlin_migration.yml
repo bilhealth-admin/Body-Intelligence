@@ -24,8 +24,70 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
-          flutter-version: 3.47.2
+          flutter-version: 3.47.5
           cache: true
+
+      - name: Apply pinned Flutter built-in Kotlin validation fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > tool/release/patch_flutter_builtin_kotlin_validation.py <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          expected_version = "3.47.5"
+          expected_revision = "6a19cca56475dbfba1478ee68d7bd0c2ef891da1"
+          flutter_root = Path(os.environ["FLUTTER_ROOT"])
+          flutter = flutter_root / "bin" / "flutter"
+          info = json.loads(
+              subprocess.check_output(
+                  [str(flutter), "--version", "--machine"],
+                  text=True,
+              )
+          )
+          if info.get("frameworkVersion") != expected_version:
+              raise SystemExit(
+                  f"Expected Flutter {expected_version}, got {info.get('frameworkVersion')}"
+              )
+          if info.get("frameworkRevision") != expected_revision:
+              raise SystemExit(
+                  "Unexpected Flutter 3.47.5 framework revision; refusing toolchain patch."
+              )
+
+          checker = (
+              flutter_root
+              / "packages"
+              / "flutter_tools"
+              / "gradle"
+              / "src"
+              / "main"
+              / "kotlin"
+              / "DependencyVersionChecker.kt"
+          )
+          source = checker.read_text()
+          old = """        val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
+                  if (kgpVersion != null) {
+                      checkKGPVersion(kgpVersion, project)
+                  }"""
+          new = """        val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
+                  val usesBuiltInKotlin =
+                      FlutterPluginUtils.isBuiltInKotlinEnabled(project, agpVersion)
+                  if (kgpVersion != null && !usesBuiltInKotlin) {
+                      checkKGPVersion(kgpVersion, project)
+                  }"""
+          if source.count(new) == 1 and old not in source:
+              print("Flutter built-in Kotlin validation fix already applied.")
+          elif source.count(old) == 1:
+              checker.write_text(source.replace(old, new))
+              print("Applied flutter/flutter#192206 built-in Kotlin validation fix.")
+          else:
+              raise SystemExit(
+                  "Flutter DependencyVersionChecker.kt did not match the pinned 3.47.5 source."
+              )
+          PY
+          python3 tool/release/patch_flutter_builtin_kotlin_validation.py
 
       - name: Resolve current dependencies
         run: flutter pub get
@@ -151,13 +213,13 @@ jobs:
 
           pubspec = Path('pubspec.yaml')
           source = pubspec.read_text()
-          if '  flutter: ">=3.47.0"' not in source:
+          if '  flutter: ">=3.47.5"' not in source:
               marker = 'environment:\n  sdk: ^3.12.2\n'
               if source.count(marker) != 1:
                   raise SystemExit('Expected app SDK environment block exactly once.')
               source = source.replace(
                   marker,
-                  marker + '  flutter: ">=3.47.0"\n',
+                  marker + '  flutter: ">=3.47.5"\n',
               )
           old_scanner = '  mobile_scanner: ^7.4.0'
           if source.count(old_scanner) != 1:
@@ -213,26 +275,6 @@ jobs:
           )
           settings.write_text(settings_text)
 
-          root_build = Path('android/build.gradle.kts')
-          root_text = root_build.read_text()
-          kotlin_runtime = "\n".join([
-              "buildscript {",
-              "    repositories {",
-              "        google()",
-              "        mavenCentral()",
-              "    }",
-              "    dependencies {",
-              "        // AGP 9 built-in Kotlin defaults to 2.2.10, while Flutter 3.47+",
-              "        // requires at least 2.2.20. Keep BIL's already-audited 2.3.20.",
-              "        classpath(\"org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20\")",
-              "    }",
-              "}",
-              "",
-              "",
-          ])
-          if 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20' not in root_text:
-              root_text = kotlin_runtime + root_text
-          root_build.write_text(root_text)
           PY
 
           flutter pub get
@@ -329,12 +371,52 @@ jobs:
           changed = []
           for workflow in Path('.github/workflows').glob('*.y*ml'):
               source = workflow.read_text()
-              if '3.44.6' in source:
-                  workflow.write_text(source.replace('3.44.6', '3.47.2'))
+              updated = source.replace('3.44.6', '3.47.5').replace('3.47.2', '3.47.5')
+              if updated != source:
+                  workflow.write_text(updated)
                   changed.append(str(workflow))
+
+          rc = Path('.github/workflows/bil_rc_mobile_test_build.yml')
+          rc_text = rc.read_text()
+          rc_install = '''      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.47.5
+          cache: true
+
+'''
+          rc_patch = rc_install + '''      - name: Apply pinned Flutter built-in Kotlin validation fix
+        run: python3 tool/release/patch_flutter_builtin_kotlin_validation.py
+
+'''
+          if rc_text.count(rc_install) < 1:
+              raise SystemExit('Android RC Flutter install block was not found.')
+          rc.write_text(rc_text.replace(rc_install, rc_patch, 1))
+          if str(rc) not in changed:
+              changed.append(str(rc))
+
+          android_release = Path('.github/workflows/bil_android_release_candidate.yml')
+          release_text = android_release.read_text()
+          release_install = '''      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.47.5
+          cache: true
+
+'''
+          release_patch = release_install + '''      - name: Apply pinned Flutter built-in Kotlin validation fix
+        run: python3 tool/release/patch_flutter_builtin_kotlin_validation.py
+
+'''
+          if release_text.count(release_install) != 1:
+              raise SystemExit('Signed Android Flutter install block was not found exactly once.')
+          android_release.write_text(release_text.replace(release_install, release_patch, 1))
+          if str(android_release) not in changed:
+              changed.append(str(android_release))
+
           if not changed:
-              raise SystemExit('Expected at least one release workflow pinned to Flutter 3.44.6.')
-          print('Updated Flutter workflow pins:', *changed, sep='\n- ')
+              raise SystemExit('Expected release workflow changes were not produced.')
+          print('Updated Flutter workflow pins/hotfixes:', *changed, sep='\n- ')
           PY
           rm -f .github/workflows/bil_android_built_in_kotlin_migration.yml
           git add \
@@ -343,8 +425,8 @@ jobs:
             analysis_options.yaml \
             android/gradle.properties \
             android/settings.gradle.kts \
-            android/build.gradle.kts \
             tool/vendor_in_app_review \
+            tool/release/patch_flutter_builtin_kotlin_validation.py \
             .github/workflows
           git diff --cached --check
           python3 - <<'PY'
@@ -355,8 +437,8 @@ jobs:
               'analysis_options.yaml',
               'android/gradle.properties',
               'android/settings.gradle.kts',
-              'android/build.gradle.kts',
               'tool/vendor_in_app_review/',
+              'tool/release/patch_flutter_builtin_kotlin_validation.py',
               '.github/workflows/',
           )
           files = subprocess.check_output(
