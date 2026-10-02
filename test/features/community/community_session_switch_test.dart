@@ -147,6 +147,9 @@ void main() {
 }
 
 Future<void> _settleFeed(WidgetTester tester, String body) async {
+  // Community intentionally keeps its branded entry surface for 2.2 seconds.
+  // Advance that product-owned minimum before waiting on the feed itself.
+  await tester.pump(const Duration(milliseconds: 2200));
   for (var i = 0; i < 40 && find.text(body).evaluate().isEmpty; i++) {
     await tester.pump();
     await tester.runAsync(
@@ -156,6 +159,6 @@ Future<void> _settleFeed(WidgetTester tester, String body) async {
   await tester.pumpAndSettle(
     const Duration(milliseconds: 100),
     EnginePhase.sendSemanticsUpdate,
-    const Duration(seconds: 2),
+    const Duration(seconds: 3),
   );
 }
