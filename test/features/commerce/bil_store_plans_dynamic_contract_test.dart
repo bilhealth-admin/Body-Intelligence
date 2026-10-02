@@ -738,6 +738,12 @@ final class _CancellationReadyStore extends VerifiedStorePurchaseService {
   void reportFeedback(VerifiedStoreState nextState, String code) {
     state = nextState;
     messageCode = code;
+    if (code == 'purchase_owned_by_another_account') {
+      ownershipConflictProductId = 'premium.monthly';
+    }
+    if (code == 'subscription_verified') {
+      lastVerifiedProductId = 'premium.monthly';
+    }
     notifyListeners();
   }
 
