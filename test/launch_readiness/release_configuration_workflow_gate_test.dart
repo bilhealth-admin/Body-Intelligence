@@ -17,32 +17,21 @@ void main() {
     expect(source, isNot(contains('\n  push:')));
   });
 
-  test('iOS no-pub archive cannot consume a stale native ads Swift graph', () {
+  test('iOS signed archive retains production Google Mobile Ads', () {
     final ios = _read('.github/workflows/bil_ios_signed_release.yml');
-    final prepare = ios.indexOf('- name: Sanitize retained Swift graph');
-    final signing = ios.indexOf('- name: Configure manual App Store');
-    final archive = ios.indexOf('- name: Build signed archive');
-    final postArchive = ios.indexOf(
-      '- name: Verify regenerated iOS native plugin graph',
-    );
-    expect(prepare, greaterThanOrEqualTo(0));
-    expect(signing, greaterThan(prepare));
-    expect(archive, greaterThan(signing));
-    expect(postArchive, greaterThan(archive));
-    final beforeArchive = ios.substring(prepare, signing);
     expect(
-      beforeArchive,
-      contains('test_sanitize_ios_deferred_ads_swift_package.py'),
+      ios,
+      contains(
+        'dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios',
+      ),
     );
+    expect(ios, isNot(contains('--defer-ios-google-mobile-ads')));
+    expect(ios, contains("grep -Fq 'google_mobile_ads'"));
+    expect(ios, contains("grep -Fq 'FLTGoogleMobileAdsPlugin'"));
     expect(
-      beforeArchive,
-      contains('sanitize_ios_deferred_ads_swift_package.py --project-root .'),
+      ios,
+      contains('validate_admob_production_configuration.py'),
     );
-    expect(
-      beforeArchive,
-      contains('verify_ios_deferred_ads_plugin_graph.py --project-root .'),
-    );
-    expect(ios, contains('verify_ios_deferred_ads_artifact.py'));
   });
 
   const workflows = <String>[
@@ -59,8 +48,8 @@ void main() {
         reason: path,
       );
       final expectedSourceBinding = path.contains('ios')
-          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}'
-          : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V30_AUDITED_SOURCE_SHA }}';
+          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}'
+          : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}';
       expect(source, contains(expectedSourceBinding), reason: path);
       expect(
         source,
@@ -84,12 +73,12 @@ void main() {
 
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V30_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_IOS_V33_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V30_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V33_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_ANDROID_V30_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V33_STAGING_MANIFEST_SHA256'));
+    expect(android, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_IOS_V34_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_ANDROID_V31_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V34_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_ANDROID_V31_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V34_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -100,7 +89,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V30_FROZEN_SOURCE_MANIFEST_2026-09-29.md',
+        'docs/release/BIL_ANDROID_V31_FROZEN_SOURCE_MANIFEST_2026-10-02.md',
       ),
     );
     expect(
@@ -114,13 +103,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 33 release manifest', () {
+  test('iOS validator consumes only the build 34 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V33_FROZEN_SOURCE_MANIFEST_2026-09-29.md',
+        'docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md',
       ),
     );
     expect(
@@ -132,7 +121,7 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 33 ))'));
+    expect(source, contains('(( BUILD_NUMBER == 34 ))'));
     expect(source, isNot(contains('(( BUILD_NUMBER == 32 ))')));
   });
 
