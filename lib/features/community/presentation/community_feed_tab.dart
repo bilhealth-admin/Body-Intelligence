@@ -44,6 +44,7 @@ class _FeedTabState extends State<_FeedTab>
     _entryWelcomeTimer?.cancel();
     super.dispose();
   }
+
   @override
   bool _hasMore = false;
   @override
