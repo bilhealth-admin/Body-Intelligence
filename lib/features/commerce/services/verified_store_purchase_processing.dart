@@ -131,17 +131,22 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
                 .completePurchase(purchase)
                 .timeout(const Duration(seconds: 12));
           } on Object {
-            // Do not leave the Plans screen in an endless pending state when
-            // StoreKit accepts the receipt but never acknowledges completion.
-            // The unfinished transaction remains eligible for a later native
-            // replay, while the server entitlement stays authoritative.
-            state = VerifiedStoreState.failed;
-            messageCode = 'verification_failed';
-            if (origin == _StorePurchaseEventOrigin.purchase) {
-              _clearPurchaseInitiation();
+            // The receipt is already server-verified. StoreKit 2 can
+            // occasionally fail to settle the plugin completion Future even
+            // after Transaction.finish, or leave the transaction unfinished.
+            // Confirm native state before turning that into a purchase error.
+            final recovered = await _recoverVerifiedStoreKit2Completion(
+              purchase,
+            );
+            if (!recovered) {
+              state = VerifiedStoreState.failed;
+              messageCode = 'verification_failed';
+              if (origin == _StorePurchaseEventOrigin.purchase) {
+                _clearPurchaseInitiation();
+              }
+              notifyListeners();
+              return;
             }
-            notifyListeners();
-            return;
           }
         }
       }
@@ -186,6 +191,45 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           settled: transactionSettled,
         );
       }
+    }
+  }
+
+
+  Future<bool> _recoverVerifiedStoreKit2Completion(
+    PurchaseDetails purchase,
+  ) async {
+    if (defaultTargetPlatform != TargetPlatform.iOS ||
+        purchase is! SK2PurchaseDetails) {
+      return false;
+    }
+    final purchaseId = purchase.purchaseID;
+    final numericId = int.tryParse(purchaseId ?? '');
+    if (purchaseId == null || numericId == null) return false;
+
+    Future<List<SK2Transaction>> readUnfinished() =>
+        SK2Transaction.unfinishedTransactions().timeout(
+          const Duration(seconds: 4),
+        );
+
+    try {
+      final before = await readUnfinished();
+      if (!before.any((transaction) => transaction.id == purchaseId)) {
+        // Native StoreKit already considers it finished; only the plugin
+        // completion callback failed to settle.
+        return true;
+      }
+      try {
+        await SK2Transaction.finish(
+          numericId,
+        ).timeout(const Duration(seconds: 4));
+      } on Object {
+        // Re-read native state below. StoreKit may have completed the finish
+        // even when the wrapper Future reported or timed out.
+      }
+      final after = await readUnfinished();
+      return !after.any((transaction) => transaction.id == purchaseId);
+    } on Object {
+      return false;
     }
   }
 
