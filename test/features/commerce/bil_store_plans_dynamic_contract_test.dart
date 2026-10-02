@@ -739,10 +739,10 @@ final class _CancellationReadyStore extends VerifiedStorePurchaseService {
     state = nextState;
     messageCode = code;
     if (code == 'purchase_owned_by_another_account') {
-      ownershipConflictProductId = 'premium.monthly';
+      ownershipConflictProductId = StoreCatalogConfiguration.premiumMonthly;
     }
     if (code == 'subscription_verified') {
-      lastVerifiedProductId = 'premium.monthly';
+      lastVerifiedProductId = StoreCatalogConfiguration.premiumMonthly;
     }
     notifyListeners();
   }
