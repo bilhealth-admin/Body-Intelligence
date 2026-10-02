@@ -230,10 +230,10 @@ void main() {
     expect(
       android,
       contains(
-        '--android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml"',
+        r'--android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml"',
       ),
     );
-    expect(ios, contains('--ios-info-plist "$SIGNED_APP/Info.plist"'));
+    expect(ios, contains(r'--ios-info-plist "$SIGNED_APP/Info.plist"'));
     expect(ios, contains('ReleaseAdMob.xcconfig'));
     expect(ios, contains("grep -Fq 'FLTGoogleMobileAdsPlugin'"));
     expect(
