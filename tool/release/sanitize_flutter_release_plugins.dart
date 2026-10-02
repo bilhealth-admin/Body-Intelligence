@@ -76,8 +76,7 @@ ReleasePluginSanitizationResult sanitizeFlutterPluginDependencies(
     sanitizedPlatforms[platformEntry.key] = entries
         .where((value) {
           final plugin = value! as Map<String, Object?>;
-          return (!removeDevOnlyPlugins ||
-                  plugin['dev_dependency'] != true) &&
+          return (!removeDevOnlyPlugins || plugin['dev_dependency'] != true) &&
               !excludedNames.contains(plugin['name']);
         })
         .toList(growable: false);
@@ -604,8 +603,9 @@ void main(List<String> arguments) {
     }
     DeferredIosSimpleBarcodeScannerResult? deferredBarcode;
     if (platform == 'ios') {
-      deferredBarcode =
-          prepareDeferredIosSimpleBarcodeScannerPackage(Directory.current);
+      deferredBarcode = prepareDeferredIosSimpleBarcodeScannerPackage(
+        Directory.current,
+      );
     }
     DeferredIosGoogleMobileAdsResult? deferredAds;
     if (deferIosGoogleMobileAds == 1) {
