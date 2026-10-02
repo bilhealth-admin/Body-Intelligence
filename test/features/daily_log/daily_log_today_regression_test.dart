@@ -400,9 +400,7 @@ void main() {
       );
       expect(
         find.descendant(
-          of: find.byKey(
-            ValueKey('daily-log-week-${day.toIso8601String()}'),
-          ),
+          of: find.byKey(ValueKey('daily-log-week-${day.toIso8601String()}')),
           matching: find.text('${day.day}'),
         ),
         findsOneWidget,
