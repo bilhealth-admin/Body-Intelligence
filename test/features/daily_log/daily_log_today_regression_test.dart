@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_meals_list.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_summary_widgets.dart';
+import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_today_sections.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
