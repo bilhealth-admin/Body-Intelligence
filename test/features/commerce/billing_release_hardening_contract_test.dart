@@ -182,7 +182,9 @@ void main() {
     expect(source, contains('Closed-test grants are a separate'));
   });
 
-  test('iOS subscription checkout refreshes and recovers StoreKit2 duplicates', () {
+  test(
+    'iOS subscription checkout refreshes and recovers StoreKit2 duplicates',
+    () {
     final service = File(
       'lib/features/commerce/services/verified_store_purchase_service.dart',
     ).readAsStringSync();
@@ -201,7 +203,7 @@ void main() {
     expect(service, contains("queryProductDetails({displayed.id})"));
     expect(processing, contains("_recoverVerifiedStoreKit2Completion"));
     expect(processing, contains("SK2Transaction.unfinishedTransactions()"));
-    expect(processing, contains("SK2Transaction.finish("));
-  });
-
+      expect(processing, contains("SK2Transaction.finish("));
+    },
+  );
 }
