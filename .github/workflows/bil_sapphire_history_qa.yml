@@ -1,7 +1,7 @@
 name: BIL Sapphire and daily history full QA
 on:
   push:
-    branches: [fix/community-sapphire-health-3033]
+    branches: [fix/community-sapphire-health-3033, fix/admob-clean-production-2026-10-02]
   workflow_dispatch:
 permissions:
   contents: read
