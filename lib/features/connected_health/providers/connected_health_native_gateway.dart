@@ -13,17 +13,10 @@ final class NativeConnectedHealthGateway
 
   @override
   Future<ConnectedHealthSnapshot?> requestStartupPermissions() async {
-    if (!_isIos || _capability?.available != true) return null;
-    final bridge = _bridge;
-    if (bridge is! NativeHealthAuthorizationReviewBridge) return null;
-    final types = connectedHealthReadTypesForPlatform(
-      TargetPlatform.iOS,
-    ).map((type) => type.name).toSet();
-    final status = await (bridge as NativeHealthAuthorizationReviewBridge)
-        .authorizationRequestStatus(types)
-        .timeout(const Duration(seconds: 8));
-    if (status != HealthAuthorizationRequestStatus.shouldRequest) return null;
-    return requestPermissions();
+    // Apple Health authorization must be initiated by an explicit user action.
+    // Keep this legacy startup seam fail-closed so a future dashboard caller
+    // cannot present HealthKit permission during launch or passive refresh.
+    return null;
   }
 
   @override

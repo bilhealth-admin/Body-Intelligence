@@ -387,14 +387,21 @@ jobs:
           scheme_tree_for() {
             local udid="$1"
             local target="$PRIVATE_UI_DIR/$udid-scheme.json"
+            local stderr_path="$PRIVATE_UI_DIR/$udid-scheme.stderr"
             local attempt
             for attempt in 1 2 3; do
+              : > "$target"
+              : > "$stderr_path"
               if idb ui describe-all --udid "$udid" \
-                --api axbridge --json > "$target" && test -s "$target"; then
+                --api axbridge --json > "$target" 2> "$stderr_path" &&
+                test -s "$target" &&
+                python3 -m json.tool "$target" >/dev/null 2>&1; then
+                rm -f "$stderr_path"
                 return 0
               fi
               sleep 1
             done
+            cat "$stderr_path" >&2 || true
             return 1
           }
 

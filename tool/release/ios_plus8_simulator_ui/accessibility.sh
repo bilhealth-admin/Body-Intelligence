@@ -4,7 +4,31 @@
 # RUNNER_TEMP because accessibility dumps can contain private account text.
 
 tree_for() {
-  idb ui describe-all --udid "$1" --json > "$PRIVATE_UI_DIR/$1.json"
+  local udid="$1"
+  local target="$PRIVATE_UI_DIR/$udid.json"
+  local stderr_path="$PRIVATE_UI_DIR/$udid-describe-all.stderr"
+  local attempt
+  for attempt in 1 2 3; do
+    : > "$target"
+    : > "$stderr_path"
+    if idb ui describe-all --udid "$udid" --json \
+        > "$target" 2> "$stderr_path" &&
+      test -s "$target" &&
+      python3 - "$target" >/dev/null 2>&1 <<'PY'
+import json
+import sys
+with open(sys.argv[1], encoding='utf-8') as handle:
+    json.load(handle)
+PY
+    then
+      rm -f "$stderr_path"
+      return 0
+    fi
+    sleep 1
+  done
+  cat "$stderr_path" >&2 || true
+  echo 'Could not obtain valid accessibility JSON after three attempts.' >&2
+  return 1
 }
 
 has_marker() {

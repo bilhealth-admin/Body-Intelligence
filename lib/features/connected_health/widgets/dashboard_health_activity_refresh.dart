@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/connected_health_provider.dart';
 
-/// The first dashboard follows startup for existing users and completion for
-/// new users. Offer unanswered iOS Health questions there once, then read only
-/// consented daily activity totals. Full history stays an explicit action.
+/// Restores previously verified health evidence and refreshes daily activity
+/// only for users who already granted the relevant platform access.
+/// Native Health permissions are requested only from an explicit user action
+/// in Apps & Devices; passive dashboard startup never opens a permission sheet.
 class DashboardHealthActivityRefresh extends ConsumerStatefulWidget {
   const DashboardHealthActivityRefresh({required this.child, super.key});
   final Widget child;
@@ -25,10 +26,9 @@ class _DashboardHealthActivityRefreshState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Start the local-only projection read immediately. Permission prompts and
-    // native activity refresh still wait for the first rendered frame, but a
-    // cold dashboard must not spend that frame showing an empty watch when a
-    // verified cached snapshot already exists on the device.
+    // Start the local-only projection read immediately. Native activity refresh
+    // waits for the first rendered frame, but permission prompts are never
+    // initiated from this passive dashboard lifecycle.
     unawaited(
       ref.read(connectedHealthProvider.notifier).restoreCachedSnapshot(),
     );
@@ -62,10 +62,6 @@ class _DashboardHealthActivityRefreshState
   Future<void> _refresh() async {
     final controller = ref.read(connectedHealthProvider.notifier);
     await controller.restoreCachedSnapshot();
-    if (!mounted) return;
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await controller.requestStartupPermissions();
-    }
     if (mounted) await controller.refreshDailyActivity();
   }
 

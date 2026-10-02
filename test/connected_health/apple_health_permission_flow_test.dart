@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -59,10 +58,22 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
 
-    test('startup asks unanswered Health questions without a button', () async {
-      final result = await gateway.requestStartupPermissions();
+    test('passive startup never requests or probes Apple Health access', () async {
+      expect(await gateway.requestStartupPermissions(), isNull);
+      expect(calls, isEmpty);
+      expect(
+        await host.productFlows!.store.get(
+          'connected_health_consent',
+          'Apple Health',
+        ),
+        isNull,
+      );
+    });
+
+    test('explicit user action requests unanswered Apple Health access', () async {
+      final result = await gateway.requestPermissions();
       expect(calls.where((call) => call == 'requestPermissions'), hasLength(1));
-      expect(result!.status, ConnectedHealthStatus.authorizationRequested);
+      expect(result.status, ConnectedHealthStatus.authorizationRequested);
       expect(result.failureCode, isNull);
       expect(calls, isNot(contains('readChanges')));
       expect(calls, isNot(contains('openSettings')));
@@ -74,24 +85,6 @@ void main() {
         isTrue,
       );
     });
-
-    for (final answered in ['unnecessary', 'unknown']) {
-      test(
-        'startup does not reprompt or open settings for $answered',
-        () async {
-          status = answered;
-          expect(await gateway.requestStartupPermissions(), isNull);
-          expect(calls, ['authorizationRequestStatus']);
-          expect(
-            await host.productFlows!.store.get(
-              'connected_health_consent',
-              'Apple Health',
-            ),
-            isNull,
-          );
-        },
-      );
-    }
 
     test(
       'manual review opens guidance and preserves existing read anchors',
@@ -132,12 +125,12 @@ void main() {
           'Apple Health',
           {'readRequested': true},
         );
-        final result = await gateway.requestStartupPermissions();
+        final result = await gateway.requestPermissions();
         expect(
           calls.where((call) => call == 'requestPermissions'),
           hasLength(1),
         );
-        expect(result!.status, isNot(ConnectedHealthStatus.ready));
+        expect(result.status, isNot(ConnectedHealthStatus.ready));
       },
     );
 
@@ -250,7 +243,7 @@ void main() {
 
   for (final entry in ['after startup', 'after onboarding completion']) {
     testWidgets(
-      'Health prompt is automatic once $entry and resume cannot duplicate it',
+      'dashboard $entry never requests Health permission passively',
       (tester) async {
         final gateway = _StartupGateway();
         final container = ProviderContainer(
@@ -270,24 +263,22 @@ void main() {
           ),
         );
         await mount(true);
-        await tester.pump();
-        expect(gateway.startupChecks, 1);
-        expect(gateway.dailyReads, 0);
+        await tester.pumpAndSettle();
+        expect(gateway.startupChecks, 0);
+        expect(gateway.dailyReads, 1);
         tester.binding.handleAppLifecycleStateChanged(
           AppLifecycleState.inactive,
         );
         tester.binding.handleAppLifecycleStateChanged(
           AppLifecycleState.resumed,
         );
-        await tester.pump();
-        expect(gateway.startupChecks, 1);
-        gateway.pending.complete(const ConnectedHealthSnapshot.unavailable());
         await tester.pumpAndSettle();
+        expect(gateway.startupChecks, 0);
         expect(gateway.dailyReads, 1);
         await mount(false);
         await mount(true);
         await tester.pumpAndSettle();
-        expect(gateway.startupChecks, 1);
+        expect(gateway.startupChecks, 0);
         expect(gateway.manualCalls, 0);
         expect(tester.takeException(), isNull);
       },
@@ -301,14 +292,13 @@ class _StartupGateway
         ConnectedHealthGateway,
         ConnectedHealthStartupPermissionGateway,
         ConnectedHealthDailyActivityGateway {
-  final pending = Completer<ConnectedHealthSnapshot?>();
   int startupChecks = 0;
   int dailyReads = 0;
   int manualCalls = 0;
   @override
-  Future<ConnectedHealthSnapshot?> requestStartupPermissions() {
+  Future<ConnectedHealthSnapshot?> requestStartupPermissions() async {
     startupChecks++;
-    return pending.future;
+    return null;
   }
 
   @override
