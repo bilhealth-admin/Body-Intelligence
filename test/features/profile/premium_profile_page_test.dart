@@ -28,16 +28,16 @@ void main() {
   test(
     'profile edit recovers the owner-scoped database instead of retrying a stale stream',
     () {
-    final page = File(
-      'lib/features/profile/premium_profile_page.dart',
-    ).readAsStringSync();
-    final actions = File(
-      'lib/features/profile/premium_profile_actions.dart',
-    ).readAsStringSync();
+      final page = File(
+        'lib/features/profile/premium_profile_page.dart',
+      ).readAsStringSync();
+      final actions = File(
+        'lib/features/profile/premium_profile_actions.dart',
+      ).readAsStringSync();
 
-    expect(page, contains('profileStorageFailure()'));
-    expect(actions, contains('ref.invalidate(databaseProvider)'));
-    expect(actions, contains('repo.localOwnerId != authIdentity.ownerId'));
+      expect(page, contains('profileStorageFailure()'));
+      expect(actions, contains('ref.invalidate(databaseProvider)'));
+      expect(actions, contains('repo.localOwnerId != authIdentity.ownerId'));
       expect(
         actions,
         isNot(contains('Profile storage owner does not match auth owner.')),
