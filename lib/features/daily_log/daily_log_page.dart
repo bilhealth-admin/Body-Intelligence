@@ -449,6 +449,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                         },
                                 ),
                                 const SizedBox(height: 8),
+                                // Date navigation must not flash loading
+                                // placeholders between two local diary reads.
+                                // Clear old-day values immediately, but keep
+                                // the normal zero-value summary shell visible.
                                 DailyLogSnapshot(
                                   key: const Key('daily-log-today-summary'),
                                   arabic: _arabic,
@@ -462,7 +466,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                   carbsGoal: dailyGoal?.carbsGrams,
                                   proteinGoal: dailyGoal?.proteinGrams,
                                   fatGoal: dailyGoal?.fatGrams,
-                                  loading: meals.isLoading,
                                 ),
                                 const SizedBox(height: 12),
                                 Row(
@@ -542,7 +545,14 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                               ),
                               DailyMealsList(
                                 arabic: _arabic,
-                                meals: meals,
+                                // Keep Breakfast/Lunch/Dinner/Snack cards
+                                // mounted while a newly selected date resolves.
+                                // Never reuse the previous date's rows.
+                                meals: meals.isLoading
+                                    ? const AsyncData<List<MealWithItems>>(
+                                        <MealWithItems>[],
+                                      )
+                                    : meals,
                                 showEmptyMealSlots: showAllMeals,
                                 showFoodInsights: showFoodInsights,
                                 showFoodTimestamps: showFoodTimestamps,
