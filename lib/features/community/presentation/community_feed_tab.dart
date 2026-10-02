@@ -26,6 +26,24 @@ class _FeedTabState extends State<_FeedTab>
   final _draft = _CommunityComposerDraft();
   bool _managingPost = false;
   bool _openingComposer = false;
+  Timer? _entryWelcomeTimer;
+  bool _entryWelcomeVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Match AI Coach's entry welcome: keep Community's branded first paint
+    // visible for at least 2.2 seconds without delaying the feed request itself.
+    _entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
+      if (mounted) setState(() => _entryWelcomeVisible = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _entryWelcomeTimer?.cancel();
+    super.dispose();
+  }
   @override
   bool _hasMore = false;
   @override
@@ -308,6 +326,9 @@ class _FeedTabState extends State<_FeedTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    if (_entryWelcomeVisible) {
+      return const CommunityWelcome();
+    }
     return Stack(
       children: [
         FutureBuilder<List<CommunityPost>>(
