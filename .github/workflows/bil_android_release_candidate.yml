@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - name: Require exact audited 30/33 source bindings
+      - name: Require exact audited 31/34 source bindings
         shell: bash
         env:
           ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
