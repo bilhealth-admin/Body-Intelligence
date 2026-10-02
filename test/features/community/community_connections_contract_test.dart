@@ -17,6 +17,19 @@ void main() {
     expect(source, isNot(contains('3x')));
   });
 
+  test('pending requests remain visible before a public profile exists', () {
+    final repository = File(
+      'lib/features/community/data/community_repository.dart',
+    ).readAsStringSync();
+    final migration = File(
+      'supabase/migrations/20261002163500_fix_friend_request_visibility_without_public_profile.sql',
+    ).readAsStringSync();
+
+    expect(migration, contains('left join public.bil_public_profiles'));
+    expect(migration, contains('f.other_user_id'));
+    expect(repository, contains('displayName == null ||'));
+  });
+
   test('connections copy has direct entries in all extended locales', () {
     const keys = {
       'Friends and requests',
