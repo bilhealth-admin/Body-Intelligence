@@ -217,6 +217,10 @@ jobs:
           root_text = root_build.read_text()
           kotlin_runtime = "\n".join([
               "buildscript {",
+              "    repositories {",
+              "        google()",
+              "        mavenCentral()",
+              "    }",
               "    dependencies {",
               "        // AGP 9 built-in Kotlin defaults to 2.2.10, while Flutter 3.47+",
               "        // requires at least 2.2.20. Keep BIL's already-audited 2.3.20.",
