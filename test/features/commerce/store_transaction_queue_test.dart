@@ -387,6 +387,9 @@ void main() {
         native.updates.add([_receipt()]);
         await verificationStarted.future;
         verification.complete(_verifiedResponse());
+        await native.completionAttempted.future.timeout(
+          const Duration(seconds: 2),
+        );
         await drain();
         expect(store.state, VerifiedStoreState.verified);
         if (throws) {
