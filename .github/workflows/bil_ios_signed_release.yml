@@ -1,4 +1,4 @@
-name: BIL iOS signed release candidate (build 33)
+name: BIL iOS signed release candidate (build 34)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: false
         type: boolean
       build_number:
-        description: Exact App Store build number for this candidate; must be 33
+        description: Exact App Store build number for this candidate; must be 34
         required: true
         type: string
       run_native_crypto_checks:
@@ -29,27 +29,27 @@ jobs:
       - name: Require exact audited 30/33 source bindings
         shell: bash
         env:
-          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
-          ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V30_AUDITED_SOURCE_SHA }}
+          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
         run: |
           set -euo pipefail
-          EXPECTED='45079805c98c4885558afadd8d6263f774e3a4e4'
-          test "$IOS_AUDITED_SOURCE" = "$EXPECTED" || { echo 'BIL_IOS_V33_AUDITED_SOURCE_SHA is not the accepted Sapphire source.' >&2; exit 1; }
-          test "$ANDROID_AUDITED_SOURCE" = "$EXPECTED" || { echo 'BIL_ANDROID_V30_AUDITED_SOURCE_SHA must match iOS 33.' >&2; exit 1; }
+          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V34_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
+          [[ "$ANDROID_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_ANDROID_V31_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
+          test "$IOS_AUDITED_SOURCE" = "$ANDROID_AUDITED_SOURCE" || { echo 'iOS 34 and Android 31 must use the same audited source SHA.' >&2; exit 1; }
 
       - name: Checkout accepted source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
-          ref: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
+          ref: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
 
       - name: Verify frozen iOS manifest digest binding
         shell: bash
         env:
-          EXPECTED_MANIFEST_SHA: ${{ vars.BIL_IOS_V33_STAGING_MANIFEST_SHA256 }}
+          EXPECTED_MANIFEST_SHA: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
         run: |
           set -euo pipefail
-          ACTUAL="$(shasum -a 256 docs/release/BIL_IOS_V33_FROZEN_SOURCE_MANIFEST_2026-09-29.md | awk '{print $1}')"
-          test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_IOS_V33_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
+          ACTUAL="$(shasum -a 256 docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md | awk '{print $1}')"
+          test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_IOS_V34_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
 
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
@@ -66,7 +66,7 @@ jobs:
         if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
+          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -91,8 +91,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 33 )) || {
-            echo 'build_number must be exactly 33 for the iOS release candidate; build 32 and earlier must never be selected.' >&2
+          (( BUILD_NUMBER == 34 )) || {
+            echo 'build_number must be exactly 34 for the iOS release candidate; build 33 and earlier must never be selected.' >&2
             exit 1
           }
           [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
@@ -238,17 +238,23 @@ jobs:
           BIL_FACEBOOK_REQUIRED: true
           BIL_FACEBOOK_LOGIN_ENABLED: true
           BIL_FACEBOOK_LOGIN_READY: true
-          BIL_ADS_ENABLED: false
-          BIL_AD_PROVIDER_READY: false
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
           BIL_PUSH_ENABLED: true
           BIL_PUSH_PROVIDER_READY: true
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V30_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V33_FROZEN_SOURCE_MANIFEST_2026-09-29.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V33_STAGING_MANIFEST_SHA256 }}
+          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
           flutter pub get
@@ -316,28 +322,28 @@ jobs:
               'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=EXPLICIT_WORKFLOW_INPUT'
           fi | tee BIL-ios-native-crypto-gate.txt
 
-      - name: Exclude dev-only and owner-deferred ads native plugins from iOS release
-        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --defer-ios-google-mobile-ads
-
-      - name: Apply owner-deferred AdMob source configuration
+      - name: Preserve production AdMob plugin and validate configuration
         shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
         run: |
           set -euo pipefail
-          python3 tool/release/test_configure_deferred_admob.py
-          python3 tool/release/test_verify_ios_deferred_ads_artifact.py
-          python3 tool/release/test_verify_ios_deferred_ads_plugin_graph.py
-          python3 tool/release/configure_deferred_admob.py \
-            --prepare-ios-source-plist ios/Runner/Info.plist \
-            | tee BIL-ios-deferred-admob-source.txt
-
-      - name: Sanitize retained Swift graph before Xcode dependency resolution
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/test_sanitize_ios_deferred_ads_swift_package.py
-          python3 tool/release/sanitize_ios_deferred_ads_swift_package.py --project-root .
-          python3 tool/release/verify_ios_deferred_ads_plugin_graph.py --project-root . \
-            | tee BIL-ios-deferred-admob-plugin-graph-before-archive.txt
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-ios-production-admob-source.txt
+          printf '%s\n' \
+            'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
+            > ios/Flutter/ReleaseAdMob.xcconfig
+          grep -Fqx '<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
+          grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
+          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
+          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
 
       - name: Configure manual App Store distribution signing
         shell: bash
@@ -413,6 +419,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
         shell: bash
         run: |
           set -euo pipefail
@@ -431,16 +438,23 @@ jobs:
             --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
             --dart-define=BIL_PUSH_ENABLED=true \
             --dart-define=BIL_PUSH_PROVIDER_READY=true \
-            --dart-define=BIL_ADS_ENABLED=false \
-            --dart-define=BIL_AD_PROVIDER_READY=false \
+            --dart-define=BIL_ADS_ENABLED=true \
+            --dart-define=BIL_AD_PROVIDER_READY=true \
+            --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+            --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+            --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+            --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+            --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
 
-      - name: Verify regenerated iOS native plugin graph
+      - name: Verify regenerated iOS production AdMob plugin graph
         shell: bash
         run: |
           set -euo pipefail
-          python3 tool/release/verify_ios_deferred_ads_plugin_graph.py \
-            --project-root . | tee BIL-ios-deferred-admob-plugin-graph.txt
+          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
+          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
+          printf '%s\n' 'ADMOB_IOS_NATIVE_SDK_GRAPH_GATE=PASS' \
+            | tee BIL-ios-production-admob-plugin-graph.txt
 
       - name: Capture signed IPA evidence
         shell: bash
@@ -464,12 +478,15 @@ jobs:
             -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
           test -d "$SIGNED_APP"
 
-          python3 tool/release/configure_deferred_admob.py \
-            --verify-ios-final-plist "$SIGNED_APP/Info.plist" \
-            | tee BIL-ios-deferred-admob.txt
-          python3 tool/release/verify_ios_deferred_ads_artifact.py \
-            --ipa "$IPA" --expected-build "$BUILD_NUMBER" \
-            | tee BIL-ios-deferred-admob-native-artifact.txt
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --ios-info-plist "$SIGNED_APP/Info.plist" \
+            | tee BIL-ios-production-admob.txt
 
           codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
             2>&1 | tee BIL-ios-codesign-verify.txt
@@ -524,10 +541,10 @@ jobs:
             'CODE_GATE=PASS' \
             'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
             'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
-            'ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED' \
-            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
-            'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
-            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=ABSENT_VERIFIED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_IOS_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED' \
+            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=PRESENT_VERIFIED' \
             'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_OWNER_INSTALL_OR_UPLOAD' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
@@ -581,7 +598,7 @@ jobs:
       - name: Upload signed IPA and validation evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V33_AUDITED_SOURCE_SHA }}
+          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -594,11 +611,9 @@ jobs:
             BIL-ios-ipa.size
             BIL-ios-crypto-scan.txt
             BIL-ios-native-crypto-gate.txt
-            BIL-ios-deferred-admob-source.txt
-            BIL-ios-deferred-admob.txt
-            BIL-ios-deferred-admob-native-artifact.txt
-            BIL-ios-deferred-admob-plugin-graph.txt
-            BIL-ios-deferred-admob-plugin-graph-before-archive.txt
+            BIL-ios-production-admob-source.txt
+            BIL-ios-production-admob.txt
+            BIL-ios-production-admob-plugin-graph.txt
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt
