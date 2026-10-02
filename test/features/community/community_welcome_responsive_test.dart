@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,6 +14,20 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_welcome.dart';
 
 void main() {
+  test('community entry welcome matches AI Coach 2.2 second minimum', () {
+    final community = File(
+      'lib/features/community/presentation/community_feed_tab.dart',
+    ).readAsStringSync();
+    final coach = File(
+      'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+    ).readAsStringSync();
+
+    const duration = 'Timer(const Duration(milliseconds: 2200)';
+    expect(coach, contains(duration));
+    expect(community, contains(duration));
+    expect(community, contains('_entryWelcomeVisible'));
+  });
+
   for (final dark in [false, true]) {
     for (final scale in [1.0, 2.0, 3.0]) {
       testWidgets(
