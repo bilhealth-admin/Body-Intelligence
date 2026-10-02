@@ -1,9 +1,7 @@
 name: BIL one-shot Android signed release candidate (build 31)
 
 on:
-  push:
-    branches:
-      - ops/release-dispatch-31-34-555496eb
+  workflow_dispatch:
 
 permissions:
   contents: read

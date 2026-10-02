@@ -342,8 +342,8 @@ jobs:
           printf '%s\n' \
             'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
             > ios/Flutter/ReleaseAdMob.xcconfig
-          grep -Fqx '<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
-          grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
+          grep -Fq '<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
+          grep -Fq '<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
           grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
           grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
 
