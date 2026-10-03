@@ -43,10 +43,7 @@ void main() {
     ).readAsStringSync();
 
     expect(mentionSql, contains("'community_mention_search_v1',60,60"));
-    expect(
-      rateLimitSql,
-      contains("('community_mention_search_v1', 60, 60)"),
-    );
+    expect(rateLimitSql, contains("('community_mention_search_v1', 60, 60)"));
     expect(
       rateLimitSql,
       contains('public.bil_consume_rate_limit(text,integer,integer)'),
