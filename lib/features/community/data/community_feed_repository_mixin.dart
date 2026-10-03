@@ -1,3 +1,4 @@
+import '../domain/community_circles.dart';
 import '../domain/community_models.dart';
 import '../domain/community_topics.dart';
 import 'community_post_cloud_store.dart';
@@ -18,6 +19,13 @@ mixin CommunityFeedRepositoryMixin {
   });
 
   Future<List<CommunityTopicPostReference>> loadCommunityTopicPostReferences({
+    required String slug,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  });
+
+  Future<List<CommunityCirclePostReference>> loadCommunityCirclePostReferences({
     required String slug,
     DateTime? before,
     String? beforeId,
@@ -92,6 +100,44 @@ mixin CommunityFeedRepositoryMixin {
       hasMore: page.hasMore,
       nextBefore: page.nextBefore,
       nextBeforeId: page.nextBeforeId,
+    );
+  }
+
+  Future<CommunityCirclePostBatch> loadCommunityCirclePosts({
+    required String slug,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async {
+    final references = await loadCommunityCirclePostReferences(
+      slug: slug,
+      before: before,
+      beforeId: beforeId,
+      limit: limit,
+    );
+    if (references.isEmpty) {
+      return const CommunityCirclePostBatch(posts: [], hasMore: false);
+    }
+    final store = communityPostStore;
+    if (store is! CommunityPostLookupContract) {
+      throw StateError('Community circle post lookup is unavailable');
+    }
+    final ids = references.map((value) => value.postId).toList(growable: false);
+    final posts = await (store as CommunityPostLookupContract).loadPostsByIds(
+      ids,
+    );
+    final hydrated = await _hydrateSocialPosts(posts);
+    final byId = {for (final post in hydrated) post.id: post};
+    final ordered = references
+        .map((reference) => byId[reference.postId])
+        .whereType<CommunityPost>()
+        .toList(growable: false);
+    final cursor = references.last;
+    return CommunityCirclePostBatch(
+      posts: List.unmodifiable(ordered),
+      hasMore: references.length == limit,
+      nextBefore: cursor.createdAt,
+      nextBeforeId: cursor.postId,
     );
   }
 
