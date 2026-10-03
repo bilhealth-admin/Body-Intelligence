@@ -13,6 +13,60 @@ class CommunityTaxonomySheet extends StatelessWidget {
   static String browseLabel(BuildContext context) =>
       _CommunityTaxonomyCopy.of(context).browse;
 
+  static String titleForSlug(BuildContext context, String slug) {
+    final copy = _CommunityTaxonomyCopy.of(context);
+    return switch (slug) {
+      'getting-started' => copy.gettingStarted,
+      'weight-loss' => copy.healthWeightLoss,
+      'nutrition' => copy.foodNutrition,
+      'recipes' => copy.recipes,
+      'fitness' => copy.fitnessExercise,
+      'wellness' => copy.wellness,
+      'maintenance' => copy.maintainingWeight,
+      'muscle-gain' => copy.gainingWeight,
+      'success-stories' => copy.successStories,
+      'motivation-support' => copy.motivation,
+      'challenges' => copy.challenges,
+      'social' => copy.socialCorner,
+      _ => '#$slug',
+    };
+  }
+
+  static String descriptionForSlug(BuildContext context, String slug) {
+    final copy = _CommunityTaxonomyCopy.of(context);
+    return switch (slug) {
+      'getting-started' => copy.gettingStartedBody,
+      'weight-loss' => copy.healthWeightLossBody,
+      'nutrition' => copy.foodNutritionBody,
+      'recipes' => copy.recipesBody,
+      'fitness' => copy.fitnessExerciseBody,
+      'wellness' => copy.wellnessBody,
+      'maintenance' => copy.maintainingWeightBody,
+      'muscle-gain' => copy.gainingWeightBody,
+      'success-stories' => copy.successStoriesBody,
+      'motivation-support' => copy.motivationBody,
+      'challenges' => copy.challengesBody,
+      'social' => copy.socialCornerBody,
+      _ => '',
+    };
+  }
+
+  static IconData iconForSlug(String slug) => switch (slug) {
+    'getting-started' => Icons.rocket_launch_outlined,
+    'weight-loss' => Icons.monitor_weight_outlined,
+    'nutrition' => Icons.restaurant_outlined,
+    'recipes' => Icons.menu_book_outlined,
+    'fitness' => Icons.fitness_center_outlined,
+    'wellness' => Icons.self_improvement_outlined,
+    'maintenance' => Icons.trending_flat_rounded,
+    'muscle-gain' => Icons.sports_gymnastics_outlined,
+    'success-stories' => Icons.emoji_events_outlined,
+    'motivation-support' => Icons.volunteer_activism_outlined,
+    'challenges' => Icons.flag_outlined,
+    'social' => Icons.groups_outlined,
+    _ => Icons.tag_rounded,
+  };
+
   static Future<void> show(
     BuildContext context, {
     required ValueChanged<String> onSelectTag,
