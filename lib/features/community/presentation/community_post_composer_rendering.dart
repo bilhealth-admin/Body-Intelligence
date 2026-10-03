@@ -469,28 +469,23 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           this,
                         )._buildCommunityCollaboratorSection(context, busy),
                         const SizedBox(height: 8),
-                        SwitchListTile.adaptive(
+                        _CommunityComposerSwitchRow(
                           key: const Key('community-composer-poll-toggle'),
-                          contentPadding: EdgeInsets.zero,
                           value: widget.draft.pollEnabled,
                           onChanged: busy
                               ? null
                               : (value) => _setComposerState(() {
                                   widget.draft.pollEnabled = value;
                                 }),
-                          title: Text(
-                            communityText(
-                              context,
-                              'Add a poll',
-                              'إضافة استطلاع',
-                            ),
+                          title: communityText(
+                            context,
+                            'Add a poll',
+                            'إضافة استطلاع',
                           ),
-                          subtitle: Text(
-                            communityText(
-                              context,
-                              'Ask one question with 2–6 options.',
-                              'اطرح سؤالًا واحدًا مع 2–6 خيارات.',
-                            ),
+                          subtitle: communityText(
+                            context,
+                            'Ask one question with 2–6 options.',
+                            'اطرح سؤالًا واحدًا مع 2–6 خيارات.',
                           ),
                         ),
                         if (widget.draft.pollEnabled) ...[
@@ -606,21 +601,18 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                 ),
                               ),
                             ),
-                          SwitchListTile.adaptive(
+                          _CommunityComposerSwitchRow(
                             key: const Key('community-composer-poll-multiple'),
-                            contentPadding: EdgeInsets.zero,
                             value: widget.draft.pollAllowMultiple,
                             onChanged: busy
                                 ? null
                                 : (value) => _setComposerState(() {
                                     widget.draft.pollAllowMultiple = value;
                                   }),
-                            title: Text(
-                              communityText(
-                                context,
-                                'Allow multiple choices',
-                                'السماح باختيار أكثر من خيار',
-                              ),
+                            title: communityText(
+                              context,
+                              'Allow multiple choices',
+                              'السماح باختيار أكثر من خيار',
                             ),
                           ),
                         ],
