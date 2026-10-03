@@ -6,6 +6,7 @@ String _communityRepositorySource() => [
   'lib/features/community/data/community_repository.dart',
   'lib/features/community/data/community_repository_discovery_mixin.dart',
   'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+  'lib/features/community/data/community_repository_reference_parity_mixin.dart',
   'lib/features/community/data/community_repository_publishing_mixin.dart',
   'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
 ].map((path) => File(path).readAsStringSync()).join('\n');
@@ -56,7 +57,10 @@ void main() {
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
 
     expect(repository, contains('bil_community_profile_projection_v1'));
-    expect(repository, contains('bil_community_profile_connections_v1'));
+    expect(repository, contains('bil_community_profile_connections_v2'));
+    expect(repository, contains('bil_community_creator_projection_v1'));
+    expect(repository, contains('bil_community_profile_reviews_v1'));
+    expect(repository, contains('bil_community_post_view_counts_v1'));
     expect(store, contains('bil_community_profile_posts_v1'));
     expect(mixin, contains('loadProfilePosts'));
     expect(account, contains('BIL Gold'));
