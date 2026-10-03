@@ -186,8 +186,9 @@ mixin _CommunityProfileModerationRepositoryMixin {
     required String postId,
     required CommunityPostModerationDecision decision,
   }) async {
-    if (!CommunityRepository._uuid.hasMatch(postId))
+    if (!CommunityRepository._uuid.hasMatch(postId)) {
       throw ArgumentError.value(postId, 'postId');
+    }
     final response = await _client.rpc(
       'bil_moderate_community_post',
       params: {'p_post_id': postId, 'p_decision': decision.name},
@@ -204,8 +205,9 @@ mixin _CommunityProfileModerationRepositoryMixin {
     required String postId,
     required String reason,
   }) async {
-    if (!CommunityRepository._uuid.hasMatch(postId))
+    if (!CommunityRepository._uuid.hasMatch(postId)) {
       throw ArgumentError.value(postId, 'postId');
+    }
     if (!const {
       'spam',
       'abuse',
@@ -235,8 +237,9 @@ mixin _CommunityProfileModerationRepositoryMixin {
     required String action,
     String? reason,
   }) async {
-    if (!CommunityRepository._uuid.hasMatch(postId))
+    if (!CommunityRepository._uuid.hasMatch(postId)) {
       throw ArgumentError.value(postId, 'postId');
+    }
     const reasons = {
       'spam',
       'abuse',
