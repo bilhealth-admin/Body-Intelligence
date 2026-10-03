@@ -48,6 +48,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   }
 
   Future<void> _recordView() async {
+    if (!widget.repository.useServerCommunityReferenceParity) return;
     try {
       final count = await widget.repository.recordCommunityPostView(
         widget.post.id,
