@@ -77,7 +77,7 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
   }
 
   Future<CommunityAttention> _load() async {
-    final response = await _client!.rpc('bil_community_attention_v1');
+    final response = await _client!.rpc('bil_community_attention_v2');
     if (response is! Map) {
       throw const FormatException('Invalid Community attention response');
     }
