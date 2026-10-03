@@ -24,6 +24,8 @@ class _FeedTabState extends State<_FeedTab>
   Future<CommunityPolicyState>? _policyState;
   String? _policyLocale;
   final _draft = _CommunityComposerDraft();
+  final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
+      <String, CommunityPostReferenceMetadata>{};
   bool _managingPost = false;
   bool _openingComposer = false;
   Timer? _entryWelcomeTimer;
