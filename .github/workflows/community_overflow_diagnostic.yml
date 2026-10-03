@@ -1,0 +1,32 @@
+name: Community overflow diagnostic
+
+on:
+  push:
+    branches:
+      - work/community-reference-parity-20261003
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-overflow-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Run exact overflow matrix test
+        run: |
+          flutter test --no-pub \
+            test/features/community/community_post_image_support_test.dart \
+            --plain-name "photo affordance survives 25 locales at 390x844 and 160%" \
+            --reporter expanded
