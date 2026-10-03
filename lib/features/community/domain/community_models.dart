@@ -374,6 +374,7 @@ class CommunityPostStats {
     final postId = json['post_id'];
     final likeCount = json['like_count'];
     final liked = json['liked'];
+    final replyCount = json['reply_count'] ?? 0;
     final commentCount = json['comment_count'];
     if (postId is! String ||
         likeCount is! num ||
@@ -552,6 +553,7 @@ class CommunityComment {
     required this.createdAt,
     required this.likeCount,
     required this.liked,
+    this.replyCount = 0,
     this.parentId,
     this.authorName,
     this.authorAvatarUrl,
@@ -568,8 +570,13 @@ class CommunityComment {
   final String? authorHandle;
   final int likeCount;
   final bool liked;
+  final int replyCount;
 
-  CommunityComment copyWith({int? likeCount, bool? liked}) => CommunityComment(
+  CommunityComment copyWith({
+    int? likeCount,
+    bool? liked,
+    int? replyCount,
+  }) => CommunityComment(
     id: id,
     authorId: authorId,
     parentId: parentId,
@@ -580,6 +587,7 @@ class CommunityComment {
     authorHandle: authorHandle,
     likeCount: likeCount ?? this.likeCount,
     liked: liked ?? this.liked,
+    replyCount: replyCount ?? this.replyCount,
   );
 
   factory CommunityComment.fromJson(Map<String, dynamic> json) {
@@ -607,7 +615,10 @@ class CommunityComment {
         likeCount is! num ||
         likeCount < 0 ||
         likeCount % 1 != 0 ||
-        liked is! bool) {
+        liked is! bool ||
+        replyCount is! num ||
+        replyCount < 0 ||
+        replyCount % 1 != 0) {
       throw const FormatException('Invalid Community comment');
     }
     return CommunityComment(
@@ -621,6 +632,7 @@ class CommunityComment {
       authorHandle: handle as String?,
       likeCount: likeCount.toInt(),
       liked: liked,
+      replyCount: replyCount.toInt(),
     );
   }
 }
