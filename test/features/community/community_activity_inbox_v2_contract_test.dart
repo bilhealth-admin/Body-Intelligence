@@ -11,7 +11,12 @@ void main() {
       'lib/features/community/presentation/community_notifications_filters.dart',
     ).readAsStringSync();
 
-    expect(page, contains('enum _ActivityFilter { updates, reactions, comments, followers }'));
+    expect(
+      page,
+      contains(
+        'enum _ActivityFilter { updates, reactions, comments, followers }',
+      ),
+    );
     expect(page, contains('community-activity-filter-'));
     expect(filters, contains('_ActivityFilter.updates'));
     expect(filters, contains('_ActivityFilter.reactions'));
@@ -22,7 +27,10 @@ void main() {
     expect(filters, contains("'Comments'"));
     expect(filters, contains("'New followers'"));
     expect(filters, contains('CommunityNotificationKind.collaborationInvite'));
-    expect(filters, contains('CommunityNotificationKind.collaborationAccepted'));
+    expect(
+      filters,
+      contains('CommunityNotificationKind.collaborationAccepted'),
+    );
     expect(filters, contains('CommunityNotificationKind.follow'));
     expect(page, contains("'/community/profile/\${notification.actorId}'"));
     expect(page, contains('CommunityNotificationKind.collaborationInvite'));
