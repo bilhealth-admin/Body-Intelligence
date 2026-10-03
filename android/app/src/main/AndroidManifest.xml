@@ -180,6 +180,17 @@
                     android:host="www.bilhealth.com"
                     android:path="/auth/reset-password"/>
             </intent-filter>
+            <!-- Public Community invites contain only an opaque referral token.
+                 They are verified separately from credential-bearing auth returns. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="www.bilhealth.com"
+                    android:pathPrefix="/invite/"/>
+            </intent-filter>
         </activity>
         <service
             android:name=".BILFirebaseMessagingService"
