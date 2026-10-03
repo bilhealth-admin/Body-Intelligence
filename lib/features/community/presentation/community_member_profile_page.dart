@@ -13,6 +13,8 @@ CommunityRepository? _communityProfileProductionRepository() {
   }
 }
 
+enum _CommunityProfileContentTab { moments, reviews }
+
 class CommunityMemberProfilePage extends StatefulWidget {
   const CommunityMemberProfilePage({
     required this.userId,
@@ -35,15 +37,25 @@ class _CommunityMemberProfilePageState
   late final CommunityRepository? _repository =
       widget.repository ?? _communityProfileProductionRepository();
   CommunityProfileOverview? _profile;
+  CommunityCreatorProfile? _creator;
   final List<CommunityPost> _posts = [];
+  final List<CommunityProfileReview> _reviews = [];
+  final Map<String, int> _viewCounts = <String, int>{};
   late Future<void> _loading = _loadInitial();
   DateTime? _before;
   String? _beforeId;
+  DateTime? _reviewBefore;
+  String? _reviewBeforeId;
   bool _hasMore = false;
+  bool _reviewHasMore = false;
   bool _loadingMore = false;
+  bool _loadingMoreReviews = false;
   bool _gridMode = true;
   bool _relationshipBusy = false;
+  bool _followBusy = false;
   bool _managingPost = false;
+  _CommunityProfileContentTab _contentTab =
+      _CommunityProfileContentTab.moments;
 
   Future<void> _loadInitial() async {
     final repository = _repository;
@@ -51,15 +63,37 @@ class _CommunityMemberProfilePageState
     final values = await Future.wait<Object>([
       repository.loadProfileOverview(widget.userId),
       repository.loadProfilePosts(userId: widget.userId, limit: _pageSize),
+      repository.loadCommunityCreatorProfile(widget.userId),
+      repository.loadCommunityProfileReviews(
+        userId: widget.userId,
+        limit: _pageSize,
+      ),
     ]);
-    _profile = values[0] as CommunityProfileOverview;
+    final profile = values[0] as CommunityProfileOverview;
     final batch = values[1] as CommunityFeedBatch;
+    final creator = values[2] as CommunityCreatorProfile;
+    final reviews = values[3] as List<CommunityProfileReview>;
+    final counts = await repository.loadCommunityPostViewCounts(
+      batch.posts.map((post) => post.id).toList(growable: false),
+    );
+
+    _profile = profile;
+    _creator = creator;
     _posts
       ..clear()
       ..addAll(batch.posts);
+    _viewCounts
+      ..clear()
+      ..addAll(counts);
+    _reviews
+      ..clear()
+      ..addAll(reviews);
     _before = batch.nextBefore;
     _beforeId = batch.nextBeforeId;
     _hasMore = batch.hasMore;
+    _reviewHasMore = reviews.length == _pageSize;
+    _reviewBefore = reviews.lastOrNull?.createdAt;
+    _reviewBeforeId = reviews.lastOrNull?.reviewId;
   }
 
   Future<void> _refresh() async {
@@ -89,10 +123,17 @@ class _CommunityMemberProfilePageState
         beforeId: _beforeId,
         limit: _pageSize,
       );
-      if (!mounted) return;
       final known = _posts.map((post) => post.id).toSet();
+      final incoming = batch.posts
+          .where((post) => known.add(post.id))
+          .toList(growable: false);
+      final counts = await repository.loadCommunityPostViewCounts(
+        incoming.map((post) => post.id).toList(growable: false),
+      );
+      if (!mounted) return;
       setState(() {
-        _posts.addAll(batch.posts.where((post) => known.add(post.id)));
+        _posts.addAll(incoming);
+        _viewCounts.addAll(counts);
         _before = batch.nextBefore;
         _beforeId = batch.nextBeforeId;
         _hasMore = batch.hasMore;
@@ -101,6 +142,42 @@ class _CommunityMemberProfilePageState
       if (mounted) _showFailure();
     } finally {
       if (mounted) setState(() => _loadingMore = false);
+    }
+  }
+
+  Future<void> _loadMoreReviews() async {
+    final repository = _repository;
+    if (repository == null ||
+        _loadingMoreReviews ||
+        !_reviewHasMore ||
+        _reviewBefore == null ||
+        _reviewBeforeId == null) {
+      return;
+    }
+    setState(() => _loadingMoreReviews = true);
+    try {
+      final page = await repository.loadCommunityProfileReviews(
+        userId: widget.userId,
+        before: _reviewBefore,
+        beforeId: _reviewBeforeId,
+        limit: _pageSize,
+      );
+      if (!mounted) return;
+      final known = _reviews.map((review) => review.reviewId).toSet();
+      setState(() {
+        _reviews.addAll(
+          page.where((review) => known.add(review.reviewId)),
+        );
+        _reviewHasMore = page.length == _pageSize;
+        if (page.isNotEmpty) {
+          _reviewBefore = page.last.createdAt;
+          _reviewBeforeId = page.last.reviewId;
+        }
+      });
+    } catch (_) {
+      if (mounted) _showFailure();
+    } finally {
+      if (mounted) setState(() => _loadingMoreReviews = false);
     }
   }
 
@@ -123,6 +200,39 @@ class _CommunityMemberProfilePageState
       if (mounted) _showFailure();
     } finally {
       if (mounted) setState(() => _relationshipBusy = false);
+    }
+  }
+
+  Future<void> _toggleFollow() async {
+    final repository = _repository;
+    final profile = _profile;
+    if (repository == null ||
+        profile == null ||
+        profile.isSelf ||
+        _followBusy ||
+        (!profile.viewerFollows && !profile.allowFollows)) {
+      return;
+    }
+    setState(() => _followBusy = true);
+    try {
+      if (profile.viewerFollows) {
+        await repository.unfollow(profile.userId);
+      } else {
+        await repository.follow(profile.userId);
+      }
+      final values = await Future.wait<Object>([
+        repository.loadProfileOverview(profile.userId),
+        repository.loadCommunityCreatorProfile(profile.userId),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _profile = values[0] as CommunityProfileOverview;
+        _creator = values[1] as CommunityCreatorProfile;
+      });
+    } catch (_) {
+      if (mounted) _showFailure();
+    } finally {
+      if (mounted) setState(() => _followBusy = false);
     }
   }
 
@@ -288,6 +398,252 @@ class _CommunityMemberProfilePageState
     );
   }
 
+  List<Widget> _profileContentSlivers(CommunityProfileOverview profile) {
+    final tabs = SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: _contentTab == _CommunityProfileContentTab.moments
+                  ? FilledButton.tonal(
+                      key: const Key('community-profile-tab-moments'),
+                      onPressed: null,
+                      child: Text(
+                        communityText(context, 'Moments', 'اللحظات'),
+                      ),
+                    )
+                  : TextButton(
+                      key: const Key('community-profile-tab-moments'),
+                      onPressed: () => setState(
+                        () => _contentTab =
+                            _CommunityProfileContentTab.moments,
+                      ),
+                      child: Text(
+                        communityText(context, 'Moments', 'اللحظات'),
+                      ),
+                    ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _contentTab == _CommunityProfileContentTab.reviews
+                  ? FilledButton.tonal(
+                      key: const Key('community-profile-tab-reviews'),
+                      onPressed: null,
+                      child: Text(
+                        communityText(context, 'Reviews', 'المراجعات'),
+                      ),
+                    )
+                  : TextButton(
+                      key: const Key('community-profile-tab-reviews'),
+                      onPressed: () => setState(
+                        () => _contentTab =
+                            _CommunityProfileContentTab.reviews,
+                      ),
+                      child: Text(
+                        communityText(context, 'Reviews', 'المراجعات'),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (_contentTab == _CommunityProfileContentTab.reviews) {
+      return <Widget>[
+        tabs,
+        if (_reviews.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Column(
+                children: [
+                  const Icon(Icons.rate_review_outlined, size: 48),
+                  const SizedBox(height: 12),
+                  Text(
+                    profile.showPosts
+                        ? communityText(
+                            context,
+                            'No approved reviews yet.',
+                            'لا توجد مراجعات معتمدة بعد.',
+                          )
+                        : communityText(
+                            context,
+                            'Reviews are private on this profile.',
+                            'المراجعات خاصة في هذا الملف.',
+                          ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList.builder(
+              itemCount: _reviews.length,
+              itemBuilder: (context, index) =>
+                  _CommunityProfileReviewTile(review: _reviews[index]),
+            ),
+          ),
+        if (_reviewHasMore)
+          SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextButton.icon(
+                  onPressed:
+                      _loadingMoreReviews ? null : _loadMoreReviews,
+                  icon: _loadingMoreReviews
+                      ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.expand_more_rounded),
+                  label: Text(
+                    communityText(context, 'Load more', 'تحميل المزيد'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ];
+    }
+
+    return <Widget>[
+      tabs,
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+          child: Row(
+            children: [
+              Text(
+                communityText(context, 'Moments', 'اللحظات'),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                _gridMode
+                    ? Icons.grid_view_rounded
+                    : Icons.view_agenda_outlined,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (_posts.isEmpty)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(40),
+            child: Column(
+              children: [
+                const Icon(Icons.article_outlined, size: 48),
+                const SizedBox(height: 12),
+                Text(
+                  profile.showPosts
+                      ? communityText(
+                          context,
+                          'No visible moments yet.',
+                          'لا توجد لحظات ظاهرة بعد.',
+                        )
+                      : communityText(
+                          context,
+                          'Moments are private on this profile.',
+                          'اللحظات خاصة في هذا الملف.',
+                        ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        )
+      else if (_gridMode)
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          sliver: SliverGrid(
+            gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: .82,
+                ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _CommunityProfilePostTile(
+                post: _posts[index],
+                repository: _repository!,
+                viewCount: _viewCounts[_posts[index].id] ?? 0,
+              ),
+              childCount: _posts.length,
+            ),
+          ),
+        )
+      else
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverList.builder(
+            itemCount: _posts.length,
+            itemBuilder: (context, index) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _CommunityPostCard(
+                  post: _posts[index],
+                  repository: _repository!,
+                  currentUserId: _repository!.currentUserId,
+                  actionsEnabled: !_managingPost,
+                  showModerationStatus: profile.isSelf,
+                  onAction: (action) =>
+                      _managePost(_posts[index], action),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 12,
+                    end: 12,
+                    bottom: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.visibility_outlined, size: 15),
+                      const SizedBox(width: 4),
+                      Text(
+                        (_viewCounts[_posts[index].id] ?? 0).toString(),
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      if (_hasMore)
+        SliverToBoxAdapter(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextButton.icon(
+                onPressed: _loadingMore ? null : _loadMore,
+                icon: _loadingMore
+                    ? const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.expand_more_rounded),
+                label: Text(
+                  communityText(context, 'Load more', 'تحميل المزيد'),
+                ),
+              ),
+            ),
+          ),
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -297,7 +653,9 @@ class _CommunityMemberProfilePageState
           tooltip: _gridMode
               ? communityText(context, 'List view', 'عرض القائمة')
               : communityText(context, 'Grid view', 'عرض الشبكة'),
-          onPressed: () => setState(() => _gridMode = !_gridMode),
+          onPressed: _contentTab == _CommunityProfileContentTab.moments
+              ? () => setState(() => _gridMode = !_gridMode)
+              : null,
           icon: Icon(
             _gridMode ? Icons.view_agenda_outlined : Icons.grid_view_rounded,
           ),
@@ -343,121 +701,26 @@ class _CommunityMemberProfilePageState
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: _CommunityMemberProfileHeader(
                           profile: profile,
+                          creator: _creator,
                           relationshipBusy: _relationshipBusy,
+                          followBusy: _followBusy,
                           onRequestFriend: _requestFriend,
+                          onToggleFollow: _toggleFollow,
                           onOpenConnections: _openConnections,
                         ),
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              communityText(context, 'Posts', 'المنشورات'),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const Spacer(),
-                            Icon(
-                              _gridMode
-                                  ? Icons.grid_view_rounded
-                                  : Icons.view_agenda_outlined,
-                              size: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (_posts.isEmpty)
+                    if (_creator case final creator?)
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.all(40),
-                          child: Column(
-                            children: [
-                              const Icon(Icons.article_outlined, size: 48),
-                              const SizedBox(height: 12),
-                              Text(
-                                profile.showPosts
-                                    ? communityText(
-                                        context,
-                                        'No visible posts yet.',
-                                        'لا توجد منشورات ظاهرة بعد.',
-                                      )
-                                    : communityText(
-                                        context,
-                                        'Posts are private on this profile.',
-                                        'المنشورات خاصة في هذا الملف.',
-                                      ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else if (_gridMode)
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                childAspectRatio: .82,
-                              ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) => _CommunityProfilePostTile(
-                              post: _posts[index],
-                              repository: _repository!,
-                            ),
-                            childCount: _posts.length,
-                          ),
-                        ),
-                      )
-                    else
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        sliver: SliverList.builder(
-                          itemCount: _posts.length,
-                          itemBuilder: (context, index) => _CommunityPostCard(
-                            post: _posts[index],
-                            repository: _repository!,
-                            currentUserId: _repository!.currentUserId,
-                            actionsEnabled: !_managingPost,
-                            showModerationStatus: profile.isSelf,
-                            onAction: (action) =>
-                                _managePost(_posts[index], action),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: _CommunityCreatorPanel(
+                            creator: creator,
+                            isSelf: profile.isSelf,
                           ),
                         ),
                       ),
-                    if (_hasMore)
-                      SliverToBoxAdapter(
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: TextButton.icon(
-                              onPressed: _loadingMore ? null : _loadMore,
-                              icon: _loadingMore
-                                  ? const SizedBox.square(
-                                      dimension: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.expand_more_rounded),
-                              label: Text(
-                                communityText(
-                                  context,
-                                  'Load more',
-                                  'تحميل المزيد',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    ..._profileContentSlivers(profile),
                     const SliverToBoxAdapter(child: SizedBox(height: 32)),
                   ],
                 ),
@@ -470,14 +733,20 @@ class _CommunityMemberProfilePageState
 class _CommunityMemberProfileHeader extends StatelessWidget {
   const _CommunityMemberProfileHeader({
     required this.profile,
+    required this.creator,
     required this.relationshipBusy,
+    required this.followBusy,
     required this.onRequestFriend,
+    required this.onToggleFollow,
     required this.onOpenConnections,
   });
 
   final CommunityProfileOverview profile;
+  final CommunityCreatorProfile? creator;
   final bool relationshipBusy;
+  final bool followBusy;
   final VoidCallback onRequestFriend;
+  final VoidCallback onToggleFollow;
   final ValueChanged<CommunityProfileConnectionKind> onOpenConnections;
 
   @override
@@ -629,10 +898,56 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
               ],
             )
           else
-            _ProfileRelationshipAction(
-              profile: profile,
-              busy: relationshipBusy,
-              onRequestFriend: onRequestFriend,
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                _ProfileRelationshipAction(
+                  profile: profile,
+                  busy: relationshipBusy,
+                  onRequestFriend: onRequestFriend,
+                ),
+                if (profile.viewerFollows || profile.allowFollows)
+                  OutlinedButton.icon(
+                    key: const Key('community-profile-follow-action'),
+                    onPressed: followBusy ? null : onToggleFollow,
+                    icon: followBusy
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            profile.viewerFollows
+                                ? Icons.person_remove_outlined
+                                : Icons.person_add_alt_outlined,
+                          ),
+                    label: Text(
+                      profile.viewerFollows
+                          ? communityText(
+                              context,
+                              'Following',
+                              'يتابع',
+                            )
+                          : communityText(
+                              context,
+                              'Follow',
+                              'متابعة',
+                            ),
+                    ),
+                  ),
+                if (profile.followsViewer)
+                  Chip(
+                    avatar: const Icon(Icons.swap_horiz_rounded, size: 17),
+                    label: Text(
+                      communityText(
+                        context,
+                        'Follows you',
+                        'يتابعك',
+                      ),
+                    ),
+                  ),
+              ],
             ),
         ],
       ),
@@ -687,10 +1002,12 @@ class _CommunityProfilePostTile extends StatelessWidget {
   const _CommunityProfilePostTile({
     required this.post,
     required this.repository,
+    required this.viewCount,
   });
 
   final CommunityPost post;
   final CommunityRepository repository;
+  final int viewCount;
 
   Future<void> _open(BuildContext context) => pushCommunityPage<void>(
     context,
@@ -758,6 +1075,10 @@ class _CommunityProfilePostTile extends StatelessWidget {
                   const Icon(Icons.mode_comment_outlined, size: 16),
                   const SizedBox(width: 3),
                   Text('${post.commentCount}'),
+                  const SizedBox(width: 10),
+                  const Icon(Icons.visibility_outlined, size: 16),
+                  const SizedBox(width: 3),
+                  Text(viewCount.toString()),
                   if (post.moderationStatus !=
                       CommunityPostModerationStatus.approved) ...[
                     const Spacer(),
@@ -797,9 +1118,54 @@ class _CommunityProfileConnectionsSheet extends StatefulWidget {
 
 class _CommunityProfileConnectionsSheetState
     extends State<_CommunityProfileConnectionsSheet> {
-  late final Future<List<CommunityProfileConnection>> _connections = widget
-      .repository
-      .loadProfileConnections(userId: widget.profile.userId, kind: widget.kind);
+  late Future<List<CommunityProfileConnection>> _connections;
+  String? _followBusyUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    _connections = _loadConnections();
+  }
+
+  Future<List<CommunityProfileConnection>> _loadConnections() =>
+      widget.repository.loadProfileConnections(
+        userId: widget.profile.userId,
+        kind: widget.kind,
+      );
+
+  Future<void> _toggleFollow(CommunityProfileConnection member) async {
+    if (_followBusyUserId != null ||
+        member.relationship == CommunityRelationshipStatus.self ||
+        (!member.viewerFollows && !member.allowFollows)) {
+      return;
+    }
+    setState(() => _followBusyUserId = member.userId);
+    try {
+      if (member.viewerFollows) {
+        await widget.repository.unfollow(member.userId);
+      } else {
+        await widget.repository.follow(member.userId);
+      }
+      if (!mounted) return;
+      setState(() => _connections = _loadConnections());
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              communityText(
+                context,
+                'Could not update follow state.',
+                'تعذر تحديث حالة المتابعة.',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _followBusyUserId = null);
+    }
+  }
 
   String _title(BuildContext context) => switch (widget.kind) {
     CommunityProfileConnectionKind.followers => communityText(
@@ -879,10 +1245,46 @@ class _CommunityProfileConnectionsSheetState
                             '@${member.handle}',
                             textDirection: TextDirection.ltr,
                           ),
-                    trailing: Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (member.relationship !=
+                                CommunityRelationshipStatus.self &&
+                            (member.viewerFollows || member.allowFollows))
+                          TextButton(
+                            key: Key(
+                              'community-connection-follow-' + member.userId,
+                            ),
+                            onPressed: _followBusyUserId == null
+                                ? () => _toggleFollow(member)
+                                : null,
+                            child: _followBusyUserId == member.userId
+                                ? const SizedBox.square(
+                                    dimension: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    member.viewerFollows
+                                        ? communityText(
+                                            context,
+                                            'Following',
+                                            'يتابع',
+                                          )
+                                        : communityText(
+                                            context,
+                                            'Follow',
+                                            'متابعة',
+                                          ),
+                                  ),
+                          ),
+                        Icon(
+                          Directionality.of(context) == TextDirection.rtl
+                              ? Icons.chevron_left_rounded
+                              : Icons.chevron_right_rounded,
+                        ),
+                      ],
                     ),
                     onTap: () {
                       Navigator.pop(context);
