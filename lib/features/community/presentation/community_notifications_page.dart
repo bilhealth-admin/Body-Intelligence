@@ -149,89 +149,95 @@ class _CommunityNotificationsPageState
   String _notificationTitle(CommunityNotification notification) {
     final actor = notification.actorDisplayName;
     return switch (notification.kind) {
-      CommunityNotificationKind.friendRequest => actor == null
-          ? communityText(context, 'New friend request', 'طلب صداقة جديد')
-          : communityText(
-              context,
-              '$actor sent you a friend request',
-              '$actor أرسل إليك طلب صداقة',
-            ),
-      CommunityNotificationKind.friendAccepted => actor == null
-          ? communityText(
-              context,
-              'Your friend request was accepted',
-              'تم قبول طلب صداقتك',
-            )
-          : communityText(
-              context,
-              '$actor accepted your friend request',
-              '$actor قبل طلب صداقتك',
-            ),
-      CommunityNotificationKind.postLike => actor == null
-          ? communityText(
-              context,
-              'Someone liked your post',
-              'أعجب شخص بمنشورك',
-            )
-          : communityText(
-              context,
-              '$actor liked your post',
-              '$actor أعجب بمنشورك',
-            ),
+      CommunityNotificationKind.friendRequest =>
+        actor == null
+            ? communityText(context, 'New friend request', 'طلب صداقة جديد')
+            : communityText(
+                context,
+                '$actor sent you a friend request',
+                '$actor أرسل إليك طلب صداقة',
+              ),
+      CommunityNotificationKind.friendAccepted =>
+        actor == null
+            ? communityText(
+                context,
+                'Your friend request was accepted',
+                'تم قبول طلب صداقتك',
+              )
+            : communityText(
+                context,
+                '$actor accepted your friend request',
+                '$actor قبل طلب صداقتك',
+              ),
+      CommunityNotificationKind.postLike =>
+        actor == null
+            ? communityText(
+                context,
+                'Someone liked your post',
+                'أعجب شخص بمنشورك',
+              )
+            : communityText(
+                context,
+                '$actor liked your post',
+                '$actor أعجب بمنشورك',
+              ),
       CommunityNotificationKind.postSave => communityText(
-          context,
-          'Your post was saved',
-          'تم حفظ منشورك',
-        ),
-      CommunityNotificationKind.comment => actor == null
-          ? communityText(
-              context,
-              'New comment on your post',
-              'تعليق جديد على منشورك',
-            )
-          : communityText(
-              context,
-              '$actor commented on your post',
-              '$actor علّق على منشورك',
-            ),
-      CommunityNotificationKind.reply => actor == null
-          ? communityText(
-              context,
-              'New reply to your comment',
-              'رد جديد على تعليقك',
-            )
-          : communityText(
-              context,
-              '$actor replied to your comment',
-              '$actor رد على تعليقك',
-            ),
-      CommunityNotificationKind.follow => actor == null
-          ? communityText(context, 'New follower', 'متابع جديد')
-          : communityText(
-              context,
-              '$actor followed you',
-              '$actor بدأ بمتابعتك',
-            ),
+        context,
+        'Your post was saved',
+        'تم حفظ منشورك',
+      ),
+      CommunityNotificationKind.comment =>
+        actor == null
+            ? communityText(
+                context,
+                'New comment on your post',
+                'تعليق جديد على منشورك',
+              )
+            : communityText(
+                context,
+                '$actor commented on your post',
+                '$actor علّق على منشورك',
+              ),
+      CommunityNotificationKind.reply =>
+        actor == null
+            ? communityText(
+                context,
+                'New reply to your comment',
+                'رد جديد على تعليقك',
+              )
+            : communityText(
+                context,
+                '$actor replied to your comment',
+                '$actor رد على تعليقك',
+              ),
+      CommunityNotificationKind.follow =>
+        actor == null
+            ? communityText(context, 'New follower', 'متابع جديد')
+            : communityText(
+                context,
+                '$actor followed you',
+                '$actor بدأ بمتابعتك',
+              ),
       CommunityNotificationKind.rewardEarned => communityText(
-          context,
-          'You earned a Community reward',
-          'حصلت على مكافأة في المجتمع',
-        ),
+        context,
+        'You earned a Community reward',
+        'حصلت على مكافأة في المجتمع',
+      ),
       CommunityNotificationKind.questCompleted => communityText(
-          context,
-          'Quest completed',
-          'اكتملت المهمة',
-        ),
+        context,
+        'Quest completed',
+        'اكتملت المهمة',
+      ),
       CommunityNotificationKind.badgeEarned => communityText(
-          context,
-          'New badge earned',
-          'حصلت على شارة جديدة',
-        ),
+        context,
+        'New badge earned',
+        'حصلت على شارة جديدة',
+      ),
       CommunityNotificationKind.challengeUpdate => communityText(
-          context,
-          'Challenge update',
-          'تحديث للتحدي',
-        ),
+        context,
+        'Challenge update',
+        'تحديث للتحدي',
+      ),
     };
   }
 
