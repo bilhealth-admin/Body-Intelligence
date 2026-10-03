@@ -14,6 +14,11 @@ abstract final class BilVerifiedLinksConfiguration {
     '/auth/reset-password',
   ];
 
+  /// Public Community invitation links carry only an opaque, one-time referral
+  /// token. They are intentionally separate from credential-bearing auth
+  /// returns and are accepted only by the Community invite route.
+  static const publicCommunityPaths = <String>['/invite/*'];
+
   static const androidPackage = String.fromEnvironment(
     'BIL_GOOGLE_PACKAGE_NAME',
     defaultValue: 'com.bilhealth.bodyintelligencelog',
@@ -71,6 +76,8 @@ abstract final class BilVerifiedLinksConfiguration {
             'components': <Map<String, String>>[
               for (final path in authenticatedReturnPaths)
                 {'/': path, 'comment': 'BIL authenticated return'},
+              for (final path in publicCommunityPaths)
+                {'/': path, 'comment': 'BIL Community invitation'},
             ],
           },
         ],
