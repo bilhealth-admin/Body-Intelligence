@@ -49,7 +49,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
           const SizedBox(height: 12),
           for (final badge in creator.badges)
             ListTile(
-              key: Key('community-creator-badge-' + badge.badgeKey),
+              key: Key('community-creator-badge-${badge.badgeKey}'),
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
                 child: Icon(
@@ -191,26 +191,14 @@ class _CommunityCreatorPanel extends StatelessWidget {
     final nextLevel = creator.nextCommunityLevel;
     final nextXp = creator.nextLevelMinXp;
     final badgeCount =
-        creator.earnedBadgeCount.toString() +
-        '/' +
-        creator.totalBadgeCount.toString();
-    final levelLabel = 'Lv ' + creator.communityLevel.toString();
+        '${creator.earnedBadgeCount}/${creator.totalBadgeCount}';
+    final levelLabel = 'Lv ${creator.communityLevel}';
     final progressEnglish = nextLevel == null || nextXp == null
         ? 'Highest configured Community level reached'
-        : creator.communityXp.toString() +
-              ' XP · Next: Lv ' +
-              nextLevel.toString() +
-              ' at ' +
-              nextXp.toString() +
-              ' XP';
+        : '${creator.communityXp} XP · Next: Lv $nextLevel at $nextXp XP';
     final progressArabic = nextLevel == null || nextXp == null
         ? 'تم بلوغ أعلى مستوى مجتمع مُعد حاليًا'
-        : creator.communityXp.toString() +
-              ' XP · التالي: المستوى ' +
-              nextLevel.toString() +
-              ' عند ' +
-              nextXp.toString() +
-              ' XP';
+        : '${creator.communityXp} XP · التالي: المستوى $nextLevel عند $nextXp XP';
 
     return Card(
       key: const Key('community-creator-panel'),
@@ -242,9 +230,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
                   avatar: const Icon(Icons.emoji_events_outlined, size: 18),
                   onPressed: () => _openBadges(context),
                   label: Text(
-                    badgeCount +
-                        ' ' +
-                        communityText(context, 'Badges', 'شارات'),
+                    '$badgeCount ${communityText(context, 'Badges', 'شارات')}',
                   ),
                 ),
               ],
@@ -347,16 +333,8 @@ class _CommunityCreatorPanel extends StatelessWidget {
                               Text(
                                 communityText(
                                   context,
-                                  'Progress toward Lv ' +
-                                      nextLevel.toString() +
-                                      ' · ' +
-                                      nextXp.toString() +
-                                      ' XP target',
-                                  'التقدم نحو المستوى ' +
-                                      nextLevel.toString() +
-                                      ' · الهدف ' +
-                                      nextXp.toString() +
-                                      ' XP',
+                                  'Progress toward Lv $nextLevel · $nextXp XP target',
+                                  'التقدم نحو المستوى $nextLevel · الهدف $nextXp XP',
                                 ),
                               ),
                             ],
