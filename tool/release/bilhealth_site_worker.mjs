@@ -5,6 +5,7 @@ const REQUIRED_RETURN_PATHS = new Set([
   '/auth/callback',
   '/auth/reset-password',
 ]);
+const REQUIRED_PUBLIC_PATHS = new Set(['/invite/*']);
 const TEAM_APP_ID = new RegExp(`^[A-Z0-9]{10}\\.${BUNDLE_ID.replaceAll('.', '\\.')}$`);
 const SHA256_FINGERPRINT = /^(?:[A-F0-9]{2}:){31}[A-F0-9]{2}$/;
 
@@ -21,7 +22,9 @@ function hasAasaContract(document) {
             .map((component) => component?.['/'])
         : [],
     );
-    return [...REQUIRED_RETURN_PATHS].every((path) => paths.has(path));
+    return [...REQUIRED_RETURN_PATHS, ...REQUIRED_PUBLIC_PATHS].every(
+      (path) => paths.has(path),
+    );
   });
 }
 
