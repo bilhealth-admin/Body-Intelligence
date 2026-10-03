@@ -437,7 +437,7 @@ class _CommunityProfileConnectionsSheetState
 
   void _switchKind(CommunityProfileConnectionKind kind) {
     if (kind == _activeKind) return;
-    _setProfileState(() {
+    setState(() {
       _activeKind = kind;
       _connections = _loadConnections(kind);
     });
@@ -449,7 +449,7 @@ class _CommunityProfileConnectionsSheetState
         (!member.viewerFollows && !member.allowFollows)) {
       return;
     }
-    _setProfileState(() => _followBusyUserId = member.userId);
+    setState(() => _followBusyUserId = member.userId);
     try {
       if (member.viewerFollows) {
         await widget.repository.unfollow(member.userId);
@@ -457,7 +457,7 @@ class _CommunityProfileConnectionsSheetState
         await widget.repository.follow(member.userId);
       }
       if (!mounted) return;
-      _setProfileState(() => _connections = _loadConnections(_activeKind));
+      setState(() => _connections = _loadConnections(_activeKind));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -473,7 +473,7 @@ class _CommunityProfileConnectionsSheetState
         );
       }
     } finally {
-      if (mounted) _setProfileState(() => _followBusyUserId = null);
+      if (mounted) setState(() => _followBusyUserId = null);
     }
   }
 
