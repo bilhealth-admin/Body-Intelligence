@@ -26,6 +26,10 @@ void main() {
       '/community/invite/$inviteToken',
     );
     expect(
+      CommunityDeepLink.routeFor(Uri.parse('bil://invite/$inviteToken')),
+      '/community/invite/$inviteToken',
+    );
+    expect(
       CommunityDeepLink.routeFor(Uri.parse('bil://community/messages/new')),
       '/community/messages/new',
     );
@@ -252,6 +256,10 @@ void main() {
       CommunityDeepLink.routeFor(
         Uri.parse('bil://community/invite/not-a-token'),
       ),
+      isNull,
+    );
+    expect(
+      CommunityDeepLink.routeFor(Uri.parse('bil://invite/not-a-token')),
       isNull,
     );
     expect(
