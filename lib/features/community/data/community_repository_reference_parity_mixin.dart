@@ -76,6 +76,48 @@ mixin _CommunityReferenceParityRepositoryMixin {
     return Map<String, int>.unmodifiable(result);
   }
 
+  Future<Map<String, String>> loadCommentMembershipTiers(
+    List<String> userIds,
+  ) async {
+    final unique = userIds.toSet().toList(growable: false);
+    if (unique.isEmpty) return const <String, String>{};
+    if (unique.length > 100 ||
+        unique.any((id) => !CommunityRepository._uuid.hasMatch(id))) {
+      throw ArgumentError.value(userIds, 'userIds');
+    }
+    final response = await _client.rpc(
+      'bil_community_comment_membership_tiers_v1',
+      params: {'p_user_ids': unique},
+    );
+    if (response is! List) {
+      throw const FormatException(
+        'Invalid Community comment membership tier batch',
+      );
+    }
+    final result = <String, String>{};
+    for (final raw in response) {
+      if (raw is! Map) {
+        throw const FormatException(
+          'Invalid Community comment membership tier row',
+        );
+      }
+      final row = Map<String, dynamic>.from(raw);
+      final userId = row['user_id'];
+      final tier = row['membership_tier'];
+      if (userId is! String ||
+          !unique.contains(userId) ||
+          tier is! String ||
+          !const {'free', 'premium'}.contains(tier) ||
+          result.containsKey(userId)) {
+        throw const FormatException(
+          'Invalid Community comment membership tier row',
+        );
+      }
+      result[userId] = tier;
+    }
+    return Map<String, String>.unmodifiable(result);
+  }
+
   Future<List<CommunityProfileReview>> loadCommunityProfileReviews({
     required String userId,
     DateTime? before,
