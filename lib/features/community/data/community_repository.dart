@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
+import '../domain/community_composer_persistence.dart';
 import '../domain/community_circles.dart';
 import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
@@ -20,6 +22,7 @@ import 'community_post_cloud_store.dart';
 import 'community_feed_repository_mixin.dart';
 import 'community_social_repository_mixin.dart';
 
+part 'community_repository_composer_persistence_mixin.dart';
 part 'community_repository_connections_messaging_mixin.dart';
 part 'community_repository_discovery_mixin.dart';
 part 'community_repository_profile_moderation_mixin.dart';
@@ -30,6 +33,7 @@ class CommunityRepository
     with
         CommunitySocialRepositoryMixin,
         CommunityFeedRepositoryMixin,
+        _CommunityComposerPersistenceRepositoryMixin,
         _CommunityDiscoveryRepositoryMixin,
         _CommunityProfileModerationRepositoryMixin,
         _CommunityReferenceParityRepositoryMixin,
