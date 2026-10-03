@@ -79,9 +79,12 @@ void main() {
     final repository = File(
       'lib/features/community/data/community_social_repository_mixin.dart',
     ).readAsStringSync();
-    final detail = File(
+    final detail = [
       'lib/features/community/presentation/community_post_detail_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_post_detail_rendering.dart',
+      'lib/features/community/presentation/community_post_detail_header.dart',
+      'lib/features/community/presentation/community_post_detail_comment_tile.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(repository, contains('bil_social_comment_threads_v3'));
     expect(repository, contains('bil_social_comment_replies_v3'));
