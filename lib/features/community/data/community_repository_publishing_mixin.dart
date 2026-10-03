@@ -38,6 +38,11 @@ mixin _CommunityPublishingRepositoryMixin {
     List<String> collaboratorUserIds,
   });
 
+  Future<void> consumeMyCommunityDraftAfterPublish({
+    required String draftId,
+    required String postId,
+  });
+
   Future<void> publishPost(String body) async {
     await assertCommunityPublishReady();
     await _runCommunityMutation(() => _posts.publishText(body));
@@ -398,6 +403,7 @@ mixin _CommunityPublishingRepositoryMixin {
     List<String> hashtags = const <String>[],
     List<CommunityMentionCandidate> collaborators =
         const <CommunityMentionCandidate>[],
+    String? persistentDraftId,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
@@ -472,6 +478,12 @@ mixin _CommunityPublishingRepositoryMixin {
       }
       if (normalizedPoll != null) {
         await createCommunityPoll(postId: postId, draft: normalizedPoll);
+      }
+      if (persistentDraftId != null) {
+        await consumeMyCommunityDraftAfterPublish(
+          draftId: persistentDraftId,
+          postId: postId,
+        );
       }
     } on StorageException catch (error, stackTrace) {
       await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
