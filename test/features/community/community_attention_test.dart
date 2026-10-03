@@ -11,8 +11,10 @@ void main() {
       'incoming_requests': 3,
       'community_updates': 2,
       'unread_by_sender': {'member': 140},
+      'activity_unseen_by_kind': {'friend_accepted': 1, 'reward_earned': 1},
     });
     expect(value.total, 145);
+    expect(value.activityUnseenByKind['reward_earned'], 1);
     expect(value.unreadMessages, 140);
     expect(CommunityAttention.badgeText(value.total), '99+');
     expect(CommunityAttention.badgeText(9), '9');
@@ -29,6 +31,48 @@ void main() {
       );
     }
   });
+  test('Activity v2 parser accepts every supported event kind safely', () {
+    for (final kind in CommunityNotificationKind.values) {
+      final notification = CommunityNotification.fromJson({
+        'id': '11111111-1111-4111-8111-111111111111',
+        'kind': kind.wireValue,
+        'actor_id': null,
+        'actor_display_name': null,
+        'actor_avatar_url': null,
+        'friendship_id': kind == CommunityNotificationKind.friendAccepted
+            ? '22222222-2222-4222-8222-222222222222'
+            : null,
+        'entity_kind': kind == CommunityNotificationKind.friendAccepted
+            ? 'friendship'
+            : 'reward',
+        'entity_id': 'entity-1',
+        'copy_key': 'community_activity_test',
+        'deep_link_path': '/community/notifications',
+        'metadata': <String, dynamic>{},
+        'created_at': '2026-10-03T00:00:00Z',
+        'seen_at': null,
+      });
+      expect(notification.kind, kind);
+      expect(notification.seen, isFalse);
+    }
+  });
+
+  test('legacy friend-accepted rows remain parseable', () {
+    final notification = CommunityNotification.fromJson({
+      'id': '11111111-1111-4111-8111-111111111111',
+      'kind': 'friend_accepted',
+      'actor_id': null,
+      'actor_display_name': null,
+      'actor_avatar_url': null,
+      'friendship_id': '22222222-2222-4222-8222-222222222222',
+      'created_at': '2026-10-03T00:00:00Z',
+      'seen_at': null,
+    });
+    expect(notification.entityKind, 'friendship');
+    expect(notification.copyKey, 'friend_accepted_v1');
+    expect(notification.deepLinkPath, '/community/notifications');
+  });
+
   test('late response cannot leak badges between accounts', () async {
     final first = Completer<CommunityAttention>();
     final second = Completer<CommunityAttention>();
