@@ -15,8 +15,8 @@ class CommunityTopicsPage extends StatefulWidget {
 }
 
 class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
-  late Future<List<CommunityTopic>> _topics =
-      widget.repository.loadCommunityTopics();
+  late Future<List<CommunityTopic>> _topics = widget.repository
+      .loadCommunityTopics();
   final Set<String> _busy = <String>{};
 
   Future<void> _refresh() async {
@@ -78,200 +78,189 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(
-            communityText(context, 'Community topics', 'مواضيع المجتمع'),
-          ),
-        ),
-        body: RefreshIndicator(
-          onRefresh: _refresh,
-          child: FutureBuilder<List<CommunityTopic>>(
-            future: _topics,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done &&
-                  !snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    const SizedBox(height: 160),
-                    Center(
-                      child: FilledButton.icon(
-                        onPressed: _refresh,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: Text(
-                          communityText(context, 'Retry', 'إعادة المحاولة'),
-                        ),
-                      ),
+    appBar: AppBar(
+      title: Text(communityText(context, 'Community topics', 'مواضيع المجتمع')),
+    ),
+    body: RefreshIndicator(
+      onRefresh: _refresh,
+      child: FutureBuilder<List<CommunityTopic>>(
+        future: _topics,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done &&
+              !snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 160),
+                Center(
+                  child: FilledButton.icon(
+                    onPressed: _refresh,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(
+                      communityText(context, 'Retry', 'إعادة المحاولة'),
                     ),
-                  ],
-                );
-              }
+                  ),
+                ),
+              ],
+            );
+          }
 
-              final topics = snapshot.data ?? const <CommunityTopic>[];
-              return ListView.separated(
-                key: const Key('community-topics-list'),
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                itemCount: topics.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final topic = topics[index];
-                  final title = CommunityTaxonomySheet.titleForSlug(
+          final topics = snapshot.data ?? const <CommunityTopic>[];
+          return ListView.separated(
+            key: const Key('community-topics-list'),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            itemCount: topics.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final topic = topics[index];
+              final title = CommunityTaxonomySheet.titleForSlug(
+                context,
+                topic.slug,
+              );
+              final description = CommunityTaxonomySheet.descriptionForSlug(
+                context,
+                topic.slug,
+              );
+              return Card(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => pushCommunityPage<void>(
                     context,
-                    topic.slug,
-                  );
-                  final description = CommunityTaxonomySheet.descriptionForSlug(
-                    context,
-                    topic.slug,
-                  );
-                  return Card(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => pushCommunityPage<void>(
-                        context,
-                        _CommunityTopicPage(
-                          repository: widget.repository,
-                          topic: topic,
-                          onComposeTopic: widget.onComposeTopic,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                    _CommunityTopicPage(
+                      repository: widget.repository,
+                      topic: topic,
+                      onComposeTopic: widget.onComposeTopic,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                BilSemanticIconBadge(
-                                  kind: BilSemanticIconKind.community,
-                                  iconOverride:
-                                      CommunityTaxonomySheet.iconForSlug(
+                            BilSemanticIconBadge(
+                              kind: BilSemanticIconKind.community,
+                              iconOverride: CommunityTaxonomySheet.iconForSlug(
+                                topic.slug,
+                              ),
+                              appleIconOverride:
+                                  CommunityTaxonomySheet.iconForSlug(
                                     topic.slug,
                                   ),
-                                  appleIconOverride:
-                                      CommunityTaxonomySheet.iconForSlug(
-                                    topic.slug,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              title,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium
-                                                  ?.copyWith(
-                                                    fontWeight:
-                                                        FontWeight.w800,
-                                                  ),
-                                            ),
-                                          ),
-                                          if (topic.featured)
-                                            const Icon(
-                                              Icons.auto_awesome_rounded,
-                                              size: 18,
-                                            ),
-                                        ],
-                                      ),
-                                      if (description.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          description,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                      Expanded(
+                                        child: Text(
+                                          title,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w800,
+                                              ),
                                         ),
-                                      ],
+                                      ),
+                                      if (topic.featured)
+                                        const Icon(
+                                          Icons.auto_awesome_rounded,
+                                          size: 18,
+                                        ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                _TopicMetric(
-                                  icon: Icons.article_outlined,
-                                  value: topic.postCount,
-                                  label: communityText(
-                                    context,
-                                    'posts',
-                                    'منشورات',
-                                  ),
-                                ),
-                                _TopicMetric(
-                                  icon: Icons.people_outline_rounded,
-                                  value: topic.followerCount,
-                                  label: communityText(
-                                    context,
-                                    'followers',
-                                    'متابعون',
-                                  ),
-                                ),
-                                OutlinedButton.icon(
-                                  key: Key(
-                                    'community-topic-follow-${topic.slug}',
-                                  ),
-                                  onPressed: _busy.contains(topic.slug)
-                                      ? null
-                                      : () => _toggleFollow(topic),
-                                  icon: Icon(
-                                    topic.following
-                                        ? Icons.check_rounded
-                                        : Icons.add_rounded,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    topic.following
-                                        ? communityText(
-                                            context,
-                                            'Following',
-                                            'متابَع',
-                                          )
-                                        : communityText(
-                                            context,
-                                            'Follow',
-                                            'متابعة',
-                                          ),
-                                  ),
-                                ),
-                                if (widget.onComposeTopic != null)
-                                  IconButton.filledTonal(
-                                    tooltip: communityText(
-                                      context,
-                                      'Start a post',
-                                      'ابدأ منشورًا',
+                                  if (description.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    onPressed: () =>
-                                        widget.onComposeTopic!(topic.slug),
-                                    icon: const Icon(Icons.edit_outlined),
-                                  ),
-                              ],
+                                  ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            _TopicMetric(
+                              icon: Icons.article_outlined,
+                              value: topic.postCount,
+                              label: communityText(context, 'posts', 'منشورات'),
+                            ),
+                            _TopicMetric(
+                              icon: Icons.people_outline_rounded,
+                              value: topic.followerCount,
+                              label: communityText(
+                                context,
+                                'followers',
+                                'متابعون',
+                              ),
+                            ),
+                            OutlinedButton.icon(
+                              key: Key('community-topic-follow-${topic.slug}'),
+                              onPressed: _busy.contains(topic.slug)
+                                  ? null
+                                  : () => _toggleFollow(topic),
+                              icon: Icon(
+                                topic.following
+                                    ? Icons.check_rounded
+                                    : Icons.add_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                topic.following
+                                    ? communityText(
+                                        context,
+                                        'Following',
+                                        'متابَع',
+                                      )
+                                    : communityText(
+                                        context,
+                                        'Follow',
+                                        'متابعة',
+                                      ),
+                              ),
+                            ),
+                            if (widget.onComposeTopic != null)
+                              IconButton.filledTonal(
+                                tooltip: communityText(
+                                  context,
+                                  'Start a post',
+                                  'ابدأ منشورًا',
+                                ),
+                                onPressed: () =>
+                                    widget.onComposeTopic!(topic.slug),
+                                icon: const Icon(Icons.edit_outlined),
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               );
             },
-          ),
-        ),
-      );
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class _CommunityTopicPage extends StatefulWidget {
@@ -364,9 +353,7 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
           : FloatingActionButton.extended(
               onPressed: () => widget.onComposeTopic!(widget.topic.slug),
               icon: const Icon(Icons.edit_outlined),
-              label: Text(
-                communityText(context, 'New post', 'منشور جديد'),
-              ),
+              label: Text(communityText(context, 'New post', 'منشور جديد')),
             ),
       body: FutureBuilder<void>(
         future: _loading,
@@ -380,9 +367,7 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
               child: FilledButton.icon(
                 onPressed: _refresh,
                 icon: const Icon(Icons.refresh_rounded),
-                label: Text(
-                  communityText(context, 'Retry', 'إعادة المحاولة'),
-                ),
+                label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
               ),
             );
           }
@@ -434,11 +419,11 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: .82,
-                      ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: .82,
+                          ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => _CommunityProfilePostTile(
                           post: _posts[index],
@@ -464,11 +449,7 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                                 )
                               : const Icon(Icons.expand_more_rounded),
                           label: Text(
-                            communityText(
-                              context,
-                              'Load more',
-                              'تحميل المزيد',
-                            ),
+                            communityText(context, 'Load more', 'تحميل المزيد'),
                           ),
                         ),
                       ),
@@ -496,8 +477,6 @@ class _TopicMetric extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Chip(
-        avatar: Icon(icon, size: 16),
-        label: Text('$value $label'),
-      );
+  Widget build(BuildContext context) =>
+      Chip(avatar: Icon(icon, size: 16), label: Text('$value $label'));
 }

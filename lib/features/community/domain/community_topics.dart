@@ -12,12 +12,8 @@ class CommunityTopic {
     required this.following,
   });
 
-  static final RegExp slugPattern = RegExp(
-    r'^[a-z0-9]+(?:-[a-z0-9]+)*$',
-  );
-  static final RegExp copyKeyPattern = RegExp(
-    r'^[a-z][a-z0-9_]{2,63}$',
-  );
+  static final RegExp slugPattern = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$');
+  static final RegExp copyKeyPattern = RegExp(r'^[a-z][a-z0-9_]{2,63}$');
 
   final String slug;
   final String titleCopyKey;
@@ -101,10 +97,7 @@ class CommunityTopicPostReference {
     if (postId is! String || createdAt == null) {
       throw const FormatException('Invalid Community topic post reference');
     }
-    return CommunityTopicPostReference(
-      postId: postId,
-      createdAt: createdAt,
-    );
+    return CommunityTopicPostReference(postId: postId, createdAt: createdAt);
   }
 }
 
