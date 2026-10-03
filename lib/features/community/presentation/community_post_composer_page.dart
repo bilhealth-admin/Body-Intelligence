@@ -637,6 +637,173 @@ class _CommunityPostComposerPageState
                           },
                         ),
                         const SizedBox(height: 18),
+                        Text(
+                          communityText(
+                            context,
+                            'Location — optional',
+                            'الموقع — اختياري',
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          key: const Key('community-composer-location'),
+                          controller: _location,
+                          enabled: !busy,
+                          maxLength: 80,
+                          textCapitalization: TextCapitalization.words,
+                          onChanged: (value) {
+                            widget.draft.locationLabel = value;
+                            if (_submitError != null) {
+                              setState(() => _submitError = null);
+                            }
+                          },
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.location_on_outlined),
+                            labelText: communityText(
+                              context,
+                              'City or place label',
+                              'اسم المدينة أو المكان',
+                            ),
+                            helperText: communityText(
+                              context,
+                              'Optional text only. BIL does not request GPS for Community posts.',
+                              'نص اختياري فقط. لا يطلب BIL موقع GPS لمنشورات المجتمع.',
+                            ),
+                            helperMaxLines: 2,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          communityText(
+                            context,
+                            'Mention people — optional',
+                            'الإشارة إلى أشخاص — اختياري',
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          communityText(
+                            context,
+                            'Mention up to 10 discoverable Community members. They are notified only after the post is approved.',
+                            'يمكنك الإشارة إلى 10 أعضاء ظاهرين كحد أقصى. لا يصلهم إشعار إلا بعد اعتماد المنشور.',
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if (widget.draft.mentions.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final mention in widget.draft.mentions)
+                                InputChip(
+                                  key: Key(
+                                    'community-composer-selected-mention-${mention.userId}',
+                                  ),
+                                  avatar: BilAccountAvatar(
+                                    radius: 12,
+                                    networkUrl: mention.avatarUrl,
+                                  ),
+                                  label: Text('@${mention.handle}'),
+                                  onDeleted: busy
+                                      ? null
+                                      : () => _toggleMention(mention),
+                                ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                key: const Key(
+                                  'community-composer-mention-query',
+                                ),
+                                controller: _mentionQuery,
+                                enabled: !busy,
+                                textDirection: TextDirection.ltr,
+                                autocorrect: false,
+                                enableSuggestions: false,
+                                textInputAction: TextInputAction.search,
+                                onSubmitted: (_) => _searchMentions(),
+                                decoration: InputDecoration(
+                                  prefixText: '@',
+                                  labelText: communityText(
+                                    context,
+                                    'Search handle',
+                                    'البحث باسم المستخدم',
+                                  ),
+                                  border: const OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton.filledTonal(
+                              key: const Key(
+                                'community-composer-mention-search',
+                              ),
+                              tooltip: communityText(
+                                context,
+                                'Search',
+                                'بحث',
+                              ),
+                              onPressed:
+                                  busy || _mentionSearching
+                                  ? null
+                                  : _searchMentions,
+                              icon: _mentionSearching
+                                  ? const SizedBox.square(
+                                      dimension: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.search_rounded),
+                            ),
+                          ],
+                        ),
+                        if (_mentionResults.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final mention in _mentionResults)
+                                FilterChip(
+                                  key: Key(
+                                    'community-composer-mention-${mention.userId}',
+                                  ),
+                                  selected: widget.draft.mentions.any(
+                                    (value) =>
+                                        value.userId == mention.userId,
+                                  ),
+                                  avatar: BilAccountAvatar(
+                                    radius: 12,
+                                    networkUrl: mention.avatarUrl,
+                                  ),
+                                  label: Text('@${mention.handle}'),
+                                  onSelected:
+                                      busy ||
+                                          (!widget.draft.mentions.any(
+                                                (value) =>
+                                                    value.userId ==
+                                                    mention.userId,
+                                              ) &&
+                                              widget.draft.mentions.length >=
+                                                  10)
+                                      ? null
+                                      : (_) => _toggleMention(mention),
+                                ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 18),
                         SwitchListTile.adaptive(
                           key: const Key('community-composer-poll-toggle'),
                           contentPadding: EdgeInsets.zero,
