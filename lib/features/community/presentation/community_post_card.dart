@@ -304,6 +304,24 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               ),
             ],
           ),
+          if (widget.post.locationLabel case final location?) ...[
+            const SizedBox(height: 8),
+            Row(
+              key: Key('community-post-location-${widget.post.id}'),
+              children: [
+                const Icon(Icons.location_on_outlined, size: 17),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    location,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (widget.post.hasImage) ...[
             const SizedBox(height: 10),
             _CommunityFeedImage(post: widget.post),
