@@ -155,6 +155,7 @@ class CommunityRepository
     }
   }
 
+  @override
   Future<List<CommunityTopicPostReference>> loadCommunityTopicPostReferences({
     required String slug,
     DateTime? before,
@@ -530,9 +531,14 @@ class CommunityRepository
         .toList(growable: false);
   }
 
-  Future<void> publishPost(
+  Future<void> publishPost(String body) async {
+    await assertCommunityPublishReady();
+    await _runCommunityMutation(() => _posts.publishText(body));
+  }
+
+  Future<void> publishPostWithTopics(
     String body, {
-    List<String> topicSlugs = const [],
+    required List<String> topicSlugs,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
@@ -545,8 +551,9 @@ class CommunityRepository
     if (store is! CommunityPostPublishingReceiptContract) {
       throw StateError('Community topic publishing receipt is unavailable');
     }
+    final receiptStore = store as CommunityPostPublishingReceiptContract;
     final postId = await _runCommunityMutation(
-      () => store.publishTextWithReceipt(body),
+      () => receiptStore.publishTextWithReceipt(body),
     );
     if (postId == null) return;
     try {
@@ -563,13 +570,25 @@ class CommunityRepository
 
   Future<void> publishPostWithImage(
     String body,
-    CommunityPostImageDraft image, {
-    List<String> topicSlugs = const [],
-  }) async {
+    CommunityPostImageDraft image,
+  ) async {
     // Run the server guard before CommunityPostCloudStore sends image bytes.
     // Storage and the post INSERT keep their own server guards for race
     // protection. If Storage hides an RLS reason behind its generic error,
     // re-read the authoritative guard so the UI can explain the current block.
+    await assertCommunityPublishReady();
+    try {
+      await _runCommunityMutation(() => _posts.publishWithImage(body, image));
+    } on StorageException catch (error, stackTrace) {
+      await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
+    }
+  }
+
+  Future<void> publishPostWithImageAndTopics(
+    String body,
+    CommunityPostImageDraft image, {
+    required List<String> topicSlugs,
+  }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     try {
@@ -582,8 +601,9 @@ class CommunityRepository
       if (store is! CommunityPostPublishingReceiptContract) {
         throw StateError('Community topic publishing receipt is unavailable');
       }
+      final receiptStore = store as CommunityPostPublishingReceiptContract;
       final postId = await _runCommunityMutation(
-        () => store.publishWithImageReceipt(body, image),
+        () => receiptStore.publishWithImageReceipt(body, image),
       );
       if (postId == null) return;
       try {
