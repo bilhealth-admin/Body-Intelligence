@@ -7,6 +7,10 @@ class _CommunityComposerDraft {
   CommunityPostImageDraft? image;
   final Set<String> topicSlugs = <String>{};
   String? circleSlug;
+  bool pollEnabled = false;
+  String pollQuestion = '';
+  final List<String> pollOptions = <String>['', ''];
+  bool pollAllowMultiple = false;
 }
 
 class _CommunityPostComposerPage extends StatefulWidget {
@@ -77,7 +81,45 @@ class _CommunityPostComposerPageState
       final image = _selectedImage;
       final topicSlugs = widget.draft.topicSlugs.toList(growable: false);
       final circleSlug = widget.draft.circleSlug;
-      if (image == null) {
+      CommunityPollDraft? poll;
+      if (widget.draft.pollEnabled) {
+        try {
+          poll = CommunityPollDraft(
+            question: widget.draft.pollQuestion,
+            options: widget.draft.pollOptions,
+            allowMultiple: widget.draft.pollAllowMultiple,
+          ).normalized();
+        } on FormatException {
+          if (!mounted) return;
+          setState(
+            () => _submitError = communityText(
+              context,
+              'Finish the poll: add a question and 2–6 different options.',
+              'أكمل الاستطلاع: أضف سؤالًا و2–6 خيارات مختلفة.',
+            ),
+          );
+          return;
+        }
+      }
+
+      if (poll != null) {
+        if (image == null) {
+          await widget.repository.publishPostWithTopicsCircleAndPoll(
+            text,
+            topicSlugs: topicSlugs,
+            circleSlug: circleSlug,
+            poll: poll,
+          );
+        } else {
+          await widget.repository.publishPostWithImageTopicsCircleAndPoll(
+            text,
+            image,
+            topicSlugs: topicSlugs,
+            circleSlug: circleSlug,
+            poll: poll,
+          );
+        }
+      } else if (image == null) {
         if (topicSlugs.isEmpty && circleSlug == null) {
           await widget.repository.publishPost(text);
         } else {
@@ -102,6 +144,12 @@ class _CommunityPostComposerPageState
       widget.draft.image = null;
       widget.draft.topicSlugs.clear();
       widget.draft.circleSlug = null;
+      widget.draft.pollEnabled = false;
+      widget.draft.pollQuestion = '';
+      widget.draft.pollOptions
+        ..clear()
+        ..addAll(const ['', '']);
+      widget.draft.pollAllowMultiple = false;
       // Pop only after the request completes successfully. The hub owns refresh.
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);
@@ -461,6 +509,164 @@ class _CommunityPostComposerPageState
                             );
                           },
                         ),
+                        const SizedBox(height: 18),
+                        SwitchListTile.adaptive(
+                          key: const Key('community-composer-poll-toggle'),
+                          contentPadding: EdgeInsets.zero,
+                          value: widget.draft.pollEnabled,
+                          onChanged: busy
+                              ? null
+                              : (value) => setState(() {
+                                    widget.draft.pollEnabled = value;
+                                  }),
+                          title: Text(
+                            communityText(
+                              context,
+                              'Add a poll',
+                              'إضافة استطلاع',
+                            ),
+                          ),
+                          subtitle: Text(
+                            communityText(
+                              context,
+                              'Ask one question with 2–6 options.',
+                              'اطرح سؤالًا واحدًا مع 2–6 خيارات.',
+                            ),
+                          ),
+                        ),
+                        if (widget.draft.pollEnabled) ...[
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            key: const Key(
+                              'community-composer-poll-question',
+                            ),
+                            initialValue: widget.draft.pollQuestion,
+                            enabled: !busy,
+                            maxLength: 200,
+                            textCapitalization:
+                                TextCapitalization.sentences,
+                            onChanged: (value) {
+                              widget.draft.pollQuestion = value;
+                              if (_submitError != null) {
+                                setState(() => _submitError = null);
+                              }
+                            },
+                            decoration: InputDecoration(
+                              labelText: communityText(
+                                context,
+                                'Poll question',
+                                'سؤال الاستطلاع',
+                              ),
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          for (var index = 0;
+                              index < widget.draft.pollOptions.length;
+                              index++) ...[
+                            Row(
+                              key: ValueKey(
+                                'community-composer-poll-option-row-$index',
+                              ),
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    key: ValueKey(
+                                      'community-composer-poll-option-$index',
+                                    ),
+                                    initialValue:
+                                        widget.draft.pollOptions[index],
+                                    enabled: !busy,
+                                    maxLength: 100,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    onChanged: (value) {
+                                      widget.draft.pollOptions[index] = value;
+                                      if (_submitError != null) {
+                                        setState(
+                                          () => _submitError = null,
+                                        );
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      labelText: communityText(
+                                        context,
+                                        'Option ${index + 1}',
+                                        'الخيار ${index + 1}',
+                                      ),
+                                      border: const OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                if (widget.draft.pollOptions.length > 2) ...[
+                                  const SizedBox(width: 6),
+                                  IconButton(
+                                    key: ValueKey(
+                                      'community-composer-poll-remove-$index',
+                                    ),
+                                    tooltip: communityText(
+                                      context,
+                                      'Remove option',
+                                      'إزالة الخيار',
+                                    ),
+                                    onPressed: busy
+                                        ? null
+                                        : () => setState(() {
+                                              widget.draft.pollOptions
+                                                  .removeAt(index);
+                                            }),
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline_rounded,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                          ],
+                          if (widget.draft.pollOptions.length < 6)
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TextButton.icon(
+                                key: const Key(
+                                  'community-composer-poll-add-option',
+                                ),
+                                onPressed: busy
+                                    ? null
+                                    : () => setState(() {
+                                          widget.draft.pollOptions.add('');
+                                        }),
+                                icon: const Icon(Icons.add_rounded),
+                                label: Text(
+                                  communityText(
+                                    context,
+                                    'Add option',
+                                    'إضافة خيار',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          SwitchListTile.adaptive(
+                            key: const Key(
+                              'community-composer-poll-multiple',
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            value: widget.draft.pollAllowMultiple,
+                            onChanged: busy
+                                ? null
+                                : (value) => setState(() {
+                                      widget.draft.pollAllowMultiple = value;
+                                    }),
+                            title: Text(
+                              communityText(
+                                context,
+                                'Allow multiple choices',
+                                'السماح باختيار أكثر من خيار',
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
