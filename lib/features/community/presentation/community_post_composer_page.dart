@@ -316,6 +316,57 @@ class _CommunityPostComposerPageState
     }
   }
 
+  Future<void> _searchMentions() async {
+    if (_publishing || _selectingImage || _completed || _mentionSearching) {
+      return;
+    }
+    final query = _mentionQuery.text.trim();
+    if (query.isEmpty) {
+      setState(
+        () => _mentionResults = const <CommunityMentionCandidate>[],
+      );
+      return;
+    }
+
+    setState(() => _mentionSearching = true);
+    try {
+      final results = await widget.repository.searchCommunityMentions(query);
+      if (!mounted) return;
+      setState(() => _mentionResults = results);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _mentionResults = const <CommunityMentionCandidate>[]);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not search mentions right now.',
+              'تعذر البحث عن الأشخاص للإشارة إليهم الآن.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _mentionSearching = false);
+    }
+  }
+
+  void _toggleMention(CommunityMentionCandidate candidate) {
+    if (_publishing || _completed) return;
+    final index = widget.draft.mentions.indexWhere(
+      (value) => value.userId == candidate.userId,
+    );
+    setState(() {
+      if (index >= 0) {
+        widget.draft.mentions.removeAt(index);
+      } else if (widget.draft.mentions.length < 10) {
+        widget.draft.mentions.add(candidate);
+      }
+      _submitError = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final busy = _publishing || _selectingImage || _completed;
