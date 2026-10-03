@@ -542,6 +542,9 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
                         itemBuilder: (context, index) {
                           final row = rows[index];
                           return ListTile(
+                            onTap: () => context.push(
+                              '/community/profile/${row['user_id']}',
+                            ),
                             leading: BilAccountAvatar(
                               radius: 20,
                               networkUrl: row['avatar_url'] as String?,
