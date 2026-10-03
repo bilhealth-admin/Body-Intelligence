@@ -394,9 +394,7 @@ mixin CommunitySocialRepositoryMixin {
               : allReplies.length;
           return CommunityCommentThread(
             root: root.copyWith(replyCount: replyCount),
-            replies: List<CommunityComment>.unmodifiable(
-              allReplies.take(3),
-            ),
+            replies: List<CommunityComment>.unmodifiable(allReplies.take(3)),
             replyCount: replyCount,
           );
         }),
