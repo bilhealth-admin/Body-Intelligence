@@ -172,6 +172,9 @@ class _ReferenceParityRepository extends CommunityRepository {
   }
 
   @override
+  Future<String?> loadCommunityProfileCoverUrl(String userId) async => null;
+
+  @override
   Future<int> recordCommunityPostView(String postId) async {
     expect(postId, _postId);
     viewCalls++;
@@ -208,13 +211,17 @@ void main() {
     for (final forbidden in const [
       'weight',
       'waist',
-      'bmi',
       'body_fat',
       'health_log',
       'bil_subscriptions',
     ]) {
       expect(sql, isNot(contains(forbidden)), reason: forbidden);
     }
+    expect(
+      RegExp(r'(^|[^a-z0-9_])bmi([^a-z0-9_]|$)').hasMatch(sql),
+      isFalse,
+      reason: 'bmi identifier',
+    );
   });
 
   test('creator projection parses badge and level progress strictly', () {
