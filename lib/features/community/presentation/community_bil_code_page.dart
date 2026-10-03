@@ -485,6 +485,20 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
                             requesting: _requesting,
                             onAdd: () => _request(member),
                           ),
+                          const SizedBox(height: 10),
+                          OutlinedButton.icon(
+                            onPressed: () => context.push(
+                              '/community/profile/${member.userId}',
+                            ),
+                            icon: const Icon(Icons.account_circle_outlined),
+                            label: Text(
+                              communityText(
+                                context,
+                                'View profile',
+                                'عرض الملف',
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
