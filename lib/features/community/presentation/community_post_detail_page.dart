@@ -36,9 +36,27 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   bool _loadingMore = false;
   bool _submitting = false;
   bool _likingPost = false;
+  int? _viewCount;
   final Set<String> _busyComments = <String>{};
   final Set<String> _expandedThreads = <String>{};
   final Set<String> _loadingReplyThreads = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_recordView());
+  }
+
+  Future<void> _recordView() async {
+    try {
+      final count = await widget.repository.recordCommunityPostView(
+        widget.post.id,
+      );
+      if (mounted) setState(() => _viewCount = count);
+    } on Object {
+      // Reading a post remains available when non-critical view analytics fail.
+    }
+  }
 
   Future<void> _loadInitial() async {
     final generation = ++_loadGeneration;
@@ -475,6 +493,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                     _CommunityPostDetailHeader(
                       post: widget.post,
                       stats: _stats,
+                      viewCount: _viewCount,
                       liking: _likingPost,
                       onLike: _togglePostLike,
                     ),
@@ -763,12 +782,14 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   const _CommunityPostDetailHeader({
     required this.post,
     required this.stats,
+    required this.viewCount,
     required this.liking,
     required this.onLike,
   });
 
   final CommunityPost post;
   final CommunityPostStats stats;
+  final int? viewCount;
   final bool liking;
   final VoidCallback onLike;
 
@@ -858,6 +879,12 @@ class _CommunityPostDetailHeader extends StatelessWidget {
               Icon(Icons.mode_comment_outlined, size: 19),
               const SizedBox(width: 5),
               Text('${stats.commentCount}'),
+              if (viewCount != null) ...[
+                const SizedBox(width: 12),
+                const Icon(Icons.visibility_outlined, size: 19),
+                const SizedBox(width: 5),
+                Text(viewCount.toString()),
+              ],
             ],
           ),
         ],
