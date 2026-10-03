@@ -9,7 +9,10 @@ void main() {
     ).readAsStringSync();
 
     expect(sql, contains('create table public.bil_community_reward_policy'));
-    expect(sql, contains('create table public.bil_community_quest_definitions'));
+    expect(
+      sql,
+      contains('create table public.bil_community_quest_definitions'),
+    );
     expect(sql, contains('create table public.bil_community_quest_progress'));
     expect(
       sql,
@@ -19,8 +22,16 @@ void main() {
       sql,
       contains('create table public.bil_community_reward_claim_audit'),
     );
-    expect(sql, contains('max_quest_gold_per_owner_per_utc_day bigint not null default 0'));
-    expect(sql, contains('max_quest_xp_per_owner_per_utc_day bigint not null default 0'));
+    expect(
+      sql,
+      contains(
+        'max_quest_gold_per_owner_per_utc_day bigint not null default 0',
+      ),
+    );
+    expect(
+      sql,
+      contains('max_quest_xp_per_owner_per_utc_day bigint not null default 0'),
+    );
     expect(sql, contains('active boolean not null default false'));
     expect(sql, contains('private.bil_record_community_action_v1'));
     expect(sql, contains('private.bil_record_community_quest_progress_v1'));
