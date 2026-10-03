@@ -303,6 +303,7 @@ class CommunityRepository
     return poll;
   }
 
+  @override
   Future<List<CommunityPoll>> loadCommunityPolls(List<String> postIds) async {
     if (postIds.isEmpty) return const <CommunityPoll>[];
     if (postIds.length > 100 ||
