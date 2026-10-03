@@ -230,33 +230,6 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     context.push('/community/code');
   }
 
-  Future<void> _pickPhoto() async {
-    if (_photoBusy || _saving) return;
-    setState(() => _photoBusy = true);
-    try {
-      final result = await ref
-          .read(profilePhotoServiceProvider)
-          .chooseAndSave();
-      if (!mounted || result == null) return;
-      setState(() {
-        if (result.publicUrl != null) _avatarUrl = result.publicUrl;
-      });
-      if (!result.cloudSynced && AppEnvironment.supabaseRuntimeReady) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.strings.text(
-                'Your photo is saved on this device. Community sync will retry when the cloud is available.',
-              ),
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _photoBusy = false);
-    }
-  }
-
   @override
   void dispose() {
     _name.dispose();
@@ -325,7 +298,11 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                           label: context.strings.text('Profile photo'),
                           child: InkWell(
                             key: const Key('community-profile-photo'),
-                            onTap: _photoBusy ? null : _pickPhoto,
+                            onTap: _photoBusy
+                                ? null
+                                : () => _CommunityProfileCoverActions(
+                                    this,
+                                  ).pickAvatar(),
                             customBorder: const CircleBorder(),
                             child: Stack(
                               clipBehavior: Clip.none,
