@@ -7,6 +7,7 @@ class _CommunityComposerDraft {
   final List<CommunityPostImageDraft> images = <CommunityPostImageDraft>[];
   final Set<String> topicSlugs = <String>{};
   String? circleSlug;
+  String locationLabel = '';
   bool pollEnabled = false;
   String pollQuestion = '';
   final List<String> pollOptions = <String>['', ''];
@@ -84,6 +85,8 @@ class _CommunityPostComposerPageState
       );
       final topicSlugs = widget.draft.topicSlugs.toList(growable: false);
       final circleSlug = widget.draft.circleSlug;
+      final rawLocation = widget.draft.locationLabel.trim();
+      final locationLabel = rawLocation.isEmpty ? null : rawLocation;
       CommunityPollDraft? poll;
       if (widget.draft.pollEnabled) {
         try {
@@ -111,6 +114,7 @@ class _CommunityPostComposerPageState
             text,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
+            locationLabel: locationLabel,
             poll: poll,
           );
         } else if (images.length == 1) {
@@ -119,6 +123,7 @@ class _CommunityPostComposerPageState
             images.single,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
+            locationLabel: locationLabel,
             poll: poll,
           );
         } else {
@@ -127,21 +132,27 @@ class _CommunityPostComposerPageState
             images,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
+            locationLabel: locationLabel,
             poll: poll,
           );
         }
       } else if (images.isEmpty) {
-        if (topicSlugs.isEmpty && circleSlug == null) {
+        if (topicSlugs.isEmpty &&
+            circleSlug == null &&
+            locationLabel == null) {
           await widget.repository.publishPost(text);
         } else {
           await widget.repository.publishPostWithTopicsAndCircle(
             text,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
+            locationLabel: locationLabel,
           );
         }
       } else if (images.length == 1) {
-        if (topicSlugs.isEmpty && circleSlug == null) {
+        if (topicSlugs.isEmpty &&
+            circleSlug == null &&
+            locationLabel == null) {
           await widget.repository.publishPostWithImage(text, images.single);
         } else {
           await widget.repository.publishPostWithImageTopicsAndCircle(
@@ -149,6 +160,7 @@ class _CommunityPostComposerPageState
             images.single,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
+            locationLabel: locationLabel,
           );
         }
       } else {
@@ -157,6 +169,7 @@ class _CommunityPostComposerPageState
           images,
           topicSlugs: topicSlugs,
           circleSlug: circleSlug,
+          locationLabel: locationLabel,
         );
       }
       if (!mounted) return;
@@ -165,6 +178,7 @@ class _CommunityPostComposerPageState
       _selectedImages.clear();
       widget.draft.topicSlugs.clear();
       widget.draft.circleSlug = null;
+      widget.draft.locationLabel = '';
       widget.draft.pollEnabled = false;
       widget.draft.pollQuestion = '';
       widget.draft.pollOptions
@@ -551,6 +565,37 @@ class _CommunityPostComposerPageState
                               ],
                             );
                           },
+                        ),
+                        const SizedBox(height: 18),
+                        TextFormField(
+                          key: const Key(
+                            'community-composer-location-label',
+                          ),
+                          initialValue: widget.draft.locationLabel,
+                          enabled: !busy,
+                          maxLength: 80,
+                          textCapitalization: TextCapitalization.words,
+                          onChanged: (value) {
+                            widget.draft.locationLabel = value;
+                            if (_submitError != null) {
+                              setState(() => _submitError = null);
+                            }
+                          },
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.location_on_outlined),
+                            labelText: communityText(
+                              context,
+                              'Location label — optional',
+                              'اسم الموقع — اختياري',
+                            ),
+                            helperText: communityText(
+                              context,
+                              'Type a place name manually. BIL does not attach GPS coordinates to this post.',
+                              'اكتب اسم المكان يدويًا. لا يرفق BIL إحداثيات GPS بهذا المنشور.',
+                            ),
+                            helperMaxLines: 3,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
                         const SizedBox(height: 18),
                         SwitchListTile.adaptive(
