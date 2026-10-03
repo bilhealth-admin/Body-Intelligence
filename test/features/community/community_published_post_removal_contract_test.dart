@@ -7,9 +7,10 @@ void main() {
     final sql = File(
       'supabase/migrations/20260924093000_community_published_post_moderator_removal.sql',
     ).readAsStringSync();
-    final repository = File(
+    final repository = [
       'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+      'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final card = File(
       'lib/features/community/presentation/community_post_card.dart',
     ).readAsStringSync();
