@@ -313,6 +313,14 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             postId: widget.post.id,
             body: widget.post.body,
           ),
+          if (widget.post.poll case final poll?) ...[
+            const SizedBox(height: 12),
+            _CommunityPollPanel(
+              poll: poll,
+              repository: widget.repository,
+              compact: true,
+            ),
+          ],
           const SizedBox(height: 4),
           Wrap(
             alignment: WrapAlignment.spaceBetween,
