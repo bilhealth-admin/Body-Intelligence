@@ -40,9 +40,9 @@ void main() {
   test(
     'aggregate inbox and sent routes use bil_messages and profile lookup',
     () {
-      final repository = File(
+      final repository = _librarySource(
         'lib/features/community/data/community_repository.dart',
-      ).readAsStringSync();
+      );
       final router = File('lib/app/router/app_router.dart').readAsStringSync();
       final settings = File(
         'lib/features/settings/settings_page.dart',
@@ -83,9 +83,9 @@ void main() {
   });
 
   test('inbox enables RLS-protected realtime refresh', () {
-    final source = File(
+    final source = _librarySource(
       'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+    );
     final page = File(
       'lib/features/community/presentation/community_messages_page.dart',
     ).readAsStringSync();
@@ -106,9 +106,9 @@ void main() {
   });
 
   test('open chat watches both RLS-protected conversation directions', () {
-    final source = File(
+    final source = _librarySource(
       'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+    );
     final chat = File(
       'lib/features/community/presentation/community_chat_page.dart',
     ).readAsStringSync();
@@ -127,9 +127,9 @@ void main() {
   test(
     'conversation queries use a deterministic tie-breaker for equal times',
     () {
-      final source = File(
+      final source = _librarySource(
         'lib/features/community/data/community_repository.dart',
-      ).readAsStringSync();
+      );
       final conversationStart = source.indexOf(
         'Future<List<CommunityMessage>> loadMessages',
       );
