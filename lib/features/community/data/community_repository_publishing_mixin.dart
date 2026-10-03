@@ -31,6 +31,13 @@ mixin _CommunityPublishingRepositoryMixin {
     required List<String> slugs,
   });
 
+  Future<void> setMyCommunityPostReferenceMetadata({
+    required String postId,
+    String? title,
+    List<String> hashtags,
+    List<String> collaboratorUserIds,
+  });
+
   Future<void> publishPost(String body) async {
     await assertCommunityPublishReady();
     await _runCommunityMutation(() => _posts.publishText(body));
@@ -387,6 +394,10 @@ mixin _CommunityPublishingRepositoryMixin {
     String? locationLabel,
     List<CommunityMentionCandidate> mentions =
         const <CommunityMentionCandidate>[],
+    String? title,
+    List<String> hashtags = const <String>[],
+    List<CommunityMentionCandidate> collaborators =
+        const <CommunityMentionCandidate>[],
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
@@ -431,6 +442,20 @@ mixin _CommunityPublishingRepositoryMixin {
       }
 
       if (postId == null) return;
+
+      final normalizedTitle = title?.trim();
+      if ((normalizedTitle?.isNotEmpty ?? false) ||
+          hashtags.isNotEmpty ||
+          collaborators.isNotEmpty) {
+        await setMyCommunityPostReferenceMetadata(
+          postId: postId,
+          title: normalizedTitle,
+          hashtags: hashtags,
+          collaboratorUserIds: [
+            for (final collaborator in collaborators) collaborator.userId,
+          ],
+        );
+      }
 
       if (topicSlugs.isNotEmpty) {
         await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
