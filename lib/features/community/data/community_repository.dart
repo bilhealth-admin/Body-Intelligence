@@ -925,6 +925,45 @@ class CommunityRepository
     }
   }
 
+  Future<void> publishPostWithTopicsCircleAndPoll(
+    String body, {
+    List<String> topicSlugs = const [],
+    String? circleSlug,
+    required CommunityPollDraft poll,
+  }) async {
+    await assertCommunityPublishReady();
+    _validateTopicSlugs(topicSlugs);
+    _validateCircleSlug(circleSlug);
+    final normalizedPoll = poll.normalized();
+
+    final store = _posts;
+    if (store is! CommunityPostPublishingReceiptContract) {
+      throw StateError('Community poll publishing receipt is unavailable');
+    }
+    final receiptStore = store as CommunityPostPublishingReceiptContract;
+    final postId = await _runCommunityMutation(
+      () => receiptStore.publishTextWithReceipt(body),
+    );
+    if (postId == null) return;
+
+    try {
+      if (topicSlugs.isNotEmpty) {
+        await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+      }
+      if (circleSlug != null) {
+        await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+      }
+      await createCommunityPoll(postId: postId, draft: normalizedPoll);
+    } on Object {
+      try {
+        await store.delete(postId);
+      } on Object {
+        // The moderation-pending post remains non-public if cleanup fails.
+      }
+      rethrow;
+    }
+  }
+
   Future<void> publishPostWithImageTopicsAndCircle(
     String body,
     CommunityPostImageDraft image, {
@@ -957,6 +996,50 @@ class CommunityRepository
         if (circleSlug != null) {
           await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
         }
+      } on Object {
+        try {
+          await store.delete(postId);
+        } on Object {
+          // The moderation-pending post remains non-public if cleanup fails.
+        }
+        rethrow;
+      }
+    } on StorageException catch (error, stackTrace) {
+      await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
+    }
+  }
+
+  Future<void> publishPostWithImageTopicsCircleAndPoll(
+    String body,
+    CommunityPostImageDraft image, {
+    List<String> topicSlugs = const [],
+    String? circleSlug,
+    required CommunityPollDraft poll,
+  }) async {
+    await assertCommunityPublishReady();
+    _validateTopicSlugs(topicSlugs);
+    _validateCircleSlug(circleSlug);
+    final normalizedPoll = poll.normalized();
+
+    final store = _posts;
+    if (store is! CommunityPostPublishingReceiptContract) {
+      throw StateError('Community poll publishing receipt is unavailable');
+    }
+    final receiptStore = store as CommunityPostPublishingReceiptContract;
+    try {
+      final postId = await _runCommunityMutation(
+        () => receiptStore.publishWithImageReceipt(body, image),
+      );
+      if (postId == null) return;
+
+      try {
+        if (topicSlugs.isNotEmpty) {
+          await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+        }
+        if (circleSlug != null) {
+          await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+        }
+        await createCommunityPoll(postId: postId, draft: normalizedPoll);
       } on Object {
         try {
           await store.delete(postId);
