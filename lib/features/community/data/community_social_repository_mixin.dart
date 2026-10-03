@@ -30,7 +30,7 @@ mixin CommunitySocialRepositoryMixin {
 
   Future<CommunityAttention> loadAttention() async {
     final response = await communitySocialClient.rpc(
-      'bil_community_attention_v1',
+      'bil_community_attention_v2',
     );
     if (response is! Map) {
       throw const FormatException('Invalid attention snapshot');
