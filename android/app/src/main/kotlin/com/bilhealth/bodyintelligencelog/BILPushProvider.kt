@@ -1,6 +1,10 @@
 package com.bilhealth.bodyintelligencelog
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.plugin.common.MethodChannel
@@ -23,6 +27,7 @@ class BILUnconfiguredPushProvider : BILPushProvider {
         // MainActivity can route a valid remote deep link even though this
         // placeholder cannot register an FCM token or receive a message.
         "remoteTapRouting" to true,
+        "permissionGranted" to false,
         "provider" to "unconfigured",
     )
 
@@ -40,10 +45,17 @@ class BILUnconfiguredPushProvider : BILPushProvider {
 class BILFirebasePushProvider(private val context: Context) : BILPushProvider {
     override fun status(): Map<String, Any> {
         val configured = FirebaseApp.getApps(context).isNotEmpty()
+        val permissionGranted =
+            Build.VERSION.SDK_INT < 33 ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
         return mapOf(
             "configured" to configured,
             "tokenRegistration" to configured,
             "remoteTapRouting" to true,
+            "permissionGranted" to permissionGranted,
             "provider" to "firebase_cloud_messaging",
         )
     }

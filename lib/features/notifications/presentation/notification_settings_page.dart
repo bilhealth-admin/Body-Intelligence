@@ -382,6 +382,20 @@ class _NotificationSettingsPageState
                         _ReferencePushToggle(
                           enabled: !_saving,
                           value: delivery.allows(
+                            NotificationCategory.friendAccepted,
+                          ),
+                          label: _referenceLabel(
+                            'Someone accepts my friend request',
+                          ),
+                          onChanged: (value) => _toggleCategory(
+                            NotificationCategory.friendAccepted,
+                            value,
+                          ),
+                        ),
+                        const Divider(height: 1),
+                        _ReferencePushToggle(
+                          enabled: !_saving,
+                          value: delivery.allows(
                             NotificationCategory.friendWorkout,
                           ),
                           label: _referenceLabel(
@@ -525,8 +539,8 @@ class _NotificationSettingsPageState
                                         'Uzak bildirim teslimi bu sürümde yapılandırılmadı.',
                                       )
                                     : _ui(
-                                        'Friend requests and messages in your time zone.',
-                                        'طلبات الأصدقاء والرسائل حسب منطقتك الزمنية.',
+                                        'Friend requests, acceptances, and messages in your time zone.',
+                                        'طلبات الأصدقاء وقبولها والرسائل حسب منطقتك الزمنية.',
                                         'Demandes d’amis et messages selon votre fuseau horaire.',
                                         'Solicitudes y mensajes según tu zona horaria.',
                                         'Saat diliminize göre arkadaşlık istekleri ve mesajlar.',
@@ -683,6 +697,12 @@ class _NotificationSettingsPageState
         'Je reçois une nouvelle demande d’ami',
         'Recibo una solicitud de amistad',
         'Yeni bir arkadaşlık isteği aldığımda',
+      ],
+      'Someone accepts my friend request': [
+        'عندما يقبل شخص طلب صداقتي',
+        'Quelqu’un accepte ma demande d’ami',
+        'Alguien acepta mi solicitud de amistad',
+        'Birisi arkadaşlık isteğimi kabul ettiğinde',
       ],
       'One of my friends logs a workout': [
         'عندما يسجل أحد أصدقائي تمرينًا',

@@ -15,7 +15,11 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     if (_pushService == null || _pushSaving) return;
     _updateState(() => _pushSaving = true);
     try {
-      await _pushService!.setEnabled(enabled);
+      await _pushService!.setEnabled(
+        enabled,
+        deliveryPreferences:
+            _deliveryPreferences ?? const NotificationDeliveryPreferences(),
+      );
       await _loadPushPreferences();
     } on Object {
       if (mounted) _showPushError();
@@ -117,6 +121,13 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     try {
       await _deliveryStore.save(value);
       await _reconcile(reminders, value);
+      if (_pushService != null && (_pushPreferences?.enabled ?? false)) {
+        try {
+          await _pushService!.syncDeliveryPreferences(value);
+        } on Object {
+          if (mounted) _showPushError();
+        }
+      }
     } on Object {
       if (mounted) _updateState(() => _deliveryPreferences = previous);
       try {
@@ -154,11 +165,31 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     context,
   ).showSnackBar(SnackBar(content: Text(_copy.permissionError)));
 
-  Future<void> _toggleCategory(NotificationCategory category, bool enabled) {
+  Future<void> _toggleCategory(
+    NotificationCategory category,
+    bool enabled,
+  ) async {
     final current = _deliveryPreferences!;
     final categories = {...current.enabledCategories};
     enabled ? categories.add(category) : categories.remove(category);
-    return _saveDelivery(current.copyWith(enabledCategories: categories));
+    final next = current.copyWith(enabledCategories: categories);
+    await _saveDelivery(next);
+    if (!mounted || _pushService == null) return;
+    const remoteCategories = {
+      NotificationCategory.newMessage,
+      NotificationCategory.friendRequest,
+      NotificationCategory.friendAccepted,
+    };
+    if (!remoteCategories.contains(category)) return;
+    if (enabled && !(_pushPreferences?.enabled ?? false)) {
+      await _setPushEnabled(true);
+    } else if (_pushPreferences?.enabled ?? false) {
+      try {
+        await _pushService!.syncDeliveryPreferences(next);
+      } on Object {
+        if (mounted) _showPushError();
+      }
+    }
   }
 
   Future<void> _update(DailyReminder updated) async {

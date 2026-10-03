@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum NotificationCategory {
   newMessage,
   friendRequest,
+  friendAccepted,
   friendWorkout,
   friendStreak,
   stepGoal,
@@ -15,6 +16,7 @@ class NotificationDeliveryPreferences {
     this.enabledCategories = const {
       NotificationCategory.newMessage,
       NotificationCategory.friendRequest,
+      NotificationCategory.friendAccepted,
       NotificationCategory.friendWorkout,
       NotificationCategory.friendStreak,
       NotificationCategory.stepGoal,
@@ -68,10 +70,14 @@ class NotificationDeliveryPreferencesStore {
       final value = jsonDecode(encoded) as Map<String, dynamic>;
       final names = (value['enabledCategories'] as List<dynamic>)
           .cast<String>();
+      final enabledCategories = names
+          .map(NotificationCategory.values.byName)
+          .toSet();
+      if (!names.contains(NotificationCategory.friendAccepted.name)) {
+        enabledCategories.add(NotificationCategory.friendAccepted);
+      }
       return NotificationDeliveryPreferences(
-        enabledCategories: names
-            .map(NotificationCategory.values.byName)
-            .toSet(),
+        enabledCategories: enabledCategories,
         quietHoursEnabled: value['quietHoursEnabled'] as bool? ?? false,
         quietStartMinutes: value['quietStartMinutes'] as int? ?? 22 * 60,
         quietEndMinutes: value['quietEndMinutes'] as int? ?? 7 * 60,

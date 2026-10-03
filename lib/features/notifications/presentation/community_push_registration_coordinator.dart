@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../domain/notification_delivery_preferences.dart';
 import '../services/community_push_service.dart';
 
 /// Refreshes an enabled owner's provider token after sign-in, token rotation,
@@ -62,7 +63,10 @@ class _CommunityPushRegistrationCoordinatorState
       do {
         _refreshQueued = false;
         try {
-          await service.refreshRegistrationIfEnabled();
+          final delivery = await NotificationDeliveryPreferencesStore().load();
+          await service.refreshRegistrationIfEnabled(
+            deliveryPreferences: delivery,
+          );
         } on Object {
           // A later auth, startup, or resume event retries safely.
         }

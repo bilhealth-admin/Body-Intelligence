@@ -52,12 +52,21 @@ import UserNotifications
       guard let self else { result(FlutterError(code: "push_unavailable", message: nil, details: nil)); return }
       switch call.method {
       case "providerStatus":
-        result([
-          "configured": true,
-          "tokenRegistration": true,
-          "remoteTapRouting": true,
-          "provider": "apns",
-        ])
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+          let permissionGranted =
+            settings.authorizationStatus == .authorized ||
+            settings.authorizationStatus == .provisional ||
+            settings.authorizationStatus == .ephemeral
+          DispatchQueue.main.async {
+            result([
+              "configured": true,
+              "tokenRegistration": true,
+              "remoteTapRouting": true,
+              "permissionGranted": permissionGranted,
+              "provider": "apns",
+            ])
+          }
+        }
       case "setBadgeCount":
         guard let count = call.arguments as? Int, count >= 0 else {
           result(FlutterError(code: "invalid_badge_count", message: nil, details: nil)); return
