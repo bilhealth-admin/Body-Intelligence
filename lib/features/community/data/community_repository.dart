@@ -289,8 +289,9 @@ class CommunityRepository
     }
     return List<CommunityNotification>.unmodifiable(
       response.map((item) {
-        if (item is! Map)
+        if (item is! Map) {
           throw const FormatException('Invalid Community notification');
+        }
         return CommunityNotification.fromJson(Map<String, dynamic>.from(item));
       }),
     );
