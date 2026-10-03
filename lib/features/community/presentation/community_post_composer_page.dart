@@ -74,12 +74,18 @@ class _CommunityPostComposerPageState
       final image = _selectedImage;
       final topicSlugs = widget.draft.topicSlugs.toList(growable: false);
       if (image == null) {
-        await widget.repository.publishPost(
-          text,
-          topicSlugs: topicSlugs,
-        );
+        if (topicSlugs.isEmpty) {
+          await widget.repository.publishPost(text);
+        } else {
+          await widget.repository.publishPostWithTopics(
+            text,
+            topicSlugs: topicSlugs,
+          );
+        }
+      } else if (topicSlugs.isEmpty) {
+        await widget.repository.publishPostWithImage(text, image);
       } else {
-        await widget.repository.publishPostWithImage(
+        await widget.repository.publishPostWithImageAndTopics(
           text,
           image,
           topicSlugs: topicSlugs,
