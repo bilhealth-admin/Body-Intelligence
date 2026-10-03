@@ -34,7 +34,10 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildCommunityTitleField(context, busy),
+                        _CommunityPostComposerReferenceSections(this)._buildCommunityTitleField(
+                          context,
+                          busy,
+                        ),
                         const SizedBox(height: 12),
                         TextField(
                           key: const Key('community-post-composer'),
@@ -84,7 +87,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             ),
                           ),
                         ),
-                        ..._buildCommunityHashtagSection(context, busy),
+                        ..._CommunityPostComposerReferenceSections(
+                          this,
+                        )._buildCommunityHashtagSection(context, busy),
                         if (_selectedImages.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           SizedBox(
@@ -435,7 +440,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           ),
                         ],
                         const SizedBox(height: 18),
-                        ..._buildCommunityCollaboratorSection(
+                        ..._CommunityPostComposerReferenceSections(
+                          this,
+                        )._buildCommunityCollaboratorSection(
                           context,
                           busy,
                         ),
@@ -634,7 +641,11 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           children: [
                             OutlinedButton.icon(
                               key: const Key('community-post-save-draft'),
-                              onPressed: busy ? null : _savePersistentDraft,
+                              onPressed: busy
+                                  ? null
+                                  : _CommunityPostComposerReferenceActions(
+                                      this,
+                                    )._savePersistentDraft,
                               icon: _savingDraft
                                   ? const SizedBox.square(
                                       dimension: 18,
