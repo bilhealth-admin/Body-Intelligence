@@ -541,5 +541,4 @@ mixin _CommunityDiscoveryRepositoryMixin {
       Map<String, dynamic>.from(response),
     );
   }
-
 }

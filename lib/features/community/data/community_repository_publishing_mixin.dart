@@ -17,10 +17,7 @@ mixin _CommunityPublishingRepositoryMixin {
     required CommunityPollDraft draft,
   });
 
-  Future<void> setMyCommunityPostCircle({
-    required String postId,
-    String? slug,
-  });
+  Future<void> setMyCommunityPostCircle({required String postId, String? slug});
 
   Future<void> setMyCommunityPostContext({
     required String postId,
@@ -482,5 +479,4 @@ mixin _CommunityPublishingRepositoryMixin {
       throw ArgumentError('Invalid Community post topics');
     }
   }
-
 }
