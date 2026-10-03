@@ -351,38 +351,38 @@ class _FeedTabState extends State<_FeedTab>
   }
 
   String _feedModeLabel(CommunityFeedMode mode) => switch (mode) {
-        CommunityFeedMode.forYou =>
-          communityText(context, 'For You', 'لك'),
-        CommunityFeedMode.following =>
-          communityText(context, 'Following', 'المتابَعون'),
-        CommunityFeedMode.friends =>
-          communityText(context, 'Friends', 'الأصدقاء'),
-        CommunityFeedMode.explore =>
-          communityText(context, 'Explore', 'استكشاف'),
-      };
+    CommunityFeedMode.forYou => communityText(context, 'For You', 'لك'),
+    CommunityFeedMode.following => communityText(
+      context,
+      'Following',
+      'المتابَعون',
+    ),
+    CommunityFeedMode.friends => communityText(context, 'Friends', 'الأصدقاء'),
+    CommunityFeedMode.explore => communityText(context, 'Explore', 'استكشاف'),
+  };
 
   String _emptyFeedMessage() => switch (_selectedFeedMode) {
-        CommunityFeedMode.following => communityText(
-            context,
-            'Follow members to see their approved posts here.',
-            'تابع أعضاءً لتظهر منشوراتهم المعتمدة هنا.',
-          ),
-        CommunityFeedMode.friends => communityText(
-            context,
-            'Accepted friends will appear here when they publish.',
-            'ستظهر منشورات أصدقائك المقبولين هنا عند النشر.',
-          ),
-        CommunityFeedMode.forYou => communityText(
-            context,
-            'Nothing personalized yet. Follow people, topics, or Circles to shape this feed.',
-            'لا توجد توصيات مخصصة بعد. تابع أشخاصًا أو مواضيع أو دوائر لتخصيص هذا الموجز.',
-          ),
-        CommunityFeedMode.explore => communityText(
-            context,
-            'No approved posts yet. Start the first conversation.',
-            'لا توجد منشورات معتمدة بعد. ابدأ أول محادثة.',
-          ),
-      };
+    CommunityFeedMode.following => communityText(
+      context,
+      'Follow members to see their approved posts here.',
+      'تابع أعضاءً لتظهر منشوراتهم المعتمدة هنا.',
+    ),
+    CommunityFeedMode.friends => communityText(
+      context,
+      'Accepted friends will appear here when they publish.',
+      'ستظهر منشورات أصدقائك المقبولين هنا عند النشر.',
+    ),
+    CommunityFeedMode.forYou => communityText(
+      context,
+      'Nothing personalized yet. Follow people, topics, or Circles to shape this feed.',
+      'لا توجد توصيات مخصصة بعد. تابع أشخاصًا أو مواضيع أو دوائر لتخصيص هذا الموجز.',
+    ),
+    CommunityFeedMode.explore => communityText(
+      context,
+      'No approved posts yet. Start the first conversation.',
+      'لا توجد منشورات معتمدة بعد. ابدأ أول محادثة.',
+    ),
+  };
 
   Future<void> _refresh() async {
     if (_openingComposer || _managingPost) return;
@@ -451,8 +451,7 @@ class _FeedTabState extends State<_FeedTab>
                                 ),
                                 selected: _selectedFeedMode == mode,
                                 label: Text(_feedModeLabel(mode)),
-                                onSelected:
-                                    _openingComposer || _managingPost
+                                onSelected: _openingComposer || _managingPost
                                     ? null
                                     : (_) => _selectFeedMode(mode),
                               ),
