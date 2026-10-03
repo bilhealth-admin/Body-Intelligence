@@ -67,6 +67,8 @@ jobs:
             test/features/community/community_attention_test.dart \
             test/features/community/community_activity_v2_contract_test.dart \
             test/features/community/community_activity_v2_client_contract_test.dart \
+            test/features/community/community_activity_inbox_v2_contract_test.dart \
+            test/features/community/community_social_activity_emitters_v1_contract_test.dart \
             test/features/community/community_authenticated_interaction_test.dart \
             test/features/community/community_deep_link_test.dart \
             test/features/community/community_friend_acceptance_cloud_contract_test.dart \
@@ -99,6 +101,8 @@ jobs:
             test/features/community/community_attention_test.dart \
             test/features/community/community_activity_v2_contract_test.dart \
             test/features/community/community_activity_v2_client_contract_test.dart \
+            test/features/community/community_activity_inbox_v2_contract_test.dart \
+            test/features/community/community_social_activity_emitters_v1_contract_test.dart \
             test/features/community/community_authenticated_interaction_test.dart \
             test/features/community/community_connections_contract_test.dart \
             test/features/community/community_deep_link_test.dart \
