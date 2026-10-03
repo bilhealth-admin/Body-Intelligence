@@ -385,6 +385,17 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/community/profile/:userId',
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunitySurface(
+            child: CommunityMemberProfilePage(
+              userId: state.pathParameters['userId']!,
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/community/safety',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
