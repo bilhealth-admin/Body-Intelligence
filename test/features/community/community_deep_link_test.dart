@@ -17,6 +17,14 @@ void main() {
       CommunityDeepLink.routeFor(Uri.parse('bil://community/rewards')),
       '/community/rewards',
     );
+    const inviteToken =
+        '0123456789abcdef0123456789abcdef0123456789abcdef';
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse('bil://community/invite/$inviteToken'),
+      ),
+      '/community/invite/$inviteToken',
+    );
     expect(
       CommunityDeepLink.routeFor(Uri.parse('bil://community/messages/new')),
       '/community/messages/new',
@@ -237,6 +245,12 @@ void main() {
     expect(
       CommunityDeepLink.routeFor(
         Uri.parse('bil://community/profile/not-a-uuid'),
+      ),
+      isNull,
+    );
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse('bil://community/invite/not-a-token'),
       ),
       isNull,
     );
