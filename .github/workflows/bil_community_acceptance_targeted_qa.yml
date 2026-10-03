@@ -42,6 +42,10 @@ jobs:
             lib/features/community/domain/community_polls.dart \
             lib/features/community/domain/community_post_context.dart \
             lib/features/community/data/community_repository.dart \
+            lib/features/community/data/community_repository_connections_messaging_mixin.dart \
+            lib/features/community/data/community_repository_discovery_mixin.dart \
+            lib/features/community/data/community_repository_profile_moderation_mixin.dart \
+            lib/features/community/data/community_repository_publishing_mixin.dart \
             lib/features/community/data/community_social_repository_mixin.dart \
             lib/features/community/data/community_post_cloud_store.dart \
             lib/features/community/data/community_feed_repository_mixin.dart \
