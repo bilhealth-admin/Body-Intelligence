@@ -35,7 +35,7 @@ extension _CommunityMemberProfileContentSlivers
                     )
                   : TextButton(
                       key: const Key('community-profile-tab-moments'),
-                      onPressed: () => setState(
+                      onPressed: () => _setProfileState(
                         () => _contentTab = _CommunityProfileContentTab.moments,
                       ),
                       child: Text(communityText(context, 'Moments', 'اللحظات')),
@@ -53,7 +53,7 @@ extension _CommunityMemberProfileContentSlivers
                     )
                   : TextButton(
                       key: const Key('community-profile-tab-reviews'),
-                      onPressed: () => setState(
+                      onPressed: () => _setProfileState(
                         () => _contentTab = _CommunityProfileContentTab.reviews,
                       ),
                       child: Text(
@@ -168,7 +168,7 @@ extension _CommunityMemberProfileContentSlivers
                   ],
                   onChanged: (value) {
                     if (value != null) {
-                      setState(() => _momentFilter = value);
+                      _setProfileState(() => _momentFilter = value);
                     }
                   },
                 )
@@ -437,7 +437,7 @@ class _CommunityProfileConnectionsSheetState
 
   void _switchKind(CommunityProfileConnectionKind kind) {
     if (kind == _activeKind) return;
-    setState(() {
+    _setProfileState(() {
       _activeKind = kind;
       _connections = _loadConnections(kind);
     });
@@ -449,7 +449,7 @@ class _CommunityProfileConnectionsSheetState
         (!member.viewerFollows && !member.allowFollows)) {
       return;
     }
-    setState(() => _followBusyUserId = member.userId);
+    _setProfileState(() => _followBusyUserId = member.userId);
     try {
       if (member.viewerFollows) {
         await widget.repository.unfollow(member.userId);
@@ -457,7 +457,7 @@ class _CommunityProfileConnectionsSheetState
         await widget.repository.follow(member.userId);
       }
       if (!mounted) return;
-      setState(() => _connections = _loadConnections(_activeKind));
+      _setProfileState(() => _connections = _loadConnections(_activeKind));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -473,7 +473,7 @@ class _CommunityProfileConnectionsSheetState
         );
       }
     } finally {
-      if (mounted) setState(() => _followBusyUserId = null);
+      if (mounted) _setProfileState(() => _followBusyUserId = null);
     }
   }
 
