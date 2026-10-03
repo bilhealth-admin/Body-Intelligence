@@ -94,9 +94,13 @@ void main() {
       final mixin = File(
         'lib/features/community/data/community_feed_repository_mixin.dart',
       ).readAsStringSync();
-      final composer = File(
+      final composer = [
         'lib/features/community/presentation/community_post_composer_page.dart',
-      ).readAsStringSync();
+        'lib/features/community/presentation/community_post_composer_rendering.dart',
+        'lib/features/community/presentation/community_post_composer_reference_sections.dart',
+        'lib/features/community/presentation/community_post_composer_reference_actions.dart',
+        'lib/features/community/presentation/community_post_composer_toolbar.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final card = File(
         'lib/features/community/presentation/community_post_card.dart',
       ).readAsStringSync();
