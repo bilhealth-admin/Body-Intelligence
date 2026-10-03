@@ -374,7 +374,6 @@ class CommunityPostStats {
     final postId = json['post_id'];
     final likeCount = json['like_count'];
     final liked = json['liked'];
-    final replyCount = json['reply_count'] ?? 0;
     final commentCount = json['comment_count'];
     if (postId is! String ||
         likeCount is! num ||
@@ -598,6 +597,7 @@ class CommunityComment {
     final handle = json['handle'];
     final likeCount = json['like_count'];
     final liked = json['liked'];
+    final replyCount = json['reply_count'] ?? 0;
     final parsedAt = createdAt is String ? DateTime.tryParse(createdAt) : null;
     if (id is! String ||
         authorId is! String ||
