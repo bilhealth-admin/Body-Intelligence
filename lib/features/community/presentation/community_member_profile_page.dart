@@ -42,6 +42,8 @@ class _CommunityMemberProfilePageState
   final List<CommunityProfileReview> _reviews = [];
   final List<CommunityDraftSummary> _draftSummaries = [];
   final Map<String, int> _viewCounts = <String, int>{};
+  final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
+      <String, CommunityPostReferenceMetadata>{};
   late Future<void> _loading = _loadInitial();
   DateTime? _before;
   String? _beforeId;
@@ -60,25 +62,49 @@ class _CommunityMemberProfilePageState
   Future<void> _loadInitial() async {
     final repository = _repository;
     if (repository == null) return;
-    final values = await Future.wait<Object>([
+
+    final core = await Future.wait<Object>([
       repository.loadProfileOverview(widget.userId),
       repository.loadProfilePosts(userId: widget.userId, limit: _pageSize),
-      repository.loadCommunityCreatorProfile(widget.userId),
-      repository.loadCommunityProfileReviews(
-        userId: widget.userId,
-        limit: _pageSize,
-      ),
     ]);
-    final profile = values[0] as CommunityProfileOverview;
-    final batch = values[1] as CommunityFeedBatch;
-    final creator = values[2] as CommunityCreatorProfile;
-    final reviews = values[3] as List<CommunityProfileReview>;
-    final drafts = profile.isSelf
-        ? await repository.listMyCommunityDrafts(limit: 5)
-        : const <CommunityDraftSummary>[];
-    final counts = await repository.loadCommunityPostViewCounts(
-      batch.posts.map((post) => post.id).toList(growable: false),
-    );
+    final profile = core[0] as CommunityProfileOverview;
+    final batch = core[1] as CommunityFeedBatch;
+
+    CommunityCreatorProfile? creator;
+    List<CommunityProfileReview> reviews = const <CommunityProfileReview>[];
+    List<CommunityDraftSummary> drafts = const <CommunityDraftSummary>[];
+    Map<String, int> counts = const <String, int>{};
+    List<CommunityPostReferenceMetadata> references =
+        const <CommunityPostReferenceMetadata>[];
+
+    if (repository.useServerCommunityReferenceParity) {
+      final postIds = batch.posts
+          .map((post) => post.id)
+          .toList(growable: false);
+      final extras = await Future.wait<Object>([
+        repository.loadCommunityCreatorProfile(widget.userId),
+        repository.loadCommunityProfileReviews(
+          userId: widget.userId,
+          limit: _pageSize,
+        ),
+        profile.isSelf
+            ? repository.listMyCommunityDrafts(limit: 5)
+            : Future<List<CommunityDraftSummary>>.value(
+                const <CommunityDraftSummary>[],
+              ),
+        repository.loadCommunityPostViewCounts(postIds),
+        postIds.isEmpty
+            ? Future<List<CommunityPostReferenceMetadata>>.value(
+                const <CommunityPostReferenceMetadata>[],
+              )
+            : repository.loadCommunityPostReferenceMetadata(postIds),
+      ]);
+      creator = extras[0] as CommunityCreatorProfile;
+      reviews = extras[1] as List<CommunityProfileReview>;
+      drafts = extras[2] as List<CommunityDraftSummary>;
+      counts = extras[3] as Map<String, int>;
+      references = extras[4] as List<CommunityPostReferenceMetadata>;
+    }
 
     _profile = profile;
     _creator = creator;
@@ -88,6 +114,11 @@ class _CommunityMemberProfilePageState
     _viewCounts
       ..clear()
       ..addAll(counts);
+    _referenceByPost
+      ..clear()
+      ..addEntries(
+        references.map((value) => MapEntry(value.postId, value)),
+      );
     _reviews
       ..clear()
       ..addAll(reviews);
@@ -133,13 +164,28 @@ class _CommunityMemberProfilePageState
       final incoming = batch.posts
           .where((post) => known.add(post.id))
           .toList(growable: false);
-      final counts = await repository.loadCommunityPostViewCounts(
-        incoming.map((post) => post.id).toList(growable: false),
-      );
+
+      Map<String, int> counts = const <String, int>{};
+      List<CommunityPostReferenceMetadata> references =
+          const <CommunityPostReferenceMetadata>[];
+      if (repository.useServerCommunityReferenceParity &&
+          incoming.isNotEmpty) {
+        final ids = incoming.map((post) => post.id).toList(growable: false);
+        final extras = await Future.wait<Object>([
+          repository.loadCommunityPostViewCounts(ids),
+          repository.loadCommunityPostReferenceMetadata(ids),
+        ]);
+        counts = extras[0] as Map<String, int>;
+        references = extras[1] as List<CommunityPostReferenceMetadata>;
+      }
+
       if (!mounted) return;
       setState(() {
         _posts.addAll(incoming);
         _viewCounts.addAll(counts);
+        _referenceByPost.addEntries(
+          references.map((value) => MapEntry(value.postId, value)),
+        );
         _before = batch.nextBefore;
         _beforeId = batch.nextBeforeId;
         _hasMore = batch.hasMore;
