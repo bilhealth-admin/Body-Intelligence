@@ -46,7 +46,7 @@ void main() {
 
     expect(
       () => CommunityPostContextDraft(
-        locationLabel: 'x' * 81,
+        locationLabel: List<String>.filled(81, 'x').join(),
       ).normalized(),
       throwsFormatException,
     );
