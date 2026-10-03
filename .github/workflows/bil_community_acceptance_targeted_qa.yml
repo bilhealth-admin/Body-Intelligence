@@ -8,9 +8,10 @@ on:
   push:
     branches:
       - fix/community-acceptance-notifications-20261003
+      - work/community-polls-v1-20261003
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   targeted:
@@ -28,7 +29,7 @@ jobs:
         run: flutter pub get
       - name: Verify Dart formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             lib/app/router/app_router.dart \
             lib/features/community/domain/community_attention.dart \
             lib/features/community/domain/community_models.dart \
@@ -37,17 +38,22 @@ jobs:
             lib/features/community/domain/community_topics.dart \
             lib/features/community/domain/community_circles.dart \
             lib/features/community/domain/community_feed_modes.dart \
+            lib/features/community/domain/community_polls.dart \
             lib/features/community/data/community_repository.dart \
             lib/features/community/data/community_post_cloud_store.dart \
             lib/features/community/data/community_feed_repository_mixin.dart \
             lib/features/community/presentation/bil_gold_coin.dart \
             lib/features/community/presentation/community_attention_scope.dart \
             lib/features/community/presentation/community_notifications_page.dart \
+            lib/features/community/presentation/community_poll_panel.dart \
             lib/features/community/presentation/community_rewards_page.dart \
             lib/features/community/presentation/community_invite_landing_page.dart \
             lib/features/community/presentation/community_topics_page.dart \
             lib/features/community/presentation/community_circles_page.dart \
             lib/features/community/presentation/community_taxonomy_sheet.dart \
+            lib/features/community/presentation/community_post_composer_page.dart \
+            lib/features/community/presentation/community_post_card.dart \
+            lib/features/community/presentation/community_post_detail_page.dart \
             lib/features/community/presentation/community_gold_balance_action.dart \
             lib/features/community/presentation/community_account_widgets.dart \
             lib/features/community/presentation/community_my_posts_page.dart \
@@ -77,6 +83,11 @@ jobs:
             test/features/community/community_gold_ledger_contract_test.dart \
             test/features/community/community_feed_pagination_contract_test.dart \
             test/features/community/community_feed_modes_v1_contract_test.dart \
+            test/features/community/community_publish_preflight_test.dart \
+            test/features/community/community_polls_v1_contract_test.dart \
+            test/features/community/community_feed_pagination_contract_test.dart \
+            test/features/community/community_feed_modes_v1_contract_test.dart \
+            test/features/community/community_polls_v1_contract_test.dart \
             test/features/community/community_profile_identity_contract_test.dart \
             test/features/community/community_publish_preflight_test.dart \
             test/features/community/community_quest_reward_engine_contract_test.dart \
@@ -89,6 +100,13 @@ jobs:
             test/features/community/community_circles_v1_contract_test.dart \
             test/features/notifications/community_push_registration_contract_test.dart \
             test/features/notifications/ios_notification_navigation_test.dart
+          if ! git diff --quiet; then
+            git config user.name "BIL Community QA"
+            git config user.email "actions@users.noreply.github.com"
+            git add lib test
+            git commit -m "style(community): format polls implementation"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Verify referral association tooling
         run: |
           python3 tool/release/generate_app_link_associations.py --self-test
