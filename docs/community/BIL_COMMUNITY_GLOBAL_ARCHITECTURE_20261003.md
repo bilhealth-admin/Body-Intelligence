@@ -30,7 +30,7 @@ No reward amount or AI exchange rate is embedded in the ledger. Economic values 
 
 XP is permanent reputation, not currency. Spending Gold never decreases XP or level.
 
-A later focused migration will add an append-only XP event ledger, a projection for total XP/current level, and versioned level thresholds. Abuse reversals, if ever needed, must be explicit counter-events and auditable.
+V1 now uses an append-only XP event ledger, an owner XP projection, and a versioned level-policy table. The initial policy contains only Level 1 at 0 XP; future thresholds remain configurable instead of being baked into the client. Negative XP is forbidden except as an explicit reversal of a prior XP event.
 
 ## Activity inbox
 
@@ -90,7 +90,7 @@ Neither will be implemented as free-form client-only tags with authority semanti
 
 1. Friend-acceptance Activity and reliable push registration — complete.
 2. Gold ledger foundation — isolated, no earn/spend product integration yet.
-3. XP/reputation foundation.
+3. XP/reputation foundation — complete.
 4. Activity schema expansion with backward-compatible client parsing.
 5. Quest/reward definitions, progress, claim engine, and anti-abuse audit.
 6. Referral/deferred-attribution contract.
