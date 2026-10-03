@@ -1,6 +1,33 @@
 part of 'community_profile_page.dart';
 
 extension _CommunityProfileCoverActions on _CommunityProfilePageState {
+  Future<void> pickAvatar() async {
+    if (_photoBusy || _saving) return;
+    setState(() => _photoBusy = true);
+    try {
+      final result = await ref
+          .read(profilePhotoServiceProvider)
+          .chooseAndSave();
+      if (!mounted || result == null) return;
+      setState(() {
+        if (result.publicUrl != null) _avatarUrl = result.publicUrl;
+      });
+      if (!result.cloudSynced && AppEnvironment.supabaseRuntimeReady) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text(
+                'Your photo is saved on this device. Community sync will retry when the cloud is available.',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _photoBusy = false);
+    }
+  }
+
   Future<void> pickCover() async {
     final repository = _repository;
     if (repository == null ||
