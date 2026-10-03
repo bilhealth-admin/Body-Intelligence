@@ -138,9 +138,10 @@ class _CommunityNotificationsPageState
     return switch (notification.kind) {
       CommunityNotificationKind.friendRequest ||
       CommunityNotificationKind.friendAccepted => '/community/connections',
-      CommunityNotificationKind.follow => notification.actorId == null
-          ? '/community/people'
-          : '/community/profile/${notification.actorId}',
+      CommunityNotificationKind.follow =>
+        notification.actorId == null
+            ? '/community/people'
+            : '/community/profile/${notification.actorId}',
       CommunityNotificationKind.postLike ||
       CommunityNotificationKind.postSave ||
       CommunityNotificationKind.comment ||
@@ -174,12 +175,17 @@ class _CommunityNotificationsPageState
   String _filterLabel(_ActivityFilter filter) => switch (filter) {
     _ActivityFilter.all => communityText(context, 'All', 'الكل'),
     _ActivityFilter.friends => communityText(context, 'Friends', 'الأصدقاء'),
-    _ActivityFilter.reactions =>
-      communityText(context, 'Likes & saves', 'الإعجابات والحفظ'),
-    _ActivityFilter.comments =>
-      communityText(context, 'Comments & replies', 'التعليقات والردود'),
-    _ActivityFilter.rewards =>
-      communityText(context, 'Rewards', 'المكافآت'),
+    _ActivityFilter.reactions => communityText(
+      context,
+      'Likes & saves',
+      'الإعجابات والحفظ',
+    ),
+    _ActivityFilter.comments => communityText(
+      context,
+      'Comments & replies',
+      'التعليقات والردود',
+    ),
+    _ActivityFilter.rewards => communityText(context, 'Rewards', 'المكافآت'),
   };
 
   String _notificationTitle(CommunityNotification notification) {
@@ -440,8 +446,7 @@ class _CommunityNotificationsPageState
                   onTap: () => _openNotification(notification),
                 ),
               ),
-            if (_filter == _ActivityFilter.all &&
-                updates.incomingRequests > 0)
+            if (_filter == _ActivityFilter.all && updates.incomingRequests > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.friends,
@@ -457,8 +462,7 @@ class _CommunityNotificationsPageState
                 ),
                 onTap: () => _openAndRefresh('/community/connections'),
               ),
-            if (_filter == _ActivityFilter.all &&
-                updates.unreadMessages > 0)
+            if (_filter == _ActivityFilter.all && updates.unreadMessages > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.messages,
