@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_community_moderation.dart';
+import '../../../app/localization/runtime_copy_community_reference.dart';
 import '../../../app/localization/runtime_copy_community_expansion.dart';
 import '../../../app/localization/runtime_copy_community_social.dart';
 import '../../../app/localization/runtime_copy_community_review.dart';
@@ -30,6 +31,7 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
   };
   return CommunityReviewCopy.resolve(catalogEnglish, canonical) ??
       CommunitySocialRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      CommunityReferenceRuntimeCopy.resolve(catalogEnglish, canonical) ??
       (code == 'ar' ? ar : null) ??
       CommunityExpansionRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityFormCopy.resolve(catalogEnglish, canonical) ??
