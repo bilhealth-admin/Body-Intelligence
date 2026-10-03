@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
+import '../domain/community_circles.dart';
 import '../domain/community_models.dart';
 import '../domain/community_referral.dart';
 import '../domain/community_rewards.dart';
@@ -103,6 +104,117 @@ class CommunityRepository
     }
     return CommunityReferralAttribution.fromJson(
       Map<String, dynamic>.from(response),
+    );
+  }
+
+  Future<List<CommunityCircle>> loadCommunityCircles() async {
+    final response = await _client.rpc('bil_list_community_circles_v1');
+    if (response is! List) {
+      throw const FormatException('Invalid Community circle list');
+    }
+    return List<CommunityCircle>.unmodifiable(
+      response.map((row) {
+        if (row is! Map) {
+          throw const FormatException('Invalid Community circle row');
+        }
+        return CommunityCircle.fromJson(Map<String, dynamic>.from(row));
+      }),
+    );
+  }
+
+  Future<CommunityCircleMembershipStatus> joinCommunityCircle(
+    String slug,
+  ) async {
+    if (!CommunityCircle.slugPattern.hasMatch(slug) || slug.length > 48) {
+      throw ArgumentError.value(slug, 'slug');
+    }
+    final response = await _client.rpc(
+      'bil_join_community_circle_v1',
+      params: {'p_slug': slug},
+    );
+    if (response is! String ||
+        !CommunityCircleMembershipStatus.values.any(
+          (status) => status.name == response,
+        )) {
+      throw const FormatException('Invalid Community circle join result');
+    }
+    return CommunityCircleMembershipStatus.values.byName(response);
+  }
+
+  Future<bool> leaveCommunityCircle(String slug) async {
+    if (!CommunityCircle.slugPattern.hasMatch(slug) || slug.length > 48) {
+      throw ArgumentError.value(slug, 'slug');
+    }
+    final response = await _client.rpc(
+      'bil_leave_community_circle_v1',
+      params: {'p_slug': slug},
+    );
+    if (response is! bool) {
+      throw const FormatException('Invalid Community circle leave result');
+    }
+    return response;
+  }
+
+  Future<void> setMyCommunityPostCircle({
+    required String postId,
+    String? slug,
+  }) async {
+    if (!_uuid.hasMatch(postId) ||
+        (slug != null &&
+            (slug.length > 48 || !CommunityCircle.slugPattern.hasMatch(slug)))) {
+      throw ArgumentError('Invalid Community post circle');
+    }
+    final response = await _client.rpc(
+      'bil_set_my_community_post_circle_v1',
+      params: {'p_post_id': postId, 'p_slug': slug},
+    );
+    if (slug == null) {
+      if (response != null) {
+        throw const FormatException('Invalid Community post circle result');
+      }
+      return;
+    }
+    if (response != slug) {
+      throw const FormatException('Invalid Community post circle result');
+    }
+  }
+
+  @override
+  Future<List<CommunityCirclePostReference>> loadCommunityCirclePostReferences({
+    required String slug,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async {
+    if (!CommunityCircle.slugPattern.hasMatch(slug) ||
+        slug.length > 48 ||
+        (before == null) != (beforeId == null) ||
+        (beforeId != null && !_uuid.hasMatch(beforeId)) ||
+        limit < 1 ||
+        limit > 60) {
+      throw ArgumentError('Invalid Community circle feed request');
+    }
+    final response = await _client.rpc(
+      'bil_community_circle_post_refs_v1',
+      params: {
+        'p_slug': slug,
+        'p_before': before?.toUtc().toIso8601String(),
+        'p_before_id': beforeId,
+        'p_limit': limit,
+      },
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community circle feed');
+    }
+    return List<CommunityCirclePostReference>.unmodifiable(
+      response.map((row) {
+        if (row is! Map) {
+          throw const FormatException('Invalid Community circle reference');
+        }
+        return CommunityCirclePostReference.fromJson(
+          Map<String, dynamic>.from(row),
+        );
+      }),
     );
   }
 
@@ -618,6 +730,98 @@ class CommunityRepository
       }
     } on StorageException catch (error, stackTrace) {
       await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
+    }
+  }
+
+  Future<void> publishPostWithTopicsAndCircle(
+    String body, {
+    List<String> topicSlugs = const [],
+    String? circleSlug,
+  }) async {
+    await assertCommunityPublishReady();
+    _validateTopicSlugs(topicSlugs);
+    _validateCircleSlug(circleSlug);
+
+    if (topicSlugs.isEmpty && circleSlug == null) {
+      await _runCommunityMutation(() => _posts.publishText(body));
+      return;
+    }
+
+    final store = _posts;
+    if (store is! CommunityPostPublishingReceiptContract) {
+      throw StateError('Community post publishing receipt is unavailable');
+    }
+    final receiptStore = store as CommunityPostPublishingReceiptContract;
+    final postId = await _runCommunityMutation(
+      () => receiptStore.publishTextWithReceipt(body),
+    );
+    if (postId == null) return;
+    try {
+      if (topicSlugs.isNotEmpty) {
+        await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+      }
+      if (circleSlug != null) {
+        await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+      }
+    } on Object {
+      try {
+        await store.delete(postId);
+      } on Object {
+        // The moderation-pending post remains non-public if cleanup fails.
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> publishPostWithImageTopicsAndCircle(
+    String body,
+    CommunityPostImageDraft image, {
+    List<String> topicSlugs = const [],
+    String? circleSlug,
+  }) async {
+    await assertCommunityPublishReady();
+    _validateTopicSlugs(topicSlugs);
+    _validateCircleSlug(circleSlug);
+
+    if (topicSlugs.isEmpty && circleSlug == null) {
+      await publishPostWithImage(body, image);
+      return;
+    }
+
+    final store = _posts;
+    if (store is! CommunityPostPublishingReceiptContract) {
+      throw StateError('Community post publishing receipt is unavailable');
+    }
+    final receiptStore = store as CommunityPostPublishingReceiptContract;
+    try {
+      final postId = await _runCommunityMutation(
+        () => receiptStore.publishWithImageReceipt(body, image),
+      );
+      if (postId == null) return;
+      try {
+        if (topicSlugs.isNotEmpty) {
+          await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+        }
+        if (circleSlug != null) {
+          await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+        }
+      } on Object {
+        try {
+          await store.delete(postId);
+        } on Object {
+          // The moderation-pending post remains non-public if cleanup fails.
+        }
+        rethrow;
+      }
+    } on StorageException catch (error, stackTrace) {
+      await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
+    }
+  }
+
+  void _validateCircleSlug(String? slug) {
+    if (slug != null &&
+        (slug.length > 48 || !CommunityCircle.slugPattern.hasMatch(slug))) {
+      throw ArgumentError.value(slug, 'circleSlug');
     }
   }
 
