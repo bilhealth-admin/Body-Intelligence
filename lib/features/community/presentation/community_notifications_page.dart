@@ -196,9 +196,9 @@ class _CommunityNotificationsPageState
               Card(
                 color: notification.seen
                     ? null
-                    : Theme.of(context).colorScheme.primaryContainer.withValues(
-                        alpha: 0.35,
-                      ),
+                    : Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.35),
                 child: ListTile(
                   leading: BilAccountAvatar(
                     radius: 20,

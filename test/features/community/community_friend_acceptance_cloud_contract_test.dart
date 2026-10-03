@@ -15,7 +15,10 @@ void main() {
     expect(requestSql, contains('allow_friend_requests'));
     expect(requestSql, contains('bil_consume_rate_limit'));
     expect(acceptanceSql, contains('bil_community_notifications'));
-    expect(acceptanceSql, contains("old.status='pending' and new.status='accepted'"));
+    expect(
+      acceptanceSql,
+      contains("old.status='pending' and new.status='accepted'"),
+    );
     expect(acceptanceSql, contains('bil://community/notifications'));
     expect(acceptanceSql, contains("'community_updates'"));
     expect(acceptanceSql, contains('bil_register_push_token_v2'));

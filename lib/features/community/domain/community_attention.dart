@@ -89,7 +89,9 @@ class CommunityNotification {
     final friendshipId = json['friendship_id'];
     final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '');
     final rawSeenAt = json['seen_at'];
-    final seenAt = rawSeenAt == null ? null : DateTime.tryParse(rawSeenAt.toString());
+    final seenAt = rawSeenAt == null
+        ? null
+        : DateTime.tryParse(rawSeenAt.toString());
     if (id is! String ||
         id.isEmpty ||
         kind != 'friend_accepted' ||
