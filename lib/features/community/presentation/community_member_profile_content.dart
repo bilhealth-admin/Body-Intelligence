@@ -3,6 +3,17 @@ part of 'community_hub_page.dart';
 extension _CommunityMemberProfileContentSlivers
     on _CommunityMemberProfilePageState {
   List<Widget> _profileContentSlivers(CommunityProfileOverview profile) {
+    final moments = profile.isSelf
+        ? _posts.where((post) => switch (_momentFilter) {
+            _CommunityProfileMomentFilter.all => true,
+            _CommunityProfileMomentFilter.published =>
+              post.moderationStatus == CommunityPostModerationStatus.approved,
+            _CommunityProfileMomentFilter.pending =>
+              post.moderationStatus == CommunityPostModerationStatus.pending,
+            _CommunityProfileMomentFilter.rejected =>
+              post.moderationStatus == CommunityPostModerationStatus.rejected,
+          }).toList(growable: false)
+        : _posts;
     final tabs = SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -122,6 +133,47 @@ extension _CommunityMemberProfileContentSlivers
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
+              const SizedBox(width: 10),
+              if (profile.isSelf)
+                DropdownButton<_CommunityProfileMomentFilter>(
+                  key: const Key('community-profile-moment-filter'),
+                  value: _momentFilter,
+                  underline: const SizedBox.shrink(),
+                  items: [
+                    DropdownMenuItem(
+                      value: _CommunityProfileMomentFilter.all,
+                      child: Text(communityText(context, 'All', 'الكل')),
+                    ),
+                    DropdownMenuItem(
+                      value: _CommunityProfileMomentFilter.published,
+                      child: Text(
+                        communityText(context, 'Published', 'منشور'),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: _CommunityProfileMomentFilter.pending,
+                      child: Text(
+                        communityText(context, 'Pending', 'قيد الانتظار'),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: _CommunityProfileMomentFilter.rejected,
+                      child: Text(
+                        communityText(context, 'Rejected', 'مرفوض'),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _momentFilter = value);
+                    }
+                  },
+                )
+              else
+                Text(
+                  communityText(context, 'All', 'الكل'),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
               const Spacer(),
               Icon(
                 _gridMode
@@ -133,7 +185,7 @@ extension _CommunityMemberProfileContentSlivers
           ),
         ),
       ),
-      if (_posts.isEmpty)
+      if (moments.isEmpty)
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(40),
@@ -171,12 +223,12 @@ extension _CommunityMemberProfileContentSlivers
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => _CommunityProfilePostTile(
-                post: _posts[index],
+                post: moments[index],
                 repository: _repository!,
-                referenceMetadata: _referenceByPost[_posts[index].id],
-                viewCount: _viewCounts[_posts[index].id] ?? 0,
+                referenceMetadata: _referenceByPost[moments[index].id],
+                viewCount: _viewCounts[moments[index].id] ?? 0,
               ),
-              childCount: _posts.length,
+              childCount: moments.length,
             ),
           ),
         )
@@ -184,18 +236,18 @@ extension _CommunityMemberProfileContentSlivers
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver: SliverList.builder(
-            itemCount: _posts.length,
+            itemCount: moments.length,
             itemBuilder: (context, index) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _CommunityPostCard(
-                  post: _posts[index],
+                  post: moments[index],
                   repository: _repository!,
                   currentUserId: _repository!.currentUserId,
-                  referenceMetadata: _referenceByPost[_posts[index].id],
+                  referenceMetadata: _referenceByPost[moments[index].id],
                   actionsEnabled: !_managingPost,
                   showModerationStatus: profile.isSelf,
-                  onAction: (action) => _managePost(_posts[index], action),
+                  onAction: (action) => _managePost(moments[index], action),
                 ),
                 Padding(
                   padding: const EdgeInsetsDirectional.only(
@@ -208,7 +260,7 @@ extension _CommunityMemberProfileContentSlivers
                       const Icon(Icons.visibility_outlined, size: 15),
                       const SizedBox(width: 4),
                       Text(
-                        (_viewCounts[_posts[index].id] ?? 0).toString(),
+                        (_viewCounts[moments[index].id] ?? 0).toString(),
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],
