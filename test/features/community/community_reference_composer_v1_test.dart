@@ -219,8 +219,8 @@ void main() {
       'bil_community_post_hashtags_v1',
       'bil_community_post_collaborators_v1',
       'bil_community_post_reference_metadata_v1',
-      "'topics'",
-      "'circle'",
+      'topics jsonb',
+      'circle jsonb',
       'security definer',
       "set search_path=''",
       'revoke all on table',
@@ -328,7 +328,14 @@ void main() {
         find.byKey(const Key('community-composer-hashtag-input')),
         'Progress',
       );
-      await tester.tap(find.byKey(const Key('community-composer-hashtag-add')));
+      tester.testTextInput.hide();
+      await tester.pumpAndSettle();
+      final hashtagAdd = find.byKey(
+        const Key('community-composer-hashtag-add'),
+      );
+      await tester.ensureVisible(hashtagAdd);
+      await tester.pumpAndSettle();
+      await tester.tap(hashtagAdd);
       await tester.pumpAndSettle();
       expect(find.text('#progress'), findsOneWidget);
 
@@ -339,13 +346,21 @@ void main() {
         find.byKey(const Key('community-composer-collaborator-query')),
         'collab',
       );
-      await tester.tap(
-        find.byKey(const Key('community-composer-collaborator-search')),
-      );
+      tester.testTextInput.hide();
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.byKey(const Key('community-composer-collaborator-$_collaborator')),
+      final collaboratorSearch = find.byKey(
+        const Key('community-composer-collaborator-search'),
       );
+      await tester.ensureVisible(collaboratorSearch);
+      await tester.pumpAndSettle();
+      await tester.tap(collaboratorSearch);
+      await tester.pumpAndSettle();
+      final collaboratorChip = find.byKey(
+        const Key('community-composer-collaborator-$_collaborator'),
+      );
+      await tester.ensureVisible(collaboratorChip);
+      await tester.pumpAndSettle();
+      await tester.tap(collaboratorChip);
       await tester.pumpAndSettle();
       expect(find.text('@collab_member'), findsWidgets);
 
