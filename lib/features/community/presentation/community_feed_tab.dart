@@ -546,6 +546,7 @@ class _FeedTabState extends State<_FeedTab>
                                 post: post,
                                 repository: widget.repository,
                                 currentUserId: widget.repository.currentUserId,
+                                referenceMetadata: _referenceByPost[post.id],
                                 actionsEnabled:
                                     !_openingComposer && !_managingPost,
                                 onAction: (value) => _managePost(post, value),
