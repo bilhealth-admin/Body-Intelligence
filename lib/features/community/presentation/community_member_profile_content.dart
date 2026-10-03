@@ -173,6 +173,7 @@ extension _CommunityMemberProfileContentSlivers
               (context, index) => _CommunityProfilePostTile(
                 post: _posts[index],
                 repository: _repository!,
+                referenceMetadata: _referenceByPost[_posts[index].id],
                 viewCount: _viewCounts[_posts[index].id] ?? 0,
               ),
               childCount: _posts.length,
@@ -191,6 +192,7 @@ extension _CommunityMemberProfileContentSlivers
                   post: _posts[index],
                   repository: _repository!,
                   currentUserId: _repository!.currentUserId,
+                  referenceMetadata: _referenceByPost[_posts[index].id],
                   actionsEnabled: !_managingPost,
                   showModerationStatus: profile.isSelf,
                   onAction: (action) => _managePost(_posts[index], action),
@@ -244,11 +246,13 @@ class _CommunityProfilePostTile extends StatelessWidget {
   const _CommunityProfilePostTile({
     required this.post,
     required this.repository,
+    required this.referenceMetadata,
     required this.viewCount,
   });
 
   final CommunityPost post;
   final CommunityRepository repository;
+  final CommunityPostReferenceMetadata? referenceMetadata;
   final int viewCount;
 
   Future<void> _open(BuildContext context) => pushCommunityPage<void>(
@@ -262,6 +266,7 @@ class _CommunityProfilePostTile extends StatelessWidget {
         commentCount: post.commentCount,
       ),
       repository: repository,
+      referenceMetadata: referenceMetadata,
     ),
   );
 
@@ -287,7 +292,9 @@ class _CommunityProfilePostTile extends StatelessWidget {
                   ? Padding(
                       padding: const EdgeInsets.all(14),
                       child: Text(
-                        post.body,
+                        referenceMetadata?.title?.trim().isNotEmpty == true
+                            ? referenceMetadata!.title!
+                            : post.body,
                         maxLines: 7,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodyMedium,
