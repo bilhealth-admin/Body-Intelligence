@@ -145,7 +145,8 @@ class _CommunityNotificationsPageState
       CommunityNotificationKind.postLike ||
       CommunityNotificationKind.postSave ||
       CommunityNotificationKind.comment ||
-      CommunityNotificationKind.reply => '/community',
+      CommunityNotificationKind.reply ||
+      CommunityNotificationKind.mention => '/community',
       CommunityNotificationKind.rewardEarned ||
       CommunityNotificationKind.questCompleted => '/community/rewards',
       CommunityNotificationKind.badgeEarned ||
@@ -164,7 +165,8 @@ class _CommunityNotificationsPageState
           notification.kind == CommunityNotificationKind.postSave,
     _ActivityFilter.comments =>
       notification.kind == CommunityNotificationKind.comment ||
-          notification.kind == CommunityNotificationKind.reply,
+          notification.kind == CommunityNotificationKind.reply ||
+          notification.kind == CommunityNotificationKind.mention,
     _ActivityFilter.rewards =>
       notification.kind == CommunityNotificationKind.rewardEarned ||
           notification.kind == CommunityNotificationKind.questCompleted ||
@@ -182,8 +184,8 @@ class _CommunityNotificationsPageState
     ),
     _ActivityFilter.comments => communityText(
       context,
-      'Comments & replies',
-      'التعليقات والردود',
+      'Comments & mentions',
+      'التعليقات والإشارات',
     ),
     _ActivityFilter.rewards => communityText(context, 'Rewards', 'المكافآت'),
   };
@@ -259,6 +261,18 @@ class _CommunityNotificationsPageState
                 context,
                 '$actor followed you',
                 '$actor بدأ بمتابعتك',
+              ),
+      CommunityNotificationKind.mention =>
+        actor == null
+            ? communityText(
+                context,
+                'You were mentioned in a post',
+                'تمت الإشارة إليك في منشور',
+              )
+            : communityText(
+                context,
+                '$actor mentioned you in a post',
+                '$actor أشار إليك في منشور',
               ),
       CommunityNotificationKind.rewardEarned => communityText(
         context,
