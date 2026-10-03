@@ -8,6 +8,8 @@ import 'community_post_cloud_store.dart';
 mixin CommunityFeedRepositoryMixin {
   CommunityPostStoreContract get communityPostStore;
 
+  bool get useServerRankedCommunityFeed;
+
   Future<List<CommunityPostStats>> loadPostStats(List<String> postIds);
 
   Future<List<CommunitySavedState>> loadSavedStates(List<String> postIds);
@@ -125,19 +127,13 @@ mixin CommunityFeedRepositoryMixin {
     // Keep injected non-cloud stores used by deterministic widget/unit tests
     // compatible with the established public feed seam. Production always
     // uses the server-ranked RPC below.
-    if (communityPostStore is! CommunityPostCloudStore &&
+    if (!useServerRankedCommunityFeed &&
         (mode == CommunityFeedMode.forYou ||
             mode == CommunityFeedMode.explore)) {
-      final page = before == null
-          ? CommunityFeedBatch(
-              posts: await communityPostStore.loadFeed(limit: limit),
-              hasMore: false,
-            )
-          : await loadOlderFeed(
-              before: before,
-              beforeId: beforeId!,
-              limit: limit,
-            );
+      final page = CommunityFeedBatch(
+        posts: await loadFeed(limit: limit),
+        hasMore: false,
+      );
       final refs = page.posts
           .map(
             (post) => CommunityFeedReference(
