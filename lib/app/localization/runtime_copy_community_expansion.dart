@@ -18,6 +18,15 @@ part 'runtime_copy_community_expansion_th.dart';
 /// other production locale without falling back to English.
 abstract final class CommunityExpansionRuntimeCopy {
   static const sources = <String>[
+    "{actor} accepted your friend request",
+    "{actor} commented on your post",
+    "{actor} followed you",
+    "{actor} liked your post",
+    "{actor} mentioned you in a post",
+    "{actor} replied to your comment",
+    "{actor} sent you a friend request",
+    "{inviterName} invited you to join BIL",
+    "{total} votes",
     "10K Steps",
     "A welcoming place for safe, gradual fitness progress.",
     "AI Coach usage",
@@ -176,15 +185,6 @@ abstract final class CommunityExpansionRuntimeCopy {
     "followers",
     "members",
     "posts",
-    "{actor} accepted your friend request",
-    "{actor} commented on your post",
-    "{actor} followed you",
-    "{actor} liked your post",
-    "{actor} mentioned you in a post",
-    "{actor} replied to your comment",
-    "{actor} sent you a friend request",
-    "{inviterName} invited you to join BIL",
-    "{total} votes",
   ];
 
   static const supported = <String>{
