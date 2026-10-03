@@ -2,6 +2,14 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _repositorySource() => [
+  'lib/features/community/data/community_repository.dart',
+  'lib/features/community/data/community_repository_discovery_mixin.dart',
+  'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+  'lib/features/community/data/community_repository_publishing_mixin.dart',
+  'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
+].map((path) => File(path).readAsStringSync()).join('\n');
+
 void main() {
   test('profile discovery exposes only bounded public identity fields', () {
     final sql = File(
@@ -53,9 +61,7 @@ void main() {
     final sql = File(
       'supabase/migrations/202608240001_community_connection_identity_and_message_realtime.sql',
     ).readAsStringSync().toLowerCase();
-    final repository = File(
-      'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+    final repository = _repositorySource();
 
     expect(sql, contains('bil_list_community_connections'));
     expect(sql, contains('security definer'));
