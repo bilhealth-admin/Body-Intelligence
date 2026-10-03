@@ -48,6 +48,8 @@ part 'community_post_composer_rendering.dart';
 part 'community_post_composer_toolbar.dart';
 part 'community_post_composer_image_preview.dart';
 part 'community_post_detail_page.dart';
+part 'community_post_detail_rendering.dart';
+part 'community_post_detail_header.dart';
 part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_post_reference_widgets.dart';
