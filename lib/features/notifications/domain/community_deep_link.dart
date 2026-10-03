@@ -102,7 +102,7 @@ class CommunityDeepLink {
           return null;
         }
         final userId = Uri.encodeComponent(rawUserId.toLowerCase());
-        return '/community/profile/' + userId;
+        return '/community/profile/$userId';
       }
       if (segments.length == 3 && segments[1] == 'member') {
         final code = segments[2].toLowerCase();
