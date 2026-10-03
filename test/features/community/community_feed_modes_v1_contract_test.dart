@@ -21,7 +21,10 @@ void main() {
     expect(sql, contains("then 15 else 0"));
     expect(sql, contains('p_before_priority'));
     expect(sql, contains('order by s.priority desc'));
-    expect(sql, contains('grant execute on function public.bil_community_feed_refs_v1'));
+    expect(
+      sql,
+      contains('grant execute on function public.bil_community_feed_refs_v1'),
+    );
     expect(sql, isNot(contains('service_role to authenticated')));
   });
 

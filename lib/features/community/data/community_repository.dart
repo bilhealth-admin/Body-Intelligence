@@ -141,9 +141,7 @@ class CommunityRepository
         if (row is! Map) {
           throw const FormatException('Invalid Community feed reference');
         }
-        return CommunityFeedReference.fromJson(
-          Map<String, dynamic>.from(row),
-        );
+        return CommunityFeedReference.fromJson(Map<String, dynamic>.from(row));
       }),
     );
   }
