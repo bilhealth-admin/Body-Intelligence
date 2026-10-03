@@ -49,7 +49,9 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
                   (displayName is String &&
                       displayName.trim().length >= 2 &&
                       displayName.trim().length <= 60 &&
-                      !CommunityRepository._unsafeText.hasMatch(displayName))) &&
+                      !CommunityRepository._unsafeText.hasMatch(
+                        displayName,
+                      ))) &&
               (avatarUrl == null || avatarUrl is String);
         })
         .map((row) {
@@ -93,7 +95,8 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
   Future<int> markCommunityNotificationsSeen(List<String> ids) async {
     final unique = ids.toSet().toList(growable: false);
     if (unique.isEmpty) return 0;
-    if (unique.length > 100 || unique.any((id) => !CommunityRepository._uuid.hasMatch(id))) {
+    if (unique.length > 100 ||
+        unique.any((id) => !CommunityRepository._uuid.hasMatch(id))) {
       throw ArgumentError.value(ids, 'ids');
     }
     final response = await _client.rpc(
@@ -113,7 +116,8 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
       _client.rpc('bil_unfollow_member', params: {'p_followed_id': userId});
 
   Future<void> respondToFriendship(String id, {required bool accept}) async {
-    if (!CommunityRepository._uuid.hasMatch(id)) throw ArgumentError.value(id, 'id');
+    if (!CommunityRepository._uuid.hasMatch(id))
+      throw ArgumentError.value(id, 'id');
     final changed = await _client
         .from('bil_friendships')
         .update({
@@ -130,7 +134,8 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
   }
 
   Future<void> removeFriendship(String id) async {
-    if (!CommunityRepository._uuid.hasMatch(id)) throw ArgumentError.value(id, 'id');
+    if (!CommunityRepository._uuid.hasMatch(id))
+      throw ArgumentError.value(id, 'id');
     final changed = await _client
         .from('bil_friendships')
         .delete()
@@ -174,7 +179,8 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
 
   Stream<void> watchConversationChanges(String otherUserId) {
     final currentUserId = _user.id;
-    if (!CommunityRepository._uuid.hasMatch(otherUserId) || otherUserId == currentUserId) {
+    if (!CommunityRepository._uuid.hasMatch(otherUserId) ||
+        otherUserId == currentUserId) {
       throw ArgumentError.value(otherUserId, 'otherUserId');
     }
 
@@ -321,11 +327,14 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
   }
 
   Future<void> sendMessage(String recipientId, String body) async {
-    if (!CommunityRepository._uuid.hasMatch(recipientId) || recipientId == _user.id) {
+    if (!CommunityRepository._uuid.hasMatch(recipientId) ||
+        recipientId == _user.id) {
       throw ArgumentError.value(recipientId, 'recipientId');
     }
     final text = body.trim();
-    if (text.isEmpty || text.length > 4200 || CommunityRepository._unsafeText.hasMatch(text)) {
+    if (text.isEmpty ||
+        text.length > 4200 ||
+        CommunityRepository._unsafeText.hasMatch(text)) {
       throw ArgumentError.value(body, 'body');
     }
     CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.message);
@@ -360,5 +369,4 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
       Map<String, dynamic>.from(response),
     );
   }
-
 }

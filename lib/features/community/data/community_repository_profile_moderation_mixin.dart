@@ -58,7 +58,8 @@ mixin _CommunityProfileModerationRepositoryMixin {
   }) async {
     if (!CommunityRepository._uuid.hasMatch(userId) ||
         (before == null) != (beforeUserId == null) ||
-        (beforeUserId != null && !CommunityRepository._uuid.hasMatch(beforeUserId)) ||
+        (beforeUserId != null &&
+            !CommunityRepository._uuid.hasMatch(beforeUserId)) ||
         limit < 1 ||
         limit > 60) {
       throw ArgumentError('Invalid Community profile connection cursor');
@@ -185,7 +186,8 @@ mixin _CommunityProfileModerationRepositoryMixin {
     required String postId,
     required CommunityPostModerationDecision decision,
   }) async {
-    if (!CommunityRepository._uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    if (!CommunityRepository._uuid.hasMatch(postId))
+      throw ArgumentError.value(postId, 'postId');
     final response = await _client.rpc(
       'bil_moderate_community_post',
       params: {'p_post_id': postId, 'p_decision': decision.name},
@@ -202,7 +204,8 @@ mixin _CommunityProfileModerationRepositoryMixin {
     required String postId,
     required String reason,
   }) async {
-    if (!CommunityRepository._uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    if (!CommunityRepository._uuid.hasMatch(postId))
+      throw ArgumentError.value(postId, 'postId');
     if (!const {
       'spam',
       'abuse',
@@ -232,7 +235,8 @@ mixin _CommunityProfileModerationRepositoryMixin {
     required String action,
     String? reason,
   }) async {
-    if (!CommunityRepository._uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    if (!CommunityRepository._uuid.hasMatch(postId))
+      throw ArgumentError.value(postId, 'postId');
     const reasons = {
       'spam',
       'abuse',
@@ -265,5 +269,4 @@ mixin _CommunityProfileModerationRepositoryMixin {
         .map((row) => CommunityPost.fromJson(Map<String, dynamic>.from(row)))
         .toList(growable: false);
   }
-
 }
