@@ -86,9 +86,11 @@ void main() {
   test(
     'composer and feed use server poll receipts rather than fake UI state',
     () {
-      final repository = File(
+      final repository = [
         'lib/features/community/data/community_repository.dart',
-      ).readAsStringSync();
+        'lib/features/community/data/community_repository_discovery_mixin.dart',
+        'lib/features/community/data/community_repository_publishing_mixin.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final mixin = File(
         'lib/features/community/data/community_feed_repository_mixin.dart',
       ).readAsStringSync();
