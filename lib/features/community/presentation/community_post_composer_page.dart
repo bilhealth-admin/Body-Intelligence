@@ -117,7 +117,23 @@ class _CommunityPostComposerPageState
         }
       }
 
-      if (poll != null) {
+      final locationLabel = widget.draft.locationLabel.trim();
+      final mentions = List<CommunityMentionCandidate>.unmodifiable(
+        widget.draft.mentions,
+      );
+      final hasPostContext = locationLabel.isNotEmpty || mentions.isNotEmpty;
+
+      if (hasPostContext) {
+        await widget.repository.publishRichPost(
+          text,
+          images: images,
+          topicSlugs: topicSlugs,
+          circleSlug: circleSlug,
+          poll: poll,
+          locationLabel: locationLabel,
+          mentions: mentions,
+        );
+      } else if (poll != null) {
         if (images.isEmpty) {
           await widget.repository.publishPostWithTopicsCircleAndPoll(
             text,
@@ -183,6 +199,11 @@ class _CommunityPostComposerPageState
         ..clear()
         ..addAll(const ['', '']);
       widget.draft.pollAllowMultiple = false;
+      widget.draft.locationLabel = '';
+      _location.clear();
+      widget.draft.mentions.clear();
+      _mentionResults = const <CommunityMentionCandidate>[];
+      _mentionQuery.clear();
       // Pop only after the request completes successfully. The hub owns refresh.
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);
