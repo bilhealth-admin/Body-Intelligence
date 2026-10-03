@@ -1,0 +1,52 @@
+name: BIL Community acceptance format once
+
+on:
+  push:
+    branches:
+      - fix/community-acceptance-notifications-20261003
+
+permissions:
+  contents: write
+
+jobs:
+  format-once:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Format exact Community acceptance files
+        run: |
+          dart format             lib/features/community/domain/community_attention.dart             lib/features/community/data/community_repository.dart             lib/features/community/presentation/community_notifications_page.dart             test/features/community/community_friend_acceptance_cloud_contract_test.dart             test/features/community/community_friend_acceptance_notification_contract_test.dart             test/features/notifications/community_push_registration_contract_test.dart
+      - name: Enforce exact formatter scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only | sort)
+          expected=(
+            lib/features/community/data/community_repository.dart
+            lib/features/community/domain/community_attention.dart
+            lib/features/community/presentation/community_notifications_page.dart
+            test/features/community/community_friend_acceptance_cloud_contract_test.dart
+            test/features/community/community_friend_acceptance_notification_contract_test.dart
+            test/features/notifications/community_push_registration_contract_test.dart
+          )
+          printf '%s\n' "${changed[@]}" > /tmp/changed.txt
+          printf '%s\n' "${expected[@]}" | sort > /tmp/expected.txt
+          diff -u /tmp/expected.txt /tmp/changed.txt
+      - name: Commit formatting and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             lib/features/community/domain/community_attention.dart             lib/features/community/data/community_repository.dart             lib/features/community/presentation/community_notifications_page.dart             test/features/community/community_friend_acceptance_cloud_contract_test.dart             test/features/community/community_friend_acceptance_notification_contract_test.dart             test/features/notifications/community_push_registration_contract_test.dart
+          git rm .github/workflows/bil_community_acceptance_format_once.yml
+          git commit -m "style(community): format acceptance notification fixes"
+          git push origin HEAD:fix/community-acceptance-notifications-20261003
