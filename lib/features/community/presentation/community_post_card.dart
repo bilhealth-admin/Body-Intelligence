@@ -8,6 +8,7 @@ class _CommunityPostCard extends StatefulWidget {
     required this.actionsEnabled,
     required this.onAction,
     this.referenceMetadata,
+    this.viewCount,
     this.onSavedChanged,
     this.showModerationStatus = false,
   });
@@ -18,6 +19,7 @@ class _CommunityPostCard extends StatefulWidget {
   final bool actionsEnabled;
   final ValueChanged<String> onAction;
   final CommunityPostReferenceMetadata? referenceMetadata;
+  final int? viewCount;
   final ValueChanged<bool>? onSavedChanged;
   final bool showModerationStatus;
 
@@ -380,6 +382,14 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       '${communityText(context, 'Like', 'إعجاب')}: ${_stats.likeCount}',
                 ),
               ),
+              if (widget.viewCount != null) ...[
+                const Icon(Icons.visibility_outlined, size: 18),
+                const SizedBox(width: 4),
+                Text(
+                  widget.viewCount.toString(),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ],
               TextButton.icon(
                 key: Key('community-post-comments-${widget.post.id}'),
                 style: TextButton.styleFrom(
