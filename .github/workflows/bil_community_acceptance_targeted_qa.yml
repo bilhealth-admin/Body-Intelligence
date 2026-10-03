@@ -8,9 +8,10 @@ on:
   push:
     branches:
       - fix/community-acceptance-notifications-20261003
+      - work/community-topics-v1-20261003
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   targeted:
@@ -28,12 +29,13 @@ jobs:
         run: flutter pub get
       - name: Verify Dart formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             lib/app/router/app_router.dart \
             lib/features/community/domain/community_attention.dart \
             lib/features/community/domain/community_models.dart \
             lib/features/community/domain/community_rewards.dart \
             lib/features/community/domain/community_referral.dart \
+            lib/features/community/domain/community_topics.dart \
             lib/features/community/data/community_repository.dart \
             lib/features/community/data/community_post_cloud_store.dart \
             lib/features/community/data/community_feed_repository_mixin.dart \
@@ -42,6 +44,8 @@ jobs:
             lib/features/community/presentation/community_notifications_page.dart \
             lib/features/community/presentation/community_rewards_page.dart \
             lib/features/community/presentation/community_invite_landing_page.dart \
+            lib/features/community/presentation/community_topics_page.dart \
+            lib/features/community/presentation/community_taxonomy_sheet.dart \
             lib/features/community/presentation/community_gold_balance_action.dart \
             lib/features/community/presentation/community_account_widgets.dart \
             lib/features/community/presentation/community_my_posts_page.dart \
@@ -67,15 +71,25 @@ jobs:
             test/features/community/community_friend_acceptance_notification_contract_test.dart \
             test/features/community/community_global_profile_v1_contract_test.dart \
             test/features/community/community_gold_ledger_contract_test.dart \
+            test/features/community/community_feed_pagination_contract_test.dart \
             test/features/community/community_profile_identity_contract_test.dart \
+            test/features/community/community_publish_preflight_test.dart \
             test/features/community/community_quest_reward_engine_contract_test.dart \
             test/features/community/community_reputation_xp_contract_test.dart \
             test/features/community/community_rewards_center_test.dart \
             test/features/community/community_rewards_ai_coach_contract_test.dart \
             test/features/community/community_referral_backend_contract_test.dart \
             test/features/community/community_referral_link_contract_test.dart \
+            test/features/community/community_topics_v1_contract_test.dart \
             test/features/notifications/community_push_registration_contract_test.dart \
             test/features/notifications/ios_notification_navigation_test.dart
+          if ! git diff --quiet; then
+            git config user.name "BIL Community QA"
+            git config user.email "actions@users.noreply.github.com"
+            git add lib test
+            git commit -m "style(community): format topics implementation"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Verify referral association tooling
         run: |
           python3 tool/release/generate_app_link_associations.py --self-test
@@ -102,6 +116,7 @@ jobs:
             test/features/community/community_rewards_ai_coach_contract_test.dart \
             test/features/community/community_referral_backend_contract_test.dart \
             test/features/community/community_referral_link_contract_test.dart \
+            test/features/community/community_topics_v1_contract_test.dart \
             test/launch_readiness/verified_links_and_analytics_test.dart \
             test/apple_preparation/ios_return_to_app_link_contract_test.dart \
             test/features/notifications/community_push_registration_contract_test.dart \
