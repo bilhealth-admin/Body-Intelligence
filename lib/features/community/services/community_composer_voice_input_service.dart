@@ -22,6 +22,11 @@ final class CommunityComposerVoiceInputService {
   final CommunityVoicePermissionGate? permissionGate;
 
   Future<String?> capture(BuildContext context) async {
+    final interfaceLocale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
+    final deviceLocale =
+        WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag();
     final gate = permissionGate;
     final allowed = gate == null
         ? await _ensurePermission(context)
@@ -41,21 +46,20 @@ final class CommunityComposerVoiceInputService {
           refresh?.call(() {});
         },
       );
-      if (!available || !context.mounted) {
+      if (!context.mounted) return null;
+      if (!available) {
         _showUnavailable(context);
         return null;
       }
 
       final locales = await _speech.locales();
+      if (!context.mounted) return null;
       final localeId = MealVoiceLocaleResolver.resolve(
-        appLanguage: BilLocalePolicy.canonicalTag(
-          Localizations.localeOf(context),
-        ),
-        deviceLocale: WidgetsBinding.instance.platformDispatcher.locale
-            .toLanguageTag(),
+        appLanguage: interfaceLocale,
+        deviceLocale: deviceLocale,
         availableLocales: locales.map((value) => value.localeId),
       );
-      if (localeId == null || !context.mounted) {
+      if (localeId == null) {
         _showUnavailable(context);
         return null;
       }
