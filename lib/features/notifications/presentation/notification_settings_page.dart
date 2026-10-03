@@ -539,8 +539,8 @@ class _NotificationSettingsPageState
                                         'Uzak bildirim teslimi bu sürümde yapılandırılmadı.',
                                       )
                                     : _ui(
-                                        'Friend requests, acceptances, and messages in your time zone.',
-                                        'طلبات الأصدقاء وقبولها والرسائل حسب منطقتك الزمنية.',
+                                        'Friend requests and messages in your time zone.',
+                                        'طلبات الأصدقاء والرسائل حسب منطقتك الزمنية.',
                                         'Demandes d’amis et messages selon votre fuseau horaire.',
                                         'Solicitudes y mensajes según tu zona horaria.',
                                         'Saat diliminize göre arkadaşlık istekleri ve mesajlar.',
