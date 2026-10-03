@@ -36,7 +36,14 @@ void main() {
           .cast<Map<String, Object?>>()
           .map((component) => component['/'])
           .toList(),
-      BilVerifiedLinksConfiguration.authenticatedReturnPaths,
+      [
+        ...BilVerifiedLinksConfiguration.authenticatedReturnPaths,
+        ...BilVerifiedLinksConfiguration.publicCommunityPaths,
+      ],
+    );
+    expect(
+      BilVerifiedLinksConfiguration.publicCommunityPaths,
+      const ['/invite/*'],
     );
     expect(
       BilVerifiedLinksConfiguration.appleAppSiteAssociationJsonFor(
