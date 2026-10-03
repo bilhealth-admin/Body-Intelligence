@@ -34,10 +34,10 @@ V1 now uses an append-only XP event ledger, an owner XP projection, and a versio
 
 ## Activity inbox
 
-The current notification table will expand only when clients can safely parse the new kinds. Target kinds are:
+Activity v2 now evolves `bil_community_notifications` in place with typed entity identity, safe copy keys, safe Community deep-link paths, bounded metadata, cursor pagination, per-kind unseen counts, and seen state. Target kinds are:
 `friend_request`, `friend_accepted`, `post_like`, `post_save`, `comment`, `reply`, `follow`, `reward_earned`, `quest_completed`, `badge_earned`, and `challenge_update`.
 
-Each event must have recipient, optional actor, typed entity reference, safe localized copy key, safe deep link, created time, seen time, and an idempotent source key. The Activity row is the source; push is derived delivery.
+Compatibility is explicit: v1 list/attention surfaces remain narrowed to `friend_accepted` until every shipped client that consumes Activity v2 can parse the broader kind set. No new kind is emitted merely because the schema accepts it. Blocked or suspended actors are filtered from Activity reads and attention counts. The Activity row is the source; push is derived delivery.
 
 ## Rewards and quests
 
@@ -91,7 +91,7 @@ Neither will be implemented as free-form client-only tags with authority semanti
 1. Friend-acceptance Activity and reliable push registration — complete.
 2. Gold ledger foundation — isolated, no earn/spend product integration yet.
 3. XP/reputation foundation — complete.
-4. Activity schema expansion with backward-compatible client parsing.
+4. Activity schema expansion with backward-compatible v1/v2 reads — complete; new event emitters remain gated on v2 Flutter parsing.
 5. Quest/reward definitions, progress, claim engine, and anti-abuse audit.
 6. Referral/deferred-attribution contract.
 7. Profile projection and authored-post pagination.
