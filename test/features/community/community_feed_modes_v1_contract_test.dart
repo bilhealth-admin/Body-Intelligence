@@ -3,6 +3,14 @@ import 'dart:io';
 import 'package:body_intelligence_log/features/community/domain/community_feed_modes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _repositorySource() => [
+  'lib/features/community/data/community_repository.dart',
+  'lib/features/community/data/community_repository_discovery_mixin.dart',
+  'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+  'lib/features/community/data/community_repository_publishing_mixin.dart',
+  'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
+].map((path) => File(path).readAsStringSync()).join('\n');
+
 void main() {
   test('server feed modes are scoped, ranked, and cursor-bounded', () {
     final sql = File(
@@ -50,9 +58,7 @@ void main() {
   });
 
   test('Flutter feed tabs use server references, not client-side ranking', () {
-    final repository = File(
-      'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+    final repository = _repositorySource();
     final mixin = File(
       'lib/features/community/data/community_feed_repository_mixin.dart',
     ).readAsStringSync();
