@@ -16,6 +16,7 @@ import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_comment_threads.dart';
 import '../domain/community_circles.dart';
+import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_topics.dart';
