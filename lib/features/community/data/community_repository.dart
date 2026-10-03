@@ -330,9 +330,7 @@ class CommunityRepository
       if (rowPostId is! String || rawPoll is! Map) {
         throw const FormatException('Invalid Community poll batch row');
       }
-      final poll = CommunityPoll.fromJson(
-        Map<String, dynamic>.from(rawPoll),
-      );
+      final poll = CommunityPoll.fromJson(Map<String, dynamic>.from(rawPoll));
       if (poll.postId != rowPostId ||
           !requested.contains(poll.postId) ||
           !seen.add(poll.postId)) {

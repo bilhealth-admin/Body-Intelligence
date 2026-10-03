@@ -337,13 +337,9 @@ mixin CommunityFeedRepositoryMixin {
               ? post
               : post.withStats(postStats);
           final social = authorById[post.authorId];
-          final withSaved = withStats.withSaved(
-            savedByPost[post.id] ?? false,
-          );
+          final withSaved = withStats.withSaved(savedByPost[post.id] ?? false);
           final withPoll = withSaved.withPoll(pollByPost[post.id]);
-          return social == null
-              ? withPoll
-              : withPoll.withAuthorSocial(social);
+          return social == null ? withPoll : withPoll.withAuthorSocial(social);
         })
         .toList(growable: false);
   }

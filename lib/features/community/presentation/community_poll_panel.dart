@@ -99,9 +99,9 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
           children: [
             Text(
               _poll.question,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 10),
             for (final option in _poll.options) ...[
@@ -120,7 +120,11 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
                 Expanded(
                   child: Text(
                     _poll.closed
-                        ? communityText(context, 'Poll closed', 'انتهى الاستطلاع')
+                        ? communityText(
+                            context,
+                            'Poll closed',
+                            'انتهى الاستطلاع',
+                          )
                         : _poll.allowMultiple
                         ? communityText(
                             context,
@@ -136,11 +140,7 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
                   ),
                 ),
                 Text(
-                  communityText(
-                    context,
-                    '$total votes',
-                    '$total تصويت',
-                  ),
+                  communityText(context, '$total votes', '$total تصويت'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -156,9 +156,7 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.how_to_vote_outlined),
-                label: Text(
-                  communityText(context, 'Vote', 'تصويت'),
-                ),
+                label: Text(communityText(context, 'Vote', 'تصويت')),
               ),
             ],
           ],

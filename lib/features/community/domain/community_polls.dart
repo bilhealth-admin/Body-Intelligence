@@ -18,9 +18,7 @@ class CommunityPollDraft {
         normalizedQuestion.length > 200 ||
         normalizedOptions.length < 2 ||
         normalizedOptions.length > 6 ||
-        normalizedOptions.any(
-          (value) => value.isEmpty || value.length > 100,
-        ) ||
+        normalizedOptions.any((value) => value.isEmpty || value.length > 100) ||
         normalizedOptions.map((value) => value.toLowerCase()).toSet().length !=
             normalizedOptions.length ||
         (closesAt != null && !closesAt!.isAfter(DateTime.now().toUtc()))) {
@@ -129,12 +127,14 @@ class CommunityPoll {
       throw const FormatException('Invalid Community poll');
     }
 
-    final options = rawOptions.map((raw) {
-      if (raw is! Map) {
-        throw const FormatException('Invalid Community poll option');
-      }
-      return CommunityPollOption.fromJson(Map<String, dynamic>.from(raw));
-    }).toList(growable: false);
+    final options = rawOptions
+        .map((raw) {
+          if (raw is! Map) {
+            throw const FormatException('Invalid Community poll option');
+          }
+          return CommunityPollOption.fromJson(Map<String, dynamic>.from(raw));
+        })
+        .toList(growable: false);
 
     for (var i = 0; i < options.length; i++) {
       if (options[i].position != i) {

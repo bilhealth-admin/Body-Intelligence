@@ -33,10 +33,10 @@ class _CommunityPostComposerPageState
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
   late CommunityPostImageDraft? _selectedImage = widget.draft.image;
-  late final Future<List<CommunityTopic>> _topics =
-      widget.repository.loadCommunityTopics();
-  late final Future<List<CommunityCircle>> _circles =
-      widget.repository.loadCommunityCircles();
+  late final Future<List<CommunityTopic>> _topics = widget.repository
+      .loadCommunityTopics();
+  late final Future<List<CommunityCircle>> _circles = widget.repository
+      .loadCommunityCircles();
   bool _publishing = false;
   bool _selectingImage = false;
   bool _completed = false;
@@ -443,10 +443,10 @@ class _CommunityPostComposerPageState
                         FutureBuilder<List<CommunityCircle>>(
                           future: _circles,
                           builder: (context, snapshot) {
-                            final circles = (snapshot.data ??
-                                    const <CommunityCircle>[])
-                                .where((circle) => circle.activeMember)
-                                .toList(growable: false);
+                            final circles =
+                                (snapshot.data ?? const <CommunityCircle>[])
+                                    .where((circle) => circle.activeMember)
+                                    .toList(growable: false);
                             if (snapshot.connectionState !=
                                     ConnectionState.done &&
                                 circles.isEmpty) {
@@ -481,8 +481,8 @@ class _CommunityPostComposerPageState
                                   onSelected: busy
                                       ? null
                                       : (_) => setState(
-                                            () => widget.draft.circleSlug = null,
-                                          ),
+                                          () => widget.draft.circleSlug = null,
+                                        ),
                                 ),
                                 for (final circle in circles)
                                   ChoiceChip(
@@ -501,9 +501,10 @@ class _CommunityPostComposerPageState
                                     onSelected: busy
                                         ? null
                                         : (selected) => setState(() {
-                                              widget.draft.circleSlug =
-                                                  selected ? circle.slug : null;
-                                            }),
+                                            widget.draft.circleSlug = selected
+                                                ? circle.slug
+                                                : null;
+                                          }),
                                   ),
                               ],
                             );
@@ -517,8 +518,8 @@ class _CommunityPostComposerPageState
                           onChanged: busy
                               ? null
                               : (value) => setState(() {
-                                    widget.draft.pollEnabled = value;
-                                  }),
+                                  widget.draft.pollEnabled = value;
+                                }),
                           title: Text(
                             communityText(
                               context,
@@ -537,14 +538,11 @@ class _CommunityPostComposerPageState
                         if (widget.draft.pollEnabled) ...[
                           const SizedBox(height: 8),
                           TextFormField(
-                            key: const Key(
-                              'community-composer-poll-question',
-                            ),
+                            key: const Key('community-composer-poll-question'),
                             initialValue: widget.draft.pollQuestion,
                             enabled: !busy,
                             maxLength: 200,
-                            textCapitalization:
-                                TextCapitalization.sentences,
+                            textCapitalization: TextCapitalization.sentences,
                             onChanged: (value) {
                               widget.draft.pollQuestion = value;
                               if (_submitError != null) {
@@ -561,9 +559,11 @@ class _CommunityPostComposerPageState
                             ),
                           ),
                           const SizedBox(height: 8),
-                          for (var index = 0;
-                              index < widget.draft.pollOptions.length;
-                              index++) ...[
+                          for (
+                            var index = 0;
+                            index < widget.draft.pollOptions.length;
+                            index++
+                          ) ...[
                             Row(
                               key: ValueKey(
                                 'community-composer-poll-option-row-$index',
@@ -584,9 +584,7 @@ class _CommunityPostComposerPageState
                                     onChanged: (value) {
                                       widget.draft.pollOptions[index] = value;
                                       if (_submitError != null) {
-                                        setState(
-                                          () => _submitError = null,
-                                        );
+                                        setState(() => _submitError = null);
                                       }
                                     },
                                     decoration: InputDecoration(
@@ -613,9 +611,10 @@ class _CommunityPostComposerPageState
                                     onPressed: busy
                                         ? null
                                         : () => setState(() {
-                                              widget.draft.pollOptions
-                                                  .removeAt(index);
-                                            }),
+                                            widget.draft.pollOptions.removeAt(
+                                              index,
+                                            );
+                                          }),
                                     icon: const Icon(
                                       Icons.remove_circle_outline_rounded,
                                     ),
@@ -635,8 +634,8 @@ class _CommunityPostComposerPageState
                                 onPressed: busy
                                     ? null
                                     : () => setState(() {
-                                          widget.draft.pollOptions.add('');
-                                        }),
+                                        widget.draft.pollOptions.add('');
+                                      }),
                                 icon: const Icon(Icons.add_rounded),
                                 label: Text(
                                   communityText(
@@ -648,16 +647,14 @@ class _CommunityPostComposerPageState
                               ),
                             ),
                           SwitchListTile.adaptive(
-                            key: const Key(
-                              'community-composer-poll-multiple',
-                            ),
+                            key: const Key('community-composer-poll-multiple'),
                             contentPadding: EdgeInsets.zero,
                             value: widget.draft.pollAllowMultiple,
                             onChanged: busy
                                 ? null
                                 : (value) => setState(() {
-                                      widget.draft.pollAllowMultiple = value;
-                                    }),
+                                    widget.draft.pollAllowMultiple = value;
+                                  }),
                             title: Text(
                               communityText(
                                 context,
