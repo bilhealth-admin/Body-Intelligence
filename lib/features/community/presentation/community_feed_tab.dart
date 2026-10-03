@@ -26,6 +26,7 @@ class _FeedTabState extends State<_FeedTab>
   final _draft = _CommunityComposerDraft();
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
       <String, CommunityPostReferenceMetadata>{};
+  final Map<String, int> _viewCountByPost = <String, int>{};
   bool _managingPost = false;
   bool _openingComposer = false;
   Timer? _entryWelcomeTimer;
@@ -547,6 +548,7 @@ class _FeedTabState extends State<_FeedTab>
                                 repository: widget.repository,
                                 currentUserId: widget.repository.currentUserId,
                                 referenceMetadata: _referenceByPost[post.id],
+                                viewCount: _viewCountByPost[post.id],
                                 actionsEnabled:
                                     !_openingComposer && !_managingPost,
                                 onAction: (value) => _managePost(post, value),
