@@ -58,6 +58,9 @@ class CommunityRepository
   bool get useServerThreadedCommunityComments =>
       _client.auth.currentUser != null;
 
+  bool get useServerCommunityReferenceParity =>
+      _client.auth.currentUser != null;
+
   @override
   Future<T> runCommunitySocialMutation<T>(Future<T> Function() mutation) =>
       _runCommunityMutation(mutation);
