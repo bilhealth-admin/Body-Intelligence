@@ -94,9 +94,7 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
                 ),
               ),
               Text(
-                topic.postCount.toString() +
-                    ' ' +
-                    communityText(context, 'posts', 'منشور'),
+                '${topic.postCount} ${communityText(context, 'posts', 'منشور')}',
                 style: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(width: 4),
@@ -138,9 +136,7 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
             ),
           ),
           Text(
-            circle.postCount.toString() +
-                ' ' +
-                communityText(context, 'posts', 'منشور'),
+            '${circle.postCount} ${communityText(context, 'posts', 'منشور')}',
             style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(width: 4),
