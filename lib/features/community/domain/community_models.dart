@@ -726,6 +726,7 @@ class CommunityPost {
     this.authorCanRequest = false,
     this.poll,
     this.media = const <CommunityPostMedia>[],
+    this.locationLabel,
   });
 
   final String id;
@@ -752,6 +753,7 @@ class CommunityPost {
   final bool authorCanRequest;
   final CommunityPoll? poll;
   final List<CommunityPostMedia> media;
+  final String? locationLabel;
 
   CommunityPost withStats(CommunityPostStats stats) {
     if (stats.postId != id) {
@@ -782,6 +784,7 @@ class CommunityPost {
       authorCanRequest: authorCanRequest,
       poll: poll,
       media: media,
+      locationLabel: locationLabel,
     );
   }
 
@@ -810,6 +813,7 @@ class CommunityPost {
     authorCanRequest: authorCanRequest,
     poll: poll,
     media: media,
+    locationLabel: locationLabel,
   );
 
   CommunityPost withPoll(CommunityPoll? value) => CommunityPost(
@@ -837,6 +841,7 @@ class CommunityPost {
     authorCanRequest: authorCanRequest,
     poll: value,
     media: media,
+    locationLabel: locationLabel,
   );
 
   CommunityPost withMedia(List<CommunityPostMedia> value) => CommunityPost(
@@ -864,6 +869,35 @@ class CommunityPost {
     authorCanRequest: authorCanRequest,
     poll: poll,
     media: List<CommunityPostMedia>.unmodifiable(value),
+    locationLabel: locationLabel,
+  );
+
+  CommunityPost withLocation(String? value) => CommunityPost(
+    id: id,
+    authorId: authorId,
+    body: body,
+    createdAt: createdAt,
+    authorName: authorName,
+    authorAvatarUrl: authorAvatarUrl,
+    mediaObjectPath: mediaObjectPath,
+    mediaUrl: mediaUrl,
+    mediaMimeType: mediaMimeType,
+    mediaBytes: mediaBytes,
+    mediaWidth: mediaWidth,
+    mediaHeight: mediaHeight,
+    moderationStatus: moderationStatus,
+    moderationVisibility: moderationVisibility,
+    reviewedAt: reviewedAt,
+    likeCount: likeCount,
+    liked: liked,
+    commentCount: commentCount,
+    saved: saved,
+    authorHandle: authorHandle,
+    authorRelationship: authorRelationship,
+    authorCanRequest: authorCanRequest,
+    poll: poll,
+    media: media,
+    locationLabel: value,
   );
 
   CommunityPost withAuthorSocial(CommunityPostAuthorSocial author) {
@@ -895,6 +929,7 @@ class CommunityPost {
       authorCanRequest: author.canRequest,
       poll: poll,
       media: media,
+      locationLabel: locationLabel,
     );
   }
 
@@ -981,6 +1016,7 @@ class CommunityPost {
               );
             }),
           ),
+    locationLabel: json['location_label'] as String?,
   );
 }
 
