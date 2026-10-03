@@ -120,10 +120,10 @@ mixin CommunityFeedRepositoryMixin {
     );
     final hydrated = await _hydrateSocialPosts(posts);
     final byId = {for (final post in hydrated) post.id: post};
-    final ordered = <CommunityPost>[
-      for (final reference in references)
-        if (byId[reference.postId] case final post?) post,
-    ];
+    final ordered = references
+        .map((reference) => byId[reference.postId])
+        .whereType<CommunityPost>()
+        .toList(growable: false);
     final cursor = references.last;
     return CommunityTopicPostBatch(
       posts: List.unmodifiable(ordered),
