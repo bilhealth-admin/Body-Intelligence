@@ -114,12 +114,15 @@ class _FeedTabState extends State<_FeedTab>
     return mounted && refreshed?.permitsCommunityPublishing == true;
   }
 
-  Future<void> _openComposer({String? tag}) async {
+  Future<void> _openComposer({String? tag, String? circle}) async {
     if (_openingComposer || _managingPost) return;
     if (tag != null) {
       _draft.topicSlugs
         ..clear()
         ..add(tag);
+    }
+    if (circle != null) {
+      _draft.circleSlug = circle;
     }
     setState(() => _openingComposer = true);
     try {
