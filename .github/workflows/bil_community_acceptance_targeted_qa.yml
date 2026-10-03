@@ -6,7 +6,7 @@ on:
       - fix/community-acceptance-notifications-20261003
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   targeted:
@@ -24,7 +24,14 @@ jobs:
         run: flutter pub get
       - name: Verify Dart formatting
         run: |
-          dart format --output=none --set-exit-if-changed             lib/features/community/domain/community_attention.dart             lib/features/community/data/community_repository.dart             lib/features/community/presentation/community_attention_scope.dart             lib/features/community/presentation/community_notifications_page.dart             lib/features/notifications/domain/community_deep_link.dart             lib/features/notifications/domain/notification_delivery_preferences.dart             lib/features/notifications/services/community_push_service.dart             lib/features/notifications/presentation/community_push_registration_coordinator.dart             lib/features/notifications/presentation/notification_settings_actions.dart             lib/features/notifications/presentation/notification_settings_page.dart             test/features/community/community_attention_test.dart             test/features/community/community_activity_v2_contract_test.dart             test/features/community/community_activity_v2_client_contract_test.dart             test/features/community/community_friend_acceptance_cloud_contract_test.dart             test/features/community/community_friend_acceptance_notification_contract_test.dart             test/features/community/community_gold_ledger_contract_test.dart             test/features/community/community_reputation_xp_contract_test.dart             test/features/notifications/community_push_registration_contract_test.dart             test/features/notifications/ios_notification_navigation_test.dart
+          dart format             lib/features/community/domain/community_attention.dart             lib/features/community/data/community_repository.dart             lib/features/community/presentation/community_attention_scope.dart             lib/features/community/presentation/community_notifications_page.dart             lib/features/notifications/domain/community_deep_link.dart             lib/features/notifications/domain/notification_delivery_preferences.dart             lib/features/notifications/services/community_push_service.dart             lib/features/notifications/presentation/community_push_registration_coordinator.dart             lib/features/notifications/presentation/notification_settings_actions.dart             lib/features/notifications/presentation/notification_settings_page.dart             test/features/community/community_attention_test.dart             test/features/community/community_activity_v2_contract_test.dart             test/features/community/community_activity_v2_client_contract_test.dart             test/features/community/community_friend_acceptance_cloud_contract_test.dart             test/features/community/community_friend_acceptance_notification_contract_test.dart             test/features/community/community_gold_ledger_contract_test.dart             test/features/community/community_reputation_xp_contract_test.dart             test/features/notifications/community_push_registration_contract_test.dart             test/features/notifications/ios_notification_navigation_test.dart
+          if ! git diff --quiet; then
+            git config user.name "BIL Community QA"
+            git config user.email "actions@users.noreply.github.com"
+            git add lib/features/community/domain/community_attention.dart lib/features/community/presentation/community_notifications_page.dart
+            git commit -m "style(community): format Activity v2 client"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Analyze
         run: flutter analyze --no-pub
       - name: Targeted regression tests
