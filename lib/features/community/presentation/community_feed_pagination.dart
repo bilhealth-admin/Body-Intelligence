@@ -10,35 +10,58 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   set _feedGeneration(int value);
   bool get _feedRefreshing;
   set _feedRefreshing(bool value);
+  CommunityFeedMode get _selectedFeedMode;
+  int? get _feedCursorPriority;
+  set _feedCursorPriority(int? value);
+  DateTime? get _feedCursorCreatedAt;
+  set _feedCursorCreatedAt(DateTime? value);
+  String? get _feedCursorPostId;
+  set _feedCursorPostId(String? value);
 
   Future<List<CommunityPost>> _loadFirst() async {
     final generation = ++_feedGeneration;
     _feedRefreshing = true;
     _loadingMore = false;
+    _feedCursorPriority = null;
+    _feedCursorCreatedAt = null;
+    _feedCursorPostId = null;
     try {
-      final posts = await widget.repository
-          .loadFeed(limit: _FeedTabState._pageSize)
+      final page = await widget.repository
+          .loadCommunityFeedMode(
+            mode: _selectedFeedMode,
+            limit: _FeedTabState._pageSize,
+          )
           .timeout(const Duration(seconds: 15));
       if (mounted && generation == _feedGeneration) {
-        _hasMore = posts.length == _FeedTabState._pageSize;
+        _hasMore = page.hasMore;
+        _feedCursorPriority = page.nextPriority;
+        _feedCursorCreatedAt = page.nextBefore;
+        _feedCursorPostId = page.nextBeforeId;
       }
-      return posts;
+      return page.posts;
     } finally {
       if (generation == _feedGeneration) _feedRefreshing = false;
     }
   }
 
   Future<void> _loadMore(List<CommunityPost> visiblePosts) async {
-    if (_loadingMore || _feedRefreshing || !_hasMore || visiblePosts.isEmpty) {
+    if (_loadingMore ||
+        _feedRefreshing ||
+        !_hasMore ||
+        visiblePosts.isEmpty ||
+        _feedCursorPriority == null ||
+        _feedCursorCreatedAt == null ||
+        _feedCursorPostId == null) {
       return;
     }
     final generation = _feedGeneration;
     setState(() => _loadingMore = true);
     try {
-      final cursor = visiblePosts.last;
-      final page = await widget.repository.loadOlderFeed(
-        before: cursor.createdAt,
-        beforeId: cursor.id,
+      final page = await widget.repository.loadCommunityFeedMode(
+        mode: _selectedFeedMode,
+        beforePriority: _feedCursorPriority,
+        before: _feedCursorCreatedAt,
+        beforeId: _feedCursorPostId,
         limit: _FeedTabState._pageSize,
       );
       if (!mounted || generation != _feedGeneration) return;
@@ -50,6 +73,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
       setState(() {
         _feed = Future.value(combined);
         _hasMore = page.hasMore;
+        _feedCursorPriority = page.nextPriority;
+        _feedCursorCreatedAt = page.nextBefore;
+        _feedCursorPostId = page.nextBeforeId;
       });
     } catch (_) {
       if (!mounted || generation != _feedGeneration) return;
