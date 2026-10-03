@@ -42,6 +42,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   int? _viewCount;
   CommunityProfileOverview? _authorProfile;
   final Set<String> _busyComments = <String>{};
+  final Set<String> _membershipTierResolvedUsers = <String>{};
+  final Map<String, String> _membershipTierByUser = <String, String>{};
   final Set<String> _expandedThreads = <String>{};
   final Set<String> _loadingReplyThreads = <String>{};
 
@@ -115,6 +117,26 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     }
   }
 
+  Future<Map<String, String>> _fetchMembershipTiers(
+    Iterable<CommunityComment> comments,
+  ) async {
+    if (!widget.repository.useServerCommunityReferenceParity) {
+      return const <String, String>{};
+    }
+    final ids = comments
+        .map((comment) => comment.authorId)
+        .where((id) => !_membershipTierResolvedUsers.contains(id))
+        .toSet()
+        .toList(growable: false);
+    if (ids.isEmpty) return const <String, String>{};
+    try {
+      return await widget.repository.loadCommentMembershipTiers(ids);
+    } on Object {
+      // Tier display is optional and must never block comment reading.
+      return const <String, String>{};
+    }
+  }
+
   Future<void> _loadInitial() async {
     final generation = ++_loadGeneration;
     _refreshing = true;
@@ -129,13 +151,21 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       ]);
       final stats = values[0] as List<CommunityPostStats>;
       final threads = values[1] as List<CommunityCommentThread>;
+      final loadedComments = <CommunityComment>[
+        for (final thread in threads) ...[thread.root, ...thread.replies],
+      ];
+      final tiers = await _fetchMembershipTiers(loadedComments);
       if (!mounted || generation != _loadGeneration) return;
       if (stats.length == 1) _stats = stats.single;
       _comments
         ..clear()
-        ..addAll([
-          for (final thread in threads) ...[thread.root, ...thread.replies],
-        ]);
+        ..addAll(loadedComments);
+      _membershipTierResolvedUsers
+        ..clear()
+        ..addAll(loadedComments.map((comment) => comment.authorId));
+      _membershipTierByUser
+        ..clear()
+        ..addAll(tiers);
       _expandedThreads.removeWhere(
         (rootId) => !_comments.any((comment) => comment.id == rootId),
       );
@@ -183,9 +213,17 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         afterId: _afterId,
         limit: _pageSize,
       );
+      final loaded = <CommunityComment>[
+        for (final thread in page) ...[thread.root, ...thread.replies],
+      ];
+      final tiers = await _fetchMembershipTiers(loaded);
       if (!mounted || generation != _loadGeneration) return;
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
+        _membershipTierResolvedUsers.addAll(
+          loaded.map((comment) => comment.authorId),
+        );
+        _membershipTierByUser.addAll(tiers);
         for (final thread in page) {
           if (known.add(thread.root.id)) {
             _comments.add(thread.root);
@@ -246,9 +284,14 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         afterId: last?.id,
         limit: 20,
       );
+      final tiers = await _fetchMembershipTiers(page);
       if (!mounted) return;
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
+        _membershipTierResolvedUsers.addAll(
+          page.map((comment) => comment.authorId),
+        );
+        _membershipTierByUser.addAll(tiers);
         _comments.addAll(page.where((comment) => known.add(comment.id)));
       });
     } catch (_) {
@@ -310,8 +353,11 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         parentId: _replyingTo?.id,
         clientId: clientId,
       );
+      final tiers = await _fetchMembershipTiers([comment]);
       if (!mounted) return;
       setState(() {
+        _membershipTierResolvedUsers.add(comment.authorId);
+        _membershipTierByUser.addAll(tiers);
         final existing = _comments.indexWhere((item) => item.id == comment.id);
         if (existing < 0) {
           _comments.add(comment);
@@ -588,6 +634,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                         _CommunityCommentTile(
                           key: ValueKey(root.id),
                           comment: root,
+                          membershipTier:
+                              _membershipTierByUser[root.authorId],
                           mine:
                               root.authorId == widget.repository.currentUserId,
                           busy:
@@ -603,6 +651,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                               _CommunityCommentTile(
                                 key: ValueKey(reply.id),
                                 comment: reply,
+                                membershipTier:
+                                    _membershipTierByUser[reply.authorId],
                                 mine:
                                     reply.authorId ==
                                     widget.repository.currentUserId,
