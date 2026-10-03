@@ -382,7 +382,10 @@ class _CommunityProfilePostTile extends StatelessWidget {
                   const SizedBox(width: 10),
                   const Icon(Icons.visibility_outlined, size: 16),
                   const SizedBox(width: 3),
-                  Text(viewCount.toString()),
+                  Text(
+                    viewCount.toString(),
+                    key: Key('community-profile-post-views-${post.id}'),
+                  ),
                   if (post.moderationStatus !=
                       CommunityPostModerationStatus.approved) ...[
                     const Spacer(),
