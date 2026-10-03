@@ -1,4 +1,5 @@
 import '../domain/community_models.dart';
+import '../domain/community_topics.dart';
 import 'community_post_cloud_store.dart';
 
 mixin CommunityFeedRepositoryMixin {
@@ -11,6 +12,13 @@ mixin CommunityFeedRepositoryMixin {
   Future<List<CommunityPostAuthorSocial>> loadPostAuthors(List<String> userIds);
 
   Future<List<CommunitySavedPostReference>> loadSavedPostReferences({
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  });
+
+  Future<List<CommunityTopicPostReference>> loadCommunityTopicPostReferences({
+    required String slug,
     DateTime? before,
     String? beforeId,
     int limit = 30,
@@ -84,6 +92,44 @@ mixin CommunityFeedRepositoryMixin {
       hasMore: page.hasMore,
       nextBefore: page.nextBefore,
       nextBeforeId: page.nextBeforeId,
+    );
+  }
+
+  Future<CommunityTopicPostBatch> loadCommunityTopicPosts({
+    required String slug,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async {
+    final references = await loadCommunityTopicPostReferences(
+      slug: slug,
+      before: before,
+      beforeId: beforeId,
+      limit: limit,
+    );
+    if (references.isEmpty) {
+      return const CommunityTopicPostBatch(posts: [], hasMore: false);
+    }
+    final store = communityPostStore;
+    if (store is! CommunityPostLookupContract) {
+      throw StateError('Community topic post lookup is unavailable');
+    }
+    final ids = references.map((value) => value.postId).toList(growable: false);
+    final posts = await (store as CommunityPostLookupContract).loadPostsByIds(
+      ids,
+    );
+    final hydrated = await _hydrateSocialPosts(posts);
+    final byId = {for (final post in hydrated) post.id: post};
+    final ordered = <CommunityPost>[
+      for (final reference in references)
+        if (byId[reference.postId] case final post?) post,
+    ];
+    final cursor = references.last;
+    return CommunityTopicPostBatch(
+      posts: List.unmodifiable(ordered),
+      hasMore: references.length == limit,
+      nextBefore: cursor.createdAt,
+      nextBeforeId: cursor.postId,
     );
   }
 
