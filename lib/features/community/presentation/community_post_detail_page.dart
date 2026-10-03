@@ -604,10 +604,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                                     context,
                                     'View {count} replies',
                                     'عرض {count} ردود',
-                                  ).replaceAll(
-                                    '{count}',
-                                    '${root.replyCount}',
-                                  ),
+                                  ).replaceAll('{count}', '${root.replyCount}'),
                                 ),
                               ),
                             ),

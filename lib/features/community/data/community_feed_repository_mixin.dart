@@ -133,10 +133,7 @@ mixin CommunityFeedRepositoryMixin {
       final CommunityFeedBatch page;
       if (before == null) {
         final posts = await loadFeed(limit: limit);
-        page = CommunityFeedBatch(
-          posts: posts,
-          hasMore: posts.length == limit,
-        );
+        page = CommunityFeedBatch(posts: posts, hasMore: posts.length == limit);
       } else {
         page = await loadOlderFeed(
           before: before,
