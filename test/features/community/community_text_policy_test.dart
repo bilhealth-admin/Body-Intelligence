@@ -157,14 +157,15 @@ void main() {
       'lib/features/nutrition/community_catalog/data/supabase_community_food_catalog.dart',
     ).readAsStringSync();
 
-    for (final method in const [
-      'saveMyProfile',
-      'sendMessage',
-      'reviewFood',
-      'submitFood',
-      'submitProductReview',
-    ]) {
-      final start = repository.indexOf(method);
+    for (final entry in const <String, String>{
+      'saveMyProfile': 'Future<void> saveMyProfile({',
+      'sendMessage': 'Future<void> sendMessage(',
+      'reviewFood': 'Future<void> reviewFood({',
+      'submitFood': 'Future<void> submitFood(',
+      'submitProductReview': 'Future<void> submitProductReview(',
+    }.entries) {
+      final method = entry.key;
+      final start = repository.indexOf(entry.value);
       expect(start, greaterThanOrEqualTo(0), reason: method);
       final proposedEnd = start + 2200;
       final end = proposedEnd < repository.length
