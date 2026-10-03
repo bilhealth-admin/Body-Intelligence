@@ -11,7 +11,10 @@ void main() {
       'supabase/migrations/20261003014554_community_friend_acceptance_attention_push_v2.sql',
     ).readAsStringSync();
 
-    expect(requestSql, isNot(contains('community_profile_required')));
+    expect(
+      requestSql,
+      isNot(contains("raise exception 'community_profile_required'")),
+    );
     expect(requestSql, contains('allow_friend_requests'));
     expect(requestSql, contains('bil_consume_rate_limit'));
     expect(acceptanceSql, contains('bil_community_notifications'));

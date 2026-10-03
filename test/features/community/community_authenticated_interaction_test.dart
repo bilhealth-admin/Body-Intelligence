@@ -102,6 +102,11 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   }
 
   @override
+  Future<List<CommunityNotification>> loadCommunityNotifications({
+    int limit = 30,
+  }) async => const <CommunityNotification>[];
+
+  @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
     if (updatesFailuresRemaining > 0) {
       updatesFailuresRemaining--;
