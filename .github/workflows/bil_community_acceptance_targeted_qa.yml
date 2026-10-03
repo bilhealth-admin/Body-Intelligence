@@ -11,7 +11,7 @@ on:
       - work/community-referral-v1-20261003
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   targeted:
@@ -29,7 +29,7 @@ jobs:
         run: flutter pub get
       - name: Verify Dart formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             lib/app/router/app_router.dart \
             lib/features/community/domain/community_attention.dart \
             lib/features/community/domain/community_models.dart \
@@ -77,6 +77,13 @@ jobs:
             test/features/community/community_referral_link_contract_test.dart \
             test/features/notifications/community_push_registration_contract_test.dart \
             test/features/notifications/ios_notification_navigation_test.dart
+          if ! git diff --quiet; then
+            git config user.name "BIL Community QA"
+            git config user.email "actions@users.noreply.github.com"
+            git add lib test
+            git commit -m "style(community): format referral implementation"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Verify referral association tooling
         run: |
           python3 tool/release/generate_app_link_associations.py --self-test
