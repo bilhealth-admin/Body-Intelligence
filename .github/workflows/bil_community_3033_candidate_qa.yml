@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: community-sharded-${{ github.ref }}
+  group: community-sharded-final-${{ github.sha }}
   cancel-in-progress: true
 jobs:
   source-and-performance:
