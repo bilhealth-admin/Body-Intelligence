@@ -367,9 +367,13 @@ mixin CommunitySocialRepositoryMixin {
   }) async {
     if (!_uuid.hasMatch(postId) ||
         (after == null) != (afterId == null) ||
-        (afterId != null && !_uuid.hasMatch(afterId)) ||
         limit < 1 ||
         limit > 50) {
+      throw ArgumentError('Invalid Community comment-thread cursor');
+    }
+    if (useServerThreadedCommunityComments &&
+        afterId != null &&
+        !_uuid.hasMatch(afterId)) {
       throw ArgumentError('Invalid Community comment-thread cursor');
     }
     if (!useServerThreadedCommunityComments) {
