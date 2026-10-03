@@ -113,6 +113,7 @@ void main() {
     expect(androidManifest, contains('android:host="www.bilhealth.com"'));
     expect(androidManifest, contains('android:path="/auth/callback"'));
     expect(androidManifest, contains('android:path="/auth/reset-password"'));
+    expect(androidManifest, contains('android:pathPrefix="/invite/"'));
     for (final entitlements in <String>[
       releaseEntitlements,
       debugEntitlements,
@@ -120,6 +121,15 @@ void main() {
       expect(entitlements, contains('com.apple.developer.associated-domains'));
       expect(entitlements, contains('applinks:www.bilhealth.com'));
     }
+
+    // Referral links are public opaque-token journeys, not auth callbacks.
+    // iOS path scoping lives in AASA while Android also narrows its manifest.
+    expect(
+      File(
+        'lib/app/launch/bil_verified_links_configuration.dart',
+      ).readAsStringSync(),
+      contains("'/invite/*'"),
+    );
 
     // Registration in source is not proof that the domain association files
     // are live. Keep the independently verified publication state explicit in
