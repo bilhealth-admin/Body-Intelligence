@@ -3,6 +3,14 @@ import 'dart:io';
 import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _communityRepositorySource() => [
+  'lib/features/community/data/community_repository.dart',
+  'lib/features/community/data/community_repository_discovery_mixin.dart',
+  'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+  'lib/features/community/data/community_repository_publishing_mixin.dart',
+  'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
+].map((path) => File(path).readAsStringSync()).join('\n');
+
 void main() {
   test('topics foundation is server-authoritative and privacy bounded', () {
     final sql = File(
@@ -57,9 +65,7 @@ void main() {
   test(
     'Flutter topics use real RPC counts and explicit composer assignment',
     () {
-      final repository = File(
-        'lib/features/community/data/community_repository.dart',
-      ).readAsStringSync();
+      final repository = _communityRepositorySource();
       final store = File(
         'lib/features/community/data/community_post_cloud_store.dart',
       ).readAsStringSync();
