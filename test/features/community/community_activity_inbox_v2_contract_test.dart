@@ -20,7 +20,8 @@ void main() {
         "CommunityNotificationKind.postLike ||\n"
         "      CommunityNotificationKind.postSave ||\n"
         "      CommunityNotificationKind.comment ||\n"
-        "      CommunityNotificationKind.reply => '/community'",
+        "      CommunityNotificationKind.reply ||\n"
+        "      CommunityNotificationKind.mention => '/community'",
       ),
     );
     expect(
