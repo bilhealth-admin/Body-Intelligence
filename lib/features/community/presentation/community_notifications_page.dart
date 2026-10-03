@@ -198,7 +198,7 @@ class _CommunityNotificationsPageState
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          key: Key('community-collab-decline-' + notification.id),
+          key: Key('community-collab-decline-${notification.id}'),
           tooltip: communityText(context, 'Decline', 'رفض'),
           onPressed: busy
               ? null
@@ -206,7 +206,7 @@ class _CommunityNotificationsPageState
           icon: const Icon(Icons.close_rounded),
         ),
         IconButton(
-          key: Key('community-collab-accept-' + notification.id),
+          key: Key('community-collab-accept-${notification.id}'),
           tooltip: communityText(context, 'Accept', 'قبول'),
           onPressed: busy
               ? null
