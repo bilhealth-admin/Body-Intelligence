@@ -8,6 +8,7 @@ import '../domain/community_content_policy.dart';
 import '../domain/community_circles.dart';
 import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
+import '../domain/community_polls.dart';
 import '../domain/community_referral.dart';
 import '../domain/community_rewards.dart';
 import '../domain/community_text_policy.dart';
@@ -256,6 +257,117 @@ class CommunityRepository
         );
       }),
     );
+  }
+
+  Future<void> createCommunityPoll({
+    required String postId,
+    required CommunityPollDraft draft,
+  }) async {
+    if (!_uuid.hasMatch(postId)) {
+      throw ArgumentError.value(postId, 'postId');
+    }
+    final normalized = draft.normalized();
+    final response = await _runCommunityMutation(
+      () => _client.rpc(
+        'bil_create_my_community_poll_v1',
+        params: {
+          'p_post_id': postId,
+          'p_question': normalized.question,
+          'p_options': normalized.options,
+          'p_allow_multiple': normalized.allowMultiple,
+          'p_closes_at': normalized.closesAt?.toIso8601String(),
+        },
+      ),
+    );
+    if (response != postId) {
+      throw const FormatException('Invalid Community poll creation result');
+    }
+  }
+
+  Future<CommunityPoll?> loadCommunityPoll(String postId) async {
+    if (!_uuid.hasMatch(postId)) {
+      throw ArgumentError.value(postId, 'postId');
+    }
+    final response = await _client.rpc(
+      'bil_community_poll_v1',
+      params: {'p_post_id': postId},
+    );
+    if (response == null) return null;
+    if (response is! Map) {
+      throw const FormatException('Invalid Community poll');
+    }
+    final poll = CommunityPoll.fromJson(Map<String, dynamic>.from(response));
+    if (poll.postId != postId) {
+      throw const FormatException('Community poll did not match post');
+    }
+    return poll;
+  }
+
+  Future<List<CommunityPoll>> loadCommunityPolls(List<String> postIds) async {
+    if (postIds.isEmpty) return const <CommunityPoll>[];
+    if (postIds.length > 100 ||
+        postIds.toSet().length != postIds.length ||
+        postIds.any((id) => !_uuid.hasMatch(id))) {
+      throw ArgumentError.value(postIds, 'postIds');
+    }
+    final response = await _client.rpc(
+      'bil_community_polls_v1',
+      params: {'p_post_ids': postIds},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community poll batch');
+    }
+    final requested = postIds.toSet();
+    final seen = <String>{};
+    final polls = <CommunityPoll>[];
+    for (final row in response) {
+      if (row is! Map) {
+        throw const FormatException('Invalid Community poll batch row');
+      }
+      final json = Map<String, dynamic>.from(row);
+      final rawPoll = json['poll'];
+      final rowPostId = json['post_id'];
+      if (rowPostId is! String || rawPoll is! Map) {
+        throw const FormatException('Invalid Community poll batch row');
+      }
+      final poll = CommunityPoll.fromJson(
+        Map<String, dynamic>.from(rawPoll),
+      );
+      if (poll.postId != rowPostId ||
+          !requested.contains(poll.postId) ||
+          !seen.add(poll.postId)) {
+        throw const FormatException('Invalid Community poll batch');
+      }
+      polls.add(poll);
+    }
+    return List.unmodifiable(polls);
+  }
+
+  Future<CommunityPoll> voteCommunityPoll({
+    required String postId,
+    required List<String> optionIds,
+  }) async {
+    if (!_uuid.hasMatch(postId) ||
+        optionIds.isEmpty ||
+        optionIds.length > 6 ||
+        optionIds.toSet().length != optionIds.length ||
+        optionIds.any((id) => !_uuid.hasMatch(id))) {
+      throw ArgumentError('Invalid Community poll vote');
+    }
+    final response = await _runCommunityMutation(
+      () => _client.rpc(
+        'bil_vote_community_poll_v1',
+        params: {'p_post_id': postId, 'p_option_ids': optionIds},
+      ),
+    );
+    if (response is! num || response.toInt() != optionIds.length) {
+      throw const FormatException('Invalid Community poll vote result');
+    }
+    final poll = await loadCommunityPoll(postId);
+    if (poll == null) {
+      throw const FormatException('Community poll disappeared after vote');
+    }
+    return poll;
   }
 
   Future<List<CommunityTopic>> loadCommunityTopics() async {
