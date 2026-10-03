@@ -6,6 +6,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
+import '../domain/community_referral.dart';
 import '../domain/community_rewards.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
@@ -52,6 +53,59 @@ class CommunityRepository
 
   CommunityPostStoreContract get _posts =>
       _postStore ?? CommunityPostCloudStore(_client, _user);
+
+  Future<CommunityInviteCreateResult> createCommunityInvite() async {
+    final response = await _client.rpc('bil_create_community_invite_v1');
+    if (response is! Map) {
+      throw const FormatException('Invalid Community invite creation');
+    }
+    return CommunityInviteCreateResult.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
+
+  Future<CommunityInvitePreview> previewCommunityInvite(String token) async {
+    if (!CommunityInviteCreateResult.tokenPattern.hasMatch(token)) {
+      throw ArgumentError.value(token, 'token');
+    }
+    final response = await _client.rpc(
+      'bil_preview_community_invite_v1',
+      params: {'p_token': token},
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid Community invite preview');
+    }
+    return CommunityInvitePreview.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
+
+  Future<CommunityInviteAcceptance> acceptCommunityInvite(String token) async {
+    if (!CommunityInviteCreateResult.tokenPattern.hasMatch(token)) {
+      throw ArgumentError.value(token, 'token');
+    }
+    final response = await _client.rpc(
+      'bil_accept_community_invite_v1',
+      params: {'p_token': token},
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid Community invite acceptance');
+    }
+    return CommunityInviteAcceptance.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
+
+  Future<CommunityReferralAttribution?> loadMyReferralAttribution() async {
+    final response = await _client.rpc('bil_my_community_referral_v1');
+    if (response == null) return null;
+    if (response is! Map) {
+      throw const FormatException('Invalid Community referral attribution');
+    }
+    return CommunityReferralAttribution.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
 
   Future<CommunityGoldBalance> loadGoldBalance() async {
     final response = await _client.rpc('bil_gold_balance_v1');
