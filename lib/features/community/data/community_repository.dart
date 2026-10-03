@@ -6,6 +6,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
+import '../domain/community_rewards.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_post_cloud_store.dart';
@@ -51,6 +52,87 @@ class CommunityRepository
 
   CommunityPostStoreContract get _posts =>
       _postStore ?? CommunityPostCloudStore(_client, _user);
+
+  Future<CommunityGoldBalance> loadGoldBalance() async {
+    final response = await _client.rpc('bil_gold_balance_v1');
+    if (response is! Map) {
+      throw const FormatException('Invalid BIL Gold balance');
+    }
+    return CommunityGoldBalance.fromJson(Map<String, dynamic>.from(response));
+  }
+
+  Future<List<CommunityGoldLedgerEntry>> loadGoldHistory({
+    DateTime? beforeCreatedAt,
+    int? beforeId,
+    int limit = 30,
+  }) async {
+    if ((beforeCreatedAt == null) != (beforeId == null) ||
+        (beforeId != null && beforeId < 1) ||
+        limit < 1 ||
+        limit > 100) {
+      throw ArgumentError('Invalid BIL Gold history cursor');
+    }
+    final response = await _client.rpc(
+      'bil_gold_history_v1',
+      params: {
+        'p_before_created_at': beforeCreatedAt?.toUtc().toIso8601String(),
+        'p_before_id': beforeId,
+        'p_limit': limit,
+      },
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid BIL Gold history');
+    }
+    return List<CommunityGoldLedgerEntry>.unmodifiable(
+      response.map((row) {
+        if (row is! Map) {
+          throw const FormatException('Invalid BIL Gold history row');
+        }
+        return CommunityGoldLedgerEntry.fromJson(
+          Map<String, dynamic>.from(row),
+        );
+      }),
+    );
+  }
+
+  Future<List<CommunityQuest>> loadCommunityQuests() async {
+    final response = await _client.rpc('bil_list_community_quests_v1');
+    if (response is! List) {
+      throw const FormatException('Invalid Community quest list');
+    }
+    return List<CommunityQuest>.unmodifiable(
+      response.map((row) {
+        if (row is! Map) {
+          throw const FormatException('Invalid Community quest row');
+        }
+        return CommunityQuest.fromJson(Map<String, dynamic>.from(row));
+      }),
+    );
+  }
+
+  Future<CommunityQuestClaimResult> claimCommunityQuest({
+    required String questKey,
+    required String periodKey,
+  }) async {
+    if (!CommunityQuest.questKeyPattern.hasMatch(questKey) ||
+        periodKey.length < 4 ||
+        periodKey.length > 16) {
+      throw ArgumentError('Invalid Community quest claim');
+    }
+    final response = await _client.rpc(
+      'bil_claim_community_quest_v1',
+      params: {
+        'p_quest_key': questKey,
+        'p_period_key': periodKey,
+      },
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid Community quest claim result');
+    }
+    return CommunityQuestClaimResult.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
 
   Future<CommunityProfile?> loadMyProfile() async {
     final row = await _client
