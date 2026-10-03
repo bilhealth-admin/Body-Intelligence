@@ -1172,8 +1172,8 @@ class CommunityRepository
     ).normalized();
     final normalizedPoll = poll?.normalized();
     final store = _posts;
-
     String? postId;
+
     try {
       if (images.isEmpty) {
         if (store is! CommunityPostPublishingReceiptContract) {
