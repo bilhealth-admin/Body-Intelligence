@@ -18,6 +18,7 @@ import '../domain/community_comment_threads.dart';
 import '../domain/community_circles.dart';
 import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
+import '../domain/community_polls.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_topics.dart';
 import '../services/community_post_image_picker.dart';
@@ -34,6 +35,7 @@ import 'community_sapphire.dart';
 part 'community_feed_tab.dart';
 
 part 'community_post_card.dart';
+part 'community_poll_panel.dart';
 part 'community_feed_pagination.dart';
 part 'community_post_composer_page.dart';
 part 'community_post_detail_page.dart';
