@@ -14,6 +14,10 @@ void main() {
       '/community/messages',
     );
     expect(
+      CommunityDeepLink.routeFor(Uri.parse('bil://community/rewards')),
+      '/community/rewards',
+    );
+    expect(
       CommunityDeepLink.routeFor(Uri.parse('bil://community/messages/new')),
       '/community/messages/new',
     );
@@ -174,6 +178,7 @@ void main() {
       'community/connections/': '/community/connections',
       'community/people/': '/community/people',
       'community/messages/': '/community/messages',
+      'community/rewards/': '/community/rewards',
       'community/messages/new/': '/community/messages/new',
       'community/moderation/': '/community/moderation',
       'community/safety/': '/community/safety',
