@@ -4,7 +4,7 @@ part of 'community_hub_page.dart';
 // hub remains mounted; this does not claim persistence across process death.
 class _CommunityComposerDraft {
   String body = '';
-  CommunityPostImageDraft? image;
+  final List<CommunityPostImageDraft> images = <CommunityPostImageDraft>[];
   final Set<String> topicSlugs = <String>{};
   String? circleSlug;
   bool pollEnabled = false;
@@ -32,7 +32,8 @@ class _CommunityPostComposerPageState
     extends State<_CommunityPostComposerPage> {
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
-  late CommunityPostImageDraft? _selectedImage = widget.draft.image;
+  late final List<CommunityPostImageDraft> _selectedImages =
+      List<CommunityPostImageDraft>.from(widget.draft.images);
   late final Future<List<CommunityTopic>> _topics = widget.repository
       .loadCommunityTopics();
   late final Future<List<CommunityCircle>> _circles = widget.repository
@@ -56,7 +57,7 @@ class _CommunityPostComposerPageState
     final text = _composer.text.trim();
     if (text.isEmpty) {
       setState(
-        () => _composerError = _selectedImage == null
+        () => _composerError = _selectedImages.isEmpty
             ? communityText(
                 context,
                 'Write your post before publishing.',
@@ -78,7 +79,9 @@ class _CommunityPostComposerPageState
       _publishing = true;
     });
     try {
-      final image = _selectedImage;
+      final images = List<CommunityPostImageDraft>.unmodifiable(
+        _selectedImages,
+      );
       final topicSlugs = widget.draft.topicSlugs.toList(growable: false);
       final circleSlug = widget.draft.circleSlug;
       CommunityPollDraft? poll;
@@ -103,23 +106,31 @@ class _CommunityPostComposerPageState
       }
 
       if (poll != null) {
-        if (image == null) {
+        if (images.isEmpty) {
           await widget.repository.publishPostWithTopicsCircleAndPoll(
             text,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
             poll: poll,
           );
-        } else {
+        } else if (images.length == 1) {
           await widget.repository.publishPostWithImageTopicsCircleAndPoll(
             text,
-            image,
+            images.single,
+            topicSlugs: topicSlugs,
+            circleSlug: circleSlug,
+            poll: poll,
+          );
+        } else {
+          await widget.repository.publishPostWithImagesTopicsCircleAndPoll(
+            text,
+            images,
             topicSlugs: topicSlugs,
             circleSlug: circleSlug,
             poll: poll,
           );
         }
-      } else if (image == null) {
+      } else if (images.isEmpty) {
         if (topicSlugs.isEmpty && circleSlug == null) {
           await widget.repository.publishPost(text);
         } else {
@@ -129,19 +140,29 @@ class _CommunityPostComposerPageState
             circleSlug: circleSlug,
           );
         }
-      } else if (topicSlugs.isEmpty && circleSlug == null) {
-        await widget.repository.publishPostWithImage(text, image);
+      } else if (images.length == 1) {
+        if (topicSlugs.isEmpty && circleSlug == null) {
+          await widget.repository.publishPostWithImage(text, images.single);
+        } else {
+          await widget.repository.publishPostWithImageTopicsAndCircle(
+            text,
+            images.single,
+            topicSlugs: topicSlugs,
+            circleSlug: circleSlug,
+          );
+        }
       } else {
-        await widget.repository.publishPostWithImageTopicsAndCircle(
+        await widget.repository.publishPostWithImagesTopicsAndCircle(
           text,
-          image,
+          images,
           topicSlugs: topicSlugs,
           circleSlug: circleSlug,
         );
       }
       if (!mounted) return;
       widget.draft.body = '';
-      widget.draft.image = null;
+      widget.draft.images.clear();
+      _selectedImages.clear();
       widget.draft.topicSlugs.clear();
       widget.draft.circleSlug = null;
       widget.draft.pollEnabled = false;
@@ -198,10 +219,10 @@ class _CommunityPostComposerPageState
       setState(
         () => _submitError = communityText(
           context,
-          _selectedImage == null
+          _selectedImages.isEmpty
               ? 'Could not publish now. Your text is kept so you can retry.'
               : 'Could not publish now. Your text and photo are kept so you can retry.',
-          _selectedImage == null
+          _selectedImages.isEmpty
               ? 'تعذر نشر المشاركة الآن. احتفظنا بالنص لتعيد المحاولة.'
               : 'تعذر النشر الآن. احتفظنا بالنص والصورة لتعيد المحاولة.',
         ),
@@ -212,14 +233,21 @@ class _CommunityPostComposerPageState
   }
 
   Future<void> _pickImage() async {
-    if (_publishing || _selectingImage || _completed) return;
+    if (_publishing ||
+        _selectingImage ||
+        _completed ||
+        _selectedImages.length >= 4) {
+      return;
+    }
     setState(() => _selectingImage = true);
     try {
       final image = await widget.imagePicker.pick();
       if (image != null && mounted) {
         setState(() {
-          _selectedImage = image;
-          widget.draft.image = image;
+          _selectedImages.add(image);
+          widget.draft.images
+            ..clear()
+            ..addAll(_selectedImages);
           _submitError = null;
         });
       }
@@ -336,17 +364,33 @@ class _CommunityPostComposerPageState
                             ),
                           ),
                         ),
-                        if (_selectedImage case final image?) ...[
+                        if (_selectedImages.isNotEmpty) ...[
                           const SizedBox(height: 16),
-                          _CommunityPostImagePreview(
-                            image: image,
-                            onRemove: busy
-                                ? null
-                                : () => setState(() {
-                                    _selectedImage = null;
-                                    widget.draft.image = null;
-                                    _composerError = null;
-                                  }),
+                          SizedBox(
+                            height: 160,
+                            child: ListView.separated(
+                              key: const Key(
+                                'community-post-selected-images',
+                              ),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _selectedImages.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 10),
+                              itemBuilder: (context, index) =>
+                                  _CommunityPostImagePreview(
+                                index: index,
+                                image: _selectedImages[index],
+                                onRemove: busy
+                                    ? null
+                                    : () => setState(() {
+                                          _selectedImages.removeAt(index);
+                                          widget.draft.images
+                                            ..clear()
+                                            ..addAll(_selectedImages);
+                                          _composerError = null;
+                                        }),
+                              ),
+                            ),
                           ),
                         ],
                         const SizedBox(height: 18),
@@ -692,7 +736,7 @@ class _CommunityPostComposerPageState
                             ),
                           ),
                         ],
-                        if (_publishing && _selectedImage != null) ...[
+                        if (_publishing && _selectedImages.isNotEmpty) ...[
                           const LinearProgressIndicator(
                             key: Key('community-post-upload-progress'),
                           ),
@@ -705,7 +749,9 @@ class _CommunityPostComposerPageState
                           children: [
                             OutlinedButton.icon(
                               key: const Key('community-post-add-photo'),
-                              onPressed: busy ? null : _pickImage,
+                              onPressed: busy || _selectedImages.length >= 4
+                                  ? null
+                                  : _pickImage,
                               icon: _selectingImage
                                   ? const SizedBox.square(
                                       dimension: 18,
@@ -719,8 +765,12 @@ class _CommunityPostComposerPageState
                               label: Text(
                                 communityText(
                                   context,
-                                  'Add photo',
-                                  'إضافة صورة',
+                                  _selectedImages.isEmpty
+                                      ? 'Add photo'
+                                      : 'Add photo (${_selectedImages.length}/4)',
+                                  _selectedImages.isEmpty
+                                      ? 'إضافة صورة'
+                                      : 'إضافة صورة (${_selectedImages.length}/4)',
                                 ),
                               ),
                             ),
@@ -736,7 +786,7 @@ class _CommunityPostComposerPageState
                                     )
                                   : const Icon(Icons.send_rounded),
                               label: Text(
-                                _publishing && _selectedImage != null
+                                _publishing && _selectedImages.isNotEmpty
                                     ? communityText(
                                         context,
                                         'Uploading photo…',
@@ -761,8 +811,13 @@ class _CommunityPostComposerPageState
 }
 
 class _CommunityPostImagePreview extends StatelessWidget {
-  const _CommunityPostImagePreview({required this.image, this.onRemove});
+  const _CommunityPostImagePreview({
+    required this.index,
+    required this.image,
+    this.onRemove,
+  });
 
+  final int index;
   final CommunityPostImageDraft image;
   final VoidCallback? onRemove;
 
@@ -773,6 +828,7 @@ class _CommunityPostImagePreview extends StatelessWidget {
     child: ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
+        width: 220,
         height: 160,
         child: Stack(
           fit: StackFit.expand,
@@ -790,7 +846,11 @@ class _CommunityPostImagePreview extends StatelessWidget {
               top: 8,
               end: 8,
               child: IconButton.filledTonal(
-                key: const Key('community-post-remove-photo'),
+                key: Key(
+                  index == 0
+                      ? 'community-post-remove-photo'
+                      : 'community-post-remove-photo-$index',
+                ),
                 onPressed: onRemove,
                 tooltip: communityText(context, 'Remove photo', 'إزالة الصورة'),
                 icon: const Icon(Icons.close_rounded),
