@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
+import 'package:body_intelligence_log/features/community/domain/community_feed_modes.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_text_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
@@ -224,6 +225,36 @@ final class _CommunityInteractionRepository extends CommunityRepository {
       createdAt: DateTime.utc(2026, 8, 15),
     ),
   ];
+
+  @override
+  Future<CommunityFeedModeBatch> loadCommunityFeedMode({
+    required CommunityFeedMode mode,
+    int? beforePriority,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async {
+    final posts = await loadFeed(limit: limit);
+    final refs = posts
+        .map(
+          (post) => CommunityFeedReference(
+            postId: post.id,
+            createdAt: post.createdAt,
+            priority: 0,
+            reasons: const [],
+          ),
+        )
+        .toList(growable: false);
+    final cursor = refs.isEmpty ? null : refs.last;
+    return CommunityFeedModeBatch(
+      posts: posts,
+      references: refs,
+      hasMore: false,
+      nextPriority: cursor?.priority,
+      nextBefore: cursor?.createdAt,
+      nextBeforeId: cursor?.postId,
+    );
+  }
 
   @override
   Future<void> publishPost(String body) async {
