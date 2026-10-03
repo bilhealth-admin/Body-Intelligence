@@ -2,13 +2,23 @@ import '../../../app/localization/bil_locale_policy.dart';
 
 const bilCommunityInviteDownloadUrl = 'https://www.bilhealth.com/download';
 
-String bilCommunityInviteMessage(String localeTag, {required String name}) {
+String bilCommunityInviteMessage(
+  String localeTag, {
+  required String name,
+  String? url,
+}) {
   final tag = BilLocalePolicy.canonicalSupportedTag(localeTag) ?? 'en';
   final greetingName = name.trim().isEmpty ? '' : ' ${name.trim()}';
   final template = _messages[tag] ?? _messages['en']!;
+  final destination = url?.trim();
   return template
       .replaceAll('{name}', greetingName)
-      .replaceAll('{url}', bilCommunityInviteDownloadUrl);
+      .replaceAll(
+        '{url}',
+        destination == null || destination.isEmpty
+            ? bilCommunityInviteDownloadUrl
+            : destination,
+      );
 }
 
 String bilCommunityContactPrivacy(String localeTag) {
