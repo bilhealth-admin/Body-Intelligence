@@ -24,8 +24,12 @@ void main() {
       'display_name': 'BIL Member',
       'avatar_url': null,
       'handle': 'bil_member',
+      'friendship_id': '44444444-4444-4444-8444-444444444444',
+      'relationship': 'accepted',
+      'new_account_eligible': true,
     });
     expect(accepted.attributed, isTrue);
+    expect(accepted.relationshipAccepted, isTrue);
 
     expect(
       () => CommunityInviteCreateResult.fromJson({
@@ -53,12 +57,13 @@ void main() {
 
     final routeStart = router.indexOf("path: '/community/invite/:token'");
     expect(routeStart, greaterThanOrEqualTo(0));
-    final routeTail = router.substring(
+    final nextRoute = router.indexOf('\n      GoRoute(', routeStart + 1);
+    final routeBlock = router.substring(
       routeStart,
-      (routeStart + 700).clamp(0, router.length),
+      nextRoute < 0 ? router.length : nextRoute,
     );
-    expect(routeTail, contains('CommunityInviteLandingPage'));
-    expect(routeTail, isNot(contains('PremiumRouteGlassGate')));
+    expect(routeBlock, contains('CommunityInviteLandingPage'));
+    expect(routeBlock, isNot(contains('PremiumRouteGlassGate')));
 
     expect(page, contains('previewCommunityInvite'));
     expect(page, contains('acceptCommunityInvite'));
