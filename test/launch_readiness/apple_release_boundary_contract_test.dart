@@ -143,9 +143,10 @@ void main() {
     final cloudTransport = File(
       'lib/features/cloud_platform/services/supabase_cloud_transport.dart',
     ).readAsStringSync();
-    final community = File(
+    final community = [
       'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+      'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final auth = File(
       'lib/features/auth/supabase_auth_service.dart',
     ).readAsStringSync();
