@@ -40,6 +40,12 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   CommunityMessagePermission _messages = CommunityMessagePermission.friends;
   bool _allowFriendRequests = true;
   bool _allowFollows = false;
+  bool _showFollowers = true;
+  bool _showFollowing = true;
+  bool _showFriends = true;
+  bool _showPosts = true;
+  bool _showMembershipTier = false;
+  String? _countryCode;
   bool _saving = false;
   bool _photoBusy = false;
   String? _avatarUrl;
@@ -102,6 +108,12 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     _messages = profile.allowMessagesFrom;
     _allowFriendRequests = profile.allowFriendRequests;
     _allowFollows = profile.allowFollows;
+    _showFollowers = profile.showFollowers;
+    _showFollowing = profile.showFollowing;
+    _showFriends = profile.showFriends;
+    _showPosts = profile.showPosts;
+    _showMembershipTier = profile.showMembershipTier;
+    _countryCode = profile.countryCode;
   }
 
   void _retryLoad() {
@@ -144,6 +156,14 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         allowFriendRequests: _allowFriendRequests,
         allowFollows: _allowFollows,
         allowMessagesFrom: _messages,
+      );
+      await _repository!.saveMyProfilePrivacy(
+        countryCode: _countryCode,
+        showFollowers: _showFollowers,
+        showFollowing: _showFollowing,
+        showFriends: _showFriends,
+        showPosts: _showPosts,
+        showMembershipTier: _showMembershipTier,
       );
       final identity = _identity?.chosen == true
           ? _identity!
@@ -442,6 +462,111 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                             : (value) => setState(
                                 () => _messages = value ?? _messages,
                               ),
+                      ),
+                      const Divider(height: 32),
+                      Text(
+                        communityText(
+                          context,
+                          'Community profile privacy',
+                          'خصوصية ملف المجتمع',
+                        ),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        communityText(
+                          context,
+                          'Choose which social sections other members can see. Health data is never included.',
+                          'اختر الأقسام الاجتماعية التي يمكن للأعضاء الآخرين رؤيتها. لا يتم تضمين البيانات الصحية أبدًا.',
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      SwitchListTile.adaptive(
+                        key: const Key('community-profile-show-posts'),
+                        contentPadding: EdgeInsets.zero,
+                        value: _showPosts,
+                        onChanged: _saving
+                            ? null
+                            : (value) => setState(() => _showPosts = value),
+                        title: Text(
+                          communityText(
+                            context,
+                            'Show posts on my profile',
+                            'إظهار منشوراتي في ملفي',
+                          ),
+                        ),
+                      ),
+                      SwitchListTile.adaptive(
+                        key: const Key('community-profile-show-friends'),
+                        contentPadding: EdgeInsets.zero,
+                        value: _showFriends,
+                        onChanged: _saving
+                            ? null
+                            : (value) => setState(() => _showFriends = value),
+                        title: Text(
+                          communityText(
+                            context,
+                            'Show friends',
+                            'إظهار الأصدقاء',
+                          ),
+                        ),
+                      ),
+                      SwitchListTile.adaptive(
+                        key: const Key('community-profile-show-followers'),
+                        contentPadding: EdgeInsets.zero,
+                        value: _showFollowers,
+                        onChanged: _saving
+                            ? null
+                            : (value) =>
+                                  setState(() => _showFollowers = value),
+                        title: Text(
+                          communityText(
+                            context,
+                            'Show followers',
+                            'إظهار المتابعين',
+                          ),
+                        ),
+                      ),
+                      SwitchListTile.adaptive(
+                        key: const Key('community-profile-show-following'),
+                        contentPadding: EdgeInsets.zero,
+                        value: _showFollowing,
+                        onChanged: _saving
+                            ? null
+                            : (value) =>
+                                  setState(() => _showFollowing = value),
+                        title: Text(
+                          communityText(
+                            context,
+                            'Show following',
+                            'إظهار الحسابات التي أتابعها',
+                          ),
+                        ),
+                      ),
+                      SwitchListTile.adaptive(
+                        key: const Key(
+                          'community-profile-show-membership-tier',
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        value: _showMembershipTier,
+                        onChanged: _saving
+                            ? null
+                            : (value) =>
+                                  setState(() => _showMembershipTier = value),
+                        title: Text(
+                          communityText(
+                            context,
+                            'Show membership tier',
+                            'إظهار فئة العضوية',
+                          ),
+                        ),
+                        subtitle: Text(
+                          communityText(
+                            context,
+                            'Off by default. BIL Gold and Community XP remain separate from your subscription.',
+                            'متوقف افتراضيًا. يبقى BIL Gold وCommunity XP منفصلين عن اشتراكك.',
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       FilledButton.icon(
