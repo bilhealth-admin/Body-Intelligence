@@ -279,10 +279,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
               ),
               Expanded(
                 child: TabBarView(
-                  children: [
-                    _buildEarnTab(data.quests),
-                    _buildHistoryTab(),
-                  ],
+                  children: [_buildEarnTab(data.quests), _buildHistoryTab()],
                 ),
               ),
             ],
@@ -371,13 +368,15 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   }
 
   Widget _buildHistoryTab() {
-    final visible = _history.where((entry) {
-      return switch (_historyFilter) {
-        _HistoryFilter.all => true,
-        _HistoryFilter.earned => entry.earned,
-        _HistoryFilter.used => entry.used,
-      };
-    }).toList(growable: false);
+    final visible = _history
+        .where((entry) {
+          return switch (_historyFilter) {
+            _HistoryFilter.all => true,
+            _HistoryFilter.earned => entry.earned,
+            _HistoryFilter.used => entry.used,
+          };
+        })
+        .toList(growable: false);
 
     return RefreshIndicator(
       onRefresh: _reloadAfterMutation,
@@ -577,38 +576,32 @@ class _QuestCard extends StatelessWidget {
               alignment: AlignmentDirectional.centerEnd,
               child: switch (quest.state) {
                 CommunityQuestState.go => FilledButton(
-                    onPressed: actionAvailable ? onGo : null,
-                    child: Text(communityText(context, 'Go', 'ابدأ')),
-                  ),
+                  onPressed: actionAvailable ? onGo : null,
+                  child: Text(communityText(context, 'Go', 'ابدأ')),
+                ),
                 CommunityQuestState.pending => FilledButton.tonal(
-                    onPressed: null,
-                    child: Text(
-                      communityText(context, 'Pending', 'قيد الانتظار'),
-                    ),
+                  onPressed: null,
+                  child: Text(
+                    communityText(context, 'Pending', 'قيد الانتظار'),
                   ),
+                ),
                 CommunityQuestState.readyToClaim => FilledButton.icon(
-                    key: Key('community-quest-claim-${quest.questKey}'),
-                    onPressed: claiming ? null : onClaim,
-                    icon: claiming
-                        ? const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.redeem_rounded),
-                    label: Text(
-                      communityText(
-                        context,
-                        'Ready to claim',
-                        'جاهزة للاستلام',
-                      ),
-                    ),
+                  key: Key('community-quest-claim-${quest.questKey}'),
+                  onPressed: claiming ? null : onClaim,
+                  icon: claiming
+                      ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.redeem_rounded),
+                  label: Text(
+                    communityText(context, 'Ready to claim', 'جاهزة للاستلام'),
                   ),
+                ),
                 CommunityQuestState.claimed => Chip(
-                    avatar: const Icon(Icons.check_circle_outline_rounded),
-                    label: Text(
-                      communityText(context, 'Claimed', 'تم الاستلام'),
-                    ),
-                  ),
+                  avatar: const Icon(Icons.check_circle_outline_rounded),
+                  label: Text(communityText(context, 'Claimed', 'تم الاستلام')),
+                ),
               },
             ),
           ],
@@ -618,8 +611,11 @@ class _QuestCard extends StatelessWidget {
   }
 
   static String _questTitle(BuildContext context, String key) => switch (key) {
-    'quest_invite_friend_title' =>
-      communityText(context, 'Invite a friend', 'ادعُ صديقًا'),
+    'quest_invite_friend_title' => communityText(
+      context,
+      'Invite a friend',
+      'ادعُ صديقًا',
+    ),
     'quest_valuable_post_title' => communityText(
       context,
       'Create a valuable post',
@@ -633,7 +629,10 @@ class _QuestCard extends StatelessWidget {
     _ => communityText(context, 'Community quest', 'مهمة في المجتمع'),
   };
 
-  static String _questSubtitle(BuildContext context, String key) => switch (key) {
+  static String _questSubtitle(
+    BuildContext context,
+    String key,
+  ) => switch (key) {
     'quest_invite_friend_subtitle' => communityText(
       context,
       'Rewards unlock only after the verified friend relationship qualifies.',
@@ -698,9 +697,9 @@ class _GoldHistoryTile extends StatelessWidget {
     leading: const BilGoldCoin(size: 34),
     title: Text(_title(context)),
     subtitle: Text(
-      MaterialLocalizations.of(context).formatCompactDate(
-        entry.createdAt.toLocal(),
-      ),
+      MaterialLocalizations.of(
+        context,
+      ).formatCompactDate(entry.createdAt.toLocal()),
     ),
     trailing: Text(
       '${entry.delta > 0 ? '+' : ''}${entry.delta}',
@@ -724,11 +723,7 @@ class _GoldHistoryTile extends StatelessWidget {
       'AI Coach usage',
       'استخدام مدرب الذكاء الاصطناعي',
     ),
-    'reversal' => communityText(
-      context,
-      'Balance adjustment',
-      'تسوية الرصيد',
-    ),
+    'reversal' => communityText(context, 'Balance adjustment', 'تسوية الرصيد'),
     _ => communityText(context, 'BIL Gold activity', 'نشاط BIL Gold'),
   };
 }
@@ -806,10 +801,8 @@ class _RewardsMessageState extends StatelessWidget {
 }
 
 class _RewardsSnapshot {
-  const _RewardsSnapshot({
-    required this.balance,
-    required this.quests,
-  }) : signedOut = false;
+  const _RewardsSnapshot({required this.balance, required this.quests})
+    : signedOut = false;
 
   const _RewardsSnapshot.signedOut()
     : balance = const CommunityGoldBalance(balance: 0),

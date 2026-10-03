@@ -94,26 +94,27 @@ void main() {
     expect(quest.completionRatio, 1);
   });
 
-  testWidgets('Rewards Center claims once and refreshes authoritative balance', (
-    tester,
-  ) async {
-    final repository = _RewardsRepository();
-    await tester.pumpWidget(
-      MaterialApp(home: CommunityRewardsPage(repository: repository)),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Rewards Center claims once and refreshes authoritative balance',
+    (tester) async {
+      final repository = _RewardsRepository();
+      await tester.pumpWidget(
+        MaterialApp(home: CommunityRewardsPage(repository: repository)),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('community-gold-balance')), findsOneWidget);
-    expect(find.text('50'), findsOneWidget);
-    expect(find.text('Complete your Community profile'), findsOneWidget);
+      expect(find.byKey(const Key('community-gold-balance')), findsOneWidget);
+      expect(find.text('50'), findsOneWidget);
+      expect(find.text('Complete your Community profile'), findsOneWidget);
 
-    await tester.tap(
-      find.byKey(const Key('community-quest-claim-qa_profile_quest')),
-    );
-    await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('community-quest-claim-qa_profile_quest')),
+      );
+      await tester.pumpAndSettle();
 
-    expect(repository.claimCalls, 1);
-    expect(find.text('75'), findsOneWidget);
-    expect(find.text('Claimed'), findsOneWidget);
-  });
+      expect(repository.claimCalls, 1);
+      expect(find.text('75'), findsOneWidget);
+      expect(find.text('Claimed'), findsOneWidget);
+    },
+  );
 }

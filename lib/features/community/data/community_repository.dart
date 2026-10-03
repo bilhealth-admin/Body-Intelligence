@@ -121,10 +121,7 @@ class CommunityRepository
     }
     final response = await _client.rpc(
       'bil_claim_community_quest_v1',
-      params: {
-        'p_quest_key': questKey,
-        'p_period_key': periodKey,
-      },
+      params: {'p_quest_key': questKey, 'p_period_key': periodKey},
     );
     if (response is! Map) {
       throw const FormatException('Invalid Community quest claim result');

@@ -85,10 +85,7 @@ class _CommunityGoldBalanceActionState
                   minHeight: 46,
                   minWidth: widget.compact ? 68 : 88,
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 9,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: .09),
                   borderRadius: BorderRadius.circular(16),

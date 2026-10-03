@@ -8,18 +8,26 @@ void main() {
       'supabase/migrations/20261003035646_community_quest_reward_engine_v1.sql',
     ).readAsStringSync();
 
-    expect(sql, contains('create table public.bil_community_quest_definitions'));
+    expect(
+      sql,
+      contains('create table public.bil_community_quest_definitions'),
+    );
     expect(sql, contains('create table public.bil_community_quest_progress'));
     expect(
       sql,
       contains('create table public.bil_community_quest_progress_events'),
     );
     expect(sql, contains('create table public.bil_community_reward_policy'));
-    expect(sql, contains('create table public.bil_community_reward_claim_audit'));
+    expect(
+      sql,
+      contains('create table public.bil_community_reward_claim_audit'),
+    );
     expect(sql, contains('active boolean not null default false'));
     expect(
       sql,
-      contains('max_quest_gold_per_owner_per_utc_day bigint not null default 0'),
+      contains(
+        'max_quest_gold_per_owner_per_utc_day bigint not null default 0',
+      ),
     );
     expect(
       sql,
@@ -39,9 +47,7 @@ void main() {
     expect(sql, contains('public.bil_claim_community_quest_v1'));
     expect(
       sql,
-      contains(
-        'revoke all on function private.bil_record_community_action_v1',
-      ),
+      contains('revoke all on function private.bil_record_community_action_v1'),
     );
     expect(sql, isNot(contains('grant execute on function private.')));
   });

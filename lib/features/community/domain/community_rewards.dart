@@ -6,13 +6,11 @@ enum CommunityQuestCadence {
   const CommunityQuestCadence(this.wireValue);
   final String wireValue;
 
-  static CommunityQuestCadence fromWire(Object? value) =>
-      values.firstWhere(
-        (item) => item.wireValue == value,
-        orElse: () => throw const FormatException(
-          'Invalid Community quest cadence',
-        ),
-      );
+  static CommunityQuestCadence fromWire(Object? value) => values.firstWhere(
+    (item) => item.wireValue == value,
+    orElse: () =>
+        throw const FormatException('Invalid Community quest cadence'),
+  );
 }
 
 enum CommunityQuestClaimMode {
@@ -22,13 +20,11 @@ enum CommunityQuestClaimMode {
   const CommunityQuestClaimMode(this.wireValue);
   final String wireValue;
 
-  static CommunityQuestClaimMode fromWire(Object? value) =>
-      values.firstWhere(
-        (item) => item.wireValue == value,
-        orElse: () => throw const FormatException(
-          'Invalid Community quest claim mode',
-        ),
-      );
+  static CommunityQuestClaimMode fromWire(Object? value) => values.firstWhere(
+    (item) => item.wireValue == value,
+    orElse: () =>
+        throw const FormatException('Invalid Community quest claim mode'),
+  );
 }
 
 enum CommunityQuestState {
@@ -40,13 +36,10 @@ enum CommunityQuestState {
   const CommunityQuestState(this.wireValue);
   final String wireValue;
 
-  static CommunityQuestState fromWire(Object? value) =>
-      values.firstWhere(
-        (item) => item.wireValue == value,
-        orElse: () => throw const FormatException(
-          'Invalid Community quest state',
-        ),
-      );
+  static CommunityQuestState fromWire(Object? value) => values.firstWhere(
+    (item) => item.wireValue == value,
+    orElse: () => throw const FormatException('Invalid Community quest state'),
+  );
 }
 
 enum CommunityQuestClaimStatus {
@@ -57,13 +50,11 @@ enum CommunityQuestClaimStatus {
   const CommunityQuestClaimStatus(this.wireValue);
   final String wireValue;
 
-  static CommunityQuestClaimStatus fromWire(Object? value) =>
-      values.firstWhere(
-        (item) => item.wireValue == value,
-        orElse: () => throw const FormatException(
-          'Invalid Community quest claim status',
-        ),
-      );
+  static CommunityQuestClaimStatus fromWire(Object? value) => values.firstWhere(
+    (item) => item.wireValue == value,
+    orElse: () =>
+        throw const FormatException('Invalid Community quest claim status'),
+  );
 }
 
 int _rewardInt(Object? value, {required String field, bool nullable = false}) {
@@ -211,10 +202,7 @@ class CommunityQuest {
     final subtitleCopyKey = json['subtitle_copy_key'];
     final actionKind = json['action_kind'];
     final periodKey = json['period_key'];
-    final targetCount = _rewardInt(
-      json['target_count'],
-      field: 'target_count',
-    );
+    final targetCount = _rewardInt(json['target_count'], field: 'target_count');
     final progress = _rewardInt(json['progress'], field: 'progress');
     final goldReward = _rewardInt(json['gold_reward'], field: 'gold_reward');
     final xpReward = _rewardInt(json['xp_reward'], field: 'xp_reward');
@@ -289,12 +277,8 @@ class CommunityQuestClaimResult {
     return CommunityQuestClaimResult(
       status: CommunityQuestClaimStatus.fromWire(json['status']),
       duplicate: duplicate as bool? ?? false,
-      gold: json['gold'] == null
-          ? 0
-          : _rewardInt(json['gold'], field: 'gold'),
-      xp: json['xp'] == null
-          ? 0
-          : _rewardInt(json['xp'], field: 'xp'),
+      gold: json['gold'] == null ? 0 : _rewardInt(json['gold'], field: 'gold'),
+      xp: json['xp'] == null ? 0 : _rewardInt(json['xp'], field: 'xp'),
       reason: reason as String?,
     );
   }
