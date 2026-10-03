@@ -24,8 +24,10 @@ class _FeedTabState extends State<_FeedTab>
   Future<CommunityPolicyState>? _policyState;
   String? _policyLocale;
   final _draft = _CommunityComposerDraft();
+  @override
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
       <String, CommunityPostReferenceMetadata>{};
+  @override
   final Map<String, int> _viewCountByPost = <String, int>{};
   bool _managingPost = false;
   bool _openingComposer = false;
