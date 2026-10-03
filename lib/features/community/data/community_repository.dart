@@ -6,6 +6,7 @@ import '../../../app/localization/bil_locale_policy.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_circles.dart';
+import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
 import '../domain/community_referral.dart';
 import '../domain/community_rewards.dart';
@@ -104,6 +105,46 @@ class CommunityRepository
     }
     return CommunityReferralAttribution.fromJson(
       Map<String, dynamic>.from(response),
+    );
+  }
+
+  @override
+  Future<List<CommunityFeedReference>> loadCommunityFeedReferences({
+    required CommunityFeedMode mode,
+    int? beforePriority,
+    DateTime? before,
+    String? beforeId,
+    int limit = 30,
+  }) async {
+    if ((beforePriority == null) != (before == null) ||
+        (before == null) != (beforeId == null) ||
+        (beforeId != null && !_uuid.hasMatch(beforeId)) ||
+        limit < 1 ||
+        limit > 60) {
+      throw ArgumentError('Invalid Community feed cursor');
+    }
+    final response = await _client.rpc(
+      'bil_community_feed_refs_v1',
+      params: {
+        'p_mode': mode.wireValue,
+        'p_before_priority': beforePriority,
+        'p_before': before?.toUtc().toIso8601String(),
+        'p_before_id': beforeId,
+        'p_limit': limit,
+      },
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community feed references');
+    }
+    return List<CommunityFeedReference>.unmodifiable(
+      response.map((row) {
+        if (row is! Map) {
+          throw const FormatException('Invalid Community feed reference');
+        }
+        return CommunityFeedReference.fromJson(
+          Map<String, dynamic>.from(row),
+        );
+      }),
     );
   }
 
