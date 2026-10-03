@@ -20,6 +20,7 @@ import tempfile
 BUNDLE_ID = "com.bilhealth.bodyintelligencelog"
 ANDROID_PACKAGE_NAME = "com.bilhealth.bodyintelligencelog"
 APP_LINK_PATHS = ("/auth/callback", "/auth/reset-password")
+PUBLIC_COMMUNITY_PATHS = ("/invite/*",)
 _TEAM_ID_PATTERN = re.compile(r"^[A-Z0-9]{10}$")
 _SHA256_PATTERN = re.compile(r"^[A-F0-9]{64}$")
 _REJECTED_MARKERS = ("EXAMPLE", "PLACEHOLDER", "REPLACE", "YOUR_")
@@ -67,8 +68,14 @@ def _documents(*, team_id: str, fingerprint: str) -> tuple[object, object]:
                 {
                     "appIDs": [app_id],
                     "components": [
-                        {"/": path, "comment": "BIL authenticated return"}
-                        for path in APP_LINK_PATHS
+                        *[
+                            {"/": path, "comment": "BIL authenticated return"}
+                            for path in APP_LINK_PATHS
+                        ],
+                        *[
+                            {"/": path, "comment": "BIL Community invitation"}
+                            for path in PUBLIC_COMMUNITY_PATHS
+                        ],
                     ],
                 }
             ]
