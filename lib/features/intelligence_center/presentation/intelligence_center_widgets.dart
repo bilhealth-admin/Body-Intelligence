@@ -304,6 +304,9 @@ class _CoachHero extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 identity,
+                const SizedBox(width: 6),
+                CommunityGoldBalanceAction(compact: compact),
+                const SizedBox(width: 6),
                 _CoachHeroControl(
                   tooltip: intelligenceText(
                     context,
