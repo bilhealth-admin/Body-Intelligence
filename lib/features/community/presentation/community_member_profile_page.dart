@@ -118,48 +118,10 @@ class _CommunityMemberProfilePageState
     }
     setState(() => _relationshipBusy = true);
     try {
-      final result = await repository.requestFriend(profile.userId);
-      if (!mounted) return;
-      final next = switch (result) {
-        CommunityFriendRequestStatus.pending =>
-          CommunityRelationshipStatus.pending,
-        CommunityFriendRequestStatus.incoming =>
-          CommunityRelationshipStatus.incoming,
-        CommunityFriendRequestStatus.accepted =>
-          CommunityRelationshipStatus.accepted,
-        CommunityFriendRequestStatus.declined =>
-          CommunityRelationshipStatus.none,
-      };
+      await repository.requestFriend(profile.userId);
       final refreshed = await repository.loadProfileOverview(profile.userId);
       if (!mounted) return;
-      setState(() {
-        _profile = CommunityProfileOverview(
-          userId: refreshed.userId,
-          displayName: refreshed.displayName,
-          avatarUrl: refreshed.avatarUrl,
-          bio: refreshed.bio,
-          localeCode: refreshed.localeCode,
-          countryCode: refreshed.countryCode,
-          handle: refreshed.handle,
-          isSelf: refreshed.isSelf,
-          relationship: next,
-          allowFriendRequests: refreshed.allowFriendRequests,
-          allowFollows: refreshed.allowFollows,
-          showFollowers: refreshed.showFollowers,
-          showFollowing: refreshed.showFollowing,
-          showFriends: refreshed.showFriends,
-          showPosts: refreshed.showPosts,
-          showMembershipTier: refreshed.showMembershipTier,
-          followerCount: refreshed.followerCount,
-          followingCount: refreshed.followingCount,
-          friendCount: refreshed.friendCount,
-          postCount: refreshed.postCount,
-          communityXp: refreshed.communityXp,
-          communityLevel: refreshed.communityLevel,
-          communityLevelCopyKey: refreshed.communityLevelCopyKey,
-          goldBalance: refreshed.goldBalance,
-        );
-      });
+      setState(() => _profile = refreshed);
     } catch (_) {
       if (mounted) _showFailure();
     } finally {
@@ -264,37 +226,36 @@ class _CommunityMemberProfilePageState
 
     setState(() => _managingPost = true);
     try {
-      switch (action) {
-        case 'report':
-          await repository.report(
-            targetKind: 'post',
-            targetId: post.id,
-            reason: 'user_reported_from_profile',
-          );
-        case 'delete':
-          await repository.deletePost(post.id);
-          if (mounted) {
-            setState(() => _posts.removeWhere((item) => item.id == post.id));
-          }
-        case 'block':
-          await repository.blockMember(post.authorId);
-          if (mounted) context.pop();
-        case 'moderate_remove':
-          await repository.removePublishedPostAsModerator(
-            postId: post.id,
-            reason: moderationReason!,
-          );
-          if (mounted) {
-            setState(() => _posts.removeWhere((item) => item.id == post.id));
-          }
-        case 'moderate_hide':
-          await repository.hidePublishedPostAsModerator(
-            postId: post.id,
-            reason: moderationReason!,
-          );
-          if (mounted) {
-            setState(() => _posts.removeWhere((item) => item.id == post.id));
-          }
+      if (action == 'report') {
+        await repository.report(
+          targetKind: 'post',
+          targetId: post.id,
+          reason: 'user_reported_from_profile',
+        );
+      } else if (action == 'delete') {
+        await repository.deletePost(post.id);
+        if (mounted) {
+          setState(() => _posts.removeWhere((item) => item.id == post.id));
+        }
+      } else if (action == 'block') {
+        await repository.blockMember(post.authorId);
+        if (mounted) context.pop();
+      } else if (action == 'moderate_remove') {
+        await repository.removePublishedPostAsModerator(
+          postId: post.id,
+          reason: moderationReason!,
+        );
+        if (mounted) {
+          setState(() => _posts.removeWhere((item) => item.id == post.id));
+        }
+      } else if (action == 'moderate_hide') {
+        await repository.hidePublishedPostAsModerator(
+          postId: post.id,
+          reason: moderationReason!,
+        );
+        if (mounted) {
+          setState(() => _posts.removeWhere((item) => item.id == post.id));
+        }
       }
       if (mounted && action == 'report') {
         ScaffoldMessenger.of(context).showSnackBar(
