@@ -170,15 +170,15 @@ class CommunityNotification {
         rawEntityId ?? (legacyFriendAccepted ? friendshipId : null);
     final copyKey =
         rawCopyKey ?? (legacyFriendAccepted ? 'friend_accepted_v1' : null);
-    final deepLinkPath = rawDeepLinkPath ??
+    final deepLinkPath =
+        rawDeepLinkPath ??
         (legacyFriendAccepted ? '/community/notifications' : null);
     final metadata = rawMetadata ?? const <String, dynamic>{};
 
     if (id is! String ||
         !_uuid.hasMatch(id) ||
         kind == null ||
-        (actorId != null &&
-            (actorId is! String || !_uuid.hasMatch(actorId))) ||
+        (actorId != null && (actorId is! String || !_uuid.hasMatch(actorId))) ||
         (actorDisplayName != null &&
             (actorDisplayName is! String ||
                 actorDisplayName.trim().isEmpty ||
