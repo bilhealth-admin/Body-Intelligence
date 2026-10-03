@@ -161,7 +161,8 @@ class CommunityRepository
   }) async {
     if (!_uuid.hasMatch(postId) ||
         (slug != null &&
-            (slug.length > 48 || !CommunityCircle.slugPattern.hasMatch(slug)))) {
+            (slug.length > 48 ||
+                !CommunityCircle.slugPattern.hasMatch(slug)))) {
       throw ArgumentError('Invalid Community post circle');
     }
     final response = await _client.rpc(

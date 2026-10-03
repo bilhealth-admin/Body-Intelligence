@@ -66,35 +66,38 @@ void main() {
     );
   });
 
-  test('Flutter circles expose real membership, feed, and composer contracts', () {
-    final repository = File(
-      'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
-    final mixin = File(
-      'lib/features/community/data/community_feed_repository_mixin.dart',
-    ).readAsStringSync();
-    final page = File(
-      'lib/features/community/presentation/community_circles_page.dart',
-    ).readAsStringSync();
-    final composer = File(
-      'lib/features/community/presentation/community_post_composer_page.dart',
-    ).readAsStringSync();
-    final hub = File(
-      'lib/features/community/presentation/community_hub_page.dart',
-    ).readAsStringSync();
+  test(
+    'Flutter circles expose real membership, feed, and composer contracts',
+    () {
+      final repository = File(
+        'lib/features/community/data/community_repository.dart',
+      ).readAsStringSync();
+      final mixin = File(
+        'lib/features/community/data/community_feed_repository_mixin.dart',
+      ).readAsStringSync();
+      final page = File(
+        'lib/features/community/presentation/community_circles_page.dart',
+      ).readAsStringSync();
+      final composer = File(
+        'lib/features/community/presentation/community_post_composer_page.dart',
+      ).readAsStringSync();
+      final hub = File(
+        'lib/features/community/presentation/community_hub_page.dart',
+      ).readAsStringSync();
 
-    expect(repository, contains('bil_list_community_circles_v1'));
-    expect(repository, contains('bil_join_community_circle_v1'));
-    expect(repository, contains('bil_leave_community_circle_v1'));
-    expect(repository, contains('bil_set_my_community_post_circle_v1'));
-    expect(repository, contains('bil_community_circle_post_refs_v1'));
-    expect(repository, contains('publishPostWithTopicsAndCircle'));
-    expect(repository, contains('publishPostWithImageTopicsAndCircle'));
-    expect(mixin, contains('loadCommunityCirclePosts'));
-    expect(page, contains('community-circles-list'));
-    expect(page, contains('community-circle-membership-'));
-    expect(composer, contains('community-composer-circle-'));
-    expect(hub, contains("part 'community_circles_page.dart';"));
-    expect(hub, contains("case 'circles':"));
-  });
+      expect(repository, contains('bil_list_community_circles_v1'));
+      expect(repository, contains('bil_join_community_circle_v1'));
+      expect(repository, contains('bil_leave_community_circle_v1'));
+      expect(repository, contains('bil_set_my_community_post_circle_v1'));
+      expect(repository, contains('bil_community_circle_post_refs_v1'));
+      expect(repository, contains('publishPostWithTopicsAndCircle'));
+      expect(repository, contains('publishPostWithImageTopicsAndCircle'));
+      expect(mixin, contains('loadCommunityCirclePosts'));
+      expect(page, contains('community-circles-list'));
+      expect(page, contains('community-circle-membership-'));
+      expect(composer, contains('community-composer-circle-'));
+      expect(hub, contains("part 'community_circles_page.dart';"));
+      expect(hub, contains("case 'circles':"));
+    },
+  );
 }
