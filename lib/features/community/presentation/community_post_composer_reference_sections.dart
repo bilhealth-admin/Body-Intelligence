@@ -80,7 +80,7 @@ extension _CommunityPostComposerReferenceSections
                 _CommunityPostComposerReferenceActions(this)._addHashtag(),
             decoration: InputDecoration(
               prefixText: '#',
-              hintText: communityText(context, 'healthyhabits', 'عادات_صحية'),
+              hintText: 'progress',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
