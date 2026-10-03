@@ -11,6 +11,23 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
   final CommunityRepository repository;
   final bool compact;
 
+  String _collaboratorLabel(
+    BuildContext context,
+    CommunityPostCollaborator collaborator,
+  ) {
+    final identity = collaborator.handle?.isNotEmpty == true
+        ? '@${collaborator.handle!}'
+        : collaborator.displayName;
+    final status = switch (collaborator.status) {
+      CommunityCollaborationStatus.accepted => '',
+      CommunityCollaborationStatus.pending =>
+        ' · ${communityText(context, 'Pending', 'قيد الانتظار')}',
+      CommunityCollaborationStatus.declined =>
+        ' · ${communityText(context, 'Declined', 'مرفوض')}',
+    };
+    return '$identity$status';
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = metadata.title?.trim();
@@ -61,21 +78,7 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
                     networkUrl: collaborator.avatarUrl,
                   ),
                   label: Text(
-                    (collaborator.handle?.isNotEmpty == true
-                            ? '@' + collaborator.handle!
-                            : collaborator.displayName) +
-                        switch (collaborator.status) {
-                          CommunityCollaborationStatus.accepted => '',
-                          CommunityCollaborationStatus.pending =>
-                            ' · ' +
-                                communityText(
-                                  context,
-                                  'Pending',
-                                  'قيد الانتظار',
-                                ),
-                          CommunityCollaborationStatus.declined =>
-                            ' · ' + communityText(context, 'Declined', 'مرفوض'),
-                        },
+                    _collaboratorLabel(context, collaborator),
                   ),
                   side:
                       collaborator.status ==
@@ -104,7 +107,7 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
             children: [
               for (final hashtag in metadata.hashtags)
                 Text(
-                  '#' + hashtag,
+                  '#$hashtag',
                   textDirection: TextDirection.ltr,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
