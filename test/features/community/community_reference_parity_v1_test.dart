@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_reference.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
@@ -183,6 +185,41 @@ class _ReferenceParityRepository extends CommunityRepository {
 }
 
 void main() {
+  test('reference Community copy closes every production locale', () {
+    expect(CommunityReferenceRuntimeCopy.sources, hasLength(88));
+    expect(CommunityReferenceRuntimeCopy.supported, hasLength(23));
+    expect(CommunityReferenceRuntimeCopy.balanced, isTrue);
+    expect(
+      CommunityReferenceRuntimeCopy.supported,
+      BilLocalePolicy.productionTags
+          .where((tag) => tag != 'en' && tag != 'ar')
+          .toSet(),
+    );
+
+    for (final tag in CommunityReferenceRuntimeCopy.supported) {
+      for (final source in CommunityReferenceRuntimeCopy.sources) {
+        final translated = CommunityReferenceRuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        expect(translated, isNot(source), reason: '$tag: $source');
+        final expectedPlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(source).map((match) => match.group(0)).toList();
+        final actualPlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(translated).map((match) => match.group(0)).toList();
+        expect(
+          actualPlaceholders,
+          expectedPlaceholders,
+          reason: '$tag: $source',
+        );
+        if (source.contains('BIL')) {
+          expect(translated, contains('BIL'), reason: '$tag: $source');
+        }
+      }
+    }
+  });
+
   test('reference parity migration is authoritative and privacy bounded', () {
     final sql = File(
       'supabase/migrations/20261003210000_community_reference_profile_creator_v1.sql',
