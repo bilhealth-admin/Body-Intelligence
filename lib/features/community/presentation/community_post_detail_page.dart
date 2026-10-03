@@ -853,7 +853,10 @@ class _CommunityPostDetailHeader extends StatelessWidget {
           ],
           if (referenceMetadata case final metadata?) ...[
             const SizedBox(height: 12),
-            _CommunityPostReferenceBlock(metadata: metadata),
+            _CommunityPostReferenceBlock(
+              metadata: metadata,
+              repository: widget.repository,
+            ),
           ],
           if (post.hasImage) ...[
             const SizedBox(height: 14),
