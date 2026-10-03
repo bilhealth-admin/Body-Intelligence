@@ -27,6 +27,7 @@ class _CommunityNotificationsPageState
   CommunityRepository? _repository;
   late Future<_CommunityUpdates> _updates;
   final Set<String> _markingSeen = <String>{};
+  final Set<String> _respondingCollaboration = <String>{};
   CommunityAttentionController? _attentionController;
   int? _lastCommunityUpdates;
   _ActivityFilter _filter = _ActivityFilter.all;
@@ -123,6 +124,102 @@ class _CommunityNotificationsPageState
     }
   }
 
+  Future<void> _respondCollaboration(
+    CommunityNotification notification, {
+    required bool accept,
+  }) async {
+    final repository = _repository;
+    if (repository == null ||
+        notification.entityKind != 'post' ||
+        !_respondingCollaboration.add(notification.id)) {
+      return;
+    }
+    setState(() {});
+    try {
+      await repository.respondCommunityCollaboration(
+        postId: notification.entityId,
+        accept: accept,
+      );
+      if (!notification.seen) {
+        await repository.markCommunityNotificationsSeen([notification.id]);
+      }
+      if (!mounted) return;
+      await CommunityAttentionScope.refresh(context);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            accept
+                ? communityText(
+                    context,
+                    'Collaboration accepted.',
+                    'تم قبول التعاون.',
+                  )
+                : communityText(
+                    context,
+                    'Collaboration declined.',
+                    'تم رفض التعاون.',
+                  ),
+          ),
+        ),
+      );
+      _retry();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not update this collaboration. Try again.',
+              'تعذر تحديث هذا التعاون. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      _respondingCollaboration.remove(notification.id);
+      if (mounted) setState(() {});
+    }
+  }
+
+  Widget _notificationTrailing(CommunityNotification notification) {
+    if (notification.kind != CommunityNotificationKind.collaborationInvite) {
+      return Icon(
+        Directionality.of(context) == TextDirection.rtl
+            ? Icons.chevron_left_rounded
+            : Icons.chevron_right_rounded,
+      );
+    }
+    final busy = _respondingCollaboration.contains(notification.id);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          key: Key('community-collab-decline-' + notification.id),
+          tooltip: communityText(context, 'Decline', 'رفض'),
+          onPressed: busy
+              ? null
+              : () => _respondCollaboration(notification, accept: false),
+          icon: const Icon(Icons.close_rounded),
+        ),
+        IconButton(
+          key: Key('community-collab-accept-' + notification.id),
+          tooltip: communityText(context, 'Accept', 'قبول'),
+          onPressed: busy
+              ? null
+              : () => _respondCollaboration(notification, accept: true),
+          icon: busy
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.check_rounded),
+        ),
+      ],
+    );
+  }
+
   String _routeFor(CommunityNotification notification) {
     const liveRoutes = {
       '/community',
@@ -150,7 +247,9 @@ class _CommunityNotificationsPageState
       CommunityNotificationKind.rewardEarned ||
       CommunityNotificationKind.questCompleted => '/community/rewards',
       CommunityNotificationKind.badgeEarned ||
-      CommunityNotificationKind.challengeUpdate => '/community',
+      CommunityNotificationKind.challengeUpdate ||
+      CommunityNotificationKind.collaborationInvite ||
+      CommunityNotificationKind.collaborationAccepted => '/community',
     };
   }
 
@@ -159,7 +258,11 @@ class _CommunityNotificationsPageState
     _ActivityFilter.friends =>
       notification.kind == CommunityNotificationKind.friendRequest ||
           notification.kind == CommunityNotificationKind.friendAccepted ||
-          notification.kind == CommunityNotificationKind.follow,
+          notification.kind == CommunityNotificationKind.follow ||
+          notification.kind ==
+              CommunityNotificationKind.collaborationInvite ||
+          notification.kind ==
+              CommunityNotificationKind.collaborationAccepted,
     _ActivityFilter.reactions =>
       notification.kind == CommunityNotificationKind.postLike ||
           notification.kind == CommunityNotificationKind.postSave,
@@ -294,6 +397,30 @@ class _CommunityNotificationsPageState
         'Challenge update',
         'تحديث للتحدي',
       ),
+      CommunityNotificationKind.collaborationInvite =>
+        actor == null
+            ? communityText(
+                context,
+                'Collaboration invitation',
+                'دعوة للتعاون',
+              )
+            : communityText(
+                context,
+                '{actor} invited you to collaborate on a post',
+                '{actor} دعاك للتعاون على منشور',
+              ).replaceAll('{actor}', actor),
+      CommunityNotificationKind.collaborationAccepted =>
+        actor == null
+            ? communityText(
+                context,
+                'Collaboration invitation accepted',
+                'تم قبول دعوة التعاون',
+              )
+            : communityText(
+                context,
+                '{actor} accepted your collaboration invitation',
+                '{actor} قبل دعوة التعاون الخاصة بك',
+              ).replaceAll('{actor}', actor),
     };
   }
 
@@ -452,12 +579,12 @@ class _CommunityNotificationsPageState
                         ? communityText(context, 'Seen', 'تمت المشاهدة')
                         : communityText(context, 'New', 'جديد'),
                   ),
-                  trailing: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_left_rounded
-                        : Icons.chevron_right_rounded,
-                  ),
-                  onTap: () => _openNotification(notification),
+                  trailing: _notificationTrailing(notification),
+                  onTap:
+                      notification.kind ==
+                          CommunityNotificationKind.collaborationInvite
+                      ? null
+                      : () => _openNotification(notification),
                 ),
               ),
             if (_filter == _ActivityFilter.all && updates.incomingRequests > 0)
