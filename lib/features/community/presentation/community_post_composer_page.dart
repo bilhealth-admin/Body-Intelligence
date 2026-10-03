@@ -11,6 +11,9 @@ class _CommunityComposerDraft {
   String pollQuestion = '';
   final List<String> pollOptions = <String>['', ''];
   bool pollAllowMultiple = false;
+  String locationLabel = '';
+  final List<CommunityMentionCandidate> mentions =
+      <CommunityMentionCandidate>[];
 }
 
 class _CommunityPostComposerPage extends StatefulWidget {
@@ -32,6 +35,10 @@ class _CommunityPostComposerPageState
     extends State<_CommunityPostComposerPage> {
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
+  late final _location = TextEditingController(
+    text: widget.draft.locationLabel,
+  );
+  final _mentionQuery = TextEditingController();
   late final List<CommunityPostImageDraft> _selectedImages =
       List<CommunityPostImageDraft>.from(widget.draft.images);
   late final Future<List<CommunityTopic>> _topics = widget.repository
@@ -44,11 +51,16 @@ class _CommunityPostComposerPageState
   TextDirection? _composerDirection;
   String? _composerError;
   String? _submitError;
+  bool _mentionSearching = false;
+  List<CommunityMentionCandidate> _mentionResults =
+      const <CommunityMentionCandidate>[];
 
   @override
   void dispose() {
     _composerFocus.dispose();
     _composer.dispose();
+    _location.dispose();
+    _mentionQuery.dispose();
     super.dispose();
   }
 
