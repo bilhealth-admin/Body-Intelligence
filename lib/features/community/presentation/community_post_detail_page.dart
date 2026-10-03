@@ -380,6 +380,13 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                       liking: _likingPost,
                       onLike: _togglePostLike,
                     ),
+                    if (widget.post.poll case final poll?) ...[
+                      const SizedBox(height: 16),
+                      _CommunityPollPanel(
+                        poll: poll,
+                        repository: widget.repository,
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     Text(
                       communityText(context, 'Comments', 'التعليقات'),
