@@ -64,6 +64,8 @@ class _CommunityMemberProfilePageState
   _CommunityProfileMomentFilter _momentFilter =
       _CommunityProfileMomentFilter.all;
 
+  void _setProfileState(VoidCallback callback) => setState(callback);
+
   Future<void> _loadInitial() async {
     final repository = _repository;
     if (repository == null) return;
