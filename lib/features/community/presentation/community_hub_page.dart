@@ -218,30 +218,35 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         bottom: repository == null
             ? null
             : PreferredSize(
-                preferredSize: const Size.fromHeight(48),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _CommunityHubTopTab(
-                        key: const Key('community-hub-explore-tab'),
-                        label: communityText(context, 'Explore', 'استكشاف'),
-                        selected: _section == _CommunityHubSection.explore,
-                        onTap: () => setState(
-                          () => _section = _CommunityHubSection.explore,
+                preferredSize: Size.fromHeight(
+                  _communityHubTopTabsHeight(context),
+                ),
+                child: SizedBox(
+                  height: _communityHubTopTabsHeight(context),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _CommunityHubTopTab(
+                          key: const Key('community-hub-explore-tab'),
+                          label: communityText(context, 'Explore', 'استكشاف'),
+                          selected: _section == _CommunityHubSection.explore,
+                          onTap: () => setState(
+                            () => _section = _CommunityHubSection.explore,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: _CommunityHubTopTab(
-                        key: const Key('community-hub-circles-tab'),
-                        label: communityText(context, 'Circles', 'الدوائر'),
-                        selected: _section == _CommunityHubSection.circles,
-                        onTap: () => setState(
-                          () => _section = _CommunityHubSection.circles,
+                      Expanded(
+                        child: _CommunityHubTopTab(
+                          key: const Key('community-hub-circles-tab'),
+                          label: communityText(context, 'Circles', 'الدوائر'),
+                          selected: _section == _CommunityHubSection.circles,
+                          onTap: () => setState(
+                            () => _section = _CommunityHubSection.circles,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
       ),
@@ -372,6 +377,16 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   }
 }
 
+double _communityHubTopTabsHeight(BuildContext context) {
+  final scale = MediaQuery.textScalerOf(context).scale(1);
+  if (scale <= 1.2) return 48;
+  final baseFontSize =
+      Theme.of(context).textTheme.titleMedium?.fontSize ?? 16;
+  final scaledFontSize = MediaQuery.textScalerOf(context).scale(baseFontSize);
+  final threeLineTextHeight = scaledFontSize * 1.6 * 3;
+  return (threeLineTextHeight + 20).clamp(72.0, 190.0);
+}
+
 class _CommunityHubTopTab extends StatelessWidget {
   const _CommunityHubTopTab({
     required this.label,
@@ -393,6 +408,9 @@ class _CommunityHubTopTab extends StatelessWidget {
         const SizedBox(height: 9),
         Text(
           label,
+          maxLines: MediaQuery.textScalerOf(context).scale(1) > 1.2 ? 3 : 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
             color: selected
