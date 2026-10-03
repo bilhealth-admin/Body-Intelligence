@@ -65,7 +65,7 @@ mixin _CommunityProfileModerationRepositoryMixin {
       throw ArgumentError('Invalid Community profile connection cursor');
     }
     final response = await _client.rpc(
-      'bil_community_profile_connections_v1',
+      'bil_community_profile_connections_v2',
       params: {
         'p_user_id': userId,
         'p_kind': kind.name,

@@ -11,6 +11,7 @@ import '../domain/community_models.dart';
 import '../domain/community_polls.dart';
 import '../domain/community_post_context.dart';
 import '../domain/community_referral.dart';
+import '../domain/community_reference_parity.dart';
 import '../domain/community_rewards.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_topics.dart';
@@ -22,6 +23,7 @@ import 'community_social_repository_mixin.dart';
 part 'community_repository_connections_messaging_mixin.dart';
 part 'community_repository_discovery_mixin.dart';
 part 'community_repository_profile_moderation_mixin.dart';
+part 'community_repository_reference_parity_mixin.dart';
 part 'community_repository_publishing_mixin.dart';
 
 class CommunityRepository
@@ -30,6 +32,7 @@ class CommunityRepository
         CommunityFeedRepositoryMixin,
         _CommunityDiscoveryRepositoryMixin,
         _CommunityProfileModerationRepositoryMixin,
+        _CommunityReferenceParityRepositoryMixin,
         _CommunityPublishingRepositoryMixin,
         _CommunityConnectionsMessagingRepositoryMixin {
   CommunityRepository(this._client, {CommunityPostStoreContract? postStore})

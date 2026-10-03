@@ -92,6 +92,11 @@ class CommunityProfileOverview {
     this.communityXp,
     this.communityLevel,
     this.communityLevelCopyKey,
+    this.viewerFollows = false,
+    this.followsViewer = false,
+    this.nextCommunityLevel,
+    this.nextLevelMinXp,
+    this.currentLevelMinXp,
     this.goldBalance,
   });
 
@@ -118,6 +123,11 @@ class CommunityProfileOverview {
   final int? communityXp;
   final int? communityLevel;
   final String? communityLevelCopyKey;
+  final bool viewerFollows;
+  final bool followsViewer;
+  final int? nextCommunityLevel;
+  final int? nextLevelMinXp;
+  final int? currentLevelMinXp;
   final int? goldBalance;
 
   factory CommunityProfileOverview.fromJson(Map<String, dynamic> json) {
@@ -153,6 +163,8 @@ class CommunityProfileOverview {
     final showPosts = json['show_posts'];
     final showMembershipTier = json['show_membership_tier'];
     final levelCopyKey = json['community_level_copy_key'];
+    final viewerFollows = json['viewer_follows'] ?? false;
+    final followsViewer = json['follows_viewer'] ?? false;
 
     if (userId is! String ||
         displayName is! String ||
@@ -177,6 +189,8 @@ class CommunityProfileOverview {
         showFriends is! bool ||
         showPosts is! bool ||
         showMembershipTier is! bool ||
+        viewerFollows is! bool ||
+        followsViewer is! bool ||
         (levelCopyKey != null && levelCopyKey is! String)) {
       throw const FormatException('Invalid Community profile overview');
     }
@@ -205,6 +219,11 @@ class CommunityProfileOverview {
       communityXp: count('community_xp'),
       communityLevel: count('community_level'),
       communityLevelCopyKey: levelCopyKey as String?,
+      viewerFollows: viewerFollows,
+      followsViewer: followsViewer,
+      nextCommunityLevel: count('next_community_level'),
+      nextLevelMinXp: count('next_level_min_xp'),
+      currentLevelMinXp: count('current_level_min_xp'),
       goldBalance: count('gold_balance'),
     );
   }
@@ -239,6 +258,9 @@ class CommunityProfileConnection {
     required this.connectedAt,
     this.handle,
     this.avatarUrl,
+    this.viewerFollows = false,
+    this.followsViewer = false,
+    this.allowFollows = false,
   });
 
   final String userId;
@@ -247,6 +269,9 @@ class CommunityProfileConnection {
   final String? avatarUrl;
   final CommunityRelationshipStatus relationship;
   final DateTime connectedAt;
+  final bool viewerFollows;
+  final bool followsViewer;
+  final bool allowFollows;
 
   factory CommunityProfileConnection.fromJson(Map<String, dynamic> json) {
     final userId = json['user_id'];
@@ -254,6 +279,9 @@ class CommunityProfileConnection {
     final displayName = json['display_name'];
     final avatarUrl = json['avatar_url'];
     final relationship = json['relationship'];
+    final viewerFollows = json['viewer_follows'] ?? false;
+    final followsViewer = json['follows_viewer'] ?? false;
+    final allowFollows = json['allow_follows'] ?? false;
     final connectedAt = DateTime.tryParse(
       json['connected_at']?.toString() ?? '',
     );
@@ -269,6 +297,9 @@ class CommunityProfileConnection {
         !CommunityRelationshipStatus.values.any(
           (value) => value.name == relationship,
         ) ||
+        viewerFollows is! bool ||
+        followsViewer is! bool ||
+        allowFollows is! bool ||
         connectedAt == null) {
       throw const FormatException('Invalid Community profile connection');
     }
@@ -279,6 +310,9 @@ class CommunityProfileConnection {
       avatarUrl: avatarUrl as String?,
       relationship: CommunityRelationshipStatus.values.byName(relationship),
       connectedAt: connectedAt,
+      viewerFollows: viewerFollows,
+      followsViewer: followsViewer,
+      allowFollows: allowFollows,
     );
   }
 }
