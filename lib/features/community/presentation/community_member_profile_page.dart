@@ -38,6 +38,7 @@ class _CommunityMemberProfilePageState
       widget.repository ?? _communityProfileProductionRepository();
   CommunityProfileOverview? _profile;
   CommunityCreatorProfile? _creator;
+  String? _coverUrl;
   final List<CommunityPost> _posts = [];
   final List<CommunityProfileReview> _reviews = [];
   final List<CommunityDraftSummary> _draftSummaries = [];
@@ -104,6 +105,11 @@ class _CommunityMemberProfilePageState
       drafts = extras[2] as List<CommunityDraftSummary>;
       counts = extras[3] as Map<String, int>;
       references = extras[4] as List<CommunityPostReferenceMetadata>;
+      _coverUrl = await repository.loadCommunityProfileCoverUrl(
+        widget.userId,
+      );
+    } else {
+      _coverUrl = null;
     }
 
     _profile = profile;
@@ -506,6 +512,7 @@ class _CommunityMemberProfilePageState
                         child: _CommunityMemberProfileHeader(
                           profile: profile,
                           creator: _creator,
+                          coverUrl: _coverUrl,
                           relationshipBusy: _relationshipBusy,
                           followBusy: _followBusy,
                           onRequestFriend: _requestFriend,
