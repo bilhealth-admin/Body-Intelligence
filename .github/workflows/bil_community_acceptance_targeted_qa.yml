@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - fix/community-acceptance-notifications-20261003
-      - work/community-comments-v3-20261003
 
 permissions:
   contents: read
