@@ -56,6 +56,8 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   CommunitySocialIdentity? _identity;
   bool _profileSaved = false;
 
+  void _setProfileEditorState(VoidCallback callback) => setState(callback);
+
   @override
   void initState() {
     super.initState();
