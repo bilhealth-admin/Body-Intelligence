@@ -1052,6 +1052,95 @@ class CommunityRepository
     }
   }
 
+  Future<void> publishPostWithImagesTopicsAndCircle(
+    String body,
+    List<CommunityPostImageDraft> images, {
+    List<String> topicSlugs = const [],
+    String? circleSlug,
+  }) async {
+    await assertCommunityPublishReady();
+    _validateTopicSlugs(topicSlugs);
+    _validateCircleSlug(circleSlug);
+    if (images.isEmpty || images.length > 4) {
+      throw ArgumentError.value(images.length, 'images');
+    }
+
+    final store = _posts;
+    if (store is! CommunityPostMultiImagePublishingContract) {
+      throw StateError('Community multi-image publishing is unavailable');
+    }
+    final mediaStore = store as CommunityPostMultiImagePublishingContract;
+    try {
+      final postId = await _runCommunityMutation(
+        () => mediaStore.publishWithImagesReceipt(body, images),
+      );
+      if (postId == null) return;
+      try {
+        if (topicSlugs.isNotEmpty) {
+          await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+        }
+        if (circleSlug != null) {
+          await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+        }
+      } on Object {
+        try {
+          await store.delete(postId);
+        } on Object {
+          // The moderation-pending post remains non-public if cleanup fails.
+        }
+        rethrow;
+      }
+    } on StorageException catch (error, stackTrace) {
+      await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
+    }
+  }
+
+  Future<void> publishPostWithImagesTopicsCircleAndPoll(
+    String body,
+    List<CommunityPostImageDraft> images, {
+    List<String> topicSlugs = const [],
+    String? circleSlug,
+    required CommunityPollDraft poll,
+  }) async {
+    await assertCommunityPublishReady();
+    _validateTopicSlugs(topicSlugs);
+    _validateCircleSlug(circleSlug);
+    if (images.isEmpty || images.length > 4) {
+      throw ArgumentError.value(images.length, 'images');
+    }
+    final normalizedPoll = poll.normalized();
+
+    final store = _posts;
+    if (store is! CommunityPostMultiImagePublishingContract) {
+      throw StateError('Community multi-image publishing is unavailable');
+    }
+    final mediaStore = store as CommunityPostMultiImagePublishingContract;
+    try {
+      final postId = await _runCommunityMutation(
+        () => mediaStore.publishWithImagesReceipt(body, images),
+      );
+      if (postId == null) return;
+      try {
+        if (topicSlugs.isNotEmpty) {
+          await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+        }
+        if (circleSlug != null) {
+          await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+        }
+        await createCommunityPoll(postId: postId, draft: normalizedPoll);
+      } on Object {
+        try {
+          await store.delete(postId);
+        } on Object {
+          // The moderation-pending post remains non-public if cleanup fails.
+        }
+        rethrow;
+      }
+    } on StorageException catch (error, stackTrace) {
+      await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
+    }
+  }
+
   void _validateCircleSlug(String? slug) {
     if (slug != null &&
         (slug.length > 48 || !CommunityCircle.slugPattern.hasMatch(slug))) {
