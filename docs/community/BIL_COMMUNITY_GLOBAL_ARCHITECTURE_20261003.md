@@ -58,11 +58,11 @@ A referral can become reward-eligible only after a real distinct invitee account
 
 ## Profiles
 
-The global Community profile composes existing public profile, handle, follow/friend relationships, authored posts, reputation, badges, and privacy controls through bounded projection RPCs to avoid N+1 loading.
+The global Community profile now composes existing public profile, handle, follow/friend relationships, authored posts, reputation, and privacy controls through bounded projection RPCs to avoid N+1 loading.
 
-Own-profile UI may show exact Gold balance. Exact Gold balance is not public by default. Health/private-account data is never joined into the public Community projection.
+Production migration `20261003064812_community_profile_projection_privacy_v1` adds explicit social-visibility controls, owner-only Gold projection, public XP/level projection, cursor-paginated authored posts, and privacy-bounded Followers / Following / Friends lists. Exact Gold balance is visible only to the owner. Health/private-account data is never joined into the public Community projection.
 
-Posts support Grid and List presentation from cursor-paginated author-post RPCs. Counts are server projections, not client full-table calculations.
+Flutter now exposes a global member-profile route with safe UUID deep links, Grid/List post presentation, social counts, XP/Level, owner Gold, BIL Code entry points, and explicit privacy controls including an opt-in membership-tier flag.
 
 ## Topics and Circles
 
@@ -92,9 +92,9 @@ Neither will be implemented as free-form client-only tags with authority semanti
 2. Gold ledger foundation — isolated, no earn/spend product integration yet.
 3. XP/reputation foundation — complete.
 4. Activity schema expansion plus backward-compatible Flutter v2 parsing — complete; new event emitters remain gated on localized copy and live destination routes.
-5. Quest/reward definitions, progress, claim engine, and anti-abuse audit.
-6. Referral/deferred-attribution contract.
-7. Profile projection and authored-post pagination.
+5. Global profile projection, authored-post pagination, social counts and privacy controls — complete.
+6. Quest/reward definitions, progress, claim engine, and anti-abuse audit.
+7. Referral/deferred-attribution contract.
 8. Rewards Center + AI Coach Earn entry.
 9. Feed/Topics/Circles/composer expansion.
 10. Security advisors, migration drift, transactional E2E, and mobile QA before any release build.
