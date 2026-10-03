@@ -48,6 +48,7 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   String friendshipStatus = 'pending';
   int responseCalls = 0;
   int profileSaves = 0;
+  int profilePrivacySaves = 0;
   int profileLoads = 0;
   int loadFailuresRemaining = 0;
   bool failDeletion = false;
@@ -167,6 +168,18 @@ final class _CommunityInteractionRepository extends CommunityRepository {
         CommunityMessagePermission.friends,
   }) async {
     profileSaves++;
+  }
+
+  @override
+  Future<void> saveMyProfilePrivacy({
+    String? countryCode,
+    required bool showFollowers,
+    required bool showFollowing,
+    required bool showFriends,
+    required bool showPosts,
+    required bool showMembershipTier,
+  }) async {
+    profilePrivacySaves++;
   }
 
   @override
@@ -402,11 +415,16 @@ void main() {
     final repository = _CommunityInteractionRepository();
     await tester.pumpWidget(_app(CommunityProfilePage(repository: repository)));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -560));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-profile-save')).first);
+    final save = find.byKey(const Key('community-profile-save'));
+    await tester.scrollUntilVisible(
+      save,
+      480,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(save);
     await tester.pumpAndSettle();
     expect(repository.profileSaves, 1);
+    expect(repository.profilePrivacySaves, 1);
     expect(find.text('Community profile saved.'), findsOneWidget);
   });
 
