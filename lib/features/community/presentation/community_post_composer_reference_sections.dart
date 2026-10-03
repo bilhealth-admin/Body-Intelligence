@@ -11,7 +11,7 @@ extension _CommunityPostComposerReferenceSections
         textCapitalization: TextCapitalization.sentences,
         onChanged: (value) {
           widget.draft.title = value;
-          if (_submitError != null) setState(() => _submitError = null);
+          if (_submitError != null) _setComposerState(() => _submitError = null);
         },
         decoration: InputDecoration(
           labelText: communityText(context, 'Title', 'العنوان'),
@@ -56,7 +56,7 @@ extension _CommunityPostComposerReferenceSections
               label: Text('#' + hashtag),
               onDeleted: busy
                   ? null
-                  : () => setState(() {
+                  : () => _setComposerState(() {
                       widget.draft.hashtags.remove(hashtag);
                       _submitError = null;
                     }),
