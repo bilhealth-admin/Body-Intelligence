@@ -270,6 +270,34 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
     }
   }
 
+  Future<void> consumeMyCommunityDraftAfterPublish({
+    required String draftId,
+    required String postId,
+  }) async {
+    if (!CommunityRepository._uuid.hasMatch(draftId) ||
+        !CommunityRepository._uuid.hasMatch(postId)) {
+      throw ArgumentError('Invalid Community draft publish receipt');
+    }
+    final response = await _client.rpc(
+      'bil_consume_my_community_post_draft_v1',
+      params: {'p_draft_id': draftId, 'p_post_id': postId},
+    );
+    if (response is! List || response.any((value) => value is! String)) {
+      throw const FormatException(
+        'Invalid Community draft publish consumption receipt',
+      );
+    }
+    final paths = response.cast<String>();
+    if (paths.isNotEmpty) {
+      try {
+        await _client.storage.from(_draftBucket).remove(paths);
+      } on Object {
+        // The authoritative draft row is already gone. Private orphan cleanup
+        // can retry independently without leaving a visible duplicate draft.
+      }
+    }
+  }
+
   Future<void> deleteMyCommunityDraft(String draftId) async {
     if (!CommunityRepository._uuid.hasMatch(draftId)) {
       throw ArgumentError.value(draftId, 'draftId');
