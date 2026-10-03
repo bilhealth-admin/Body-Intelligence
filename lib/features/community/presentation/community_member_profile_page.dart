@@ -40,6 +40,7 @@ class _CommunityMemberProfilePageState
   CommunityCreatorProfile? _creator;
   final List<CommunityPost> _posts = [];
   final List<CommunityProfileReview> _reviews = [];
+  final List<CommunityDraftSummary> _draftSummaries = [];
   final Map<String, int> _viewCounts = <String, int>{};
   late Future<void> _loading = _loadInitial();
   DateTime? _before;
@@ -72,6 +73,9 @@ class _CommunityMemberProfilePageState
     final batch = values[1] as CommunityFeedBatch;
     final creator = values[2] as CommunityCreatorProfile;
     final reviews = values[3] as List<CommunityProfileReview>;
+    final drafts = profile.isSelf
+        ? await repository.listMyCommunityDrafts(limit: 5)
+        : const <CommunityDraftSummary>[];
     final counts = await repository.loadCommunityPostViewCounts(
       batch.posts.map((post) => post.id).toList(growable: false),
     );
@@ -87,6 +91,9 @@ class _CommunityMemberProfilePageState
     _reviews
       ..clear()
       ..addAll(reviews);
+    _draftSummaries
+      ..clear()
+      ..addAll(drafts);
     _before = batch.nextBefore;
     _beforeId = batch.nextBeforeId;
     _hasMore = batch.hasMore;
@@ -468,6 +475,18 @@ class _CommunityMemberProfilePageState
                           child: _CommunityCreatorPanel(
                             creator: creator,
                             isSelf: profile.isSelf,
+                          ),
+                        ),
+                      ),
+                    if (profile.isSelf)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                          child: _CommunityDraftShortcut(
+                            summary: _draftSummaries.firstOrNull,
+                            onTap: () =>
+                                _CommunityProfileDraftActions(this)
+                                    .openDrafts(),
                           ),
                         ),
                       ),
