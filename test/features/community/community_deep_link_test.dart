@@ -27,6 +27,14 @@ void main() {
       ),
       '/community/chat/8c2d80b2-266c-4a7c-820e-a36b4ef9ac28',
     );
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse(
+          'bil://community/profile/8c2d80b2-266c-4a7c-820e-a36b4ef9ac28',
+        ),
+      ),
+      '/community/profile/8c2d80b2-266c-4a7c-820e-a36b4ef9ac28',
+    );
   });
 
   test('maps product deep-link aliases to canonical router paths', () {
@@ -219,6 +227,12 @@ void main() {
     );
     expect(
       CommunityDeepLink.routeFor(Uri.parse('bil://community/chat/not-a-uuid')),
+      isNull,
+    );
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse('bil://community/profile/not-a-uuid'),
+      ),
       isNull,
     );
     expect(
