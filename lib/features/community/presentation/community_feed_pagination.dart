@@ -10,6 +10,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   set _feedGeneration(int value);
   bool get _feedRefreshing;
   set _feedRefreshing(bool value);
+  Map<String, CommunityPostReferenceMetadata> get _referenceByPost;
   CommunityFeedMode get _selectedFeedMode;
   int? get _feedCursorPriority;
   set _feedCursorPriority(int? value);
@@ -32,7 +33,19 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
             limit: _FeedTabState._pageSize,
           )
           .timeout(const Duration(seconds: 15));
+      final references =
+          widget.repository.useServerCommunityReferenceParity &&
+              page.posts.isNotEmpty
+          ? await widget.repository.loadCommunityPostReferenceMetadata(
+              page.posts.map((post) => post.id).toList(growable: false),
+            )
+          : const <CommunityPostReferenceMetadata>[];
       if (mounted && generation == _feedGeneration) {
+        _referenceByPost
+          ..clear()
+          ..addEntries(
+            references.map((value) => MapEntry(value.postId, value)),
+          );
         _hasMore = page.hasMore;
         _feedCursorPriority = page.nextPriority;
         _feedCursorCreatedAt = page.nextBefore;
@@ -64,6 +77,13 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         beforeId: _feedCursorPostId,
         limit: _FeedTabState._pageSize,
       );
+      final references =
+          widget.repository.useServerCommunityReferenceParity &&
+              page.posts.isNotEmpty
+          ? await widget.repository.loadCommunityPostReferenceMetadata(
+              page.posts.map((post) => post.id).toList(growable: false),
+            )
+          : const <CommunityPostReferenceMetadata>[];
       if (!mounted || generation != _feedGeneration) return;
       final known = visiblePosts.map((post) => post.id).toSet();
       final combined = [
@@ -71,6 +91,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         ...page.posts.where((post) => known.add(post.id)),
       ];
       setState(() {
+        _referenceByPost.addEntries(
+          references.map((value) => MapEntry(value.postId, value)),
+        );
         _feed = Future.value(combined);
         _hasMore = page.hasMore;
         _feedCursorPriority = page.nextPriority;
