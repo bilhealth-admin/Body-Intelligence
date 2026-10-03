@@ -18,6 +18,9 @@ final class CommunityComposerVoiceInputService {
     this.permissionGate,
   });
 
+  factory CommunityComposerVoiceInputService.platform() =>
+      CommunityComposerVoiceInputService(SpeechToText());
+
   final SpeechToText _speech;
   @visibleForTesting
   final CommunityVoicePermissionGate? permissionGate;
