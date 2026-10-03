@@ -31,46 +31,49 @@ void main() {
     );
   });
 
-  test('thread parser keeps authoritative reply count separate from preview', () {
-    final thread = CommunityCommentThread.fromJson({
-      'root': {
-        'id': '11111111-1111-4111-8111-111111111111',
-        'author_id': '22222222-2222-4222-8222-222222222222',
-        'parent_id': null,
-        'body': 'Root',
-        'created_at': '2026-10-03T12:00:00Z',
-        'author_name': 'Root member',
-        'avatar_url': null,
-        'handle': 'root_member',
-        'like_count': 2,
-        'liked': false,
-        'reply_count': 4,
-      },
-      'replies': [
-        {
-          'id': '33333333-3333-4333-8333-333333333333',
-          'author_id': '44444444-4444-4444-8444-444444444444',
-          'parent_id': '11111111-1111-4111-8111-111111111111',
-          'body': 'Reply',
-          'created_at': '2026-10-03T12:01:00Z',
-          'author_name': 'Reply member',
+  test(
+    'thread parser keeps authoritative reply count separate from preview',
+    () {
+      final thread = CommunityCommentThread.fromJson({
+        'root': {
+          'id': '11111111-1111-4111-8111-111111111111',
+          'author_id': '22222222-2222-4222-8222-222222222222',
+          'parent_id': null,
+          'body': 'Root',
+          'created_at': '2026-10-03T12:00:00Z',
+          'author_name': 'Root member',
           'avatar_url': null,
-          'handle': 'reply_member',
-          'like_count': 0,
+          'handle': 'root_member',
+          'like_count': 2,
           'liked': false,
-          'reply_count': 0,
+          'reply_count': 4,
         },
-      ],
-      'reply_count': 4,
-      'root_created_at': '2026-10-03T12:00:00Z',
-      'root_id': '11111111-1111-4111-8111-111111111111',
-    });
+        'replies': [
+          {
+            'id': '33333333-3333-4333-8333-333333333333',
+            'author_id': '44444444-4444-4444-8444-444444444444',
+            'parent_id': '11111111-1111-4111-8111-111111111111',
+            'body': 'Reply',
+            'created_at': '2026-10-03T12:01:00Z',
+            'author_name': 'Reply member',
+            'avatar_url': null,
+            'handle': 'reply_member',
+            'like_count': 0,
+            'liked': false,
+            'reply_count': 0,
+          },
+        ],
+        'reply_count': 4,
+        'root_created_at': '2026-10-03T12:00:00Z',
+        'root_id': '11111111-1111-4111-8111-111111111111',
+      });
 
-    expect(thread.root.replyCount, 4);
-    expect(thread.replyCount, 4);
-    expect(thread.replies, hasLength(1));
-    expect(thread.hasHiddenReplies, isTrue);
-  });
+      expect(thread.root.replyCount, 4);
+      expect(thread.replyCount, 4);
+      expect(thread.replies, hasLength(1));
+      expect(thread.hasHiddenReplies, isTrue);
+    },
+  );
 
   test('post detail uses collapsed server-paged replies', () {
     final repository = File(

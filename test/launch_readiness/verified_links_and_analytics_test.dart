@@ -41,10 +41,9 @@ void main() {
         ...BilVerifiedLinksConfiguration.publicCommunityPaths,
       ],
     );
-    expect(
-      BilVerifiedLinksConfiguration.publicCommunityPaths,
-      const ['/invite/*'],
-    );
+    expect(BilVerifiedLinksConfiguration.publicCommunityPaths, const [
+      '/invite/*',
+    ]);
     expect(
       BilVerifiedLinksConfiguration.appleAppSiteAssociationJsonFor(
         teamId: 'YOUR_TEAM',

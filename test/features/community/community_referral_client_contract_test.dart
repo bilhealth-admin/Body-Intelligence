@@ -5,8 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('referral domain validates opaque token and attribution states', () {
-    const token =
-        '0123456789abcdef0123456789abcdef0123456789abcdef';
+    const token = '0123456789abcdef0123456789abcdef0123456789abcdef';
     final created = CommunityInviteCreateResult.fromJson({
       'status': 'active',
       'invite_id': '11111111-1111-4111-8111-111111111111',
