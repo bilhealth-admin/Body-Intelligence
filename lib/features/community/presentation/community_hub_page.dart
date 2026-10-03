@@ -49,6 +49,8 @@ part 'community_circles_page.dart';
 part 'community_my_posts_page.dart';
 part 'community_member_profile_page.dart';
 part 'community_member_profile_creator_widgets.dart';
+part 'community_member_profile_header.dart';
+part 'community_member_profile_content.dart';
 part 'community_account_widgets.dart';
 part 'community_navigation_sheet.dart';
 part 'community_friends_tab.dart';
