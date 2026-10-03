@@ -11,6 +11,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
     required this.liking,
     required this.onLike,
     required this.onToggleFollow,
+    required this.repository,
   });
 
   final CommunityPost post;
@@ -22,6 +23,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final bool liking;
   final VoidCallback onLike;
   final VoidCallback onToggleFollow;
+  final CommunityRepository repository;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -95,7 +97,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
             const SizedBox(height: 12),
             _CommunityPostReferenceBlock(
               metadata: metadata,
-              repository: widget.repository,
+              repository: repository,
             ),
           ],
           if (post.hasImage) ...[
