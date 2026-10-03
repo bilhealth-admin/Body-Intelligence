@@ -627,6 +627,22 @@ class _CommunityPostDetailHeader extends StatelessWidget {
               ),
             ],
           ),
+          if (post.locationLabel case final location?) ...[
+            const SizedBox(height: 10),
+            Row(
+              key: const Key('community-post-detail-location'),
+              children: [
+                const Icon(Icons.location_on_outlined, size: 18),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    location,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (post.hasImage) ...[
             const SizedBox(height: 14),
             _CommunityFeedImage(post: post),
