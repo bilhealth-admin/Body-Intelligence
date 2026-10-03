@@ -6,6 +6,7 @@ class _CommunityComposerDraft {
   String body = '';
   CommunityPostImageDraft? image;
   final Set<String> topicSlugs = <String>{};
+  String? circleSlug;
 }
 
 class _CommunityPostComposerPage extends StatefulWidget {
@@ -30,6 +31,8 @@ class _CommunityPostComposerPageState
   late CommunityPostImageDraft? _selectedImage = widget.draft.image;
   late final Future<List<CommunityTopic>> _topics =
       widget.repository.loadCommunityTopics();
+  late final Future<List<CommunityCircle>> _circles =
+      widget.repository.loadCommunityCircles();
   bool _publishing = false;
   bool _selectingImage = false;
   bool _completed = false;
@@ -73,28 +76,32 @@ class _CommunityPostComposerPageState
     try {
       final image = _selectedImage;
       final topicSlugs = widget.draft.topicSlugs.toList(growable: false);
+      final circleSlug = widget.draft.circleSlug;
       if (image == null) {
-        if (topicSlugs.isEmpty) {
+        if (topicSlugs.isEmpty && circleSlug == null) {
           await widget.repository.publishPost(text);
         } else {
-          await widget.repository.publishPostWithTopics(
+          await widget.repository.publishPostWithTopicsAndCircle(
             text,
             topicSlugs: topicSlugs,
+            circleSlug: circleSlug,
           );
         }
-      } else if (topicSlugs.isEmpty) {
+      } else if (topicSlugs.isEmpty && circleSlug == null) {
         await widget.repository.publishPostWithImage(text, image);
       } else {
-        await widget.repository.publishPostWithImageAndTopics(
+        await widget.repository.publishPostWithImageTopicsAndCircle(
           text,
           image,
           topicSlugs: topicSlugs,
+          circleSlug: circleSlug,
         );
       }
       if (!mounted) return;
       widget.draft.body = '';
       widget.draft.image = null;
       widget.draft.topicSlugs.clear();
+      widget.draft.circleSlug = null;
       // Pop only after the request completes successfully. The hub owns refresh.
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);
@@ -369,6 +376,86 @@ class _CommunityPostComposerPageState
                                               }
                                             });
                                           },
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          communityText(
+                            context,
+                            'Circle — optional',
+                            'الدائرة — اختياري',
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        FutureBuilder<List<CommunityCircle>>(
+                          future: _circles,
+                          builder: (context, snapshot) {
+                            final circles = (snapshot.data ??
+                                    const <CommunityCircle>[])
+                                .where((circle) => circle.activeMember)
+                                .toList(growable: false);
+                            if (snapshot.connectionState !=
+                                    ConnectionState.done &&
+                                circles.isEmpty) {
+                              return const LinearProgressIndicator();
+                            }
+                            if (circles.isEmpty) {
+                              return Text(
+                                communityText(
+                                  context,
+                                  'Join a Circle to post inside it.',
+                                  'انضم إلى دائرة لتتمكن من النشر داخلها.',
+                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              );
+                            }
+                            return Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                ChoiceChip(
+                                  key: const Key(
+                                    'community-composer-circle-none',
+                                  ),
+                                  selected: widget.draft.circleSlug == null,
+                                  label: Text(
+                                    communityText(
+                                      context,
+                                      'No Circle',
+                                      'بدون دائرة',
+                                    ),
+                                  ),
+                                  onSelected: busy
+                                      ? null
+                                      : (_) => setState(
+                                            () => widget.draft.circleSlug = null,
+                                          ),
+                                ),
+                                for (final circle in circles)
+                                  ChoiceChip(
+                                    key: Key(
+                                      'community-composer-circle-${circle.slug}',
+                                    ),
+                                    selected:
+                                        widget.draft.circleSlug == circle.slug,
+                                    avatar: Icon(
+                                      _circleIcon(circle.slug),
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      _circleTitle(context, circle.slug),
+                                    ),
+                                    onSelected: busy
+                                        ? null
+                                        : (selected) => setState(() {
+                                              widget.draft.circleSlug =
+                                                  selected ? circle.slug : null;
+                                            }),
                                   ),
                               ],
                             );
