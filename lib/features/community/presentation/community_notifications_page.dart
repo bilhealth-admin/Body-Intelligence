@@ -114,10 +114,125 @@ class _CommunityNotificationsPageState
         await repository.markCommunityNotificationsSeen([notification.id]);
         if (mounted) await CommunityAttentionScope.refresh(context);
       }
-      if (mounted) await _openAndRefresh('/community/connections');
+      if (mounted) await _openAndRefresh(_routeFor(notification));
     } finally {
       _markingSeen.remove(notification.id);
     }
+  }
+
+  String _routeFor(CommunityNotification notification) {
+    const liveRoutes = {
+      '/community',
+      '/community/connections',
+      '/community/people',
+      '/community/messages',
+      '/community/notifications',
+    };
+    if (liveRoutes.contains(notification.deepLinkPath)) {
+      return notification.deepLinkPath;
+    }
+    return switch (notification.kind) {
+      CommunityNotificationKind.friendRequest ||
+      CommunityNotificationKind.friendAccepted => '/community/connections',
+      CommunityNotificationKind.follow => '/community/people',
+      CommunityNotificationKind.postLike ||
+      CommunityNotificationKind.postSave ||
+      CommunityNotificationKind.comment ||
+      CommunityNotificationKind.reply ||
+      CommunityNotificationKind.rewardEarned ||
+      CommunityNotificationKind.questCompleted ||
+      CommunityNotificationKind.badgeEarned ||
+      CommunityNotificationKind.challengeUpdate => '/community',
+    };
+  }
+
+  String _notificationTitle(CommunityNotification notification) {
+    final actor = notification.actorDisplayName;
+    return switch (notification.kind) {
+      CommunityNotificationKind.friendRequest => actor == null
+          ? communityText(context, 'New friend request', 'طلب صداقة جديد')
+          : communityText(
+              context,
+              '$actor sent you a friend request',
+              '$actor أرسل إليك طلب صداقة',
+            ),
+      CommunityNotificationKind.friendAccepted => actor == null
+          ? communityText(
+              context,
+              'Your friend request was accepted',
+              'تم قبول طلب صداقتك',
+            )
+          : communityText(
+              context,
+              '$actor accepted your friend request',
+              '$actor قبل طلب صداقتك',
+            ),
+      CommunityNotificationKind.postLike => actor == null
+          ? communityText(
+              context,
+              'Someone liked your post',
+              'أعجب شخص بمنشورك',
+            )
+          : communityText(
+              context,
+              '$actor liked your post',
+              '$actor أعجب بمنشورك',
+            ),
+      CommunityNotificationKind.postSave => communityText(
+          context,
+          'Your post was saved',
+          'تم حفظ منشورك',
+        ),
+      CommunityNotificationKind.comment => actor == null
+          ? communityText(
+              context,
+              'New comment on your post',
+              'تعليق جديد على منشورك',
+            )
+          : communityText(
+              context,
+              '$actor commented on your post',
+              '$actor علّق على منشورك',
+            ),
+      CommunityNotificationKind.reply => actor == null
+          ? communityText(
+              context,
+              'New reply to your comment',
+              'رد جديد على تعليقك',
+            )
+          : communityText(
+              context,
+              '$actor replied to your comment',
+              '$actor رد على تعليقك',
+            ),
+      CommunityNotificationKind.follow => actor == null
+          ? communityText(context, 'New follower', 'متابع جديد')
+          : communityText(
+              context,
+              '$actor followed you',
+              '$actor بدأ بمتابعتك',
+            ),
+      CommunityNotificationKind.rewardEarned => communityText(
+          context,
+          'You earned a Community reward',
+          'حصلت على مكافأة في المجتمع',
+        ),
+      CommunityNotificationKind.questCompleted => communityText(
+          context,
+          'Quest completed',
+          'اكتملت المهمة',
+        ),
+      CommunityNotificationKind.badgeEarned => communityText(
+          context,
+          'New badge earned',
+          'حصلت على شارة جديدة',
+        ),
+      CommunityNotificationKind.challengeUpdate => communityText(
+          context,
+          'Challenge update',
+          'تحديث للتحدي',
+        ),
+    };
   }
 
   @override
@@ -234,19 +349,7 @@ class _CommunityNotificationsPageState
                     radius: 20,
                     networkUrl: notification.actorAvatarUrl,
                   ),
-                  title: Text(
-                    notification.actorDisplayName == null
-                        ? communityText(
-                            context,
-                            'Your friend request was accepted',
-                            'تم قبول طلب صداقتك',
-                          )
-                        : communityText(
-                            context,
-                            '${notification.actorDisplayName} accepted your friend request',
-                            '${notification.actorDisplayName} قبل طلب صداقتك',
-                          ),
-                  ),
+                  title: Text(_notificationTitle(notification)),
                   subtitle: Text(
                     notification.seen
                         ? communityText(context, 'Seen', 'تمت المشاهدة')
