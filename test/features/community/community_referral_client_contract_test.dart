@@ -48,9 +48,10 @@ void main() {
     final page = File(
       'lib/features/community/presentation/community_invite_landing_page.dart',
     ).readAsStringSync();
-    final repository = File(
+    final repository = [
       'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+      'lib/features/community/data/community_repository_discovery_mixin.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final people = File(
       'lib/features/community/presentation/community_people_page.dart',
     ).readAsStringSync();
