@@ -3,10 +3,12 @@ part of 'community_hub_page.dart';
 class _CommunityPostReferenceBlock extends StatelessWidget {
   const _CommunityPostReferenceBlock({
     required this.metadata,
+    required this.repository,
     this.compact = false,
   });
 
   final CommunityPostReferenceMetadata metadata;
+  final CommunityRepository repository;
   final bool compact;
 
   @override
@@ -15,6 +17,8 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
     final collaborators = metadata.collaborators;
     if (title?.isNotEmpty != true &&
         metadata.hashtags.isEmpty &&
+        metadata.topics.isEmpty &&
+        metadata.circle == null &&
         collaborators.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -86,6 +90,13 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
                         ),
                 ),
             ],
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (metadata.topics.isNotEmpty || metadata.circle != null) ...[
+          _CommunityPostTaxonomyReference(
+            metadata: metadata,
+            repository: repository,
           ),
           const SizedBox(height: 8),
         ],
