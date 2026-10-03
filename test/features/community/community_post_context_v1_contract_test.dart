@@ -42,14 +42,8 @@ void main() {
       'supabase/migrations/20261003141000_community_mention_rate_limit_contract_v1.sql',
     ).readAsStringSync();
 
-    expect(
-      mentionSql,
-      contains("'community_mention_search_v1',60,60"),
-    );
-    expect(
-      rateLimitSql,
-      contains("('community_mention_search_v1', 60, 60)"),
-    );
+    expect(mentionSql, contains("'community_mention_search_v1',60,60"));
+    expect(rateLimitSql, contains("('community_mention_search_v1', 60, 60)"));
     expect(
       rateLimitSql,
       contains('public.bil_consume_rate_limit(text,integer,integer)'),
