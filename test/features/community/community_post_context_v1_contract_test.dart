@@ -5,6 +5,14 @@ import 'package:body_intelligence_log/features/community/domain/community_models
 import 'package:body_intelligence_log/features/community/domain/community_post_context.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _repositorySource() => [
+  'lib/features/community/data/community_repository.dart',
+  'lib/features/community/data/community_repository_discovery_mixin.dart',
+  'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+  'lib/features/community/data/community_repository_publishing_mixin.dart',
+  'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
+].map((path) => File(path).readAsStringSync()).join('\n');
+
 void main() {
   test(
     'post context backend is bounded and mention notifications wait for approval',
@@ -96,9 +104,7 @@ void main() {
   test(
     'Flutter composer exposes manual location and mention search without GPS',
     () {
-      final repository = File(
-        'lib/features/community/data/community_repository.dart',
-      ).readAsStringSync();
+      final repository = _repositorySource();
       final composer = File(
         'lib/features/community/presentation/community_post_composer_page.dart',
       ).readAsStringSync();

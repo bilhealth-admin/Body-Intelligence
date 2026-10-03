@@ -383,6 +383,15 @@ void main() {
         ),
         findsOneWidget,
       );
+      expect(find.text('One-level reply'), findsNothing);
+      await tester.tap(
+        find.byKey(
+          const Key(
+            'community-comment-view-replies-${_SocialV2Repository.rootId}',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('One-level reply'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('community-post-detail-like')));
