@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/community-acceptance-notifications-20261003
+      - work/community-activity-v2-client-20261003
 
 permissions:
   contents: read
