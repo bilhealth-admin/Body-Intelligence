@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - fix/community-acceptance-notifications-20261003
+      - staging/community-final-qa-20261003
 
 permissions:
   contents: read
