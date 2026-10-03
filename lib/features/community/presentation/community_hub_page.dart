@@ -38,6 +38,7 @@ part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_saved_posts_page.dart';
 part 'community_my_posts_page.dart';
+part 'community_member_profile_page.dart';
 part 'community_account_widgets.dart';
 part 'community_navigation_sheet.dart';
 part 'community_friends_tab.dart';
