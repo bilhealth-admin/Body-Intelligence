@@ -188,9 +188,29 @@ abstract final class CommunityExpansionRuntimeCopy {
   ];
 
   static const supported = <String>{
-    'fr', 'es', 'tr', 'de', 'it', 'pt-BR', 'pt-PT',
-    'ur', 'fa', 'hi', 'id', 'ms', 'ja', 'ko', 'zh-Hans',
-    'zh-Hant', 'ru', 'bn', 'vi', 'th', 'pl', 'nl', 'uk',
+    'fr',
+    'es',
+    'tr',
+    'de',
+    'it',
+    'pt-BR',
+    'pt-PT',
+    'ur',
+    'fa',
+    'hi',
+    'id',
+    'ms',
+    'ja',
+    'ko',
+    'zh-Hans',
+    'zh-Hant',
+    'ru',
+    'bn',
+    'vi',
+    'th',
+    'pl',
+    'nl',
+    'uk',
   };
 
   static const rows = <String, List<String>>{
