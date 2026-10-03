@@ -129,6 +129,12 @@ class CommunityProfileOverview {
       return value.toInt();
     }
 
+    bool validCountry(Object? value) {
+      if (value == null) return true;
+      if (value is! String || value.length != 2) return false;
+      return value.codeUnits.every((unit) => unit >= 65 && unit <= 90);
+    }
+
     final userId = json['user_id'];
     final displayName = json['display_name'];
     final avatarUrl = json['avatar_url'];
@@ -154,9 +160,130 @@ class CommunityProfileOverview {
         (avatarUrl != null && avatarUrl is! String) ||
         (bio != null && (bio is! String || bio.length > 280)) ||
         (localeCode != null && localeCode is! String) ||
-        (countryCode != null &&
-            (countryCode is! String ||
-                !RegExp(r'^[A-Z]{2}
+        !validCountry(countryCode) ||
+        (handle != null &&
+            (handle is! String ||
+                !CommunitySocialIdentity.handlePattern.hasMatch(handle))) ||
+        isSelf is! bool ||
+        relationship is! String ||
+        !CommunityRelationshipStatus.values.any(
+          (value) => value.name == relationship,
+        ) ||
+        allowFriendRequests is! bool ||
+        allowFollows is! bool ||
+        showFollowers is! bool ||
+        showFollowing is! bool ||
+        showFriends is! bool ||
+        showPosts is! bool ||
+        showMembershipTier is! bool ||
+        (levelCopyKey != null && levelCopyKey is! String)) {
+      throw const FormatException('Invalid Community profile overview');
+    }
+
+    return CommunityProfileOverview(
+      userId: userId,
+      displayName: displayName,
+      avatarUrl: avatarUrl as String?,
+      bio: bio as String?,
+      localeCode: localeCode as String?,
+      countryCode: countryCode as String?,
+      handle: handle as String?,
+      isSelf: isSelf,
+      relationship: CommunityRelationshipStatus.values.byName(relationship),
+      allowFriendRequests: allowFriendRequests,
+      allowFollows: allowFollows,
+      showFollowers: showFollowers,
+      showFollowing: showFollowing,
+      showFriends: showFriends,
+      showPosts: showPosts,
+      showMembershipTier: showMembershipTier,
+      followerCount: count('follower_count'),
+      followingCount: count('following_count'),
+      friendCount: count('friend_count'),
+      postCount: count('post_count'),
+      communityXp: count('community_xp'),
+      communityLevel: count('community_level'),
+      communityLevelCopyKey: levelCopyKey as String?,
+      goldBalance: count('gold_balance'),
+    );
+  }
+
+  factory CommunityProfileOverview.fromProfile(CommunityProfile profile) =>
+      CommunityProfileOverview(
+        userId: profile.userId,
+        displayName: profile.displayName,
+        avatarUrl: profile.avatarUrl,
+        bio: profile.bio,
+        localeCode: profile.localeCode,
+        countryCode: profile.countryCode,
+        isSelf: true,
+        relationship: CommunityRelationshipStatus.self,
+        allowFriendRequests: profile.allowFriendRequests,
+        allowFollows: profile.allowFollows,
+        showFollowers: profile.showFollowers,
+        showFollowing: profile.showFollowing,
+        showFriends: profile.showFriends,
+        showPosts: profile.showPosts,
+        showMembershipTier: profile.showMembershipTier,
+      );
+}
+
+enum CommunityProfileConnectionKind { followers, following, friends }
+
+class CommunityProfileConnection {
+  const CommunityProfileConnection({
+    required this.userId,
+    required this.displayName,
+    required this.relationship,
+    required this.connectedAt,
+    this.handle,
+    this.avatarUrl,
+  });
+
+  final String userId;
+  final String? handle;
+  final String displayName;
+  final String? avatarUrl;
+  final CommunityRelationshipStatus relationship;
+  final DateTime connectedAt;
+
+  factory CommunityProfileConnection.fromJson(Map<String, dynamic> json) {
+    final userId = json['user_id'];
+    final handle = json['handle'];
+    final displayName = json['display_name'];
+    final avatarUrl = json['avatar_url'];
+    final relationship = json['relationship'];
+    final connectedAt = DateTime.tryParse(
+      json['connected_at']?.toString() ?? '',
+    );
+    if (userId is! String ||
+        displayName is! String ||
+        displayName.trim().isEmpty ||
+        displayName.length > 60 ||
+        (handle != null &&
+            (handle is! String ||
+                !CommunitySocialIdentity.handlePattern.hasMatch(handle))) ||
+        (avatarUrl != null && avatarUrl is! String) ||
+        relationship is! String ||
+        !CommunityRelationshipStatus.values.any(
+          (value) => value.name == relationship,
+        ) ||
+        connectedAt == null) {
+      throw const FormatException('Invalid Community profile connection');
+    }
+    return CommunityProfileConnection(
+      userId: userId,
+      handle: handle as String?,
+      displayName: displayName,
+      avatarUrl: avatarUrl as String?,
+      relationship: CommunityRelationshipStatus.values.byName(relationship),
+      connectedAt: connectedAt,
+    );
+  }
+}
+
+enum CommunityProfileVisibility { public, friends, private }
+
 enum CommunityMessagePermission { friends, nobody }
 
 enum CommunityPostModerationStatus { pending, approved, rejected }
