@@ -82,10 +82,13 @@ class CommunityHubPage extends StatefulWidget {
   State<CommunityHubPage> createState() => _CommunityHubPageState();
 }
 
+enum _CommunityHubSection { explore, circles }
+
 class _CommunityHubPageState extends State<CommunityHubPage> {
   CommunityRepository? _repository;
   GlobalKey<_FeedTabState> _feedKey = GlobalKey<_FeedTabState>();
   bool _openingNavigation = false;
+  _CommunityHubSection _section = _CommunityHubSection.explore;
   StreamSubscription<AuthState>? _authSubscription;
   String? _ownerId;
 
@@ -209,15 +212,71 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 : () => _openNavigation(context, repository),
           ),
         ],
+        bottom: repository == null
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(48),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _CommunityHubTopTab(
+                        key: const Key('community-hub-explore-tab'),
+                        label: communityText(
+                          context,
+                          'Explore',
+                          'استكشاف',
+                        ),
+                        selected: _section == _CommunityHubSection.explore,
+                        onTap: () => setState(
+                          () => _section = _CommunityHubSection.explore,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _CommunityHubTopTab(
+                        key: const Key('community-hub-circles-tab'),
+                        label: communityText(
+                          context,
+                          'Circles',
+                          'الدوائر',
+                        ),
+                        selected: _section == _CommunityHubSection.circles,
+                        onTap: () => setState(
+                          () => _section = _CommunityHubSection.circles,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
       ),
       body: repository == null
           ? const _SignInRequired()
-          : _FeedTab(
-              key: _feedKey,
-              repository: repository,
-              imagePicker: widget.postImagePicker ?? CommunityPostImagePicker(),
-            ),
+          : switch (_section) {
+              _CommunityHubSection.explore => _FeedTab(
+                key: _feedKey,
+                repository: repository,
+                imagePicker:
+                    widget.postImagePicker ?? CommunityPostImagePicker(),
+              ),
+              _CommunityHubSection.circles => CommunityCirclesPage(
+                repository: repository,
+                embedded: true,
+                onComposeCircle: _composeCircleFromHub,
+              ),
+            },
     );
+  }
+
+  Future<void> _composeCircleFromHub(String slug) async {
+    if (_section != _CommunityHubSection.explore) {
+      setState(() => _section = _CommunityHubSection.explore);
+    }
+    final ready = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => ready.complete());
+    await ready.future;
+    if (!mounted) return;
+    await _feedKey.currentState?._openComposer(circle: slug);
   }
 
   Future<void> _openNavigation(
@@ -317,6 +376,51 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     }
   }
 }
+class _CommunityHubTopTab extends StatelessWidget {
+  const _CommunityHubTopTab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        const SizedBox(height: 9),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: selected ? FontWeight.w900 : FontWeight.w600,
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 3,
+          width: 56,
+          decoration: BoxDecoration(
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
 PopupMenuItem<String> _communityAction(
   BuildContext context,
