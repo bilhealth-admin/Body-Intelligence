@@ -51,6 +51,7 @@ part 'community_post_detail_page.dart';
 part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_post_reference_widgets.dart';
+part 'community_post_taxonomy_reference.dart';
 part 'community_saved_posts_page.dart';
 part 'community_topics_page.dart';
 part 'community_circles_page.dart';
