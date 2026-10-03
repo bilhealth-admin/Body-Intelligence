@@ -430,9 +430,7 @@ mixin CommunitySocialRepositoryMixin {
       if (item is! Map) {
         throw const FormatException('Invalid Community comment reply');
       }
-      final reply = CommunityComment.fromJson(
-        Map<String, dynamic>.from(item),
-      );
+      final reply = CommunityComment.fromJson(Map<String, dynamic>.from(item));
       if (reply.parentId != rootId ||
           reply.replyCount != 0 ||
           !seen.add(reply.id)) {

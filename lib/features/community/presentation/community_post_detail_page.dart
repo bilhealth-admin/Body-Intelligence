@@ -59,10 +59,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       _comments
         ..clear()
         ..addAll([
-          for (final thread in threads) ...[
-            thread.root,
-            ...thread.replies,
-          ],
+          for (final thread in threads) ...[thread.root, ...thread.replies],
         ]);
       _expandedThreads.removeWhere(
         (rootId) => !_comments.any((comment) => comment.id == rootId),
@@ -138,24 +135,26 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   }
 
   List<CommunityComment> get _rootComments {
-    final roots = _comments
-        .where((comment) => comment.parentId == null)
-        .toList(growable: false)
-      ..sort((a, b) {
-        final byTime = a.createdAt.compareTo(b.createdAt);
-        return byTime == 0 ? a.id.compareTo(b.id) : byTime;
-      });
+    final roots =
+        _comments
+            .where((comment) => comment.parentId == null)
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byTime = a.createdAt.compareTo(b.createdAt);
+            return byTime == 0 ? a.id.compareTo(b.id) : byTime;
+          });
     return roots;
   }
 
   List<CommunityComment> _loadedReplies(String rootId) {
-    final replies = _comments
-        .where((comment) => comment.parentId == rootId)
-        .toList(growable: false)
-      ..sort((a, b) {
-        final byTime = a.createdAt.compareTo(b.createdAt);
-        return byTime == 0 ? a.id.compareTo(b.id) : byTime;
-      });
+    final replies =
+        _comments
+            .where((comment) => comment.parentId == rootId)
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byTime = a.createdAt.compareTo(b.createdAt);
+            return byTime == 0 ? a.id.compareTo(b.id) : byTime;
+          });
     return replies;
   }
 
@@ -510,8 +509,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                           key: ValueKey(root.id),
                           comment: root,
                           mine:
-                              root.authorId ==
-                              widget.repository.currentUserId,
+                              root.authorId == widget.repository.currentUserId,
                           busy:
                               _refreshing ||
                               _submitting ||
@@ -556,10 +554,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                                           _loadingReplyThreads.contains(root.id)
                                           ? const SizedBox.square(
                                               dimension: 14,
-                                              child:
-                                                  CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                  ),
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
                                             )
                                           : const Icon(
                                               Icons.expand_more_rounded,

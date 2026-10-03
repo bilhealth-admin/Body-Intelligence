@@ -572,23 +572,20 @@ class CommunityComment {
   final bool liked;
   final int replyCount;
 
-  CommunityComment copyWith({
-    int? likeCount,
-    bool? liked,
-    int? replyCount,
-  }) => CommunityComment(
-    id: id,
-    authorId: authorId,
-    parentId: parentId,
-    body: body,
-    createdAt: createdAt,
-    authorName: authorName,
-    authorAvatarUrl: authorAvatarUrl,
-    authorHandle: authorHandle,
-    likeCount: likeCount ?? this.likeCount,
-    liked: liked ?? this.liked,
-    replyCount: replyCount ?? this.replyCount,
-  );
+  CommunityComment copyWith({int? likeCount, bool? liked, int? replyCount}) =>
+      CommunityComment(
+        id: id,
+        authorId: authorId,
+        parentId: parentId,
+        body: body,
+        createdAt: createdAt,
+        authorName: authorName,
+        authorAvatarUrl: authorAvatarUrl,
+        authorHandle: authorHandle,
+        likeCount: likeCount ?? this.likeCount,
+        liked: liked ?? this.liked,
+        replyCount: replyCount ?? this.replyCount,
+      );
 
   factory CommunityComment.fromJson(Map<String, dynamic> json) {
     final id = json['id'];

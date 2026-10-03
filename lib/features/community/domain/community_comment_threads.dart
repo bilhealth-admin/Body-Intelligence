@@ -42,9 +42,7 @@ class CommunityCommentThread {
       throw const FormatException('Invalid Community comment thread');
     }
 
-    final root = CommunityComment.fromJson(
-      Map<String, dynamic>.from(rawRoot),
-    );
+    final root = CommunityComment.fromJson(Map<String, dynamic>.from(rawRoot));
     final rootCreatedAt = DateTime.tryParse(rawRootCreatedAt);
     if (rootCreatedAt == null ||
         root.id != rawRootId ||
@@ -54,18 +52,20 @@ class CommunityCommentThread {
       throw const FormatException('Invalid Community comment thread root');
     }
 
-    final replies = rawReplies.map((item) {
-      if (item is! Map) {
-        throw const FormatException('Invalid Community thread reply');
-      }
-      final reply = CommunityComment.fromJson(
-        Map<String, dynamic>.from(item),
-      );
-      if (reply.parentId != root.id || reply.replyCount != 0) {
-        throw const FormatException('Invalid Community thread reply');
-      }
-      return reply;
-    }).toList(growable: false);
+    final replies = rawReplies
+        .map((item) {
+          if (item is! Map) {
+            throw const FormatException('Invalid Community thread reply');
+          }
+          final reply = CommunityComment.fromJson(
+            Map<String, dynamic>.from(item),
+          );
+          if (reply.parentId != root.id || reply.replyCount != 0) {
+            throw const FormatException('Invalid Community thread reply');
+          }
+          return reply;
+        })
+        .toList(growable: false);
 
     if (replies.length > root.replyCount) {
       throw const FormatException('Invalid Community reply count');
@@ -78,7 +78,6 @@ class CommunityCommentThread {
     );
   }
 }
-
 
 /// Social v2 stores one-level threads. Transport order is chronological and
 /// must remain separate from display order and from locally added comments.
