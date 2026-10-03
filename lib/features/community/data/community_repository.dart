@@ -369,6 +369,67 @@ class CommunityRepository
     return poll;
   }
 
+  Future<void> setMyCommunityPostLocation({
+    required String postId,
+    String? label,
+  }) async {
+    if (!_uuid.hasMatch(postId)) {
+      throw ArgumentError.value(postId, 'postId');
+    }
+    final normalized = _normalizeLocationLabel(label);
+    final response = await _client.rpc(
+      'bil_set_my_community_post_location_v1',
+      params: {'p_post_id': postId, 'p_label': normalized},
+    );
+    if (normalized == null) {
+      if (response != null) {
+        throw const FormatException('Invalid Community location clear result');
+      }
+      return;
+    }
+    if (response != normalized) {
+      throw const FormatException('Invalid Community location result');
+    }
+  }
+
+  @override
+  Future<Map<String, String>> loadCommunityPostLocations(
+    List<String> postIds,
+  ) async {
+    if (postIds.isEmpty) return const <String, String>{};
+    if (postIds.length > 100 ||
+        postIds.toSet().length != postIds.length ||
+        postIds.any((id) => !_uuid.hasMatch(id))) {
+      throw ArgumentError.value(postIds, 'postIds');
+    }
+    final response = await _client.rpc(
+      'bil_community_post_locations_v1',
+      params: {'p_post_ids': postIds},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community location batch');
+    }
+    final requested = postIds.toSet();
+    final locations = <String, String>{};
+    for (final row in response) {
+      if (row is! Map) {
+        throw const FormatException('Invalid Community location row');
+      }
+      final json = Map<String, dynamic>.from(row);
+      final postId = json['post_id'];
+      final label = json['location_label'];
+      if (postId is! String ||
+          !requested.contains(postId) ||
+          locations.containsKey(postId) ||
+          label is! String ||
+          _normalizeLocationLabel(label) != label) {
+        throw const FormatException('Invalid Community location batch');
+      }
+      locations[postId] = label;
+    }
+    return Map<String, String>.unmodifiable(locations);
+  }
+
   Future<List<CommunityTopic>> loadCommunityTopics() async {
     final response = await _client.rpc('bil_list_community_topics_v1');
     if (response is! List) {
@@ -888,12 +949,16 @@ class CommunityRepository
     String body, {
     List<String> topicSlugs = const [],
     String? circleSlug,
+    String? locationLabel,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
+    final normalizedLocation = _normalizeLocationLabel(locationLabel);
 
-    if (topicSlugs.isEmpty && circleSlug == null) {
+    if (topicSlugs.isEmpty &&
+        circleSlug == null &&
+        normalizedLocation == null) {
       await _runCommunityMutation(() => _posts.publishText(body));
       return;
     }
@@ -914,6 +979,12 @@ class CommunityRepository
       if (circleSlug != null) {
         await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
       }
+      if (normalizedLocation != null) {
+        await setMyCommunityPostLocation(
+          postId: postId,
+          label: normalizedLocation,
+        );
+      }
     } on Object {
       try {
         await store.delete(postId);
@@ -928,11 +999,13 @@ class CommunityRepository
     String body, {
     List<String> topicSlugs = const [],
     String? circleSlug,
+    String? locationLabel,
     required CommunityPollDraft poll,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
+    final normalizedLocation = _normalizeLocationLabel(locationLabel);
     final normalizedPoll = poll.normalized();
 
     final store = _posts;
@@ -952,6 +1025,12 @@ class CommunityRepository
       if (circleSlug != null) {
         await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
       }
+      if (normalizedLocation != null) {
+        await setMyCommunityPostLocation(
+          postId: postId,
+          label: normalizedLocation,
+        );
+      }
       await createCommunityPoll(postId: postId, draft: normalizedPoll);
     } on Object {
       try {
@@ -968,12 +1047,16 @@ class CommunityRepository
     CommunityPostImageDraft image, {
     List<String> topicSlugs = const [],
     String? circleSlug,
+    String? locationLabel,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
+    final normalizedLocation = _normalizeLocationLabel(locationLabel);
 
-    if (topicSlugs.isEmpty && circleSlug == null) {
+    if (topicSlugs.isEmpty &&
+        circleSlug == null &&
+        normalizedLocation == null) {
       await publishPostWithImage(body, image);
       return;
     }
@@ -995,6 +1078,12 @@ class CommunityRepository
         if (circleSlug != null) {
           await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
         }
+        if (normalizedLocation != null) {
+          await setMyCommunityPostLocation(
+            postId: postId,
+            label: normalizedLocation,
+          );
+        }
       } on Object {
         try {
           await store.delete(postId);
@@ -1013,11 +1102,13 @@ class CommunityRepository
     CommunityPostImageDraft image, {
     List<String> topicSlugs = const [],
     String? circleSlug,
+    String? locationLabel,
     required CommunityPollDraft poll,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
+    final normalizedLocation = _normalizeLocationLabel(locationLabel);
     final normalizedPoll = poll.normalized();
 
     final store = _posts;
@@ -1038,6 +1129,12 @@ class CommunityRepository
         if (circleSlug != null) {
           await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
         }
+        if (normalizedLocation != null) {
+          await setMyCommunityPostLocation(
+            postId: postId,
+            label: normalizedLocation,
+          );
+        }
         await createCommunityPoll(postId: postId, draft: normalizedPoll);
       } on Object {
         try {
@@ -1057,10 +1154,12 @@ class CommunityRepository
     List<CommunityPostImageDraft> images, {
     List<String> topicSlugs = const [],
     String? circleSlug,
+    String? locationLabel,
   }) async {
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
+    final normalizedLocation = _normalizeLocationLabel(locationLabel);
     if (images.isEmpty || images.length > 4) {
       throw ArgumentError.value(images.length, 'images');
     }
@@ -1081,6 +1180,12 @@ class CommunityRepository
         }
         if (circleSlug != null) {
           await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+        }
+        if (normalizedLocation != null) {
+          await setMyCommunityPostLocation(
+            postId: postId,
+            label: normalizedLocation,
+          );
         }
       } on Object {
         try {
@@ -1100,6 +1205,7 @@ class CommunityRepository
     List<CommunityPostImageDraft> images, {
     List<String> topicSlugs = const [],
     String? circleSlug,
+    String? locationLabel,
     required CommunityPollDraft poll,
   }) async {
     await assertCommunityPublishReady();
@@ -1108,6 +1214,7 @@ class CommunityRepository
     if (images.isEmpty || images.length > 4) {
       throw ArgumentError.value(images.length, 'images');
     }
+    final normalizedLocation = _normalizeLocationLabel(locationLabel);
     final normalizedPoll = poll.normalized();
 
     final store = _posts;
@@ -1127,6 +1234,12 @@ class CommunityRepository
         if (circleSlug != null) {
           await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
         }
+        if (normalizedLocation != null) {
+          await setMyCommunityPostLocation(
+            postId: postId,
+            label: normalizedLocation,
+          );
+        }
         await createCommunityPoll(postId: postId, draft: normalizedPoll);
       } on Object {
         try {
@@ -1139,6 +1252,19 @@ class CommunityRepository
     } on StorageException catch (error, stackTrace) {
       await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
     }
+  }
+
+  String? _normalizeLocationLabel(String? label) {
+    final normalized = label?.trim() ?? '';
+    if (normalized.isEmpty) return null;
+    if (normalized.length < 2 ||
+        normalized.length > 80 ||
+        _unsafeText.hasMatch(normalized) ||
+        normalized.contains('\n') ||
+        normalized.contains('\r')) {
+      throw ArgumentError.value(label, 'locationLabel');
+    }
+    return normalized;
   }
 
   void _validateCircleSlug(String? slug) {
