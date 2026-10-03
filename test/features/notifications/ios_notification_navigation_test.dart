@@ -34,6 +34,15 @@ void main() {
     messenger.setMockMethodCallHandler(navigationTestChannel, null);
   });
 
+  test('friend-acceptance push deep link resolves to Community updates', () {
+    expect(
+      BilNotificationNavigation.routeForPayload(
+        'bil://community/notifications',
+      ),
+      '/community/notifications',
+    );
+  });
+
   test('mobile notification navigation includes iOS and Android only', () {
     expect(
       BilNotificationNavigation.supportsPlatform(TargetPlatform.iOS),

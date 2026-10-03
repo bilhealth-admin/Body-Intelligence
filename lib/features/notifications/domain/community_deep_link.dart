@@ -81,6 +81,9 @@ class CommunityDeepLink {
       if (segments.length == 2 && segments[1] == 'connections') {
         return '/community/connections';
       }
+      if (segments.length == 2 && segments[1] == 'notifications') {
+        return '/community/notifications';
+      }
       if (segments.length == 2 && segments[1] == 'people') {
         return '/community/people';
       }
