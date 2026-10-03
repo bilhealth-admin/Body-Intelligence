@@ -239,7 +239,7 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
                   final body = draft.body.trim();
                   final deleting = _deleting.contains(draft.draftId);
                   return ListTile(
-                    key: Key('community-draft-' + draft.draftId),
+                    key: Key('community-draft-${draft.draftId}'),
                     leading: const CircleAvatar(
                       child: Icon(Icons.edit_note_rounded),
                     ),
@@ -276,7 +276,7 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
                           Text(draft.mediaCount.toString()),
                         ],
                         IconButton(
-                          key: Key('community-draft-delete-' + draft.draftId),
+                          key: Key('community-draft-delete-${draft.draftId}'),
                           tooltip: communityText(
                             context,
                             'Delete draft',
