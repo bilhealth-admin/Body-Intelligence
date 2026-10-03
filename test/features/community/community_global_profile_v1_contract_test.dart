@@ -51,9 +51,13 @@ void main() {
     final account = File(
       'lib/features/community/presentation/community_account_widgets.dart',
     ).readAsStringSync();
-    final memberPage = File(
+    final memberPage = [
       'lib/features/community/presentation/community_member_profile_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_member_profile_content.dart',
+      'lib/features/community/presentation/community_member_profile_header.dart',
+      'lib/features/community/presentation/community_member_profile_drafts.dart',
+      'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
 
     expect(repository, contains('bil_community_profile_projection_v1'));
