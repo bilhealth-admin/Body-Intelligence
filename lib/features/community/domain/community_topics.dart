@@ -1,3 +1,5 @@
+import 'community_models.dart';
+
 class CommunityTopic {
   const CommunityTopic({
     required this.slug,
