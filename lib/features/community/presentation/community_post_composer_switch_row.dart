@@ -39,10 +39,7 @@ class _CommunityComposerSwitchRow extends StatelessWidget {
                     ),
                     if (subtitle case final copy? when copy.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(
-                        copy,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                      Text(copy, style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ],
                 ),
