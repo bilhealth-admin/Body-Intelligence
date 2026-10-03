@@ -52,8 +52,8 @@ extension _CommunityPostComposerReferenceSections
         children: [
           for (final hashtag in widget.draft.hashtags)
             InputChip(
-              key: Key('community-composer-hashtag-' + hashtag),
-              label: Text('#' + hashtag),
+              key: Key('community-composer-hashtag-$hashtag'),
+              label: Text('#$hashtag'),
               onDeleted: busy
                   ? null
                   : () => _setComposerState(() {
@@ -127,14 +127,13 @@ extension _CommunityPostComposerReferenceSections
           for (final collaborator in widget.draft.collaborators)
             InputChip(
               key: Key(
-                'community-composer-selected-collaborator-' +
-                    collaborator.userId,
+                'community-composer-selected-collaborator-${collaborator.userId}',
               ),
               avatar: BilAccountAvatar(
                 radius: 12,
                 networkUrl: collaborator.avatarUrl,
               ),
-              label: Text('@' + collaborator.handle),
+              label: Text('@${collaborator.handle}'),
               onDeleted: busy
                   ? null
                   : () => _CommunityPostComposerReferenceActions(
@@ -202,7 +201,7 @@ extension _CommunityPostComposerReferenceSections
           for (final collaborator in _collaboratorResults)
             FilterChip(
               key: Key(
-                'community-composer-collaborator-' + collaborator.userId,
+                'community-composer-collaborator-${collaborator.userId}',
               ),
               selected: widget.draft.collaborators.any(
                 (value) => value.userId == collaborator.userId,
@@ -211,7 +210,7 @@ extension _CommunityPostComposerReferenceSections
                 radius: 12,
                 networkUrl: collaborator.avatarUrl,
               ),
-              label: Text('@' + collaborator.handle),
+              label: Text('@${collaborator.handle}'),
               onSelected:
                   busy ||
                       (!widget.draft.collaborators.any(
