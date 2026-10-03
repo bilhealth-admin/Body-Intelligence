@@ -40,6 +40,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                       liking: _likingPost,
                       onLike: _togglePostLike,
                       onToggleFollow: _toggleAuthorFollow,
+                      repository: widget.repository,
                     ),
                     if (widget.post.poll case final poll?) ...[
                       const SizedBox(height: 16),
