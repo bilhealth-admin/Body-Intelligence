@@ -28,6 +28,7 @@ import '../../../shared/widgets/chat_history_viewport.dart';
 import '../../../shared/widgets/bil_camera_capture_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../commerce/providers/commerce_providers.dart';
+import '../../community/presentation/community_gold_balance_action.dart';
 import '../../foods/providers/food_provider.dart';
 import '../domain/intelligence_action.dart';
 import '../domain/bil_tool_registry.dart';
