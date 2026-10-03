@@ -79,6 +79,7 @@ enum CommunityNotificationKind {
   comment('comment'),
   reply('reply'),
   follow('follow'),
+  mention('mention'),
   rewardEarned('reward_earned'),
   questCompleted('quest_completed'),
   badgeEarned('badge_earned'),
