@@ -313,11 +313,14 @@ mixin CommunityFeedRepositoryMixin {
     if (posts.isEmpty) return posts;
     final postIds = posts.map((post) => post.id).toList(growable: false);
     final authorIds = posts.map((post) => post.authorId).toSet().toList();
+    final pollFuture = communityPostStore is CommunityPostCloudStore
+        ? loadCommunityPolls(postIds)
+        : Future<List<CommunityPoll>>.value(const <CommunityPoll>[]);
     final hydratedData = await Future.wait<Object>([
       loadPostStats(postIds),
       loadSavedStates(postIds),
       loadPostAuthors(authorIds),
-      loadCommunityPolls(postIds),
+      pollFuture,
     ]);
     final stats = hydratedData[0] as List<CommunityPostStats>;
     final saved = hydratedData[1] as List<CommunitySavedState>;
