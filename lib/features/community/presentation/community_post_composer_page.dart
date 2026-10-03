@@ -5,6 +5,7 @@ part of 'community_hub_page.dart';
 class _CommunityComposerDraft {
   String body = '';
   CommunityPostImageDraft? image;
+  final Set<String> topicSlugs = <String>{};
 }
 
 class _CommunityPostComposerPage extends StatefulWidget {
@@ -27,6 +28,8 @@ class _CommunityPostComposerPageState
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
   late CommunityPostImageDraft? _selectedImage = widget.draft.image;
+  late final Future<List<CommunityTopic>> _topics =
+      widget.repository.loadCommunityTopics();
   bool _publishing = false;
   bool _selectingImage = false;
   bool _completed = false;
@@ -69,14 +72,23 @@ class _CommunityPostComposerPageState
     });
     try {
       final image = _selectedImage;
+      final topicSlugs = widget.draft.topicSlugs.toList(growable: false);
       if (image == null) {
-        await widget.repository.publishPost(text);
+        await widget.repository.publishPost(
+          text,
+          topicSlugs: topicSlugs,
+        );
       } else {
-        await widget.repository.publishPostWithImage(text, image);
+        await widget.repository.publishPostWithImage(
+          text,
+          image,
+          topicSlugs: topicSlugs,
+        );
       }
       if (!mounted) return;
       widget.draft.body = '';
       widget.draft.image = null;
+      widget.draft.topicSlugs.clear();
       // Pop only after the request completes successfully. The hub owns refresh.
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);
@@ -276,6 +288,86 @@ class _CommunityPostComposerPageState
                                   }),
                           ),
                         ],
+                        const SizedBox(height: 18),
+                        Text(
+                          communityText(
+                            context,
+                            'Topics — choose up to 3',
+                            'المواضيع — اختر حتى 3',
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 8),
+                        FutureBuilder<List<CommunityTopic>>(
+                          future: _topics,
+                          builder: (context, snapshot) {
+                            final topics =
+                                snapshot.data ?? const <CommunityTopic>[];
+                            if (topics.isEmpty) {
+                              if (snapshot.connectionState !=
+                                  ConnectionState.done) {
+                                return const LinearProgressIndicator();
+                              }
+                              return Text(
+                                communityText(
+                                  context,
+                                  'Topics are unavailable right now. You can still publish.',
+                                  'المواضيع غير متاحة الآن. لا يزال بإمكانك النشر.',
+                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              );
+                            }
+                            return Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                for (final topic in topics)
+                                  FilterChip(
+                                    key: Key(
+                                      'community-composer-topic-${topic.slug}',
+                                    ),
+                                    selected: widget.draft.topicSlugs.contains(
+                                      topic.slug,
+                                    ),
+                                    avatar: Icon(
+                                      CommunityTaxonomySheet.iconForSlug(
+                                        topic.slug,
+                                      ),
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      CommunityTaxonomySheet.titleForSlug(
+                                        context,
+                                        topic.slug,
+                                      ),
+                                    ),
+                                    onSelected: busy
+                                        ? null
+                                        : (selected) {
+                                            setState(() {
+                                              if (selected) {
+                                                if (widget
+                                                        .draft
+                                                        .topicSlugs
+                                                        .length <
+                                                    3) {
+                                                  widget.draft.topicSlugs.add(
+                                                    topic.slug,
+                                                  );
+                                                }
+                                              } else {
+                                                widget.draft.topicSlugs.remove(
+                                                  topic.slug,
+                                                );
+                                              }
+                                            });
+                                          },
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
