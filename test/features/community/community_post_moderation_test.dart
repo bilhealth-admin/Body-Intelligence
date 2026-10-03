@@ -166,9 +166,10 @@ void main() {
     final store = File(
       'lib/features/community/data/community_post_cloud_store.dart',
     ).readAsStringSync();
-    final repository = File(
+    final repository = [
       'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
+      'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(store, contains('moderation_status,'));
     expect(store, contains('moderation_visibility,reviewed_at'));
     expect(store, contains("'moderation_status': 'pending'"));

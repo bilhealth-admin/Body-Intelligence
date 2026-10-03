@@ -48,6 +48,10 @@ class CommunityRepository
   CommunityPostStoreContract get communityPostStore => _posts;
 
   @override
+  bool get useServerRankedCommunityFeed =>
+      _postStore == null && _client.auth.currentUser != null;
+
+  @override
   Future<T> runCommunitySocialMutation<T>(Future<T> Function() mutation) =>
       _runCommunityMutation(mutation);
 

@@ -272,7 +272,8 @@ void main() {
     expect(migration, isNot(contains('for update\nto authenticated')));
     expect(repository, contains('createSignedUrlsResult'));
     expect(repository, contains('upsert: false'));
-    expect(repository, contains("remove([path])"));
+    expect(repository, contains('.remove(uploaded)'));
+    expect(repository, contains('.remove(mediaPaths.toList(growable: false))'));
     expect(repository, isNot(contains('getPublicUrl')));
   });
 

@@ -371,9 +371,7 @@ void main() {
                   scrollable: find
                       .descendant(
                         of: find.byKey(
-                          const PageStorageKey(
-                            'community-feed-scroll-for_you',
-                          ),
+                          const PageStorageKey('community-feed-scroll-for_you'),
                         ),
                         matching: find.byType(Scrollable),
                       )
