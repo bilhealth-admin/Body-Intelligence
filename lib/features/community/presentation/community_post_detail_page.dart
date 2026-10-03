@@ -37,6 +37,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   bool _submitting = false;
   bool _likingPost = false;
   final Set<String> _busyComments = <String>{};
+  final Set<String> _expandedThreads = <String>{};
+  final Set<String> _loadingReplyThreads = <String>{};
 
   Future<void> _loadInitial() async {
     final generation = ++_loadGeneration;
@@ -45,18 +47,29 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     try {
       final values = await Future.wait<Object>([
         widget.repository.loadPostStats([widget.post.id]),
-        widget.repository.loadPostComments(widget.post.id, limit: _pageSize),
+        widget.repository.loadPostCommentThreads(
+          widget.post.id,
+          limit: _pageSize,
+        ),
       ]);
       final stats = values[0] as List<CommunityPostStats>;
-      final comments = values[1] as List<CommunityComment>;
+      final threads = values[1] as List<CommunityCommentThread>;
       if (!mounted || generation != _loadGeneration) return;
       if (stats.length == 1) _stats = stats.single;
       _comments
         ..clear()
-        ..addAll(comments);
-      _hasMore = comments.length == _pageSize;
-      _after = comments.lastOrNull?.createdAt;
-      _afterId = comments.lastOrNull?.id;
+        ..addAll([
+          for (final thread in threads) ...[
+            thread.root,
+            ...thread.replies,
+          ],
+        ]);
+      _expandedThreads.removeWhere(
+        (rootId) => !_comments.any((comment) => comment.id == rootId),
+      );
+      _hasMore = threads.length == _pageSize;
+      _after = threads.lastOrNull?.root.createdAt;
+      _afterId = threads.lastOrNull?.root.id;
     } finally {
       if (generation == _loadGeneration) _refreshing = false;
     }
@@ -92,7 +105,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
-      final page = await widget.repository.loadPostComments(
+      final page = await widget.repository.loadPostCommentThreads(
         widget.post.id,
         after: _after,
         afterId: _afterId,
@@ -101,11 +114,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       if (!mounted || generation != _loadGeneration) return;
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
-        _comments.addAll(page.where((comment) => known.add(comment.id)));
+        for (final thread in page) {
+          if (known.add(thread.root.id)) {
+            _comments.add(thread.root);
+          }
+          for (final reply in thread.replies) {
+            if (known.add(reply.id)) _comments.add(reply);
+          }
+        }
         _hasMore = page.length == _pageSize;
         if (page.isNotEmpty) {
-          _after = page.last.createdAt;
-          _afterId = page.last.id;
+          _after = page.last.root.createdAt;
+          _afterId = page.last.root.id;
         }
       });
     } catch (_) {
@@ -113,6 +133,57 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     } finally {
       if (mounted && generation == _loadGeneration) {
         setState(() => _loadingMore = false);
+      }
+    }
+  }
+
+  List<CommunityComment> get _rootComments {
+    final roots = _comments
+        .where((comment) => comment.parentId == null)
+        .toList(growable: false)
+      ..sort((a, b) {
+        final byTime = a.createdAt.compareTo(b.createdAt);
+        return byTime == 0 ? a.id.compareTo(b.id) : byTime;
+      });
+    return roots;
+  }
+
+  List<CommunityComment> _loadedReplies(String rootId) {
+    final replies = _comments
+        .where((comment) => comment.parentId == rootId)
+        .toList(growable: false)
+      ..sort((a, b) {
+        final byTime = a.createdAt.compareTo(b.createdAt);
+        return byTime == 0 ? a.id.compareTo(b.id) : byTime;
+      });
+    return replies;
+  }
+
+  Future<void> _loadMoreReplies(CommunityComment root) async {
+    if (!_loadingReplyThreads.add(root.id)) return;
+    setState(() => _expandedThreads.add(root.id));
+    try {
+      final loaded = _loadedReplies(root.id);
+      if (loaded.length >= root.replyCount) return;
+      final last = loaded.lastOrNull;
+      final page = await widget.repository.loadCommentReplies(
+        root.id,
+        after: last?.createdAt,
+        afterId: last?.id,
+        limit: 20,
+      );
+      if (!mounted) return;
+      final known = _comments.map((comment) => comment.id).toSet();
+      setState(() {
+        _comments.addAll(page.where((comment) => known.add(comment.id)));
+      });
+    } catch (_) {
+      if (mounted) _showActionError();
+    } finally {
+      if (mounted) {
+        setState(() => _loadingReplyThreads.remove(root.id));
+      } else {
+        _loadingReplyThreads.remove(root.id);
       }
     }
   }
