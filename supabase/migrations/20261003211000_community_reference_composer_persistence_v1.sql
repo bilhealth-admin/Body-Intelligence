@@ -215,6 +215,8 @@ returns table(
   post_id uuid,
   title text,
   hashtags text[],
+  topics jsonb,
+  circle jsonb,
   collaborators jsonb
 )
 language plpgsql
@@ -258,24 +260,77 @@ begin
       (
         select pg_catalog.jsonb_agg(
           pg_catalog.jsonb_build_object(
-            'user_id',c.collaborator_id,
+            'slug',t.slug,
+            'title_copy_key',t.title_copy_key,
+            'post_count',(
+              select count(*)::integer
+              from public.bil_community_post_topics pt_all
+              join public.bil_community_posts p_all
+                on p_all.id=pt_all.post_id
+              where pt_all.topic_id=t.id
+                and p_all.deleted_at is null
+                and p_all.moderation_status='approved'
+                and p_all.moderation_visibility='visible'
+                and public.bil_social_post_visible_v2(p_all.id)
+            )
+          )
+          order by pt.created_at,t.slug
+        )
+        from public.bil_community_post_topics pt
+        join public.bil_community_topics t on t.id=pt.topic_id
+        where pt.post_id=p.id and t.active
+      ),
+      '[]'::jsonb
+    ),
+    (
+      select pg_catalog.jsonb_build_object(
+        'slug',cir.slug,
+        'title_copy_key',cir.title_copy_key,
+        'post_count',(
+          select count(*)::integer
+          from public.bil_community_post_circles pc_all
+          join public.bil_community_posts p_all
+            on p_all.id=pc_all.post_id
+          where pc_all.circle_id=cir.id
+            and p_all.deleted_at is null
+            and p_all.moderation_status='approved'
+            and p_all.moderation_visibility='visible'
+            and public.bil_social_post_visible_v2(p_all.id)
+        ),
+        'member_count',(
+          select count(*)::integer
+          from public.bil_community_circle_memberships cm
+          where cm.circle_id=cir.id and cm.status='active'
+        )
+      )
+      from public.bil_community_post_circles pc
+      join public.bil_community_circles cir on cir.id=pc.circle_id
+      where pc.post_id=p.id and cir.active
+      order by pc.created_at desc
+      limit 1
+    ),
+    coalesce(
+      (
+        select pg_catalog.jsonb_agg(
+          pg_catalog.jsonb_build_object(
+            'user_id',coll.collaborator_id,
             'handle',sh.handle,
             'display_name',pp.display_name,
             'avatar_url',pp.avatar_url,
-            'status',c.status
+            'status',coll.status
           )
-          order by c.created_at,c.collaborator_id
+          order by coll.created_at,coll.collaborator_id
         )
-        from public.bil_community_post_collaborators_v1 c
+        from public.bil_community_post_collaborators_v1 coll
         join public.bil_public_profiles pp
-          on pp.user_id=c.collaborator_id
+          on pp.user_id=coll.collaborator_id
         left join public.bil_social_handles_v2 sh
-          on sh.user_id=c.collaborator_id and sh.chosen
-        where c.post_id=p.id
+          on sh.user_id=coll.collaborator_id and sh.chosen
+        where coll.post_id=p.id
           and (
-            c.status='accepted'
+            coll.status='accepted'
             or p.author_id=v_uid
-            or c.collaborator_id=v_uid
+            or coll.collaborator_id=v_uid
             or v_moderator
           )
       ),
