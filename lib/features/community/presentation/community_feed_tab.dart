@@ -116,7 +116,11 @@ class _FeedTabState extends State<_FeedTab>
 
   Future<void> _openComposer({String? tag}) async {
     if (_openingComposer || _managingPost) return;
-    if (tag != null && _draft.body.isEmpty) _draft.body = '#$tag ';
+    if (tag != null) {
+      _draft.topicSlugs
+        ..clear()
+        ..add(tag);
+    }
     setState(() => _openingComposer = true);
     try {
       if (!await _ensurePolicyAccepted()) return;
