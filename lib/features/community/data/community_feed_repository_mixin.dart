@@ -119,6 +119,43 @@ mixin CommunityFeedRepositoryMixin {
     String? beforeId,
     int limit = 30,
   }) async {
+    // Keep injected non-cloud stores used by deterministic widget/unit tests
+    // compatible with the established public feed seam. Production always
+    // uses the server-ranked RPC below.
+    if (communityPostStore is! CommunityPostCloudStore &&
+        (mode == CommunityFeedMode.forYou ||
+            mode == CommunityFeedMode.explore)) {
+      final page = before == null
+          ? CommunityFeedBatch(
+              posts: await communityPostStore.loadFeed(limit: limit),
+              hasMore: false,
+            )
+          : await loadOlderFeed(
+              before: before,
+              beforeId: beforeId!,
+              limit: limit,
+            );
+      final refs = page.posts
+          .map(
+            (post) => CommunityFeedReference(
+              postId: post.id,
+              createdAt: post.createdAt,
+              priority: 0,
+              reasons: const [],
+            ),
+          )
+          .toList(growable: false);
+      final cursor = refs.isEmpty ? null : refs.last;
+      return CommunityFeedModeBatch(
+        posts: page.posts,
+        references: refs,
+        hasMore: page.hasMore,
+        nextPriority: cursor?.priority,
+        nextBefore: cursor?.createdAt,
+        nextBeforeId: cursor?.postId,
+      );
+    }
+
     final references = await loadCommunityFeedReferences(
       mode: mode,
       beforePriority: beforePriority,
