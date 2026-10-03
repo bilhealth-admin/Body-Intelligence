@@ -10,7 +10,7 @@ extension _CommunityPostComposerReferenceActions
         _completed) {
       return;
     }
-    setState(() {
+    _setComposerState(() {
       _voiceCapturing = true;
       _submitError = null;
     });
@@ -22,7 +22,7 @@ extension _CommunityPostComposerReferenceActions
       final current = _composer.text.trim();
       final next = current.isEmpty ? transcript : '$current\n$transcript';
       if (next.length > 1200) {
-        setState(
+        _setComposerState(
           () => _submitError = communityText(
             context,
             'The voice transcript would exceed the 1200-character post limit.',
@@ -32,7 +32,7 @@ extension _CommunityPostComposerReferenceActions
         return;
       }
 
-      setState(() {
+      _setComposerState(() {
         _composer.value = TextEditingValue(
           text: next,
           selection: TextSelection.collapsed(offset: next.length),
@@ -46,7 +46,7 @@ extension _CommunityPostComposerReferenceActions
         _submitError = null;
       });
     } finally {
-      if (mounted) setState(() => _voiceCapturing = false);
+      if (mounted) _setComposerState(() => _voiceCapturing = false);
     }
   }
 
@@ -67,7 +67,7 @@ extension _CommunityPostComposerReferenceActions
     if (_publishing || _savingDraft || _completed) return;
     final normalized = _normalizeHashtag(_hashtagInput.text);
     if (normalized == null) {
-      setState(
+      _setComposerState(
         () => _submitError = communityText(
           context,
           'Use one hashtag without spaces, up to 40 characters.',
@@ -81,7 +81,7 @@ extension _CommunityPostComposerReferenceActions
       return;
     }
     if (widget.draft.hashtags.length >= 10) {
-      setState(
+      _setComposerState(
         () => _submitError = communityText(
           context,
           'You can add up to 10 hashtags.',
@@ -90,7 +90,7 @@ extension _CommunityPostComposerReferenceActions
       );
       return;
     }
-    setState(() {
+    _setComposerState(() {
       widget.draft.hashtags.add(normalized);
       _hashtagInput.clear();
       _submitError = null;
@@ -107,19 +107,19 @@ extension _CommunityPostComposerReferenceActions
     }
     final query = _collaboratorQuery.text.trim();
     if (query.isEmpty) {
-      setState(
+      _setComposerState(
         () => _collaboratorResults = const <CommunityMentionCandidate>[],
       );
       return;
     }
-    setState(() => _collaboratorSearching = true);
+    _setComposerState(() => _collaboratorSearching = true);
     try {
       final results = await widget.repository.searchCommunityMentions(query);
       if (!mounted) return;
-      setState(() => _collaboratorResults = results);
+      _setComposerState(() => _collaboratorResults = results);
     } catch (_) {
       if (!mounted) return;
-      setState(
+      _setComposerState(
         () => _collaboratorResults = const <CommunityMentionCandidate>[],
       );
       ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +134,7 @@ extension _CommunityPostComposerReferenceActions
         ),
       );
     } finally {
-      if (mounted) setState(() => _collaboratorSearching = false);
+      if (mounted) _setComposerState(() => _collaboratorSearching = false);
     }
   }
 
@@ -143,7 +143,7 @@ extension _CommunityPostComposerReferenceActions
     final index = widget.draft.collaborators.indexWhere(
       (value) => value.userId == candidate.userId,
     );
-    setState(() {
+    _setComposerState(() {
       if (index >= 0) {
         widget.draft.collaborators.removeAt(index);
       } else if (widget.draft.collaborators.length < 3) {
@@ -197,7 +197,7 @@ extension _CommunityPostComposerReferenceActions
       return;
     }
     if (!_hasDraftContent) {
-      setState(
+      _setComposerState(
         () => _submitError = communityText(
           context,
           'Add something before saving a draft.',
@@ -207,7 +207,7 @@ extension _CommunityPostComposerReferenceActions
       return;
     }
     FocusScope.of(context).unfocus();
-    setState(() {
+    _setComposerState(() {
       _savingDraft = true;
       _submitError = null;
     });
@@ -218,7 +218,7 @@ extension _CommunityPostComposerReferenceActions
         images: List<CommunityPostImageDraft>.unmodifiable(_selectedImages),
       );
       if (!mounted) return;
-      setState(() {
+      _setComposerState(() {
         widget.draft.persistentDraftId = draftId;
         widget.draft.savedPersistently = true;
         widget.draft.title = _title.text;
@@ -237,7 +237,7 @@ extension _CommunityPostComposerReferenceActions
       );
     } on CommunityPolicyAccessException catch (error) {
       if (!mounted) return;
-      setState(
+      _setComposerState(
         () => _submitError = communityText(
           context,
           error.englishMessage(CommunityPolicyProtectedAction.publishing),
@@ -246,7 +246,7 @@ extension _CommunityPostComposerReferenceActions
       );
     } catch (_) {
       if (!mounted) return;
-      setState(
+      _setComposerState(
         () => _submitError = communityText(
           context,
           'Could not save this draft. Nothing was published.',
@@ -254,7 +254,7 @@ extension _CommunityPostComposerReferenceActions
         ),
       );
     } finally {
-      if (mounted) setState(() => _savingDraft = false);
+      if (mounted) _setComposerState(() => _savingDraft = false);
     }
   }
 }
