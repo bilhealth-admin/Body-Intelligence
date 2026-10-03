@@ -10,6 +10,8 @@ import '../data/community_repository.dart';
 import '../domain/community_attention.dart';
 import 'community_copy.dart';
 
+part 'community_notifications_filters.dart';
+
 class CommunityNotificationsPage extends StatefulWidget {
   const CommunityNotificationsPage({this.repository, super.key});
 
@@ -253,55 +255,6 @@ class _CommunityNotificationsPageState
     };
   }
 
-  bool _matchesFilter(CommunityNotification notification) =>
-      switch (_filter) {
-        _ActivityFilter.updates =>
-          notification.kind ==
-                  CommunityNotificationKind.friendRequest ||
-              notification.kind ==
-                  CommunityNotificationKind.friendAccepted ||
-              notification.kind ==
-                  CommunityNotificationKind.rewardEarned ||
-              notification.kind ==
-                  CommunityNotificationKind.questCompleted ||
-              notification.kind ==
-                  CommunityNotificationKind.badgeEarned ||
-              notification.kind ==
-                  CommunityNotificationKind.challengeUpdate ||
-              notification.kind ==
-                  CommunityNotificationKind.collaborationInvite ||
-              notification.kind ==
-                  CommunityNotificationKind.collaborationAccepted,
-        _ActivityFilter.reactions =>
-          notification.kind == CommunityNotificationKind.postLike ||
-              notification.kind == CommunityNotificationKind.postSave,
-        _ActivityFilter.comments =>
-          notification.kind == CommunityNotificationKind.comment ||
-              notification.kind == CommunityNotificationKind.reply ||
-              notification.kind == CommunityNotificationKind.mention,
-        _ActivityFilter.followers =>
-          notification.kind == CommunityNotificationKind.follow,
-      };
-
-  String _filterLabel(_ActivityFilter filter) => switch (filter) {
-    _ActivityFilter.updates => communityText(context, 'Updates', 'التحديثات'),
-    _ActivityFilter.reactions => communityText(
-      context,
-      'Likes & saves',
-      'الإعجابات والحفظ',
-    ),
-    _ActivityFilter.comments => communityText(
-      context,
-      'Comments',
-      'التعليقات',
-    ),
-    _ActivityFilter.followers => communityText(
-      context,
-      'New followers',
-      'متابعون جدد',
-    ),
-  };
-
   String _notificationTitle(CommunityNotification notification) {
     final actor = notification.actorDisplayName;
     return switch (notification.kind) {
@@ -533,7 +486,7 @@ class _CommunityNotificationsPageState
           );
         }
         final filteredNotifications = updates.notifications
-            .where(_matchesFilter)
+            .where(_CommunityNotificationsFilters(this).matchesFilter)
             .toList(growable: false);
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -547,7 +500,7 @@ class _CommunityNotificationsPageState
                       ChoiceChip(
                         key: Key('community-activity-filter-${filter.name}'),
                         selected: _filter == filter,
-                        label: Text(_filterLabel(filter)),
+                        label: Text(_CommunityNotificationsFilters(this).filterLabel(filter)),
                         onSelected: (_) => setState(() => _filter = filter),
                       ),
                       const SizedBox(width: 8),
