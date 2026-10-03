@@ -625,6 +625,81 @@ class CommunityComment {
   }
 }
 
+class CommunityPostMedia {
+  const CommunityPostMedia({
+    required this.position,
+    required this.objectPath,
+    required this.mimeType,
+    required this.bytes,
+    required this.width,
+    required this.height,
+    this.url,
+  });
+
+  final int position;
+  final String objectPath;
+  final String mimeType;
+  final int bytes;
+  final int width;
+  final int height;
+  final String? url;
+
+  double get aspectRatio => width / height;
+
+  CommunityPostMedia withUrl(String? value) => CommunityPostMedia(
+    position: position,
+    objectPath: objectPath,
+    mimeType: mimeType,
+    bytes: bytes,
+    width: width,
+    height: height,
+    url: value,
+  );
+
+  factory CommunityPostMedia.fromJson(Map<String, dynamic> json) {
+    final position = json['media_position'];
+    final objectPath = json['object_path'];
+    final mimeType = json['mime_type'];
+    final bytes = json['bytes'];
+    final width = json['width'];
+    final height = json['height'];
+    final url = json['url'];
+    if (position is! num ||
+        position % 1 != 0 ||
+        position < 0 ||
+        position > 3 ||
+        objectPath is! String ||
+        objectPath.isEmpty ||
+        mimeType is! String ||
+        !const {'image/jpeg', 'image/png', 'image/webp'}.contains(mimeType) ||
+        bytes is! num ||
+        bytes % 1 != 0 ||
+        bytes < 1 ||
+        bytes > 5 * 1024 * 1024 ||
+        width is! num ||
+        width % 1 != 0 ||
+        width < 1 ||
+        width > 8192 ||
+        height is! num ||
+        height % 1 != 0 ||
+        height < 1 ||
+        height > 8192 ||
+        width.toInt() * height.toInt() > 40000000 ||
+        (url != null && url is! String)) {
+      throw const FormatException('Invalid Community post media');
+    }
+    return CommunityPostMedia(
+      position: position.toInt(),
+      objectPath: objectPath,
+      mimeType: mimeType,
+      bytes: bytes.toInt(),
+      width: width.toInt(),
+      height: height.toInt(),
+      url: url as String?,
+    );
+  }
+}
+
 class CommunityPost {
   const CommunityPost({
     required this.id,
@@ -650,6 +725,7 @@ class CommunityPost {
     this.authorRelationship,
     this.authorCanRequest = false,
     this.poll,
+    this.media = const <CommunityPostMedia>[],
   });
 
   final String id;
@@ -675,6 +751,7 @@ class CommunityPost {
   final CommunityRelationshipStatus? authorRelationship;
   final bool authorCanRequest;
   final CommunityPoll? poll;
+  final List<CommunityPostMedia> media;
 
   CommunityPost withStats(CommunityPostStats stats) {
     if (stats.postId != id) {
@@ -704,6 +781,8 @@ class CommunityPost {
       authorRelationship: authorRelationship,
       authorCanRequest: authorCanRequest,
       poll: poll,
+    media: media,
+      media: media,
     );
   }
 
@@ -731,6 +810,7 @@ class CommunityPost {
     authorRelationship: authorRelationship,
     authorCanRequest: authorCanRequest,
     poll: poll,
+    media: media,
   );
 
   CommunityPost withPoll(CommunityPoll? value) => CommunityPost(
@@ -757,6 +837,33 @@ class CommunityPost {
     authorRelationship: authorRelationship,
     authorCanRequest: authorCanRequest,
     poll: value,
+  );
+
+  CommunityPost withMedia(List<CommunityPostMedia> value) => CommunityPost(
+    id: id,
+    authorId: authorId,
+    body: body,
+    createdAt: createdAt,
+    authorName: authorName,
+    authorAvatarUrl: authorAvatarUrl,
+    mediaObjectPath: mediaObjectPath,
+    mediaUrl: mediaUrl,
+    mediaMimeType: mediaMimeType,
+    mediaBytes: mediaBytes,
+    mediaWidth: mediaWidth,
+    mediaHeight: mediaHeight,
+    moderationStatus: moderationStatus,
+    moderationVisibility: moderationVisibility,
+    reviewedAt: reviewedAt,
+    likeCount: likeCount,
+    liked: liked,
+    commentCount: commentCount,
+    saved: saved,
+    authorHandle: authorHandle,
+    authorRelationship: authorRelationship,
+    authorCanRequest: authorCanRequest,
+    poll: poll,
+    media: List.unmodifiable(value),
   );
 
   CommunityPost withAuthorSocial(CommunityPostAuthorSocial author) {
@@ -787,24 +894,42 @@ class CommunityPost {
       authorRelationship: author.relationship,
       authorCanRequest: author.canRequest,
       poll: poll,
+    media: media,
+      media: media,
     );
   }
 
-  bool get hasImage =>
-      mediaObjectPath != null &&
-      mediaMimeType != null &&
-      mediaBytes != null &&
-      mediaWidth != null &&
-      mediaHeight != null;
-
-  double? get mediaAspectRatio {
+  List<CommunityPostMedia> get mediaItems {
+    if (media.isNotEmpty) return media;
+    final path = mediaObjectPath;
+    final mime = mediaMimeType;
+    final byteCount = mediaBytes;
     final width = mediaWidth;
     final height = mediaHeight;
-    if (width == null || height == null || width <= 0 || height <= 0) {
-      return null;
+    if (path == null ||
+        mime == null ||
+        byteCount == null ||
+        width == null ||
+        height == null) {
+      return const <CommunityPostMedia>[];
     }
-    return width / height;
+    return <CommunityPostMedia>[
+      CommunityPostMedia(
+        position: 0,
+        objectPath: path,
+        mimeType: mime,
+        bytes: byteCount,
+        width: width,
+        height: height,
+        url: mediaUrl,
+      ),
+    ];
   }
+
+  bool get hasImage => mediaItems.isNotEmpty;
+
+  double? get mediaAspectRatio =>
+      mediaItems.isEmpty ? null : mediaItems.first.aspectRatio;
 
   factory CommunityPost.fromJson(Map<String, dynamic> json) => CommunityPost(
     id: json['id'] as String,
@@ -844,6 +969,18 @@ class CommunityPost {
         ? null
         : CommunityPoll.fromJson(
             Map<String, dynamic>.from(json['poll'] as Map),
+          ),
+    media: json['media'] is! List
+        ? const <CommunityPostMedia>[]
+        : List<CommunityPostMedia>.unmodifiable(
+            (json['media'] as List).map((item) {
+              if (item is! Map) {
+                throw const FormatException('Invalid Community post media');
+              }
+              return CommunityPostMedia.fromJson(
+                Map<String, dynamic>.from(item),
+              );
+            }),
           ),
   );
 }
