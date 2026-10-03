@@ -76,7 +76,26 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
     final localeTag = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final message = bilCommunityInviteMessage(localeTag, name: contact.name);
+    String? trackedInviteUrl;
+    final repository = _repository;
+    if (repository != null) {
+      try {
+        final invite = await repository.createCommunityInvite();
+        if (invite.active) {
+          trackedInviteUrl = invite.url?.toString();
+        }
+      } on Object {
+        // Referral attribution is fail-closed. The existing generic BIL
+        // download invite remains available when tracked links are disabled
+        // or the cloud is temporarily unavailable.
+      }
+    }
+    if (!mounted) return;
+    final message = bilCommunityInviteMessage(
+      localeTag,
+      name: contact.name,
+      url: trackedInviteUrl,
+    );
     final privacy = bilCommunityContactPrivacy(localeTag);
     // The native system picker grants one-contact access only.
     // No permission was requested. BIL cannot read or retain the address book.
