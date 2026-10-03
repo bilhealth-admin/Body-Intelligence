@@ -9,6 +9,7 @@ on:
     branches:
       - fix/community-acceptance-notifications-20261003
       - work/community-feed-v1-20261003
+      - work/community-activity-emitters-v1-20261003
 
 permissions:
   contents: write
@@ -68,6 +69,8 @@ jobs:
             test/features/community/community_attention_test.dart \
             test/features/community/community_activity_v2_contract_test.dart \
             test/features/community/community_activity_v2_client_contract_test.dart \
+            test/features/community/community_activity_inbox_v2_contract_test.dart \
+            test/features/community/community_social_activity_emitters_v1_contract_test.dart \
             test/features/community/community_authenticated_interaction_test.dart \
             test/features/community/community_deep_link_test.dart \
             test/features/community/community_friend_acceptance_cloud_contract_test.dart \
@@ -92,7 +95,7 @@ jobs:
             git config user.name "BIL Community QA"
             git config user.email "actions@users.noreply.github.com"
             git add lib test
-            git commit -m "style(community): format feed modes implementation"
+            git commit -m "style(community): format Activity emitters implementation"
             git push origin HEAD:${GITHUB_REF_NAME}
           fi
       - name: Verify referral association tooling
