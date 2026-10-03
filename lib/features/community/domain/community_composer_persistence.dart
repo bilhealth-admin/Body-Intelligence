@@ -165,36 +165,44 @@ class CommunityPostReferenceMetadata {
         rawCollaborators is! List) {
       throw const FormatException('Invalid Community post reference metadata');
     }
-    final hashtags = rawHashtags.map((value) {
-      if (value is! String ||
-          value.isEmpty ||
-          value.length > 40 ||
-          value.contains(RegExp(r'[#\s\x00-\x1F\x7F]'))) {
-        throw const FormatException('Invalid Community hashtag');
-      }
-      return value;
-    }).toList(growable: false);
-    final topics = rawTopics.map((raw) {
-      if (raw is! Map) {
-        throw const FormatException('Invalid Community topic reference row');
-      }
-      return CommunityPostTopicReference.fromJson(
-        Map<String, dynamic>.from(raw),
-      );
-    }).toList(growable: false);
+    final hashtags = rawHashtags
+        .map((value) {
+          if (value is! String ||
+              value.isEmpty ||
+              value.length > 40 ||
+              value.contains(RegExp(r'[#\s\x00-\x1F\x7F]'))) {
+            throw const FormatException('Invalid Community hashtag');
+          }
+          return value;
+        })
+        .toList(growable: false);
+    final topics = rawTopics
+        .map((raw) {
+          if (raw is! Map) {
+            throw const FormatException(
+              'Invalid Community topic reference row',
+            );
+          }
+          return CommunityPostTopicReference.fromJson(
+            Map<String, dynamic>.from(raw),
+          );
+        })
+        .toList(growable: false);
     final circle = rawCircle == null
         ? null
         : CommunityPostCircleReference.fromJson(
             Map<String, dynamic>.from(rawCircle),
           );
-    final collaborators = rawCollaborators.map((raw) {
-      if (raw is! Map) {
-        throw const FormatException('Invalid Community collaborator row');
-      }
-      return CommunityPostCollaborator.fromJson(
-        Map<String, dynamic>.from(raw),
-      );
-    }).toList(growable: false);
+    final collaborators = rawCollaborators
+        .map((raw) {
+          if (raw is! Map) {
+            throw const FormatException('Invalid Community collaborator row');
+          }
+          return CommunityPostCollaborator.fromJson(
+            Map<String, dynamic>.from(raw),
+          );
+        })
+        .toList(growable: false);
     return CommunityPostReferenceMetadata(
       postId: postId,
       title: title as String?,
@@ -277,10 +285,7 @@ class CommunityDraftMediaMetadata {
     int exactInt(String key, {required int min, required int max}) {
       final value = json[key];
       if (value is int && value >= min && value <= max) return value;
-      if (value is num &&
-          value % 1 == 0 &&
-          value >= min &&
-          value <= max) {
+      if (value is num && value % 1 == 0 && value >= min && value <= max) {
         return value.toInt();
       }
       throw FormatException('Invalid Community draft media field: $key');
@@ -394,14 +399,16 @@ class CommunityPersistentDraft {
       throw const FormatException('Invalid Community persistent draft');
     }
 
-    final media = rawMedia.map((item) {
-      if (item is! Map) {
-        throw const FormatException('Invalid Community draft media row');
-      }
-      return CommunityDraftMediaMetadata.fromJson(
-        Map<String, dynamic>.from(item),
-      );
-    }).toList(growable: false);
+    final media = rawMedia
+        .map((item) {
+          if (item is! Map) {
+            throw const FormatException('Invalid Community draft media row');
+          }
+          return CommunityDraftMediaMetadata.fromJson(
+            Map<String, dynamic>.from(item),
+          );
+        })
+        .toList(growable: false);
 
     return CommunityPersistentDraft(
       draftId: draftId,

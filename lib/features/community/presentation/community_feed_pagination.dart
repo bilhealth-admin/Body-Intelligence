@@ -43,8 +43,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           widget.repository.loadCommunityPostReferenceMetadata(ids),
           widget.repository.loadCommunityPostViewCounts(ids),
         ]);
-        references =
-            extras[0] as List<CommunityPostReferenceMetadata>;
+        references = extras[0] as List<CommunityPostReferenceMetadata>;
         viewCounts = extras[1] as Map<String, int>;
       } else {
         references = const <CommunityPostReferenceMetadata>[];
@@ -99,8 +98,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           widget.repository.loadCommunityPostReferenceMetadata(ids),
           widget.repository.loadCommunityPostViewCounts(ids),
         ]);
-        references =
-            extras[0] as List<CommunityPostReferenceMetadata>;
+        references = extras[0] as List<CommunityPostReferenceMetadata>;
         viewCounts = extras[1] as Map<String, int>;
       } else {
         references = const <CommunityPostReferenceMetadata>[];

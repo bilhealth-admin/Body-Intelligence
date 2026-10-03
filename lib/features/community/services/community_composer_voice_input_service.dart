@@ -8,15 +8,11 @@ import '../../../app/services/runtime_permission_policy.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_voice_candidate.dart';
 
-typedef CommunityVoicePermissionGate = Future<bool> Function(
-  BuildContext context,
-);
+typedef CommunityVoicePermissionGate =
+    Future<bool> Function(BuildContext context);
 
 final class CommunityComposerVoiceInputService {
-  CommunityComposerVoiceInputService(
-    this._speech, {
-    this.permissionGate,
-  });
+  CommunityComposerVoiceInputService(this._speech, {this.permissionGate});
 
   factory CommunityComposerVoiceInputService.platform() =>
       CommunityComposerVoiceInputService(SpeechToText());
@@ -55,8 +51,8 @@ final class CommunityComposerVoiceInputService {
         appLanguage: BilLocalePolicy.canonicalTag(
           Localizations.localeOf(context),
         ),
-        deviceLocale:
-            WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag(),
+        deviceLocale: WidgetsBinding.instance.platformDispatcher.locale
+            .toLanguageTag(),
         availableLocales: locales.map((value) => value.localeId),
       );
       if (localeId == null || !context.mounted) {
@@ -110,13 +106,7 @@ final class CommunityComposerVoiceInputService {
                     ? Icons.mic_none_rounded
                     : Icons.graphic_eq_rounded,
               ),
-              title: Text(
-                _copy(
-                  context,
-                  'Voice input',
-                  'الإدخال الصوتي',
-                ),
-              ),
+              title: Text(_copy(context, 'Voice input', 'الإدخال الصوتي')),
               content: TextField(
                 key: const Key('community-voice-transcript'),
                 controller: editor,
@@ -203,9 +193,7 @@ final class CommunityComposerVoiceInputService {
     BilRuntimePermissionState? speechState;
     if (defaultTargetPlatform == TargetPlatform.iOS &&
         microphoneState == BilRuntimePermissionState.granted) {
-      speechState = await policy.status(
-        BilRuntimeCapability.speechRecognition,
-      );
+      speechState = await policy.status(BilRuntimeCapability.speechRecognition);
     }
 
     final capability =
@@ -251,11 +239,7 @@ final class CommunityComposerVoiceInputService {
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
               child: Text(
-                _copy(
-                  dialogContext,
-                  'Open settings',
-                  'فتح الإعدادات',
-                ),
+                _copy(dialogContext, 'Open settings', 'فتح الإعدادات'),
               ),
             ),
           ],
@@ -267,8 +251,7 @@ final class CommunityComposerVoiceInputService {
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       final granted =
-          await policy.request(capability) ==
-          BilRuntimePermissionState.granted;
+          await policy.request(capability) == BilRuntimePermissionState.granted;
       if (!granted || capability != BilRuntimeCapability.microphone) {
         return granted;
       }
@@ -332,7 +315,5 @@ final class CommunityComposerVoiceInputService {
   }
 
   String _copy(BuildContext context, String english, String arabic) =>
-      Localizations.localeOf(context).languageCode == 'ar'
-      ? arabic
-      : english;
+      Localizations.localeOf(context).languageCode == 'ar' ? arabic : english;
 }

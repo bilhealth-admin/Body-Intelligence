@@ -33,12 +33,12 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
             maxLines: compact ? 3 : null,
             overflow: compact ? TextOverflow.ellipsis : null,
             style: compact
-                ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  )
-                : Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+                ? Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)
+                : Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 8),
         ],
@@ -74,15 +74,11 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
                                   'قيد الانتظار',
                                 ),
                           CommunityCollaborationStatus.declined =>
-                            ' · ' +
-                                communityText(
-                                  context,
-                                  'Declined',
-                                  'مرفوض',
-                                ),
+                            ' · ' + communityText(context, 'Declined', 'مرفوض'),
                         },
                   ),
-                  side: collaborator.status ==
+                  side:
+                      collaborator.status ==
                           CommunityCollaborationStatus.accepted
                       ? null
                       : BorderSide(

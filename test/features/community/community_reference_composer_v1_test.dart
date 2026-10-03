@@ -70,11 +70,10 @@ final class _ReferenceComposerRepository extends CommunityRepository {
   @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
     required String localeCode,
-  }) async =>
-      CommunityPolicyState.accepted(
-        _acceptedPolicy,
-        acceptedVersion: _acceptedPolicy.version,
-      );
+  }) async => CommunityPolicyState.accepted(
+    _acceptedPolicy,
+    acceptedVersion: _acceptedPolicy.version,
+  );
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
@@ -100,8 +99,7 @@ final class _ReferenceComposerRepository extends CommunityRepository {
   Future<List<CommunityMentionCandidate>> searchCommunityMentions(
     String query, {
     int limit = 12,
-  }) async =>
-      query.trim().isEmpty
+  }) async => query.trim().isEmpty
       ? const <CommunityMentionCandidate>[]
       : const <CommunityMentionCandidate>[candidate];
 
@@ -136,8 +134,9 @@ final class _ReferenceComposerRepository extends CommunityRepository {
     publishedBody = body;
     publishedTitle = title;
     publishedHashtags = List<String>.unmodifiable(hashtags);
-    publishedCollaborators =
-        List<CommunityMentionCandidate>.unmodifiable(collaborators);
+    publishedCollaborators = List<CommunityMentionCandidate>.unmodifiable(
+      collaborators,
+    );
     publishedDraftId = persistentDraftId;
   }
 }
@@ -229,14 +228,8 @@ void main() {
       expect(composer, contains(required), reason: required);
     }
 
-    expect(
-      workInProgress,
-      contains('bil_consume_my_community_post_draft_v1'),
-    );
-    expect(
-      workInProgress,
-      contains("p.moderation_status='pending'"),
-    );
+    expect(workInProgress, contains('bil_consume_my_community_post_draft_v1'));
+    expect(workInProgress, contains("p.moderation_status='pending'"));
 
     for (final required in const [
       'collaboration_invite',
@@ -257,45 +250,48 @@ void main() {
     expect(composer, isNot(contains('body_fat')));
   });
 
-  test('reference metadata parses title hashtags topic circle and collaborators', () {
-    final metadata = CommunityPostReferenceMetadata.fromJson({
-      'post_id': '33333333-3333-4333-8333-333333333333',
-      'title': 'Reference title',
-      'hashtags': ['habits', 'progress'],
-      'topics': [
-        {
-          'slug': 'success-stories',
-          'title_copy_key': 'community_topic_success_stories',
-          'post_count': 14,
+  test(
+    'reference metadata parses title hashtags topic circle and collaborators',
+    () {
+      final metadata = CommunityPostReferenceMetadata.fromJson({
+        'post_id': '33333333-3333-4333-8333-333333333333',
+        'title': 'Reference title',
+        'hashtags': ['habits', 'progress'],
+        'topics': [
+          {
+            'slug': 'success-stories',
+            'title_copy_key': 'community_topic_success_stories',
+            'post_count': 14,
+          },
+        ],
+        'circle': {
+          'slug': 'healthy-habits',
+          'title_copy_key': 'community_circle_healthy_habits',
+          'post_count': 9,
+          'member_count': 31,
         },
-      ],
-      'circle': {
-        'slug': 'healthy-habits',
-        'title_copy_key': 'community_circle_healthy_habits',
-        'post_count': 9,
-        'member_count': 31,
-      },
-      'collaborators': [
-        {
-          'user_id': _collaborator,
-          'handle': 'collab_member',
-          'display_name': 'Collab Member',
-          'avatar_url': null,
-          'status': 'accepted',
-        },
-      ],
-    });
+        'collaborators': [
+          {
+            'user_id': _collaborator,
+            'handle': 'collab_member',
+            'display_name': 'Collab Member',
+            'avatar_url': null,
+            'status': 'accepted',
+          },
+        ],
+      });
 
-    expect(metadata.title, 'Reference title');
-    expect(metadata.hashtags, ['habits', 'progress']);
-    expect(metadata.topics.single.slug, 'success-stories');
-    expect(metadata.topics.single.postCount, 14);
-    expect(metadata.circle?.memberCount, 31);
-    expect(
-      metadata.collaborators.single.status,
-      CommunityCollaborationStatus.accepted,
-    );
-  });
+      expect(metadata.title, 'Reference title');
+      expect(metadata.hashtags, ['habits', 'progress']);
+      expect(metadata.topics.single.slug, 'success-stories');
+      expect(metadata.topics.single.postCount, 14);
+      expect(metadata.circle?.memberCount, 31);
+      expect(
+        metadata.collaborators.single.status,
+        CommunityCollaborationStatus.accepted,
+      );
+    },
+  );
 
   testWidgets(
     'composer saves and publishes title hashtags collaborator and persistent draft id',
@@ -307,10 +303,7 @@ void main() {
       await tester.tap(find.byKey(const Key('community-create-post')));
       await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('community-composer-title')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('community-composer-title')), findsOneWidget);
       expect(
         find.byKey(const Key('community-composer-voice-input')),
         findsOneWidget,
@@ -335,9 +328,7 @@ void main() {
         find.byKey(const Key('community-composer-hashtag-input')),
         'Progress',
       );
-      await tester.tap(
-        find.byKey(const Key('community-composer-hashtag-add')),
-      );
+      await tester.tap(find.byKey(const Key('community-composer-hashtag-add')));
       await tester.pumpAndSettle();
       expect(find.text('#progress'), findsOneWidget);
 
@@ -353,9 +344,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.tap(
-        find.byKey(
-          const Key('community-composer-collaborator-$_collaborator'),
-        ),
+        find.byKey(const Key('community-composer-collaborator-$_collaborator')),
       );
       await tester.pumpAndSettle();
       expect(find.text('@collab_member'), findsWidgets);
@@ -369,10 +358,7 @@ void main() {
       expect(repository.savedDraft?.title, 'My reference title');
       expect(repository.savedDraft?.body, 'My reference body');
       expect(repository.savedDraft?.hashtags, ['progress']);
-      expect(
-        repository.savedDraft?.collaborators.single.userId,
-        _collaborator,
-      );
+      expect(repository.savedDraft?.collaborators.single.userId, _collaborator);
       final savedId = repository.savedDraft?.draftId;
       expect(savedId, isNotNull);
       expect(repository.savedImages, isEmpty);
@@ -387,10 +373,7 @@ void main() {
       expect(repository.publishedHashtags, ['progress']);
       expect(repository.publishedCollaborators.single.userId, _collaborator);
       expect(repository.publishedDraftId, savedId);
-      expect(
-        find.byKey(const Key('community-post-editor-page')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('community-post-editor-page')), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -430,9 +413,7 @@ void main() {
     expect(field.controller?.text, 'Community voice draft');
     expect(accepted, isNull);
 
-    await tester.tap(
-      find.byKey(const Key('community-use-voice-transcript')),
-    );
+    await tester.tap(find.byKey(const Key('community-use-voice-transcript')));
     await tester.pumpAndSettle();
 
     expect(accepted, 'Community voice draft');

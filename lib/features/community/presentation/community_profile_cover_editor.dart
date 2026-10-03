@@ -98,11 +98,7 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          communityText(
-            context,
-            'Remove profile cover?',
-            'إزالة غلاف الملف؟',
-          ),
+          communityText(context, 'Remove profile cover?', 'إزالة غلاف الملف؟'),
         ),
         content: Text(
           communityText(
@@ -214,9 +210,7 @@ class _CommunityProfileCoverEditor extends StatelessWidget {
                   key: const Key('community-profile-cover-remove'),
                   onPressed: busy || saving ? null : onRemove,
                   icon: const Icon(Icons.delete_outline_rounded),
-                  label: Text(
-                    communityText(context, 'Remove', 'إزالة'),
-                  ),
+                  label: Text(communityText(context, 'Remove', 'إزالة')),
                 ),
             ],
           ),
@@ -235,11 +229,7 @@ class _CommunityProfileCoverEditor extends StatelessWidget {
       ),
     ),
     child: const Center(
-      child: Icon(
-        Icons.public_rounded,
-        size: 58,
-        color: Colors.white54,
-      ),
+      child: Icon(Icons.public_rounded, size: 58, color: Colors.white54),
     ),
   );
 }

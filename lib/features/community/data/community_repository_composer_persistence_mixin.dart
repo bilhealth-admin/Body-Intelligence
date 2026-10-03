@@ -73,9 +73,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
     if (json['post_id'] != postId ||
         json['hashtag_count'] != hashtags.length ||
         json['collaborator_count'] != collaboratorUserIds.length) {
-      throw const FormatException(
-        'Community post reference metadata mismatch',
-      );
+      throw const FormatException('Community post reference metadata mismatch');
     }
   }
 
@@ -106,8 +104,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
     int limit = 20,
   }) async {
     if ((before == null) != (beforeId == null) ||
-        (beforeId != null &&
-            !CommunityRepository._uuid.hasMatch(beforeId)) ||
+        (beforeId != null && !CommunityRepository._uuid.hasMatch(beforeId)) ||
         limit < 1 ||
         limit > 50) {
       throw ArgumentError('Invalid Community draft cursor');
@@ -128,14 +125,14 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
         if (raw is! Map) {
           throw const FormatException('Invalid Community draft row');
         }
-        return CommunityDraftSummary.fromJson(
-          Map<String, dynamic>.from(raw),
-        );
+        return CommunityDraftSummary.fromJson(Map<String, dynamic>.from(raw));
       }),
     );
   }
 
-  Future<({CommunityPersistentDraft draft, List<CommunityPostImageDraft> images})>
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImageDraft> images})
+  >
   loadMyCommunityDraft(String draftId) async {
     if (!CommunityRepository._uuid.hasMatch(draftId)) {
       throw ArgumentError.value(draftId, 'draftId');

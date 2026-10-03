@@ -26,11 +26,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
     final text = [
       profile.displayName,
       if (handle != null) '@' + handle,
-      communityText(
-        context,
-        'BIL Community profile',
-        'ملف مجتمع BIL',
-      ),
+      communityText(context, 'BIL Community profile', 'ملف مجتمع BIL'),
     ].join('\n');
     try {
       await SharePlus.instance.share(ShareParams(text: text));
@@ -87,10 +83,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
+          Text(label, style: Theme.of(context).textTheme.labelMedium),
         ],
       ),
     ),
@@ -123,9 +116,8 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                     cover,
                     key: const Key('community-profile-cover'),
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => _CommunityProfileCoverFallback(
-                      colorScheme: scheme,
-                    ),
+                    errorBuilder: (_, _, _) =>
+                        _CommunityProfileCoverFallback(colorScheme: scheme),
                   )
                 else
                   _CommunityProfileCoverFallback(colorScheme: scheme),
@@ -160,11 +152,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                       _heroAction(
                         context: context,
                         icon: Icons.mail_outline_rounded,
-                        tooltip: communityText(
-                          context,
-                          'Messages',
-                          'الرسائل',
-                        ),
+                        tooltip: communityText(context, 'Messages', 'الرسائل'),
                         onPressed: () => context.push('/community/messages'),
                       ),
                       if (profile.isSelf)
@@ -284,7 +272,10 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                   Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: ActionChip(
-                      avatar: const Icon(Icons.people_outline_rounded, size: 18),
+                      avatar: const Icon(
+                        Icons.people_outline_rounded,
+                        size: 18,
+                      ),
                       label: Text(
                         profile.friendCount.toString() +
                             ' ' +
@@ -307,11 +298,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                         onPressed: () => context.push('/community/profile'),
                         icon: const Icon(Icons.edit_outlined),
                         label: Text(
-                          communityText(
-                            context,
-                            'Edit profile',
-                            'تعديل الملف',
-                          ),
+                          communityText(context, 'Edit profile', 'تعديل الملف'),
                         ),
                       ),
                       OutlinedButton.icon(
@@ -340,9 +327,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                       ),
                       if (profile.viewerFollows || profile.allowFollows)
                         OutlinedButton.icon(
-                          key: const Key(
-                            'community-profile-follow-action',
-                          ),
+                          key: const Key('community-profile-follow-action'),
                           onPressed: followBusy ? null : onToggleFollow,
                           icon: followBusy
                               ? const SizedBox.square(
@@ -358,16 +343,8 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                                 ),
                           label: Text(
                             profile.viewerFollows
-                                ? communityText(
-                                    context,
-                                    'Following',
-                                    'يتابع',
-                                  )
-                                : communityText(
-                                    context,
-                                    'Follow',
-                                    'متابعة',
-                                  ),
+                                ? communityText(context, 'Following', 'يتابع')
+                                : communityText(context, 'Follow', 'متابعة'),
                           ),
                         ),
                       if (profile.followsViewer)
@@ -377,11 +354,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                             size: 17,
                           ),
                           label: Text(
-                            communityText(
-                              context,
-                              'Follows you',
-                              'يتابعك',
-                            ),
+                            communityText(context, 'Follows you', 'يتابعك'),
                           ),
                         ),
                     ],

@@ -57,10 +57,7 @@ extension _CommunityProfileDraftActions on _CommunityMemberProfilePageState {
 }
 
 class _CommunityDraftShortcut extends StatelessWidget {
-  const _CommunityDraftShortcut({
-    required this.summary,
-    required this.onTap,
-  });
+  const _CommunityDraftShortcut({required this.summary, required this.onTap});
 
   final CommunityDraftSummary? summary;
   final VoidCallback onTap;
@@ -188,9 +185,9 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
               Expanded(
                 child: Text(
                   communityText(context, 'Drafts', 'المسودات'),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
               IconButton(
@@ -261,11 +258,7 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
                       body.isNotEmpty
                           ? body
                           : draft.mediaCount > 0
-                          ? communityText(
-                              context,
-                              'Photo draft',
-                              'مسودة صور',
-                            )
+                          ? communityText(context, 'Photo draft', 'مسودة صور')
                           : communityText(
                               context,
                               'Saved draft',
@@ -283,9 +276,7 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
                           Text(draft.mediaCount.toString()),
                         ],
                         IconButton(
-                          key: Key(
-                            'community-draft-delete-' + draft.draftId,
-                          ),
+                          key: Key('community-draft-delete-' + draft.draftId),
                           tooltip: communityText(
                             context,
                             'Delete draft',

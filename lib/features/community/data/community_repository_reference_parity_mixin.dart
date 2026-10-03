@@ -163,9 +163,7 @@ mixin _CommunityReferenceParityRepositoryMixin {
         if (raw is! Map) {
           throw const FormatException('Invalid Community profile review row');
         }
-        return CommunityProfileReview.fromJson(
-          Map<String, dynamic>.from(raw),
-        );
+        return CommunityProfileReview.fromJson(Map<String, dynamic>.from(raw));
       }),
     );
   }

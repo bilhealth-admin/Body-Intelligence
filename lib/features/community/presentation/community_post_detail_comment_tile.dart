@@ -76,16 +76,8 @@ class _CommunityCommentTile extends StatelessWidget {
                           ),
                           label: Text(
                             tier == 'premium'
-                                ? communityText(
-                                    context,
-                                    'Premium',
-                                    'Premium',
-                                  )
-                                : communityText(
-                                    context,
-                                    'Free',
-                                    'مجاني',
-                                  ),
+                                ? communityText(context, 'Premium', 'Premium')
+                                : communityText(context, 'Free', 'مجاني'),
                           ),
                         ),
                       ],

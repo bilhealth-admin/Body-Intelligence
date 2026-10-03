@@ -38,10 +38,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _CommunityPostComposerReferenceSections(this)._buildCommunityTitleField(
-                          context,
-                          busy,
-                        ),
+                        _CommunityPostComposerReferenceSections(
+                          this,
+                        )._buildCommunityTitleField(context, busy),
                         const SizedBox(height: 12),
                         TextField(
                           key: const Key('community-post-composer'),
@@ -87,9 +86,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             errorText: _composerError,
                             errorMaxLines: 3,
                             suffixIcon: IconButton(
-                              key: const Key(
-                                'community-composer-voice-input',
-                              ),
+                              key: const Key('community-composer-voice-input'),
                               tooltip: communityText(
                                 context,
                                 'Voice input',
@@ -470,10 +467,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                         const SizedBox(height: 18),
                         ..._CommunityPostComposerReferenceSections(
                           this,
-                        )._buildCommunityCollaboratorSection(
-                          context,
-                          busy,
-                        ),
+                        )._buildCommunityCollaboratorSection(context, busy),
                         const SizedBox(height: 8),
                         SwitchListTile.adaptive(
                           key: const Key('community-composer-poll-toggle'),

@@ -20,9 +20,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
               child: Text(
                 error,
                 key: const Key('community-post-submit-error'),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
           ],
@@ -52,16 +50,8 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                     : const Icon(Icons.drafts_outlined),
                 label: Text(
                   widget.draft.savedPersistently
-                      ? communityText(
-                          context,
-                          'Update draft',
-                          'تحديث المسودة',
-                        )
-                      : communityText(
-                          context,
-                          'Save draft',
-                          'حفظ المسودة',
-                        ),
+                      ? communityText(context, 'Update draft', 'تحديث المسودة')
+                      : communityText(context, 'Save draft', 'حفظ المسودة'),
                 ),
               ),
               OutlinedButton.icon(

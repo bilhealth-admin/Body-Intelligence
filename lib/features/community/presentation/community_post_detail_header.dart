@@ -69,16 +69,8 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                         )
                       : Text(
                           profile.viewerFollows
-                              ? communityText(
-                                  context,
-                                  'Following',
-                                  'يتابع',
-                                )
-                              : communityText(
-                                  context,
-                                  'Follow',
-                                  'متابعة',
-                                ),
+                              ? communityText(context, 'Following', 'يتابع')
+                              : communityText(context, 'Follow', 'متابعة'),
                         ),
                 ),
             ],

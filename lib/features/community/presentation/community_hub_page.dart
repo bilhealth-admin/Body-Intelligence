@@ -223,11 +223,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     Expanded(
                       child: _CommunityHubTopTab(
                         key: const Key('community-hub-explore-tab'),
-                        label: communityText(
-                          context,
-                          'Explore',
-                          'استكشاف',
-                        ),
+                        label: communityText(context, 'Explore', 'استكشاف'),
                         selected: _section == _CommunityHubSection.explore,
                         onTap: () => setState(
                           () => _section = _CommunityHubSection.explore,
@@ -237,11 +233,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     Expanded(
                       child: _CommunityHubTopTab(
                         key: const Key('community-hub-circles-tab'),
-                        label: communityText(
-                          context,
-                          'Circles',
-                          'الدوائر',
-                        ),
+                        label: communityText(context, 'Circles', 'الدوائر'),
                         selected: _section == _CommunityHubSection.circles,
                         onTap: () => setState(
                           () => _section = _CommunityHubSection.circles,
@@ -378,6 +370,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     }
   }
 }
+
 class _CommunityHubTopTab extends StatelessWidget {
   const _CommunityHubTopTab({
     required this.label,
@@ -422,7 +415,6 @@ class _CommunityHubTopTab extends StatelessWidget {
     ),
   );
 }
-
 
 PopupMenuItem<String> _communityAction(
   BuildContext context,

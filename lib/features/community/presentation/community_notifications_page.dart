@@ -361,11 +361,7 @@ class _CommunityNotificationsPageState
       ),
       CommunityNotificationKind.collaborationInvite =>
         actor == null
-            ? communityText(
-                context,
-                'Collaboration invitation',
-                'دعوة للتعاون',
-              )
+            ? communityText(context, 'Collaboration invitation', 'دعوة للتعاون')
             : communityText(
                 context,
                 '{actor} invited you to collaborate on a post',
@@ -500,7 +496,11 @@ class _CommunityNotificationsPageState
                       ChoiceChip(
                         key: Key('community-activity-filter-${filter.name}'),
                         selected: _filter == filter,
-                        label: Text(_CommunityNotificationsFilters(this).filterLabel(filter)),
+                        label: Text(
+                          _CommunityNotificationsFilters(
+                            this,
+                          ).filterLabel(filter),
+                        ),
                         onSelected: (_) => setState(() => _filter = filter),
                       ),
                       const SizedBox(width: 8),
@@ -549,7 +549,8 @@ class _CommunityNotificationsPageState
                       : () => _openNotification(notification),
                 ),
               ),
-            if (_filter == _ActivityFilter.updates && updates.incomingRequests > 0)
+            if (_filter == _ActivityFilter.updates &&
+                updates.incomingRequests > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.friends,
@@ -565,7 +566,8 @@ class _CommunityNotificationsPageState
                 ),
                 onTap: () => _openAndRefresh('/community/connections'),
               ),
-            if (_filter == _ActivityFilter.updates && updates.unreadMessages > 0)
+            if (_filter == _ActivityFilter.updates &&
+                updates.unreadMessages > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.messages,

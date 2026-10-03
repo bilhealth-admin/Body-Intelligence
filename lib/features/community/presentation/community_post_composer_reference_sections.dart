@@ -20,9 +20,7 @@ extension _CommunityPostComposerReferenceSections
             'Give this moment a clear title',
             'امنح هذه اللحظة عنوانًا واضحًا',
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
         ),
       );
 
@@ -76,14 +74,11 @@ extension _CommunityPostComposerReferenceSections
             controller: _hashtagInput,
             enabled: !busy && widget.draft.hashtags.length < 10,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _CommunityPostComposerReferenceActions(this)._addHashtag(),
+            onSubmitted: (_) =>
+                _CommunityPostComposerReferenceActions(this)._addHashtag(),
             decoration: InputDecoration(
               prefixText: '#',
-              hintText: communityText(
-                context,
-                'healthyhabits',
-                'عادات_صحية',
-              ),
+              hintText: communityText(context, 'healthyhabits', 'عادات_صحية'),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -109,11 +104,7 @@ extension _CommunityPostComposerReferenceSections
   ) => [
     const SizedBox(height: 18),
     Text(
-      communityText(
-        context,
-        'Collaboration — optional',
-        'التعاون — اختياري',
-      ),
+      communityText(context, 'Collaboration — optional', 'التعاون — اختياري'),
       style: Theme.of(
         context,
       ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -146,9 +137,9 @@ extension _CommunityPostComposerReferenceSections
               label: Text('@' + collaborator.handle),
               onDeleted: busy
                   ? null
-                  : () => _CommunityPostComposerReferenceActions(this)._toggleCollaborator(
-                    collaborator,
-                  ),
+                  : () => _CommunityPostComposerReferenceActions(
+                      this,
+                    )._toggleCollaborator(collaborator),
             ),
         ],
       ),
@@ -163,7 +154,9 @@ extension _CommunityPostComposerReferenceSections
             controller: _collaboratorQuery,
             enabled: !busy && widget.draft.collaborators.length < 3,
             textInputAction: TextInputAction.search,
-            onSubmitted: (_) => _CommunityPostComposerReferenceActions(this)._searchCollaborators(),
+            onSubmitted: (_) => _CommunityPostComposerReferenceActions(
+              this,
+            )._searchCollaborators(),
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.group_add_outlined),
               hintText: communityText(
@@ -222,14 +215,13 @@ extension _CommunityPostComposerReferenceSections
               onSelected:
                   busy ||
                       (!widget.draft.collaborators.any(
-                            (value) =>
-                                value.userId == collaborator.userId,
+                            (value) => value.userId == collaborator.userId,
                           ) &&
                           widget.draft.collaborators.length >= 3)
                   ? null
-                  : (_) => _CommunityPostComposerReferenceActions(this)._toggleCollaborator(
-                    collaborator,
-                  ),
+                  : (_) => _CommunityPostComposerReferenceActions(
+                      this,
+                    )._toggleCollaborator(collaborator),
             ),
         ],
       ),

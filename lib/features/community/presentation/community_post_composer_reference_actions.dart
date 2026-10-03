@@ -193,10 +193,7 @@ extension _CommunityPostComposerReferenceActions
       );
 
   Future<void> _savePersistentDraft() async {
-    if (_publishing ||
-        _savingDraft ||
-        _selectingImage ||
-        _completed) {
+    if (_publishing || _savingDraft || _selectingImage || _completed) {
       return;
     }
     if (!_hasDraftContent) {
@@ -214,14 +211,11 @@ extension _CommunityPostComposerReferenceActions
       _savingDraft = true;
       _submitError = null;
     });
-    final draftId =
-        widget.draft.persistentDraftId ?? const Uuid().v4();
+    final draftId = widget.draft.persistentDraftId ?? const Uuid().v4();
     try {
       await widget.repository.saveMyCommunityDraft(
         input: _currentDraftSaveInput(draftId),
-        images: List<CommunityPostImageDraft>.unmodifiable(
-          _selectedImages,
-        ),
+        images: List<CommunityPostImageDraft>.unmodifiable(_selectedImages),
       );
       if (!mounted) return;
       setState(() {

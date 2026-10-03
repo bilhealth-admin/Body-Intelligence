@@ -109,9 +109,7 @@ class _CommunityMemberProfilePageState
       drafts = extras[2] as List<CommunityDraftSummary>;
       counts = extras[3] as Map<String, int>;
       references = extras[4] as List<CommunityPostReferenceMetadata>;
-      _coverUrl = await repository.loadCommunityProfileCoverUrl(
-        widget.userId,
-      );
+      _coverUrl = await repository.loadCommunityProfileCoverUrl(widget.userId);
     } else {
       _coverUrl = null;
     }
@@ -126,9 +124,7 @@ class _CommunityMemberProfilePageState
       ..addAll(counts);
     _referenceByPost
       ..clear()
-      ..addEntries(
-        references.map((value) => MapEntry(value.postId, value)),
-      );
+      ..addEntries(references.map((value) => MapEntry(value.postId, value)));
     _reviews
       ..clear()
       ..addAll(reviews);
@@ -178,8 +174,7 @@ class _CommunityMemberProfilePageState
       Map<String, int> counts = const <String, int>{};
       List<CommunityPostReferenceMetadata> references =
           const <CommunityPostReferenceMetadata>[];
-      if (repository.useServerCommunityReferenceParity &&
-          incoming.isNotEmpty) {
+      if (repository.useServerCommunityReferenceParity && incoming.isNotEmpty) {
         final ids = incoming.map((post) => post.id).toList(growable: false);
         final extras = await Future.wait<Object>([
           repository.loadCommunityPostViewCounts(ids),
@@ -541,9 +536,9 @@ class _CommunityMemberProfilePageState
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                           child: _CommunityDraftShortcut(
                             summary: _draftSummaries.firstOrNull,
-                            onTap: () =>
-                                _CommunityProfileDraftActions(this)
-                                    .openDrafts(),
+                            onTap: () => _CommunityProfileDraftActions(
+                              this,
+                            ).openDrafts(),
                           ),
                         ),
                       ),

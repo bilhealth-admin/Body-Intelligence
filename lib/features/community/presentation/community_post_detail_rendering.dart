@@ -71,8 +71,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                         _CommunityCommentTile(
                           key: ValueKey(root.id),
                           comment: root,
-                          membershipTier:
-                              _membershipTierByUser[root.authorId],
+                          membershipTier: _membershipTierByUser[root.authorId],
                           mine:
                               root.authorId == widget.repository.currentUserId,
                           busy:

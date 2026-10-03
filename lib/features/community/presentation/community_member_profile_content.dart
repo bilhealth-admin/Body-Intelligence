@@ -4,15 +4,22 @@ extension _CommunityMemberProfileContentSlivers
     on _CommunityMemberProfilePageState {
   List<Widget> _profileContentSlivers(CommunityProfileOverview profile) {
     final moments = profile.isSelf
-        ? _posts.where((post) => switch (_momentFilter) {
-            _CommunityProfileMomentFilter.all => true,
-            _CommunityProfileMomentFilter.published =>
-              post.moderationStatus == CommunityPostModerationStatus.approved,
-            _CommunityProfileMomentFilter.pending =>
-              post.moderationStatus == CommunityPostModerationStatus.pending,
-            _CommunityProfileMomentFilter.rejected =>
-              post.moderationStatus == CommunityPostModerationStatus.rejected,
-          }).toList(growable: false)
+        ? _posts
+              .where(
+                (post) => switch (_momentFilter) {
+                  _CommunityProfileMomentFilter.all => true,
+                  _CommunityProfileMomentFilter.published =>
+                    post.moderationStatus ==
+                        CommunityPostModerationStatus.approved,
+                  _CommunityProfileMomentFilter.pending =>
+                    post.moderationStatus ==
+                        CommunityPostModerationStatus.pending,
+                  _CommunityProfileMomentFilter.rejected =>
+                    post.moderationStatus ==
+                        CommunityPostModerationStatus.rejected,
+                },
+              )
+              .toList(growable: false)
         : _posts;
     final tabs = SliverToBoxAdapter(
       child: Padding(
@@ -146,9 +153,7 @@ extension _CommunityMemberProfileContentSlivers
                     ),
                     DropdownMenuItem(
                       value: _CommunityProfileMomentFilter.published,
-                      child: Text(
-                        communityText(context, 'Published', 'منشور'),
-                      ),
+                      child: Text(communityText(context, 'Published', 'منشور')),
                     ),
                     DropdownMenuItem(
                       value: _CommunityProfileMomentFilter.pending,
@@ -158,9 +163,7 @@ extension _CommunityMemberProfileContentSlivers
                     ),
                     DropdownMenuItem(
                       value: _CommunityProfileMomentFilter.rejected,
-                      child: Text(
-                        communityText(context, 'Rejected', 'مرفوض'),
-                      ),
+                      child: Text(communityText(context, 'Rejected', 'مرفوض')),
                     ),
                   ],
                   onChanged: (value) {
@@ -420,8 +423,9 @@ class _CommunityProfileConnectionsSheet extends StatefulWidget {
 class _CommunityProfileConnectionsSheetState
     extends State<_CommunityProfileConnectionsSheet> {
   late CommunityProfileConnectionKind _activeKind = widget.kind;
-  late Future<List<CommunityProfileConnection>> _connections =
-      _loadConnections(_activeKind);
+  late Future<List<CommunityProfileConnection>> _connections = _loadConnections(
+    _activeKind,
+  );
   String? _followBusyUserId;
 
   Future<List<CommunityProfileConnection>> _loadConnections(
@@ -473,112 +477,93 @@ class _CommunityProfileConnectionsSheetState
     }
   }
 
-  Widget _buildList(BuildContext context) =>
-      FutureBuilder<List<CommunityProfileConnection>>(
-        future: _connections,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                communityText(
-                  context,
-                  'This list is unavailable right now.',
-                  'هذه القائمة غير متاحة الآن.',
+  Widget _buildList(
+    BuildContext context,
+  ) => FutureBuilder<List<CommunityProfileConnection>>(
+    future: _connections,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState != ConnectionState.done) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (snapshot.hasError) {
+        return Center(
+          child: Text(
+            communityText(
+              context,
+              'This list is unavailable right now.',
+              'هذه القائمة غير متاحة الآن.',
+            ),
+          ),
+        );
+      }
+      final rows = snapshot.data ?? const <CommunityProfileConnection>[];
+      if (rows.isEmpty) {
+        return Center(
+          child: Text(
+            communityText(
+              context,
+              'Nothing to show here yet.',
+              'لا يوجد ما يمكن عرضه هنا بعد.',
+            ),
+          ),
+        );
+      }
+      return ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: rows.length,
+        separatorBuilder: (_, _) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final member = rows[index];
+          return ListTile(
+            leading: BilAccountAvatar(radius: 22, networkUrl: member.avatarUrl),
+            title: Text(member.displayName),
+            subtitle: member.handle == null
+                ? null
+                : Text('@' + member.handle!, textDirection: TextDirection.ltr),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (member.relationship != CommunityRelationshipStatus.self &&
+                    (member.viewerFollows || member.allowFollows))
+                  TextButton(
+                    key: Key('community-connection-follow-' + member.userId),
+                    onPressed: _followBusyUserId == null
+                        ? () => _toggleFollow(member)
+                        : null,
+                    child: _followBusyUserId == member.userId
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            member.viewerFollows
+                                ? communityText(context, 'Following', 'يتابع')
+                                : communityText(context, 'Follow', 'متابعة'),
+                          ),
+                  ),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
                 ),
-              ),
-            );
-          }
-          final rows =
-              snapshot.data ?? const <CommunityProfileConnection>[];
-          if (rows.isEmpty) {
-            return Center(
-              child: Text(
-                communityText(
-                  context,
-                  'Nothing to show here yet.',
-                  'لا يوجد ما يمكن عرضه هنا بعد.',
-                ),
-              ),
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: rows.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final member = rows[index];
-              return ListTile(
-                leading: BilAccountAvatar(
-                  radius: 22,
-                  networkUrl: member.avatarUrl,
-                ),
-                title: Text(member.displayName),
-                subtitle: member.handle == null
-                    ? null
-                    : Text(
-                        '@' + member.handle!,
-                        textDirection: TextDirection.ltr,
-                      ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (member.relationship !=
-                            CommunityRelationshipStatus.self &&
-                        (member.viewerFollows || member.allowFollows))
-                      TextButton(
-                        key: Key(
-                          'community-connection-follow-' + member.userId,
-                        ),
-                        onPressed: _followBusyUserId == null
-                            ? () => _toggleFollow(member)
-                            : null,
-                        child: _followBusyUserId == member.userId
-                            ? const SizedBox.square(
-                                dimension: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                member.viewerFollows
-                                    ? communityText(
-                                        context,
-                                        'Following',
-                                        'يتابع',
-                                      )
-                                    : communityText(
-                                        context,
-                                        'Follow',
-                                        'متابعة',
-                                      ),
-                              ),
-                      ),
-                    Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
-                    ),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/community/profile/' + member.userId);
-                },
-              );
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              context.push('/community/profile/' + member.userId);
             },
           );
         },
       );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
-    final socialTabs =
-        widget.kind != CommunityProfileConnectionKind.friends;
-    final initialIndex =
-        widget.kind == CommunityProfileConnectionKind.following ? 1 : 0;
+    final socialTabs = widget.kind != CommunityProfileConnectionKind.friends;
+    final initialIndex = widget.kind == CommunityProfileConnectionKind.following
+        ? 1
+        : 0;
 
     final content = SizedBox(
       height: MediaQuery.sizeOf(context).height * .72,
@@ -593,12 +578,8 @@ class _CommunityProfileConnectionsSheetState
                     : CommunityProfileConnectionKind.following,
               ),
               tabs: [
-                Tab(
-                  text: communityText(context, 'Followers', 'المتابعون'),
-                ),
-                Tab(
-                  text: communityText(context, 'Following', 'يتابع'),
-                ),
+                Tab(text: communityText(context, 'Followers', 'المتابعون')),
+                Tab(text: communityText(context, 'Following', 'يتابع')),
               ],
             )
           else
@@ -623,4 +604,3 @@ class _CommunityProfileConnectionsSheetState
     );
   }
 }
-

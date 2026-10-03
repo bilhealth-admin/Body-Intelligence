@@ -43,7 +43,9 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
   ) async {
     try {
       final circles = await repository.loadCommunityCircles();
-      final circle = circles.firstWhere((value) => value.slug == reference.slug);
+      final circle = circles.firstWhere(
+        (value) => value.slug == reference.slug,
+      );
       if (!context.mounted) return;
       await pushCommunityPage<void>(
         context,
@@ -65,51 +67,49 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
     }
   }
 
-  Widget _topicCard(
-    BuildContext context,
-    CommunityPostTopicReference topic,
-  ) => InkWell(
-    borderRadius: BorderRadius.circular(14),
-    onTap: () => _openTopic(context, topic),
-    child: Ink(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
+  Widget _topicCard(BuildContext context, CommunityPostTopicReference topic) =>
+      InkWell(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              CommunityTaxonomySheet.titleForSlug(context, topic.slug),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+        onTap: () => _openTopic(context, topic),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
-          Text(
-            topic.postCount.toString() +
-                ' ' +
-                communityText(context, 'posts', 'منشور'),
-            style: Theme.of(context).textTheme.labelMedium,
+          child: Row(
+            children: [
+              Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  CommunityTaxonomySheet.titleForSlug(context, topic.slug),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              Text(
+                topic.postCount.toString() +
+                    ' ' +
+                    communityText(context, 'posts', 'منشور'),
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                size: 20,
+              ),
+            ],
           ),
-          const SizedBox(width: 4),
-          Icon(
-            Directionality.of(context) == TextDirection.rtl
-                ? Icons.chevron_left_rounded
-                : Icons.chevron_right_rounded,
-            size: 20,
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
   Widget _circleCard(
     BuildContext context,
@@ -121,9 +121,7 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
