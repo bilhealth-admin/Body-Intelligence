@@ -331,6 +331,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             const SizedBox(height: 10),
             _CommunityPostReferenceBlock(
               metadata: metadata,
+              repository: widget.repository,
               compact: true,
             ),
           ],
