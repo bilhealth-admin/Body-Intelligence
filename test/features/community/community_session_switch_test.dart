@@ -48,6 +48,17 @@ void main() {
             } else if (request.url.path == '/auth/v1/logout') {
               logoutScopes.add(request.url.queryParameters['scope']);
               body = {};
+            } else if (request.url.path.endsWith(
+              '/rpc/bil_community_feed_refs_v1',
+            )) {
+              body = [
+                {
+                  'post_id': '33333333-3333-4333-8333-333333333333',
+                  'created_at': '2026-09-09T00:00:00Z',
+                  'priority': 0,
+                  'reasons': <String>[],
+                },
+              ];
             } else if (request.url.path == '/rest/v1/bil_community_posts') {
               feedLoads++;
               body = [

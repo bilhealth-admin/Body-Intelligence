@@ -57,12 +57,12 @@ void main() {
       gate,
       contains('if (feature == PremiumGateFeature.community) return child;'),
     );
-    expect(
-      RegExp(
-        r"path: '/community(?:/[^']*)?'[\s\S]{0,260}PremiumGateFeature\.community",
-      ).allMatches(router).length,
-      13,
-    );
+    final freeCommunityRoutes = RegExp(
+      r"path: '(/community(?:/[^']*)?)'[\s\S]{0,260}PremiumGateFeature\.community",
+    ).allMatches(router).map((match) => match.group(1)!).toSet();
+    expect(freeCommunityRoutes, hasLength(15));
+    expect(freeCommunityRoutes, contains('/community/invite/:token'));
+    expect(freeCommunityRoutes, contains('/community/profile/:userId'));
     expect(
       router,
       matches(
