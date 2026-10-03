@@ -53,6 +53,7 @@ import '../../features/community/presentation/community_profile_page.dart';
 import '../../features/community/presentation/community_safety_page.dart';
 import '../../features/community/presentation/community_messages_page.dart';
 import '../../features/community/presentation/community_notifications_page.dart';
+import '../../features/community/presentation/community_invite_landing_page.dart';
 import '../../features/community/presentation/community_rewards_page.dart';
 import '../../features/community/presentation/community_post_moderation_page.dart';
 import '../../features/life_context/life_context_page.dart';
@@ -355,6 +356,16 @@ class AppRouter {
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
           child: CommunitySurface(child: CommunityNotificationsPage()),
+        ),
+      ),
+      // Referral attribution must be reachable before Premium or even sign-in.
+      // Server policy still decides whether tracked invitations are active.
+      GoRoute(
+        path: '/community/invite/:token',
+        builder: (_, state) => CommunitySurface(
+          child: CommunityInviteLandingPage(
+            token: state.pathParameters['token']!,
+          ),
         ),
       ),
       GoRoute(
