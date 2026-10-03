@@ -15,6 +15,7 @@ import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_comment_threads.dart';
+import '../domain/community_circles.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_topics.dart';
@@ -39,6 +40,7 @@ part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_saved_posts_page.dart';
 part 'community_topics_page.dart';
+part 'community_circles_page.dart';
 part 'community_my_posts_page.dart';
 part 'community_member_profile_page.dart';
 part 'community_account_widgets.dart';
@@ -274,6 +276,18 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 if (context.mounted) Navigator.of(context).pop();
                 if (!context.mounted) return;
                 await _feedKey.currentState?._openComposer(tag: tag);
+              },
+            ),
+          );
+        case 'circles':
+          await pushCommunityPage<void>(
+            context,
+            CommunityCirclesPage(
+              repository: repository,
+              onComposeCircle: (slug) async {
+                if (context.mounted) Navigator.of(context).pop();
+                if (!context.mounted) return;
+                await _feedKey.currentState?._openComposer(circle: slug);
               },
             ),
           );
