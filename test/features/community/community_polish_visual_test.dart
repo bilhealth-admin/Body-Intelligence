@@ -244,7 +244,7 @@ class _ReferenceVisualRepository extends _VisualRepository {
 
   @override
   Future<CommunityProfileOverview> loadProfileOverview(String userId) async {
-    final self = userId == owner;
+    final self = userId == _VisualRepository.owner;
     return CommunityProfileOverview(
       userId: userId,
       displayName: self
@@ -292,10 +292,10 @@ class _ReferenceVisualRepository extends _VisualRepository {
       CommunityPost(
         id: profilePost,
         authorId: userId,
-        authorName: userId == owner
+        authorName: userId == _VisualRepository.owner
             ? (arabic ? 'ملفي التجريبي' : 'My sample profile')
             : name,
-        authorHandle: userId == owner ? 'sample_owner' : 'sample_member',
+        authorHandle: userId == _VisualRepository.owner ? 'sample_owner' : 'sample_member',
         body: arabic
             ? 'لحظة صغيرة تستحق المشاركة مع المجتمع.'
             : 'A small moment worth sharing with the community.',
@@ -315,7 +315,7 @@ class _ReferenceVisualRepository extends _VisualRepository {
     userId: userId,
     contributor: true,
     approvedPosts: 12,
-    followers: userId == owner ? 128 : 84,
+    followers: userId == _VisualRepository.owner ? 128 : 84,
     likesReceived: 231,
     commentsReceived: 64,
     qualifiedReferrals: 3,
@@ -394,7 +394,7 @@ class _ReferenceVisualRepository extends _VisualRepository {
         ],
         collaborators: [
           CommunityPostCollaborator(
-            userId: peer,
+            userId: _VisualRepository.peer,
             displayName: name,
             handle: 'sample_member',
             status: CommunityCollaborationStatus.accepted,
