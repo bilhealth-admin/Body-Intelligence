@@ -7,7 +7,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
-import '../domain/community_models.dart';
 import '../domain/community_referral.dart';
 import 'community_copy.dart';
 
@@ -36,7 +35,6 @@ class _CommunityInviteLandingPageState
   late Future<CommunityInvitePreview> _preview;
   CommunityInviteAcceptance? _acceptance;
   bool _accepting = false;
-  bool _connecting = false;
 
   bool get _signedIn => _client?.auth.currentUser != null;
 
@@ -129,35 +127,6 @@ class _CommunityInviteLandingPageState
     }
   }
 
-  Future<void> _connect(String inviterId) async {
-    final repository = _repository;
-    if (repository == null || _connecting) return;
-    setState(() => _connecting = true);
-    try {
-      final status = await repository.requestFriend(inviterId);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_relationshipMessage(context, status))),
-      );
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              communityText(
-                context,
-                'Could not send the connection request safely.',
-                'تعذر إرسال طلب الاتصال بأمان.',
-              ),
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _connecting = false);
-    }
-  }
-
   @override
   void dispose() {
     unawaited(_auth?.cancel());
@@ -222,7 +191,7 @@ class _CommunityInviteLandingPageState
           );
         }
 
-        final accepted = _acceptance?.attributed == true;
+        final accepted = _acceptance?.relationshipAccepted == true;
         final inviterName =
             _acceptance?.displayName ?? preview.displayName ?? 'BIL member';
         final inviterId = _acceptance?.inviterId ?? preview.inviterId;
@@ -271,8 +240,8 @@ class _CommunityInviteLandingPageState
                         accepted
                             ? communityText(
                                 context,
-                                'Invitation saved. A friendship reward is never granted from this screen; the relationship and server integrity checks must qualify first.',
-                                'تم حفظ الدعوة. لا تُمنح مكافأة الصداقة من هذه الشاشة؛ يجب أولًا تأهل العلاقة واجتياز تحقق الخادم.',
+                                'Invitation accepted and friendship created. Gold is still gated by new-account and server integrity checks.',
+                                'تم قبول الدعوة وإنشاء الصداقة. وتبقى مكافأة Gold مشروطة بكون الحساب جديدًا واجتياز تحقق الخادم.',
                               )
                             : communityText(
                                 context,
@@ -310,23 +279,16 @@ class _CommunityInviteLandingPageState
                         )
                       else if (inviterId != null)
                         FilledButton.icon(
-                          key: const Key('community-connect-inviter'),
-                          onPressed: _connecting
-                              ? null
-                              : () => _connect(inviterId),
-                          icon: _connecting
-                              ? const SizedBox.square(
-                                  dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.person_add_alt_1_rounded),
+                          key: const Key('community-open-inviter-profile'),
+                          onPressed: () => context.push(
+                            '/community/profile/$inviterId',
+                          ),
+                          icon: const Icon(Icons.people_rounded),
                           label: Text(
                             communityText(
                               context,
-                              'Connect with $inviterName',
-                              'تواصل مع $inviterName',
+                              'You’re friends — view profile',
+                              'أصبحتما صديقين — عرض الملف',
                             ),
                           ),
                         ),
@@ -432,31 +394,5 @@ String _acceptanceMessage(
       context,
       'Invitation saved.',
       'تم حفظ الدعوة.',
-    ),
-};
-
-String _relationshipMessage(
-  BuildContext context,
-  CommunityFriendRequestStatus status,
-) => switch (status) {
-  CommunityFriendRequestStatus.pending => communityText(
-      context,
-      'Connection request sent.',
-      'تم إرسال طلب الاتصال.',
-    ),
-  CommunityFriendRequestStatus.incoming => communityText(
-      context,
-      'A request from this member is already waiting for you.',
-      'يوجد طلب من هذا العضو بانتظارك بالفعل.',
-    ),
-  CommunityFriendRequestStatus.accepted => communityText(
-      context,
-      'You are already friends.',
-      'أنتما صديقان بالفعل.',
-    ),
-  CommunityFriendRequestStatus.declined => communityText(
-      context,
-      'This connection cannot be reopened right now.',
-      'لا يمكن إعادة فتح هذا الاتصال الآن.',
     ),
 };
