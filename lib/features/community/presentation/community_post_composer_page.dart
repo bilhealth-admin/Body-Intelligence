@@ -875,9 +875,9 @@ class _CommunityPostComposerPageState
                                     decoration: InputDecoration(
                                       labelText: communityText(
                                         context,
-                                        'Option ${index + 1}',
-                                        'الخيار ${index + 1}',
-                                      ),
+                                        'Option {index}',
+                                        'الخيار {index}',
+                                      ).replaceAll('{index}', '${index + 1}'),
                                       border: const OutlineInputBorder(),
                                     ),
                                   ),
