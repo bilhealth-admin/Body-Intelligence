@@ -199,13 +199,13 @@ class _CommunityCreatorPanel extends StatelessWidget {
             'تم بلوغ أعلى مستوى مجتمع مُعد حاليًا',
           )
         : communityText(
-            context,
-            '{xp} XP · Next: Lv {level} at {target} XP',
-            '{xp} XP · التالي: المستوى {level} عند {target} XP',
-          )
-            .replaceAll('{xp}', creator.communityXp.toString())
-            .replaceAll('{level}', nextLevel.toString())
-            .replaceAll('{target}', nextXp.toString());
+                context,
+                '{xp} XP · Next: Lv {level} at {target} XP',
+                '{xp} XP · التالي: المستوى {level} عند {target} XP',
+              )
+              .replaceAll('{xp}', creator.communityXp.toString())
+              .replaceAll('{level}', nextLevel.toString())
+              .replaceAll('{target}', nextXp.toString());
 
     return Card(
       key: const Key('community-creator-panel'),
@@ -250,10 +250,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             const SizedBox(height: 8),
-            Text(
-              progressText,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text(progressText, style: Theme.of(context).textTheme.bodySmall),
             if (isSelf) ...[
               const SizedBox(height: 18),
               Text(
@@ -339,18 +336,12 @@ class _CommunityCreatorPanel extends StatelessWidget {
                               ),
                               Text(
                                 communityText(
-                                  context,
-                                  'Progress toward Lv {level} · {target} XP target',
-                                  'التقدم نحو المستوى {level} · الهدف {target} XP',
-                                )
-                                    .replaceAll(
-                                      '{level}',
-                                      nextLevel.toString(),
+                                      context,
+                                      'Progress toward Lv {level} · {target} XP target',
+                                      'التقدم نحو المستوى {level} · الهدف {target} XP',
                                     )
-                                    .replaceAll(
-                                      '{target}',
-                                      nextXp.toString(),
-                                    ),
+                                    .replaceAll('{level}', nextLevel.toString())
+                                    .replaceAll('{target}', nextXp.toString()),
                               ),
                             ],
                           ),

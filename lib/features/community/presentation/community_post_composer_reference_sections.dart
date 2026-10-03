@@ -26,79 +26,77 @@ extension _CommunityPostComposerReferenceSections
         ),
       );
 
-  List<Widget> _buildCommunityHashtagSection(
-    BuildContext context,
-    bool busy,
-  ) => [
-    const SizedBox(height: 16),
-    Text(
-      communityText(context, 'Hashtags — optional', 'الوسوم — اختياري'),
-      style: Theme.of(
-        context,
-      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-    ),
-    const SizedBox(height: 6),
-    Text(
-      communityText(
-        context,
-        'Add up to 10 searchable hashtags.',
-        'أضف حتى 10 وسوم قابلة للبحث.',
-      ),
-      style: Theme.of(context).textTheme.bodySmall,
-    ),
-    if (widget.draft.hashtags.isNotEmpty) ...[
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          for (final hashtag in widget.draft.hashtags)
-            InputChip(
-              key: Key('community-composer-hashtag-$hashtag'),
-              label: Text('#$hashtag'),
-              onDeleted: busy
-                  ? null
-                  : () => _setComposerState(() {
-                      widget.draft.hashtags.remove(hashtag);
-                      _submitError = null;
-                    }),
-            ),
+  List<Widget> _buildCommunityHashtagSection(BuildContext context, bool busy) =>
+      [
+        const SizedBox(height: 16),
+        Text(
+          communityText(context, 'Hashtags — optional', 'الوسوم — اختياري'),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          communityText(
+            context,
+            'Add up to 10 searchable hashtags.',
+            'أضف حتى 10 وسوم قابلة للبحث.',
+          ),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        if (widget.draft.hashtags.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final hashtag in widget.draft.hashtags)
+                InputChip(
+                  key: Key('community-composer-hashtag-$hashtag'),
+                  label: Text('#$hashtag'),
+                  onDeleted: busy
+                      ? null
+                      : () => _setComposerState(() {
+                          widget.draft.hashtags.remove(hashtag);
+                          _submitError = null;
+                        }),
+                ),
+            ],
+          ),
         ],
-      ),
-    ],
-    const SizedBox(height: 8),
-    Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: TextField(
-            key: const Key('community-composer-hashtag-input'),
-            controller: _hashtagInput,
-            enabled: !busy && widget.draft.hashtags.length < 10,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) =>
-                _CommunityPostComposerReferenceActions(this)._addHashtag(),
-            decoration: InputDecoration(
-              prefixText: '#',
-              hintText: 'progress',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('community-composer-hashtag-input'),
+                controller: _hashtagInput,
+                enabled: !busy && widget.draft.hashtags.length < 10,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) =>
+                    _CommunityPostComposerReferenceActions(this)._addHashtag(),
+                decoration: InputDecoration(
+                  prefixText: '#',
+                  hintText: 'progress',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 8),
+            IconButton.filledTonal(
+              key: const Key('community-composer-hashtag-add'),
+              tooltip: communityText(context, 'Add hashtag', 'إضافة وسم'),
+              onPressed: busy || widget.draft.hashtags.length >= 10
+                  ? null
+                  : _addHashtag,
+              icon: const Icon(Icons.add_rounded),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        IconButton.filledTonal(
-          key: const Key('community-composer-hashtag-add'),
-          tooltip: communityText(context, 'Add hashtag', 'إضافة وسم'),
-          onPressed: busy || widget.draft.hashtags.length >= 10
-              ? null
-              : _addHashtag,
-          icon: const Icon(Icons.add_rounded),
-        ),
-      ],
-    ),
-  ];
+      ];
 
   List<Widget> _buildCommunityCollaboratorSection(
     BuildContext context,

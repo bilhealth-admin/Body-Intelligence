@@ -330,10 +330,7 @@ class _ReferenceVisualRepository extends _VisualRepository {
       CommunityCreatorBadge(badgeKey: 'profile_complete', earned: true),
       CommunityCreatorBadge(badgeKey: 'first_moment', earned: true),
       CommunityCreatorBadge(badgeKey: 'contributor', earned: true),
-      CommunityCreatorBadge(
-        badgeKey: 'conversation_starter',
-        earned: true,
-      ),
+      CommunityCreatorBadge(badgeKey: 'conversation_starter', earned: true),
       CommunityCreatorBadge(badgeKey: 'appreciated', earned: false),
       CommunityCreatorBadge(badgeKey: 'connector', earned: false),
       CommunityCreatorBadge(badgeKey: 'referral_builder', earned: false),
@@ -353,9 +350,7 @@ class _ReferenceVisualRepository extends _VisualRepository {
       productKind: 'food',
       canonicalName: arabic ? 'وجبة مجتمع موثوقة' : 'Verified community meal',
       brand: 'BIL',
-      reviewNote: arabic
-          ? 'مراجعة عامة معتمدة.'
-          : 'An approved public review.',
+      reviewNote: arabic ? 'مراجعة عامة معتمدة.' : 'An approved public review.',
       createdAt: DateTime.utc(2026, 10, 2),
     ),
   ];
@@ -412,11 +407,10 @@ class _ReferenceVisualRepository extends _VisualRepository {
   Future<String?> loadCommunityProfileCoverUrl(String userId) async => null;
 
   @override
-  Future<CommunityGoldBalance> loadGoldBalance() async =>
-      CommunityGoldBalance(
-        balance: 644,
-        updatedAt: DateTime.utc(2026, 10, 3, 12),
-      );
+  Future<CommunityGoldBalance> loadGoldBalance() async => CommunityGoldBalance(
+    balance: 644,
+    updatedAt: DateTime.utc(2026, 10, 3, 12),
+  );
 
   @override
   Future<List<CommunityQuest>> loadCommunityQuests() async => [
@@ -538,9 +532,7 @@ void main() {
                 userId: _VisualRepository.owner,
                 repository: referenceRepository,
               ),
-              'rewards': CommunityRewardsPage(
-                repository: referenceRepository,
-              ),
+              'rewards': CommunityRewardsPage(repository: referenceRepository),
               'my_code': CommunityBilCodePage(repository: repository),
               'my_posts': CommunityMyPostsPage(
                 repository: repository,
