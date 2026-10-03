@@ -4,6 +4,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
   const _CommunityMemberProfileHeader({
     required this.profile,
     required this.creator,
+    required this.coverUrl,
     required this.relationshipBusy,
     required this.followBusy,
     required this.onRequestFriend,
@@ -13,204 +14,418 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
 
   final CommunityProfileOverview profile;
   final CommunityCreatorProfile? creator;
+  final String? coverUrl;
   final bool relationshipBusy;
   final bool followBusy;
   final VoidCallback onRequestFriend;
   final VoidCallback onToggleFollow;
   final ValueChanged<CommunityProfileConnectionKind> onOpenConnections;
 
+  Future<void> _shareProfile(BuildContext context) async {
+    final handle = profile.handle;
+    final text = [
+      profile.displayName,
+      if (handle != null) '@' + handle,
+      communityText(
+        context,
+        'BIL Community profile',
+        'ملف مجتمع BIL',
+      ),
+    ].join('\n');
+    try {
+      await SharePlus.instance.share(ShareParams(text: text));
+    } on Object {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not open sharing right now.',
+              'تعذر فتح المشاركة حاليًا.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _heroAction({
+    required BuildContext context,
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Colors.black.withValues(alpha: .42),
+      shape: BoxShape.circle,
+    ),
+    child: IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      color: Colors.white,
+      icon: Icon(icon),
+    ),
+  );
+
+  Widget _metric({
+    required BuildContext context,
+    required String value,
+    required String label,
+    VoidCallback? onTap,
+  }) => InkWell(
+    borderRadius: BorderRadius.circular(14),
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ],
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [scheme.primary.withValues(alpha: .12), scheme.surface],
-        ),
+    final cover = coverUrl;
+
+    return Card(
+      key: const Key('community-profile-hero'),
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: scheme.outlineVariant),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BilAccountAvatar(radius: 42, networkUrl: profile.avatarUrl),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profile.displayName,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    if (profile.handle != null)
-                      Text(
-                        '@${profile.handle}',
-                        textDirection: TextDirection.ltr,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    if (profile.countryCode != null)
-                      Text(
-                        profile.countryCode!,
-                        style: theme.textTheme.labelMedium,
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (profile.bio?.trim().isNotEmpty == true) ...[
-            const SizedBox(height: 14),
-            Text(profile.bio!, style: theme.textTheme.bodyLarge),
-          ],
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              if (profile.postCount != null)
-                _CommunityProfileMetric(
-                  icon: Icons.article_outlined,
-                  value: '${profile.postCount}',
-                  label: communityText(context, 'Posts', 'المنشورات'),
-                ),
-              if (profile.friendCount != null)
-                InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () =>
-                      onOpenConnections(CommunityProfileConnectionKind.friends),
-                  child: _CommunityProfileMetric(
-                    icon: Icons.people_outline_rounded,
-                    value: '${profile.friendCount}',
-                    label: communityText(context, 'Friends', 'الأصدقاء'),
-                  ),
-                ),
-              if (profile.followerCount != null)
-                InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () => onOpenConnections(
-                    CommunityProfileConnectionKind.followers,
-                  ),
-                  child: _CommunityProfileMetric(
-                    icon: Icons.group_outlined,
-                    value: '${profile.followerCount}',
-                    label: communityText(context, 'Followers', 'المتابعون'),
-                  ),
-                ),
-              if (profile.followingCount != null)
-                InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () => onOpenConnections(
-                    CommunityProfileConnectionKind.following,
-                  ),
-                  child: _CommunityProfileMetric(
-                    icon: Icons.person_add_alt_outlined,
-                    value: '${profile.followingCount}',
-                    label: communityText(context, 'Following', 'يتابع'),
-                  ),
-                ),
-              if (profile.communityLevel != null)
-                _CommunityProfileMetric(
-                  icon: Icons.workspace_premium_outlined,
-                  value: 'Lv ${profile.communityLevel}',
-                  label: communityText(
-                    context,
-                    'Community level',
-                    'مستوى المجتمع',
-                  ),
-                ),
-              if (profile.communityXp != null)
-                _CommunityProfileMetric(
-                  icon: Icons.auto_graph_rounded,
-                  value: '${profile.communityXp} XP',
-                  label: 'Community XP',
-                ),
-              if (profile.goldBalance != null)
-                _CommunityProfileMetric(
-                  icon: Icons.monetization_on_outlined,
-                  value: '${profile.goldBalance}',
-                  label: 'BIL Gold',
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (profile.isSelf)
-            Wrap(
-              spacing: 10,
-              runSpacing: 8,
+          SizedBox(
+            height: 168,
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                FilledButton.tonalIcon(
-                  onPressed: () => context.push('/community/profile'),
-                  icon: const Icon(Icons.edit_outlined),
-                  label: Text(
-                    communityText(context, 'Edit profile', 'تعديل الملف'),
+                if (cover != null)
+                  Image.network(
+                    cover,
+                    key: const Key('community-profile-cover'),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => _CommunityProfileCoverFallback(
+                      colorScheme: scheme,
+                    ),
+                  )
+                else
+                  _CommunityProfileCoverFallback(colorScheme: scheme),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: .05),
+                        Colors.black.withValues(alpha: .42),
+                      ],
+                    ),
                   ),
                 ),
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/community/code'),
-                  icon: const Icon(Icons.qr_code_2_rounded),
-                  label: Text(
-                    communityText(context, 'My BIL Code', 'رمز BIL الخاص بي'),
+                PositionedDirectional(
+                  top: 10,
+                  end: 10,
+                  child: Wrap(
+                    spacing: 8,
+                    children: [
+                      _heroAction(
+                        context: context,
+                        icon: Icons.share_outlined,
+                        tooltip: communityText(
+                          context,
+                          'Share profile',
+                          'مشاركة الملف',
+                        ),
+                        onPressed: () => _shareProfile(context),
+                      ),
+                      _heroAction(
+                        context: context,
+                        icon: Icons.mail_outline_rounded,
+                        tooltip: communityText(
+                          context,
+                          'Messages',
+                          'الرسائل',
+                        ),
+                        onPressed: () => context.push('/community/messages'),
+                      ),
+                      if (profile.isSelf)
+                        _heroAction(
+                          context: context,
+                          icon: Icons.settings_outlined,
+                          tooltip: communityText(
+                            context,
+                            'Edit profile',
+                            'تعديل الملف',
+                          ),
+                          onPressed: () => context.push('/community/profile'),
+                        ),
+                    ],
+                  ),
+                ),
+                PositionedDirectional(
+                  start: 18,
+                  bottom: -1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: scheme.surface,
+                      border: Border.all(color: scheme.surface, width: 4),
+                    ),
+                    child: BilAccountAvatar(
+                      radius: 44,
+                      networkUrl: profile.avatarUrl,
+                    ),
                   ),
                 ),
               ],
-            )
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _ProfileRelationshipAction(
-                  profile: profile,
-                  busy: relationshipBusy,
-                  onRequestFriend: onRequestFriend,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: 94),
+                    Expanded(
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          if (profile.followerCount != null)
+                            _metric(
+                              context: context,
+                              value: profile.followerCount.toString(),
+                              label: communityText(
+                                context,
+                                'Followers',
+                                'المتابعون',
+                              ),
+                              onTap: () => onOpenConnections(
+                                CommunityProfileConnectionKind.followers,
+                              ),
+                            ),
+                          if (profile.followingCount != null)
+                            _metric(
+                              context: context,
+                              value: profile.followingCount.toString(),
+                              label: communityText(
+                                context,
+                                'Following',
+                                'يتابع',
+                              ),
+                              onTap: () => onOpenConnections(
+                                CommunityProfileConnectionKind.following,
+                              ),
+                            ),
+                          if (profile.postCount != null)
+                            _metric(
+                              context: context,
+                              value: profile.postCount.toString(),
+                              label: communityText(
+                                context,
+                                'Posts',
+                                'المنشورات',
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                if (profile.viewerFollows || profile.allowFollows)
-                  OutlinedButton.icon(
-                    key: const Key('community-profile-follow-action'),
-                    onPressed: followBusy ? null : onToggleFollow,
-                    icon: followBusy
-                        ? const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Icon(
-                            profile.viewerFollows
-                                ? Icons.person_remove_outlined
-                                : Icons.person_add_alt_outlined,
-                          ),
-                    label: Text(
-                      profile.viewerFollows
-                          ? communityText(context, 'Following', 'يتابع')
-                          : communityText(context, 'Follow', 'متابعة'),
+                const SizedBox(height: 8),
+                Text(
+                  profile.displayName,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                if (profile.handle != null)
+                  Text(
+                    '@' + profile.handle!,
+                    textDirection: TextDirection.ltr,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                if (profile.followsViewer)
-                  Chip(
-                    avatar: const Icon(Icons.swap_horiz_rounded, size: 17),
-                    label: Text(
-                      communityText(context, 'Follows you', 'يتابعك'),
+                if (profile.countryCode case final country?) ...[
+                  const SizedBox(height: 2),
+                  Text(country, style: theme.textTheme.labelMedium),
+                ],
+                if (profile.bio?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: 10),
+                  Text(profile.bio!, style: theme.textTheme.bodyLarge),
+                ],
+                if (profile.friendCount != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: ActionChip(
+                      avatar: const Icon(Icons.people_outline_rounded, size: 18),
+                      label: Text(
+                        profile.friendCount.toString() +
+                            ' ' +
+                            communityText(context, 'Friends', 'أصدقاء'),
+                      ),
+                      onPressed: () => onOpenConnections(
+                        CommunityProfileConnectionKind.friends,
+                      ),
                     ),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                if (profile.isSelf)
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.tonalIcon(
+                        key: const Key('community-profile-edit-action'),
+                        onPressed: () => context.push('/community/profile'),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(
+                          communityText(
+                            context,
+                            'Edit profile',
+                            'تعديل الملف',
+                          ),
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => context.push('/community/code'),
+                        icon: const Icon(Icons.qr_code_2_rounded),
+                        label: Text(
+                          communityText(
+                            context,
+                            'My BIL Code',
+                            'رمز BIL الخاص بي',
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _ProfileRelationshipAction(
+                        profile: profile,
+                        busy: relationshipBusy,
+                        onRequestFriend: onRequestFriend,
+                      ),
+                      if (profile.viewerFollows || profile.allowFollows)
+                        OutlinedButton.icon(
+                          key: const Key(
+                            'community-profile-follow-action',
+                          ),
+                          onPressed: followBusy ? null : onToggleFollow,
+                          icon: followBusy
+                              ? const SizedBox.square(
+                                  dimension: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(
+                                  profile.viewerFollows
+                                      ? Icons.person_remove_outlined
+                                      : Icons.person_add_alt_outlined,
+                                ),
+                          label: Text(
+                            profile.viewerFollows
+                                ? communityText(
+                                    context,
+                                    'Following',
+                                    'يتابع',
+                                  )
+                                : communityText(
+                                    context,
+                                    'Follow',
+                                    'متابعة',
+                                  ),
+                          ),
+                        ),
+                      if (profile.followsViewer)
+                        Chip(
+                          avatar: const Icon(
+                            Icons.swap_horiz_rounded,
+                            size: 17,
+                          ),
+                          label: Text(
+                            communityText(
+                              context,
+                              'Follows you',
+                              'يتابعك',
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
               ],
             ),
+          ),
         ],
       ),
     );
   }
+}
+
+class _CommunityProfileCoverFallback extends StatelessWidget {
+  const _CommunityProfileCoverFallback({required this.colorScheme});
+
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    key: const Key('community-profile-cover-fallback'),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: [
+          colorScheme.primary,
+          colorScheme.primaryContainer,
+          colorScheme.tertiaryContainer,
+        ],
+      ),
+    ),
+    child: Align(
+      alignment: AlignmentDirectional.centerEnd,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(end: 26),
+        child: Icon(
+          Icons.public_rounded,
+          size: 84,
+          color: colorScheme.onPrimary.withValues(alpha: .22),
+        ),
+      ),
+    ),
+  );
 }
 
 class _ProfileRelationshipAction extends StatelessWidget {
