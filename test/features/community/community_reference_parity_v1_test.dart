@@ -125,6 +125,24 @@ class _ReferenceParityRepository extends CommunityRepository {
   @override
   Future<List<CommunityPostReferenceMetadata>>
   loadCommunityPostReferenceMetadata(List<String> postIds) async => [
+    const CommunityPostReferenceMetadata(
+      postId: _postId,
+      title: 'Verified reference title',
+      hashtags: ['bilcommunity'],
+      topics: [
+        CommunityPostTopicReference(
+          slug: 'nutrition',
+          titleCopyKey: 'community_topic_nutrition',
+          postCount: 18,
+        ),
+      ],
+      collaborators: [],
+    ),
+  ];
+
+  @override
+  Future<List<CommunityPostReferenceMetadata>>
+  loadCommunityPostReferenceMetadata(List<String> postIds) async => [
     CommunityPostReferenceMetadata(
       postId: _postId,
       title: 'Reference title',
