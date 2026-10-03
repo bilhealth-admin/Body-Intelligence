@@ -281,8 +281,13 @@ class CommunityRepository
   }) async {
     if (limit < 1 || limit > 100) throw ArgumentError.value(limit, 'limit');
     final response = await _client.rpc(
-      'bil_list_community_notifications',
-      params: {'p_limit': limit},
+      'bil_list_community_activity_v2',
+      params: {
+        'p_before': null,
+        'p_before_id': null,
+        'p_kinds': null,
+        'p_limit': limit,
+      },
     );
     if (response is! List) {
       throw const FormatException('Invalid Community notifications result');
@@ -304,7 +309,7 @@ class CommunityRepository
       throw ArgumentError.value(ids, 'ids');
     }
     final response = await _client.rpc(
-      'bil_mark_community_notifications_seen',
+      'bil_mark_community_activity_seen_v2',
       params: {'p_ids': unique},
     );
     if (response is! int || response < 0 || response > unique.length) {
