@@ -47,9 +47,9 @@ begin
             detail = 'The live rate-limit RPC no longer matches the reviewed security boundary.';
   end if;
 
-  if pg_catalog.position(
+  if pg_catalog.strpos(
+       pg_catalog.pg_get_functiondef(v_mention_search),
        'community_mention_search_v1'
-       in pg_catalog.pg_get_functiondef(v_mention_search)
      ) = 0 then
     raise exception 'community_mention_rate_limit_precondition_failed'
       using errcode = '55000',
@@ -161,9 +161,9 @@ declare
   v_rate_limit regprocedure :=
     'public.bil_consume_rate_limit(text,integer,integer)'::regprocedure;
 begin
-  if pg_catalog.position(
+  if pg_catalog.strpos(
+       pg_catalog.pg_get_functiondef(v_rate_limit),
        '''community_mention_search_v1'', 60, 60'
-       in pg_catalog.pg_get_functiondef(v_rate_limit)
      ) = 0
      or not (
        select procedure.prosecdef
