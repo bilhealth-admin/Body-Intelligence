@@ -12,7 +12,6 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_media_locale_copy.dart';
 import 'package:body_intelligence_log/features/community/services/community_post_image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -437,14 +436,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final feedException = tester.takeException();
-      if (feedException != null) {
-        debugPrint(
-          'COMMUNITY_OVERFLOW_STAGE=feed LOCALE=$tag ERROR=$feedException',
-        );
-        debugDumpRenderTree();
-        fail('Community feed overflow for $tag: $feedException');
-      }
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'feed $tag',
+      );
       await tester.tap(find.byKey(const Key('community-create-post')));
       await tester.pumpAndSettle();
       expect(
@@ -452,14 +448,11 @@ void main() {
         findsOneWidget,
         reason: tag,
       );
-      final composerException = tester.takeException();
-      if (composerException != null) {
-        debugPrint(
-          'COMMUNITY_OVERFLOW_STAGE=composer LOCALE=$tag ERROR=$composerException',
-        );
-        debugDumpRenderTree();
-        fail('Community composer overflow for $tag: $composerException');
-      }
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'composer $tag',
+      );
       // Community uses a Material route in this harness; pageBack() only
       // targets CupertinoNavigationBarBackButton and would fail spuriously.
       await tester.binding.handlePopRoute();
