@@ -6,9 +6,7 @@ class CommunityMentionCandidate {
     this.avatarUrl,
   });
 
-  static final RegExp handlePattern = RegExp(
-    r'^[a-z][a-z0-9_]{2,29}$',
-  );
+  static final RegExp handlePattern = RegExp(r'^[a-z][a-z0-9_]{2,29}$');
   static final RegExp uuidPattern = RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
   );
@@ -76,7 +74,6 @@ class CommunityPostContextDraft {
   List<String> get mentionedUserIds =>
       mentions.map((value) => value.userId).toList(growable: false);
 
-  static bool _hasControlCharacters(String value) => value.codeUnits.any(
-    (unit) => unit < 32 || unit == 127,
-  );
+  static bool _hasControlCharacters(String value) =>
+      value.codeUnits.any((unit) => unit < 32 || unit == 127);
 }

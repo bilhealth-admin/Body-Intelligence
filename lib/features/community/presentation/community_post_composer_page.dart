@@ -322,9 +322,7 @@ class _CommunityPostComposerPageState
     }
     final query = _mentionQuery.text.trim();
     if (query.isEmpty) {
-      setState(
-        () => _mentionResults = const <CommunityMentionCandidate>[],
-      );
+      setState(() => _mentionResults = const <CommunityMentionCandidate>[]);
       return;
     }
 
@@ -748,13 +746,8 @@ class _CommunityPostComposerPageState
                               key: const Key(
                                 'community-composer-mention-search',
                               ),
-                              tooltip: communityText(
-                                context,
-                                'Search',
-                                'بحث',
-                              ),
-                              onPressed:
-                                  busy || _mentionSearching
+                              tooltip: communityText(context, 'Search', 'بحث'),
+                              onPressed: busy || _mentionSearching
                                   ? null
                                   : _searchMentions,
                               icon: _mentionSearching
@@ -780,8 +773,7 @@ class _CommunityPostComposerPageState
                                     'community-composer-mention-${mention.userId}',
                                   ),
                                   selected: widget.draft.mentions.any(
-                                    (value) =>
-                                        value.userId == mention.userId,
+                                    (value) => value.userId == mention.userId,
                                   ),
                                   avatar: BilAccountAvatar(
                                     radius: 12,

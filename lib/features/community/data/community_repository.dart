@@ -1206,8 +1206,7 @@ class CommunityRepository
 
   Future<void> publishRichPost(
     String body, {
-    List<CommunityPostImageDraft> images =
-        const <CommunityPostImageDraft>[],
+    List<CommunityPostImageDraft> images = const <CommunityPostImageDraft>[],
     List<String> topicSlugs = const <String>[],
     String? circleSlug,
     CommunityPollDraft? poll,
