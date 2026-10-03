@@ -11,7 +11,7 @@ on:
       - work/community-comments-v3-20261003
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   targeted:
@@ -29,7 +29,7 @@ jobs:
         run: flutter pub get
       - name: Verify Dart formatting
         run: |
-          dart format \
+          dart format --output=none --set-exit-if-changed \
             lib/app/router/app_router.dart \
             lib/features/community/domain/community_attention.dart \
             lib/features/community/domain/community_comment_threads.dart \
@@ -102,13 +102,6 @@ jobs:
             test/features/community/community_circles_v1_contract_test.dart \
             test/features/notifications/community_push_registration_contract_test.dart \
             test/features/notifications/ios_notification_navigation_test.dart
-          if ! git diff --quiet; then
-            git config user.name "BIL Community QA"
-            git config user.email "actions@users.noreply.github.com"
-            git add lib test
-            git commit -m "style(community): format comment threads v3"
-            git push origin HEAD:${GITHUB_REF_NAME}
-          fi
       - name: Verify referral association tooling
         run: |
           python3 tool/release/generate_app_link_associations.py --self-test
