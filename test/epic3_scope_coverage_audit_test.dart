@@ -48,6 +48,8 @@ void main() {
     '/community/connections': 'community',
     '/community/food-review': 'community',
     '/community/profile': 'community',
+    '/community/profile/:userId': 'community',
+    '/community/rewards': 'community',
     '/community/safety': 'community',
     '/community/chat/:userId': 'community',
     '/community/messages': 'community',
