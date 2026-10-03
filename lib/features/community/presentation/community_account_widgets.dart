@@ -9,7 +9,7 @@ class _CommunityProfileHeader extends StatelessWidget {
     required this.onRefresh,
   });
   final CommunityRepository repository;
-  final Future<CommunityProfile?> profile;
+  final Future<CommunityProfileOverview?> profile;
   final VoidCallback onRefresh;
 
   Future<void> _edit(BuildContext context) async {
@@ -19,7 +19,7 @@ class _CommunityProfileHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<CommunityProfile?>(
+  Widget build(BuildContext context) => FutureBuilder<CommunityProfileOverview?>(
     future: profile,
     builder: (context, snapshot) {
       final theme = Theme.of(context);
@@ -69,6 +69,17 @@ class _CommunityProfileHeader extends StatelessWidget {
                     fallback: Directionality.of(context),
                   ),
                 ),
+                if (profile?.handle?.trim().isNotEmpty == true) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '@${profile!.handle}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
                 if (profile?.bio?.trim().isNotEmpty == true) ...[
                   const SizedBox(height: 6),
                   Text(
@@ -78,6 +89,49 @@ class _CommunityProfileHeader extends StatelessWidget {
                       profile.bio!,
                       fallback: Directionality.of(context),
                     ),
+                  ),
+                ],
+                if (profile != null) ...[
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      if (profile.postCount != null)
+                        _CommunityProfileMetric(
+                          icon: Icons.article_outlined,
+                          value: '${profile.postCount}',
+                          label: communityText(context, 'Posts', 'المنشورات'),
+                        ),
+                      if (profile.friendCount != null)
+                        _CommunityProfileMetric(
+                          icon: Icons.people_outline_rounded,
+                          value: '${profile.friendCount}',
+                          label: communityText(context, 'Friends', 'الأصدقاء'),
+                        ),
+                      if (profile.communityLevel != null)
+                        _CommunityProfileMetric(
+                          icon: Icons.workspace_premium_outlined,
+                          value: 'Lv ${profile.communityLevel}',
+                          label: communityText(
+                            context,
+                            'Community level',
+                            'مستوى المجتمع',
+                          ),
+                        ),
+                      if (profile.communityXp != null)
+                        _CommunityProfileMetric(
+                          icon: Icons.auto_graph_rounded,
+                          value: '${profile.communityXp} XP',
+                          label: 'Community XP',
+                        ),
+                      if (profile.goldBalance != null)
+                        _CommunityProfileMetric(
+                          icon: Icons.monetization_on_outlined,
+                          value: '${profile.goldBalance}',
+                          label: 'BIL Gold',
+                        ),
+                    ],
                   ),
                 ],
                 if (snapshot.connectionState != ConnectionState.done)
@@ -135,6 +189,54 @@ class _CommunityProfileHeader extends StatelessWidget {
       );
     },
   );
+}
+
+class _CommunityProfileMetric extends StatelessWidget {
+  const _CommunityProfileMetric({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      label: '$label: $value',
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 88),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: .55),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: scheme.outlineVariant),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: scheme.primary),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _CommunityAccountMenu extends StatefulWidget {
