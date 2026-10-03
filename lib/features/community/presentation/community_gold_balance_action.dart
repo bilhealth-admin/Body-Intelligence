@@ -6,6 +6,7 @@ import '../../../app/environment/app_environment.dart';
 import '../data/community_repository.dart';
 import '../domain/community_rewards.dart';
 import 'bil_gold_coin.dart';
+import 'community_copy.dart';
 
 class CommunityGoldBalanceAction extends StatefulWidget {
   const CommunityGoldBalanceAction({this.compact = false, super.key});
@@ -67,13 +68,14 @@ class _CommunityGoldBalanceActionState
       future: _balance,
       builder: (context, snapshot) {
         final balance = snapshot.data?.balance;
+        final earn = communityText(context, 'Earn', 'اكسب');
         return Tooltip(
-          message: 'BIL Gold — Earn',
+          message: 'BIL Gold — $earn',
           child: Semantics(
             button: true,
             label: balance == null
-                ? 'BIL Gold. Earn'
-                : 'BIL Gold: $balance. Earn',
+                ? 'BIL Gold. $earn'
+                : 'BIL Gold: $balance. $earn',
             child: InkWell(
               key: const Key('ai-coach-bil-gold'),
               onTap: _openRewards,
@@ -112,9 +114,9 @@ class _CommunityGoldBalanceActionState
                       ],
                     ),
                     if (!widget.compact)
-                      const Text(
-                        'Earn',
-                        style: TextStyle(
+                      Text(
+                        earn,
+                        style: const TextStyle(
                           color: Color(0xFFFFE7A0),
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
