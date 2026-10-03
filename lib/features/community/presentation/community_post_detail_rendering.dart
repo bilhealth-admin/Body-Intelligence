@@ -139,7 +139,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                     key: Key(
                                       'community-comment-hide-replies-${root.id}',
                                     ),
-                                    onPressed: () => setState(
+                                    onPressed: () => _setDetailState(
                                       () => _expandedThreads.remove(root.id),
                                     ),
                                     icon: const Icon(Icons.expand_less_rounded),
@@ -161,7 +161,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                 key: Key(
                                   'community-comment-view-replies-${root.id}',
                                 ),
-                                onPressed: () => setState(
+                                onPressed: () => _setDetailState(
                                   () => _expandedThreads.add(root.id),
                                 ),
                                 icon: const Icon(Icons.forum_outlined),
@@ -242,7 +242,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                 'Cancel reply',
                                 'إلغاء الرد',
                               ),
-                              onPressed: () => setState(() {
+                              onPressed: () => _setDetailState(() {
                                 _replyingTo = null;
                                 _clientId = null;
                               }),
@@ -274,7 +274,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                     );
                                 if (direction != _composerDirection ||
                                     _composerError != null) {
-                                  setState(() {
+                                  _setDetailState(() {
                                     _composerDirection = direction;
                                     _composerError = null;
                                   });
