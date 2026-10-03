@@ -1,6 +1,7 @@
 import '../domain/community_circles.dart';
 import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
+import '../domain/community_polls.dart';
 import '../domain/community_topics.dart';
 import 'community_post_cloud_store.dart';
 
@@ -12,6 +13,8 @@ mixin CommunityFeedRepositoryMixin {
   Future<List<CommunitySavedState>> loadSavedStates(List<String> postIds);
 
   Future<List<CommunityPostAuthorSocial>> loadPostAuthors(List<String> userIds);
+
+  Future<List<CommunityPoll>> loadCommunityPolls(List<String> postIds);
 
   Future<List<CommunitySavedPostReference>> loadSavedPostReferences({
     DateTime? before,
@@ -314,13 +317,16 @@ mixin CommunityFeedRepositoryMixin {
       loadPostStats(postIds),
       loadSavedStates(postIds),
       loadPostAuthors(authorIds),
+      loadCommunityPolls(postIds),
     ]);
     final stats = hydratedData[0] as List<CommunityPostStats>;
     final saved = hydratedData[1] as List<CommunitySavedState>;
     final authors = hydratedData[2] as List<CommunityPostAuthorSocial>;
+    final polls = hydratedData[3] as List<CommunityPoll>;
     final byPost = {for (final value in stats) value.postId: value};
     final savedByPost = {for (final value in saved) value.postId: value.saved};
     final authorById = {for (final value in authors) value.userId: value};
+    final pollByPost = {for (final value in polls) value.postId: value};
     return posts
         .map((post) {
           final postStats = byPost[post.id];
@@ -328,8 +334,13 @@ mixin CommunityFeedRepositoryMixin {
               ? post
               : post.withStats(postStats);
           final social = authorById[post.authorId];
-          final hydrated = withStats.withSaved(savedByPost[post.id] ?? false);
-          return social == null ? hydrated : hydrated.withAuthorSocial(social);
+          final withSaved = withStats.withSaved(
+            savedByPost[post.id] ?? false,
+          );
+          final withPoll = withSaved.withPoll(pollByPost[post.id]);
+          return social == null
+              ? withPoll
+              : withPoll.withAuthorSocial(social);
         })
         .toList(growable: false);
   }
