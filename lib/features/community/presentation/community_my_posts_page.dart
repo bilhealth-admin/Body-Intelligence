@@ -22,8 +22,8 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
   static const _pageSize = 30;
   final List<CommunityPost> _posts = [];
   late Future<void> _loading = _loadInitial();
-  late Future<CommunityProfile?>? _profile = widget.showProfileHeader
-      ? widget.repository.loadMyProfile()
+  late Future<CommunityProfileOverview?>? _profile = widget.showProfileHeader
+      ? widget.repository.loadMyProfileOverview()
       : null;
   DateTime? _before;
   String? _beforeId;
@@ -34,7 +34,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
   void _refreshProfile() {
     if (!widget.showProfileHeader) return;
     setState(() {
-      _profile = widget.repository.loadMyProfile();
+      _profile = widget.repository.loadMyProfileOverview();
     });
   }
 
