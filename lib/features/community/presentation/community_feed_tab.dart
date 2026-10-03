@@ -55,6 +55,15 @@ class _FeedTabState extends State<_FeedTab>
   bool _feedRefreshing = false;
 
   @override
+  CommunityFeedMode _selectedFeedMode = CommunityFeedMode.forYou;
+  @override
+  int? _feedCursorPriority;
+  @override
+  DateTime? _feedCursorCreatedAt;
+  @override
+  String? _feedCursorPostId;
+
+  @override
   bool get wantKeepAlive => true;
 
   @override
@@ -328,6 +337,53 @@ class _FeedTabState extends State<_FeedTab>
     }
   }
 
+  Future<void> _selectFeedMode(CommunityFeedMode mode) async {
+    if (mode == _selectedFeedMode || _openingComposer || _managingPost) return;
+    setState(() {
+      _selectedFeedMode = mode;
+      _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+    });
+    try {
+      await _feed;
+    } on Object {
+      // FutureBuilder presents mode-specific load errors.
+    }
+  }
+
+  String _feedModeLabel(CommunityFeedMode mode) => switch (mode) {
+        CommunityFeedMode.forYou =>
+          communityText(context, 'For You', 'لك'),
+        CommunityFeedMode.following =>
+          communityText(context, 'Following', 'المتابَعون'),
+        CommunityFeedMode.friends =>
+          communityText(context, 'Friends', 'الأصدقاء'),
+        CommunityFeedMode.explore =>
+          communityText(context, 'Explore', 'استكشاف'),
+      };
+
+  String _emptyFeedMessage() => switch (_selectedFeedMode) {
+        CommunityFeedMode.following => communityText(
+            context,
+            'Follow members to see their approved posts here.',
+            'تابع أعضاءً لتظهر منشوراتهم المعتمدة هنا.',
+          ),
+        CommunityFeedMode.friends => communityText(
+            context,
+            'Accepted friends will appear here when they publish.',
+            'ستظهر منشورات أصدقائك المقبولين هنا عند النشر.',
+          ),
+        CommunityFeedMode.forYou => communityText(
+            context,
+            'Nothing personalized yet. Follow people, topics, or Circles to shape this feed.',
+            'لا توجد توصيات مخصصة بعد. تابع أشخاصًا أو مواضيع أو دوائر لتخصيص هذا الموجز.',
+          ),
+        CommunityFeedMode.explore => communityText(
+            context,
+            'No approved posts yet. Start the first conversation.',
+            'لا توجد منشورات معتمدة بعد. ابدأ أول محادثة.',
+          ),
+      };
+
   Future<void> _refresh() async {
     if (_openingComposer || _managingPost) return;
     final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
@@ -365,7 +421,9 @@ class _FeedTabState extends State<_FeedTab>
                   'مشاركات أعضاء BIL',
                 ),
                 child: CustomScrollView(
-                  key: const PageStorageKey('community-feed-scroll'),
+                  key: PageStorageKey(
+                    'community-feed-scroll-${_selectedFeedMode.wireValue}',
+                  ),
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     SliverToBoxAdapter(
@@ -373,6 +431,35 @@ class _FeedTabState extends State<_FeedTab>
                         state: _policyState!,
                         onReview: () => _reviewPolicy(),
                         onRetry: () => _refreshPolicyState(),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          16,
+                          10,
+                          16,
+                          4,
+                        ),
+                        child: Row(
+                          children: [
+                            for (final mode in CommunityFeedMode.values) ...[
+                              ChoiceChip(
+                                key: Key(
+                                  'community-feed-mode-${mode.wireValue}',
+                                ),
+                                selected: _selectedFeedMode == mode,
+                                label: Text(_feedModeLabel(mode)),
+                                onSelected:
+                                    _openingComposer || _managingPost
+                                    ? null
+                                    : (_) => _selectFeedMode(mode),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                     if (!loading || snapshot.hasData)
@@ -431,11 +518,7 @@ class _FeedTabState extends State<_FeedTab>
                           padding: const EdgeInsets.fromLTRB(24, 24, 24, 96),
                           child: Center(
                             child: Text(
-                              communityText(
-                                context,
-                                'No posts yet. Start the first conversation.',
-                                'لا توجد مشاركات بعد. ابدأ بأول مشاركة.',
-                              ),
+                              _emptyFeedMessage(),
                               textAlign: TextAlign.center,
                             ),
                           ),
