@@ -37,6 +37,7 @@ class CommunityRepository
     // ignore: prefer_initializing_formals
     : _postStore = postStore;
 
+  @override
   final SupabaseClient _client;
   final CommunityPostStoreContract? _postStore;
 
@@ -59,17 +60,21 @@ class CommunityRepository
   );
   static final RegExp _unsafeText = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]');
 
+  @override
   String get currentUserId => _user.id;
 
+  @override
   User get _user {
     final user = _client.auth.currentUser;
     if (user == null) throw const AuthException('Sign-in required');
     return user;
   }
 
+  @override
   CommunityPostStoreContract get _posts =>
       _postStore ?? CommunityPostCloudStore(_client, _user);
 
+  @override
   Future<void> _requireAcceptedContentPolicy() async {
     late final CommunityPolicyState state;
     try {
@@ -107,10 +112,12 @@ class CommunityRepository
   /// This deliberately runs before an image store can send any bytes. The
   /// database INSERT guards repeat the checks to cover a state change between
   /// this preflight and the eventual post mutation.
+  @override
   Future<void> assertCommunityPublishReady() => _runCommunityMutation(() async {
     await _client.rpc('bil_assert_community_publish_ready');
   });
 
+  @override
   Future<Never> _rethrowPolicyStateAfterStorageFailure(
     StorageException error,
     StackTrace stackTrace,
@@ -130,6 +137,7 @@ class CommunityRepository
     Error.throwWithStackTrace(error, stackTrace);
   }
 
+  @override
   Future<T> _runCommunityMutation<T>(Future<T> Function() mutation) async {
     try {
       return await mutation();
