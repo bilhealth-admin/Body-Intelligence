@@ -212,40 +212,115 @@ class _CommunityPostStatusChip extends StatelessWidget {
   }
 }
 
-class _CommunityFeedImage extends StatelessWidget {
+class _CommunityFeedImage extends StatefulWidget {
   const _CommunityFeedImage({required this.post});
 
   final CommunityPost post;
 
   @override
+  State<_CommunityFeedImage> createState() => _CommunityFeedImageState();
+}
+
+class _CommunityFeedImageState extends State<_CommunityFeedImage> {
+  int _index = 0;
+
+  @override
   Widget build(BuildContext context) {
-    final ratio = (post.mediaAspectRatio ?? 1).clamp(0.8, 1.91).toDouble();
-    final url = post.mediaUrl;
+    final media = widget.post.mediaItems;
+    if (media.isEmpty) return const SizedBox.shrink();
+    final ratio = media.first.aspectRatio.clamp(0.8, 1.91).toDouble();
+
     return Semantics(
       image: true,
-      label: communityText(context, 'Post photo', 'صورة المنشور'),
+      label: communityText(
+        context,
+        media.length == 1 ? 'Post photo' : 'Post photos',
+        media.length == 1 ? 'صورة المنشور' : 'صور المنشور',
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: url == null
-              ? null
-              : () => pushCommunityPage<void>(
-                  context,
-                  _CommunityPhotoPage(url: url),
-                ),
-          child: AspectRatio(
-            key: Key('community-post-image-${post.id}'),
-            aspectRatio: ratio,
-            child: url == null
-                ? const _CommunityImageFallback()
-                : Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.medium,
-                    gaplessPlayback: true,
-                    errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+        child: Stack(
+          children: [
+            AspectRatio(
+              key: Key('community-post-image-${widget.post.id}'),
+              aspectRatio: ratio,
+              child: PageView.builder(
+                key: Key('community-post-gallery-${widget.post.id}'),
+                itemCount: media.length,
+                onPageChanged: (value) => setState(() => _index = value),
+                itemBuilder: (context, index) {
+                  final item = media[index];
+                  final url = item.url;
+                  return InkWell(
+                    onTap: url == null
+                        ? null
+                        : () => pushCommunityPage<void>(
+                            context,
+                            _CommunityPhotoPage(url: url),
+                          ),
+                    child: url == null
+                        ? const _CommunityImageFallback()
+                        : Image.network(
+                            url,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.medium,
+                            gaplessPlayback: true,
+                            errorBuilder: (_, _, _) =>
+                                const _CommunityImageFallback(),
+                          ),
+                  );
+                },
+              ),
+            ),
+            if (media.length > 1)
+              PositionedDirectional(
+                top: 10,
+                end: 10,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.66),
+                    borderRadius: BorderRadius.circular(999),
                   ),
-          ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    child: Text(
+                      '${_index + 1}/${media.length}',
+                      textDirection: TextDirection.ltr,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (media.length > 1)
+              PositionedDirectional(
+                start: 0,
+                end: 0,
+                bottom: 8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var index = 0; index < media.length; index++)
+                      Container(
+                        width: index == _index ? 16 : 6,
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          color: index == _index
+                              ? Colors.white
+                              : Colors.white.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
