@@ -26,6 +26,13 @@ abstract interface class CommunityPostPublishingReceiptContract {
   );
 }
 
+abstract interface class CommunityPostMultiImagePublishingContract {
+  Future<String?> publishWithImagesReceipt(
+    String body,
+    List<CommunityPostImageDraft> images,
+  );
+}
+
 abstract interface class CommunityPostLookupContract {
   Future<List<CommunityPost>> loadPostsByIds(List<String> postIds);
 }
@@ -62,6 +69,7 @@ final class CommunityPostCloudStore
     implements
         CommunityPostStoreContract,
         CommunityPostPublishingReceiptContract,
+        CommunityPostMultiImagePublishingContract,
         CommunityPostLookupContract,
         CommunityPostPaginationContract,
         CommunityPostAuthorPaginationContract,
@@ -247,22 +255,31 @@ final class CommunityPostCloudStore
         profilesById[userId] = profile;
       }
     }
-    final mediaPaths = validRows
-        .map((row) => row['media_object_path'])
-        .whereType<String>()
-        .toSet()
+    final postIds = validRows
+        .map((row) => row['id'] as String)
         .toList(growable: false);
+    final mediaByPost = await _loadPostMedia(postIds);
+    final mediaPaths = <String>{
+      for (final row in validRows)
+        if (row['media_object_path'] case final String path) path,
+      for (final items in mediaByPost.values)
+        for (final item in items) item.objectPath,
+    }.toList(growable: false);
     final signedUrls = await _signedUrls(mediaPaths);
     return validRows
         .map((row) {
           final profile = profilesById[row['author_id'] as String];
           final path = row['media_object_path'] as String?;
+          final postId = row['id'] as String;
+          final media = (mediaByPost[postId] ?? const <CommunityPostMedia>[])
+              .map((item) => item.withUrl(signedUrls[item.objectPath]))
+              .toList(growable: false);
           return CommunityPost.fromJson({
             ...row,
             'author_name': profile?['display_name'],
             'author_avatar_url': profile?['avatar_url'],
             'media_url': path == null ? null : signedUrls[path],
-          });
+          }).withMedia(media);
         })
         .toList(growable: false);
   }
@@ -281,21 +298,77 @@ final class CommunityPostCloudStore
         .map(Map<String, dynamic>.from)
         .where(_validPostRow)
         .toList(growable: false);
-    final mediaPaths = rows
-        .map((row) => row['media_object_path'])
-        .whereType<String>()
-        .toSet()
+    final postIds = rows
+        .map((row) => row['id'] as String)
         .toList(growable: false);
+    final mediaByPost = await _loadPostMedia(postIds);
+    final mediaPaths = <String>{
+      for (final row in rows)
+        if (row['media_object_path'] case final String path) path,
+      for (final items in mediaByPost.values)
+        for (final item in items) item.objectPath,
+    }.toList(growable: false);
     final signedUrls = await _signedUrls(mediaPaths);
     return rows
         .map((row) {
           final path = row['media_object_path'] as String?;
+          final postId = row['id'] as String;
+          final media = (mediaByPost[postId] ?? const <CommunityPostMedia>[])
+              .map((item) => item.withUrl(signedUrls[item.objectPath]))
+              .toList(growable: false);
           return CommunityPost.fromJson({
             ...row,
             'media_url': path == null ? null : signedUrls[path],
-          });
+          }).withMedia(media);
         })
         .toList(growable: false);
+  }
+
+  Future<Map<String, List<CommunityPostMedia>>> _loadPostMedia(
+    List<String> postIds,
+  ) async {
+    if (postIds.isEmpty) return const {};
+    final response = await _client.rpc(
+      'bil_community_post_media_v1',
+      params: {'p_post_ids': postIds},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community post media batch');
+    }
+    final requested = postIds.toSet();
+    final grouped = <String, List<CommunityPostMedia>>{};
+    for (final raw in response) {
+      if (raw is! Map) {
+        throw const FormatException('Invalid Community post media row');
+      }
+      final json = Map<String, dynamic>.from(raw);
+      final postId = json['post_id'];
+      if (postId is! String || !requested.contains(postId)) {
+        throw const FormatException('Unexpected Community post media');
+      }
+      final media = CommunityPostMedia.fromJson(json);
+      final items = grouped.putIfAbsent(postId, () => <CommunityPostMedia>[]);
+      if (items.any(
+        (item) =>
+            item.position == media.position ||
+            item.objectPath == media.objectPath,
+      )) {
+        throw const FormatException('Duplicate Community post media');
+      }
+      items.add(media);
+    }
+    for (final items in grouped.values) {
+      items.sort((a, b) => a.position.compareTo(b.position));
+      for (var index = 0; index < items.length; index++) {
+        if (items[index].position != index) {
+          throw const FormatException('Invalid Community post media order');
+        }
+      }
+    }
+    return {
+      for (final entry in grouped.entries)
+        entry.key: List<CommunityPostMedia>.unmodifiable(entry.value),
+    };
   }
 
   Future<Map<String, String>> _signedUrls(List<String> paths) async {
@@ -350,25 +423,53 @@ final class CommunityPostCloudStore
   Future<String?> publishWithImageReceipt(
     String body,
     CommunityPostImageDraft image,
+  ) => publishWithImagesReceipt(body, [image]);
+
+  @override
+  Future<String?> publishWithImagesReceipt(
+    String body,
+    List<CommunityPostImageDraft> images,
   ) async {
     final text = _validatedBody(body);
     if (text == null) return null;
-    final validated = await validateCommunityPostImageAsync(image.bytes);
+    if (images.isEmpty || images.length > 4) {
+      throw ArgumentError.value(images.length, 'images');
+    }
+
+    final validated = <CommunityPostImageDraft>[];
+    for (final image in images) {
+      validated.add(await validateCommunityPostImageAsync(image.bytes));
+    }
+
     final postId = _uuidGenerator.v4();
-    final objectId = _uuidGenerator.v4();
-    final path = '${_user.id}/$postId/$objectId.${validated.extension}';
-    await _client.storage
-        .from(_bucket)
-        .uploadBinary(
-          path,
-          validated.bytes,
-          fileOptions: FileOptions(
-            upsert: false,
-            contentType: validated.mimeType,
-            cacheControl: '86400',
-          ),
-        );
+    final media = <({String path, CommunityPostImageDraft image})>[];
+    for (final image in validated) {
+      final objectId = _uuidGenerator.v4();
+      media.add((
+        path: '${_user.id}/$postId/$objectId.${image.extension}',
+        image: image,
+      ));
+    }
+
+    final uploaded = <String>[];
+    var postInserted = false;
     try {
+      for (final item in media) {
+        await _client.storage
+            .from(_bucket)
+            .uploadBinary(
+              item.path,
+              item.image.bytes,
+              fileOptions: FileOptions(
+                upsert: false,
+                contentType: item.image.mimeType,
+                cacheControl: '86400',
+              ),
+            );
+        uploaded.add(item.path);
+      }
+
+      final first = media.first;
       await _client.from('bil_community_posts').insert({
         'id': postId,
         'author_id': _user.id,
@@ -376,21 +477,54 @@ final class CommunityPostCloudStore
         'visibility': 'community',
         'moderation_status': 'pending',
         'media_url': null,
-        'media_object_path': path,
-        'media_mime_type': validated.mimeType,
-        'media_bytes': validated.byteLength,
-        'media_width': validated.width,
-        'media_height': validated.height,
+        'media_object_path': first.path,
+        'media_mime_type': first.image.mimeType,
+        'media_bytes': first.image.byteLength,
+        'media_width': first.image.width,
+        'media_height': first.image.height,
       });
+      postInserted = true;
+
+      final attached = await _client.rpc(
+        'bil_set_my_community_post_media_v1',
+        params: {
+          'p_post_id': postId,
+          'p_items': [
+            for (final item in media)
+              {
+                'object_path': item.path,
+                'mime_type': item.image.mimeType,
+                'bytes': item.image.byteLength,
+                'width': item.image.width,
+                'height': item.image.height,
+              },
+          ],
+        },
+      );
+      if (attached is! num || attached.toInt() != media.length) {
+        throw const FormatException('Invalid Community media receipt');
+      }
+      return postId;
     } on Object {
-      try {
-        await _client.storage.from(_bucket).remove([path]);
-      } on Object {
-        // The immutable UUID path cannot overwrite another member's object.
+      if (postInserted) {
+        try {
+          await _client.rpc(
+            'bil_delete_community_post',
+            params: {'p_post_id': postId},
+          );
+        } on Object {
+          // The pending row remains non-public if rollback cannot complete.
+        }
+      }
+      if (uploaded.isNotEmpty) {
+        try {
+          await _client.storage.from(_bucket).remove(uploaded);
+        } on Object {
+          // Immutable UUID paths cannot overwrite another member's media.
+        }
       }
       rethrow;
     }
-    return postId;
   }
 
   @override
@@ -410,6 +544,29 @@ final class CommunityPostCloudStore
         throw StateError('Post image path did not pass the ownership boundary');
       }
     }
+
+    final mediaPaths = <String>{};
+    if (mediaPath is String) mediaPaths.add(mediaPath);
+    try {
+      final response = await _client.rpc(
+        'bil_my_community_post_media_paths_v1',
+        params: {'p_post_id': postId},
+      );
+      if (response is! List ||
+          response.any(
+            (value) =>
+                value is! String ||
+                !_validMediaPath(value, _user.id, postId),
+          )) {
+        throw const FormatException('Invalid Community media paths');
+      }
+      mediaPaths.addAll(response.cast<String>());
+    } on FormatException {
+      rethrow;
+    } on Object {
+      // Legacy single-image deletion remains safe if the batch helper fails.
+    }
+
     final deleted = await _client.rpc(
       'bil_delete_community_post',
       params: {'p_post_id': postId},
@@ -418,10 +575,12 @@ final class CommunityPostCloudStore
       throw StateError('Post was not available to delete');
     }
     // The database mutation is authoritative. Storage cleanup is best effort:
-    // a stale image must never make a successfully deleted post look undeleted.
-    if (mediaPath is String) {
+    // stale images must never make a successfully deleted post look undeleted.
+    if (mediaPaths.isNotEmpty) {
       try {
-        await _client.storage.from(_bucket).remove([mediaPath]);
+        await _client.storage.from(_bucket).remove(
+          mediaPaths.toList(growable: false),
+        );
       } on Object {
         // The row is already safely hidden; retrying storage cleanup is safe.
       }
