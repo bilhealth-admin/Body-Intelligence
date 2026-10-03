@@ -34,6 +34,29 @@ void main() {
     },
   );
 
+  test('mention search rate limit tuple stays registered', () {
+    final mentionSql = File(
+      'supabase/migrations/20261003105229_community_post_context_mentions_v1.sql',
+    ).readAsStringSync();
+    final rateLimitSql = File(
+      'supabase/migrations/20261003141000_community_mention_rate_limit_contract_v1.sql',
+    ).readAsStringSync();
+
+    expect(
+      mentionSql,
+      contains("'community_mention_search_v1',60,60"),
+    );
+    expect(
+      rateLimitSql,
+      contains("('community_mention_search_v1', 60, 60)"),
+    );
+    expect(
+      rateLimitSql,
+      contains('public.bil_consume_rate_limit(text,integer,integer)'),
+    );
+    expect(rateLimitSql, contains("set search_path = ''"));
+  });
+
   test('mention candidate and post context parsers stay strict', () {
     final candidate = CommunityMentionCandidate.fromJson({
       'user_id': '11111111-1111-4111-8111-111111111111',
