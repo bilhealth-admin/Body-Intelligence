@@ -10,6 +10,7 @@ const productionShapeAasa = {
       components: [
         { '/': '/auth/callback' },
         { '/': '/auth/reset-password' },
+        { '/': '/invite/*' },
       ],
     }],
   },
