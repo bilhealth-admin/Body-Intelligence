@@ -83,7 +83,9 @@ enum CommunityNotificationKind {
   rewardEarned('reward_earned'),
   questCompleted('quest_completed'),
   badgeEarned('badge_earned'),
-  challengeUpdate('challenge_update');
+  challengeUpdate('challenge_update'),
+  collaborationInvite('collaboration_invite'),
+  collaborationAccepted('collaboration_accepted');
 
   const CommunityNotificationKind(this.wireValue);
 
