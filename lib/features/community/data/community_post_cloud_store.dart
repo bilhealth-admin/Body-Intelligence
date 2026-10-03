@@ -555,8 +555,7 @@ final class CommunityPostCloudStore
       if (response is! List ||
           response.any(
             (value) =>
-                value is! String ||
-                !_validMediaPath(value, _user.id, postId),
+                value is! String || !_validMediaPath(value, _user.id, postId),
           )) {
         throw const FormatException('Invalid Community media paths');
       }
@@ -578,9 +577,9 @@ final class CommunityPostCloudStore
     // stale images must never make a successfully deleted post look undeleted.
     if (mediaPaths.isNotEmpty) {
       try {
-        await _client.storage.from(_bucket).remove(
-          mediaPaths.toList(growable: false),
-        );
+        await _client.storage
+            .from(_bucket)
+            .remove(mediaPaths.toList(growable: false));
       } on Object {
         // The row is already safely hidden; retrying storage cleanup is safe.
       }

@@ -369,27 +369,25 @@ class _CommunityPostComposerPageState
                           SizedBox(
                             height: 160,
                             child: ListView.separated(
-                              key: const Key(
-                                'community-post-selected-images',
-                              ),
+                              key: const Key('community-post-selected-images'),
                               scrollDirection: Axis.horizontal,
                               itemCount: _selectedImages.length,
                               separatorBuilder: (_, _) =>
                                   const SizedBox(width: 10),
                               itemBuilder: (context, index) =>
                                   _CommunityPostImagePreview(
-                                index: index,
-                                image: _selectedImages[index],
-                                onRemove: busy
-                                    ? null
-                                    : () => setState(() {
-                                          _selectedImages.removeAt(index);
-                                          widget.draft.images
-                                            ..clear()
-                                            ..addAll(_selectedImages);
-                                          _composerError = null;
-                                        }),
-                              ),
+                                    index: index,
+                                    image: _selectedImages[index],
+                                    onRemove: busy
+                                        ? null
+                                        : () => setState(() {
+                                            _selectedImages.removeAt(index);
+                                            widget.draft.images
+                                              ..clear()
+                                              ..addAll(_selectedImages);
+                                            _composerError = null;
+                                          }),
+                                  ),
                             ),
                           ),
                         ],

@@ -56,33 +56,33 @@ void main() {
     expect(post.withSaved(true).mediaItems.length, 4);
   });
 
-  test('client uploads and renders real ordered media instead of fake cards', () {
-    final store = File(
-      'lib/features/community/data/community_post_cloud_store.dart',
-    ).readAsStringSync();
-    final repository = File(
-      'lib/features/community/data/community_repository.dart',
-    ).readAsStringSync();
-    final composer = File(
-      'lib/features/community/presentation/community_post_composer_page.dart',
-    ).readAsStringSync();
-    final widgets = File(
-      'lib/features/community/presentation/community_post_widgets.dart',
-    ).readAsStringSync();
+  test(
+    'client uploads and renders real ordered media instead of fake cards',
+    () {
+      final store = File(
+        'lib/features/community/data/community_post_cloud_store.dart',
+      ).readAsStringSync();
+      final repository = File(
+        'lib/features/community/data/community_repository.dart',
+      ).readAsStringSync();
+      final composer = File(
+        'lib/features/community/presentation/community_post_composer_page.dart',
+      ).readAsStringSync();
+      final widgets = File(
+        'lib/features/community/presentation/community_post_widgets.dart',
+      ).readAsStringSync();
 
-    expect(store, contains('CommunityPostMultiImagePublishingContract'));
-    expect(store, contains('publishWithImagesReceipt'));
-    expect(store, contains('bil_set_my_community_post_media_v1'));
-    expect(store, contains('bil_community_post_media_v1'));
-    expect(store, contains('bil_my_community_post_media_paths_v1'));
-    expect(repository, contains('publishPostWithImagesTopicsAndCircle'));
-    expect(
-      repository,
-      contains('publishPostWithImagesTopicsCircleAndPoll'),
-    );
-    expect(composer, contains('community-post-selected-images'));
-    expect(composer, contains('_selectedImages.length >= 4'));
-    expect(widgets, contains('PageView.builder'));
-    expect(widgets, contains('community-post-gallery-'));
-  });
+      expect(store, contains('CommunityPostMultiImagePublishingContract'));
+      expect(store, contains('publishWithImagesReceipt'));
+      expect(store, contains('bil_set_my_community_post_media_v1'));
+      expect(store, contains('bil_community_post_media_v1'));
+      expect(store, contains('bil_my_community_post_media_paths_v1'));
+      expect(repository, contains('publishPostWithImagesTopicsAndCircle'));
+      expect(repository, contains('publishPostWithImagesTopicsCircleAndPoll'));
+      expect(composer, contains('community-post-selected-images'));
+      expect(composer, contains('_selectedImages.length >= 4'));
+      expect(widgets, contains('PageView.builder'));
+      expect(widgets, contains('community-post-gallery-'));
+    },
+  );
 }
