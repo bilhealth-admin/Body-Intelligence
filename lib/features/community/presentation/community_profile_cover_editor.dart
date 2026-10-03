@@ -3,13 +3,13 @@ part of 'community_profile_page.dart';
 extension _CommunityProfileCoverActions on _CommunityProfilePageState {
   Future<void> pickAvatar() async {
     if (_photoBusy || _saving) return;
-    setState(() => _photoBusy = true);
+    _setProfileEditorState(() => _photoBusy = true);
     try {
       final result = await ref
           .read(profilePhotoServiceProvider)
           .chooseAndSave();
       if (!mounted || result == null) return;
-      setState(() {
+      _setProfileEditorState(() {
         if (result.publicUrl != null) _avatarUrl = result.publicUrl;
       });
       if (!result.cloudSynced && AppEnvironment.supabaseRuntimeReady) {
@@ -24,7 +24,7 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
         );
       }
     } finally {
-      if (mounted) setState(() => _photoBusy = false);
+      if (mounted) _setProfileEditorState(() => _photoBusy = false);
     }
   }
 
@@ -36,13 +36,13 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
         _saving) {
       return;
     }
-    setState(() => _coverBusy = true);
+    _setProfileEditorState(() => _coverBusy = true);
     try {
       final image = await CommunityPostImagePicker().pick();
       if (image == null || !mounted) return;
       final url = await repository.uploadMyCommunityProfileCover(image);
       if (!mounted) return;
-      setState(() => _coverUrl = url);
+      _setProfileEditorState(() => _coverUrl = url);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -81,7 +81,7 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
         ),
       );
     } finally {
-      if (mounted) setState(() => _coverBusy = false);
+      if (mounted) _setProfileEditorState(() => _coverBusy = false);
     }
   }
 
@@ -120,10 +120,10 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
       ),
     );
     if (confirmed != true || !mounted) return;
-    setState(() => _coverBusy = true);
+    _setProfileEditorState(() => _coverBusy = true);
     try {
       await repository.removeMyCommunityProfileCover();
-      if (mounted) setState(() => _coverUrl = null);
+      if (mounted) _setProfileEditorState(() => _coverUrl = null);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,7 +138,7 @@ extension _CommunityProfileCoverActions on _CommunityProfilePageState {
         ),
       );
     } finally {
-      if (mounted) setState(() => _coverBusy = false);
+      if (mounted) _setProfileEditorState(() => _coverBusy = false);
     }
   }
 }
