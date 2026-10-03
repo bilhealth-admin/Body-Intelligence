@@ -2,6 +2,54 @@ part of 'community_hub_page.dart';
 
 extension _CommunityPostComposerReferenceActions
     on _CommunityPostComposerPageState {
+  Future<void> _captureVoiceInput() async {
+    if (_publishing ||
+        _savingDraft ||
+        _voiceCapturing ||
+        _selectingImage ||
+        _completed) {
+      return;
+    }
+    setState(() {
+      _voiceCapturing = true;
+      _submitError = null;
+    });
+    try {
+      final transcript = await CommunityComposerVoiceInputService.platform()
+          .capture(context);
+      if (!mounted || transcript == null || transcript.isEmpty) return;
+
+      final current = _composer.text.trim();
+      final next = current.isEmpty ? transcript : '$current\n$transcript';
+      if (next.length > 1200) {
+        setState(
+          () => _submitError = communityText(
+            context,
+            'The voice transcript would exceed the 1200-character post limit.',
+            'سيؤدي النص الصوتي إلى تجاوز حد المنشور البالغ 1200 حرفًا.',
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _composer.value = TextEditingValue(
+          text: next,
+          selection: TextSelection.collapsed(offset: next.length),
+        );
+        widget.draft.body = next;
+        _composerDirection = BilWrittenLanguageResolver.directionFor(
+          next,
+          fallback: Directionality.of(context),
+        );
+        _composerError = null;
+        _submitError = null;
+      });
+    } finally {
+      if (mounted) setState(() => _voiceCapturing = false);
+    }
+  }
+
   String? _normalizeHashtag(String raw) {
     final normalized = raw
         .trim()
