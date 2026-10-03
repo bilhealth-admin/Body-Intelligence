@@ -38,7 +38,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   bool _loadingMore = false;
   bool _submitting = false;
   bool _likingPost = false;
+  bool _followBusy = false;
   int? _viewCount;
+  CommunityProfileOverview? _authorProfile;
   final Set<String> _busyComments = <String>{};
   final Set<String> _expandedThreads = <String>{};
   final Set<String> _loadingReplyThreads = <String>{};
@@ -47,6 +49,58 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   void initState() {
     super.initState();
     unawaited(_recordView());
+    unawaited(_loadAuthorProfile());
+  }
+
+  Future<void> _loadAuthorProfile() async {
+    if (!widget.repository.useServerCommunityReferenceParity) return;
+    if (widget.post.authorId == widget.repository.currentUserId) return;
+    try {
+      final profile = await widget.repository.loadProfileOverview(
+        widget.post.authorId,
+      );
+      if (mounted) setState(() => _authorProfile = profile);
+    } on Object {
+      // The post remains readable if the relationship affordance cannot load.
+    }
+  }
+
+  Future<void> _toggleAuthorFollow() async {
+    final profile = _authorProfile;
+    if (profile == null ||
+        profile.isSelf ||
+        _followBusy ||
+        (!profile.viewerFollows && !profile.allowFollows)) {
+      return;
+    }
+    setState(() => _followBusy = true);
+    try {
+      if (profile.viewerFollows) {
+        await widget.repository.unfollow(profile.userId);
+      } else {
+        await widget.repository.follow(profile.userId);
+      }
+      final refreshed = await widget.repository.loadProfileOverview(
+        profile.userId,
+      );
+      if (mounted) setState(() => _authorProfile = refreshed);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              communityText(
+                context,
+                'Could not update follow state.',
+                'تعذر تحديث حالة المتابعة.',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _followBusy = false);
+    }
   }
 
   Future<void> _recordView() async {
@@ -497,9 +551,12 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                       post: widget.post,
                       stats: _stats,
                       referenceMetadata: widget.referenceMetadata,
+                      authorProfile: _authorProfile,
+                      followBusy: _followBusy,
                       viewCount: _viewCount,
                       liking: _likingPost,
                       onLike: _togglePostLike,
+                      onToggleFollow: _toggleAuthorFollow,
                     ),
                     if (widget.post.poll case final poll?) ...[
                       const SizedBox(height: 16),
@@ -787,17 +844,23 @@ class _CommunityPostDetailHeader extends StatelessWidget {
     required this.post,
     required this.stats,
     required this.referenceMetadata,
+    required this.authorProfile,
+    required this.followBusy,
     required this.viewCount,
     required this.liking,
     required this.onLike,
+    required this.onToggleFollow,
   });
 
   final CommunityPost post;
   final CommunityPostStats stats;
   final CommunityPostReferenceMetadata? referenceMetadata;
+  final CommunityProfileOverview? authorProfile;
+  final bool followBusy;
   final int? viewCount;
   final bool liking;
   final VoidCallback onLike;
+  final VoidCallback onToggleFollow;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -833,6 +896,30 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                   ],
                 ),
               ),
+              if (authorProfile case final profile?
+                  when profile.viewerFollows || profile.allowFollows)
+                TextButton(
+                  key: const Key('community-post-detail-follow'),
+                  onPressed: followBusy ? null : onToggleFollow,
+                  child: followBusy
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          profile.viewerFollows
+                              ? communityText(
+                                  context,
+                                  'Following',
+                                  'يتابع',
+                                )
+                              : communityText(
+                                  context,
+                                  'Follow',
+                                  'متابعة',
+                                ),
+                        ),
+                ),
             ],
           ),
           if (post.locationLabel case final location?) ...[
