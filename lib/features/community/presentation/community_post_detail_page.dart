@@ -5,11 +5,13 @@ class _CommunityPostDetailPage extends StatefulWidget {
     required this.post,
     required this.initialStats,
     required this.repository,
+    this.referenceMetadata,
   });
 
   final CommunityPost post;
   final CommunityPostStats initialStats;
   final CommunityRepository repository;
+  final CommunityPostReferenceMetadata? referenceMetadata;
 
   @override
   State<_CommunityPostDetailPage> createState() =>
@@ -494,6 +496,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                     _CommunityPostDetailHeader(
                       post: widget.post,
                       stats: _stats,
+                      referenceMetadata: widget.referenceMetadata,
                       viewCount: _viewCount,
                       liking: _likingPost,
                       onLike: _togglePostLike,
@@ -783,6 +786,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   const _CommunityPostDetailHeader({
     required this.post,
     required this.stats,
+    required this.referenceMetadata,
     required this.viewCount,
     required this.liking,
     required this.onLike,
@@ -790,6 +794,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
 
   final CommunityPost post;
   final CommunityPostStats stats;
+  final CommunityPostReferenceMetadata? referenceMetadata;
   final int? viewCount;
   final bool liking;
   final VoidCallback onLike;
@@ -845,6 +850,10 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                 ),
               ],
             ),
+          ],
+          if (referenceMetadata case final metadata?) ...[
+            const SizedBox(height: 12),
+            _CommunityPostReferenceBlock(metadata: metadata),
           ],
           if (post.hasImage) ...[
             const SizedBox(height: 14),
