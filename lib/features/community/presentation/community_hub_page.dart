@@ -44,6 +44,7 @@ part 'community_post_composer_page.dart';
 part 'community_post_composer_reference_actions.dart';
 part 'community_post_composer_reference_sections.dart';
 part 'community_post_composer_rendering.dart';
+part 'community_post_composer_toolbar.dart';
 part 'community_post_composer_image_preview.dart';
 part 'community_post_detail_page.dart';
 part 'community_post_detail_comment_tile.dart';
