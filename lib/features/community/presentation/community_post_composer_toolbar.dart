@@ -1,17 +1,12 @@
 part of 'community_hub_page.dart';
 
 extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
-  Widget buildCommunityPostComposerToolbar(
-    BuildContext context,
-    bool busy,
-  ) {
+  Widget buildCommunityPostComposerToolbar(BuildContext context, bool busy) {
     final saveDraft = OutlinedButton.icon(
       key: const Key('community-post-save-draft'),
       onPressed: busy
           ? null
-          : _CommunityPostComposerReferenceActions(
-              this,
-            )._savePersistentDraft,
+          : _CommunityPostComposerReferenceActions(this)._savePersistentDraft,
       icon: _savingDraft
           ? const SizedBox.square(
               dimension: 18,
@@ -56,11 +51,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
           : const Icon(Icons.send_rounded),
       label: Text(
         _publishing && _selectedImages.isNotEmpty
-            ? communityText(
-                context,
-                'Uploading photo…',
-                'جارٍ رفع الصورة…',
-              )
+            ? communityText(context, 'Uploading photo…', 'جارٍ رفع الصورة…')
             : communityText(context, 'Publish', 'نشر'),
       ),
     );
@@ -81,9 +72,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                 child: Text(
                   error,
                   key: const Key('community-post-submit-error'),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             ],

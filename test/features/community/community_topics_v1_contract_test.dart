@@ -62,40 +62,37 @@ void main() {
     );
   });
 
-  test(
-    'Flutter topics use real RPC counts and explicit composer assignment',
-    () {
-      final repository = _communityRepositorySource();
-      final store = File(
-        'lib/features/community/data/community_post_cloud_store.dart',
-      ).readAsStringSync();
-      final composer = [
-        'lib/features/community/presentation/community_post_composer_page.dart',
-        'lib/features/community/presentation/community_post_composer_rendering.dart',
-        'lib/features/community/presentation/community_post_composer_reference_sections.dart',
-        'lib/features/community/presentation/community_post_composer_reference_actions.dart',
-        'lib/features/community/presentation/community_post_composer_toolbar.dart',
-      ].map((path) => File(path).readAsStringSync()).join('\n');
-      final topics = File(
-        'lib/features/community/presentation/community_topics_page.dart',
-      ).readAsStringSync();
-      final hub = File(
-        'lib/features/community/presentation/community_hub_page.dart',
-      ).readAsStringSync();
+  test('Flutter topics use real RPC counts and explicit composer assignment', () {
+    final repository = _communityRepositorySource();
+    final store = File(
+      'lib/features/community/data/community_post_cloud_store.dart',
+    ).readAsStringSync();
+    final composer = [
+      'lib/features/community/presentation/community_post_composer_page.dart',
+      'lib/features/community/presentation/community_post_composer_rendering.dart',
+      'lib/features/community/presentation/community_post_composer_reference_sections.dart',
+      'lib/features/community/presentation/community_post_composer_reference_actions.dart',
+      'lib/features/community/presentation/community_post_composer_toolbar.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
+    final topics = File(
+      'lib/features/community/presentation/community_topics_page.dart',
+    ).readAsStringSync();
+    final hub = File(
+      'lib/features/community/presentation/community_hub_page.dart',
+    ).readAsStringSync();
 
-      expect(repository, contains('bil_list_community_topics_v1'));
-      expect(repository, contains('bil_follow_community_topic_v1'));
-      expect(repository, contains('bil_set_my_community_post_topics_v1'));
-      expect(repository, contains('bil_community_topic_post_refs_v1'));
-      expect(store, contains('CommunityPostPublishingReceiptContract'));
-      expect(store, contains('publishTextWithReceipt'));
-      expect(store, contains('publishWithImageReceipt'));
-      expect(composer, contains('community-composer-topic-'));
-      expect(composer, contains('topicSlugs: topicSlugs'));
-      expect(topics, contains('community-topics-list'));
-      expect(topics, contains('followerCount'));
-      expect(topics, contains('postCount'));
-      expect(hub, contains("part 'community_topics_page.dart';"));
-    },
-  );
+    expect(repository, contains('bil_list_community_topics_v1'));
+    expect(repository, contains('bil_follow_community_topic_v1'));
+    expect(repository, contains('bil_set_my_community_post_topics_v1'));
+    expect(repository, contains('bil_community_topic_post_refs_v1'));
+    expect(store, contains('CommunityPostPublishingReceiptContract'));
+    expect(store, contains('publishTextWithReceipt'));
+    expect(store, contains('publishWithImageReceipt'));
+    expect(composer, contains('community-composer-topic-'));
+    expect(composer, contains('topicSlugs: topicSlugs'));
+    expect(topics, contains('community-topics-list'));
+    expect(topics, contains('followerCount'));
+    expect(topics, contains('postCount'));
+    expect(hub, contains("part 'community_topics_page.dart';"));
+  });
 }
