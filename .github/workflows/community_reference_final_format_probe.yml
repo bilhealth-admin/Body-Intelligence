@@ -1,4 +1,5 @@
 name: Community reference final format probe
+# final-current-head
 
 on:
   push:
