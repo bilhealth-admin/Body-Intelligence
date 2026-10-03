@@ -25,6 +25,7 @@ void main() {
       expect(scope, contains('bil_community_attention_v2'));
       expect(page, contains('CommunityNotificationKind.rewardEarned'));
       expect(page, contains('CommunityNotificationKind.questCompleted'));
+      expect(page, contains("'/community/rewards'"));
       expect(page, contains('CommunityNotificationKind.badgeEarned'));
       expect(page, contains('CommunityNotificationKind.challengeUpdate'));
       expect(page, isNot(contains('context.push(notification.deepLinkPath)')));
