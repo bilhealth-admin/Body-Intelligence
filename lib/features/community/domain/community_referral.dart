@@ -169,8 +169,29 @@ class CommunityInviteAcceptance {
     this.newAccountEligible,
   });
 
-  static final RegExp _uuid = RegExp(
-    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}
+  final CommunityInviteAcceptStatus status;
+  final bool duplicate;
+  final String? attributionId;
+  final String? inviterId;
+  final String? displayName;
+  final String? avatarUrl;
+  final String? handle;
+  final String? friendshipId;
+  final String? relationship;
+  final bool? newAccountEligible;
+
+  bool get attributed => status == CommunityInviteAcceptStatus.attributed;
+  bool get relationshipAccepted =>
+      attributed && friendshipId != null && relationship == 'accepted';
+
+  static bool _validUuid(String value) =>
+      value.length == 36 &&
+      value[8] == '-' &&
+      value[13] == '-' &&
+      value[18] == '-' &&
+      value[23] == '-' &&
+      !RegExp(r'[^0-9a-fA-F-]').hasMatch(value);
+
   factory CommunityInviteAcceptance.fromJson(Map<String, dynamic> json) {
     final status = CommunityInviteAcceptStatus.fromWire(json['status']);
     final duplicate = json['duplicate'];
@@ -199,7 +220,7 @@ class CommunityInviteAcceptance {
         (avatarUrl != null && avatarUrl is! String) ||
         (handle != null && handle is! String) ||
         friendshipId is! String ||
-        !_uuid.hasMatch(friendshipId) ||
+        !_validUuid(friendshipId) ||
         relationship != 'accepted' ||
         (newAccountEligible != null && newAccountEligible is! bool)) {
       throw const FormatException('Invalid Community invite acceptance');
