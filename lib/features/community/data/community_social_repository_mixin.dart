@@ -18,6 +18,8 @@ mixin CommunitySocialRepositoryMixin {
 
   Future<void> requireAcceptedCommunityPolicy();
 
+  bool get useServerThreadedCommunityComments;
+
   static final RegExp _uuid = RegExp(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
   );
@@ -370,6 +372,37 @@ mixin CommunitySocialRepositoryMixin {
         limit > 50) {
       throw ArgumentError('Invalid Community comment-thread cursor');
     }
+    if (!useServerThreadedCommunityComments) {
+      final legacyFlatComments = await loadPostComments(
+        postId,
+        after: after,
+        afterId: afterId,
+        limit: limit,
+      );
+      final ordered = communityCommentsInThreadOrder(legacyFlatComments);
+      final roots = ordered
+          .where((comment) => comment.parentId == null)
+          .take(limit)
+          .toList(growable: false);
+      return List<CommunityCommentThread>.unmodifiable(
+        roots.map((root) {
+          final allReplies = ordered
+              .where((comment) => comment.parentId == root.id)
+              .toList(growable: false);
+          final replyCount = root.replyCount > allReplies.length
+              ? root.replyCount
+              : allReplies.length;
+          return CommunityCommentThread(
+            root: root.copyWith(replyCount: replyCount),
+            replies: List<CommunityComment>.unmodifiable(
+              allReplies.take(3),
+            ),
+            replyCount: replyCount,
+          );
+        }),
+      );
+    }
+
     final response = await communitySocialClient.rpc(
       'bil_social_comment_threads_v3',
       params: {
