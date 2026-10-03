@@ -102,6 +102,13 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
               key: 'community-browse-topics',
             ),
             _item(
+              'circles',
+              Icons.groups_2_outlined,
+              'Circles',
+              'الدوائر',
+              key: 'community-browse-circles',
+            ),
+            _item(
               '/community/safety',
               Icons.shield_outlined,
               'Safety and policy',
