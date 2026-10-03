@@ -76,7 +76,7 @@ extension _CommunityPostComposerReferenceSections
             controller: _hashtagInput,
             enabled: !busy && widget.draft.hashtags.length < 10,
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _addHashtag(),
+            onSubmitted: (_) => _CommunityPostComposerReferenceActions(this)._addHashtag(),
             decoration: InputDecoration(
               prefixText: '#',
               hintText: communityText(
@@ -146,7 +146,9 @@ extension _CommunityPostComposerReferenceSections
               label: Text('@' + collaborator.handle),
               onDeleted: busy
                   ? null
-                  : () => _toggleCollaborator(collaborator),
+                  : () => _CommunityPostComposerReferenceActions(this)._toggleCollaborator(
+                    collaborator,
+                  ),
             ),
         ],
       ),
@@ -161,7 +163,7 @@ extension _CommunityPostComposerReferenceSections
             controller: _collaboratorQuery,
             enabled: !busy && widget.draft.collaborators.length < 3,
             textInputAction: TextInputAction.search,
-            onSubmitted: (_) => _searchCollaborators(),
+            onSubmitted: (_) => _CommunityPostComposerReferenceActions(this)._searchCollaborators(),
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.group_add_outlined),
               hintText: communityText(
@@ -225,7 +227,9 @@ extension _CommunityPostComposerReferenceSections
                           ) &&
                           widget.draft.collaborators.length >= 3)
                   ? null
-                  : (_) => _toggleCollaborator(collaborator),
+                  : (_) => _CommunityPostComposerReferenceActions(this)._toggleCollaborator(
+                    collaborator,
+                  ),
             ),
         ],
       ),
