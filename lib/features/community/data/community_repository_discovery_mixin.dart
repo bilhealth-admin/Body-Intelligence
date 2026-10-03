@@ -58,7 +58,6 @@ mixin _CommunityDiscoveryRepositoryMixin {
     );
   }
 
-  @override
   Future<List<CommunityFeedReference>> loadCommunityFeedReferences({
     required CommunityFeedMode mode,
     int? beforePriority,
@@ -169,7 +168,6 @@ mixin _CommunityDiscoveryRepositoryMixin {
     }
   }
 
-  @override
   Future<List<CommunityCirclePostReference>> loadCommunityCirclePostReferences({
     required String slug,
     DateTime? before,
@@ -252,7 +250,6 @@ mixin _CommunityDiscoveryRepositoryMixin {
     return poll;
   }
 
-  @override
   Future<List<CommunityPoll>> loadCommunityPolls(List<String> postIds) async {
     if (postIds.isEmpty) return const <CommunityPoll>[];
     if (postIds.length > 100 ||
@@ -429,7 +426,6 @@ mixin _CommunityDiscoveryRepositoryMixin {
     }
   }
 
-  @override
   Future<List<CommunityTopicPostReference>> loadCommunityTopicPostReferences({
     required String slug,
     DateTime? before,
