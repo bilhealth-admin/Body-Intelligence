@@ -15,6 +15,8 @@ CommunityRepository? _communityProfileProductionRepository() {
 
 enum _CommunityProfileContentTab { moments, reviews }
 
+enum _CommunityProfileMomentFilter { all, published, pending, rejected }
+
 class CommunityMemberProfilePage extends StatefulWidget {
   const CommunityMemberProfilePage({
     required this.userId,
@@ -59,6 +61,8 @@ class _CommunityMemberProfilePageState
   bool _followBusy = false;
   bool _managingPost = false;
   _CommunityProfileContentTab _contentTab = _CommunityProfileContentTab.moments;
+  _CommunityProfileMomentFilter _momentFilter =
+      _CommunityProfileMomentFilter.all;
 
   Future<void> _loadInitial() async {
     final repository = _repository;
