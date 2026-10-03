@@ -27,6 +27,7 @@ import 'runtime_copy_connected_health.dart';
 import 'runtime_copy_platform_conversation.dart';
 import 'runtime_copy_community_moderation.dart';
 import 'runtime_copy_community_social.dart';
+import 'runtime_copy_community_expansion.dart';
 import 'runtime_copy_admin_notifications.dart';
 import 'runtime_copy_meal_voice.dart';
 import 'runtime_copy_sleep_schedule.dart';
@@ -89,6 +90,11 @@ abstract final class RuntimeCopy {
       localeTag,
     );
     if (communitySocial != null) return communitySocial;
+    final communityExpansion = CommunityExpansionRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (communityExpansion != null) return communityExpansion;
     final communityModeration = CommunityModerationRuntimeCopy.resolve(
       english,
       localeTag,
@@ -218,6 +224,7 @@ abstract final class RuntimeCopy {
         FitnessWatchRuntimeCopy.balanced &&
         PlatformConversationRuntimeCopy.balanced &&
         CommunitySocialRuntimeCopy.balanced &&
+        CommunityExpansionRuntimeCopy.balanced &&
         CommunityModerationRuntimeCopy.balanced &&
         AdminNotificationRuntimeCopy.balanced &&
         MealVoiceRuntimeCopy.balanced &&
