@@ -69,9 +69,13 @@ void main() {
       final store = File(
         'lib/features/community/data/community_post_cloud_store.dart',
       ).readAsStringSync();
-      final composer = File(
+      final composer = [
         'lib/features/community/presentation/community_post_composer_page.dart',
-      ).readAsStringSync();
+        'lib/features/community/presentation/community_post_composer_rendering.dart',
+        'lib/features/community/presentation/community_post_composer_reference_sections.dart',
+        'lib/features/community/presentation/community_post_composer_reference_actions.dart',
+        'lib/features/community/presentation/community_post_composer_toolbar.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final topics = File(
         'lib/features/community/presentation/community_topics_page.dart',
       ).readAsStringSync();
