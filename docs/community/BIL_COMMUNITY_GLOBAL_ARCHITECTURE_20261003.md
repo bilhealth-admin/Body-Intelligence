@@ -46,9 +46,11 @@ Reward definitions are server-managed and versioned. Client code renders title/c
 Quest lifecycle:
 `Go -> Pending -> Ready to claim -> Claimed`.
 
-Progress and claims are owner-scoped and idempotent. A successful claim posts Gold through the private ledger primitive in the same transaction and emits a durable Activity event.
+The v1 engine now provides server-only action/progress recording, owner/quest/period idempotency, immutable progress events, manual or automatic settlement, configurable UTC daily/weekly Gold and XP caps, claim audit, and atomic settlement into the separate Gold and XP ledgers. Completion and reward settlement emit durable Activity v2 events. Production ships with no active quest definitions and all quest reward caps set to zero, so the feature is fail-closed until economics, localized copy, and destinations are intentionally configured.
 
-Posting rewards are quality rewards, not “post equals coins”. Policies will support moderation approval, unique meaningful engagement, caps, account trust, and anti-farming checks. Amounts stay configurable.
+Progress and claims are owner-scoped and idempotent. Clients can list quests and claim a ready quest, but cannot advance progress, choose reward amounts, or invoke the private settlement primitives.
+
+Posting rewards are quality rewards, not “post equals coins”. Event emitters must still enforce semantic anti-farming rules such as no self-reward, unique meaningful engagement, moderation/trust gates, and canonical source identities before recording a qualifying Community action.
 
 ## Referrals
 
@@ -92,7 +94,7 @@ Neither will be implemented as free-form client-only tags with authority semanti
 2. Gold ledger foundation — isolated, no earn/spend product integration yet.
 3. XP/reputation foundation — complete.
 4. Activity schema expansion plus backward-compatible Flutter v2 parsing — complete; new event emitters remain gated on localized copy and live destination routes.
-5. Quest/reward definitions, progress, claim engine, and anti-abuse audit.
+5. Quest/reward definitions, progress, claim engine, and anti-abuse audit — foundation complete and fail-closed; live quest seeds and action emitters remain intentionally disabled.
 6. Referral/deferred-attribution contract.
 7. Profile projection and authored-post pagination.
 8. Rewards Center + AI Coach Earn entry.
