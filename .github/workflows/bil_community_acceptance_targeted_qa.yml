@@ -1,5 +1,9 @@
 name: BIL community acceptance targeted QA
 
+concurrency:
+  group: bil-community-targeted-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
