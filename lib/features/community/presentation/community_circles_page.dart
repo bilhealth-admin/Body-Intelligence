@@ -4,11 +4,13 @@ class CommunityCirclesPage extends StatefulWidget {
   const CommunityCirclesPage({
     required this.repository,
     this.onComposeCircle,
+    this.embedded = false,
     super.key,
   });
 
   final CommunityRepository repository;
   final Future<void> Function(String slug)? onComposeCircle;
+  final bool embedded;
 
   @override
   State<CommunityCirclesPage> createState() => _CommunityCirclesPageState();
@@ -58,9 +60,8 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(communityText(context, 'Circles', 'الدوائر'))),
-    body: RefreshIndicator(
+  Widget build(BuildContext context) {
+    final body = RefreshIndicator(
       onRefresh: _refresh,
       child: FutureBuilder<List<CommunityCircle>>(
         future: _circles,
@@ -217,8 +218,16 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
           );
         },
       ),
-    ),
-  );
+    );
+    return widget.embedded
+        ? body
+        : Scaffold(
+            appBar: AppBar(
+              title: Text(communityText(context, 'Circles', 'الدوائر')),
+            ),
+            body: body,
+          );
+  }
 }
 
 class _CommunityCirclePage extends StatefulWidget {
