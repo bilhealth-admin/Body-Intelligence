@@ -726,6 +726,7 @@ class CommunityPost {
     this.authorCanRequest = false,
     this.poll,
     this.media = const <CommunityPostMedia>[],
+    this.locationLabel,
   });
 
   final String id;
@@ -752,6 +753,7 @@ class CommunityPost {
   final bool authorCanRequest;
   final CommunityPoll? poll;
   final List<CommunityPostMedia> media;
+  final String? locationLabel;
 
   CommunityPost withStats(CommunityPostStats stats) {
     if (stats.postId != id) {
@@ -782,6 +784,7 @@ class CommunityPost {
       authorCanRequest: authorCanRequest,
       poll: poll,
       media: media,
+      locationLabel: locationLabel,
     );
   }
 
@@ -810,6 +813,7 @@ class CommunityPost {
     authorCanRequest: authorCanRequest,
     poll: poll,
     media: media,
+    locationLabel: locationLabel,
   );
 
   CommunityPost withPoll(CommunityPoll? value) => CommunityPost(
@@ -837,6 +841,7 @@ class CommunityPost {
     authorCanRequest: authorCanRequest,
     poll: value,
     media: media,
+    locationLabel: locationLabel,
   );
 
   CommunityPost withMedia(List<CommunityPostMedia> value) => CommunityPost(
@@ -864,6 +869,7 @@ class CommunityPost {
     authorCanRequest: authorCanRequest,
     poll: poll,
     media: List<CommunityPostMedia>.unmodifiable(value),
+    locationLabel: locationLabel,
   );
 
   CommunityPost withAuthorSocial(CommunityPostAuthorSocial author) {
@@ -895,6 +901,7 @@ class CommunityPost {
       authorCanRequest: author.canRequest,
       poll: poll,
       media: media,
+      locationLabel: locationLabel,
     );
   }
 
@@ -964,6 +971,7 @@ class CommunityPost {
             json['author_relationship'] as String,
           ),
     authorCanRequest: json['author_can_request'] as bool? ?? false,
+    locationLabel: json['location_label'] as String?,
     poll: json['poll'] == null
         ? null
         : CommunityPoll.fromJson(
