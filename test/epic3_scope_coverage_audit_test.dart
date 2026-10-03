@@ -38,6 +38,7 @@ void main() {
     '/weekly-report': 'reports',
     '/analytics/nutrition': 'progress',
     '/community': 'community',
+    '/community/invite/:token': 'community',
     '/community/moderation': 'community',
     '/community/people': 'community',
     '/community/code': 'community',
