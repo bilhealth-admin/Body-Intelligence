@@ -25,12 +25,38 @@ class _CommunityNotificationsPageState
   CommunityRepository? _repository;
   late Future<_CommunityUpdates> _updates;
   final Set<String> _markingSeen = <String>{};
+  CommunityAttentionController? _attentionController;
+  int? _lastCommunityUpdates;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
     _updates = _load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = CommunityAttentionScope.controllerOf(context);
+    if (identical(next, _attentionController)) return;
+    _attentionController?.removeListener(_onAttentionChanged);
+    _attentionController = next;
+    _lastCommunityUpdates = next?.value.communityUpdates;
+    next?.addListener(_onAttentionChanged);
+  }
+
+  void _onAttentionChanged() {
+    final next = _attentionController?.value.communityUpdates;
+    if (next == null || next == _lastCommunityUpdates) return;
+    _lastCommunityUpdates = next;
+    if (mounted) _retry();
+  }
+
+  @override
+  void dispose() {
+    _attentionController?.removeListener(_onAttentionChanged);
+    super.dispose();
   }
 
   CommunityRepository? _productionRepository() {
@@ -60,6 +86,7 @@ class _CommunityNotificationsPageState
     return _CommunityUpdates(
       incomingRequests: attention.incomingRequests,
       unreadMessages: attention.unreadMessages,
+      communityUpdates: attention.communityUpdates,
       notifications: notifications,
     );
   }
@@ -141,12 +168,15 @@ class _CommunityNotificationsPageState
           );
         }
         final live = CommunityAttentionScope.controllerOf(context);
+        final persisted = snapshot.requireData;
         final updates = live?.owner != null && !live!.stale
             ? _CommunityUpdates(
                 incomingRequests: live.value.incomingRequests,
                 unreadMessages: live.value.unreadMessages,
+                communityUpdates: live.value.communityUpdates,
+                notifications: persisted.notifications,
               )
-            : snapshot.requireData;
+            : persisted;
         if (updates.signedOut) {
           return _CenteredUpdatesState(
             icon: Icons.lock_person_outlined,
@@ -177,8 +207,8 @@ class _CommunityNotificationsPageState
             ),
             body: communityText(
               context,
-              'Friend requests and unread messages will appear here.',
-              'ستظهر طلبات الصداقة والرسائل غير المقروءة هنا.',
+              'Friend requests, accepted connections, and unread messages will appear here.',
+              'ستظهر طلبات الصداقة والطلبات المقبولة والرسائل غير المقروءة هنا.',
             ),
             action: FilledButton.icon(
               onPressed: () => _openAndRefresh('/community/people'),
@@ -309,20 +339,26 @@ class _CommunityUpdates {
   const _CommunityUpdates({
     this.incomingRequests = 0,
     this.unreadMessages = 0,
+    this.communityUpdates = 0,
     this.notifications = const <CommunityNotification>[],
   }) : signedOut = false;
 
   const _CommunityUpdates.signedOut()
     : incomingRequests = 0,
       unreadMessages = 0,
+      communityUpdates = 0,
       notifications = const <CommunityNotification>[],
       signedOut = true;
 
   final int incomingRequests;
   final int unreadMessages;
+  final int communityUpdates;
   final List<CommunityNotification> notifications;
   final bool signedOut;
 
   bool get isEmpty =>
-      incomingRequests == 0 && unreadMessages == 0 && notifications.isEmpty;
+      incomingRequests == 0 &&
+      unreadMessages == 0 &&
+      communityUpdates == 0 &&
+      notifications.isEmpty;
 }

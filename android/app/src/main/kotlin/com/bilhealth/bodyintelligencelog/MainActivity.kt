@@ -124,6 +124,19 @@ class MainActivity : FlutterFragmentActivity() {
             channel.setMethodCallHandler { call, result ->
                 when (call.method) {
                     "providerStatus" -> result.success(pushProvider.status())
+                    "existingPermissionToken" -> {
+                        val permissionGranted =
+                            Build.VERSION.SDK_INT < 33 ||
+                                ContextCompat.checkSelfPermission(
+                                    this,
+                                    Manifest.permission.POST_NOTIFICATIONS,
+                                ) == PackageManager.PERMISSION_GRANTED
+                        if (!permissionGranted) {
+                            result.success(null)
+                        } else {
+                            pushProvider.requestToken(result)
+                        }
+                    }
                     "requestToken" -> {
                         if (Build.VERSION.SDK_INT >= 33 &&
                             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED

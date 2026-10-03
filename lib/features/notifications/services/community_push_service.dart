@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
@@ -10,6 +11,7 @@ import '../domain/notification_delivery_preferences.dart';
 
 abstract interface class PushTokenProvider {
   Future<PushProviderCapability> capability();
+  Future<String?> existingPermissionToken();
   Future<String?> requestToken();
   Future<void> deleteToken();
 }
@@ -69,6 +71,10 @@ class NativePushTokenProvider implements PushTokenProvider {
   }
 
   @override
+  Future<String?> existingPermissionToken() =>
+      _channel.invokeMethod<String>('existingPermissionToken');
+
+  @override
   Future<String?> requestToken() =>
       _channel.invokeMethod<String>('requestToken');
 
@@ -76,12 +82,35 @@ class NativePushTokenProvider implements PushTokenProvider {
   Future<void> deleteToken() => _channel.invokeMethod<void>('deleteToken');
 }
 
+class CommunityPushRegistrationPolicyStore {
+  const CommunityPushRegistrationPolicyStore();
+
+  static const _prefix = 'bil.community-push-explicit-opt-out.v1.';
+
+  Future<bool> isExplicitlyDisabled(String userId) async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getBool('$_prefix$userId') ?? false;
+  }
+
+  Future<void> setExplicitlyDisabled(String userId, bool disabled) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool('$_prefix$userId', disabled);
+  }
+}
+
 class CommunityPushService {
-  CommunityPushService(this._client, {PushTokenProvider? tokenProvider})
-    : _tokenProvider = tokenProvider ?? const NativePushTokenProvider();
+  CommunityPushService(
+    this._client, {
+    PushTokenProvider? tokenProvider,
+    CommunityPushRegistrationPolicyStore? registrationPolicyStore,
+  }) : _tokenProvider = tokenProvider ?? const NativePushTokenProvider(),
+       _registrationPolicyStore =
+           registrationPolicyStore ??
+           const CommunityPushRegistrationPolicyStore();
 
   final SupabaseClient _client;
   final PushTokenProvider _tokenProvider;
+  final CommunityPushRegistrationPolicyStore _registrationPolicyStore;
 
   static bool get isAvailable =>
       AppEnvironment.pushConfigured && (Platform.isAndroid || Platform.isIOS);
@@ -94,29 +123,42 @@ class CommunityPushService {
     final user = _client.auth.currentUser;
     if (user == null) throw const AuthException('Sign-in required');
     if (!enabled) {
-      await _client.rpc('bil_disable_push_tokens');
-      await _tokenProvider.deleteToken();
+      await _registrationPolicyStore.setExplicitlyDisabled(user.id, true);
+      try {
+        await _client.rpc('bil_disable_push_tokens');
+      } on Object {
+        await _registrationPolicyStore.setExplicitlyDisabled(user.id, false);
+        rethrow;
+      }
+      try {
+        await _tokenProvider.deleteToken();
+      } on Object {
+        // Cloud delivery is already disabled and the durable opt-out prevents
+        // a later resume from silently registering a replacement token.
+      }
       return;
     }
+    await _registrationPolicyStore.setExplicitlyDisabled(user.id, false);
     final capability = await _tokenProvider.capability();
     if (!capability.ready) throw StateError('Push provider is not ready');
-    await _registerCurrentToken(deliveryPreferences);
+    await _requestAndRegisterCurrentToken(deliveryPreferences);
   }
 
   /// Reconciles a durable provider token after sign-in, token rotation,
-  /// restart, or resume. If cloud push was never registered, background
-  /// reconciliation can register only when OS permission is already granted;
-  /// it never causes an unexpected permission prompt.
+  /// restart, or resume. This path never requests notification permission.
+  /// An explicit master-toggle opt-out is durable per account on this device.
   Future<void> refreshRegistrationIfEnabled({
     required NotificationDeliveryPreferences deliveryPreferences,
   }) async {
-    if (!isAvailable || _client.auth.currentUser == null) return;
-    final preferences = await loadPreferences();
-    if (!preferences.enabled) {
-      final capability = await _tokenProvider.capability();
-      if (!capability.ready || !capability.permissionGranted) return;
-    }
-    await _registerCurrentToken(deliveryPreferences);
+    if (!isAvailable) return;
+    final user = _client.auth.currentUser;
+    if (user == null) return;
+    if (await _registrationPolicyStore.isExplicitlyDisabled(user.id)) return;
+    final capability = await _tokenProvider.capability();
+    if (!capability.ready || !capability.permissionGranted) return;
+    final token = await _tokenProvider.existingPermissionToken();
+    if (token == null || token.isEmpty) return;
+    await _registerToken(token, deliveryPreferences);
   }
 
   Future<void> syncDeliveryPreferences(
@@ -172,7 +214,7 @@ class CommunityPushService {
     ),
   };
 
-  Future<void> _registerCurrentToken(
+  Future<void> _requestAndRegisterCurrentToken(
     NotificationDeliveryPreferences deliveryPreferences,
   ) async {
     final capability = await _tokenProvider.capability();
@@ -181,6 +223,13 @@ class CommunityPushService {
     if (token == null || token.isEmpty) {
       throw StateError('Push permission or native configuration unavailable');
     }
+    await _registerToken(token, deliveryPreferences);
+  }
+
+  Future<void> _registerToken(
+    String token,
+    NotificationDeliveryPreferences deliveryPreferences,
+  ) async {
     final local = await FlutterTimezone.getLocalTimezone();
     await _client.rpc(
       'bil_register_push_token_v2',

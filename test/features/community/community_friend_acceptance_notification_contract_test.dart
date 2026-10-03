@@ -18,5 +18,7 @@ void main() {
     expect(scope, contains("table: 'bil_community_notifications'"));
     expect(page, contains('accepted your friend request'));
     expect(page, contains('markCommunityNotificationsSeen'));
+    expect(page, contains('notifications: persisted.notifications'));
+    expect(page, contains('_onAttentionChanged'));
   });
 }

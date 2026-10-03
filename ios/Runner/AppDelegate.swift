@@ -67,6 +67,29 @@ import UserNotifications
             ])
           }
         }
+      case "existingPermissionToken":
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+          let permissionGranted =
+            settings.authorizationStatus == .authorized ||
+            settings.authorizationStatus == .provisional ||
+            settings.authorizationStatus == .ephemeral
+          DispatchQueue.main.async {
+            guard permissionGranted else {
+              result(nil)
+              return
+            }
+            if let token = self.pushToken {
+              result(token)
+              return
+            }
+            guard self.pushResult == nil else {
+              result(nil)
+              return
+            }
+            self.pushResult = result
+            UIApplication.shared.registerForRemoteNotifications()
+          }
+        }
       case "setBadgeCount":
         guard let count = call.arguments as? Int, count >= 0 else {
           result(FlutterError(code: "invalid_badge_count", message: nil, details: nil)); return

@@ -121,7 +121,7 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     try {
       await _deliveryStore.save(value);
       await _reconcile(reminders, value);
-      if (_pushService != null && (_pushPreferences?.enabled ?? false)) {
+      if (_pushService != null) {
         try {
           await _pushService!.syncDeliveryPreferences(value);
         } on Object {
@@ -174,22 +174,6 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     enabled ? categories.add(category) : categories.remove(category);
     final next = current.copyWith(enabledCategories: categories);
     await _saveDelivery(next);
-    if (!mounted || _pushService == null) return;
-    const remoteCategories = {
-      NotificationCategory.newMessage,
-      NotificationCategory.friendRequest,
-      NotificationCategory.friendAccepted,
-    };
-    if (!remoteCategories.contains(category)) return;
-    if (enabled && !(_pushPreferences?.enabled ?? false)) {
-      await _setPushEnabled(true);
-    } else if (_pushPreferences?.enabled ?? false) {
-      try {
-        await _pushService!.syncDeliveryPreferences(next);
-      } on Object {
-        if (mounted) _showPushError();
-      }
-    }
   }
 
   Future<void> _update(DailyReminder updated) async {
