@@ -519,14 +519,14 @@ class _CommunityProfileConnectionsSheetState
             title: Text(member.displayName),
             subtitle: member.handle == null
                 ? null
-                : Text('@' + member.handle!, textDirection: TextDirection.ltr),
+                : Text('@${member.handle!}', textDirection: TextDirection.ltr),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (member.relationship != CommunityRelationshipStatus.self &&
                     (member.viewerFollows || member.allowFollows))
                   TextButton(
-                    key: Key('community-connection-follow-' + member.userId),
+                    key: Key('community-connection-follow-${member.userId}'),
                     onPressed: _followBusyUserId == null
                         ? () => _toggleFollow(member)
                         : null,
@@ -550,7 +550,7 @@ class _CommunityProfileConnectionsSheetState
             ),
             onTap: () {
               Navigator.pop(context);
-              context.push('/community/profile/' + member.userId);
+              context.push('/community/profile/${member.userId}');
             },
           );
         },
