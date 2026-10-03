@@ -1,4 +1,5 @@
 import '../../nutrition/domain/product_identity.dart';
+import 'community_polls.dart';
 
 part 'community_post_author_social.dart';
 
@@ -648,6 +649,7 @@ class CommunityPost {
     this.authorHandle,
     this.authorRelationship,
     this.authorCanRequest = false,
+    this.poll,
   });
 
   final String id;
@@ -672,6 +674,7 @@ class CommunityPost {
   final String? authorHandle;
   final CommunityRelationshipStatus? authorRelationship;
   final bool authorCanRequest;
+  final CommunityPoll? poll;
 
   CommunityPost withStats(CommunityPostStats stats) {
     if (stats.postId != id) {
@@ -700,6 +703,7 @@ class CommunityPost {
       authorHandle: authorHandle,
       authorRelationship: authorRelationship,
       authorCanRequest: authorCanRequest,
+      poll: poll,
     );
   }
 
@@ -726,6 +730,33 @@ class CommunityPost {
     authorHandle: authorHandle,
     authorRelationship: authorRelationship,
     authorCanRequest: authorCanRequest,
+    poll: poll,
+  );
+
+  CommunityPost withPoll(CommunityPoll? value) => CommunityPost(
+    id: id,
+    authorId: authorId,
+    body: body,
+    createdAt: createdAt,
+    authorName: authorName,
+    authorAvatarUrl: authorAvatarUrl,
+    mediaObjectPath: mediaObjectPath,
+    mediaUrl: mediaUrl,
+    mediaMimeType: mediaMimeType,
+    mediaBytes: mediaBytes,
+    mediaWidth: mediaWidth,
+    mediaHeight: mediaHeight,
+    moderationStatus: moderationStatus,
+    moderationVisibility: moderationVisibility,
+    reviewedAt: reviewedAt,
+    likeCount: likeCount,
+    liked: liked,
+    commentCount: commentCount,
+    saved: saved,
+    authorHandle: authorHandle,
+    authorRelationship: authorRelationship,
+    authorCanRequest: authorCanRequest,
+    poll: value,
   );
 
   CommunityPost withAuthorSocial(CommunityPostAuthorSocial author) {
@@ -755,6 +786,7 @@ class CommunityPost {
       authorHandle: author.handle,
       authorRelationship: author.relationship,
       authorCanRequest: author.canRequest,
+      poll: poll,
     );
   }
 
@@ -808,6 +840,11 @@ class CommunityPost {
             json['author_relationship'] as String,
           ),
     authorCanRequest: json['author_can_request'] as bool? ?? false,
+    poll: json['poll'] == null
+        ? null
+        : CommunityPoll.fromJson(
+            Map<String, dynamic>.from(json['poll'] as Map),
+          ),
   );
 }
 
