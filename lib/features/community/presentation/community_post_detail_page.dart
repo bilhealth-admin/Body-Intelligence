@@ -241,6 +241,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         final existing = _comments.indexWhere((item) => item.id == comment.id);
         if (existing < 0) {
           _comments.add(comment);
+          final rootId = comment.parentId;
+          if (rootId != null) {
+            final rootIndex = _comments.indexWhere(
+              (item) => item.id == rootId && item.parentId == null,
+            );
+            if (rootIndex >= 0) {
+              _comments[rootIndex] = _comments[rootIndex].copyWith(
+                replyCount: _comments[rootIndex].replyCount + 1,
+              );
+            }
+            _expandedThreads.add(rootId);
+          }
           _stats = CommunityPostStats(
             postId: _stats.postId,
             likeCount: _stats.likeCount,
@@ -338,16 +350,32 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         await widget.repository.deleteComment(comment.id);
         if (!mounted) return;
         setState(() {
-          final before = _comments.length;
+          final isRoot = comment.parentId == null;
+          final removedCount = isRoot ? comment.replyCount + 1 : 1;
+          final rootId = comment.parentId;
           _comments.removeWhere(
             (item) => item.id == comment.id || item.parentId == comment.id,
           );
+          if (!isRoot && rootId != null) {
+            final rootIndex = _comments.indexWhere(
+              (item) => item.id == rootId && item.parentId == null,
+            );
+            if (rootIndex >= 0) {
+              _comments[rootIndex] = _comments[rootIndex].copyWith(
+                replyCount: _comments[rootIndex].replyCount > 0
+                    ? _comments[rootIndex].replyCount - 1
+                    : 0,
+              );
+            }
+          } else {
+            _expandedThreads.remove(comment.id);
+            _loadingReplyThreads.remove(comment.id);
+          }
           if (_replyingTo?.id == comment.id ||
               _replyingTo?.parentId == comment.id) {
             _replyingTo = null;
             _clientId = null;
           }
-          final removedCount = before - _comments.length;
           _stats = CommunityPostStats(
             postId: _stats.postId,
             likeCount: _stats.likeCount,
@@ -477,29 +505,114 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                         ),
                       )
                     else
-                      for (final comment in communityCommentsInThreadOrder(
-                        _comments,
-                      ))
+                      for (final root in _rootComments) ...[
                         _CommunityCommentTile(
-                          key: ValueKey(comment.id),
-                          comment: comment,
+                          key: ValueKey(root.id),
+                          comment: root,
                           mine:
-                              comment.authorId ==
+                              root.authorId ==
                               widget.repository.currentUserId,
                           busy:
                               _refreshing ||
                               _submitting ||
-                              _busyComments.contains(comment.id),
-                          parent: comment.parentId == null
-                              ? null
-                              : _comments
-                                    .where(
-                                      (item) => item.id == comment.parentId,
-                                    )
-                                    .firstOrNull,
-                          onLike: () => _toggleCommentLike(comment),
-                          onAction: (action) => _commentAction(comment, action),
+                              _busyComments.contains(root.id),
+                          onLike: () => _toggleCommentLike(root),
+                          onAction: (action) => _commentAction(root, action),
                         ),
+                        if (root.replyCount > 0) ...[
+                          if (_expandedThreads.contains(root.id)) ...[
+                            for (final reply in _loadedReplies(root.id))
+                              _CommunityCommentTile(
+                                key: ValueKey(reply.id),
+                                comment: reply,
+                                mine:
+                                    reply.authorId ==
+                                    widget.repository.currentUserId,
+                                busy:
+                                    _refreshing ||
+                                    _submitting ||
+                                    _busyComments.contains(reply.id),
+                                parent: root,
+                                onLike: () => _toggleCommentLike(reply),
+                                onAction: (action) =>
+                                    _commentAction(reply, action),
+                              ),
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Wrap(
+                                spacing: 4,
+                                children: [
+                                  if (_loadedReplies(root.id).length <
+                                      root.replyCount)
+                                    TextButton.icon(
+                                      key: Key(
+                                        'community-comment-load-replies-${root.id}',
+                                      ),
+                                      onPressed:
+                                          _loadingReplyThreads.contains(root.id)
+                                          ? null
+                                          : () => _loadMoreReplies(root),
+                                      icon:
+                                          _loadingReplyThreads.contains(root.id)
+                                          ? const SizedBox.square(
+                                              dimension: 14,
+                                              child:
+                                                  CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                  ),
+                                            )
+                                          : const Icon(
+                                              Icons.expand_more_rounded,
+                                            ),
+                                      label: Text(
+                                        communityText(
+                                          context,
+                                          'Load more replies',
+                                          'تحميل مزيد من الردود',
+                                        ),
+                                      ),
+                                    ),
+                                  TextButton.icon(
+                                    key: Key(
+                                      'community-comment-hide-replies-${root.id}',
+                                    ),
+                                    onPressed: () => setState(
+                                      () => _expandedThreads.remove(root.id),
+                                    ),
+                                    icon: const Icon(Icons.expand_less_rounded),
+                                    label: Text(
+                                      communityText(
+                                        context,
+                                        'Hide replies',
+                                        'إخفاء الردود',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TextButton.icon(
+                                key: Key(
+                                  'community-comment-view-replies-${root.id}',
+                                ),
+                                onPressed: () => setState(
+                                  () => _expandedThreads.add(root.id),
+                                ),
+                                icon: const Icon(Icons.forum_outlined),
+                                label: Text(
+                                  communityText(
+                                    context,
+                                    'View ${root.replyCount} replies',
+                                    'عرض ${root.replyCount} ردود',
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ],
                     if (_hasMore)
                       Center(
                         child: TextButton.icon(
@@ -516,8 +629,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                           label: Text(
                             communityText(
                               context,
-                              'Load more comments',
-                              'تحميل مزيد من التعليقات',
+                              'Load more comment threads',
+                              'تحميل مزيد من سلاسل التعليقات',
                             ),
                           ),
                         ),
