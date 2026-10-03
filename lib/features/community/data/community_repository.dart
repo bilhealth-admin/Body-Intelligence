@@ -140,9 +140,39 @@ class CommunityRepository
     required bool showMembershipTier,
   }) async {
     final normalizedCountry = countryCode?.trim().toUpperCase();
-    if (normalizedCountry != null &&
-        normalizedCountry.isNotEmpty &&
-        !RegExp(r'^[A-Z]{2}    required String displayName,
+    final validCountry =
+        normalizedCountry == null ||
+        normalizedCountry.isEmpty ||
+        (normalizedCountry.length == 2 &&
+            normalizedCountry.codeUnits.every(
+              (unit) => unit >= 65 && unit <= 90,
+            ));
+    if (!validCountry) {
+      throw const FormatException('Invalid Community country code');
+    }
+    final changed = await _client
+        .from('bil_public_profiles')
+        .update({
+          'country_code':
+              normalizedCountry == null || normalizedCountry.isEmpty
+              ? null
+              : normalizedCountry,
+          'show_followers': showFollowers,
+          'show_following': showFollowing,
+          'show_friends': showFriends,
+          'show_posts': showPosts,
+          'show_membership_tier': showMembershipTier,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('user_id', _user.id)
+        .select('user_id');
+    if (changed.length != 1) {
+      throw StateError('Community profile privacy was not available to update');
+    }
+  }
+
+  Future<void> saveMyProfile({
+    required String displayName,
     required String localeCode,
     required bool discoverable,
     String? bio,
