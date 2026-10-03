@@ -127,6 +127,7 @@ class _CommunityNotificationsPageState
       '/community/people',
       '/community/messages',
       '/community/notifications',
+      '/community/rewards',
     };
     if (liveRoutes.contains(notification.deepLinkPath)) {
       return notification.deepLinkPath;
@@ -140,7 +141,7 @@ class _CommunityNotificationsPageState
       CommunityNotificationKind.comment ||
       CommunityNotificationKind.reply ||
       CommunityNotificationKind.rewardEarned ||
-      CommunityNotificationKind.questCompleted ||
+      CommunityNotificationKind.questCompleted => '/community/rewards',
       CommunityNotificationKind.badgeEarned ||
       CommunityNotificationKind.challengeUpdate => '/community',
     };
