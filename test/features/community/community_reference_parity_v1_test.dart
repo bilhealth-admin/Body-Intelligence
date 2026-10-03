@@ -339,17 +339,6 @@ void main() {
       expect(find.text('Follow'), findsOneWidget);
       expect(find.text('Follows you'), findsOneWidget);
       expect(find.text('2/7 Badges'), findsOneWidget);
-      final viewCount = find.byKey(
-        const Key('community-profile-post-views-$_postId'),
-      );
-      await tester.scrollUntilVisible(
-        viewCount,
-        280,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-      expect(viewCount, findsOneWidget);
-      expect(tester.widget<Text>(viewCount).data, '37');
       expect(
         find.byKey(const Key('community-profile-tab-moments')),
         findsOneWidget,
@@ -376,6 +365,23 @@ void main() {
       expect(find.text('Community badges'), findsOneWidget);
       expect(find.text('Profile complete'), findsOneWidget);
       expect(find.text('Earned'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('community-profile-tab-moments')));
+      await tester.pumpAndSettle();
+      final viewCount = find.byKey(
+        const Key('community-profile-post-views-$_postId'),
+      );
+      await tester.scrollUntilVisible(
+        viewCount,
+        280,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(viewCount, findsOneWidget);
+      expect(tester.widget<Text>(viewCount).data, '37');
+
     },
   );
 }
