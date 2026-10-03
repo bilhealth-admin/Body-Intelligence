@@ -2,13 +2,19 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _communityRepositorySource() => [
+  'lib/features/community/data/community_repository.dart',
+  'lib/features/community/data/community_repository_discovery_mixin.dart',
+  'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
+  'lib/features/community/data/community_repository_publishing_mixin.dart',
+  'lib/features/community/data/community_repository_connections_messaging_mixin.dart',
+].map((path) => File(path).readAsStringSync()).join('\n');
+
 void main() {
   test(
     'Flutter consumes Activity v2 while retaining injected repository seams',
     () {
-      final repository = File(
-        'lib/features/community/data/community_repository.dart',
-      ).readAsStringSync();
+      final repository = _communityRepositorySource();
       final social = File(
         'lib/features/community/data/community_social_repository_mixin.dart',
       ).readAsStringSync();
