@@ -428,6 +428,8 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                         (context, index) => _CommunityProfilePostTile(
                           post: _posts[index],
                           repository: widget.repository,
+                          referenceMetadata: null,
+                          viewCount: 0,
                         ),
                         childCount: _posts.length,
                       ),
