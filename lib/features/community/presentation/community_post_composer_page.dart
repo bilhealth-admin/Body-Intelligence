@@ -448,6 +448,8 @@ class _CommunityPostComposerPageState
     });
   }
 
+  void _setComposerState(VoidCallback callback) => setState(callback);
+
   @override
   Widget build(BuildContext context) => buildCommunityPostComposer(context);
 }
