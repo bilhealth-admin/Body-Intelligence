@@ -15,8 +15,16 @@ void main() {
     expect(sql, contains('bil_gold_ledger_single_reversal_idx'));
     expect(sql, contains('gold_idempotency_payload_mismatch'));
     expect(sql, contains('gold_insufficient_balance'));
-    expect(sql, contains('alter table public.bil_gold_accounts enable row level security'));
-    expect(sql, contains('alter table public.bil_gold_ledger enable row level security'));
+    expect(
+      sql,
+      contains(
+        'alter table public.bil_gold_accounts enable row level security',
+      ),
+    );
+    expect(
+      sql,
+      contains('alter table public.bil_gold_ledger enable row level security'),
+    );
     expect(sql, contains('revoke all on table public.bil_gold_accounts'));
     expect(sql, contains('revoke all on table public.bil_gold_ledger'));
     expect(sql, contains('public.bil_gold_balance_v1()'));
