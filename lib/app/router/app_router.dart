@@ -53,6 +53,7 @@ import '../../features/community/presentation/community_profile_page.dart';
 import '../../features/community/presentation/community_safety_page.dart';
 import '../../features/community/presentation/community_messages_page.dart';
 import '../../features/community/presentation/community_notifications_page.dart';
+import '../../features/community/presentation/community_rewards_page.dart';
 import '../../features/community/presentation/community_post_moderation_page.dart';
 import '../../features/life_context/life_context_page.dart';
 import '../../features/life_context/decision_memory_page.dart';
@@ -354,6 +355,13 @@ class AppRouter {
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
           child: CommunitySurface(child: CommunityNotificationsPage()),
+        ),
+      ),
+      GoRoute(
+        path: '/community/rewards',
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunitySurface(child: CommunityRewardsPage()),
         ),
       ),
       // Moderation uses a server-verified role, not a customer purchase.
