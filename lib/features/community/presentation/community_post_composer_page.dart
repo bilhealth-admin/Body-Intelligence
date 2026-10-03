@@ -1,8 +1,11 @@
 part of 'community_hub_page.dart';
 
-// Transient draft owned by the hub. Back navigation keeps the draft while the
-// hub remains mounted; this does not claim persistence across process death.
+// The in-memory editor state can be promoted to a server-persistent draft.
+// Back navigation still preserves unsaved edits while the hub remains mounted.
 class _CommunityComposerDraft {
+  String? persistentDraftId;
+  bool savedPersistently = false;
+  String title = '';
   String body = '';
   final List<CommunityPostImageDraft> images = <CommunityPostImageDraft>[];
   final Set<String> topicSlugs = <String>{};
@@ -14,6 +17,40 @@ class _CommunityComposerDraft {
   String locationLabel = '';
   final List<CommunityMentionCandidate> mentions =
       <CommunityMentionCandidate>[];
+  final List<CommunityMentionCandidate> collaborators =
+      <CommunityMentionCandidate>[];
+  final List<String> hashtags = <String>[];
+
+  factory _CommunityComposerDraft.fromPersistent(
+    CommunityPersistentDraft draft,
+    List<CommunityPostImageDraft> images,
+  ) {
+    final value = _CommunityComposerDraft();
+    value.persistentDraftId = draft.draftId;
+    value.savedPersistently = true;
+    value.title = draft.title ?? '';
+    value.body = draft.body;
+    value.images.addAll(images);
+    value.topicSlugs.addAll(draft.topicSlugs);
+    value.circleSlug = draft.circleSlug;
+    value.pollEnabled =
+        draft.pollQuestion != null || draft.pollOptions.isNotEmpty;
+    value.pollQuestion = draft.pollQuestion ?? '';
+    value.pollOptions
+      ..clear()
+      ..addAll(draft.pollOptions);
+    while (value.pollOptions.length < 2) {
+      value.pollOptions.add('');
+    }
+    value.pollAllowMultiple = draft.pollAllowMultiple;
+    value.locationLabel = draft.locationLabel ?? '';
+    value.mentions.addAll(draft.mentions);
+    value.collaborators.addAll(draft.collaborators);
+    value.hashtags.addAll(draft.hashtags);
+    return value;
+  }
+
+  _CommunityComposerDraft();
 }
 
 class _CommunityPostComposerPage extends StatefulWidget {
@@ -33,12 +70,15 @@ class _CommunityPostComposerPage extends StatefulWidget {
 
 class _CommunityPostComposerPageState
     extends State<_CommunityPostComposerPage> {
+  late final _title = TextEditingController(text: widget.draft.title);
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
   late final _location = TextEditingController(
     text: widget.draft.locationLabel,
   );
+  final _hashtagInput = TextEditingController();
   final _mentionQuery = TextEditingController();
+  final _collaboratorQuery = TextEditingController();
   late final List<CommunityPostImageDraft> _selectedImages =
       List<CommunityPostImageDraft>.from(widget.draft.images);
   late final Future<List<CommunityTopic>> _topics = widget.repository
@@ -46,26 +86,33 @@ class _CommunityPostComposerPageState
   late final Future<List<CommunityCircle>> _circles = widget.repository
       .loadCommunityCircles();
   bool _publishing = false;
+  bool _savingDraft = false;
   bool _selectingImage = false;
   bool _completed = false;
   TextDirection? _composerDirection;
   String? _composerError;
   String? _submitError;
   bool _mentionSearching = false;
+  bool _collaboratorSearching = false;
   List<CommunityMentionCandidate> _mentionResults =
+      const <CommunityMentionCandidate>[];
+  List<CommunityMentionCandidate> _collaboratorResults =
       const <CommunityMentionCandidate>[];
 
   @override
   void dispose() {
     _composerFocus.dispose();
+    _title.dispose();
     _composer.dispose();
     _location.dispose();
+    _hashtagInput.dispose();
     _mentionQuery.dispose();
+    _collaboratorQuery.dispose();
     super.dispose();
   }
 
   Future<void> _publish() async {
-    if (_publishing || _selectingImage || _completed) return;
+    if (_publishing || _savingDraft || _selectingImage || _completed) return;
     final text = _composer.text.trim();
     if (text.isEmpty) {
       setState(
@@ -121,7 +168,23 @@ class _CommunityPostComposerPageState
       final mentions = List<CommunityMentionCandidate>.unmodifiable(
         widget.draft.mentions,
       );
-      final hasPostContext = locationLabel.isNotEmpty || mentions.isNotEmpty;
+      final collaborators = List<CommunityMentionCandidate>.unmodifiable(
+        widget.draft.collaborators,
+      );
+      final hashtags = List<String>.unmodifiable(widget.draft.hashtags);
+      final title = _title.text.trim();
+      final persistentDraftId = widget.draft.savedPersistently
+          ? widget.draft.persistentDraftId
+          : null;
+      final hasReferenceMetadata =
+          title.isNotEmpty ||
+          hashtags.isNotEmpty ||
+          collaborators.isNotEmpty ||
+          persistentDraftId != null;
+      final hasPostContext =
+          locationLabel.isNotEmpty ||
+          mentions.isNotEmpty ||
+          hasReferenceMetadata;
 
       if (hasPostContext) {
         await widget.repository.publishRichPost(
@@ -132,6 +195,10 @@ class _CommunityPostComposerPageState
           poll: poll,
           locationLabel: locationLabel,
           mentions: mentions,
+          title: title,
+          hashtags: hashtags,
+          collaborators: collaborators,
+          persistentDraftId: persistentDraftId,
         );
       } else if (poll != null) {
         if (images.isEmpty) {
@@ -188,6 +255,10 @@ class _CommunityPostComposerPageState
         );
       }
       if (!mounted) return;
+      widget.draft.persistentDraftId = null;
+      widget.draft.savedPersistently = false;
+      widget.draft.title = '';
+      _title.clear();
       widget.draft.body = '';
       widget.draft.images.clear();
       _selectedImages.clear();
@@ -202,8 +273,13 @@ class _CommunityPostComposerPageState
       widget.draft.locationLabel = '';
       _location.clear();
       widget.draft.mentions.clear();
+      widget.draft.collaborators.clear();
+      widget.draft.hashtags.clear();
       _mentionResults = const <CommunityMentionCandidate>[];
+      _collaboratorResults = const <CommunityMentionCandidate>[];
       _mentionQuery.clear();
+      _collaboratorQuery.clear();
+      _hashtagInput.clear();
       // Pop only after the request completes successfully. The hub owns refresh.
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);
