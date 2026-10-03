@@ -11,6 +11,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_fitness_watc
 import 'package:body_intelligence_log/app/localization/runtime_copy_connected_health.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_expansion.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_apple_ai_privacy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
@@ -133,6 +134,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...CommunityModerationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.supplementalSources,
     ...CommunitySocialRuntimeCopy.sources,
+    ...CommunityExpansionRuntimeCopy.sources,
     ...AppleAiPrivacyRuntimeCopy.values.keys,
     ...AdminNotificationRuntimeCopy.values.keys,
     ...SleepScheduleRuntimeCopy.sources,
