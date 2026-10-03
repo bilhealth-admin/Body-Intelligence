@@ -781,7 +781,6 @@ class CommunityPost {
       authorRelationship: authorRelationship,
       authorCanRequest: authorCanRequest,
       poll: poll,
-    media: media,
       media: media,
     );
   }
@@ -837,6 +836,7 @@ class CommunityPost {
     authorRelationship: authorRelationship,
     authorCanRequest: authorCanRequest,
     poll: value,
+    media: media,
   );
 
   CommunityPost withMedia(List<CommunityPostMedia> value) => CommunityPost(
@@ -863,7 +863,7 @@ class CommunityPost {
     authorRelationship: authorRelationship,
     authorCanRequest: authorCanRequest,
     poll: poll,
-    media: List.unmodifiable(value),
+    media: List<CommunityPostMedia>.unmodifiable(value),
   );
 
   CommunityPost withAuthorSocial(CommunityPostAuthorSocial author) {
@@ -894,7 +894,6 @@ class CommunityPost {
       authorRelationship: author.relationship,
       authorCanRequest: author.canRequest,
       poll: poll,
-    media: media,
       media: media,
     );
   }
