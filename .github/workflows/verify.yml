@@ -5,6 +5,7 @@ on:
     branches:
       - phase-3-product-excellence
       - fix/admob-clean-production-2026-10-02
+      - work/community-final-qa-20261003
   pull_request:
   workflow_dispatch:
 
