@@ -39,3 +39,17 @@ jobs:
             test/features/community/community_comment_threads_v3_contract_test.dart \
             test/features/community/community_referral_client_contract_test.dart \
             test/launch_readiness/verified_links_and_analytics_test.dart
+
+      - name: Upload formatted files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-final-formatted-files-${{ github.sha }}
+          path: |
+            lib/app/launch/bil_verified_links_configuration.dart
+            lib/features/community/presentation/community_feed_tab.dart
+            test/apple_preparation/ios_return_to_app_link_contract_test.dart
+            test/features/community/community_comment_threads_v3_contract_test.dart
+            test/features/community/community_referral_client_contract_test.dart
+            test/launch_readiness/verified_links_and_analytics_test.dart
+          if-no-files-found: error
+          retention-days: 7
