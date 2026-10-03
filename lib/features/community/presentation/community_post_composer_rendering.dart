@@ -2,9 +2,10 @@ part of 'community_hub_page.dart';
 
 extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
   Widget buildCommunityPostComposer(BuildContext context) {
-    final busy = _publishing || _selectingImage || _completed;
+    final busy =
+        _publishing || _savingDraft || _selectingImage || _completed;
     return PopScope<bool>(
-      canPop: !_publishing || _completed,
+      canPop: (!_publishing && !_savingDraft) || _completed,
       child: ScaffoldMessenger(
         child: Scaffold(
           key: const Key('community-post-editor-page'),
@@ -33,6 +34,8 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        _buildCommunityTitleField(context, busy),
+                        const SizedBox(height: 12),
                         TextField(
                           key: const Key('community-post-composer'),
                           controller: _composer,
@@ -81,6 +84,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             ),
                           ),
                         ),
+                        ..._buildCommunityHashtagSection(context, busy),
                         if (_selectedImages.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           SizedBox(
@@ -431,6 +435,11 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           ),
                         ],
                         const SizedBox(height: 18),
+                        ..._buildCommunityCollaboratorSection(
+                          context,
+                          busy,
+                        ),
+                        const SizedBox(height: 8),
                         SwitchListTile.adaptive(
                           key: const Key('community-composer-poll-toggle'),
                           contentPadding: EdgeInsets.zero,
@@ -623,6 +632,31 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           spacing: 12,
                           runSpacing: 8,
                           children: [
+                            OutlinedButton.icon(
+                              key: const Key('community-post-save-draft'),
+                              onPressed: busy ? null : _savePersistentDraft,
+                              icon: _savingDraft
+                                  ? const SizedBox.square(
+                                      dimension: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.drafts_outlined),
+                              label: Text(
+                                widget.draft.savedPersistently
+                                    ? communityText(
+                                        context,
+                                        'Update draft',
+                                        'تحديث المسودة',
+                                      )
+                                    : communityText(
+                                        context,
+                                        'Save draft',
+                                        'حفظ المسودة',
+                                      ),
+                              ),
+                            ),
                             OutlinedButton.icon(
                               key: const Key('community-post-add-photo'),
                               onPressed: busy || _selectedImages.length >= 4
