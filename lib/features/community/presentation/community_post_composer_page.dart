@@ -137,9 +137,7 @@ class _CommunityPostComposerPageState
           );
         }
       } else if (images.isEmpty) {
-        if (topicSlugs.isEmpty &&
-            circleSlug == null &&
-            locationLabel == null) {
+        if (topicSlugs.isEmpty && circleSlug == null && locationLabel == null) {
           await widget.repository.publishPost(text);
         } else {
           await widget.repository.publishPostWithTopicsAndCircle(
@@ -150,9 +148,7 @@ class _CommunityPostComposerPageState
           );
         }
       } else if (images.length == 1) {
-        if (topicSlugs.isEmpty &&
-            circleSlug == null &&
-            locationLabel == null) {
+        if (topicSlugs.isEmpty && circleSlug == null && locationLabel == null) {
           await widget.repository.publishPostWithImage(text, images.single);
         } else {
           await widget.repository.publishPostWithImageTopicsAndCircle(
@@ -568,9 +564,7 @@ class _CommunityPostComposerPageState
                         ),
                         const SizedBox(height: 18),
                         TextFormField(
-                          key: const Key(
-                            'community-composer-location-label',
-                          ),
+                          key: const Key('community-composer-location-label'),
                           initialValue: widget.draft.locationLabel,
                           enabled: !busy,
                           maxLength: 80,
