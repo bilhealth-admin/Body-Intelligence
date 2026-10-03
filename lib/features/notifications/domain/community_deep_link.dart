@@ -96,16 +96,7 @@ class CommunityDeepLink {
       if (segments.length == 3 && segments[1] == 'profile') {
         final rawUserId = segments[2];
         if (!RegExp(
-          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
-        ).hasMatch(rawUserId)) {
-          return null;
-        }
-        final userId = Uri.encodeComponent(rawUserId.toLowerCase());
-        return '/community/profile/$userId';
-      }
-      if (segments.length == 3 && segments[1] == 'member') {
-        final code = segments[2].toLowerCase();
-        if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(code)) return null;
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}        if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(code)) return null;
         return '/community/member/$code';
       }
       if (segments.length == 3 &&
@@ -202,7 +193,8 @@ class CommunityDeepLink {
         ).hasMatch(rawUserId)) {
           return null;
         }
-        return '/community/profile/${rawUserId.toLowerCase()}';
+        final userId = Uri.encodeComponent(rawUserId.toLowerCase());
+        return '/community/profile/$userId';
       }
       if (segments.length == 3 && segments[1] == 'member') {
         final code = segments[2].toLowerCase();
