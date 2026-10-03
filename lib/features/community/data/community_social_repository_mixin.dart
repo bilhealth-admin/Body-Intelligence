@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/community_attention.dart';
+import '../domain/community_comment_threads.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import 'community_public_code_failure.dart';
@@ -354,6 +355,92 @@ mixin CommunitySocialRepositoryMixin {
     return CommunityResolvedMember.fromJson(
       Map<String, dynamic>.from(response),
     );
+  }
+
+  Future<List<CommunityCommentThread>> loadPostCommentThreads(
+    String postId, {
+    DateTime? after,
+    String? afterId,
+    int limit = 20,
+  }) async {
+    if (!_uuid.hasMatch(postId) ||
+        (after == null) != (afterId == null) ||
+        (afterId != null && !_uuid.hasMatch(afterId)) ||
+        limit < 1 ||
+        limit > 50) {
+      throw ArgumentError('Invalid Community comment-thread cursor');
+    }
+    final response = await communitySocialClient.rpc(
+      'bil_social_comment_threads_v3',
+      params: {
+        'p_post_id': postId,
+        'p_after': after?.toUtc().toIso8601String(),
+        'p_after_id': afterId,
+        'p_limit': limit,
+      },
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community comment threads');
+    }
+    final seen = <String>{};
+    final threads = <CommunityCommentThread>[];
+    for (final item in response) {
+      if (item is! Map) {
+        throw const FormatException('Invalid Community comment thread');
+      }
+      final thread = CommunityCommentThread.fromJson(
+        Map<String, dynamic>.from(item),
+      );
+      if (!seen.add(thread.root.id)) {
+        throw const FormatException('Duplicate Community comment thread');
+      }
+      threads.add(thread);
+    }
+    return List<CommunityCommentThread>.unmodifiable(threads);
+  }
+
+  Future<List<CommunityComment>> loadCommentReplies(
+    String rootId, {
+    DateTime? after,
+    String? afterId,
+    int limit = 20,
+  }) async {
+    if (!_uuid.hasMatch(rootId) ||
+        (after == null) != (afterId == null) ||
+        (afterId != null && !_uuid.hasMatch(afterId)) ||
+        limit < 1 ||
+        limit > 50) {
+      throw ArgumentError('Invalid Community comment-reply cursor');
+    }
+    final response = await communitySocialClient.rpc(
+      'bil_social_comment_replies_v3',
+      params: {
+        'p_root_id': rootId,
+        'p_after': after?.toUtc().toIso8601String(),
+        'p_after_id': afterId,
+        'p_limit': limit,
+      },
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community comment replies');
+    }
+    final seen = <String>{};
+    final replies = <CommunityComment>[];
+    for (final item in response) {
+      if (item is! Map) {
+        throw const FormatException('Invalid Community comment reply');
+      }
+      final reply = CommunityComment.fromJson(
+        Map<String, dynamic>.from(item),
+      );
+      if (reply.parentId != rootId ||
+          reply.replyCount != 0 ||
+          !seen.add(reply.id)) {
+        throw const FormatException('Invalid Community comment reply');
+      }
+      replies.add(reply);
+    }
+    return List<CommunityComment>.unmodifiable(replies);
   }
 
   Future<List<CommunityComment>> loadPostComments(
