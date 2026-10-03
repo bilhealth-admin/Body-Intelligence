@@ -7,12 +7,14 @@ class _CommunityCommentTile extends StatelessWidget {
     required this.busy,
     required this.onLike,
     required this.onAction,
+    this.membershipTier,
     this.parent,
     super.key,
   });
 
   final CommunityComment comment;
   final CommunityComment? parent;
+  final String? membershipTier;
   final bool mine;
   final bool busy;
   final VoidCallback onLike;
@@ -59,6 +61,34 @@ class _CommunityCommentTile extends StatelessWidget {
                           textDirection: TextDirection.ltr,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
+                      if (membershipTier case final tier?) ...[
+                        const SizedBox(height: 3),
+                        Chip(
+                          key: Key(
+                            'community-comment-membership-tier-' + comment.id,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          avatar: Icon(
+                            tier == 'premium'
+                                ? Icons.workspace_premium_outlined
+                                : Icons.person_outline_rounded,
+                            size: 15,
+                          ),
+                          label: Text(
+                            tier == 'premium'
+                                ? communityText(
+                                    context,
+                                    'Premium',
+                                    'Premium',
+                                  )
+                                : communityText(
+                                    context,
+                                    'Free',
+                                    'مجاني',
+                                  ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
