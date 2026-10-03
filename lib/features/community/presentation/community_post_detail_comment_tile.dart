@@ -65,7 +65,7 @@ class _CommunityCommentTile extends StatelessWidget {
                         const SizedBox(height: 3),
                         Chip(
                           key: Key(
-                            'community-comment-membership-tier-' + comment.id,
+                            'community-comment-membership-tier-${comment.id}',
                           ),
                           visualDensity: VisualDensity.compact,
                           avatar: Icon(
