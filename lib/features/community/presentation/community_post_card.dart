@@ -7,6 +7,7 @@ class _CommunityPostCard extends StatefulWidget {
     required this.currentUserId,
     required this.actionsEnabled,
     required this.onAction,
+    this.referenceMetadata,
     this.onSavedChanged,
     this.showModerationStatus = false,
   });
@@ -16,6 +17,7 @@ class _CommunityPostCard extends StatefulWidget {
   final String currentUserId;
   final bool actionsEnabled;
   final ValueChanged<String> onAction;
+  final CommunityPostReferenceMetadata? referenceMetadata;
   final ValueChanged<bool>? onSavedChanged;
   final bool showModerationStatus;
 
@@ -164,6 +166,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
           post: widget.post,
           initialStats: _stats,
           repository: widget.repository,
+          referenceMetadata: widget.referenceMetadata,
         ),
       );
       if (!mounted) return;
@@ -320,6 +323,13 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                   ),
                 ),
               ],
+            ),
+          ],
+          if (widget.referenceMetadata case final metadata?) ...[
+            const SizedBox(height: 10),
+            _CommunityPostReferenceBlock(
+              metadata: metadata,
+              compact: true,
             ),
           ],
           if (widget.post.hasImage) ...[
