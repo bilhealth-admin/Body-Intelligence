@@ -105,15 +105,20 @@ void main() {
     'Flutter composer exposes manual location and mention search without GPS',
     () {
       final repository = _repositorySource();
-      final composer = File(
+      final composer = [
         'lib/features/community/presentation/community_post_composer_page.dart',
-      ).readAsStringSync();
+        'lib/features/community/presentation/community_post_composer_rendering.dart',
+        'lib/features/community/presentation/community_post_composer_reference_actions.dart',
+        'lib/features/community/presentation/community_post_composer_reference_sections.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final card = File(
         'lib/features/community/presentation/community_post_card.dart',
       ).readAsStringSync();
-      final detail = File(
+      final detail = [
         'lib/features/community/presentation/community_post_detail_page.dart',
-      ).readAsStringSync();
+        'lib/features/community/presentation/community_post_detail_header.dart',
+        'lib/features/community/presentation/community_post_detail_rendering.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
 
       expect(repository, contains('bil_search_community_mentions_v1'));
       expect(repository, contains('bil_set_my_community_post_context_v1'));
