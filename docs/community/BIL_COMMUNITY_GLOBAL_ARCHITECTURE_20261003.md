@@ -41,14 +41,18 @@ Compatibility is explicit: legacy v1 list/attention surfaces remain narrowed to 
 
 ## Rewards and quests
 
-Reward definitions are server-managed and versioned. Client code renders title/copy/progress/reward state but never decides eligibility or grants value.
+Production migration `20261003035646_community_quest_reward_engine_v1` now provides the versioned quest/reward engine and is mirrored exactly into the repository. Definitions, progress events, reward-policy caps, claim audit, Gold posting, XP posting, and Activity emission remain server-authoritative.
 
 Quest lifecycle:
 `Go -> Pending -> Ready to claim -> Claimed`.
 
-Progress and claims are owner-scoped and idempotent. A successful claim posts Gold through the private ledger primitive in the same transaction and emits a durable Activity event.
+The engine is fail-closed in Production today: there are zero quest definitions, zero active quests, and all daily/weekly Gold and XP caps are zero. No economic reward becomes active merely because the UI exists.
 
-Posting rewards are quality rewards, not “post equals coins”. Policies will support moderation approval, unique meaningful engagement, caps, account trust, and anti-farming checks. Amounts stay configurable.
+Progress and claims are owner-scoped and idempotent. A successful claim posts Gold and XP through private ledger primitives in the same transaction and emits durable `quest_completed` / `reward_earned` Activity rows. Direct app roles cannot call the private progress or settlement primitives.
+
+Flutter now includes a BIL Rewards Center with authoritative Gold balance, Starter/Daily/Weekly quest states, claim handling, and paginated Gold history. AI Coach exposes the owner Gold balance plus an Earn entry that opens this Rewards Center. The client never grants Gold and does not mutate ledger tables.
+
+Posting rewards remain quality rewards, not “post equals coins”. Invite rewards remain gated on the deferred-referral contract; valuable-post rewards remain gated on moderation, meaningful engagement and anti-farming evidence. Reward amounts and caps stay server-configurable.
 
 ## Referrals
 
@@ -93,8 +97,8 @@ Neither will be implemented as free-form client-only tags with authority semanti
 3. XP/reputation foundation — complete.
 4. Activity schema expansion plus backward-compatible Flutter v2 parsing — complete; new event emitters remain gated on localized copy and live destination routes.
 5. Global profile projection, authored-post pagination, social counts and privacy controls — complete.
-6. Quest/reward definitions, progress, claim engine, and anti-abuse audit.
+6. Quest/reward definitions, progress, claim engine, audit, Rewards Center and AI Coach Earn entry — complete as a fail-closed foundation; no quest is active yet.
 7. Referral/deferred-attribution contract.
-8. Rewards Center + AI Coach Earn entry.
+8. Verified action emitters and economic activation for selected quests.
 9. Feed/Topics/Circles/composer expansion.
 10. Security advisors, migration drift, transactional E2E, and mobile QA before any release build.
