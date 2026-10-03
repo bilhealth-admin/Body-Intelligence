@@ -57,9 +57,26 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
                     networkUrl: collaborator.avatarUrl,
                   ),
                   label: Text(
-                    collaborator.handle?.isNotEmpty == true
-                        ? '@' + collaborator.handle!
-                        : collaborator.displayName,
+                    (collaborator.handle?.isNotEmpty == true
+                            ? '@' + collaborator.handle!
+                            : collaborator.displayName) +
+                        switch (collaborator.status) {
+                          CommunityCollaborationStatus.accepted => '',
+                          CommunityCollaborationStatus.pending =>
+                            ' · ' +
+                                communityText(
+                                  context,
+                                  'Pending',
+                                  'قيد الانتظار',
+                                ),
+                          CommunityCollaborationStatus.declined =>
+                            ' · ' +
+                                communityText(
+                                  context,
+                                  'Declined',
+                                  'مرفوض',
+                                ),
+                        },
                   ),
                   side: collaborator.status ==
                           CommunityCollaborationStatus.accepted
@@ -67,17 +84,6 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
                       : BorderSide(
                           color: Theme.of(context).colorScheme.outlineVariant,
                         ),
-                  deleteIcon: collaborator.status ==
-                          CommunityCollaborationStatus.pending
-                      ? const Icon(Icons.schedule_rounded, size: 16)
-                      : collaborator.status ==
-                              CommunityCollaborationStatus.declined
-                          ? const Icon(Icons.close_rounded, size: 16)
-                          : null,
-                  onDeleted: collaborator.status ==
-                          CommunityCollaborationStatus.accepted
-                      ? null
-                      : () {},
                 ),
             ],
           ),
