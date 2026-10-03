@@ -20,7 +20,7 @@ class CommunityNotificationsPage extends StatefulWidget {
       _CommunityNotificationsPageState();
 }
 
-enum _ActivityFilter { all, friends, reactions, comments, rewards }
+enum _ActivityFilter { updates, reactions, comments, followers }
 
 class _CommunityNotificationsPageState
     extends State<CommunityNotificationsPage> {
@@ -30,7 +30,7 @@ class _CommunityNotificationsPageState
   final Set<String> _respondingCollaboration = <String>{};
   CommunityAttentionController? _attentionController;
   int? _lastCommunityUpdates;
-  _ActivityFilter _filter = _ActivityFilter.all;
+  _ActivityFilter _filter = _ActivityFilter.updates;
 
   @override
   void initState() {
@@ -253,33 +253,38 @@ class _CommunityNotificationsPageState
     };
   }
 
-  bool _matchesFilter(CommunityNotification notification) => switch (_filter) {
-    _ActivityFilter.all => true,
-    _ActivityFilter.friends =>
-      notification.kind == CommunityNotificationKind.friendRequest ||
-          notification.kind == CommunityNotificationKind.friendAccepted ||
-          notification.kind == CommunityNotificationKind.follow ||
+  bool _matchesFilter(CommunityNotification notification) =>
+      switch (_filter) {
+        _ActivityFilter.updates =>
           notification.kind ==
-              CommunityNotificationKind.collaborationInvite ||
-          notification.kind ==
-              CommunityNotificationKind.collaborationAccepted,
-    _ActivityFilter.reactions =>
-      notification.kind == CommunityNotificationKind.postLike ||
-          notification.kind == CommunityNotificationKind.postSave,
-    _ActivityFilter.comments =>
-      notification.kind == CommunityNotificationKind.comment ||
-          notification.kind == CommunityNotificationKind.reply ||
-          notification.kind == CommunityNotificationKind.mention,
-    _ActivityFilter.rewards =>
-      notification.kind == CommunityNotificationKind.rewardEarned ||
-          notification.kind == CommunityNotificationKind.questCompleted ||
-          notification.kind == CommunityNotificationKind.badgeEarned ||
-          notification.kind == CommunityNotificationKind.challengeUpdate,
-  };
+                  CommunityNotificationKind.friendRequest ||
+              notification.kind ==
+                  CommunityNotificationKind.friendAccepted ||
+              notification.kind ==
+                  CommunityNotificationKind.rewardEarned ||
+              notification.kind ==
+                  CommunityNotificationKind.questCompleted ||
+              notification.kind ==
+                  CommunityNotificationKind.badgeEarned ||
+              notification.kind ==
+                  CommunityNotificationKind.challengeUpdate ||
+              notification.kind ==
+                  CommunityNotificationKind.collaborationInvite ||
+              notification.kind ==
+                  CommunityNotificationKind.collaborationAccepted,
+        _ActivityFilter.reactions =>
+          notification.kind == CommunityNotificationKind.postLike ||
+              notification.kind == CommunityNotificationKind.postSave,
+        _ActivityFilter.comments =>
+          notification.kind == CommunityNotificationKind.comment ||
+              notification.kind == CommunityNotificationKind.reply ||
+              notification.kind == CommunityNotificationKind.mention,
+        _ActivityFilter.followers =>
+          notification.kind == CommunityNotificationKind.follow,
+      };
 
   String _filterLabel(_ActivityFilter filter) => switch (filter) {
-    _ActivityFilter.all => communityText(context, 'All', 'الكل'),
-    _ActivityFilter.friends => communityText(context, 'Friends', 'الأصدقاء'),
+    _ActivityFilter.updates => communityText(context, 'Updates', 'التحديثات'),
     _ActivityFilter.reactions => communityText(
       context,
       'Likes & saves',
@@ -287,10 +292,14 @@ class _CommunityNotificationsPageState
     ),
     _ActivityFilter.comments => communityText(
       context,
-      'Comments & mentions',
-      'التعليقات والإشارات',
+      'Comments',
+      'التعليقات',
     ),
-    _ActivityFilter.rewards => communityText(context, 'Rewards', 'المكافآت'),
+    _ActivityFilter.followers => communityText(
+      context,
+      'New followers',
+      'متابعون جدد',
+    ),
   };
 
   String _notificationTitle(CommunityNotification notification) {
@@ -587,7 +596,7 @@ class _CommunityNotificationsPageState
                       : () => _openNotification(notification),
                 ),
               ),
-            if (_filter == _ActivityFilter.all && updates.incomingRequests > 0)
+            if (_filter == _ActivityFilter.updates && updates.incomingRequests > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.friends,
@@ -603,7 +612,7 @@ class _CommunityNotificationsPageState
                 ),
                 onTap: () => _openAndRefresh('/community/connections'),
               ),
-            if (_filter == _ActivityFilter.all && updates.unreadMessages > 0)
+            if (_filter == _ActivityFilter.updates && updates.unreadMessages > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.messages,
