@@ -295,7 +295,9 @@ class _ReferenceVisualRepository extends _VisualRepository {
         authorName: userId == _VisualRepository.owner
             ? (arabic ? 'ملفي التجريبي' : 'My sample profile')
             : name,
-        authorHandle: userId == _VisualRepository.owner ? 'sample_owner' : 'sample_member',
+        authorHandle: userId == _VisualRepository.owner
+            ? 'sample_owner'
+            : 'sample_member',
         body: arabic
             ? 'لحظة صغيرة تستحق المشاركة مع المجتمع.'
             : 'A small moment worth sharing with the community.',

@@ -83,47 +83,44 @@ void main() {
     },
   );
 
-  test(
-    'composer and feed use server poll receipts rather than fake UI state',
-    () {
-      final repository = [
-        'lib/features/community/data/community_repository.dart',
-        'lib/features/community/data/community_repository_discovery_mixin.dart',
-        'lib/features/community/data/community_repository_publishing_mixin.dart',
-      ].map((path) => File(path).readAsStringSync()).join('\n');
-      final mixin = File(
-        'lib/features/community/data/community_feed_repository_mixin.dart',
-      ).readAsStringSync();
-      final composer = [
-        'lib/features/community/presentation/community_post_composer_page.dart',
-        'lib/features/community/presentation/community_post_composer_rendering.dart',
-        'lib/features/community/presentation/community_post_composer_reference_sections.dart',
-        'lib/features/community/presentation/community_post_composer_reference_actions.dart',
-        'lib/features/community/presentation/community_post_composer_toolbar.dart',
-      ].map((path) => File(path).readAsStringSync()).join('\n');
-      final card = File(
-        'lib/features/community/presentation/community_post_card.dart',
-      ).readAsStringSync();
-      final detail = File(
-        'lib/features/community/presentation/community_post_detail_page.dart',
-      ).readAsStringSync();
-      final panel = File(
-        'lib/features/community/presentation/community_poll_panel.dart',
-      ).readAsStringSync();
+  test('composer and feed use server poll receipts rather than fake UI state', () {
+    final repository = [
+      'lib/features/community/data/community_repository.dart',
+      'lib/features/community/data/community_repository_discovery_mixin.dart',
+      'lib/features/community/data/community_repository_publishing_mixin.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
+    final mixin = File(
+      'lib/features/community/data/community_feed_repository_mixin.dart',
+    ).readAsStringSync();
+    final composer = [
+      'lib/features/community/presentation/community_post_composer_page.dart',
+      'lib/features/community/presentation/community_post_composer_rendering.dart',
+      'lib/features/community/presentation/community_post_composer_reference_sections.dart',
+      'lib/features/community/presentation/community_post_composer_reference_actions.dart',
+      'lib/features/community/presentation/community_post_composer_toolbar.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
+    final card = File(
+      'lib/features/community/presentation/community_post_card.dart',
+    ).readAsStringSync();
+    final detail = File(
+      'lib/features/community/presentation/community_post_detail_page.dart',
+    ).readAsStringSync();
+    final panel = File(
+      'lib/features/community/presentation/community_poll_panel.dart',
+    ).readAsStringSync();
 
-      expect(repository, contains('bil_create_my_community_poll_v1'));
-      expect(repository, contains('bil_vote_community_poll_v1'));
-      expect(repository, contains('bil_community_polls_v1'));
-      expect(repository, contains('publishPostWithTopicsCircleAndPoll'));
-      expect(repository, contains('publishPostWithImageTopicsCircleAndPoll'));
-      expect(mixin, contains('loadCommunityPolls(postIds)'));
-      expect(composer, contains('community-composer-poll-toggle'));
-      expect(composer, contains('community-composer-poll-question'));
-      expect(composer, contains('community-composer-poll-add-option'));
-      expect(card, contains('_CommunityPollPanel'));
-      expect(detail, contains('_CommunityPollPanel'));
-      expect(panel, contains('voteCommunityPoll'));
-      expect(panel, contains('community-poll-option-'));
-    },
-  );
+    expect(repository, contains('bil_create_my_community_poll_v1'));
+    expect(repository, contains('bil_vote_community_poll_v1'));
+    expect(repository, contains('bil_community_polls_v1'));
+    expect(repository, contains('publishPostWithTopicsCircleAndPoll'));
+    expect(repository, contains('publishPostWithImageTopicsCircleAndPoll'));
+    expect(mixin, contains('loadCommunityPolls(postIds)'));
+    expect(composer, contains('community-composer-poll-toggle'));
+    expect(composer, contains('community-composer-poll-question'));
+    expect(composer, contains('community-composer-poll-add-option'));
+    expect(card, contains('_CommunityPollPanel'));
+    expect(detail, contains('_CommunityPollPanel'));
+    expect(panel, contains('voteCommunityPoll'));
+    expect(panel, contains('community-poll-option-'));
+  });
 }
