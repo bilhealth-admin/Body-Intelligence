@@ -71,9 +71,12 @@ void main() {
         'lib/features/community/data/community_post_cloud_store.dart',
       ).readAsStringSync();
       final repository = _repositorySource();
-      final composer = File(
+      final composer = [
         'lib/features/community/presentation/community_post_composer_page.dart',
-      ).readAsStringSync();
+        'lib/features/community/presentation/community_post_composer_rendering.dart',
+        'lib/features/community/presentation/community_post_composer_image_preview.dart',
+        'lib/features/community/presentation/community_post_composer_toolbar.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final widgets = File(
         'lib/features/community/presentation/community_post_widgets.dart',
       ).readAsStringSync();
