@@ -8,6 +8,9 @@ import 'package:body_intelligence_log/features/commerce/providers/commerce_provi
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
+import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
+import 'package:body_intelligence_log/features/community/domain/community_reference_parity.dart';
+import 'package:body_intelligence_log/features/community/domain/community_rewards.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_attention_scope.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
@@ -17,6 +20,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_surface.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_welcome.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_profile_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_rewards_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_bil_code_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_safety_page.dart';
@@ -229,6 +233,266 @@ class _VisualRepository extends CommunityRepository {
   Future<int> markVisibleMessagesRead(List<String> ids) async => ids.length;
 }
 
+class _ReferenceVisualRepository extends _VisualRepository {
+  _ReferenceVisualRepository(super.arabic);
+
+  static const profilePost = '99999999-9999-4999-8999-999999999999';
+  static const draftId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+  @override
+  bool get useServerCommunityReferenceParity => true;
+
+  @override
+  Future<CommunityProfileOverview> loadProfileOverview(String userId) async {
+    final self = userId == owner;
+    return CommunityProfileOverview(
+      userId: userId,
+      displayName: self
+          ? (arabic ? 'ملفي التجريبي' : 'My sample profile')
+          : name,
+      isSelf: self,
+      relationship: self
+          ? CommunityRelationshipStatus.self
+          : CommunityRelationshipStatus.none,
+      allowFriendRequests: true,
+      allowFollows: true,
+      showFollowers: true,
+      showFollowing: true,
+      showFriends: true,
+      showPosts: true,
+      showMembershipTier: false,
+      handle: self ? 'sample_owner' : 'sample_member',
+      bio: arabic
+          ? 'لحظات موثوقة ومجتمع داعم.'
+          : 'Trusted moments and a supportive community.',
+      followerCount: self ? 128 : 84,
+      followingCount: 36,
+      friendCount: 18,
+      postCount: 12,
+      communityXp: 900,
+      communityLevel: 4,
+      communityLevelCopyKey: 'community_level_4',
+      currentLevelMinXp: 700,
+      nextCommunityLevel: 5,
+      nextLevelMinXp: 1500,
+      viewerFollows: !self,
+      followsViewer: !self,
+      goldBalance: self ? 644 : null,
+    );
+  }
+
+  @override
+  Future<CommunityFeedBatch> loadProfilePosts({
+    required String userId,
+    DateTime? before,
+    String? beforeId,
+    int limit = 24,
+  }) async => CommunityFeedBatch(
+    posts: [
+      CommunityPost(
+        id: profilePost,
+        authorId: userId,
+        authorName: userId == owner
+            ? (arabic ? 'ملفي التجريبي' : 'My sample profile')
+            : name,
+        authorHandle: userId == owner ? 'sample_owner' : 'sample_member',
+        body: arabic
+            ? 'لحظة صغيرة تستحق المشاركة مع المجتمع.'
+            : 'A small moment worth sharing with the community.',
+        createdAt: DateTime.utc(2026, 10, 3, 12),
+        moderationStatus: CommunityPostModerationStatus.approved,
+        likeCount: 21,
+        commentCount: 5,
+      ),
+    ],
+    hasMore: false,
+  );
+
+  @override
+  Future<CommunityCreatorProfile> loadCommunityCreatorProfile(
+    String userId,
+  ) async => CommunityCreatorProfile(
+    userId: userId,
+    contributor: true,
+    approvedPosts: 12,
+    followers: userId == owner ? 128 : 84,
+    likesReceived: 231,
+    commentsReceived: 64,
+    qualifiedReferrals: 3,
+    communityXp: 900,
+    communityLevel: 4,
+    currentLevelMinXp: 700,
+    nextCommunityLevel: 5,
+    nextLevelMinXp: 1500,
+    earnedBadgeCount: 4,
+    totalBadgeCount: 7,
+    badges: const [
+      CommunityCreatorBadge(badgeKey: 'profile_complete', earned: true),
+      CommunityCreatorBadge(badgeKey: 'first_moment', earned: true),
+      CommunityCreatorBadge(badgeKey: 'contributor', earned: true),
+      CommunityCreatorBadge(
+        badgeKey: 'conversation_starter',
+        earned: true,
+      ),
+      CommunityCreatorBadge(badgeKey: 'appreciated', earned: false),
+      CommunityCreatorBadge(badgeKey: 'connector', earned: false),
+      CommunityCreatorBadge(badgeKey: 'referral_builder', earned: false),
+    ],
+    certificationStatus: CommunityCreatorCertificationStatus.approved,
+  );
+
+  @override
+  Future<List<CommunityProfileReview>> loadCommunityProfileReviews({
+    required String userId,
+    DateTime? before,
+    String? beforeId,
+    int limit = 24,
+  }) async => [
+    CommunityProfileReview(
+      reviewId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      productKind: 'food',
+      canonicalName: arabic ? 'وجبة مجتمع موثوقة' : 'Verified community meal',
+      brand: 'BIL',
+      reviewNote: arabic
+          ? 'مراجعة عامة معتمدة.'
+          : 'An approved public review.',
+      createdAt: DateTime.utc(2026, 10, 2),
+    ),
+  ];
+
+  @override
+  Future<List<CommunityDraftSummary>> listMyCommunityDrafts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 20,
+  }) async => [
+    CommunityDraftSummary(
+      draftId: draftId,
+      title: arabic ? 'مسودة إنجاز' : 'Progress draft',
+      body: arabic
+          ? 'سأكمل هذه المشاركة لاحقًا.'
+          : 'I will finish this community post later.',
+      updatedAt: DateTime.utc(2026, 10, 3, 11),
+      mediaCount: 2,
+    ),
+  ];
+
+  @override
+  Future<Map<String, int>> loadCommunityPostViewCounts(
+    List<String> postIds,
+  ) async => {for (final id in postIds) id: 292};
+
+  @override
+  Future<List<CommunityPostReferenceMetadata>>
+  loadCommunityPostReferenceMetadata(List<String> postIds) async => [
+    for (final id in postIds)
+      CommunityPostReferenceMetadata(
+        postId: id,
+        title: arabic ? 'لحظة مجتمع' : 'Community moment',
+        hashtags: const ['progress', 'community'],
+        topics: const [
+          CommunityPostTopicReference(
+            slug: 'success-stories',
+            titleCopyKey: 'community_topic_success_stories',
+            postCount: 42,
+          ),
+        ],
+        collaborators: [
+          CommunityPostCollaborator(
+            userId: peer,
+            displayName: name,
+            handle: 'sample_member',
+            status: CommunityCollaborationStatus.accepted,
+          ),
+        ],
+      ),
+  ];
+
+  @override
+  Future<String?> loadCommunityProfileCoverUrl(String userId) async => null;
+
+  @override
+  Future<CommunityGoldBalance> loadGoldBalance() async =>
+      CommunityGoldBalance(
+        balance: 644,
+        updatedAt: DateTime.utc(2026, 10, 3, 12),
+      );
+
+  @override
+  Future<List<CommunityQuest>> loadCommunityQuests() async => [
+    CommunityQuest(
+      questKey: 'invite_friend',
+      cadence: CommunityQuestCadence.oneTime,
+      titleCopyKey: 'quest_invite_friend_title',
+      subtitleCopyKey: 'quest_invite_friend_subtitle',
+      actionKind: 'invite_friend',
+      targetCount: 1,
+      claimMode: CommunityQuestClaimMode.manual,
+      goldReward: 100,
+      xpReward: 100,
+      periodKey: 'lifetime',
+      progress: 1,
+      state: CommunityQuestState.readyToClaim,
+    ),
+    CommunityQuest(
+      questKey: 'valuable_post',
+      cadence: CommunityQuestCadence.daily,
+      titleCopyKey: 'quest_valuable_post_title',
+      subtitleCopyKey: 'quest_valuable_post_subtitle',
+      actionKind: 'valuable_post',
+      targetCount: 1,
+      claimMode: CommunityQuestClaimMode.manual,
+      goldReward: 50,
+      xpReward: 50,
+      periodKey: '2026-10-03',
+      progress: 1,
+      state: CommunityQuestState.claimed,
+      completedAt: DateTime.utc(2026, 10, 3, 9),
+      claimedAt: DateTime.utc(2026, 10, 3, 9, 5),
+    ),
+    CommunityQuest(
+      questKey: 'complete_profile',
+      cadence: CommunityQuestCadence.oneTime,
+      titleCopyKey: 'quest_complete_profile_title',
+      subtitleCopyKey: 'quest_complete_profile_subtitle',
+      actionKind: 'complete_profile',
+      targetCount: 1,
+      claimMode: CommunityQuestClaimMode.manual,
+      goldReward: 25,
+      xpReward: 25,
+      periodKey: 'lifetime',
+      progress: 1,
+      state: CommunityQuestState.claimed,
+      completedAt: DateTime.utc(2026, 10, 1),
+      claimedAt: DateTime.utc(2026, 10, 1, 0, 5),
+    ),
+  ];
+
+  @override
+  Future<List<CommunityGoldLedgerEntry>> loadGoldHistory({
+    DateTime? beforeCreatedAt,
+    int? beforeId,
+    int limit = 30,
+  }) async => [
+    CommunityGoldLedgerEntry(
+      id: 3,
+      delta: 50,
+      balanceAfter: 644,
+      sourceKind: 'quest_reward',
+      copyKey: 'quest_valuable_post_reward',
+      createdAt: DateTime.utc(2026, 10, 3, 9, 5),
+    ),
+    CommunityGoldLedgerEntry(
+      id: 2,
+      delta: 25,
+      balanceAfter: 594,
+      sourceKind: 'quest_reward',
+      copyKey: 'quest_complete_profile_reward',
+      createdAt: DateTime.utc(2026, 10, 1, 0, 5),
+    ),
+  ];
+}
+
 void main() {
   setUpAll(() async {
     await loadVisualEvidenceFont();
@@ -247,6 +511,7 @@ void main() {
             addTearDown(tester.view.resetDevicePixelRatio);
             addTearDown(tester.view.resetPhysicalSize);
             final repository = _VisualRepository(arabic);
+            final referenceRepository = _ReferenceVisualRepository(arabic);
             final controller = CommunityAttentionController(
               () async => const CommunityAttention(
                 unreadMessages: 3,
@@ -265,6 +530,17 @@ void main() {
               'welcome': const Scaffold(body: CommunityWelcome()),
               'feed': CommunityHubPage(repository: repository),
               'profile': CommunityProfilePage(repository: repository),
+              'member_profile': CommunityMemberProfilePage(
+                userId: _VisualRepository.peer,
+                repository: referenceRepository,
+              ),
+              'creator_profile': CommunityMemberProfilePage(
+                userId: _VisualRepository.owner,
+                repository: referenceRepository,
+              ),
+              'rewards': CommunityRewardsPage(
+                repository: referenceRepository,
+              ),
               'my_code': CommunityBilCodePage(repository: repository),
               'my_posts': CommunityMyPostsPage(
                 repository: repository,
