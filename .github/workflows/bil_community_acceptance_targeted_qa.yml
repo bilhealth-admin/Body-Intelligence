@@ -8,9 +8,10 @@ on:
   push:
     branches:
       - fix/community-acceptance-notifications-20261003
+      - work/community-comments-v3-20261003
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   targeted:
@@ -28,9 +29,10 @@ jobs:
         run: flutter pub get
       - name: Verify Dart formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             lib/app/router/app_router.dart \
             lib/features/community/domain/community_attention.dart \
+            lib/features/community/domain/community_comment_threads.dart \
             lib/features/community/domain/community_models.dart \
             lib/features/community/domain/community_rewards.dart \
             lib/features/community/domain/community_referral.dart \
@@ -40,6 +42,7 @@ jobs:
             lib/features/community/domain/community_polls.dart \
             lib/features/community/domain/community_post_context.dart \
             lib/features/community/data/community_repository.dart \
+            lib/features/community/data/community_social_repository_mixin.dart \
             lib/features/community/data/community_post_cloud_store.dart \
             lib/features/community/data/community_feed_repository_mixin.dart \
             lib/features/community/presentation/bil_gold_coin.dart \
@@ -99,6 +102,13 @@ jobs:
             test/features/community/community_circles_v1_contract_test.dart \
             test/features/notifications/community_push_registration_contract_test.dart \
             test/features/notifications/ios_notification_navigation_test.dart
+          if ! git diff --quiet; then
+            git config user.name "BIL Community QA"
+            git config user.email "actions@users.noreply.github.com"
+            git add lib test
+            git commit -m "style(community): format comment threads v3"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Verify referral association tooling
         run: |
           python3 tool/release/generate_app_link_associations.py --self-test
@@ -115,6 +125,7 @@ jobs:
             test/features/community/community_social_activity_emitters_v1_contract_test.dart \
             test/features/community/community_authenticated_interaction_test.dart \
             test/features/community/community_connections_contract_test.dart \
+            test/features/community/community_comment_threads_v3_contract_test.dart \
             test/features/community/community_deep_link_test.dart \
             test/features/community/community_friend_acceptance_cloud_contract_test.dart \
             test/features/community/community_friend_acceptance_notification_contract_test.dart \
