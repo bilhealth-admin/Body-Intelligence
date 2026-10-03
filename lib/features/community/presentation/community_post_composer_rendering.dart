@@ -3,7 +3,11 @@ part of 'community_hub_page.dart';
 extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
   Widget buildCommunityPostComposer(BuildContext context) {
     final busy =
-        _publishing || _savingDraft || _selectingImage || _completed;
+        _publishing ||
+        _savingDraft ||
+        _voiceCapturing ||
+        _selectingImage ||
+        _completed;
     return PopScope<bool>(
       canPop: (!_publishing && !_savingDraft) || _completed,
       child: ScaffoldMessenger(
@@ -82,6 +86,30 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             helperMaxLines: 3,
                             errorText: _composerError,
                             errorMaxLines: 3,
+                            suffixIcon: IconButton(
+                              key: const Key(
+                                'community-composer-voice-input',
+                              ),
+                              tooltip: communityText(
+                                context,
+                                'Voice input',
+                                'إدخال صوتي',
+                              ),
+                              onPressed: busy
+                                  ? null
+                                  : () =>
+                                        _CommunityPostComposerReferenceActions(
+                                          this,
+                                        )._captureVoiceInput(),
+                              icon: _voiceCapturing
+                                  ? const SizedBox.square(
+                                      dimension: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.mic_none_rounded),
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                             ),
