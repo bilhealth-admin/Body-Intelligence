@@ -10,12 +10,14 @@ class CommunityAttention {
     this.incomingRequests = 0,
     this.communityUpdates = 0,
     this.unreadBySender = const {},
+    this.activityUnseenByKind = const {},
   });
 
   final int unreadMessages;
   final int incomingRequests;
   final int communityUpdates;
   final Map<String, int> unreadBySender;
+  final Map<String, int> activityUnseenByKind;
   int get total => unreadMessages + incomingRequests + communityUpdates;
 
   factory CommunityAttention.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,20 @@ class CommunityAttention {
       }
       senders[entry.key as String] = count(entry.value);
     }
+    final rawActivity = json['activity_unseen_by_kind'];
+    final activity = <String, int>{};
+    if (rawActivity != null) {
+      if (rawActivity is! Map) {
+        throw const FormatException('Invalid Community activity counts');
+      }
+      for (final entry in rawActivity.entries) {
+        if (entry.key is! String ||
+            CommunityNotificationKind.fromWire(entry.key as String) == null) {
+          throw const FormatException('Invalid Community activity kind');
+        }
+        activity[entry.key as String] = count(entry.value);
+      }
+    }
     final unread = count(json['unread_messages']);
     if (senders.values.fold<int>(0, (sum, value) => sum + value) != unread) {
       throw const FormatException('Inconsistent Community unread totals');
@@ -48,13 +64,37 @@ class CommunityAttention {
           ? 0
           : count(json['community_updates']),
       unreadBySender: Map.unmodifiable(senders),
+      activityUnseenByKind: Map.unmodifiable(activity),
     );
   }
 
   static String badgeText(int count) => count > 99 ? '99+' : '$count';
 }
 
-enum CommunityNotificationKind { friendAccepted }
+enum CommunityNotificationKind {
+  friendRequest('friend_request'),
+  friendAccepted('friend_accepted'),
+  postLike('post_like'),
+  postSave('post_save'),
+  comment('comment'),
+  reply('reply'),
+  follow('follow'),
+  rewardEarned('reward_earned'),
+  questCompleted('quest_completed'),
+  badgeEarned('badge_earned'),
+  challengeUpdate('challenge_update');
+
+  const CommunityNotificationKind(this.wireValue);
+
+  final String wireValue;
+
+  static CommunityNotificationKind? fromWire(String value) {
+    for (final kind in values) {
+      if (kind.wireValue == value) return kind;
+    }
+    return null;
+  }
+}
 
 @immutable
 class CommunityNotification {
@@ -62,12 +102,26 @@ class CommunityNotification {
     required this.id,
     required this.kind,
     required this.actorId,
-    required this.friendshipId,
     required this.createdAt,
+    required this.entityKind,
+    required this.entityId,
+    required this.copyKey,
+    required this.deepLinkPath,
     this.actorDisplayName,
     this.actorAvatarUrl,
+    this.friendshipId,
+    this.metadata = const <String, dynamic>{},
     this.seenAt,
   });
+
+  static final RegExp _uuid = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  );
+  static final RegExp _entityKind = RegExp(r'^[a-z][a-z0-9_]{2,47}$');
+  static final RegExp _copyKey = RegExp(r'^[a-z][a-z0-9_]{2,63}$');
+  static final RegExp _communityPath = RegExp(
+    r'^/community(?:/[A-Za-z0-9._~-]+)*$',
+  );
 
   final String id;
   final CommunityNotificationKind kind;
@@ -75,6 +129,11 @@ class CommunityNotification {
   final String? actorDisplayName;
   final String? actorAvatarUrl;
   final String? friendshipId;
+  final String entityKind;
+  final String entityId;
+  final String copyKey;
+  final String deepLinkPath;
+  final Map<String, dynamic> metadata;
   final DateTime createdAt;
   final DateTime? seenAt;
 
@@ -82,37 +141,81 @@ class CommunityNotification {
 
   factory CommunityNotification.fromJson(Map<String, dynamic> json) {
     final id = json['id'];
-    final kind = json['kind'];
+    final rawKind = json['kind'];
+    final kind = rawKind is String
+        ? CommunityNotificationKind.fromWire(rawKind)
+        : null;
     final actorId = json['actor_id'];
     final actorDisplayName = json['actor_display_name'];
     final actorAvatarUrl = json['actor_avatar_url'];
     final friendshipId = json['friendship_id'];
+    final rawEntityKind = json['entity_kind'];
+    final rawEntityId = json['entity_id'];
+    final rawCopyKey = json['copy_key'];
+    final rawDeepLinkPath = json['deep_link_path'];
+    final rawMetadata = json['metadata'];
     final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '');
     final rawSeenAt = json['seen_at'];
     final seenAt = rawSeenAt == null
         ? null
         : DateTime.tryParse(rawSeenAt.toString());
+
+    final legacyFriendAccepted =
+        kind == CommunityNotificationKind.friendAccepted &&
+        friendshipId is String &&
+        _uuid.hasMatch(friendshipId);
+    final entityKind =
+        rawEntityKind ?? (legacyFriendAccepted ? 'friendship' : null);
+    final entityId =
+        rawEntityId ?? (legacyFriendAccepted ? friendshipId : null);
+    final copyKey =
+        rawCopyKey ?? (legacyFriendAccepted ? 'friend_accepted_v1' : null);
+    final deepLinkPath = rawDeepLinkPath ??
+        (legacyFriendAccepted ? '/community/notifications' : null);
+    final metadata = rawMetadata ?? const <String, dynamic>{};
+
     if (id is! String ||
-        id.isEmpty ||
-        kind != 'friend_accepted' ||
-        (actorId != null && actorId is! String) ||
+        !_uuid.hasMatch(id) ||
+        kind == null ||
+        (actorId != null &&
+            (actorId is! String || !_uuid.hasMatch(actorId))) ||
         (actorDisplayName != null &&
             (actorDisplayName is! String ||
                 actorDisplayName.trim().isEmpty ||
                 actorDisplayName.length > 60)) ||
         (actorAvatarUrl != null && actorAvatarUrl is! String) ||
-        (friendshipId != null && friendshipId is! String) ||
+        (friendshipId != null &&
+            (friendshipId is! String || !_uuid.hasMatch(friendshipId))) ||
+        entityKind is! String ||
+        !_entityKind.hasMatch(entityKind) ||
+        entityId is! String ||
+        entityId.isEmpty ||
+        entityId.length > 160 ||
+        copyKey is! String ||
+        !_copyKey.hasMatch(copyKey) ||
+        deepLinkPath is! String ||
+        !_communityPath.hasMatch(deepLinkPath) ||
+        metadata is! Map ||
+        metadata.keys.any((key) => key is! String) ||
         createdAt == null ||
         (rawSeenAt != null && seenAt == null)) {
       throw const FormatException('Invalid Community notification');
     }
+
     return CommunityNotification(
       id: id,
-      kind: CommunityNotificationKind.friendAccepted,
+      kind: kind,
       actorId: actorId as String?,
       actorDisplayName: actorDisplayName as String?,
       actorAvatarUrl: actorAvatarUrl as String?,
       friendshipId: friendshipId as String?,
+      entityKind: entityKind,
+      entityId: entityId,
+      copyKey: copyKey,
+      deepLinkPath: deepLinkPath,
+      metadata: Map<String, dynamic>.unmodifiable(
+        Map<String, dynamic>.from(metadata),
+      ),
       createdAt: createdAt,
       seenAt: seenAt,
     );
