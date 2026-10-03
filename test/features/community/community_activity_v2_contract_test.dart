@@ -12,7 +12,10 @@ void main() {
     expect(sql, contains('add column entity_id text'));
     expect(sql, contains('add column copy_key text'));
     expect(sql, contains('add column deep_link_path text'));
-    expect(sql, contains("add column metadata jsonb not null default '{}'::jsonb"));
+    expect(
+      sql,
+      contains("add column metadata jsonb not null default '{}'::jsonb"),
+    );
     expect(sql, contains("'reward_earned'"));
     expect(sql, contains("'quest_completed'"));
     expect(sql, contains("'badge_earned'"));
