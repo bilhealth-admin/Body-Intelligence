@@ -89,7 +89,7 @@ final class CommunityPostCloudStore
   static const _postSelection =
       'id,author_id,body,created_at,media_object_path,media_mime_type,'
       'media_bytes,media_width,media_height,moderation_status,'
-      'moderation_visibility,reviewed_at';
+      'moderation_visibility,reviewed_at,location_label';
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
@@ -614,6 +614,15 @@ final class CommunityPostCloudStore
         DateTime.tryParse(createdAt) == null ||
         moderationStatus is! String ||
         !const {'pending', 'approved', 'rejected'}.contains(moderationStatus)) {
+      return false;
+    }
+    final locationLabel = row['location_label'];
+    if (locationLabel != null &&
+        (locationLabel is! String ||
+            locationLabel.trim().isEmpty ||
+            locationLabel != locationLabel.trim() ||
+            locationLabel.length > 80 ||
+            _unsafeText.hasMatch(locationLabel))) {
       return false;
     }
     final path = row['media_object_path'];
