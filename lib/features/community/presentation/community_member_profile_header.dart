@@ -25,7 +25,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
     final handle = profile.handle;
     final text = [
       profile.displayName,
-      if (handle != null) '@' + handle,
+      if (handle != null) '@$handle',
       communityText(context, 'BIL Community profile', 'ملف مجتمع BIL'),
     ].join('\n');
     try {
@@ -252,7 +252,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                 ),
                 if (profile.handle != null)
                   Text(
-                    '@' + profile.handle!,
+                    '@${profile.handle!}',
                     textDirection: TextDirection.ltr,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: scheme.primary,
@@ -277,9 +277,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                         size: 18,
                       ),
                       label: Text(
-                        profile.friendCount.toString() +
-                            ' ' +
-                            communityText(context, 'Friends', 'أصدقاء'),
+                        '${profile.friendCount} ${communityText(context, 'Friends', 'أصدقاء')}',
                       ),
                       onPressed: () => onOpenConnections(
                         CommunityProfileConnectionKind.friends,
