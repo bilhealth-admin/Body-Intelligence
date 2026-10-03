@@ -208,9 +208,9 @@ class _CommunityInviteLandingPageState
                       Text(
                         communityText(
                           context,
-                          '$inviterName invited you to join BIL',
-                          '$inviterName دعاك للانضمام إلى BIL',
-                        ),
+                          '{inviterName} invited you to join BIL',
+                          '{inviterName} دعاك للانضمام إلى BIL',
+                        ).replaceAll('{inviterName}', inviterName),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.w900),
