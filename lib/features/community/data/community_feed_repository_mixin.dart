@@ -16,6 +16,8 @@ mixin CommunityFeedRepositoryMixin {
 
   Future<List<CommunityPoll>> loadCommunityPolls(List<String> postIds);
 
+  Future<Map<String, String>> loadCommunityPostLocations(List<String> postIds);
+
   Future<List<CommunitySavedPostReference>> loadSavedPostReferences({
     DateTime? before,
     String? beforeId,
@@ -313,19 +315,25 @@ mixin CommunityFeedRepositoryMixin {
     if (posts.isEmpty) return posts;
     final postIds = posts.map((post) => post.id).toList(growable: false);
     final authorIds = posts.map((post) => post.authorId).toSet().toList();
-    final pollFuture = communityPostStore is CommunityPostCloudStore
+    final cloudStore = communityPostStore is CommunityPostCloudStore;
+    final pollFuture = cloudStore
         ? loadCommunityPolls(postIds)
         : Future<List<CommunityPoll>>.value(const <CommunityPoll>[]);
+    final locationFuture = cloudStore
+        ? loadCommunityPostLocations(postIds)
+        : Future<Map<String, String>>.value(const <String, String>{});
     final hydratedData = await Future.wait<Object>([
       loadPostStats(postIds),
       loadSavedStates(postIds),
       loadPostAuthors(authorIds),
       pollFuture,
+      locationFuture,
     ]);
     final stats = hydratedData[0] as List<CommunityPostStats>;
     final saved = hydratedData[1] as List<CommunitySavedState>;
     final authors = hydratedData[2] as List<CommunityPostAuthorSocial>;
     final polls = hydratedData[3] as List<CommunityPoll>;
+    final locations = hydratedData[4] as Map<String, String>;
     final byPost = {for (final value in stats) value.postId: value};
     final savedByPost = {for (final value in saved) value.postId: value.saved};
     final authorById = {for (final value in authors) value.userId: value};
@@ -339,7 +347,10 @@ mixin CommunityFeedRepositoryMixin {
           final social = authorById[post.authorId];
           final withSaved = withStats.withSaved(savedByPost[post.id] ?? false);
           final withPoll = withSaved.withPoll(pollByPost[post.id]);
-          return social == null ? withPoll : withPoll.withAuthorSocial(social);
+          final withLocation = withPoll.withLocation(locations[post.id]);
+          return social == null
+              ? withLocation
+              : withLocation.withAuthorSocial(social);
         })
         .toList(growable: false);
   }
