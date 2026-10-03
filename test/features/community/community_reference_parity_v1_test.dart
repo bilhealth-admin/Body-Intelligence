@@ -108,10 +108,7 @@ class _ReferenceParityRepository extends CommunityRepository {
       CommunityCreatorBadge(badgeKey: 'profile_complete', earned: true),
       CommunityCreatorBadge(badgeKey: 'first_moment', earned: true),
       CommunityCreatorBadge(badgeKey: 'contributor', earned: false),
-      CommunityCreatorBadge(
-        badgeKey: 'conversation_starter',
-        earned: false,
-      ),
+      CommunityCreatorBadge(badgeKey: 'conversation_starter', earned: false),
       CommunityCreatorBadge(badgeKey: 'appreciated', earned: false),
       CommunityCreatorBadge(badgeKey: 'connector', earned: false),
       CommunityCreatorBadge(badgeKey: 'referral_builder', earned: false),
@@ -249,10 +246,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('community-creator-panel')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('community-creator-panel')), findsOneWidget);
       expect(
         find.byKey(const Key('community-profile-follow-action')),
         findsOneWidget,
@@ -277,16 +271,12 @@ void main() {
       expect(repository.followCalls, 1);
       expect(find.text('Following'), findsOneWidget);
 
-      await tester.tap(
-        find.byKey(const Key('community-profile-tab-reviews')),
-      );
+      await tester.tap(find.byKey(const Key('community-profile-tab-reviews')));
       await tester.pumpAndSettle();
       expect(find.text('BIL Reference Food'), findsOneWidget);
       expect(find.text('Approved public review text.'), findsOneWidget);
 
-      await tester.tap(
-        find.byKey(const Key('community-creator-badges')),
-      );
+      await tester.tap(find.byKey(const Key('community-creator-badges')));
       await tester.pumpAndSettle();
       expect(find.text('Community badges'), findsOneWidget);
       expect(find.text('Profile complete'), findsOneWidget);

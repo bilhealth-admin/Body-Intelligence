@@ -1,10 +1,7 @@
 part of 'community_hub_page.dart';
 
 class _CommunityCreatorPanel extends StatelessWidget {
-  const _CommunityCreatorPanel({
-    required this.creator,
-    required this.isSelf,
-  });
+  const _CommunityCreatorPanel({required this.creator, required this.isSelf});
 
   final CommunityCreatorProfile creator;
   final bool isSelf;
@@ -45,9 +42,9 @@ class _CommunityCreatorPanel extends StatelessWidget {
         children: [
           Text(
             communityText(sheetContext, 'Community badges', 'شارات المجتمع'),
-            style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
+            style: Theme.of(
+              sheetContext,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 12),
           for (final badge in creator.badges)
@@ -91,9 +88,9 @@ class _CommunityCreatorPanel extends StatelessWidget {
                   'Creator Center',
                   'مركز صانع المحتوى',
                 ),
-                style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                style: Theme.of(
+                  sheetContext,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 14),
               _CreatorMetricRow(
@@ -231,9 +228,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
                 if (creator.contributor)
                   Chip(
                     avatar: const Icon(Icons.edit_note_rounded, size: 18),
-                    label: Text(
-                      communityText(context, 'Contributor', 'مساهم'),
-                    ),
+                    label: Text(communityText(context, 'Contributor', 'مساهم')),
                   ),
                 Chip(
                   avatar: const Icon(
@@ -270,9 +265,9 @@ class _CommunityCreatorPanel extends StatelessWidget {
               const SizedBox(height: 18),
               Text(
                 communityText(context, 'Creator tools', 'أدوات صانع المحتوى'),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 10),
               GridView.count(
@@ -306,11 +301,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
                   _CreatorToolTile(
                     key: const Key('community-creator-certification'),
                     icon: Icons.verified_user_outlined,
-                    label: communityText(
-                      context,
-                      'Certification',
-                      'الاعتماد',
-                    ),
+                    label: communityText(context, 'Certification', 'الاعتماد'),
                     onTap: () => _openCertification(context),
                   ),
                   _CreatorToolTile(
@@ -350,9 +341,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
                                   'Task Center',
                                   'مركز المهام',
                                 ),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall
+                                style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(fontWeight: FontWeight.w900),
                               ),
                               Text(
@@ -376,9 +365,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
                         TextButton(
                           key: const Key('community-task-center-open'),
                           onPressed: () => context.push('/community/rewards'),
-                          child: Text(
-                            communityText(context, 'Open', 'فتح'),
-                          ),
+                          child: Text(communityText(context, 'Open', 'فتح')),
                         ),
                       ],
                     ),

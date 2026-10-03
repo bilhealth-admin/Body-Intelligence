@@ -194,27 +194,15 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                           ),
                     label: Text(
                       profile.viewerFollows
-                          ? communityText(
-                              context,
-                              'Following',
-                              'يتابع',
-                            )
-                          : communityText(
-                              context,
-                              'Follow',
-                              'متابعة',
-                            ),
+                          ? communityText(context, 'Following', 'يتابع')
+                          : communityText(context, 'Follow', 'متابعة'),
                     ),
                   ),
                 if (profile.followsViewer)
                   Chip(
                     avatar: const Icon(Icons.swap_horiz_rounded, size: 17),
                     label: Text(
-                      communityText(
-                        context,
-                        'Follows you',
-                        'يتابعك',
-                      ),
+                      communityText(context, 'Follows you', 'يتابعك'),
                     ),
                   ),
               ],
@@ -267,4 +255,3 @@ class _ProfileRelationshipAction extends StatelessWidget {
     _ => const SizedBox.shrink(),
   };
 }
-

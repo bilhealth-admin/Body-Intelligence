@@ -54,8 +54,7 @@ class _CommunityMemberProfilePageState
   bool _relationshipBusy = false;
   bool _followBusy = false;
   bool _managingPost = false;
-  _CommunityProfileContentTab _contentTab =
-      _CommunityProfileContentTab.moments;
+  _CommunityProfileContentTab _contentTab = _CommunityProfileContentTab.moments;
 
   Future<void> _loadInitial() async {
     final repository = _repository;
@@ -165,9 +164,7 @@ class _CommunityMemberProfilePageState
       if (!mounted) return;
       final known = _reviews.map((review) => review.reviewId).toSet();
       setState(() {
-        _reviews.addAll(
-          page.where((review) => known.add(review.reviewId)),
-        );
+        _reviews.addAll(page.where((review) => known.add(review.reviewId)));
         _reviewHasMore = page.length == _pageSize;
         if (page.isNotEmpty) {
           _reviewBefore = page.last.createdAt;
@@ -483,4 +480,3 @@ class _CommunityMemberProfilePageState
           ),
   );
 }
-

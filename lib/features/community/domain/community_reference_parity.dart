@@ -16,10 +16,7 @@ enum CommunityCreatorCertificationStatus {
 }
 
 class CommunityCreatorBadge {
-  const CommunityCreatorBadge({
-    required this.badgeKey,
-    required this.earned,
-  });
+  const CommunityCreatorBadge({required this.badgeKey, required this.earned});
 
   static const allowedKeys = <String>{
     'profile_complete',

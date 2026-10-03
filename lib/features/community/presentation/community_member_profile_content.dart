@@ -13,19 +13,14 @@ extension _CommunityMemberProfileContentSlivers
                   ? FilledButton.tonal(
                       key: const Key('community-profile-tab-moments'),
                       onPressed: null,
-                      child: Text(
-                        communityText(context, 'Moments', 'اللحظات'),
-                      ),
+                      child: Text(communityText(context, 'Moments', 'اللحظات')),
                     )
                   : TextButton(
                       key: const Key('community-profile-tab-moments'),
                       onPressed: () => setState(
-                        () => _contentTab =
-                            _CommunityProfileContentTab.moments,
+                        () => _contentTab = _CommunityProfileContentTab.moments,
                       ),
-                      child: Text(
-                        communityText(context, 'Moments', 'اللحظات'),
-                      ),
+                      child: Text(communityText(context, 'Moments', 'اللحظات')),
                     ),
             ),
             const SizedBox(width: 8),
@@ -41,8 +36,7 @@ extension _CommunityMemberProfileContentSlivers
                   : TextButton(
                       key: const Key('community-profile-tab-reviews'),
                       onPressed: () => setState(
-                        () => _contentTab =
-                            _CommunityProfileContentTab.reviews,
+                        () => _contentTab = _CommunityProfileContentTab.reviews,
                       ),
                       child: Text(
                         communityText(context, 'Reviews', 'المراجعات'),
@@ -98,8 +92,7 @@ extension _CommunityMemberProfileContentSlivers
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: TextButton.icon(
-                  onPressed:
-                      _loadingMoreReviews ? null : _loadMoreReviews,
+                  onPressed: _loadingMoreReviews ? null : _loadMoreReviews,
                   icon: _loadingMoreReviews
                       ? const SizedBox.square(
                           dimension: 16,
@@ -125,9 +118,9 @@ extension _CommunityMemberProfileContentSlivers
             children: [
               Text(
                 communityText(context, 'Moments', 'اللحظات'),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               const Spacer(),
               Icon(
@@ -170,13 +163,12 @@ extension _CommunityMemberProfileContentSlivers
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           sliver: SliverGrid(
-            gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: .82,
-                ),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: .82,
+            ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => _CommunityProfilePostTile(
                 post: _posts[index],
@@ -201,8 +193,7 @@ extension _CommunityMemberProfileContentSlivers
                   currentUserId: _repository!.currentUserId,
                   actionsEnabled: !_managingPost,
                   showModerationStatus: profile.isSelf,
-                  onAction: (action) =>
-                      _managePost(_posts[index], action),
+                  onAction: (action) => _managePost(_posts[index], action),
                 ),
                 Padding(
                   padding: const EdgeInsetsDirectional.only(
@@ -247,8 +238,6 @@ extension _CommunityMemberProfileContentSlivers
         ),
     ];
   }
-
-
 }
 
 class _CommunityProfilePostTile extends StatelessWidget {
@@ -380,11 +369,9 @@ class _CommunityProfileConnectionsSheetState
     _connections = _loadConnections();
   }
 
-  Future<List<CommunityProfileConnection>> _loadConnections() =>
-      widget.repository.loadProfileConnections(
-        userId: widget.profile.userId,
-        kind: widget.kind,
-      );
+  Future<List<CommunityProfileConnection>> _loadConnections() => widget
+      .repository
+      .loadProfileConnections(userId: widget.profile.userId, kind: widget.kind);
 
   Future<void> _toggleFollow(CommunityProfileConnection member) async {
     if (_followBusyUserId != null ||
