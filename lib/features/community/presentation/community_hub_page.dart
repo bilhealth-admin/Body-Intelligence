@@ -17,6 +17,7 @@ import '../domain/community_content_policy.dart';
 import '../domain/community_comment_threads.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
+import '../domain/community_topics.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_copy.dart';
 import 'community_connections_page.dart';
@@ -37,6 +38,7 @@ part 'community_post_detail_page.dart';
 part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_saved_posts_page.dart';
+part 'community_topics_page.dart';
 part 'community_my_posts_page.dart';
 part 'community_member_profile_page.dart';
 part 'community_account_widgets.dart';
@@ -264,11 +266,16 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             ),
           );
         case 'topics':
-          await CommunityTaxonomySheet.show(
+          await pushCommunityPage<void>(
             context,
-            onSelectTag: (tag) {
-              _feedKey.currentState?._openComposer(tag: tag);
-            },
+            CommunityTopicsPage(
+              repository: repository,
+              onComposeTopic: (tag) async {
+                if (context.mounted) Navigator.of(context).pop();
+                if (!context.mounted) return;
+                await _feedKey.currentState?._openComposer(tag: tag);
+              },
+            ),
           );
         default:
           await context.push(destination);
