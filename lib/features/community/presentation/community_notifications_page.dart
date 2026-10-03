@@ -20,6 +20,8 @@ class CommunityNotificationsPage extends StatefulWidget {
       _CommunityNotificationsPageState();
 }
 
+enum _ActivityFilter { all, friends, reactions, comments, rewards }
+
 class _CommunityNotificationsPageState
     extends State<CommunityNotificationsPage> {
   CommunityRepository? _repository;
@@ -27,6 +29,7 @@ class _CommunityNotificationsPageState
   final Set<String> _markingSeen = <String>{};
   CommunityAttentionController? _attentionController;
   int? _lastCommunityUpdates;
+  _ActivityFilter _filter = _ActivityFilter.all;
 
   @override
   void initState() {
@@ -135,17 +138,49 @@ class _CommunityNotificationsPageState
     return switch (notification.kind) {
       CommunityNotificationKind.friendRequest ||
       CommunityNotificationKind.friendAccepted => '/community/connections',
-      CommunityNotificationKind.follow => '/community/people',
+      CommunityNotificationKind.follow => notification.actorId == null
+          ? '/community/people'
+          : '/community/profile/${notification.actorId}',
       CommunityNotificationKind.postLike ||
       CommunityNotificationKind.postSave ||
       CommunityNotificationKind.comment ||
-      CommunityNotificationKind.reply ||
+      CommunityNotificationKind.reply => '/community',
       CommunityNotificationKind.rewardEarned ||
       CommunityNotificationKind.questCompleted => '/community/rewards',
       CommunityNotificationKind.badgeEarned ||
       CommunityNotificationKind.challengeUpdate => '/community',
     };
   }
+
+  bool _matchesFilter(CommunityNotification notification) => switch (_filter) {
+    _ActivityFilter.all => true,
+    _ActivityFilter.friends =>
+      notification.kind == CommunityNotificationKind.friendRequest ||
+          notification.kind == CommunityNotificationKind.friendAccepted ||
+          notification.kind == CommunityNotificationKind.follow,
+    _ActivityFilter.reactions =>
+      notification.kind == CommunityNotificationKind.postLike ||
+          notification.kind == CommunityNotificationKind.postSave,
+    _ActivityFilter.comments =>
+      notification.kind == CommunityNotificationKind.comment ||
+          notification.kind == CommunityNotificationKind.reply,
+    _ActivityFilter.rewards =>
+      notification.kind == CommunityNotificationKind.rewardEarned ||
+          notification.kind == CommunityNotificationKind.questCompleted ||
+          notification.kind == CommunityNotificationKind.badgeEarned ||
+          notification.kind == CommunityNotificationKind.challengeUpdate,
+  };
+
+  String _filterLabel(_ActivityFilter filter) => switch (filter) {
+    _ActivityFilter.all => communityText(context, 'All', 'الكل'),
+    _ActivityFilter.friends => communityText(context, 'Friends', 'الأصدقاء'),
+    _ActivityFilter.reactions =>
+      communityText(context, 'Likes & saves', 'الإعجابات والحفظ'),
+    _ActivityFilter.comments =>
+      communityText(context, 'Comments & replies', 'التعليقات والردود'),
+    _ActivityFilter.rewards =>
+      communityText(context, 'Rewards', 'المكافآت'),
+  };
 
   String _notificationTitle(CommunityNotification notification) {
     final actor = notification.actorDisplayName;
@@ -341,10 +376,45 @@ class _CommunityNotificationsPageState
             ),
           );
         }
+        final filteredNotifications = updates.notifications
+            .where(_matchesFilter)
+            .toList(growable: false);
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            for (final notification in updates.notifications)
+            if (updates.notifications.isNotEmpty) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final filter in _ActivityFilter.values) ...[
+                      ChoiceChip(
+                        key: Key('community-activity-filter-${filter.name}'),
+                        selected: _filter == filter,
+                        label: Text(_filterLabel(filter)),
+                        onSelected: (_) => setState(() => _filter = filter),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (filteredNotifications.isEmpty &&
+                updates.notifications.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(
+                  communityText(
+                    context,
+                    'No updates in this category yet.',
+                    'لا توجد تحديثات في هذه الفئة بعد.',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            for (final notification in filteredNotifications)
               Card(
                 color: notification.seen
                     ? null
@@ -370,7 +440,8 @@ class _CommunityNotificationsPageState
                   onTap: () => _openNotification(notification),
                 ),
               ),
-            if (updates.incomingRequests > 0)
+            if (_filter == _ActivityFilter.all &&
+                updates.incomingRequests > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.friends,
@@ -386,7 +457,8 @@ class _CommunityNotificationsPageState
                 ),
                 onTap: () => _openAndRefresh('/community/connections'),
               ),
-            if (updates.unreadMessages > 0)
+            if (_filter == _ActivityFilter.all &&
+                updates.unreadMessages > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
                   kind: BilSemanticIconKind.messages,
