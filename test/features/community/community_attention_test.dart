@@ -9,9 +9,10 @@ void main() {
     final value = CommunityAttention.fromJson({
       'unread_messages': 140,
       'incoming_requests': 3,
+      'community_updates': 2,
       'unread_by_sender': {'member': 140},
     });
-    expect(value.total, 143);
+    expect(value.total, 145);
     expect(value.unreadMessages, 140);
     expect(CommunityAttention.badgeText(value.total), '99+');
     expect(CommunityAttention.badgeText(9), '9');
@@ -98,6 +99,7 @@ void main() {
             () async => const CommunityAttention(
               unreadMessages: 4,
               incomingRequests: 2,
+              communityUpdates: 3,
             ),
           );
           controller.setOwner('owner');
@@ -134,7 +136,7 @@ void main() {
           await tester.pump();
           expect(find.text('4'), findsOneWidget);
           expect(find.text('2'), findsOneWidget);
-          expect(find.text('6'), findsOneWidget);
+          expect(find.text('9'), findsOneWidget);
           expect(tester.takeException(), isNull);
           controller.setOwner(null);
           await tester.pump();

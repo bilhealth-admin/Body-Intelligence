@@ -5,7 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
+import '../domain/community_attention.dart';
 import 'community_copy.dart';
 
 class CommunityNotificationsPage extends StatefulWidget {
@@ -22,6 +24,7 @@ class _CommunityNotificationsPageState
     extends State<CommunityNotificationsPage> {
   CommunityRepository? _repository;
   late Future<_CommunityUpdates> _updates;
+  final Set<String> _markingSeen = <String>{};
 
   @override
   void initState() {
@@ -48,10 +51,16 @@ class _CommunityNotificationsPageState
   Future<_CommunityUpdates> _load() async {
     final repository = _repository;
     if (repository == null) return const _CommunityUpdates.signedOut();
-    final attention = await repository.loadAttention();
+    final values = await Future.wait<Object>([
+      repository.loadAttention(),
+      repository.loadCommunityNotifications(),
+    ]);
+    final attention = values[0] as CommunityAttention;
+    final notifications = values[1] as List<CommunityNotification>;
     return _CommunityUpdates(
       incomingRequests: attention.incomingRequests,
       unreadMessages: attention.unreadMessages,
+      notifications: notifications,
     );
   }
 
@@ -67,6 +76,20 @@ class _CommunityNotificationsPageState
     if (mounted) {
       await CommunityAttentionScope.refresh(context);
       if (mounted) _retry();
+    }
+  }
+
+  Future<void> _openNotification(CommunityNotification notification) async {
+    final repository = _repository;
+    if (repository == null || !_markingSeen.add(notification.id)) return;
+    try {
+      if (!notification.seen) {
+        await repository.markCommunityNotificationsSeen([notification.id]);
+        if (mounted) await CommunityAttentionScope.refresh(context);
+      }
+      if (mounted) await _openAndRefresh('/community/connections');
+    } finally {
+      _markingSeen.remove(notification.id);
     }
   }
 
@@ -169,6 +192,44 @@ class _CommunityNotificationsPageState
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            for (final notification in updates.notifications)
+              Card(
+                color: notification.seen
+                    ? null
+                    : Theme.of(context).colorScheme.primaryContainer.withValues(
+                        alpha: 0.35,
+                      ),
+                child: ListTile(
+                  leading: BilAccountAvatar(
+                    radius: 20,
+                    networkUrl: notification.actorAvatarUrl,
+                  ),
+                  title: Text(
+                    notification.actorDisplayName == null
+                        ? communityText(
+                            context,
+                            'Your friend request was accepted',
+                            'تم قبول طلب صداقتك',
+                          )
+                        : communityText(
+                            context,
+                            '${notification.actorDisplayName} accepted your friend request',
+                            '${notification.actorDisplayName} قبل طلب صداقتك',
+                          ),
+                  ),
+                  subtitle: Text(
+                    notification.seen
+                        ? communityText(context, 'Seen', 'تمت المشاهدة')
+                        : communityText(context, 'New', 'جديد'),
+                  ),
+                  trailing: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
+                  ),
+                  onTap: () => _openNotification(notification),
+                ),
+              ),
             if (updates.incomingRequests > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
@@ -245,17 +306,23 @@ class _CenteredUpdatesState extends StatelessWidget {
 }
 
 class _CommunityUpdates {
-  const _CommunityUpdates({this.incomingRequests = 0, this.unreadMessages = 0})
-    : signedOut = false;
+  const _CommunityUpdates({
+    this.incomingRequests = 0,
+    this.unreadMessages = 0,
+    this.notifications = const <CommunityNotification>[],
+  }) : signedOut = false;
 
   const _CommunityUpdates.signedOut()
     : incomingRequests = 0,
       unreadMessages = 0,
+      notifications = const <CommunityNotification>[],
       signedOut = true;
 
   final int incomingRequests;
   final int unreadMessages;
+  final List<CommunityNotification> notifications;
   final bool signedOut;
 
-  bool get isEmpty => incomingRequests == 0 && unreadMessages == 0;
+  bool get isEmpty =>
+      incomingRequests == 0 && unreadMessages == 0 && notifications.isEmpty;
 }

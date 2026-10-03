@@ -8,13 +8,15 @@ class CommunityAttention {
   const CommunityAttention({
     this.unreadMessages = 0,
     this.incomingRequests = 0,
+    this.communityUpdates = 0,
     this.unreadBySender = const {},
   });
 
   final int unreadMessages;
   final int incomingRequests;
+  final int communityUpdates;
   final Map<String, int> unreadBySender;
-  int get total => unreadMessages + incomingRequests;
+  int get total => unreadMessages + incomingRequests + communityUpdates;
 
   factory CommunityAttention.fromJson(Map<String, dynamic> json) {
     int count(Object? value) {
@@ -42,11 +44,77 @@ class CommunityAttention {
     return CommunityAttention(
       unreadMessages: unread,
       incomingRequests: count(json['incoming_requests']),
+      communityUpdates: json['community_updates'] == null
+          ? 0
+          : count(json['community_updates']),
       unreadBySender: Map.unmodifiable(senders),
     );
   }
 
   static String badgeText(int count) => count > 99 ? '99+' : '$count';
+}
+
+enum CommunityNotificationKind { friendAccepted }
+
+@immutable
+class CommunityNotification {
+  const CommunityNotification({
+    required this.id,
+    required this.kind,
+    required this.actorId,
+    required this.friendshipId,
+    required this.createdAt,
+    this.actorDisplayName,
+    this.actorAvatarUrl,
+    this.seenAt,
+  });
+
+  final String id;
+  final CommunityNotificationKind kind;
+  final String? actorId;
+  final String? actorDisplayName;
+  final String? actorAvatarUrl;
+  final String? friendshipId;
+  final DateTime createdAt;
+  final DateTime? seenAt;
+
+  bool get seen => seenAt != null;
+
+  factory CommunityNotification.fromJson(Map<String, dynamic> json) {
+    final id = json['id'];
+    final kind = json['kind'];
+    final actorId = json['actor_id'];
+    final actorDisplayName = json['actor_display_name'];
+    final actorAvatarUrl = json['actor_avatar_url'];
+    final friendshipId = json['friendship_id'];
+    final createdAt = DateTime.tryParse(json['created_at']?.toString() ?? '');
+    final rawSeenAt = json['seen_at'];
+    final seenAt = rawSeenAt == null ? null : DateTime.tryParse(rawSeenAt.toString());
+    if (id is! String ||
+        id.isEmpty ||
+        kind != 'friend_accepted' ||
+        (actorId != null && actorId is! String) ||
+        (actorDisplayName != null &&
+            (actorDisplayName is! String ||
+                actorDisplayName.trim().isEmpty ||
+                actorDisplayName.length > 60)) ||
+        (actorAvatarUrl != null && actorAvatarUrl is! String) ||
+        (friendshipId != null && friendshipId is! String) ||
+        createdAt == null ||
+        (rawSeenAt != null && seenAt == null)) {
+      throw const FormatException('Invalid Community notification');
+    }
+    return CommunityNotification(
+      id: id,
+      kind: CommunityNotificationKind.friendAccepted,
+      actorId: actorId as String?,
+      actorDisplayName: actorDisplayName as String?,
+      actorAvatarUrl: actorAvatarUrl as String?,
+      friendshipId: friendshipId as String?,
+      createdAt: createdAt,
+      seenAt: seenAt,
+    );
+  }
 }
 
 /// Serializes reloads, discards old-owner responses and preserves last known

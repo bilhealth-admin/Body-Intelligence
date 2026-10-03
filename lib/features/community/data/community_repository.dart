@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
@@ -273,6 +274,41 @@ class CommunityRepository
           };
         })
         .toList(growable: false);
+  }
+
+  Future<List<CommunityNotification>> loadCommunityNotifications({
+    int limit = 30,
+  }) async {
+    if (limit < 1 || limit > 100) throw ArgumentError.value(limit, 'limit');
+    final response = await _client.rpc(
+      'bil_list_community_notifications',
+      params: {'p_limit': limit},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community notifications result');
+    }
+    return List<CommunityNotification>.unmodifiable(
+      response.map((item) {
+        if (item is! Map) throw const FormatException('Invalid Community notification');
+        return CommunityNotification.fromJson(Map<String, dynamic>.from(item));
+      }),
+    );
+  }
+
+  Future<int> markCommunityNotificationsSeen(List<String> ids) async {
+    final unique = ids.toSet().toList(growable: false);
+    if (unique.isEmpty) return 0;
+    if (unique.length > 100 || unique.any((id) => !_uuid.hasMatch(id))) {
+      throw ArgumentError.value(ids, 'ids');
+    }
+    final response = await _client.rpc(
+      'bil_mark_community_notifications_seen',
+      params: {'p_ids': unique},
+    );
+    if (response is! int || response < 0 || response > unique.length) {
+      throw const FormatException('Invalid Community seen result');
+    }
+    return response;
   }
 
   Future<void> follow(String userId) =>

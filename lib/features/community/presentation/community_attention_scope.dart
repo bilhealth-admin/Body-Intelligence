@@ -127,6 +127,17 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
           ),
           callback: changed,
         )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'bil_community_notifications',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'recipient_id',
+            value: owner,
+          ),
+          callback: changed,
+        )
         .subscribe((status, error) {
           if (status == RealtimeSubscribeStatus.subscribed) _scheduleRefresh();
         });
