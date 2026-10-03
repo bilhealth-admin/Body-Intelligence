@@ -517,8 +517,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                         value: _showFollowers,
                         onChanged: _saving
                             ? null
-                            : (value) =>
-                                  setState(() => _showFollowers = value),
+                            : (value) => setState(() => _showFollowers = value),
                         title: Text(
                           communityText(
                             context,
@@ -533,8 +532,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                         value: _showFollowing,
                         onChanged: _saving
                             ? null
-                            : (value) =>
-                                  setState(() => _showFollowing = value),
+                            : (value) => setState(() => _showFollowing = value),
                         title: Text(
                           communityText(
                             context,

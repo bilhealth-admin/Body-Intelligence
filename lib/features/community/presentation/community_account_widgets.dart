@@ -19,7 +19,9 @@ class _CommunityProfileHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<CommunityProfileOverview?>(
+  Widget build(
+    BuildContext context,
+  ) => FutureBuilder<CommunityProfileOverview?>(
     future: profile,
     builder: (context, snapshot) {
       final theme = Theme.of(context);
@@ -222,9 +224,9 @@ class _CommunityProfileMetric extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             Text(
               label,

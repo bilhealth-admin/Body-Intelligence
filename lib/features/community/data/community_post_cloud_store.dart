@@ -49,7 +49,6 @@ abstract interface class CommunityPostProfilePaginationContract {
   });
 }
 
-
 final class CommunityPostCloudStore
     implements
         CommunityPostStoreContract,

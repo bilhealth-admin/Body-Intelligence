@@ -155,8 +155,7 @@ class CommunityRepository
     final changed = await _client
         .from('bil_public_profiles')
         .update({
-          'country_code':
-              normalizedCountry == null || normalizedCountry.isEmpty
+          'country_code': normalizedCountry == null || normalizedCountry.isEmpty
               ? null
               : normalizedCountry,
           'show_followers': showFollowers,

@@ -50,10 +50,7 @@ class _CommunityMemberProfilePageState
     if (repository == null) return;
     final values = await Future.wait<Object>([
       repository.loadProfileOverview(widget.userId),
-      repository.loadProfilePosts(
-        userId: widget.userId,
-        limit: _pageSize,
-      ),
+      repository.loadProfilePosts(userId: widget.userId, limit: _pageSize),
     ]);
     _profile = values[0] as CommunityProfileOverview;
     final batch = values[1] as CommunityFeedBatch;
@@ -294,9 +291,7 @@ class _CommunityMemberProfilePageState
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(
-        communityText(context, 'Community profile', 'ملف المجتمع'),
-      ),
+      title: Text(communityText(context, 'Community profile', 'ملف المجتمع')),
       actions: [
         IconButton(
           tooltip: _gridMode
@@ -802,19 +797,26 @@ class _CommunityProfileConnectionsSheet extends StatefulWidget {
 
 class _CommunityProfileConnectionsSheetState
     extends State<_CommunityProfileConnectionsSheet> {
-  late final Future<List<CommunityProfileConnection>> _connections =
-      widget.repository.loadProfileConnections(
-        userId: widget.profile.userId,
-        kind: widget.kind,
-      );
+  late final Future<List<CommunityProfileConnection>> _connections = widget
+      .repository
+      .loadProfileConnections(userId: widget.profile.userId, kind: widget.kind);
 
   String _title(BuildContext context) => switch (widget.kind) {
-    CommunityProfileConnectionKind.followers =>
-      communityText(context, 'Followers', 'المتابعون'),
-    CommunityProfileConnectionKind.following =>
-      communityText(context, 'Following', 'يتابع'),
-    CommunityProfileConnectionKind.friends =>
-      communityText(context, 'Friends', 'الأصدقاء'),
+    CommunityProfileConnectionKind.followers => communityText(
+      context,
+      'Followers',
+      'المتابعون',
+    ),
+    CommunityProfileConnectionKind.following => communityText(
+      context,
+      'Following',
+      'يتابع',
+    ),
+    CommunityProfileConnectionKind.friends => communityText(
+      context,
+      'Friends',
+      'الأصدقاء',
+    ),
   };
 
   @override
