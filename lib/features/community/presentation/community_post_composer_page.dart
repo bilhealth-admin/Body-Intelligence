@@ -87,6 +87,7 @@ class _CommunityPostComposerPageState
       .loadCommunityCircles();
   bool _publishing = false;
   bool _savingDraft = false;
+  bool _voiceCapturing = false;
   bool _selectingImage = false;
   bool _completed = false;
   TextDirection? _composerDirection;
@@ -112,7 +113,13 @@ class _CommunityPostComposerPageState
   }
 
   Future<void> _publish() async {
-    if (_publishing || _savingDraft || _selectingImage || _completed) return;
+    if (_publishing ||
+        _savingDraft ||
+        _voiceCapturing ||
+        _selectingImage ||
+        _completed) {
+      return;
+    }
     final text = _composer.text.trim();
     if (text.isEmpty) {
       setState(
