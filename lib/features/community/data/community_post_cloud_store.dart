@@ -40,12 +40,23 @@ abstract interface class CommunityPostAuthorPaginationContract {
   });
 }
 
+abstract interface class CommunityPostProfilePaginationContract {
+  Future<CommunityFeedBatch> loadProfilePostsPage({
+    required String userId,
+    DateTime? before,
+    String? beforeId,
+    int limit = 24,
+  });
+}
+
+
 final class CommunityPostCloudStore
     implements
         CommunityPostStoreContract,
         CommunityPostLookupContract,
         CommunityPostPaginationContract,
-        CommunityPostAuthorPaginationContract {
+        CommunityPostAuthorPaginationContract,
+        CommunityPostProfilePaginationContract {
   CommunityPostCloudStore(this._client, this._user);
 
   final SupabaseClient _client;
@@ -129,6 +140,48 @@ final class CommunityPostCloudStore
         .order('created_at', ascending: false)
         .order('id', ascending: false)
         .limit(boundedLimit);
+    final posts = await _hydrateVisibleRows(rows);
+    final cursor = posts.isEmpty ? null : posts.last;
+    return CommunityFeedBatch(
+      posts: posts,
+      hasMore: rows.length == boundedLimit,
+      nextBefore: cursor?.createdAt,
+      nextBeforeId: cursor?.id,
+    );
+  }
+
+  @override
+  Future<CommunityFeedBatch> loadProfilePostsPage({
+    required String userId,
+    DateTime? before,
+    String? beforeId,
+    int limit = 24,
+  }) async {
+    if (!_uuid.hasMatch(userId) ||
+        (before == null) != (beforeId == null) ||
+        (beforeId != null && !_uuid.hasMatch(beforeId))) {
+      throw ArgumentError('Invalid Community profile-post cursor');
+    }
+    final boundedLimit = limit.clamp(1, 60);
+    final response = await _client.rpc(
+      'bil_community_profile_posts_v1',
+      params: {
+        'p_user_id': userId,
+        'p_before': before?.toUtc().toIso8601String(),
+        'p_before_id': beforeId,
+        'p_limit': boundedLimit,
+      },
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community profile posts');
+    }
+    final rows = response
+        .whereType<Map>()
+        .map(Map<String, dynamic>.from)
+        .toList(growable: false);
+    if (rows.length != response.length) {
+      throw const FormatException('Invalid Community profile post row');
+    }
     final posts = await _hydrateVisibleRows(rows);
     final cursor = posts.isEmpty ? null : posts.last;
     return CommunityFeedBatch(
