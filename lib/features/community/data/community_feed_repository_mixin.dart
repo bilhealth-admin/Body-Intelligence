@@ -130,10 +130,20 @@ mixin CommunityFeedRepositoryMixin {
     if (!useServerRankedCommunityFeed &&
         (mode == CommunityFeedMode.forYou ||
             mode == CommunityFeedMode.explore)) {
-      final page = CommunityFeedBatch(
-        posts: await loadFeed(limit: limit),
-        hasMore: false,
-      );
+      final CommunityFeedBatch page;
+      if (before == null) {
+        final posts = await loadFeed(limit: limit);
+        page = CommunityFeedBatch(
+          posts: posts,
+          hasMore: posts.length == limit,
+        );
+      } else {
+        page = await loadOlderFeed(
+          before: before,
+          beforeId: beforeId!,
+          limit: limit,
+        );
+      }
       final refs = page.posts
           .map(
             (post) => CommunityFeedReference(

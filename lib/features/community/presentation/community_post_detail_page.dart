@@ -602,8 +602,11 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                                 label: Text(
                                   communityText(
                                     context,
-                                    'View ${root.replyCount} replies',
-                                    'عرض ${root.replyCount} ردود',
+                                    'View {count} replies',
+                                    'عرض {count} ردود',
+                                  ).replaceAll(
+                                    '{count}',
+                                    '${root.replyCount}',
                                   ),
                                 ),
                               ),

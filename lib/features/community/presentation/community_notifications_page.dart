@@ -198,9 +198,9 @@ class _CommunityNotificationsPageState
             ? communityText(context, 'New friend request', 'طلب صداقة جديد')
             : communityText(
                 context,
-                '$actor sent you a friend request',
-                '$actor أرسل إليك طلب صداقة',
-              ),
+                '{actor} sent you a friend request',
+                '{actor} أرسل إليك طلب صداقة',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.friendAccepted =>
         actor == null
             ? communityText(
@@ -210,9 +210,9 @@ class _CommunityNotificationsPageState
               )
             : communityText(
                 context,
-                '$actor accepted your friend request',
-                '$actor قبل طلب صداقتك',
-              ),
+                '{actor} accepted your friend request',
+                '{actor} قبل طلب صداقتك',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.postLike =>
         actor == null
             ? communityText(
@@ -222,9 +222,9 @@ class _CommunityNotificationsPageState
               )
             : communityText(
                 context,
-                '$actor liked your post',
-                '$actor أعجب بمنشورك',
-              ),
+                '{actor} liked your post',
+                '{actor} أعجب بمنشورك',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.postSave => communityText(
         context,
         'Your post was saved',
@@ -239,9 +239,9 @@ class _CommunityNotificationsPageState
               )
             : communityText(
                 context,
-                '$actor commented on your post',
-                '$actor علّق على منشورك',
-              ),
+                '{actor} commented on your post',
+                '{actor} علّق على منشورك',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.reply =>
         actor == null
             ? communityText(
@@ -251,17 +251,17 @@ class _CommunityNotificationsPageState
               )
             : communityText(
                 context,
-                '$actor replied to your comment',
-                '$actor رد على تعليقك',
-              ),
+                '{actor} replied to your comment',
+                '{actor} رد على تعليقك',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.follow =>
         actor == null
             ? communityText(context, 'New follower', 'متابع جديد')
             : communityText(
                 context,
-                '$actor followed you',
-                '$actor بدأ بمتابعتك',
-              ),
+                '{actor} followed you',
+                '{actor} بدأ بمتابعتك',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.mention =>
         actor == null
             ? communityText(
@@ -271,9 +271,9 @@ class _CommunityNotificationsPageState
               )
             : communityText(
                 context,
-                '$actor mentioned you in a post',
-                '$actor أشار إليك في منشور',
-              ),
+                '{actor} mentioned you in a post',
+                '{actor} أشار إليك في منشور',
+              ).replaceAll('{actor}', actor),
       CommunityNotificationKind.rewardEarned => communityText(
         context,
         'You earned a Community reward',

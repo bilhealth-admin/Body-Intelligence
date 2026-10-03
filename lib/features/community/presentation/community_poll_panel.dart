@@ -140,7 +140,11 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
                   ),
                 ),
                 Text(
-                  communityText(context, '$total votes', '$total تصويت'),
+                  communityText(
+                    context,
+                    '{total} votes',
+                    '{total} تصويت',
+                  ).replaceAll('{total}', '$total'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

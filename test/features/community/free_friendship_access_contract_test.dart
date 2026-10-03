@@ -61,8 +61,25 @@ void main() {
       r"path: '(/community(?:/[^']*)?)'[\s\S]{0,260}PremiumGateFeature\.community",
     ).allMatches(router).map((match) => match.group(1)!).toSet();
     expect(freeCommunityRoutes, hasLength(15));
-    expect(freeCommunityRoutes, contains('/community/invite/:token'));
     expect(freeCommunityRoutes, contains('/community/profile/:userId'));
+    expect(
+      router,
+      matches(
+        RegExp(
+          r"path: '/community/invite/:token'[\s\S]{0,260}CommunityInviteLandingPage",
+        ),
+      ),
+    );
+    expect(
+      router,
+      isNot(
+        matches(
+          RegExp(
+            r"path: '/community/invite/:token'[\s\S]{0,260}PremiumGateFeature\.community",
+          ),
+        ),
+      ),
+    );
     expect(
       router,
       matches(
