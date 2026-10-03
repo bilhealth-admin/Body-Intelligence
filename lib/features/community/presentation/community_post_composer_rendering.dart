@@ -63,7 +63,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             if (_composerError != null ||
                                 _submitError != null ||
                                 direction != _composerDirection) {
-                              setState(() {
+                              _setComposerState(() {
                                 _composerDirection = direction;
                                 _composerError = null;
                                 _submitError = null;
@@ -131,7 +131,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                     image: _selectedImages[index],
                                     onRemove: busy
                                         ? null
-                                        : () => setState(() {
+                                        : () => _setComposerState(() {
                                             _selectedImages.removeAt(index);
                                             widget.draft.images
                                               ..clear()
@@ -199,7 +199,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                     onSelected: busy
                                         ? null
                                         : (selected) {
-                                            setState(() {
+                                            _setComposerState(() {
                                               if (selected) {
                                                 if (widget
                                                         .draft
@@ -273,7 +273,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                   ),
                                   onSelected: busy
                                       ? null
-                                      : (_) => setState(
+                                      : (_) => _setComposerState(
                                           () => widget.draft.circleSlug = null,
                                         ),
                                 ),
@@ -293,7 +293,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                     ),
                                     onSelected: busy
                                         ? null
-                                        : (selected) => setState(() {
+                                        : (selected) => _setComposerState(() {
                                             widget.draft.circleSlug = selected
                                                 ? circle.slug
                                                 : null;
@@ -323,7 +323,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           onChanged: (value) {
                             widget.draft.locationLabel = value;
                             if (_submitError != null) {
-                              setState(() => _submitError = null);
+                              _setComposerState(() => _submitError = null);
                             }
                           },
                           decoration: InputDecoration(
@@ -475,7 +475,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           value: widget.draft.pollEnabled,
                           onChanged: busy
                               ? null
-                              : (value) => setState(() {
+                              : (value) => _setComposerState(() {
                                   widget.draft.pollEnabled = value;
                                 }),
                           title: Text(
@@ -504,7 +504,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             onChanged: (value) {
                               widget.draft.pollQuestion = value;
                               if (_submitError != null) {
-                                setState(() => _submitError = null);
+                                _setComposerState(() => _submitError = null);
                               }
                             },
                             decoration: InputDecoration(
@@ -542,7 +542,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                     onChanged: (value) {
                                       widget.draft.pollOptions[index] = value;
                                       if (_submitError != null) {
-                                        setState(() => _submitError = null);
+                                        _setComposerState(() => _submitError = null);
                                       }
                                     },
                                     decoration: InputDecoration(
@@ -568,7 +568,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                     ),
                                     onPressed: busy
                                         ? null
-                                        : () => setState(() {
+                                        : () => _setComposerState(() {
                                             widget.draft.pollOptions.removeAt(
                                               index,
                                             );
@@ -591,7 +591,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                 ),
                                 onPressed: busy
                                     ? null
-                                    : () => setState(() {
+                                    : () => _setComposerState(() {
                                         widget.draft.pollOptions.add('');
                                       }),
                                 icon: const Icon(Icons.add_rounded),
@@ -610,7 +610,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             value: widget.draft.pollAllowMultiple,
                             onChanged: busy
                                 ? null
-                                : (value) => setState(() {
+                                : (value) => _setComposerState(() {
                                     widget.draft.pollAllowMultiple = value;
                                   }),
                             title: Text(
