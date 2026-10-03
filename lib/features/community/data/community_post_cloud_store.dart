@@ -17,6 +17,15 @@ abstract interface class CommunityPostStoreContract {
   Future<void> delete(String postId);
 }
 
+abstract interface class CommunityPostPublishingReceiptContract {
+  Future<String?> publishTextWithReceipt(String body);
+
+  Future<String?> publishWithImageReceipt(
+    String body,
+    CommunityPostImageDraft image,
+  );
+}
+
 abstract interface class CommunityPostLookupContract {
   Future<List<CommunityPost>> loadPostsByIds(List<String> postIds);
 }
@@ -52,6 +61,7 @@ abstract interface class CommunityPostProfilePaginationContract {
 final class CommunityPostCloudStore
     implements
         CommunityPostStoreContract,
+        CommunityPostPublishingReceiptContract,
         CommunityPostLookupContract,
         CommunityPostPaginationContract,
         CommunityPostAuthorPaginationContract,
@@ -310,14 +320,22 @@ final class CommunityPostCloudStore
 
   @override
   Future<void> publishText(String body) async {
+    await publishTextWithReceipt(body);
+  }
+
+  @override
+  Future<String?> publishTextWithReceipt(String body) async {
     final text = _validatedBody(body);
-    if (text == null) return;
+    if (text == null) return null;
+    final postId = _uuidGenerator.v4();
     await _client.from('bil_community_posts').insert({
+      'id': postId,
       'author_id': _user.id,
       'body': text,
       'visibility': 'community',
       'moderation_status': 'pending',
     });
+    return postId;
   }
 
   @override
@@ -325,8 +343,16 @@ final class CommunityPostCloudStore
     String body,
     CommunityPostImageDraft image,
   ) async {
+    await publishWithImageReceipt(body, image);
+  }
+
+  @override
+  Future<String?> publishWithImageReceipt(
+    String body,
+    CommunityPostImageDraft image,
+  ) async {
     final text = _validatedBody(body);
-    if (text == null) return;
+    if (text == null) return null;
     final validated = await validateCommunityPostImageAsync(image.bytes);
     final postId = _uuidGenerator.v4();
     final objectId = _uuidGenerator.v4();
@@ -364,6 +390,7 @@ final class CommunityPostCloudStore
       }
       rethrow;
     }
+    return postId;
   }
 
   @override
