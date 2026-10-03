@@ -116,8 +116,9 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
       _client.rpc('bil_unfollow_member', params: {'p_followed_id': userId});
 
   Future<void> respondToFriendship(String id, {required bool accept}) async {
-    if (!CommunityRepository._uuid.hasMatch(id))
+    if (!CommunityRepository._uuid.hasMatch(id)) {
       throw ArgumentError.value(id, 'id');
+    }
     final changed = await _client
         .from('bil_friendships')
         .update({
@@ -134,8 +135,9 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
   }
 
   Future<void> removeFriendship(String id) async {
-    if (!CommunityRepository._uuid.hasMatch(id))
+    if (!CommunityRepository._uuid.hasMatch(id)) {
       throw ArgumentError.value(id, 'id');
+    }
     final changed = await _client
         .from('bil_friendships')
         .delete()
