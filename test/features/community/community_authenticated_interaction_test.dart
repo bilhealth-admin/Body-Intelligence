@@ -875,7 +875,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-create-post')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Draft kept for retry');
+    await tester.enterText(
+      find.byKey(const Key('community-post-composer')),
+      'Draft kept for retry',
+    );
     await tester.tap(find.byIcon(Icons.send_rounded));
     await tester.pumpAndSettle();
     expect(repository.publishCalls, 1);
@@ -896,7 +899,7 @@ void main() {
     await tester.tap(find.byKey(const Key('community-create-post')));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.byType(TextField),
+      find.byKey(const Key('community-post-composer')),
       'Contact me at person@example.com',
     );
     await tester.tap(find.byIcon(Icons.send_rounded));
