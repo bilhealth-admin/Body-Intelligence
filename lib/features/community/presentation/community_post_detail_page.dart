@@ -563,6 +563,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     super.dispose();
   }
 
+  void _setDetailState(VoidCallback callback) => setState(callback);
+
   @override
   Widget build(BuildContext context) =>
       _CommunityPostDetailRendering(this).buildCommunityPostDetail(context);
