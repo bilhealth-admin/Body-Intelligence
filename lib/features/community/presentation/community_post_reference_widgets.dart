@@ -77,9 +77,7 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
                     radius: 10,
                     networkUrl: collaborator.avatarUrl,
                   ),
-                  label: Text(
-                    _collaboratorLabel(context, collaborator),
-                  ),
+                  label: Text(_collaboratorLabel(context, collaborator)),
                   side:
                       collaborator.status ==
                           CommunityCollaborationStatus.accepted

@@ -67,47 +67,47 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
     }
   }
 
-  Widget _topicCard(BuildContext context, CommunityPostTopicReference topic) =>
-      InkWell(
+  Widget _topicCard(
+    BuildContext context,
+    CommunityPostTopicReference topic,
+  ) => InkWell(
+    borderRadius: BorderRadius.circular(14),
+    onTap: () => _openTopic(context, topic),
+    child: Ink(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => _openTopic(context, topic),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              CommunityTaxonomySheet.titleForSlug(context, topic.slug),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
-          child: Row(
-            children: [
-              Icon(CommunityTaxonomySheet.iconForSlug(topic.slug), size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  CommunityTaxonomySheet.titleForSlug(context, topic.slug),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
-                ),
-              ),
-              Text(
-                '${topic.postCount} ${communityText(context, 'posts', 'منشور')}',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
-                size: 20,
-              ),
-            ],
+          Text(
+            '${topic.postCount} ${communityText(context, 'posts', 'منشور')}',
+            style: Theme.of(context).textTheme.labelMedium,
           ),
-        ),
-      );
+          const SizedBox(width: 4),
+          Icon(
+            Directionality.of(context) == TextDirection.rtl
+                ? Icons.chevron_left_rounded
+                : Icons.chevron_right_rounded,
+            size: 20,
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _circleCard(
     BuildContext context,

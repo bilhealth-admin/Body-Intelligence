@@ -25,8 +25,8 @@ final class CommunityComposerVoiceInputService {
     final interfaceLocale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final deviceLocale =
-        WidgetsBinding.instance.platformDispatcher.locale.toLanguageTag();
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale
+        .toLanguageTag();
     final gate = permissionGate;
     final allowed = gate == null
         ? await _ensurePermission(context)

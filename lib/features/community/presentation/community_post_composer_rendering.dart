@@ -542,7 +542,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                     onChanged: (value) {
                                       widget.draft.pollOptions[index] = value;
                                       if (_submitError != null) {
-                                        _setComposerState(() => _submitError = null);
+                                        _setComposerState(
+                                          () => _submitError = null,
+                                        );
                                       }
                                     },
                                     decoration: InputDecoration(

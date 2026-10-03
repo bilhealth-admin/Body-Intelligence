@@ -11,7 +11,8 @@ extension _CommunityPostComposerReferenceSections
         textCapitalization: TextCapitalization.sentences,
         onChanged: (value) {
           widget.draft.title = value;
-          if (_submitError != null) _setComposerState(() => _submitError = null);
+          if (_submitError != null)
+            _setComposerState(() => _submitError = null);
         },
         decoration: InputDecoration(
           labelText: communityText(context, 'Title', 'العنوان'),

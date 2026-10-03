@@ -190,8 +190,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final nextLevel = creator.nextCommunityLevel;
     final nextXp = creator.nextLevelMinXp;
-    final badgeCount =
-        '${creator.earnedBadgeCount}/${creator.totalBadgeCount}';
+    final badgeCount = '${creator.earnedBadgeCount}/${creator.totalBadgeCount}';
     final levelLabel = 'Lv ${creator.communityLevel}';
     final progressEnglish = nextLevel == null || nextXp == null
         ? 'Highest configured Community level reached'
