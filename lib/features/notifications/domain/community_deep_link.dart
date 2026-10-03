@@ -204,8 +204,7 @@ class CommunityDeepLink {
     final parsed = DateTime(year, month, day);
     return parsed.year == year && parsed.month == month && parsed.day == day;
   }
-}
-).hasMatch(token)) return null;
+}).hasMatch(token)) return null;
       return '/community/invite/$token';
     }
 
@@ -334,8 +333,7 @@ class CommunityDeepLink {
     final parsed = DateTime(year, month, day);
     return parsed.year == year && parsed.month == month && parsed.day == day;
   }
-}
-).hasMatch(token)) return null;
+}).hasMatch(token)) return null;
         return '/community/invite/$token';
       }
       if (segments.length == 3 && segments[1] == 'profile') {
@@ -443,8 +441,7 @@ class CommunityDeepLink {
     final parsed = DateTime(year, month, day);
     return parsed.year == year && parsed.month == month && parsed.day == day;
   }
-}
-).hasMatch(token)) return null;
+}).hasMatch(token)) return null;
       return '/community/invite/$token';
     }
 
