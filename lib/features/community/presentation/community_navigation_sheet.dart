@@ -81,6 +81,12 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
               'Community updates',
               'تحديثات المجتمع',
             ),
+            _item(
+              '/community/rewards',
+              Icons.workspace_premium_outlined,
+              'BIL Rewards',
+              'مكافآت BIL',
+            ),
             const Divider(indent: 20, endIndent: 20, height: 20),
             _item(
               'foods',
