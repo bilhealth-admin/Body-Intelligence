@@ -84,9 +84,13 @@ void main() {
       final page = File(
         'lib/features/community/presentation/community_circles_page.dart',
       ).readAsStringSync();
-      final composer = File(
+      final composer = [
         'lib/features/community/presentation/community_post_composer_page.dart',
-      ).readAsStringSync();
+        'lib/features/community/presentation/community_post_composer_rendering.dart',
+        'lib/features/community/presentation/community_post_composer_reference_sections.dart',
+        'lib/features/community/presentation/community_post_composer_reference_actions.dart',
+        'lib/features/community/presentation/community_post_composer_toolbar.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final hub = File(
         'lib/features/community/presentation/community_hub_page.dart',
       ).readAsStringSync();
