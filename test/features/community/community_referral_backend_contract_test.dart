@@ -14,7 +14,10 @@ void main() {
       sql,
       contains('create table public.bil_community_referral_attributions'),
     );
-    expect(sql, contains('invite_links_enabled boolean not null default false'));
+    expect(
+      sql,
+      contains('invite_links_enabled boolean not null default false'),
+    );
     expect(
       sql,
       contains('reward_progress_enabled boolean not null default false'),
@@ -51,21 +54,27 @@ void main() {
     expect(sql, isNot(contains('bil_ai_credit_balances')));
   });
 
-  test('referral acceptance creates the relationship without granting reward', () {
-    final sql = File(
-      'supabase/migrations/20261003080904_community_referral_relationship_acceptance_v1.sql',
-    ).readAsStringSync();
+  test(
+    'referral acceptance creates the relationship without granting reward',
+    () {
+      final sql = File(
+        'supabase/migrations/20261003080904_community_referral_relationship_acceptance_v1.sql',
+      ).readAsStringSync();
 
-    expect(sql, contains('new_account_eligible boolean not null default false'));
-    expect(sql, contains('friendship_id uuid'));
-    expect(sql, contains('private.bil_accept_referral_friendship_v1'));
-    expect(sql, contains("new.status='pending'"));
-    expect(sql, contains("'friend_accepted'"));
-    expect(sql, contains("'friend_accepted_v1'"));
-    expect(sql, contains("'relationship','accepted'"));
-    expect(sql, contains('not v_attr.new_account_eligible'));
-    expect(sql, contains("v_attr.integrity_state<>'verified'"));
-    expect(sql, contains('not v_policy.reward_progress_enabled'));
-    expect(sql, isNot(contains('bil_post_gold_ledger_v1(')));
-  });
+      expect(
+        sql,
+        contains('new_account_eligible boolean not null default false'),
+      );
+      expect(sql, contains('friendship_id uuid'));
+      expect(sql, contains('private.bil_accept_referral_friendship_v1'));
+      expect(sql, contains("new.status='pending'"));
+      expect(sql, contains("'friend_accepted'"));
+      expect(sql, contains("'friend_accepted_v1'"));
+      expect(sql, contains("'relationship','accepted'"));
+      expect(sql, contains('not v_attr.new_account_eligible'));
+      expect(sql, contains("v_attr.integrity_state<>'verified'"));
+      expect(sql, contains('not v_policy.reward_progress_enabled'));
+      expect(sql, isNot(contains('bil_post_gold_ledger_v1(')));
+    },
+  );
 }

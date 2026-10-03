@@ -8,64 +8,70 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const token = '0123456789abcdef0123456789abcdef0123456789abcdef';
 
-  test('installed-app referral links resolve through the audited allow-list', () {
-    const route = '/community/invite/$token';
-    expect(
-      CommunityDeepLink.routeFor(Uri.parse('bil://invite/$token')),
-      route,
-    );
-    expect(
-      CommunityDeepLink.routeFor(Uri.parse('bil://community/invite/$token')),
-      route,
-    );
-    expect(
-      BilLaunchDeepLink.parse(
-        Uri.parse('https://www.bilhealth.com/invite/$token'),
-      )?.route,
-      route,
-    );
-    expect(
-      BilLaunchDeepLink.parse(
-        Uri.parse('https://bilhealth.com/invite/$token'),
-      )?.route,
-      route,
-    );
-    expect(
-      BilLaunchDeepLink.parse(
-        Uri.parse('https://www.bilhealth.com/invite/not-a-token'),
-      ),
-      isNull,
-    );
-  });
+  test(
+    'installed-app referral links resolve through the audited allow-list',
+    () {
+      const route = '/community/invite/$token';
+      expect(
+        CommunityDeepLink.routeFor(Uri.parse('bil://invite/$token')),
+        route,
+      );
+      expect(
+        CommunityDeepLink.routeFor(Uri.parse('bil://community/invite/$token')),
+        route,
+      );
+      expect(
+        BilLaunchDeepLink.parse(
+          Uri.parse('https://www.bilhealth.com/invite/$token'),
+        )?.route,
+        route,
+      );
+      expect(
+        BilLaunchDeepLink.parse(
+          Uri.parse('https://bilhealth.com/invite/$token'),
+        )?.route,
+        route,
+      );
+      expect(
+        BilLaunchDeepLink.parse(
+          Uri.parse('https://www.bilhealth.com/invite/not-a-token'),
+        ),
+        isNull,
+      );
+    },
+  );
 
-  test('referral acceptance requires the server-created friendship receipt', () {
-    final acceptance = CommunityInviteAcceptance.fromJson({
-      'status': 'attributed',
-      'duplicate': false,
-      'attribution_id': '11111111-1111-4111-8111-111111111111',
-      'inviter_id': '22222222-2222-4222-8222-222222222222',
-      'display_name': 'BIL inviter',
-      'avatar_url': null,
-      'handle': 'bil_inviter',
-      'friendship_id': '33333333-3333-4333-8333-333333333333',
-      'relationship': 'accepted',
-      'new_account_eligible': true,
-    });
-    expect(acceptance.relationshipAccepted, isTrue);
-    expect(acceptance.newAccountEligible, isTrue);
-
-    expect(
-      () => CommunityInviteAcceptance.fromJson({
+  test(
+    'referral acceptance requires the server-created friendship receipt',
+    () {
+      final acceptance = CommunityInviteAcceptance.fromJson({
         'status': 'attributed',
         'duplicate': false,
         'attribution_id': '11111111-1111-4111-8111-111111111111',
         'inviter_id': '22222222-2222-4222-8222-222222222222',
-        'friendship_id': null,
+        'display_name': 'BIL inviter',
+        'avatar_url': null,
+        'handle': 'bil_inviter',
+        'friendship_id': '33333333-3333-4333-8333-333333333333',
         'relationship': 'accepted',
-      }),
-      throwsFormatException,
-    );
-  });
+        'new_account_eligible': true,
+      });
+      expect(acceptance.relationshipAccepted, isTrue);
+      expect(acceptance.newAccountEligible, isTrue);
+
+      expect(
+        () => CommunityInviteAcceptance.fromJson({
+          'status': 'attributed',
+          'duplicate': false,
+          'attribution_id': '11111111-1111-4111-8111-111111111111',
+          'inviter_id': '22222222-2222-4222-8222-222222222222',
+          'friendship_id': null,
+          'relationship': 'accepted',
+        }),
+        throwsFormatException,
+      );
+    },
+  );
 
   test('native association sources claim only the public invite prefix', () {
     final manifest = File(
@@ -82,7 +88,10 @@ void main() {
     ).readAsStringSync();
 
     expect(manifest, contains('android:pathPrefix="/invite/"'));
-    expect(verifiedLinks, contains("publicCommunityPaths = <String>['/invite/*']"));
+    expect(
+      verifiedLinks,
+      contains("publicCommunityPaths = <String>['/invite/*']"),
+    );
     expect(generator, contains('PUBLIC_COMMUNITY_PATHS = ("/invite/*",)'));
     expect(worker, contains("REQUIRED_PUBLIC_PATHS = new Set(['/invite/*'])"));
   });

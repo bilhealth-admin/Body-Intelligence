@@ -75,9 +75,7 @@ class CommunityRepository
     if (response is! Map) {
       throw const FormatException('Invalid Community invite preview');
     }
-    return CommunityInvitePreview.fromJson(
-      Map<String, dynamic>.from(response),
-    );
+    return CommunityInvitePreview.fromJson(Map<String, dynamic>.from(response));
   }
 
   Future<CommunityInviteAcceptance> acceptCommunityInvite(String token) async {

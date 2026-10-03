@@ -17,8 +17,7 @@ void main() {
       CommunityDeepLink.routeFor(Uri.parse('bil://community/rewards')),
       '/community/rewards',
     );
-    const inviteToken =
-        '0123456789abcdef0123456789abcdef0123456789abcdef';
+    const inviteToken = '0123456789abcdef0123456789abcdef0123456789abcdef';
     expect(
       CommunityDeepLink.routeFor(
         Uri.parse('bil://community/invite/$inviteToken'),

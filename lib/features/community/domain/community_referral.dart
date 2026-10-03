@@ -9,9 +9,8 @@ enum CommunityInviteCreateStatus {
   static CommunityInviteCreateStatus fromWire(Object? value) =>
       values.firstWhere(
         (item) => item.wireValue == value,
-        orElse: () => throw const FormatException(
-          'Invalid Community invite status',
-        ),
+        orElse: () =>
+            throw const FormatException('Invalid Community invite status'),
       );
 }
 

@@ -47,12 +47,9 @@ class _CommunityInviteLandingPageState
 
     final client = _client;
     if (client != null) {
-      _auth = client.auth.onAuthStateChange.listen(
-        (_) {
-          if (mounted) setState(() {});
-        },
-        onError: (Object _) {},
-      );
+      _auth = client.auth.onAuthStateChange.listen((_) {
+        if (mounted) setState(() {});
+      }, onError: (Object _) {});
     }
   }
 
@@ -102,9 +99,7 @@ class _CommunityInviteLandingPageState
       if (!acceptance.attributed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              _acceptanceMessage(context, acceptance.status),
-            ),
+            content: Text(_acceptanceMessage(context, acceptance.status)),
           ),
         );
       }
@@ -136,9 +131,7 @@ class _CommunityInviteLandingPageState
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(
-        communityText(context, 'BIL invitation', 'دعوة BIL'),
-      ),
+      title: Text(communityText(context, 'BIL invitation', 'دعوة BIL')),
     ),
     body: FutureBuilder<CommunityInvitePreview>(
       future: _preview,
@@ -209,8 +202,7 @@ class _CommunityInviteLandingPageState
                     children: [
                       BilAccountAvatar(
                         radius: 44,
-                        networkUrl:
-                            _acceptance?.avatarUrl ?? preview.avatarUrl,
+                        networkUrl: _acceptance?.avatarUrl ?? preview.avatarUrl,
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -280,9 +272,8 @@ class _CommunityInviteLandingPageState
                       else if (inviterId != null)
                         FilledButton.icon(
                           key: const Key('community-open-inviter-profile'),
-                          onPressed: () => context.push(
-                            '/community/profile/$inviterId',
-                          ),
+                          onPressed: () =>
+                              context.push('/community/profile/$inviterId'),
                           icon: const Icon(Icons.people_rounded),
                           label: Text(
                             communityText(
@@ -346,10 +337,7 @@ class _InviteState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(body, textAlign: TextAlign.center),
-          if (action != null) ...[
-            const SizedBox(height: 18),
-            action!,
-          ],
+          if (action != null) ...[const SizedBox(height: 18), action!],
         ],
       ),
     ),
@@ -361,38 +349,38 @@ String _acceptanceMessage(
   CommunityInviteAcceptStatus status,
 ) => switch (status) {
   CommunityInviteAcceptStatus.disabled => communityText(
-      context,
-      'Tracked invitations are not active yet.',
-      'الدعوات المتتبعة غير مفعّلة بعد.',
-    ),
+    context,
+    'Tracked invitations are not active yet.',
+    'الدعوات المتتبعة غير مفعّلة بعد.',
+  ),
   CommunityInviteAcceptStatus.invalid => communityText(
-      context,
-      'This invitation is invalid or expired.',
-      'هذه الدعوة غير صالحة أو منتهية.',
-    ),
+    context,
+    'This invitation is invalid or expired.',
+    'هذه الدعوة غير صالحة أو منتهية.',
+  ),
   CommunityInviteAcceptStatus.selfInvite => communityText(
-      context,
-      'You cannot accept your own invitation.',
-      'لا يمكنك قبول دعوتك الخاصة.',
-    ),
+    context,
+    'You cannot accept your own invitation.',
+    'لا يمكنك قبول دعوتك الخاصة.',
+  ),
   CommunityInviteAcceptStatus.unavailable => communityText(
-      context,
-      'This invitation is unavailable.',
-      'هذه الدعوة غير متاحة.',
-    ),
+    context,
+    'This invitation is unavailable.',
+    'هذه الدعوة غير متاحة.',
+  ),
   CommunityInviteAcceptStatus.alreadyAttributed => communityText(
-      context,
-      'Another invitation is already linked to this account.',
-      'هناك دعوة أخرى مرتبطة بهذا الحساب بالفعل.',
-    ),
+    context,
+    'Another invitation is already linked to this account.',
+    'هناك دعوة أخرى مرتبطة بهذا الحساب بالفعل.',
+  ),
   CommunityInviteAcceptStatus.consumed => communityText(
-      context,
-      'This invitation was already used.',
-      'تم استخدام هذه الدعوة مسبقًا.',
-    ),
+    context,
+    'This invitation was already used.',
+    'تم استخدام هذه الدعوة مسبقًا.',
+  ),
   CommunityInviteAcceptStatus.attributed => communityText(
-      context,
-      'Invitation saved.',
-      'تم حفظ الدعوة.',
-    ),
+    context,
+    'Invitation saved.',
+    'تم حفظ الدعوة.',
+  ),
 };
