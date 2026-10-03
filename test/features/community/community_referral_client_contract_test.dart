@@ -67,7 +67,8 @@ void main() {
 
     expect(page, contains('previewCommunityInvite'));
     expect(page, contains('acceptCommunityInvite'));
-    expect(page, contains('requestFriend(inviterId)'));
+    expect(page, contains('relationshipAccepted'));
+    expect(page, isNot(contains('requestFriend(inviterId)')));
     expect(page, isNot(contains('bil_set_community_referral_integrity_v1')));
     expect(page, isNot(contains('bil_post_gold_ledger_v1')));
     expect(page, isNot(contains('claimCommunityQuest')));
