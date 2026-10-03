@@ -46,9 +46,11 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
                 (value) => value.slug == topic.slug
                     ? value.copyWith(
                         following: following,
-                        followerCount:
-                            (value.followerCount + (following ? 1 : -1))
-                                .clamp(0, 1 << 30),
+                        followerCount: following
+                            ? value.followerCount + 1
+                            : (value.followerCount > 0
+                                  ? value.followerCount - 1
+                                  : 0),
                       )
                     : value,
               )
