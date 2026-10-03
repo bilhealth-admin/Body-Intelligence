@@ -15,9 +15,13 @@ void main() {
     ).readAsStringSync();
     expect(attention, contains('communityUpdates'));
     expect(attention, contains('CommunityNotificationKind.friendAccepted'));
+    expect(attention, contains("rewardEarned('reward_earned')"));
+    expect(scope, contains("'bil_community_attention_v2'"));
     expect(scope, contains("table: 'bil_community_notifications'"));
     expect(page, contains('accepted your friend request'));
     expect(page, contains('markCommunityNotificationsSeen'));
+    expect(page, contains('_notificationTitle'));
+    expect(page, contains('_routeFor'));
     expect(page, contains('notifications: persisted.notifications'));
     expect(page, contains('_onAttentionChanged'));
   });
