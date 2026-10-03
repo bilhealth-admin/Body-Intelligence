@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
 import 'package:body_intelligence_log/features/community/domain/community_reference_parity.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:flutter/material.dart';
@@ -122,6 +123,24 @@ class _ReferenceParityRepository extends CommunityRepository {
   ) async => const {_postId: 37};
 
   @override
+  Future<List<CommunityPostReferenceMetadata>>
+  loadCommunityPostReferenceMetadata(List<String> postIds) async => [
+    CommunityPostReferenceMetadata(
+      postId: _postId,
+      title: 'Reference title',
+      hashtags: const ['progress'],
+      collaborators: const <CommunityPostCollaborator>[],
+    ),
+  ];
+
+  @override
+  Future<List<CommunityDraftSummary>> listMyCommunityDrafts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 20,
+  }) async => const <CommunityDraftSummary>[];
+
+  @override
   Future<List<CommunityProfileReview>> loadCommunityProfileReviews({
     required String userId,
     DateTime? before,
@@ -230,6 +249,28 @@ void main() {
     expect(projection.nextCommunityLevel, 5);
     expect(projection.levelProgress, closeTo(.25, .0001));
     expect(projection.badges.where((badge) => badge.earned), hasLength(1));
+  });
+
+  test('membership tier and cover remain explicit opt-in boundaries', () {
+    final tier = File(
+      'supabase/migrations/20261003212500_community_comment_membership_tier_v1.sql',
+    ).readAsStringSync().toLowerCase();
+    final cover = File(
+      'supabase/migrations/20261003213000_community_profile_cover_v1.sql',
+    ).readAsStringSync().toLowerCase();
+
+    expect(tier, contains('p.show_membership_tier'));
+    expect(tier, contains('bil_has_active_premium'));
+    expect(tier, contains("set search_path=''"));
+    expect(tier, isNot(contains('weight')));
+    expect(tier, isNot(contains('body_fat')));
+
+    expect(cover, contains('cover_object_path'));
+    expect(cover, contains('bil_set_my_community_profile_cover_v1'));
+    expect(cover, contains('bil_community_profile_cover_v1'));
+    expect(cover, contains("bucket_id='profile-avatars'"));
+    expect(cover, contains("owner_id=v_uid::text"));
+    expect(cover, contains("set search_path=''"));
   });
 
   testWidgets(
