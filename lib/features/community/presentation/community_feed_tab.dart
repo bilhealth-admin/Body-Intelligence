@@ -32,6 +32,8 @@ class _FeedTabState extends State<_FeedTab>
   @override
   final Map<String, CommunityComment> _commentPreviewByPost =
       <String, CommunityComment>{};
+  @override
+  final Map<String, String> _membershipTierByAuthor = <String, String>{};
   late Future<List<CommunityTopic>> _suggestedTopics = widget.repository
       .loadCommunityTopics();
   bool _managingPost = false;
@@ -576,6 +578,8 @@ class _FeedTabState extends State<_FeedTab>
                                 referenceMetadata: _referenceByPost[post.id],
                                 viewCount: _viewCountByPost[post.id],
                                 commentPreview: _commentPreviewByPost[post.id],
+                                authorMembershipTier:
+                                    _membershipTierByAuthor[post.authorId],
                                 actionsEnabled:
                                     !_openingComposer && !_managingPost,
                                 onAction: (value) => _managePost(post, value),
