@@ -44,9 +44,20 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                       sharing: _sharingPost,
                       managingPost: _managingPost,
                       onLike: _togglePostLike,
-                      onSave: _togglePostSaved,
-                      onShare: _sharePost,
-                      onPostAction: _managePostAction,
+                      onSave: () => unawaited(
+                        _CommunityPostDetailReferenceActions(
+                          this,
+                        )._togglePostSaved(),
+                      ),
+                      onShare: (anchorContext) =>
+                          _CommunityPostDetailReferenceActions(
+                            this,
+                          )._sharePost(anchorContext),
+                      onPostAction: (action) => unawaited(
+                        _CommunityPostDetailReferenceActions(
+                          this,
+                        )._managePostAction(action),
+                      ),
                       onToggleFollow: _toggleAuthorFollow,
                       repository: widget.repository,
                     ),
