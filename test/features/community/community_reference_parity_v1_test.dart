@@ -392,6 +392,34 @@ void main() {
     expect(navigation, contains("'Community profile'"));
   });
 
+  test('post detail actions and circle cards close reference parity gaps', () {
+    final detailPage = File(
+      'lib/features/community/presentation/community_post_detail_page.dart',
+    ).readAsStringSync();
+    final detailRendering = File(
+      'lib/features/community/presentation/community_post_detail_rendering.dart',
+    ).readAsStringSync();
+    final detailHeader = File(
+      'lib/features/community/presentation/community_post_detail_header.dart',
+    ).readAsStringSync();
+    final circles = File(
+      'lib/features/community/presentation/community_circles_page.dart',
+    ).readAsStringSync();
+
+    expect(detailPage, contains('setPostSaved('));
+    expect(detailPage, contains('SharePlus.instance.share('));
+    expect(detailRendering, contains('saved: _savedPost'));
+    expect(detailRendering, contains('onSave: _togglePostSaved'));
+    expect(detailRendering, contains('onShare: _sharePost'));
+    expect(detailHeader, contains("Key('community-post-detail-save')"));
+    expect(detailHeader, contains("Key('community-post-detail-share')"));
+    expect(detailHeader, contains('Wrap('));
+    expect(circles, contains("Key('community-circle-cover-\$slug')"));
+    expect(circles, contains('_CommunityCircleCover(slug: circle.slug)'));
+    expect(circles, contains('final headerAction ='));
+    expect(circles, contains("'community-circle-membership-\${circle.slug}'"));
+  });
+
   testWidgets(
     'profile exposes real Follow, creator badges, views and Reviews',
     (tester) async {
