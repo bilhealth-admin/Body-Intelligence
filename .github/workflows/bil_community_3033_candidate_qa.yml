@@ -24,26 +24,51 @@ jobs:
           mkdir -p /tmp/bil-candidate
           git merge-base --is-ancestor 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD
           git rev-parse HEAD > /tmp/bil-candidate/source-sha.txt
-          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --binary > /tmp/bil-candidate/source.patch
+          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --no-binary > /tmp/bil-candidate/source.patch
           git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --name-only > /tmp/bil-candidate/changed-paths.txt
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess,zipfile
+          output=pathlib.Path('/tmp/bil-candidate')
+          roots={'lib','test','integration_test','supabase','tool','android','ios','.github','docs'}
+          suffixes={'.dart','.sql','.py','.mjs','.js','.ts','.xml','.plist','.entitlements','.gradle','.kts','.swift','.kt','.java','.json','.yaml','.yml','.md','.pbxproj','.xcprivacy','.properties','.lock','.toml','.sh','.ps1','.xcconfig','.rb','.txt'}
+          tracked=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          manifest=[]
+          with zipfile.ZipFile(output/'tracked-source.zip','w',zipfile.ZIP_DEFLATED) as archive:
+              for name in tracked:
+                  if not name: continue
+                  path=pathlib.Path(name)
+                  if path.is_symlink() or not path.is_file(): continue
+                  if path.parts[0] not in roots and name not in {'pubspec.yaml','pubspec.lock','analysis_options.yaml','dart_test.yaml'}: continue
+                  if path.suffix not in suffixes and path.name not in {'Podfile','Gemfile'}: continue
+                  data=path.read_bytes()
+                  try: data.decode('utf-8')
+                  except UnicodeDecodeError: continue
+                  archive.writestr(name,data)
+                  manifest.append({'path':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+          (output/'tracked-source-manifest.json').write_text(json.dumps(manifest,indent=2))
+          PY
       - name: Install pinned Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Resolve dependencies and check formatting without modifying source
+      - name: Resolve dependencies and check full formatting without modifying source
         run: |
           set -euo pipefail
+          flutter --version --machine > /tmp/bil-candidate/toolchain.json
           flutter pub get
-          python3 - <<'PY'
-          import pathlib,subprocess
-          paths=[p for p in pathlib.Path('/tmp/bil-candidate/changed-paths.txt').read_text().splitlines() if p.endswith('.dart') and pathlib.Path(p).is_file()]
-          if paths: subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*paths],check=True)
-          for path,limit in [('lib/features/community/data/community_repository.dart',800),('lib/features/community/data/community_social_repository_mixin.dart',700)]:
-              assert len(pathlib.Path(path).read_text().splitlines())<=limit, path
+          python3 - <<'PY' 2>&1 | tee /tmp/bil-candidate/format.log
+          import pathlib,subprocess,sys
+          paths=[p for p in ('lib','test','integration_test') if pathlib.Path(p).is_dir()]
+          result=subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*paths],check=False)
+          sys.exit(result.returncode)
           PY
       - name: Analyze all application source
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-candidate/analyze.log
+      - name: Enforce unchanged whole-source architecture ceiling and Rewards accessibility
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded test/architecture_source_file_size_guard_test.dart test/features/community/community_rewards_accessibility_test.dart --timeout 2m 2>&1 | tee /tmp/bil-candidate/architecture-accessibility.log
       - name: Run unchanged performance budget in its own serial process before all test shards
         run: |
           set -euo pipefail
