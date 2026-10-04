@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "phase": "STORE_QA_ONLY",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "source_sha": "3f0085e6e6686f2e87e9cf14789e9e578ea64159",
+  "release_version": "1.0.0",
+  "public_release_ready": false,
+  "no_review_submission": true,
+  "no_production_rollout": true,
+  "unresolved_review_count": 8,
+  "owner_authorization_scope": "Owner explicitly authorizes a clean build of the tested source and TestFlight/Play testing uploads only. No app-code changes, public rollout, App Review submission, legal signature, security waiver or blanket release clearance.",
+  "freeze_scope": "Complete and frozen describes the source/configuration handoff for STORE_QA_ONLY, not accepted public release readiness. The unchanged production validator must still fail with exactly unresolved_release_review_items and positive count8.",
+  "ios": {
+    "bundle_id": "com.bilhealth.bodyintelligencelog",
+    "build_number": 35,
+    "destination": "testflight"
+  },
+  "android": {
+    "package_name": "com.bilhealth.bodyintelligencelog",
+    "build_number": 32,
+    "track": "internal",
+    "release_status": "completed",
+    "changes_not_sent_for_review": true,
+    "review_boundary": "ERROR_IF_IN_REVIEW"
+  },
+  "owner_store_preflight": {
+    "check_window_utc": {
+      "start": "2026-10-04T19:00:36Z",
+      "end": "2026-10-04T19:07:00Z"
+    },
+    "apple_highest_observed_build": 34,
+    "play_highest_observed_uploaded_version": 29,
+    "android31_remains_reserved": true,
+    "managed_publishing_enabled": true,
+    "in_review_section_present": false,
+    "preexisting_not_submitted_changes_preserved": [
+      "Production version29 start-full-rollout item",
+      "Existing Sign-in details updates"
+    ],
+    "pending_changes_zero": false,
+    "existing_internal_latest_version": 13,
+    "existing_internal_track_paused": true,
+    "internal32_installability": "NOT_PROVEN_REQUIRES_SAVED32_AND_TRACK_READBACK",
+    "resume_scope": "Only root may assess/resume internal testing after new32 is saved; never start pending Production29 rollout or submit pending changes for review."
+  },
+  "upstream_ci": [
+    {
+      "role": "Targeted",
+      "run_id": 37222502029,
+      "workflow_id": 373618485,
+      "workflow_name": "BIL community acceptance targeted QA",
+      "workflow_path": ".github/workflows/bil_community_acceptance_targeted_qa.yml"
+    },
+    {
+      "role": "Candidate",
+      "run_id": 37222502185,
+      "workflow_id": 370008508,
+      "workflow_name": "BIL Community 30-33 committed candidate QA",
+      "workflow_path": ".github/workflows/bil_community_3033_candidate_qa.yml"
+    },
+    {
+      "role": "Store",
+      "run_id": 37222502031,
+      "workflow_id": 374392375,
+      "workflow_name": "BIL pre-build store and backend contracts",
+      "workflow_path": ".github/workflows/bil_prebuild_store_backend_qa.yml"
+    }
+  ],
+  "known_release_gaps": [
+    {
+      "id": "NATIVE_COMMERCE",
+      "severity": "BLOCKER",
+      "status": "OPEN",
+      "description": "Genuine exact-artifact StoreKit/Play purchase, cancel/pending/restore, verification, entitlement unlock and persistence/expiry remain unproved. Host/mock/contracts are not financial transactions."
+    },
+    {
+      "id": "REVIEWER_ACCESS",
+      "severity": "BLOCKER",
+      "status": "OPEN",
+      "description": "Each paid route on the actual reviewed native artifact remains unproved. Saved Console credentials and server preflight do not close native paywall access."
+    },
+    {
+      "id": "STORE_PRIVACY_DISCLOSURES",
+      "severity": "BLOCKER",
+      "status": "OPEN",
+      "description": "Remaining Play/Apple fields, exact installed SDK/tracking behavior and owner attestations remain unresolved; artifact inspection is evidence collection, not automatic disclosure clearance."
+    },
+    {
+      "id": "GEMINI_PROCESSOR_RETENTION",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "description": "Applicable paid Vertex Express Preview processor terms/exception and actual logging/cache/retention clearance remain unproved. No provider processing or legal approval is authorized by this manifest."
+    },
+    {
+      "id": "AUTH_DATABASE_SECURITY",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "description": "Auth leaked-password protection remains disabled and Production PostgreSQL security-upgrade/impact decision remains open. Grouped as the existing closeout table row; neither subfinding is waived."
+    },
+    {
+      "id": "PRIVILEGED_RPC_HISTORICAL_RECONCILIATION",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "description": "Finite source/ordinary-role proof is not full privileged-RPC/bearer/privacy behavior clearance; historical migration-content reconciliation remains qualified, not a confirmed schema mismatch."
+    },
+    {
+      "id": "REFERENCE_AND_NATIVE_UI_BOUNDARIES",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "description": "Original IMG_9451–IMG_9472 unavailable; strict reference parity and full native feature/permission/RTL/large-text boundary remain uncertified."
+    },
+    {
+      "id": "OWNER_ATTESTATIONS",
+      "severity": "BLOCKER",
+      "status": "OPEN",
+      "description": "Required legal/store attestations remain unsigned. Engineering Git identity and build/upload authorization do not constitute legal/store signatures."
+    }
+  ],
+  "evidence_basis": "docs/release/BIL_PREBUILD_INCREMENTAL_CLOSEOUT_2026-10-04.md, exact3f0085e6 upstream CI and qualified Production receipts. Positive8 counts the eight closeout rows; the Auth/database row preserves both individual gaps.",
+  "artifact_binding_requirement": "Record source SHA, control-plane SHA, this JSON byte digest, platform/build, resolved dependencies/native settings, signed artifact SHA256 and upload/processing receipt separately. Upload alone is not native-testing completion or store acceptance.",
+  "historical_frozen_release_preservation": {
+    "android31_manifest": "docs/release/BIL_ANDROID_V31_FROZEN_SOURCE_MANIFEST_2026-10-02.md",
+    "ios34_manifest": "docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md",
+    "unchanged": true
+  }
+}
+

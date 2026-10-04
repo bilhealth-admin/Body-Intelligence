@@ -1,4 +1,4 @@
-name: BIL iOS signed release candidate (build 34)
+name: BIL iOS signed STORE_QA_ONLY candidate (build 35)
 
 on:
   workflow_dispatch:
@@ -6,50 +6,70 @@ on:
       upload_to_testflight:
         description: Upload the validated build to TestFlight (owner-controlled; leave false for artifact-only QA)
         required: true
-        default: false
+        default: true
         type: boolean
       build_number:
-        description: Exact App Store build number for this candidate; must be 34
+        description: Exact approved TestFlight candidate build number; must be 35
+        required: true
+        type: string
+      manifest_sha256:
+        description: Owner-reviewed committed-byte SHA256 of the STORE_QA_ONLY control manifest
         required: true
         type: string
       run_native_crypto_checks:
-        description: Run the optional iOS Simulator AES-GCM runtime check
+        description: Required iOS Simulator AES-GCM runtime check; cannot be waived
         required: true
-        default: false
+        default: true
         type: boolean
 
 permissions:
   contents: read
+  actions: read
+
+env:
+  BIL_RELEASE_PHASE: STORE_QA_ONLY
+  BIL_STORE_QA_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+  BIL_STORE_QA_BUILD_NUMBER: ${{ inputs.build_number }}
 
 jobs:
   signed-ios-release:
     runs-on: macos-26
     timeout-minutes: 75
     steps:
-      - name: Require exact audited 31/34 source bindings
+      - name: Require explicit testing-only source, digest and native gates
         shell: bash
         env:
-          IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
-          ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
+          RUN_NATIVE_CRYPTO_CHECKS: ${{ inputs.run_native_crypto_checks }}
         run: |
           set -euo pipefail
-          [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V34_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
-          [[ "$ANDROID_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_ANDROID_V31_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
-          test "$IOS_AUDITED_SOURCE" = "$ANDROID_AUDITED_SOURCE" || { echo 'iOS 34 and Android 31 must use the same audited source SHA.' >&2; exit 1; }
+          test "$BIL_RELEASE_PHASE" = STORE_QA_ONLY
+          [[ "$BIL_STORE_QA_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]] || { echo 'A full owner-reviewed STORE_QA_ONLY manifest digest is required.' >&2; exit 1; }
+          test "$RUN_NATIVE_CRYPTO_CHECKS" = true || { echo 'Native crypto verification cannot be waived for this testing candidate.' >&2; exit 1; }
 
-      - name: Checkout accepted source
+      - name: Checkout immutable tested application source, not legacy 31/34 bindings
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
-          ref: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          ref: 3f0085e6e6686f2e87e9cf14789e9e578ea64159
+          persist-credentials: false
 
-      - name: Verify frozen iOS manifest digest binding
+      - name: Checkout exact workflow controller separately
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          persist-credentials: false
+
+      - name: Verify exact existing QA and owner-approved testing-only freeze
         shell: bash
         env:
-          EXPECTED_MANIFEST_SHA: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ACTUAL="$(shasum -a 256 docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md | awk '{print $1}')"
-          test "$EXPECTED_MANIFEST_SHA" = "$ACTUAL" || { echo 'BIL_IOS_V34_STAGING_MANIFEST_SHA256 does not match the frozen manifest.' >&2; exit 1; }
+          test "$(git rev-parse HEAD)" = 3f0085e6e6686f2e87e9cf14789e9e578ea64159
+          test "$(git -C control rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 control/tool/release/store_qa_release.py verify \
+            --platform ios --manifest control/docs/release/BIL_STORE_QA_CANDIDATE_2026-10-04.json \
+            | tee BIL-store-qa-upstream-qa.txt
 
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
@@ -66,7 +86,7 @@ jobs:
         if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-ios-toolchain-evidence-${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
+          name: bil-ios-store-qa-toolchain-evidence-35-${{ github.sha }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -91,8 +111,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 34 )) || {
-            echo 'build_number must be exactly 34 for the iOS release candidate; build 33 and earlier must never be selected.' >&2
+          (( BUILD_NUMBER == 35 )) || {
+            echo 'build_number must be exactly 35 for this testing-only freeze; never reuse protected build 34.' >&2
             exit 1
           }
           [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
@@ -224,7 +244,7 @@ jobs:
           print('APPLE_PROVISIONING_PROFILE_GATE=PASS')
           PY
 
-      - name: Resolve and validate source
+      - name: Resolve production dependencies and retain all eight open release reviews
         env:
           BIL_RELEASE_PRODUCTION: true
           BIL_RELEASE_PLATFORM: ios
@@ -250,20 +270,17 @@ jobs:
           BIL_PUSH_PROVIDER_READY: true
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V31_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V34_FROZEN_SOURCE_MANIFEST_2026-10-02.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V34_STAGING_MANIFEST_SHA256 }}
+          BIL_SOURCE_COMMIT: 3f0085e6e6686f2e87e9cf14789e9e578ea64159
+          BIL_AUDITED_SOURCE_COMMIT: 3f0085e6e6686f2e87e9cf14789e9e578ea64159
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: 3f0085e6e6686f2e87e9cf14789e9e578ea64159
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
-          flutter pub get
-          flutter analyze --no-pub
-          dart run tool/release/validate_release_configuration.dart
-          python3 tool/release/run_portable_release_tests.py --code-only
-          flutter test --no-pub \
-            test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
-            --timeout 2m
+          set -euo pipefail
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
+          python3 control/tool/release/store_qa_release.py configuration \
+            --platform ios --manifest control/docs/release/BIL_STORE_QA_CANDIDATE_2026-10-04.json \
+            2>&1 | tee BIL-store-qa-configuration.txt
           plutil -lint ios/Runner/Info.plist
           plutil -lint ios/Runner/PrivacyInfo.xcprivacy
           plutil -lint ios/Runner/Runner.entitlements
@@ -334,7 +351,6 @@ jobs:
         run: |
           set -euo pipefail
           dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
-          python3 tool/release/test_validate_admob_production_configuration.py
           python3 tool/release/validate_admob_production_configuration.py \
             | tee BIL-ios-production-admob-source.txt
           printf '%s\n' \
@@ -416,6 +432,7 @@ jobs:
           printf '%s\n' 'IOS_MANUAL_DISTRIBUTION_SIGNING_GATE=PASS'
 
       - name: Build signed archive
+        id: ios_ipa_build
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -425,6 +442,7 @@ jobs:
           set -euo pipefail
           flutter build ipa --release --no-pub \
             --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
+            --build-name 1.0.0 \
             --build-number "$BUILD_NUMBER" \
             --dart-define=BIL_ENVIRONMENT=production \
             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
@@ -477,6 +495,16 @@ jobs:
           SIGNED_APP="$(find "$SIGNED_IPA_DIR/Payload" \
             -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
           test -d "$SIGNED_APP"
+          python3 - "$SIGNED_APP/Info.plist" "$BUILD_NUMBER" <<'PY'
+          import json,pathlib,plistlib,sys
+          info_path,expected_build=sys.argv[1:]
+          info=plistlib.loads(pathlib.Path(info_path).read_bytes())
+          evidence={key:info.get(key) for key in ('CFBundleIdentifier','CFBundleShortVersionString','CFBundleVersion')}
+          if evidence != {'CFBundleIdentifier':'com.bilhealth.bodyintelligencelog','CFBundleShortVersionString':'1.0.0','CFBundleVersion':expected_build}:
+              raise SystemExit('Final signed IPA bundle/version does not match the STORE_QA_ONLY freeze.')
+          pathlib.Path('BIL-ios-artifact-version.json').write_text(json.dumps(evidence,sort_keys=True,indent=2)+'\n')
+          print('IOS_ARTIFACT_VERSION_GATE=PASS')
+          PY
 
           BIL_ADMOB_PRODUCTION_READY=true \
           BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
@@ -514,6 +542,11 @@ jobs:
           shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
           stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
           git rev-parse HEAD | tee BIL-source-head.txt
+          git -C control rev-parse HEAD | tee BIL-control-head.txt
+          cp control/docs/release/BIL_STORE_QA_CANDIDATE_2026-10-04.json BIL-store-qa-manifest.json
+          printf '%s\n' 'RELEASE_PHASE=STORE_QA_ONLY' 'PUBLIC_RELEASE_READY=NO' \
+            'APP_REVIEW_SUBMISSION=NOT_AUTHORIZED' 'PRODUCTION_ROLLOUT=NOT_AUTHORIZED' \
+            > BIL-store-qa-boundary.txt
           printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
 
       - name: Reject forbidden bundled crypto implementations in signed IPA
@@ -538,7 +571,9 @@ jobs:
         shell: bash
         run: |
           printf '%s\n' \
-            'CODE_GATE=PASS' \
+            'UPSTREAM_EXACT_SOURCE_QA=VERIFIED' \
+            'RELEASE_PHASE=STORE_QA_ONLY' \
+            'PUBLIC_RELEASE_READY=NO' \
             'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
             'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
             'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
@@ -551,6 +586,56 @@ jobs:
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
             'PHYSICAL_DEVICE_SCOPE=Meta native Facebook authorization and Supabase token exchange,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
             > BIL-ios-gate-status.txt
+
+      - name: Preserve verified signed IPA before external TestFlight upload
+        id: signed_ios_artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios-store-qa-ipa-35-3f0085e6-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/ios/ipa/*.ipa
+            BIL-ios-codesign.txt
+            BIL-ios-codesign-verify.txt
+            BIL-ios-entitlements.plist
+            BIL-ios-embedded-profile.plist
+            BIL-ios-ipa.sha256
+            BIL-ios-ipa.size
+            BIL-ios-artifact-version.json
+            BIL-ios-crypto-scan.txt
+            BIL-ios-native-crypto-gate.txt
+            BIL-ios-production-admob-source.txt
+            BIL-ios-production-admob.txt
+            BIL-ios-production-admob-plugin-graph.txt
+            BIL-ios-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-control-head.txt
+            BIL-store-qa-manifest.json
+            BIL-store-qa-boundary.txt
+            BIL-store-qa-upstream-qa.txt
+            BIL-store-qa-configuration.txt
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
+
+      - name: Record exact testing-only signed artifact identity
+        shell: bash
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+          ARTIFACT_ID: ${{ steps.signed_ios_artifact.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.signed_ios_artifact.outputs.artifact-digest }}
+        run: |
+          set -euo pipefail
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          {
+            printf '%s\n' 'RELEASE_PHASE=STORE_QA_ONLY' 'PUBLIC_RELEASE_READY=NO' 'OPEN_RELEASE_REVIEWS=8'
+            printf 'APPLICATION_SOURCE_SHA=%s\n' "$(cat BIL-source-head.txt)"
+            printf 'CONTROL_SOURCE_SHA=%s\n' "$(cat BIL-control-head.txt)"
+            printf 'VERSION=1.0.0\nBUILD_NUMBER=%s\n' "$BUILD_NUMBER"
+            printf 'SIGNED_IPA_SHA256=%s\n' "$(cut -d ' ' -f 1 BIL-ios-ipa.sha256)"
+            printf 'ACTIONS_ARTIFACT_ID=%s\nACTIONS_ARCHIVE_DIGEST=%s\n' "$ARTIFACT_ID" "$ARTIFACT_DIGEST"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Validate candidate with App Store Connect
         if: ${{ inputs.upload_to_testflight }}
@@ -594,31 +679,6 @@ jobs:
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           xcrun altool --upload-app -f "$IPA" -t ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
-
-      - name: Upload signed IPA and validation evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: bil-ios-signed-ipa-${{ vars.BIL_IOS_V34_AUDITED_SOURCE_SHA }}
-          if-no-files-found: error
-          retention-days: 14
-          path: |
-            build/ios/ipa/*.ipa
-            BIL-ios-codesign.txt
-            BIL-ios-codesign-verify.txt
-            BIL-ios-entitlements.plist
-            BIL-ios-embedded-profile.plist
-            BIL-ios-ipa.sha256
-            BIL-ios-ipa.size
-            BIL-ios-crypto-scan.txt
-            BIL-ios-native-crypto-gate.txt
-            BIL-ios-production-admob-source.txt
-            BIL-ios-production-admob.txt
-            BIL-ios-production-admob-plugin-graph.txt
-            BIL-ios-gate-status.txt
-            BIL-build-number.txt
-            BIL-source-head.txt
-            BIL-apple-release-toolchain.txt
-            BIL-apple-release-toolchain.json
 
       - name: Remove ephemeral release inputs
         if: always()
