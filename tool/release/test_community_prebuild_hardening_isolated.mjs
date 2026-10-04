@@ -16,6 +16,9 @@ const psql = process.env.BIL_QA_PSQL ?? 'psql';
 const migration = readFileSync(resolve(here,
   '../../supabase/migrations/20261004073453_community_prebuild_privacy_write_hardening_v1.sql'));
 console.log('AUDITED_MIGRATION_SHA256:' + createHash('sha256').update(migration).digest('hex'));
+const draftConstraintMigration = readFileSync(resolve(here,
+  '../../supabase/migrations/20261004131411_community_draft_body_whitespace_contract_v1.sql'));
+console.log('DRAFT_CONSTRAINT_MIGRATION_SHA256:' + createHash('sha256').update(draftConstraintMigration).digest('hex'));
 const args = ['-X', '-qAt', '-v', 'ON_ERROR_STOP=1'];
 function run(sql) {
   const result = spawnSync(psql, args, {
@@ -70,13 +73,15 @@ const transports = [
   'grant execute on function public.bil_delete_community_post(uuid) to authenticated;',
 ].join('\n');
 const fixture = readFileSync(resolve(here, 'test_community_prebuild_hardening_isolated.sql'), 'utf8');
-if (!fixture.includes('-- PREBUILD_EXACT_TRANSPORT') || !fixture.includes('-- PREBUILD_EXACT_HELPERS')) {
+if (!fixture.includes('-- PREBUILD_EXACT_TRANSPORT') || !fixture.includes('-- PREBUILD_EXACT_HELPERS') ||
+    !fixture.includes('-- PREBUILD_EXACT_DRAFT_BODY_CONSTRAINT_FORWARD')) {
   throw new Error('Missing exact function load marker');
 }
 // Callback replacements preserve literal SQL dollar quotes. A replacement
 // string would interpret $$ as $, corrupting the exact function definition.
 const initial = run(fixture.replace('-- PREBUILD_EXACT_HELPERS', () => helpers)
-  .replace('-- PREBUILD_EXACT_TRANSPORT', () => transports));
+  .replace('-- PREBUILD_EXACT_TRANSPORT', () => transports)
+  .replace('-- PREBUILD_EXACT_DRAFT_BODY_CONSTRAINT_FORWARD', () => draftConstraintMigration.toString('utf8')));
 process.stdout.write(initial.stderr);
 if (!initial.stdout.includes('ISOLATED_FUNCTION_AND_ROLE_ASSERTIONS_PASSED')) throw new Error('Missing SQL completion marker');
 console.log('PASS: exact forward migration + ordinary-role privacy/write assertions');

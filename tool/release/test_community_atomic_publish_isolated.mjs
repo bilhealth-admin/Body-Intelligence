@@ -42,6 +42,9 @@ function exactFunction(sql, qualified) {
 const forward = file('../../supabase/migrations/20261004073453_community_prebuild_privacy_write_hardening_v1.sql');
 run(exactFunction(forward, 'public.bil_guard_community_member_access') + '\n' +
     exactFunction(forward, 'public.bil_upsert_my_community_post_draft_v1'));
+// Preserve the exact old live CHECK in the baseline. The privacy runner first
+// proves that boundary rejects LF/CR/TAB, then validates this constraint-only fix.
+run('begin;\n' + file('../../supabase/migrations/20261004131411_community_draft_body_whitespace_contract_v1.sql') + '\ncommit;');
 run(file('../../supabase/migrations/20261004074954_community_atomic_publish_operation_v1.sql'));
 const assertions = run(file('test_community_atomic_publish_isolated.sql'));
 if (!assertions.stdout.includes('ATOMIC_FUNCTION_AND_ROLE_ASSERTIONS_PASSED')) throw new Error('Missing atomic proof');

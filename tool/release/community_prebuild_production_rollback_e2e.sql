@@ -5,7 +5,9 @@
 -- community_prebuild_privacy_write_hardening_v1
 -- community_atomic_publish_operation_v1
 -- notification_delivery_preferences_authority_v1
--- Source filenames 20261004073453 / 20261004074954 / 20261004094021 are NOT Production version
+-- community_draft_body_whitespace_contract_v1
+-- Source filenames 20261004073453 / 20261004074954 / 20261004094021 /
+-- 20261004131411 are NOT Production version
 -- requirements: MCP apply_migration generates its own timestamp. Names alone
 -- do NOT attest body identity. Root must independently read back migration
 -- statements plus relevant functions/grants/policies/triggers and compare them
@@ -479,6 +481,8 @@ begin
       where name='community_atomic_publish_operation_v1')<>1
       or (select count(*) from supabase_migrations.schema_migrations
       where name='notification_delivery_preferences_authority_v1')<>1
+      or (select count(*) from supabase_migrations.schema_migrations
+      where name='community_draft_body_whitespace_contract_v1')<>1
       or to_regprocedure('public.bil_publish_community_post_operation_v1(uuid,jsonb)') is null
       or to_regprocedure('public.bil_get_my_push_delivery_categories_v1()') is null
       or to_regprocedure('public.bil_set_my_push_delivery_categories_v1(boolean,boolean,boolean,bigint)') is null then
@@ -590,10 +594,11 @@ begin
         discoverable,allow_follows,show_membership_tier)
       values(v_uid,case when v_uid=v_a then 'Audit Author' else 'Audit Reviewer' end,
         'Nutrition release audit','public',true,true,false);
-    -- Exact production app boundary: owner policy upsert + canonical trigger.
+    -- SDK omits onConflict: PostgREST uses the complete composite primary key.
+    -- Preserve the canonical owner/current-policy trigger on both write paths.
     insert into public.bil_content_policy_acceptances(user_id,policy_version)
-      values(v_uid,v_policy) on conflict(user_id) do update
-      set policy_version=excluded.policy_version;
+      values(v_uid,v_policy) on conflict(user_id,policy_version) do update
+      set user_id=excluded.user_id,policy_version=excluded.policy_version;
     v_result:=public.bil_current_community_policy_status();
     if v_result->>'status' is distinct from 'accepted' then
       raise exception 'AUDIT authoritative policy readback did not accept: %',v_result;

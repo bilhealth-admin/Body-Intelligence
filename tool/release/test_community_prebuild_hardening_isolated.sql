@@ -68,6 +68,9 @@ create table public.bil_community_post_drafts_v1(
  hashtags text[],poll_question text,poll_options text[],poll_allow_multiple boolean,
  created_at timestamptz default clock_timestamp(),updated_at timestamptz default clock_timestamp()
 );
+-- Exact current Production CHECK from community_atomic_publish_live_baseline.sql.
+-- Do not omit the table boundary merely because the RPC validates its input.
+alter table public.bil_community_post_drafts_v1 add constraint bil_community_post_drafts_v1_body_check CHECK (((char_length(body) <= 1200) AND (body !~ '[[:cntrl:]]'::text)));
 create table public.bil_community_post_draft_media_v1(
  draft_id uuid references public.bil_community_post_drafts_v1(draft_id) on delete cascade,
  position smallint,object_path text,mime_type text,bytes integer,width integer,height integer
@@ -203,13 +206,50 @@ select qa_expect_error('select bil_upsert_my_community_post_draft_v1(''eeeeeeee-
 reset role;
 insert into public.bil_content_policy_acceptances values('11111111-1111-4111-8111-111111111111','community-policy-v1',now());
 set local role authenticated;
+select qa_expect_error(format(
+ 'select bil_upsert_my_community_post_draft_v1(''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1'',p_body=>%L)',
+ E'سطر عربي\nEnglish line\tmore\rReturn line'),
+ '23514','exact original Production CHECK rejects RPC-approved LF/CR/TAB draft');
+reset role;
+-- PREBUILD_EXACT_DRAFT_BODY_CONSTRAINT_FORWARD
+set local role authenticated;
 select bil_upsert_my_community_post_draft_v1(
- 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1',p_title=>'Real title',p_body=>E'سطر عربي\nEnglish line\tmore',
+ 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1',p_title=>'Real title',p_body=>E'سطر عربي\nEnglish line\tmore\rReturn line',
  p_mentioned_user_ids=>array['22222222-2222-4222-8222-222222222222'::uuid],
  p_collaborator_user_ids=>array['22222222-2222-4222-8222-222222222222'::uuid],p_hashtags=>array['#Bil']);
-select qa_assert(bil_get_my_community_post_draft_v1('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1')->>'body'=E'سطر عربي\nEnglish line\tmore','Arabic English multiline/tab draft preserved exactly');
+select qa_assert(bil_get_my_community_post_draft_v1('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1')->>'body'=E'سطر عربي\nEnglish line\tmore\rReturn line','Arabic English LF/CR/TAB draft preserved exactly after constraint-only forward');
 select qa_assert(bil_get_my_community_post_draft_v1('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1')->>'title'='Real title' and bil_get_my_community_post_draft_v1('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1')->'hashtags'='["bil"]'::jsonb,'title and normalized hashtag persistence');
 select qa_expect_error(format('select bil_upsert_my_community_post_draft_v1(''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2'',p_body=>%L)','bad'||chr(1)),'22023','unsafe control remains rejected');
+select bil_upsert_my_community_post_draft_v1(
+ 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2',p_body=>repeat('ش',1200));
+select qa_assert(bil_get_my_community_post_draft_v1('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2')->>'body'=repeat('ش',1200),'1200-character Arabic body remains accepted with exact readback');
+select qa_expect_error(
+ 'select bil_upsert_my_community_post_draft_v1(''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2'',p_body=>repeat(''ش'',1201))',
+ '22023','1201-character RPC body remains rejected');
+do $all_unsafe_controls$ declare v_code integer; begin
+ for v_code in select generate_series(1,31) union all select 127 loop
+  if v_code not in (9,10,13) then
+   perform qa_expect_error(format(
+    'select bil_upsert_my_community_post_draft_v1(''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2'',p_body=>%L)',
+    'bad'||chr(v_code)), '22023','RPC rejects remaining control code '||v_code);
+  end if;
+ end loop;
+end $all_unsafe_controls$;
+reset role;
+-- Owner-only fixture checks exercise the CHECK itself without granting app CRUD.
+select qa_expect_error(
+ 'update public.bil_community_post_drafts_v1 set body=repeat(''ش'',1201) where draft_id=''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2''',
+ '23514','table CHECK independently preserves 1200-character budget');
+do $table_unsafe_controls$ declare v_code integer; begin
+ for v_code in select generate_series(1,31) union all select 127 loop
+  if v_code not in (9,10,13) then
+   perform qa_expect_error(format(
+    'update public.bil_community_post_drafts_v1 set body=%L where draft_id=''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2''',
+    'bad'||chr(v_code)), '23514','table CHECK rejects remaining control code '||v_code);
+  end if;
+ end loop;
+end $table_unsafe_controls$;
+set local role authenticated;
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
 select qa_expect_error('select bil_get_my_community_post_draft_v1(''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1'')','P0002','nonowner draft read denied');
 select qa_expect_error('select bil_upsert_my_community_post_draft_v1(''eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1'',p_body=>''steal'')','42501','nonowner draft overwrite denied');

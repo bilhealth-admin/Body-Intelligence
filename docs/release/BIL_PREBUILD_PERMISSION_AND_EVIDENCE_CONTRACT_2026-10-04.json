@@ -40,11 +40,25 @@
       "Targeted staging QA succeeds for the exact committed candidate",
       "Candidate staging QA succeeds for the exact committed candidate"
     ],
-    "forward_only_unapplied_migrations": [
+    "forward_only_migrations": [
       "20261004073453_community_prebuild_privacy_write_hardening_v1.sql",
       "20261004074954_community_atomic_publish_operation_v1.sql",
-      "20261004094021_notification_delivery_preferences_authority_v1.sql"
+      "20261004094021_notification_delivery_preferences_authority_v1.sql",
+      "20261004131411_community_draft_body_whitespace_contract_v1.sql"
     ],
+    "applied_readback_checkpoint": {
+      "at_utc": "2026-10-04T13:04:36Z",
+      "migration_count": 203,
+      "source_sha": "e82858bc75a45e1ae65617a34aa1d72389bb1d72",
+      "stored_statement_identity": "All three entire stored SQL statements matched their source literals",
+      "actual_production_versions": {
+        "community_prebuild_privacy_write_hardening_v1": "20261004130400",
+        "community_atomic_publish_operation_v1": "20261004130406",
+        "notification_delivery_preferences_authority_v1": "20261004130413"
+      },
+      "remaining_unapplied_at_checkpoint": "community_draft_body_whitespace_contract_v1",
+      "full_production_e2e": "FAILED_23514_MULTILINE_DRAFT_CHECK_REQUIRES_FOURTH_FORWARD_FIX_AND_NEW_GREEN_STAGING"
+    },
     "must_follow_apply": [
       "Production migration readback",
       "Focused Production role-authenticated RPC assertions inside a rolled-back transaction; not Auth-service HTTP login, native E2E or provider delivery",
