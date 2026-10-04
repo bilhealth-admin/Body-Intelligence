@@ -6,7 +6,8 @@ begin
   if to_regclass('public.bil_social_comments_v2') is null
      or to_regprocedure('public.bil_social_post_visible_v2(uuid)') is null
      or to_regprocedure('public.bil_social_member_visible_v2(uuid)') is null
-     or to_regprocedure('public.bil_social_profile_visible_v2(uuid)') is null then
+     or to_regprocedure('public.bil_social_profile_visible_v2(uuid)') is null
+     or to_regprocedure('public.bil_can_use_community()') is null then
     raise exception 'community_feed_comment_preview_dependencies_missing';
   end if;
 end
