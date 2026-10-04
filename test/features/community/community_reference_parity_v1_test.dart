@@ -332,6 +332,9 @@ void main() {
       final feed = File(
         'lib/features/community/presentation/community_feed_tab.dart',
       ).readAsStringSync();
+      final feedSuggestions = File(
+        'lib/features/community/presentation/community_feed_reference_suggestions.dart',
+      ).readAsStringSync();
       final card = File(
         'lib/features/community/presentation/community_post_card.dart',
       ).readAsStringSync();
@@ -356,7 +359,7 @@ void main() {
         contains("'bil_community_feed_comment_previews_v1'"),
       );
       expect(pagination, contains('loadCommunityFeedCommentPreviews(ids)'));
-      expect(feed, contains("'community-feed-topic-suggestions'"));
+      expect(feedSuggestions, contains("'community-feed-topic-suggestions'"));
       expect(feed, contains('commentPreview: _commentPreviewByPost[post.id]'));
       expect(card, contains("'community-post-comment-preview-"));
       expect(profile, contains('repository.loadGoldBalance()'));
@@ -389,21 +392,27 @@ void main() {
       expect(find.text('Follow'), findsOneWidget);
       expect(find.text('Follows you'), findsOneWidget);
       expect(find.text('2/7 Badges'), findsOneWidget);
-      expect(
-        find.byKey(const Key('community-profile-tab-moments')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const Key('community-profile-tab-reviews')),
-        findsOneWidget,
-      );
-
       await tester.tap(
         find.byKey(const Key('community-profile-follow-action')),
       );
       await tester.pumpAndSettle();
       expect(repository.followCalls, 1);
       expect(find.text('Following'), findsOneWidget);
+
+      final momentsTab = find.byKey(
+        const Key('community-profile-tab-moments'),
+      );
+      await tester.scrollUntilVisible(
+        momentsTab,
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(momentsTab, findsOneWidget);
+      expect(
+        find.byKey(const Key('community-profile-tab-reviews')),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byKey(const Key('community-profile-tab-reviews')));
       await tester.pumpAndSettle();
