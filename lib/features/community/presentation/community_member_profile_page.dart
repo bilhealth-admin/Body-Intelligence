@@ -40,6 +40,8 @@ class _CommunityMemberProfilePageState
       widget.repository ?? _communityProfileProductionRepository();
   CommunityProfileOverview? _profile;
   CommunityCreatorProfile? _creator;
+  CommunityGoldBalance? _goldBalance;
+  List<CommunityQuest> _quests = const <CommunityQuest>[];
   String? _coverUrl;
   final List<CommunityPost> _posts = [];
   final List<CommunityProfileReview> _reviews = [];
@@ -78,6 +80,8 @@ class _CommunityMemberProfilePageState
     final batch = core[1] as CommunityFeedBatch;
 
     CommunityCreatorProfile? creator;
+    CommunityGoldBalance? goldBalance;
+    List<CommunityQuest> quests = const <CommunityQuest>[];
     List<CommunityProfileReview> reviews = const <CommunityProfileReview>[];
     List<CommunityDraftSummary> drafts = const <CommunityDraftSummary>[];
     Map<String, int> counts = const <String, int>{};
@@ -112,12 +116,29 @@ class _CommunityMemberProfilePageState
       counts = extras[3] as Map<String, int>;
       references = extras[4] as List<CommunityPostReferenceMetadata>;
       _coverUrl = await repository.loadCommunityProfileCoverUrl(widget.userId);
+      if (profile.isSelf) {
+        try {
+          final rewards = await Future.wait<Object>([
+            repository.loadGoldBalance(),
+            repository.loadCommunityQuests(),
+          ]);
+          goldBalance = rewards[0] as CommunityGoldBalance;
+          quests = rewards[1] as List<CommunityQuest>;
+        } on Object {
+          // Creator rewards are an enhancement to the self-profile. The
+          // profile itself remains usable when reward policy is unavailable.
+          goldBalance = null;
+          quests = const <CommunityQuest>[];
+        }
+      }
     } else {
       _coverUrl = null;
     }
 
     _profile = profile;
     _creator = creator;
+    _goldBalance = goldBalance;
+    _quests = List<CommunityQuest>.unmodifiable(quests);
     _posts
       ..clear()
       ..addAll(batch.posts);
@@ -529,6 +550,8 @@ class _CommunityMemberProfilePageState
                           child: _CommunityCreatorPanel(
                             creator: creator,
                             isSelf: profile.isSelf,
+                            goldBalance: _goldBalance,
+                            quests: _quests,
                           ),
                         ),
                       ),
