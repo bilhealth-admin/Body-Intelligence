@@ -42,6 +42,8 @@ jobs:
       - name: Exact formatter
         run: |
           set -o pipefail
+          dart format --output=show --summary=none lib/features/community/presentation/community_notifications_page.dart > /tmp/notification-resilience/formatted-page.dart
+          dart format --output=show --summary=none test/features/community/community_notification_resilience_test.dart > /tmp/notification-resilience/formatted-regression.dart
           dart format --output=none --set-exit-if-changed lib/features/community/presentation/community_notifications_page.dart test/features/community/community_notification_resilience_test.dart 2>&1 | tee /tmp/notification-resilience/format.log
       - name: Analyze changed source and regression
         if: ${{ !cancelled() }}

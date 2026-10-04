@@ -11,7 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _NotificationRepository extends CommunityRepository {
-  _NotificationRepository()
+  _NotificationRepository({this.path = '/community/connections'})
     : super(
         SupabaseClient(
           'https://notification-fixture.invalid',
@@ -20,6 +20,7 @@ class _NotificationRepository extends CommunityRepository {
         ),
       );
 
+  final String path;
   final writes = <Completer<int>>[];
   final markedIds = <List<String>>[];
 
@@ -43,7 +44,7 @@ class _NotificationRepository extends CommunityRepository {
       entityKind: 'friendship',
       entityId: '33333333-3333-4333-8333-333333333333',
       copyKey: 'friend_accepted_v1',
-      deepLinkPath: '/community/connections',
+      deepLinkPath: path,
     ),
   ];
 
@@ -180,5 +181,23 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(SnackBar), findsNothing);
     expect(find.text('Connections destination'), findsNothing);
+  });
+
+  testWidgets('server acceptance inbox link opens its relationship', (
+    tester,
+  ) async {
+    final repository = _NotificationRepository(
+      path: '/community/notifications',
+    );
+    final write = Completer<int>();
+    repository.writes.add(write);
+    await _pumpNotifications(tester, repository, language: 'en');
+    await tester.tap(_acceptanceRow('en'));
+    await tester.pump();
+    write.complete(1);
+    await tester.pumpAndSettle();
+    expect(repository.markedIds, hasLength(1));
+    expect(find.text('Connections destination'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
