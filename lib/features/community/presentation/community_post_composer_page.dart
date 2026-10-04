@@ -73,6 +73,10 @@ class _CommunityPostComposerPageState
   late final _title = TextEditingController(text: widget.draft.title);
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
+  final _circleAnchor = GlobalKey();
+  final _locationAnchor = GlobalKey();
+  final _collaborationAnchor = GlobalKey();
+  final _pollAnchor = GlobalKey();
   late final _location = TextEditingController(
     text: widget.draft.locationLabel,
   );
