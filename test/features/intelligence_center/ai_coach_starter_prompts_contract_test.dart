@@ -18,7 +18,7 @@ void main() {
     expect(viewport, contains('_CoachStarterPrompts(onPrompt: usePrompt)'));
     expect(widgets, contains("ValueKey('ai-coach-starter-prompts')"));
     expect(widgets, contains("'Review my day from my saved BIL data"));
-    expect(widgets, contains("'without inventing missing data.'"));
+    expect(widgets, contains('without inventing missing data.'));
     expect(actions, contains('question.text = value;'));
     expect(actions, contains('ask();'));
   });
