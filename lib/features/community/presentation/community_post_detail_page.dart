@@ -38,6 +38,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   bool _loadingMore = false;
   bool _submitting = false;
   bool _likingPost = false;
+  bool _savingPost = false;
+  bool _sharingPost = false;
+  late bool _savedPost = widget.post.saved;
   bool _followBusy = false;
   int? _viewCount;
   CommunityProfileOverview? _authorProfile;
@@ -318,6 +321,42 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       if (mounted) _showActionError();
     } finally {
       if (mounted) setState(() => _likingPost = false);
+    }
+  }
+  Future<void> _togglePostSaved() async {
+    if (_savingPost) return;
+    setState(() => _savingPost = true);
+    try {
+      final state = await widget.repository.setPostSaved(
+        widget.post.id,
+        saved: !_savedPost,
+      );
+      if (mounted) setState(() => _savedPost = state.saved);
+    } catch (_) {
+      if (mounted) _showActionError();
+    } finally {
+      if (mounted) setState(() => _savingPost = false);
+    }
+  }
+
+  Future<void> _sharePost(BuildContext anchorContext) async {
+    if (_sharingPost) return;
+    setState(() => _sharingPost = true);
+    try {
+      final box = anchorContext.findRenderObject() as RenderBox?;
+      await SharePlus.instance.share(
+        ShareParams(
+          text:
+              '${widget.post.authorName ?? communityText(context, 'BIL member', 'عضو BIL')}\n\n${widget.post.body}',
+          sharePositionOrigin: box == null
+              ? null
+              : box.localToGlobal(Offset.zero) & box.size,
+        ),
+      );
+    } catch (_) {
+      if (mounted) _showActionError();
+    } finally {
+      if (mounted) setState(() => _sharingPost = false);
     }
   }
 
