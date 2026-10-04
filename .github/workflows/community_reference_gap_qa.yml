@@ -24,99 +24,54 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: flutter pub get
-      - name: Repair missing visual fixture seam and lazy navigation
+      - name: Replace fixed media height with intrinsic accessible layout
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('test/features/community/community_polish_visual_test.dart')
+          path = Path('lib/features/community/presentation/community_post_composer_rendering.dart')
           text = path.read_text()
-          def replace_once(old, new, label):
-              global text
-              if new in text:
-                  return
-              if text.count(old) != 1:
-                  raise SystemExit(f'{label}: source changed; inspect before retrying')
-              text = text.replace(old, new, 1)
-          old = '  String get currentUserId => owner;\n'
-          new = old + '''  @override
-            Future<Map<String, String>> loadVisibleMembershipTiers(
-              List<String> userIds,
-            ) async => const <String, String>{};
-          '''.replace('\n  ', '\n')
-          replace_once(old, new, 'membership fixture')
-          old = '                await tester.ensureVisible(comments);\n'
-          new = '''                await tester.scrollUntilVisible(
-                            comments.hitTestable(),
-                            180,
-                            scrollable: find.descendant(
-                              of: find.byKey(
-                                const PageStorageKey('community-feed-scroll-for_you'),
-                              ),
-                              matching: find.byType(Scrollable),
-                            ).first,
-                          );
-          '''
-          replace_once(old, new, 'lazy comment navigation')
-          old = '                await tester.tap(comments);\n'
-          new = '''                expect(comments.hitTestable(), findsOneWidget);
-                          await tester.tap(comments);
-          '''
-          replace_once(old, new, 'hit test requirement')
-          old = "                  reason: 'post details/comments',\n                );\n"
-          new = old + '''                expect(
-                            find.byKey(const Key('community-post-detail-list')),
-                            findsOneWidget,
-                          );
-          '''
-          replace_once(old, new, 'detail route assertion')
-          path.write_text(text)
-          print('Applied only guarded visual fixture/navigation repairs.')
+          start = text.index('                        if (_selectedImages.isEmpty) ...[')
+          end = text.index('                        ..._CommunityPostComposerReferenceSections(', start)
+          block = text[start:end]
+          old = 'child: SizedBox(\n                              width: 132,\n                              height: 116,'
+          new = 'child: ConstrainedBox(\n                              constraints: const BoxConstraints(\n                                minWidth: 132,\n                                maxWidth: 132,\n                                minHeight: 116,\n                              ),'
+          if old in block:
+              assert block.count(old) == 1
+              block = block.replace(old, new, 1)
+              old_column = 'child: Column(\n                                  mainAxisAlignment:'
+              new_column = 'child: Column(\n                                  mainAxisSize: MainAxisSize.min,\n                                  mainAxisAlignment:'
+              assert block.count(old_column) == 1
+              block = block.replace(old_column, new_column, 1)
+              text = text[:start] + block + text[end:]
+              path.write_text(text)
+          else:
+              assert 'minHeight: 116,' in block and 'mainAxisSize: MainAxisSize.min,' in block
+          print('Media tile grows with content; text scaling and assertions unchanged.')
           PY
-      - name: Apply exact Dart formatting
+      - name: Format exact changed source
         run: |
-          dart format \
-            lib/features/community/data/community_social_repository_mixin.dart \
-            lib/features/community/data/community_repository_reference_parity_mixin.dart \
-            lib/features/community/presentation/community_hub_page.dart \
-            lib/features/community/presentation/community_feed_tab.dart \
-            lib/features/community/presentation/community_feed_reference_suggestions.dart \
-            lib/features/community/presentation/community_feed_pagination.dart \
-            lib/features/community/presentation/community_post_card.dart \
-            lib/features/community/presentation/community_post_reference_widgets.dart \
-            lib/features/community/presentation/community_post_detail_page.dart \
-            lib/features/community/presentation/community_post_detail_reference_actions.dart \
-            lib/features/community/presentation/community_post_detail_rendering.dart \
-            lib/features/community/presentation/community_post_detail_header.dart \
-            lib/features/community/presentation/community_circles_page.dart \
-            lib/features/community/presentation/community_member_profile_page.dart \
-            lib/features/community/presentation/community_member_profile_creator_widgets.dart \
-            lib/features/community/presentation/community_post_composer_page.dart \
-            lib/features/community/presentation/community_post_composer_rendering.dart \
-            lib/features/community/presentation/community_post_composer_toolbar.dart \
-            test/features/community/community_reference_parity_v1_test.dart \
-            test/features/community/community_polish_visual_test.dart \
-            test/features/community/community_reference_composer_v1_test.dart
-      - name: Commit guarded repairs and exact formatting
+          dart format lib/features/community/presentation/community_post_composer_rendering.dart
+          git diff --check
+      - name: Commit guarded source correction
         shell: bash
         run: |
           set -euo pipefail
-          git diff --check
-          if git diff --quiet -- '*.dart'; then
-            echo "No source changes."
-          else
+          if ! git diff --quiet -- '*.dart'; then
             git config user.name "bil-community-qa"
             git config user.email "actions@users.noreply.github.com"
-            git add -- '*.dart'
-            git commit -m "test(community): repair visual fixture and lazy hit testing"
+            git add lib/features/community/presentation/community_post_composer_rendering.dart
+            git commit -m "fix(community): let media tile grow with accessible text"
             git push origin HEAD:work/community-reference-parity-20261003
           fi
           echo "TESTED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           echo "Tested source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Strict current Community formatting
+        run: dart format --output=none --set-exit-if-changed lib/features/community test/features/community
       - name: Analyze complete source
         run: flutter analyze --no-pub
-      - name: Verify source-size boundaries
+      - name: Verify changed production source-size boundaries
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -142,6 +97,11 @@ jobs:
               print(path, lines)
               assert lines <= 700, (path, lines)
           PY
+      - name: Composer locale and image regression matrix
+        run: |
+          flutter test --no-pub \
+            test/features/community/community_post_image_support_test.dart \
+            --timeout 2m
       - name: Focused reference parity contracts
         run: |
           flutter test --no-pub \
@@ -159,11 +119,6 @@ jobs:
         run: |
           flutter test --no-pub \
             test/features/community/community_polish_visual_test.dart \
-            --timeout 2m
-      - name: Composer locale and image regression matrix
-        run: |
-          flutter test --no-pub \
-            test/features/community/community_post_image_support_test.dart \
             --timeout 2m
       - name: Preserve rendered visual evidence
         if: always()
