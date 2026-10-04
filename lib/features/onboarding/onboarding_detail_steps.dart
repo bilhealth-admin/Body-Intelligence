@@ -514,36 +514,60 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
     );
   }
 
+  String _aiConsentCopy(String english, String arabic) {
+    if (Localizations.localeOf(context).languageCode == 'ar') return arabic;
+    return t(english);
+  }
+
   Future<void> _setAiConsent(bool granted, {bool thenContinue = false}) async {
     if (_permissionBusy) return;
     if (granted) {
-      final accepted = await showDialog<bool>(
+      final accepted = await showBilPremiumAiConsentSheet(
         context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => AlertDialog.adaptive(
-          contentPadding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
-          content: SingleChildScrollView(
-            child: BilPremiumTrustSurface(
-              icon: Icons.auto_awesome_rounded,
-              title: t('Send selected personal data to Google Gemini?'),
-              body: t(
-                'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.',
-              ),
+        title: _aiConsentCopy(
+          'Send selected personal data to Google Gemini?',
+          'إرسال بيانات شخصية محددة إلى Google Gemini؟',
+        ),
+        intro: _aiConsentCopy(
+          'BIL uses Google Gemini, a third-party AI service operated by Google, only to generate the answer you request.',
+          'يستخدم BIL خدمة Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط لإنشاء الإجابة التي تطلبها.',
+        ),
+        points: [
+          BilPremiumAiConsentPoint(
+            icon: Icons.tune_rounded,
+            title: _aiConsentCopy(
+              'Only the context you choose',
+              'فقط السياق الذي تختاره',
+            ),
+            body: _aiConsentCopy(
+              'Your question; selected weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns.',
+              'سؤالك؛ وما تختاره من الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 رسالة.',
             ),
           ),
-          actions: [
-            TextButton(
-              key: const Key('onboarding-ai-consent-decline'),
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(t("Don't Allow")),
+          BilPremiumAiConsentPoint(
+            icon: Icons.mic_off_rounded,
+            title: _aiConsentCopy(
+              'Raw microphone audio is not sent',
+              'لا يتم إرسال صوت الميكروفون الخام',
             ),
-            FilledButton(
-              key: const Key('onboarding-ai-consent-accept'),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(t('Allow & Continue')),
+            body: _aiConsentCopy(
+              'Voice recognition stays separate from this Remote AI consent.',
+              'يبقى التعرف على الصوت منفصلًا عن موافقة الذكاء الاصطناعي عن بُعد.',
             ),
-          ],
-        ),
+          ),
+          BilPremiumAiConsentPoint(
+            icon: Icons.verified_user_outlined,
+            title: _aiConsentCopy('You stay in control', 'التحكم يبقى بيدك'),
+            body: _aiConsentCopy(
+              'You can decline and keep using local BIL features, or withdraw this consent later in AI Coach settings.',
+              'يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، أو سحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
+            ),
+          ),
+        ],
+        allowLabel: _aiConsentCopy('Allow & Continue', 'السماح والمتابعة'),
+        declineLabel: _aiConsentCopy("Don't Allow", 'عدم السماح'),
+        allowKey: const Key('onboarding-ai-consent-accept'),
+        declineKey: const Key('onboarding-ai-consent-decline'),
       );
       if (accepted != true || !mounted) return;
     }

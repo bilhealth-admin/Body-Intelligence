@@ -16,19 +16,26 @@ void main() {
     final privacy = File(
       'lib/features/settings/sharing_privacy_settings_page.dart',
     ).readAsStringSync();
+    final shared = File(
+      'lib/shared/widgets/bil_premium_trust_surface.dart',
+    ).readAsStringSync();
     final settings = File(
       'lib/features/intelligence_center/presentation/ai_coach_settings_usage_widgets.dart',
     ).readAsStringSync();
 
-    expect(onboarding, contains('BilPremiumTrustSurface('));
+    expect(onboarding, contains('showBilPremiumAiConsentSheet('));
     expect(onboarding, contains("Key('onboarding-ai-consent-decline')"));
     expect(onboarding, contains("Key('onboarding-ai-consent-accept')"));
-    expect(coach, contains('BilPremiumTrustSurface('));
+    expect(coach, contains('showBilPremiumAiConsentSheet('));
     expect(vision, contains('BilPremiumTrustSurface('));
     expect(vision, contains("Key('meal-vision-consent-decline')"));
     expect(vision, contains("Key('meal-vision-consent-accept')"));
     expect(privacy, contains('BilPremiumConsentToggle('));
     expect(privacy, contains("Key('meal-vision-ai-consent')"));
     expect(settings, contains('BilPremiumConsentToggle('));
+    expect(shared, contains('class _BilPremiumAiConsentSheet'));
+    expect(shared, contains('SingleChildScrollView('));
+    expect(shared, contains('Color(0xFF64D8FF)'));
+    expect(shared, contains('Color(0xFF7568FF)'));
   });
 }

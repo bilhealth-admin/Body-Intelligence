@@ -581,45 +581,52 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     }
     consentPromptVisible = true;
     try {
-      final enabled = await showModalBottomSheet<bool>(
+      final enabled = await showBilPremiumAiConsentSheet(
         context: context,
-        showDragHandle: true,
-        isScrollControlled: true,
-        builder: (sheetContext) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  BilPremiumTrustSurface(
-                    icon: Icons.auto_awesome_rounded,
-                    title: tr(
-                      'Send selected personal data to Google Gemini?',
-                      'إرسال بيانات شخصية محددة إلى Google Gemini؟',
-                    ),
-                    body: tr(
-                      'If you agree, BIL sends your question and only the context you selected—such as weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate your requested answer. Raw microphone audio is not sent to BIL or Google Gemini. You can decline and keep using BIL’s local features, and withdraw consent later in AI Coach settings.',
-                      'إذا وافقت، يرسل BIL سؤالك والسياق الذي اخترته فقط—مثل الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ وما يصل إلى آخر 12 رسالة—إلى Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، لإنشاء الإجابة التي طلبتها. لا يُرسل صوت الميكروفون الخام إلى BIL أو Google Gemini. يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، وسحب الموافقة لاحقًا من إعدادات مدرب BIL.',
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => Navigator.pop(sheetContext, true),
-                      child: Text(tr('Allow & Continue', 'السماح والمتابعة')),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(sheetContext, false),
-                    child: Text(tr("Don't Allow", 'عدم السماح')),
-                  ),
-                ],
-              ),
+        title: tr(
+          'Send selected personal data to Google Gemini?',
+          'إرسال بيانات شخصية محددة إلى Google Gemini؟',
+        ),
+        intro: tr(
+          'BIL uses Google Gemini, a third-party AI service operated by Google, only to generate the answer you request.',
+          'يستخدم BIL خدمة Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط لإنشاء الإجابة التي تطلبها.',
+        ),
+        points: [
+          BilPremiumAiConsentPoint(
+            icon: Icons.tune_rounded,
+            title: tr(
+              'Only the context you choose',
+              'فقط السياق الذي تختاره',
             ),
-          );
-        },
+            body: tr(
+              'Your question; selected weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns.',
+              'سؤالك؛ وما تختاره من الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 رسالة.',
+            ),
+          ),
+          BilPremiumAiConsentPoint(
+            icon: Icons.mic_off_rounded,
+            title: tr(
+              'Raw microphone audio is not sent',
+              'لا يتم إرسال صوت الميكروفون الخام',
+            ),
+            body: tr(
+              'Voice recognition stays separate from this Remote AI consent.',
+              'يبقى التعرف على الصوت منفصلًا عن موافقة الذكاء الاصطناعي عن بُعد.',
+            ),
+          ),
+          BilPremiumAiConsentPoint(
+            icon: Icons.verified_user_outlined,
+            title: tr('You stay in control', 'التحكم يبقى بيدك'),
+            body: tr(
+              'You can decline and keep using local BIL features, or withdraw this consent later in AI Coach settings.',
+              'يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، أو سحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
+            ),
+          ),
+        ],
+        allowLabel: tr('Allow & Continue', 'السماح والمتابعة'),
+        declineLabel: tr("Don't Allow", 'عدم السماح'),
+        allowKey: const Key('ai-coach-remote-consent-accept'),
+        declineKey: const Key('ai-coach-remote-consent-decline'),
       );
       if (enabled != true) return _RemoteAiConsentChoice.declined;
       final verified = await sharedRemoteAiConsentCoordinator()
