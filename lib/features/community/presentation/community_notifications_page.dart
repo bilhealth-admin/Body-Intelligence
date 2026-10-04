@@ -121,6 +121,19 @@ class _CommunityNotificationsPageState
         if (mounted) await CommunityAttentionScope.refresh(context);
       }
       if (mounted) await _openAndRefresh(_routeFor(notification));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'BIL could not check your updates safely. Try again.',
+              'تعذر على BIL التحقق من تحديثاتك بأمان. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
     } finally {
       _markingSeen.remove(notification.id);
     }

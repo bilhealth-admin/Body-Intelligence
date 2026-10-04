@@ -72,7 +72,8 @@ Future<GoRouter> _pumpNotifications(
       ),
       GoRoute(
         path: '/community/connections',
-        builder: (_, _) => const Scaffold(body: Text('Connections destination')),
+        builder: (_, _) =>
+            const Scaffold(body: Text('Connections destination')),
       ),
     ],
   );
@@ -101,7 +102,9 @@ Future<GoRouter> _pumpNotifications(
 
 Finder _acceptanceRow(String language) => find.widgetWithText(
   ListTile,
-  language == 'ar' ? 'Peer قبل طلب صداقتك' : 'Peer accepted your friend request',
+  language == 'ar'
+      ? 'Peer قبل طلب صداقتك'
+      : 'Peer accepted your friend request',
 );
 
 void main() {
