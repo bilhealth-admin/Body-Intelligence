@@ -1,0 +1,99 @@
+name: BIL reference delta targeted QA
+
+on:
+  push:
+    branches:
+      - work/community-reference-parity-20261003
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bil-reference-delta-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  delta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Apply the explicit one-time wiring delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-reference-delta
+          if grep -q 'ReferenceDeltaRuntimeCopy.resolve' lib/app/localization/runtime_copy.dart; then
+            echo 'Wiring already committed; validation only.'
+          else
+            python3 tool/qa/apply_reference_delta_wiring.py
+          fi
+      - name: Apply exact formatter to the changed files only
+        run: |
+          dart format \
+            lib/app/localization/runtime_copy.dart \
+            lib/app/localization/runtime_copy_reference_delta.dart \
+            tool/localization/locale_fallback_closure.dart \
+            lib/features/intelligence_center/presentation/intelligence_conversation_viewport.dart \
+            test/features/intelligence_center/ai_coach_starter_prompts_contract_test.dart \
+            test/features/community/community_social_v2_ui_test.dart \
+            test/features/dashboard/dashboard_preferences_widget_test.dart \
+            test/dashboard_polish/icon_label_layout_review_test.dart \
+            test/localization/reference_delta_copy_test.dart
+      - name: Commit exact tested source without force or branch overwrite
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git add -- \
+            lib/app/localization/runtime_copy.dart \
+            lib/app/localization/runtime_copy_reference_delta.dart \
+            tool/localization/locale_fallback_closure.dart \
+            lib/features/intelligence_center/presentation/intelligence_conversation_viewport.dart \
+            test/features/intelligence_center/ai_coach_starter_prompts_contract_test.dart \
+            test/features/community/community_social_v2_ui_test.dart \
+            test/features/dashboard/dashboard_preferences_widget_test.dart \
+            test/dashboard_polish/icon_label_layout_review_test.dart \
+            test/localization/reference_delta_copy_test.dart
+          if ! git diff --cached --quiet; then
+            git fetch origin "$GITHUB_REF_NAME" --depth=1
+            test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+            git config user.name 'BIL QA'
+            git config user.email 'bilhealth-admin@users.noreply.github.com'
+            git commit -m 'fix(qa): wire complete delta localization and precise layout checks'
+            git push origin HEAD:refs/heads/work/community-reference-parity-20261003
+          fi
+          git rev-parse HEAD | tee /tmp/bil-reference-delta/TESTED_SHA.txt
+          git diff "$GITHUB_SHA" HEAD > /tmp/bil-reference-delta/source.patch
+      - name: Full analysis without suppression
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub 2>&1 | tee /tmp/bil-reference-delta/analyze.log
+      - name: Exact current regressions and new runtime copy validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded \
+            test/features/community/community_social_v2_ui_test.dart \
+            test/features/dashboard/dashboard_preferences_widget_test.dart \
+            test/dashboard_polish/icon_label_layout_review_test.dart \
+            test/features/intelligence_center/coach_page_lifecycle_regression_test.dart \
+            test/features/intelligence_center/ai_coach_starter_prompts_contract_test.dart \
+            test/localization/bil_25_locale_fallback_closure_test.dart \
+            test/localization/reference_delta_copy_test.dart \
+            2>&1 | tee /tmp/bil-reference-delta/tests.log
+      - name: Upload source and test evidence, no fonts or credentials
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: reference-delta-${{ github.sha }}
+          path: /tmp/bil-reference-delta/
+          if-no-files-found: error
+          retention-days: 3
