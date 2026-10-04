@@ -52,6 +52,7 @@ part 'community_post_composer_toolbar.dart';
 part 'community_post_composer_switch_row.dart';
 part 'community_post_composer_image_preview.dart';
 part 'community_post_detail_page.dart';
+part 'community_post_detail_reference_actions.dart';
 part 'community_post_detail_rendering.dart';
 part 'community_post_detail_header.dart';
 part 'community_post_detail_comment_tile.dart';
