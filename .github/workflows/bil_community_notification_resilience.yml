@@ -1,0 +1,67 @@
+name: BIL Community notification resilience
+
+on:
+  push:
+    branches: [work/community-reference-parity-20261003]
+    paths:
+      - lib/features/community/presentation/community_notifications_page.dart
+      - test/features/community/community_notification_resilience_test.dart
+      - .github/workflows/bil_community_notification_resilience.yml
+  pull_request:
+    paths:
+      - lib/features/community/presentation/community_notifications_page.dart
+      - test/features/community/community_notification_resilience_test.dart
+      - .github/workflows/bil_community_notification_resilience.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-notification-resilience-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resilience:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies and record exact source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/notification-resilience
+          git rev-parse HEAD > /tmp/notification-resilience/source-sha.txt
+          flutter --version --machine > /tmp/notification-resilience/toolchain.json
+          flutter pub get
+      - name: Exact formatter
+        run: |
+          set -o pipefail
+          dart format --output=none --set-exit-if-changed lib/features/community/presentation/community_notifications_page.dart test/features/community/community_notification_resilience_test.dart 2>&1 | tee /tmp/notification-resilience/format.log
+      - name: Analyze changed source and regression
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          flutter analyze --no-pub lib/features/community/presentation/community_notifications_page.dart test/features/community/community_notification_resilience_test.dart 2>&1 | tee /tmp/notification-resilience/analyze.log
+      - name: New network failure and route lifecycle regressions
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded test/features/community/community_notification_resilience_test.dart --timeout 2m 2>&1 | tee /tmp/notification-resilience/regressions.log
+      - name: Record execution boundary
+        if: always()
+        run: |
+          mkdir -p /tmp/notification-resilience
+          printf '%s\n' 'NO_APP_BUILD' 'NO_STORE_UPLOAD' 'NO_PRODUCTION_ACCESS' 'SYNTHETIC_REPOSITORY_ONLY' > /tmp/notification-resilience/boundary.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: notification-resilience-${{ github.sha }}
+          path: /tmp/notification-resilience
+          if-no-files-found: error
+          retention-days: 14
