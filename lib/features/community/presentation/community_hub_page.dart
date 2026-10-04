@@ -39,6 +39,7 @@ import 'community_welcome.dart';
 import 'community_sapphire.dart';
 
 part 'community_feed_tab.dart';
+part 'community_feed_reference_suggestions.dart';
 
 part 'community_post_card.dart';
 part 'community_poll_panel.dart';
