@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/features/nutrition/services/trusted_food_network_search_resolver.dart';
+
 import '../../lib/features/nutrition/services/food_arabic_regional_lexicon.dart';
 import '../../lib/features/nutrition/services/food_multilingual_lexicon.dart';
 import '../../lib/features/nutrition/services/food_multilingual_core_lexicon.dart'
@@ -70,4 +72,25 @@ void main() {
       expect(after.toSet().length, after.length, reason: query);
     }
   });
+  test('actual outbound network hint retains regional brands', () {
+    const resolver = TrustedFoodNetworkSearchResolver();
+    expect(resolver.searchHintForTesting('جهينة حليب'), 'juhayna milk');
+    expect(resolver.searchHintForTesting('مزارع دينا حليب'), 'dina farms milk');
+    expect(resolver.searchHintForTesting('المراعي حليب'), 'almarai milk');
+  });
+
+  test('actual outbound hint retains a dish and its translated ingredient', () {
+    const resolver = TrustedFoodNetworkSearchResolver();
+    expect(resolver.searchHintForTesting('كبسة دجاج'), 'kabsa chicken');
+    expect(resolver.searchHintForTesting('كشري'), 'koshari');
+  });
+
+  test('established single-food fallback is retained', () {
+    const resolver = TrustedFoodNetworkSearchResolver();
+    expect(resolver.searchHintForTesting('بطيخ الكيوي'), 'watermelon');
+    expect(resolver.searchHintForTesting('りんご'), 'apple');
+    expect(resolver.searchHintForTesting('яблоко'), 'apple');
+    expect(resolver.searchHintForTesting(''), isNull);
+  });
+
 }

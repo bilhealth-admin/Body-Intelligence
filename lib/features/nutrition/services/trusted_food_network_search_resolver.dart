@@ -94,14 +94,23 @@ class TrustedFoodNetworkSearchResolver {
 
   String? _englishSearchHint(String query) {
     final normalized = query.trim();
+    String? best;
+    var bestWordCount = 0;
     for (final candidate in _assistance.expand(normalized)) {
       final hint = candidate.trim();
       if (hint.isEmpty || hint == normalized) continue;
       if (RegExp(r'^[A-Za-z0-9][A-Za-z0-9 ,&()/-]{1,119}$').hasMatch(hint)) {
-        return hint;
+        // Prefer the more specific translated phrase over its generic food
+        // token: a regional brand plus milk must not become just "milk".
+        // Ties preserve the established lexicon ordering and fallback.
+        final wordCount = hint.split(RegExp(r'\s+')).length;
+        if (wordCount > bestWordCount) {
+          best = hint;
+          bestWordCount = wordCount;
+        }
       }
     }
-    return null;
+    return best;
   }
 
   UnifiedFood? _toFood(Map<String, dynamic> row) {
