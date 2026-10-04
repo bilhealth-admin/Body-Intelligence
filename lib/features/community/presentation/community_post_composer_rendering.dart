@@ -122,9 +122,12 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           const SizedBox(height: 12),
                           Align(
                             alignment: AlignmentDirectional.centerStart,
-                            child: SizedBox(
-                              width: 132,
-                              height: 116,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 132,
+                                maxWidth: 132,
+                                minHeight: 116,
+                              ),
                               child: OutlinedButton(
                                 key: const Key('community-composer-media-tile'),
                                 onPressed: busy ? null : _pickImage,
@@ -135,6 +138,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                   ),
                                 ),
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _selectingImage
