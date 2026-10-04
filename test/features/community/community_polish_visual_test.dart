@@ -52,6 +52,10 @@ class _VisualRepository extends CommunityRepository {
   @override
   String get currentUserId => owner;
   @override
+  Future<Map<String, String>> loadVisibleMembershipTiers(
+    List<String> userIds,
+  ) async => const <String, String>{};
+  @override
   Future<bool> isCommunityModerator() async => false;
   @override
   Future<CommunityProfile?> loadMyProfile() async => CommunityProfile(
@@ -714,7 +718,18 @@ void main() {
                     'community-post-comments-66666666-6666-4666-8666-666666666666',
                   ),
                 );
-                await tester.ensureVisible(comments);
+                await tester.scrollUntilVisible(
+                  comments.hitTestable(),
+                  180,
+                  scrollable: find
+                      .descendant(
+                        of: find.byKey(
+                          const PageStorageKey('community-feed-scroll-for_you'),
+                        ),
+                        matching: find.byType(Scrollable),
+                      )
+                      .first,
+                );
                 await tester.pumpAndSettle();
                 final commentsRect = tester.getRect(comments);
                 expect(
@@ -722,12 +737,17 @@ void main() {
                   lessThanOrEqualTo(tester.view.physicalSize.height),
                   reason: 'comment action must be on-screen before tap',
                 );
+                expect(comments.hitTestable(), findsOneWidget);
                 await tester.tap(comments);
                 await tester.pumpAndSettle();
                 expect(
                   tester.takeException(),
                   isNull,
                   reason: 'post details/comments',
+                );
+                expect(
+                  find.byKey(const Key('community-post-detail-list')),
+                  findsOneWidget,
                 );
                 await _capture(
                   tester,
