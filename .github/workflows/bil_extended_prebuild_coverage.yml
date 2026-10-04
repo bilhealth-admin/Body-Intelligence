@@ -1,0 +1,112 @@
+name: BIL extended prebuild visual and asset coverage
+on:
+  push:
+    branches: [work/community-reference-parity-20261003]
+    paths:
+      - .github/workflows/bil_extended_prebuild_coverage.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: extended-prebuild-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  remaining-coverage:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - name: Preserve canonical LF checkout
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Execute missing coverage without golden updates or automatic retries
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,shutil,subprocess,sys
+          root=pathlib.Path.cwd()
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-extended'
+          out.mkdir(parents=True,exist_ok=True)
+          files='''test/dashboard_polish/live_health_watch_layout_golden_test.dart
+          test/epic11_locale_golden_test.dart
+          test/epic15_store_screenshot_golden_test.dart
+          test/epic3_visual_matrix_golden_test.dart
+          test/epic8_weekly_report_golden_test.dart
+          test/epic9_cloud_completion_contract_test.dart
+          test/features/commerce/ai_boost_coach_artwork_test.dart
+          test/features/commerce/apple_review_asset_package_contract_test.dart
+          test/features/commerce/apple_review_product_screenshot_test.dart
+          test/features/commerce/bil_store_plans_light_visual_test.dart
+          test/features/commerce/premium_ai_market_gate_widget_test.dart
+          test/features/meal_planner/existing_recipe_canonical_seeds_test.dart
+          test/features/meal_planner/generated_recipe_assets_test.dart
+          test/features/meal_planner/pending_nutrition_b_test.dart
+          test/features/meal_planner/recipe_catalog_1500_contract_test.dart
+          test/features/meal_planner/recipe_nutrition_batch_b_test.dart
+          test/features/nutrition/existing_recipe_nutrition_batch_a_test.dart
+          test/features/nutrition/recipe_nutrition_pending_a_test.dart
+          test/features/onboarding/onboarding_visual_golden_test.dart
+          test/features/wellness/recipe_library_polish_test.dart
+          test/features/wellness/wellness_video_stream_live_test.dart
+          test/features/wellness/workout_reference_golden_test.dart
+          test/launch_readiness/visual_reference_evidence_truth_contract_test.dart
+          test/launch_readiness/webcam_vision_barcode_preparation_contract_test.dart
+          test/personal_health_ai_panel_test.dart
+          test/premium_dashboard_benchmark_test.dart
+          test/release/workout_video_completion_monitor_contract_test.dart
+          test/release_metadata_test.dart
+          test/splash_video_contract_test.dart
+          test/visual_closure/actual_data_pages_golden_test.dart
+          test/visual_closure/actual_production_pages_golden_test.dart
+          test/visual_closure/quick_add_golden_test.dart'''.splitlines()
+          files=[s.strip() for s in files]
+          assert len(files)==32 and len(set(files))==32
+          assert all((root/f).is_file() for f in files)
+          shard=int(os.environ['SHARD']); assigned=files[shard::4]
+          source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          (out/'plan.json').write_text(json.dumps({'source':source,'host':sys.platform,'shard':shard,'assigned':assigned,'already_green_not_repeated':['portable','architecture','community_polish_visual']},indent=2))
+          flutter=pathlib.Path(shutil.which('flutter.bat') or shutil.which('flutter')).resolve()
+          dart=flutter.parent/'cache/dart-sdk/bin/dart.exe'
+          snapshot=flutter.parent/'cache/flutter_tools.snapshot'
+          assert dart.is_file() and snapshot.is_file()
+          results=[]
+          for i,file in enumerate(assigned):
+              command=[str(dart),str(snapshot),'test','--no-pub','--concurrency=1','--reporter=json','--timeout','2m','--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true',file]
+              log=out/f'{i:02d}-{pathlib.Path(file).stem}.jsonl'
+              with log.open('w',encoding='utf-8') as stream:
+                  code=subprocess.run(command,stdout=stream,stderr=subprocess.STDOUT,check=False).returncode
+              events=[]
+              for line in log.read_text(encoding='utf-8',errors='replace').splitlines():
+                  try: events.append(json.loads(line))
+                  except ValueError: pass
+              completed=[e for e in events if e.get('type')=='testDone' and not e.get('hidden')]
+              result={'path':file,'exit_code':code,'passed':sum(e.get('result')=='success' and not e.get('skipped') for e in completed),'skipped':sum(bool(e.get('skipped')) for e in completed),'failed':sum(e.get('result') in ('failure','error') for e in completed),'log':log.name}
+              results.append(result);print(json.dumps(result),flush=True)
+              (out/'results.json').write_text(json.dumps(results,indent=2))
+          subprocess.run(['git','diff','--exit-code'],check=True)
+          sys.exit(int(any(r['exit_code'] for r in results)))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: extended-prebuild-${{ matrix.shard }}-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/bil-extended/
+            test/**/failures/*.png
+          if-no-files-found: error
+          retention-days: 14
