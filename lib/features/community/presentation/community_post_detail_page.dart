@@ -40,6 +40,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   bool _likingPost = false;
   bool _savingPost = false;
   bool _sharingPost = false;
+  bool _managingPost = false;
   late bool _savedPost = widget.post.saved;
   bool _followBusy = false;
   int? _viewCount;
@@ -321,6 +322,93 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       } else {
         _loadingReplyThreads.remove(root.id);
       }
+    }
+  }
+
+  Future<void> _managePostAction(String action) async {
+    if (_managingPost) return;
+
+    if (action == 'delete' || action == 'block') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            action == 'delete'
+                ? communityText(context, 'Delete post?', 'حذف المنشور؟')
+                : communityText(
+                    context,
+                    'Block this member?',
+                    'حظر هذا العضو؟',
+                  ),
+          ),
+          content: Text(
+            action == 'delete'
+                ? communityText(
+                    context,
+                    'This removes your post from Community.',
+                    'سيؤدي ذلك إلى إزالة منشورك من المجتمع.',
+                  )
+                : communityText(
+                    context,
+                    'You will no longer see each other in Community or messages.',
+                    'لن يتمكن أي منكما من رؤية الآخر في المجتمع أو الرسائل.',
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(communityText(context, 'Cancel', 'إلغاء')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(
+                action == 'delete'
+                    ? communityText(context, 'Delete', 'حذف')
+                    : communityText(context, 'Block', 'حظر'),
+              ),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+
+    setState(() => _managingPost = true);
+    try {
+      if (action == 'delete') {
+        await widget.repository.deletePost(widget.post.id);
+        if (mounted) Navigator.of(context).pop();
+        return;
+      }
+      if (action == 'block') {
+        await widget.repository.blockMember(widget.post.authorId);
+        if (mounted) Navigator.of(context).pop();
+        return;
+      }
+      if (action == 'report') {
+        await widget.repository.report(
+          targetKind: 'post',
+          targetId: widget.post.id,
+          reason: 'user_reported_from_post_detail',
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                communityText(
+                  context,
+                  'Report sent for human review.',
+                  'تم إرسال البلاغ للمراجعة البشرية.',
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) _showActionError();
+    } finally {
+      if (mounted) setState(() => _managingPost = false);
     }
   }
 
