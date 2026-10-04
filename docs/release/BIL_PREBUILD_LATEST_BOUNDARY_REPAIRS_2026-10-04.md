@@ -13,6 +13,7 @@ are unchanged. No app build or store submission is authorized or performed.
 | BLOCKER: cloud RPC/direct reads ignore declined or absent cloud-sync consent | Genuine current source in local PG17 accepts absent/latest-denied writes, returns health envelopes through the RPC and direct owner SELECT | Exact latest purpose receipt must grant current policy 1; refusal wins timestamp ties. Same owner lock serializes sync/grant/revoke; restrictive SELECT policies preserve owner RLS and existing grants. Local PG17: 36 strict base assertions and five genuine two-session races pass; Production deployment remains gated |
 | HIGH: old current-policy grant hides newer refusal in runtime/settings | Three actual host-gate tests fail before repair; grant/version filters select old approval instead of latest denial/unknown-policy/tied denial | Actual runtime and consent repository fetch deterministic latest receipt, validate current policy and recheck session ownership. Seven focused host/source assertions pass, including current grant/revoke, network failure and logout during read. Host HTTP/Auth are fixtures, not Production/native proof |
 | MEDIUM: five unfiltered auth-user FK lookups lack coverage | Current catalog and ordinary equality EXPLAIN show partial indexes do not cover all FK rows; five different IS NOT NULL partials do cover equality | Five nonunique full BTrees, bounded locks/timeouts and strict drift guards. Local PG17 proves exact coverage/index capability, three drift/replay failures and unchanged constraints/RLS/ACLs/original indexes. No measured latency or speedup claim |
+| BLOCKER: later-completed cross-version AI refusal is stamped before the grant | Genuine ordinary-role transactions reproduce transaction-start `now()` misordering for Remote AI policy 2 versus 3 and Meal Vision policy 0 versus 1; the actual unchanged Coach helper still permits the request after refusal | Separate forward-only writer repair serializes one AI purpose/owner and stamps after waiting. Local PG17: 19 scoped checks, including two BEFORE failures and three AFTER overlapping-session cases. Exact readers, Edge functions, cloud lock branch, ACLs and policies unchanged. Production deployment remains gated |
 
 The first host repair run caught an actual ordering mistake: PostgREST's
 default `.order('granted')` was descending. The implementation now explicitly
@@ -25,6 +26,10 @@ Permanent Candidate QA adds the three independent empty-loopback PostgreSQL
 fixtures to its existing job. No temporary probe workflow, direct API table
 grant, test exclusion, size limit or performance timeout was added/increased.
 The unmodified prior green runs are retained; they do not certify these changes.
+An additional permanent empty-loopback fixture covers the newly confirmed AI
+receipt-ordering defect. A deterministic timestamp-tie bypass was not proved;
+that hypothesis is not reported as a failure. The repair does not cancel a
+provider request already admitted and does not change unknown store declarations.
 
 Local validation with the repository's Flutter 3.44.6 / Dart 3.12.2 is complete:
 2411 Dart files formatted with zero changes; full `flutter analyze --no-pub`
@@ -39,6 +44,11 @@ password login and authenticated owner/server entitlement/AI-credit preflight
 at 17:02 UTC passed for `c1b11121-18eb-444c-aaea-b78e05bdfcc9`.
 This is the legitimate administrator-provisioned review access contract, not
 a fake store transaction, secret route bypass or inferred paid entitlement.
+At 17:34 UTC, genuine password login and a synthetic, empty-context request to
+the current Production AI Coach returned HTTP 403 `ai_consent_required`.
+Authoritative usage/credits were unchanged; no consent was written and the
+current test session was signed out. This proves that specific actual Edge
+refusal, not a consented provider response, native route unlock or purchase.
 
 Console entry `Google Play Review Account` was updated with the approved pair
 and 420-character English instructions. Google displayed **Change saved. Send

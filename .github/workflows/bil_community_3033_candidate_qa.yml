@@ -265,6 +265,18 @@ jobs:
           set -euo pipefail
           psql -d community_qa -c 'CREATE DATABASE bil_cloud_qa_candidate'
           node tool/release/test_cloud_sync_consent_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/cloud-consent-sql.log
+      - name: Verify real cross-version AI refusal completion ordering without provider requests
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_ai_consent_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_ai_consent_qa_candidate'
+          node tool/release/test_ai_consent_completion_order_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/ai-consent-completion-sql.log
       - name: Run provider payload tests with mocked transports only
         if: ${{ !cancelled() }}
         run: |

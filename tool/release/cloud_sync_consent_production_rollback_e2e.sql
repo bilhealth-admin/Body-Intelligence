@@ -1,6 +1,7 @@
 -- DRAFT / NOT EXECUTED. Root review and exact-SHA QA required before any call.
 -- This is NOT a migration, app build, native transaction or Auth login proof.
 -- After source-approved cloud_sync_authoritative_consent_boundary_v1 is applied,
+-- also require the approved ai_consent_receipt_completion_order_v1 extension.
 -- ROOT must independently compare actual migration statements and body/policy/
 -- grant identities to approved source. Migration NAME is NOT byte identity.
 -- Three independent tool calls: PRECHECK -> TRANSACTION -> RESIDUE. Retain
@@ -64,10 +65,12 @@ declare
 begin
  if (select count(*) from supabase_migrations.schema_migrations
      where name='cloud_sync_authoritative_consent_boundary_v1')<>1
+    or (select count(*) from supabase_migrations.schema_migrations
+     where name='ai_consent_receipt_completion_order_v1')<>1
     or (select md5(prosrc) from pg_proc where oid='public.bil_sync_records(text,bigint,jsonb)'::regprocedure)
       is distinct from '47aebaf2b294a889e142c6eae145335d'
     or (select md5(prosrc) from pg_proc where oid='public.bil_record_consent(text,text,boolean)'::regprocedure)
-      is distinct from '7c99240c0acfa473bc2765cee540e609'
+      is distinct from 'd6190a543d5c621d3f781d20c14e3c68'
     or (select count(*) from pg_policy where polname in
       ('bil_cloud_records_current_consent_select_v1','bil_cloud_operations_current_consent_select_v1')
       and not polpermissive and polcmd='r' and polroles=array['authenticated'::regrole::oid])<>2
