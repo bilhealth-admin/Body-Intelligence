@@ -32,9 +32,9 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
                   'Topics you might like',
                   'مواضيع قد تعجبك',
                 ),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
             ),
             const SizedBox(height: 9),
@@ -64,9 +64,10 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
                                 kind: BilSemanticIconKind.community,
                                 size: 38,
                                 iconSize: 19,
-                                iconOverride: CommunityTaxonomySheet.iconForSlug(
-                                  topic.slug,
-                                ),
+                                iconOverride:
+                                    CommunityTaxonomySheet.iconForSlug(
+                                      topic.slug,
+                                    ),
                                 appleIconOverride:
                                     CommunityTaxonomySheet.iconForSlug(
                                       topic.slug,
@@ -95,7 +96,9 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
                                     const SizedBox(height: 4),
                                     Text(
                                       '${topic.postCount} ${communityText(context, 'posts', 'منشورات')}',
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
                                     ),
                                   ],
                                 ),

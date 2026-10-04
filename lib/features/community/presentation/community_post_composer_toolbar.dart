@@ -23,6 +23,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
         if (mounted) reveal(_pollAnchor);
       });
     }
+
     final saveDraft = OutlinedButton.icon(
       key: const Key('community-post-save-draft'),
       onPressed: busy
@@ -112,9 +113,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                     key: const Key('community-composer-action-location'),
                     onPressed: busy ? null : () => reveal(_locationAnchor),
                     icon: const Icon(Icons.location_on_outlined, size: 19),
-                    label: Text(
-                      communityText(context, 'Location', 'الموقع'),
-                    ),
+                    label: Text(communityText(context, 'Location', 'الموقع')),
                   ),
                   TextButton.icon(
                     key: const Key('community-composer-action-poll'),
@@ -130,13 +129,9 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                   ),
                   TextButton.icon(
                     key: const Key('community-composer-action-collab'),
-                    onPressed: busy
-                        ? null
-                        : () => reveal(_collaborationAnchor),
+                    onPressed: busy ? null : () => reveal(_collaborationAnchor),
                     icon: const Icon(Icons.group_add_outlined, size: 19),
-                    label: Text(
-                      communityText(context, 'Collab', 'تعاون'),
-                    ),
+                    label: Text(communityText(context, 'Collab', 'تعاون')),
                   ),
                   PopupMenuButton<String>(
                     key: const Key('community-composer-action-more'),

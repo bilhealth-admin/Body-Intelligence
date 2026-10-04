@@ -362,10 +362,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               borderRadius: BorderRadius.circular(14),
               onTap: _socialActionsAvailable ? _openDetail : null,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 7,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -380,11 +377,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                         children: [
                           Text(
                             preview.authorName ??
-                                communityText(
-                                  context,
-                                  'BIL member',
-                                  'عضو BIL',
-                                ),
+                                communityText(context, 'BIL member', 'عضو BIL'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.labelLarge

@@ -383,8 +383,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
 double _communityHubTopTabsHeight(BuildContext context) {
   final scale = MediaQuery.textScalerOf(context).scale(1);
   if (scale <= 1.2) return 48;
-  final baseFontSize =
-      Theme.of(context).textTheme.titleMedium?.fontSize ?? 16;
+  final baseFontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? 16;
   final scaledFontSize = MediaQuery.textScalerOf(context).scale(baseFontSize);
   final threeLineTextHeight = scaledFontSize * 1.6 * 3;
   return (threeLineTextHeight + 20).clamp(72.0, 190.0);

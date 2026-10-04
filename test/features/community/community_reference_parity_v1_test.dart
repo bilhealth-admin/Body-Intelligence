@@ -317,46 +317,55 @@ void main() {
     expect(cover, contains("set search_path=''"));
   });
 
-  test('feed reference extras stay batched and creator rewards stay authoritative', () {
-    final previewMigration = File(
-      'supabase/migrations/20261004010500_community_feed_comment_previews_v1.sql',
-    ).readAsStringSync().toLowerCase();
-    final socialRepository = File(
-      'lib/features/community/data/community_social_repository_mixin.dart',
-    ).readAsStringSync();
-    final pagination = File(
-      'lib/features/community/presentation/community_feed_pagination.dart',
-    ).readAsStringSync();
-    final feed = File(
-      'lib/features/community/presentation/community_feed_tab.dart',
-    ).readAsStringSync();
-    final card = File(
-      'lib/features/community/presentation/community_post_card.dart',
-    ).readAsStringSync();
-    final profile = File(
-      'lib/features/community/presentation/community_member_profile_page.dart',
-    ).readAsStringSync();
-    final creator = File(
-      'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
-    ).readAsStringSync();
+  test(
+    'feed reference extras stay batched and creator rewards stay authoritative',
+    () {
+      final previewMigration = File(
+        'supabase/migrations/20261004010500_community_feed_comment_previews_v1.sql',
+      ).readAsStringSync().toLowerCase();
+      final socialRepository = File(
+        'lib/features/community/data/community_social_repository_mixin.dart',
+      ).readAsStringSync();
+      final pagination = File(
+        'lib/features/community/presentation/community_feed_pagination.dart',
+      ).readAsStringSync();
+      final feed = File(
+        'lib/features/community/presentation/community_feed_tab.dart',
+      ).readAsStringSync();
+      final card = File(
+        'lib/features/community/presentation/community_post_card.dart',
+      ).readAsStringSync();
+      final profile = File(
+        'lib/features/community/presentation/community_member_profile_page.dart',
+      ).readAsStringSync();
+      final creator = File(
+        'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
+      ).readAsStringSync();
 
-    expect(previewMigration, contains('bil_community_feed_comment_previews_v1'));
-    expect(previewMigration, contains('cardinality(p_post_ids) > 100'));
-    expect(previewMigration, contains('bil_social_post_visible_v2'));
-    expect(previewMigration, contains('bil_social_member_visible_v2'));
-    expect(previewMigration, contains('revoke all on function'));
-    expect(previewMigration, isNot(contains('grant all on table')));
-    expect(socialRepository, contains("'bil_community_feed_comment_previews_v1'"));
-    expect(pagination, contains('loadCommunityFeedCommentPreviews(ids)'));
-    expect(feed, contains("'community-feed-topic-suggestions'"));
-    expect(feed, contains('commentPreview: _commentPreviewByPost[post.id]'));
-    expect(card, contains("'community-post-comment-preview-"));
-    expect(profile, contains('repository.loadGoldBalance()'));
-    expect(profile, contains('repository.loadCommunityQuests()'));
-    expect(creator, contains("'community-creator-rewards-snapshot'"));
-    expect(creator, contains("'community-creator-gold-balance'"));
-    expect(creator, contains("'community-creator-quest-progress'"));
-  });
+      expect(
+        previewMigration,
+        contains('bil_community_feed_comment_previews_v1'),
+      );
+      expect(previewMigration, contains('cardinality(p_post_ids) > 100'));
+      expect(previewMigration, contains('bil_social_post_visible_v2'));
+      expect(previewMigration, contains('bil_social_member_visible_v2'));
+      expect(previewMigration, contains('revoke all on function'));
+      expect(previewMigration, isNot(contains('grant all on table')));
+      expect(
+        socialRepository,
+        contains("'bil_community_feed_comment_previews_v1'"),
+      );
+      expect(pagination, contains('loadCommunityFeedCommentPreviews(ids)'));
+      expect(feed, contains("'community-feed-topic-suggestions'"));
+      expect(feed, contains('commentPreview: _commentPreviewByPost[post.id]'));
+      expect(card, contains("'community-post-comment-preview-"));
+      expect(profile, contains('repository.loadGoldBalance()'));
+      expect(profile, contains('repository.loadCommunityQuests()'));
+      expect(creator, contains("'community-creator-rewards-snapshot'"));
+      expect(creator, contains("'community-creator-gold-balance'"));
+      expect(creator, contains("'community-creator-quest-progress'"));
+    },
+  );
 
   testWidgets(
     'profile exposes real Follow, creator badges, views and Reviews',
@@ -422,7 +431,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(viewCount, findsOneWidget);
       expect(tester.widget<Text>(viewCount).data, '37');
-
     },
   );
 }

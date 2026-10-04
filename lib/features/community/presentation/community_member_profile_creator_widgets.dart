@@ -395,19 +395,18 @@ class _CommunityCreatorRewardsSnapshot extends StatelessWidget {
     final readyCount = quests
         .where((quest) => quest.state == CommunityQuestState.readyToClaim)
         .length;
-    final topQuest = activeQuests.isEmpty ? quests.firstOrNull : activeQuests.first;
+    final topQuest = activeQuests.isEmpty
+        ? quests.firstOrNull
+        : activeQuests.first;
 
     return DecoratedBox(
       key: const Key('community-creator-rewards-snapshot'),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: .34),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: .34),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
