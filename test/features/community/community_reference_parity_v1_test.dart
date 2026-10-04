@@ -419,9 +419,6 @@ void main() {
   });
 
   test('post detail actions and circle cards close reference parity gaps', () {
-    final detailPage = File(
-      'lib/features/community/presentation/community_post_detail_page.dart',
-    ).readAsStringSync();
     final detailActions = File(
       'lib/features/community/presentation/community_post_detail_reference_actions.dart',
     ).readAsStringSync();
