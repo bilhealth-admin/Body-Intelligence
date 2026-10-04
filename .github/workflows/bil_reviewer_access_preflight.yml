@@ -7,12 +7,42 @@ on:
       - tool/prebuild/reviewer_access_preflight_test.mjs
       - .github/workflows/bil_reviewer_access_preflight.yml
   workflow_dispatch:
+    inputs:
+      google_reviewer_owner_id:
+        description: Owner-approved new Google reviewer UUID; blank keeps read-only mode
+        required: false
+        default: ''
+      google_reviewer_email:
+        description: Dedicated owner-controlled Google reviewer email
+        required: false
+        default: ''
+      owner_confirmation:
+        description: OWNER_APPROVED_GOOGLE_REVIEWER_CONFIRMATION
+        required: false
+        default: ''
 permissions:
   contents: read
 concurrency:
   group: reviewer-access-preflight
   cancel-in-progress: false
 jobs:
+  owner-approved-google-reviewer-confirmation:
+    if: github.event_name == 'workflow_dispatch' && inputs.google_reviewer_owner_id != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify limited owner-confirmation contract
+        run: node --test tool/prebuild/confirm_owner_google_reviewer_test.mjs
+      - name: Confirm only the specified owner-created Google reviewer email
+        env:
+          BIL_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.BIL_SUPABASE_SERVICE_ROLE_KEY }}
+          BIL_REVIEWER_OWNER_ID: ${{ inputs.google_reviewer_owner_id }}
+          BIL_REVIEWER_EMAIL: ${{ inputs.google_reviewer_email }}
+          BIL_REVIEWER_OWNER_ACK: ${{ inputs.owner_confirmation }}
+        run: node tool/prebuild/confirm_owner_google_reviewer.mjs
   reviewer-login-and-own-entitlements:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
