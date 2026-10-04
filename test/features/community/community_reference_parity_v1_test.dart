@@ -439,8 +439,9 @@ void main() {
     expect(detailActions, contains("action == 'report'"));
     expect(detailActions, contains("targetKind: 'post'"));
     expect(detailRendering, contains('saved: _savedPost'));
-    expect(detailRendering, contains('onSave: _togglePostSaved'));
-    expect(detailRendering, contains('onShare: _sharePost'));
+    expect(detailRendering, contains('_CommunityPostDetailReferenceActions('));
+    expect(detailRendering, contains('._togglePostSaved()'));
+    expect(detailRendering, contains('._sharePost(anchorContext)'));
     expect(detailHeader, contains("Key('community-post-detail-save')"));
     expect(detailHeader, contains("Key('community-post-detail-share')"));
     expect(detailHeader, contains("Key('community-post-detail-actions')"));
