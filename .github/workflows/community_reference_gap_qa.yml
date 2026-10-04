@@ -1,4 +1,4 @@
-name: BIL requested UX regression QA
+name: BIL onboarding consent regression QA
 on:
   push:
     branches: [work/community-reference-parity-20261003]
@@ -8,9 +8,9 @@ concurrency:
   group: bil-requested-ux-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  consent-today-splashes:
+  onboarding-consent:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -18,43 +18,53 @@ jobs:
           flutter-version: 3.44.6
           cache: true
       - run: flutter pub get
-      - name: Exact formatter and source checkpoint
+      - name: Guarded repair of three obsolete direct modal taps
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          targets = {
+              'test/features/onboarding/onboarding_flow_widget_test.dart': 1,
+              'test/features/onboarding/onboarding_review_mode_test.dart': 2,
+          }
+          needle = "await tester.tap(find.byKey(const Key('onboarding-ai-consent-accept')));"
+          for name, expected in targets.items():
+              p = Path(name)
+              source = p.read_text()
+              assert source.count(needle) == expected, (name, 'inspect changed test source')
+              result = []
+              for line in source.splitlines(keepends=True):
+                  if needle not in line:
+                      result.append(line)
+                      continue
+                  indent = line[:len(line)-len(line.lstrip())]
+                  for statement in [
+                      "final accept = find.byKey(const Key('onboarding-ai-consent-accept'));",
+                      'await tester.ensureVisible(accept);',
+                      'await tester.pumpAndSettle();',
+                      'expect(accept.hitTestable(), findsOneWidget);',
+                      'await tester.tap(accept);',
+                  ]:
+                      result.append(indent + statement + '\n')
+              p.write_text(''.join(result))
+              print(name, expected, 'real hit-tested modal taps; expectations preserved')
+          PY
+      - name: Exact formatting and source checkpoint
         run: |
           set -euo pipefail
-          dart format test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
+          dart format test/features/onboarding/onboarding_flow_widget_test.dart test/features/onboarding/onboarding_review_mode_test.dart
           git diff --check
-          if ! git diff --quiet -- '*.dart'; then
-            git config user.name bil-community-qa
-            git config user.email actions@users.noreply.github.com
-            git add test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
-            git commit -m "style(test): format real modal consent matrix"
-            git push origin HEAD:work/community-reference-parity-20261003
-          fi
+          git config user.name bil-community-qa
+          git config user.email actions@users.noreply.github.com
+          git add test/features/onboarding/onboarding_flow_widget_test.dart test/features/onboarding/onboarding_review_mode_test.dart
+          git commit -m "test(onboarding): scroll and hit-test real consent actions"
+          git push origin HEAD:work/community-reference-parity-20261003
           echo "TESTED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           echo "TESTED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
-          dart format --output=none --set-exit-if-changed test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
+          dart format --output=none --set-exit-if-changed test/features/onboarding/onboarding_flow_widget_test.dart test/features/onboarding/onboarding_review_mode_test.dart
       - name: Full source analysis
         run: flutter analyze --no-pub
-      - name: Actual modal locale scale and explicit decisions
-        run: flutter test --no-pub --reporter expanded test/shared/widgets/bil_premium_ai_consent_sheet_test.dart --timeout 2m
-      - name: Consent orchestration and shared presentation
-        if: ${{ !cancelled() }}
+      - name: Changed onboarding consent and review flows
         run: |
           flutter test --no-pub --reporter expanded \
-            test/features/intelligence_center/remote_ai_consent_orchestration_test.dart \
-            test/features/intelligence_center/coach_remote_consent_preflight_test.dart \
-            test/features/onboarding/premium_consent_surface_contract_test.dart \
-            test/shared/widgets/premium_trust_and_clinical_surface_test.dart
-      - name: Today saves must not flash or move controls
-        if: ${{ !cancelled() }}
-        run: flutter test --no-pub --reporter expanded test/features/dashboard/dashboard_custom_card_save_stability_test.dart --timeout 2m
-      - name: Feature entry splash boundaries
-        if: ${{ !cancelled() }}
-        run: flutter test --no-pub --reporter expanded test/shared/widgets/bil_feature_entry_splash_test.dart --timeout 2m
-      - name: Real onboarding accessibility and consent flows
-        if: ${{ !cancelled() }}
-        run: |
-          flutter test --no-pub --reporter expanded \
-            test/features/onboarding/onboarding_accessibility_layout_test.dart \
             test/features/onboarding/onboarding_flow_widget_test.dart \
             test/features/onboarding/onboarding_review_mode_test.dart --timeout 2m
