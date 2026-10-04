@@ -422,6 +422,9 @@ void main() {
     final detailPage = File(
       'lib/features/community/presentation/community_post_detail_page.dart',
     ).readAsStringSync();
+    final detailActions = File(
+      'lib/features/community/presentation/community_post_detail_reference_actions.dart',
+    ).readAsStringSync();
     final detailRendering = File(
       'lib/features/community/presentation/community_post_detail_rendering.dart',
     ).readAsStringSync();
@@ -432,12 +435,12 @@ void main() {
       'lib/features/community/presentation/community_circles_page.dart',
     ).readAsStringSync();
 
-    expect(detailPage, contains('setPostSaved('));
-    expect(detailPage, contains('SharePlus.instance.share('));
-    expect(detailPage, contains("action == 'delete'"));
-    expect(detailPage, contains("action == 'block'"));
-    expect(detailPage, contains("action == 'report'"));
-    expect(detailPage, contains("targetKind: 'post'"));
+    expect(detailActions, contains('setPostSaved('));
+    expect(detailActions, contains('SharePlus.instance.share('));
+    expect(detailActions, contains("action == 'delete'"));
+    expect(detailActions, contains("action == 'block'"));
+    expect(detailActions, contains("action == 'report'"));
+    expect(detailActions, contains("targetKind: 'post'"));
     expect(detailRendering, contains('saved: _savedPost'));
     expect(detailRendering, contains('onSave: _togglePostSaved'));
     expect(detailRendering, contains('onShare: _sharePost'));
