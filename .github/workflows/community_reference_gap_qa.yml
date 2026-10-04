@@ -28,17 +28,25 @@ jobs:
         run: |
           dart format \
             lib/features/community/data/community_social_repository_mixin.dart \
+            lib/features/community/data/community_repository_reference_parity_mixin.dart \
             lib/features/community/presentation/community_hub_page.dart \
             lib/features/community/presentation/community_feed_tab.dart \
             lib/features/community/presentation/community_feed_reference_suggestions.dart \
             lib/features/community/presentation/community_feed_pagination.dart \
             lib/features/community/presentation/community_post_card.dart \
+            lib/features/community/presentation/community_post_reference_widgets.dart \
+            lib/features/community/presentation/community_post_detail_page.dart \
+            lib/features/community/presentation/community_post_detail_reference_actions.dart \
+            lib/features/community/presentation/community_post_detail_rendering.dart \
+            lib/features/community/presentation/community_post_detail_header.dart \
+            lib/features/community/presentation/community_circles_page.dart \
             lib/features/community/presentation/community_member_profile_page.dart \
             lib/features/community/presentation/community_member_profile_creator_widgets.dart \
             lib/features/community/presentation/community_post_composer_page.dart \
             lib/features/community/presentation/community_post_composer_rendering.dart \
             lib/features/community/presentation/community_post_composer_toolbar.dart \
             test/features/community/community_reference_parity_v1_test.dart \
+            test/features/community/community_polish_visual_test.dart \
             test/features/community/community_reference_composer_v1_test.dart
       - name: Commit exact formatter output when needed
         shell: bash
@@ -64,10 +72,17 @@ jobs:
             'lib/features/community/presentation/community_feed_reference_suggestions.dart',
             'lib/features/community/presentation/community_feed_pagination.dart',
             'lib/features/community/presentation/community_post_card.dart',
+            'lib/features/community/presentation/community_post_reference_widgets.dart',
+            'lib/features/community/presentation/community_post_detail_page.dart',
+            'lib/features/community/presentation/community_post_detail_reference_actions.dart',
+            'lib/features/community/presentation/community_post_detail_rendering.dart',
+            'lib/features/community/presentation/community_post_detail_header.dart',
+            'lib/features/community/presentation/community_circles_page.dart',
             'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
             'lib/features/community/presentation/community_post_composer_toolbar.dart',
             'lib/features/community/presentation/community_post_composer_rendering.dart',
             'lib/features/community/data/community_social_repository_mixin.dart',
+            'lib/features/community/data/community_repository_reference_parity_mixin.dart',
           ]
           for path in paths:
               lines = len(Path(path).read_text().splitlines())
