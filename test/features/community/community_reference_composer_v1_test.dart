@@ -312,6 +312,30 @@ void main() {
         find.byKey(const Key('community-post-save-draft')),
         findsOneWidget,
       );
+      expect(
+        find.byKey(const Key('community-composer-reference-action-rail')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-composer-action-location')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-composer-action-poll')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-composer-action-circle')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-composer-action-collab')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-composer-action-more')),
+        findsOneWidget,
+      );
 
       await tester.enterText(
         find.byKey(const Key('community-composer-title')),
