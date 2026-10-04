@@ -1,5 +1,9 @@
 # BIL pre-build repair contracts — 2026-10-04
 
+This source/isolated-test checkpoint predates permanent Production application.
+The later exact-SHA CI, 204-migration parity and rolled-back Production results
+are in [the final evidence report](BIL_PREBUILD_FINAL_REPORT_2026-10-04.md).
+
 This is an engineering contract, not a release approval, owner signature, or
 evidence of a new mobile artifact. Android 31 and iOS 34 source/manifest bindings
 remain protected. The current candidate is on a separate repair branch.

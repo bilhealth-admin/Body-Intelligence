@@ -1,5 +1,10 @@
 # BIL Production prebuild checkpoint
 
+For the later 204-migration readback and passing 79-assertion Production
+transaction, read [the final evidence report](BIL_PREBUILD_FINAL_REPORT_2026-10-04.md).
+The timed checkpoint below is preserved as the actual failure investigation,
+not the current pending-migration state.
+
 This engineering record binds the source, current CI and actual Production
 boundaries inspected on 4 October 2026. It is not an owner signature or release
 approval. **Verdict at this checkpoint: NOT READY FOR BUILD.** No mobile build,
