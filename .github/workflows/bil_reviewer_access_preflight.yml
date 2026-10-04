@@ -1,0 +1,40 @@
+name: BIL reviewer account access preflight
+on:
+  push:
+    branches: [work/community-reference-parity-20261003]
+    paths:
+      - tool/prebuild/reviewer_access_preflight.mjs
+      - tool/prebuild/reviewer_access_preflight_test.mjs
+      - .github/workflows/bil_reviewer_access_preflight.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: reviewer-access-preflight
+  cancel-in-progress: false
+jobs:
+  reviewer-login-and-own-entitlements:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify preflight fail-closed summary without live credentials
+        run: |
+          node --check tool/prebuild/reviewer_access_preflight.mjs
+          node --test tool/prebuild/reviewer_access_preflight_test.mjs
+      - name: Verify configured reviewer normal login and own server access
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+          BIL_SUPABASE_PUBLISHABLE_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+        run: node tool/prebuild/reviewer_access_preflight.mjs "$RUNNER_TEMP/bil-reviewer-access"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: reviewer-access-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-reviewer-access/reviewer-access.json
+          if-no-files-found: error
+          retention-days: 14
