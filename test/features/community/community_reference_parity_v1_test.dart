@@ -437,11 +437,19 @@ void main() {
 
     expect(detailPage, contains('setPostSaved('));
     expect(detailPage, contains('SharePlus.instance.share('));
+    expect(detailPage, contains("action == 'delete'"));
+    expect(detailPage, contains("action == 'block'"));
+    expect(detailPage, contains("action == 'report'"));
+    expect(detailPage, contains("targetKind: 'post'"));
     expect(detailRendering, contains('saved: _savedPost'));
     expect(detailRendering, contains('onSave: _togglePostSaved'));
     expect(detailRendering, contains('onShare: _sharePost'));
     expect(detailHeader, contains("Key('community-post-detail-save')"));
     expect(detailHeader, contains("Key('community-post-detail-share')"));
+    expect(detailHeader, contains("Key('community-post-detail-actions')"));
+    expect(detailHeader, contains("value: 'delete'"));
+    expect(detailHeader, contains("value: 'report'"));
+    expect(detailHeader, contains("value: 'block'"));
     expect(detailHeader, contains('Wrap('));
     expect(circles, contains("Key('community-circle-cover-\$slug')"));
     expect(circles, contains('_CommunityCircleCover(slug: circle.slug)'));
