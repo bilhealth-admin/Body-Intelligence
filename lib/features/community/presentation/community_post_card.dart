@@ -251,10 +251,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       ),
                     if (widget.authorMembershipTier case final tier?) ...[
                       const SizedBox(height: 4),
-                      _CommunityMembershipTierChip(
-                        tier: tier,
-                        compact: true,
-                      ),
+                      _CommunityMembershipTierChip(tier: tier, compact: true),
                     ],
                     if (widget.post.authorId == widget.currentUserId &&
                         (widget.showModerationStatus ||

@@ -333,10 +333,7 @@ void main() {
     ).readAsStringSync();
 
     expect(repository, contains('loadVisibleMembershipTiers'));
-    expect(
-      repository,
-      contains("'bil_community_comment_membership_tiers_v1'"),
-    );
+    expect(repository, contains("'bil_community_comment_membership_tiers_v1'"));
     expect(pagination, contains('loadVisibleMembershipTiers(authorIds)'));
     expect(card, contains('authorMembershipTier'));
     expect(card, contains('_CommunityMembershipTierChip('));
