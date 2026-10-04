@@ -14,7 +14,8 @@ void main() {
       'lib/features/intelligence_center/presentation/intelligence_action_flow.dart',
     ).readAsStringSync();
 
-    expect(viewport, contains("'coach-starter-prompts'"));
+    expect(viewport, contains('dailyBrief != null &&'));
+    expect(viewport, isNot(contains("'coach-starter-prompts'")));
     expect(viewport, contains('_CoachStarterPrompts(onPrompt: usePrompt)'));
     expect(widgets, contains("ValueKey('ai-coach-starter-prompts')"));
     expect(widgets, contains("'Review my day from my saved BIL data"));
