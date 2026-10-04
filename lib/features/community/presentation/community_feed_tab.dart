@@ -29,6 +29,11 @@ class _FeedTabState extends State<_FeedTab>
       <String, CommunityPostReferenceMetadata>{};
   @override
   final Map<String, int> _viewCountByPost = <String, int>{};
+  @override
+  final Map<String, CommunityComment> _commentPreviewByPost =
+      <String, CommunityComment>{};
+  late Future<List<CommunityTopic>> _suggestedTopics = widget.repository
+      .loadCommunityTopics();
   bool _managingPost = false;
   bool _openingComposer = false;
   Timer? _entryWelcomeTimer;
@@ -180,6 +185,17 @@ class _FeedTabState extends State<_FeedTab>
     await pushCommunityPage<void>(
       context,
       CommunityMyPostsPage(repository: widget.repository),
+    );
+  }
+
+  Future<void> _openTopic(CommunityTopic topic) async {
+    await pushCommunityPage<void>(
+      context,
+      _CommunityTopicPage(
+        repository: widget.repository,
+        topic: topic,
+        onComposeTopic: (slug) => _openComposer(tag: slug),
+      ),
     );
   }
 
@@ -394,6 +410,7 @@ class _FeedTabState extends State<_FeedTab>
     final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
     setState(() {
       _feed = refreshedFeed;
+      _suggestedTopics = widget.repository.loadCommunityTopics();
     });
     try {
       await refreshedFeed;
@@ -504,6 +521,149 @@ class _FeedTabState extends State<_FeedTab>
                           ),
                         ),
                       ),
+                    if (_selectedFeedMode == CommunityFeedMode.explore)
+                      SliverToBoxAdapter(
+                        child: FutureBuilder<List<CommunityTopic>>(
+                          future: _suggestedTopics,
+                          builder: (context, topicSnapshot) {
+                            final topics = (topicSnapshot.data ??
+                                    const <CommunityTopic>[])
+                                .where((topic) => topic.featured)
+                                .take(5)
+                                .toList(growable: false);
+                            if (topics.isEmpty) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 12, 0, 4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                      end: 16,
+                                    ),
+                                    child: Text(
+                                      communityText(
+                                        context,
+                                        'Topics you might like',
+                                        'مواضيع قد تعجبك',
+                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 9),
+                                  SizedBox(
+                                    height: 112,
+                                    child: ListView.separated(
+                                      key: const Key(
+                                        'community-feed-topic-suggestions',
+                                      ),
+                                      scrollDirection: Axis.horizontal,
+                                      padding: const EdgeInsetsDirectional.only(
+                                        end: 16,
+                                      ),
+                                      itemCount: topics.length,
+                                      separatorBuilder: (_, _) =>
+                                          const SizedBox(width: 10),
+                                      itemBuilder: (context, index) {
+                                        final topic = topics[index];
+                                        return SizedBox(
+                                          width: 190,
+                                          child: Card(
+                                            margin: EdgeInsets.zero,
+                                            child: InkWell(
+                                              key: Key(
+                                                'community-feed-topic-${topic.slug}',
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              onTap: () => _openTopic(topic),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12),
+                                                child: Row(
+                                                  children: [
+                                                    BilSemanticIconBadge(
+                                                      kind:
+                                                          BilSemanticIconKind
+                                                              .community,
+                                                      size: 38,
+                                                      iconSize: 19,
+                                                      iconOverride:
+                                                          CommunityTaxonomySheet
+                                                              .iconForSlug(
+                                                                topic.slug,
+                                                              ),
+                                                      appleIconOverride:
+                                                          CommunityTaxonomySheet
+                                                              .iconForSlug(
+                                                                topic.slug,
+                                                              ),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    Expanded(
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            CommunityTaxonomySheet
+                                                                .titleForSlug(
+                                                                  context,
+                                                                  topic.slug,
+                                                                ),
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: Theme.of(
+                                                              context,
+                                                            ).textTheme
+                                                                .titleSmall
+                                                                ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w800,
+                                                                ),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Text(
+                                                            '${topic.postCount} ${communityText(context, 'posts', 'منشورات')}',
+                                                            style:
+                                                                Theme.of(
+                                                                      context,
+                                                                    )
+                                                                    .textTheme
+                                                                    .bodySmall,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     if (loading && snapshot.hasData)
                       const SliverToBoxAdapter(
                         child: LinearProgressIndicator(),
@@ -551,6 +711,7 @@ class _FeedTabState extends State<_FeedTab>
                                 currentUserId: widget.repository.currentUserId,
                                 referenceMetadata: _referenceByPost[post.id],
                                 viewCount: _viewCountByPost[post.id],
+                                commentPreview: _commentPreviewByPost[post.id],
                                 actionsEnabled:
                                     !_openingComposer && !_managingPost,
                                 onAction: (value) => _managePost(post, value),
