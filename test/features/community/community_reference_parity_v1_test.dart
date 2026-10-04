@@ -429,9 +429,7 @@ void main() {
       expect(find.text('Profile complete'), findsOneWidget);
       expect(
         find.descendant(
-          of: find.byKey(
-            const Key('community-creator-badge-profile_complete'),
-          ),
+          of: find.byKey(const Key('community-creator-badge-profile_complete')),
           matching: find.text('Earned'),
         ),
         findsOneWidget,
