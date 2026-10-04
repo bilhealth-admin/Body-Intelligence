@@ -99,6 +99,10 @@ jobs:
           flutter-version: 3.44.6
           cache: true
 
+      - name: Disable unrelated macOS desktop regeneration in disposable iOS builder
+        shell: bash
+        run: flutter config --no-enable-macos-desktop
+
       - name: Validate release build number and Apple team
         shell: bash
         env:
