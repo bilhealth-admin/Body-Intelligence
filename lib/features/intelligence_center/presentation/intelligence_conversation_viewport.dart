@@ -16,9 +16,13 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
         : visibleMessages
               .where((message) => !message.id.startsWith('welcome'))
               .toList(growable: false);
+    final showStarters = !visibleMessages.any(
+      (message) => message.role == IntelligenceMessageRole.user,
+    );
     final ids = <String>[
       if (dailyBrief != null) 'coach-session-brief',
       ...presentedMessages.map((message) => message.id),
+      if (showStarters) 'coach-starter-prompts',
       if (showLiveVoiceDraft) 'coach-live-draft',
       if (showReplyThinking) 'coach-reply-thinking',
       if (showReplyFailure) 'coach-reply-failure',
@@ -40,6 +44,9 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
               }
             },
           );
+        }
+        if (id == 'coach-starter-prompts') {
+          return _CoachStarterPrompts(onPrompt: usePrompt);
         }
         if (id == 'coach-live-draft') {
           return _LiveVoiceTranscript(

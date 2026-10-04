@@ -509,6 +509,112 @@ class _CoachEmptyState extends StatelessWidget {
   }
 }
 
+class _CoachStarterPrompts extends StatelessWidget {
+  const _CoachStarterPrompts({required this.onPrompt});
+
+  final ValueChanged<String> onPrompt;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final prompts = <({IconData icon, String label, String prompt})>[
+      (
+        icon: Icons.today_rounded,
+        label: intelligenceText(context, 'Review my day', 'راجع يومي'),
+        prompt: intelligenceText(
+          context,
+          'Review my day from my saved BIL data and tell me the most useful next step.',
+          'راجع يومي من بيانات BIL المحفوظة وأخبرني بأكثر خطوة مفيدة الآن.',
+        ),
+      ),
+      (
+        icon: Icons.restaurant_menu_rounded,
+        label: intelligenceText(context, 'Check nutrition', 'راجع التغذية'),
+        prompt: intelligenceText(
+          context,
+          'Review today’s nutrition from my saved BIL data. What stands out and what should I focus on next?',
+          'راجع تغذية اليوم من بيانات BIL المحفوظة. ما الأبرز وما الذي أركز عليه الآن؟',
+        ),
+      ),
+      (
+        icon: Icons.bedtime_outlined,
+        label: intelligenceText(context, 'Explain sleep', 'اشرح نومي'),
+        prompt: intelligenceText(
+          context,
+          'Explain my recorded sleep trend and what it may mean for today, without inventing missing data.',
+          'اشرح اتجاه نومي المسجل وما قد يعنيه لليوم، من دون اختراع بيانات مفقودة.',
+        ),
+      ),
+      (
+        icon: Icons.track_changes_rounded,
+        label: intelligenceText(context, 'Next best focus', 'أفضل تركيز تالٍ'),
+        prompt: intelligenceText(
+          context,
+          'Based on my selected BIL context, what is the single best thing to focus on next and why?',
+          'بناءً على سياق BIL الذي اخترته، ما أفضل شيء واحد أركز عليه الآن ولماذا؟',
+        ),
+      ),
+    ];
+
+    return Padding(
+      key: const ValueKey('ai-coach-starter-prompts'),
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: const Color(0xFF64D8FF).withValues(alpha: .22),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                intelligenceText(
+                  context,
+                  'Start with your real BIL data',
+                  'ابدأ من بيانات BIL الحقيقية',
+                ),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                intelligenceText(
+                  context,
+                  'Choose a starting point. The Coach uses only the context available to it.',
+                  'اختر نقطة بداية. يستخدم المدرب فقط السياق المتاح له.',
+                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final item in prompts)
+                    ActionChip(
+                      avatar: Icon(item.icon, size: 17),
+                      label: Text(item.label),
+                      onPressed: () => onPrompt(item.prompt),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ListeningComposerLabel extends StatelessWidget {
   const _ListeningComposerLabel({
     required this.label,
