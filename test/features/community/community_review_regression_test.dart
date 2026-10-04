@@ -225,6 +225,9 @@ class _ReviewRepository extends CommunityRepository {
   }
 
   @override
+  Future<List<CommunityTopic>> loadCommunityTopics() async =>
+      const <CommunityTopic>[];
+  @override
   Future<List<Map<String, dynamic>>> loadMyFoodSubmissions() async => [];
   @override
   Future<List<CommunityPostStats>> loadPostStats(List<String> postIds) async =>
