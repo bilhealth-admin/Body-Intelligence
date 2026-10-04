@@ -41,14 +41,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           .map((post) => post.authorId)
           .toSet()
           .toList(growable: false);
-      final authorIds = page.posts
-          .map((post) => post.authorId)
-          .toSet()
-          .toList(growable: false);
       final List<CommunityPostReferenceMetadata> references;
       final Map<String, int> viewCounts;
       final Map<String, CommunityComment> commentPreviews;
-      final Map<String, String> membershipTiers;
       final Map<String, String> membershipTiers;
       if (widget.repository.useServerCommunityReferenceParity &&
           ids.isNotEmpty) {
@@ -115,9 +110,14 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         limit: _FeedTabState._pageSize,
       );
       final ids = page.posts.map((post) => post.id).toList(growable: false);
+      final authorIds = page.posts
+          .map((post) => post.authorId)
+          .toSet()
+          .toList(growable: false);
       final List<CommunityPostReferenceMetadata> references;
       final Map<String, int> viewCounts;
       final Map<String, CommunityComment> commentPreviews;
+      final Map<String, String> membershipTiers;
       if (widget.repository.useServerCommunityReferenceParity &&
           ids.isNotEmpty) {
         final extras = await Future.wait<Object>([
