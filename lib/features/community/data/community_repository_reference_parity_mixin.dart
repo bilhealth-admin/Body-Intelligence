@@ -87,7 +87,7 @@ mixin _CommunityReferenceParityRepositoryMixin {
     return Map<String, int>.unmodifiable(result);
   }
 
-  Future<Map<String, String>> loadCommentMembershipTiers(
+  Future<Map<String, String>> loadVisibleMembershipTiers(
     List<String> userIds,
   ) async {
     final unique = userIds.toSet().toList(growable: false);
@@ -103,7 +103,7 @@ mixin _CommunityReferenceParityRepositoryMixin {
     );
     if (response is! List) {
       throw const FormatException(
-        'Invalid Community comment membership tier batch',
+        'Invalid Community visible membership tier batch',
       );
     }
 
@@ -111,7 +111,7 @@ mixin _CommunityReferenceParityRepositoryMixin {
     for (final raw in response) {
       if (raw is! Map) {
         throw const FormatException(
-          'Invalid Community comment membership tier row',
+          'Invalid Community visible membership tier row',
         );
       }
       final row = Map<String, dynamic>.from(raw);
@@ -123,7 +123,7 @@ mixin _CommunityReferenceParityRepositoryMixin {
           !const {'free', 'premium'}.contains(tier) ||
           result.containsKey(userId)) {
         throw const FormatException(
-          'Invalid Community comment membership tier row',
+          'Invalid Community visible membership tier row',
         );
       }
       result[userId] = tier;
@@ -131,6 +131,9 @@ mixin _CommunityReferenceParityRepositoryMixin {
     return Map<String, String>.unmodifiable(result);
   }
 
+  Future<Map<String, String>> loadCommentMembershipTiers(
+    List<String> userIds,
+  ) => loadVisibleMembershipTiers(userIds);
   Future<List<CommunityProfileReview>> loadCommunityProfileReviews({
     required String userId,
     DateTime? before,
