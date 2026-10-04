@@ -1,5 +1,12 @@
 # BIL current-consent and collaborator boundary repairs
 
+Latest superseding evidence: [final incremental closeout](BIL_PREBUILD_INCREMENTAL_CLOSEOUT_2026-10-04.md).
+Exact-source QA on `3f0085e6` is SUCCESS; all five forward SQL repairs are
+permanently applied, with 17 exact stored-literal comparisons and 160 scoped
+Production assertions followed by unconditional rollback/independent zero
+residue. The local/pre-application statuses below are historical checkpoints,
+not the current deployment result. The release verdict remains NOT READY.
+
 This is an incremental checkpoint after `8e804b7f`, not a release certificate.
 The protected release branch remains `555496ebb6d6d3952c9e69e7bb6b9788269b39fa`.
 Android 31 and iOS 34 frozen manifests and all native build/upload workflows

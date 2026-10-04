@@ -1,5 +1,11 @@
 # BIL prebuild audit results
 
+Latest confirmed evidence is the [incremental closeout](BIL_PREBUILD_INCREMENTAL_CLOSEOUT_2026-10-04.md):
+tested source `3f0085e6`, current exact-source CI SUCCESS, Production 209 records,
+five later repairs applied and 160 scoped rollback assertions with zero residue.
+The report below preserves its earlier 16:51 checkpoint, not current branch or
+deployment status. All remaining native/store/security/privacy gaps stay open.
+
 Historical checkpoint: source `57989acd`, Production readback through
 16:51 UTC. The later [incremental boundary repairs and reviewer save](BIL_PREBUILD_LATEST_BOUNDARY_REPAIRS_2026-10-04.md)
 supersede the pending App access, collaborator and five-FK findings below.
