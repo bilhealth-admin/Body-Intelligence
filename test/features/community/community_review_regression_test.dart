@@ -517,7 +517,7 @@ void main() {
           expect(find.byType(TabBar), findsNothing);
           expect(
             tester.widget<AppBar>(find.byType(AppBar)).actions,
-            hasLength(3),
+            hasLength(4),
           );
           expect(tester.takeException(), isNull);
           if ((tag == 'ar' || tag == 'en') && scale == 1) {
