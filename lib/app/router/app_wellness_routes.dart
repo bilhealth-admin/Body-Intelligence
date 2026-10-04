@@ -9,19 +9,28 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
     path: '/wellness/sleep',
     builder: (_, _) => const PremiumRouteGlassGate(
       feature: PremiumGateFeature.sleep,
-      child: SleepTrackerPage(),
+      child: BilFeatureEntrySplashGate(
+        kind: BilFeatureEntryKind.sleep,
+        child: SleepTrackerPage(),
+      ),
     ),
   ),
   GoRoute(
     path: '/wellness/workouts',
-    builder: (_, state) => BilWorkoutRoutinesPage(
-      initialItemId: state.uri.queryParameters['item'],
+    builder: (_, state) => BilFeatureEntrySplashGate(
+      kind: BilFeatureEntryKind.videos,
+      child: BilWorkoutRoutinesPage(
+        initialItemId: state.uri.queryParameters['item'],
+      ),
     ),
   ),
   GoRoute(
     path: '/wellness/workouts/routines',
-    builder: (_, state) => BilWorkoutRoutinesPage(
-      initialItemId: state.uri.queryParameters['item'],
+    builder: (_, state) => BilFeatureEntrySplashGate(
+      kind: BilFeatureEntryKind.videos,
+      child: BilWorkoutRoutinesPage(
+        initialItemId: state.uri.queryParameters['item'],
+      ),
     ),
   ),
   GoRoute(
@@ -40,8 +49,11 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   GoRoute(
     path: '/wellness/recipes',
     pageBuilder: (_, state) => NoTransitionPage(
-      child: RecipeLibraryPage(
-        initialRecipeId: state.uri.queryParameters['recipe'],
+      child: BilFeatureEntrySplashGate(
+        kind: BilFeatureEntryKind.recipes,
+        child: RecipeLibraryPage(
+          initialRecipeId: state.uri.queryParameters['recipe'],
+        ),
       ),
     ),
   ),

@@ -99,6 +99,7 @@ import '../../features/profile/premium_profile_page.dart';
 import '../../features/profile/profile_settings_page.dart';
 import '../../features/profile/profile_summary_page.dart';
 import '../../features/startup/startup_page.dart';
+import '../../shared/widgets/bil_feature_entry_splash.dart';
 import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
 
