@@ -428,6 +428,7 @@ jobs:
             BIL-store-qa-boundary.txt
             BIL-store-qa-upstream-qa.txt
             BIL-store-qa-configuration.txt
+            ${{ runner.temp }}/BIL-store-qa-source-android.json
             BIL-android-16k-evidence/
 
       - name: Record exact testing-only signed artifact identity

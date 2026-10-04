@@ -616,6 +616,8 @@ jobs:
             BIL-store-qa-boundary.txt
             BIL-store-qa-upstream-qa.txt
             BIL-store-qa-configuration.txt
+            ${{ runner.temp }}/BIL-store-qa-source-ios.json
+            ios/Podfile.lock
             BIL-apple-release-toolchain.txt
             BIL-apple-release-toolchain.json
 

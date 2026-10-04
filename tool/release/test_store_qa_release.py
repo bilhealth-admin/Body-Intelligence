@@ -16,6 +16,51 @@ SPEC = importlib.util.spec_from_file_location("store_qa_release", HERE / "store_
 qa = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(qa)
 MANIFEST = HERE.parent.parent / "docs/release/BIL_STORE_QA_CANDIDATE_2026-10-04.json"
+# Verbatim LF template from the official ee80f08 Flutter Git blob, not native proof.
+OFFICIAL_IOS_PODFILE = r'''# Uncomment this line to define a global platform for your project
+# platform :ios, '13.0'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+  end
+end
+'''.encode("utf-8")
 
 
 def completed(code=0, stdout="", stderr=""):
@@ -162,8 +207,13 @@ class StoreQaControlContractTest(unittest.TestCase):
             qa.verify_ci(self.manifest, self.environment(), get)
 
     def source_runner(self, *, head=qa.SOURCE_SHA, dirty="", controller="a" * 40,
-                      controller_dirty=False):
-        def run(command, *, cwd, env=None, timeout=300):
+                      controller_dirty=False, originals=None):
+        def run(command, *, cwd, env=None, timeout=300, text=True):
+            if originals is not None and command[:2] == ["git", "show"]:
+                self.assertFalse(text)
+                self.assertTrue(command[2].startswith(qa.SOURCE_SHA + ":"))
+                path = command[2].split(":", 1)[1]
+                return completed(stdout=originals[path])
             if command == ["git", "rev-parse", "--verify", "HEAD"]:
                 return completed(stdout=head + "\n")
             if command == ["git", "status", "--porcelain", "--untracked-files=all"]:
@@ -220,6 +270,143 @@ class StoreQaControlContractTest(unittest.TestCase):
                                    self.environment("android"), HERE,
                                    self.source_runner(dirty=dirty), after_build=True)
 
+    def ios_originals(self):
+        # Actual immutable source content; platform fixture emulates Git LF blobs.
+        root = HERE.parent.parent
+        return {path: (root / path).read_bytes().replace(b"\r\n", b"\n")
+                for path in qa.IOS_PODS_CONFIG_PREFIXES}
+
+    def test_ios_pub_get_accepts_only_exact_prefix_and_checkpoints_both_hashes(self):
+        originals = self.ios_originals()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            environment = self.environment("ios", temporary)
+            for path, original in originals.items():
+                config = root / path
+                config.parent.mkdir(parents=True, exist_ok=True)
+                config.write_bytes(qa.IOS_PODS_CONFIG_PREFIXES[path] + original)
+                if path.endswith("Release.xcconfig"):
+                    self.assertIn(b'#include? "ReleaseAdMob.xcconfig"', config.read_bytes())
+            dirty = "".join(" M " + path + "\n" for path in originals)
+            source_run = self.source_runner(dirty=dirty, originals=originals)
+            def run(command, *, cwd, env=None, timeout=300, text=True):
+                if command[0] == "git":
+                    return source_run(command, cwd=cwd, env=env, timeout=timeout, text=text)
+                self.assertEqual(command, ["dart", "run",
+                                          "tool/release/validate_release_configuration.dart"])
+                return completed(78, stderr="\n".join(qa.EXPECTED_FAILURE) + "\n")
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                qa.configuration(self.manifest, self.manifest["ios"], "ios", self.digest,
+                                 environment, root, run)
+            checkpoint = json.loads(qa._checkpoint_path(environment, "ios").read_bytes())
+            self.assertEqual(checkpoint["original_production_gate"], "FAIL")
+            self.assertEqual(checkpoint["unresolved_review_count"], 8)
+            expected = [dict(path=path,
+                             transformation="FLUTTER_3_44_6_SINGLE_COCOAPODS_INCLUDE",
+                             source_sha256=hashlib.sha256(original).hexdigest(),
+                             generated_sha256=hashlib.sha256(
+                                 qa.IOS_PODS_CONFIG_PREFIXES[path] + original).hexdigest())
+                        for path, original in originals.items()]
+            self.assertEqual(checkpoint["generated_native_configuration"], expected)
+
+    def test_ios_prefix_cannot_hide_changed_flags_wrong_duplicate_or_normalized_bytes(self):
+        originals = self.ios_originals()
+        for path, original in originals.items():
+            prefix = qa.IOS_PODS_CONFIG_PREFIXES[path]
+            wrong_path = next(other for other in originals if other != path)
+            for generated in (
+                prefix + original.replace(b"BIL_ADMOB_IOS_APP_ID=", b"BIL_ADMOB_IOS_APP_ID=ALTERED"),
+                qa.IOS_PODS_CONFIG_PREFIXES[wrong_path] + original,
+                prefix + prefix + original,
+                prefix + original + b"INJECTED_FLAG=true\n",
+                (prefix + original).replace(b"\n", b"\r\n"),
+            ):
+                with self.subTest(path=path), tempfile.TemporaryDirectory() as temporary:
+                    config = Path(temporary) / path
+                    config.parent.mkdir(parents=True)
+                    config.write_bytes(generated)
+                    with self.assertRaises(qa.GateError):
+                        qa.validate_source(self.manifest, self.manifest["ios"], "ios",
+                                           self.environment(), temporary,
+                                           self.source_runner(dirty=" M " + path + "\n",
+                                                              originals=originals))
+
+    def test_ios_transform_never_allows_android_staged_or_other_source_changes(self):
+        for platform, dirty in (
+            ("android", " M ios/Flutter/Debug.xcconfig\n"),
+            ("ios", "M  ios/Flutter/Debug.xcconfig\n"),
+            ("ios", " M ios/Runner/Info.plist\n"),
+            ("ios", " M ios/Flutter/Profile.xcconfig\n"),
+        ):
+            with self.subTest(platform=platform, dirty=dirty), self.assertRaises(qa.GateError):
+                qa.validate_source(self.manifest, self.manifest[platform], platform,
+                                   self.environment(platform), HERE, self.source_runner(dirty=dirty))
+
+    def ios_sdk_fixture(self, root):
+        sdk = root / "sdk-fixture"
+        version = sdk / "bin/cache/flutter.version.json"
+        version.parent.mkdir(parents=True)
+        version.write_text(json.dumps(dict(
+            frameworkVersion="3.44.6", frameworkRevision=qa.PINNED_FLUTTER_FRAMEWORK_REVISION)))
+        template = sdk / "packages/flutter_tools/templates/cocoapods/Podfile-ios"
+        template.parent.mkdir(parents=True)
+        template.write_bytes(OFFICIAL_IOS_PODFILE)
+        generated = root / "ios/Podfile"
+        generated.parent.mkdir()
+        generated.write_bytes(OFFICIAL_IOS_PODFILE)
+        environment = self.environment("ios", str(root))
+        environment["FLUTTER_ROOT"] = str(sdk)
+        return environment, template, generated, version
+
+    def test_untracked_ios_podfile_requires_exact_pinned_official_template(self):
+        self.assertEqual(hashlib.sha256(OFFICIAL_IOS_PODFILE).hexdigest(),
+                         "db2da28b10a5ac3ed5d42dbf7208ece60fc886bd1f86f14335dde4037ba32350")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            environment, _, _, _ = self.ios_sdk_fixture(root)
+            receipt = qa.validate_source(self.manifest, self.manifest["ios"], "ios",
+                                         environment, root,
+                                         self.source_runner(dirty="?? ios/Podfile\n"))
+            self.assertEqual(receipt["generated_native_configuration"], [dict(
+                path="ios/Podfile", transformation="FLUTTER_3_44_6_OFFICIAL_PODFILE_COPY",
+                framework_revision=qa.PINNED_FLUTTER_FRAMEWORK_REVISION,
+                template_sha256=qa.PINNED_IOS_PODFILE_SHA256,
+                generated_sha256=qa.PINNED_IOS_PODFILE_SHA256)])
+
+    def test_generated_podfile_rejects_any_change_wrong_sdk_or_template(self):
+        for mutation in ("changed", "double", "newline", "sdk", "template", "missing_sdk"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                environment, template, generated, version = self.ios_sdk_fixture(root)
+                if mutation == "changed":
+                    generated.write_bytes(OFFICIAL_IOS_PODFILE.replace(b"use_frameworks!", b"use_frameworks! #changed"))
+                elif mutation == "double":
+                    generated.write_bytes(OFFICIAL_IOS_PODFILE * 2)
+                elif mutation == "newline":
+                    generated.write_bytes(OFFICIAL_IOS_PODFILE.replace(b"\n", b"\r\n"))
+                elif mutation == "sdk":
+                    version.write_text(json.dumps(dict(frameworkVersion="3.44.6", frameworkRevision="0" * 40)))
+                elif mutation == "template":
+                    template.write_bytes(OFFICIAL_IOS_PODFILE + b"#injected\n")
+                    generated.write_bytes(template.read_bytes())
+                else:
+                    environment.pop("FLUTTER_ROOT")
+                with self.assertRaises(qa.GateError):
+                    qa.validate_source(self.manifest, self.manifest["ios"], "ios",
+                                       environment, root,
+                                       self.source_runner(dirty="?? ios/Podfile\n"))
+
+    def test_generated_podfile_does_not_allow_android_other_paths_or_lock_before_build(self):
+        for platform, dirty in (
+            ("android", "?? ios/Podfile\n"),
+            ("ios", "?? ios/Podfile.lock\n"),
+            ("ios", "?? ios/AnotherPodfile\n"),
+            ("ios", "A  ios/Podfile\n"),
+        ):
+            with self.subTest(platform=platform, dirty=dirty), self.assertRaises(qa.GateError):
+                qa.validate_source(self.manifest, self.manifest[platform], platform,
+                                   self.environment(platform), HERE, self.source_runner(dirty=dirty))
+
     def test_original_production_fail78_is_mandatory_and_any_other_result_rejected(self):
         expected = "\n".join(qa.EXPECTED_FAILURE) + "\n"
         qa.qualify_validator_result(completed(78, stderr=expected))
@@ -233,18 +420,19 @@ class StoreQaControlContractTest(unittest.TestCase):
             with self.assertRaises(qa.GateError):
                 qa.qualify_validator_result(result)
 
-    def test_observed_dart_build_hook_stdout_retains_exact_original_fail78(self):
+    def test_actual_dart_build_hook_stderr_prefix_retains_exact_original_fail78(self):
         qa.qualify_validator_result(completed(
             78,
-            stdout="Running build hooks...Running build hooks...",
-            stderr="\n".join(qa.EXPECTED_FAILURE) + "\n",
+            stdout="",
+            stderr="Running build hooks...Running build hooks..." +
+                   "\n".join(qa.EXPECTED_FAILURE) + "\n",
         ))
 
     def test_build_hook_banner_cannot_hide_other_output_or_warnings(self):
         banner = "Running build hooks...Running build hooks..."
         expected = "\n".join(qa.EXPECTED_FAILURE) + "\n"
         for output in (
-            "Running build hooks...", banner + "Running build hooks...",
+            "Running build hooks...", banner, banner + "Running build hooks...",
             "warning: compile warning\n" + banner,
             banner + "\nwarning: compile warning\n",
             banner + "RELEASE_CONFIGURATION_GATE=PASS\n",
@@ -253,17 +441,33 @@ class StoreQaControlContractTest(unittest.TestCase):
                 qa.qualify_validator_result(completed(78, stdout=output, stderr=expected))
         with self.assertRaises(qa.GateError):
             qa.qualify_validator_result(completed(
-                78, stdout=banner, stderr=expected + "warning: compile warning\n"))
+                78, stderr=banner + expected + "warning: compile warning\n"))
+
+    def test_hook_stderr_prefix_is_exact_bounded_and_at_start_only(self):
+        banner = "Running build hooks...Running build hooks..."
+        expected = "\n".join(qa.EXPECTED_FAILURE) + "\n"
+        for stderr in (
+            "Running build hooks..." + expected,
+            banner + "Running build hooks..." + expected,
+            "warning: compile warning\n" + banner + expected,
+            banner + "\nwarning: compile warning\n" + expected,
+            expected + banner,
+            banner + "\n" + expected,
+        ):
+            with self.subTest(stderr=stderr), self.assertRaises(qa.GateError):
+                qa.qualify_validator_result(completed(78, stderr=stderr))
+        with self.assertRaises(qa.GateError):
+            qa.qualify_validator_result(completed(78, stdout=banner, stderr=banner + expected))
 
     def test_build_hook_banner_cannot_authorize_other_exit_or_gate_issue(self):
         banner = "Running build hooks...Running build hooks..."
         expected = "\n".join(qa.EXPECTED_FAILURE) + "\n"
         for result in (
-            completed(0, stdout=banner, stderr=expected),
-            completed(1, stdout=banner, stderr=expected),
-            completed(78, stdout=banner, stderr="RELEASE_CONFIGURATION_GATE=PASS\n"),
-            completed(78, stdout=banner, stderr=expected + "unaudited_source_commit: bad\n"),
-            completed(78, stdout=banner, stderr=expected + expected),
+            completed(0, stderr=banner + expected),
+            completed(1, stderr=banner + expected),
+            completed(78, stderr=banner + "RELEASE_CONFIGURATION_GATE=PASS\n"),
+            completed(78, stderr=banner + expected + "unaudited_source_commit: bad\n"),
+            completed(78, stderr=banner + expected + expected),
         ):
             with self.assertRaises(qa.GateError):
                 qa.qualify_validator_result(result)
@@ -291,9 +495,9 @@ class StoreQaControlContractTest(unittest.TestCase):
                                      hashlib.sha256(raw).hexdigest())
                     return completed(
                         78,
-                        stdout=("Running build hooks...Running build hooks..."
-                                if platform == "android" else ""),
-                        stderr="\n".join(qa.EXPECTED_FAILURE) + "\n",
+                        stderr=(("Running build hooks...Running build hooks..."
+                                 if platform == "android" else "") +
+                                "\n".join(qa.EXPECTED_FAILURE) + "\n"),
                     )
                 stdout, stderr = io.StringIO(), io.StringIO()
                 with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
@@ -303,7 +507,7 @@ class StoreQaControlContractTest(unittest.TestCase):
                 self.assertIn("STORE_QA_CONFIGURATION_GATE=PASS", stdout.getvalue())
                 self.assertIn("PUBLIC_RELEASE_READY=NO", stdout.getvalue())
                 if platform == "android":
-                    self.assertIn("Running build hooks...Running build hooks...", stdout.getvalue())
+                    self.assertIn("Running build hooks...Running build hooks...", stderr.getvalue())
                 self.assertNotIn("RELEASE_CONFIGURATION_GATE=PASS",
                                  stdout.getvalue() + stderr.getvalue())
                 self.assertTrue(all(not path.exists() for path in snapshots))

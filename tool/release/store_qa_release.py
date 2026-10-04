@@ -42,9 +42,17 @@ EXPECTED_ERROR = (
     "The frozen release manifest must contain zero unresolved reviews."
 )
 EXPECTED_FAILURE = ["RELEASE_CONFIGURATION_GATE=FAIL", EXPECTED_ERROR]
-# Dart's nonsemantic stdout observed in Android run37227785435, job111510923333.
-# Accept only that exact bounded banner, never arbitrary compiler diagnostics.
-OBSERVED_DART_BUILD_HOOK_STDOUT = "Running build hooks...Running build hooks..."
+# Actual pinned Dart3.12.2 subprocess capture proves this prefix is on STDERR.
+# GitHub merges streams; never accept arbitrary stdout/compiler diagnostics.
+OBSERVED_DART_BUILD_HOOK_STDERR_PREFIX = "Running build hooks...Running build hooks..."
+IOS_PODS_CONFIG_PREFIXES = {
+    "ios/Flutter/Debug.xcconfig":
+        b'#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n',
+    "ios/Flutter/Release.xcconfig":
+        b'#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n',
+}
+PINNED_FLUTTER_FRAMEWORK_REVISION = "ee80f08bbf97172ec030b8751ceab557177a34a6"
+PINNED_IOS_PODFILE_SHA256 = "db2da28b10a5ac3ed5d42dbf7208ece60fc886bd1f86f14335dde4037ba32350"
 PREBUILD_RECEIPTS = {
     "BIL-store-qa-upstream-qa.txt", "BIL-store-qa-configuration.txt",
     "BIL-apple-release-toolchain.txt", "BIL-apple-release-toolchain.json",
@@ -216,12 +224,49 @@ def verify_ci(manifest, environment, get=_api_get):
     return receipts
 
 
-def _run(command, *, cwd, env=None, timeout=300):
+def _run(command, *, cwd, env=None, timeout=300, text=True):
     try:
         return subprocess.run(command, cwd=cwd, env=env, capture_output=True,
-                              text=True, check=False, timeout=timeout)
+                              text=text, check=False, timeout=timeout)
     except (OSError, subprocess.TimeoutExpired) as error:
         raise GateError("Bounded control-plane subprocess failed") from error
+
+
+def _validated_ios_pods_configuration(path, cwd, run):
+    # Flutter3.44.6 cocoapods.dart:300-314 prepends this one include at pub get.
+    # Read the immutable Git blob as bytes: no whitespace/newline normalization.
+    original = run(["git", "show", SOURCE_SHA + ":" + path], cwd=cwd, text=False)
+    if original.returncode != 0 or not isinstance(original.stdout, bytes) or not original.stdout:
+        raise GateError("Immutable iOS configuration source unavailable: " + path)
+    generated = _read_receipt(Path(cwd) / path)
+    if generated != IOS_PODS_CONFIG_PREFIXES[path] + original.stdout:
+        raise GateError("Unexpected iOS CocoaPods configuration transformation: " + path)
+    return dict(path=path,
+                transformation="FLUTTER_3_44_6_SINGLE_COCOAPODS_INCLUDE",
+                source_sha256=hashlib.sha256(original.stdout).hexdigest(),
+                generated_sha256=hashlib.sha256(generated).hexdigest())
+
+
+def _validated_ios_podfile(cwd, environment):
+    flutter_root = environment.get("FLUTTER_ROOT", "")
+    if not flutter_root or not Path(flutter_root).is_dir():
+        raise GateError("Pinned Flutter SDK required for generated iOS Podfile")
+    sdk = Path(flutter_root)
+    version = _json(_read_receipt(sdk / "bin/cache/flutter.version.json"))
+    if (version.get("frameworkVersion") != "3.44.6" or
+            version.get("frameworkRevision") != PINNED_FLUTTER_FRAMEWORK_REVISION):
+        raise GateError("Unexpected Flutter SDK for generated iOS Podfile")
+    template = _read_receipt(sdk / "packages/flutter_tools/templates/cocoapods/Podfile-ios")
+    template_digest = hashlib.sha256(template).hexdigest()
+    if template_digest != PINNED_IOS_PODFILE_SHA256:
+        raise GateError("Pinned Flutter iOS Podfile template digest mismatch")
+    generated = _read_receipt(Path(cwd) / "ios/Podfile")
+    if generated != template:
+        raise GateError("Generated iOS Podfile differs from exact pinned SDK template")
+    return dict(path="ios/Podfile", transformation="FLUTTER_3_44_6_OFFICIAL_PODFILE_COPY",
+                framework_revision=PINNED_FLUTTER_FRAMEWORK_REVISION,
+                template_sha256=template_digest,
+                generated_sha256=hashlib.sha256(generated).hexdigest())
 
 
 def validate_source(manifest, target, platform, environment, cwd, run=_run,
@@ -237,6 +282,13 @@ def validate_source(manifest, target, platform, environment, cwd, run=_run,
             raise GateError("Malformed Git source-status receipt")
         state, path = line[:2], line[3:]
         if state == "??" and (path == "control/" or path in allowed):
+            continue
+        if not after_build and platform == "ios" and state == "??" and path == "ios/Podfile":
+            generated.append(_validated_ios_podfile(cwd, environment))
+            continue
+        if (not after_build and platform == "ios" and state == " M" and
+                path in IOS_PODS_CONFIG_PREFIXES):
+            generated.append(_validated_ios_pods_configuration(path, cwd, run))
             continue
         # Only this explicit iOS signing file may change after native compilation.
         # Android registrants and build outputs are ignored by the source's own
@@ -295,9 +347,11 @@ def freeze_text(manifest, target, platform, digest):
 
 def qualify_validator_result(result):
     # No filter/waiver/continue-on-error: the exact original failure is mandatory.
-    if (result.returncode != 78 or
-            result.stdout.strip() not in ("", OBSERVED_DART_BUILD_HOOK_STDOUT) or
-            result.stderr.splitlines() != EXPECTED_FAILURE):
+    gate_stderr = result.stderr
+    if gate_stderr.startswith(OBSERVED_DART_BUILD_HOOK_STDERR_PREFIX):
+        gate_stderr = gate_stderr[len(OBSERVED_DART_BUILD_HOOK_STDERR_PREFIX):]
+    if (result.returncode != 78 or result.stdout.strip() or
+            gate_stderr.splitlines() != EXPECTED_FAILURE):
         raise GateError("Unmodified production gate did not report exactly the known review failure")
 
 
