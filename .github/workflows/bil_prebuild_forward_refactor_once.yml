@@ -1,0 +1,75 @@
+name: BIL code-only forward refactor
+on:
+  push:
+    branches: [work/community-reference-parity-20261003]
+    paths: ['.github/workflows/bil_prebuild_forward_refactor_once.yml', '.github/prebuild_forward_refactor.py']
+permissions:
+  contents: write
+concurrency:
+  group: bil-prebuild-forward-refactor
+  cancel-in-progress: false
+jobs:
+  code-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact authorized work commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Validate parent and apply byte-guarded source changes
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = c1be3ee7c33d5e7d77491023b5d638775d3d781d
+          python3 .github/prebuild_forward_refactor.py
+      - name: Install exact project toolchain
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Format and analyze code only
+        run: |
+          set -euo pipefail
+          flutter pub get
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          dart format lib test integration_test
+          flutter analyze --no-pub 2>&1 | tee /tmp/bil-forward/analyze.log
+      - name: Verify architecture and affected Rewards contract without building an app
+        run: |
+          set -euo pipefail
+          flutter test --no-pub test/architecture_source_file_size_guard_test.dart test/features/community/community_rewards_accessibility_test.dart test/platform_readiness/community_voice_purpose_contract_test.dart --reporter expanded --timeout 2m 2>&1 | tee /tmp/bil-forward/tests.log
+      - name: Commit only reviewed source paths, never merge or build
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin refs/heads/work/community-reference-parity-20261003 | cut -f1)" = "$EXPECTED_SHA"
+          git add lib test ios
+          git diff --cached --check
+          git diff --cached > /tmp/bil-forward/forward.patch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(prebuild): preserve route contracts within architecture limits and repair Activity evidence'
+          git rev-parse HEAD > /tmp/bil-forward/source-sha.txt
+          git push origin HEAD:refs/heads/work/community-reference-parity-20261003
+      - name: Record native disclosure source and boundaries
+        if: always()
+        run: |
+          mkdir -p /tmp/bil-forward
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          with zipfile.ZipFile('/tmp/bil-forward/native-purpose-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for p in Path('ios/Runner').glob('*.lproj/InfoPlist.strings'):
+                  z.write(p,p.as_posix())
+          PY
+          printf '%s\n' 'NO_APP_BUILD' 'NO_SIGNING' 'NO_UPLOAD' 'NO_PRODUCTION_DATABASE_MUTATION' > /tmp/bil-forward/boundary.txt
+      - name: Preserve review evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-prebuild-forward-${{ github.sha }}
+          path: /tmp/bil-forward
+          if-no-files-found: error
+          retention-days: 14
