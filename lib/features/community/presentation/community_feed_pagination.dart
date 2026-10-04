@@ -12,6 +12,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   set _feedRefreshing(bool value);
   Map<String, CommunityPostReferenceMetadata> get _referenceByPost;
   Map<String, int> get _viewCountByPost;
+  Map<String, CommunityComment> get _commentPreviewByPost;
   CommunityFeedMode get _selectedFeedMode;
   int? get _feedCursorPriority;
   set _feedCursorPriority(int? value);
@@ -37,17 +38,21 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
       final ids = page.posts.map((post) => post.id).toList(growable: false);
       final List<CommunityPostReferenceMetadata> references;
       final Map<String, int> viewCounts;
+      final Map<String, CommunityComment> commentPreviews;
       if (widget.repository.useServerCommunityReferenceParity &&
           ids.isNotEmpty) {
         final extras = await Future.wait<Object>([
           widget.repository.loadCommunityPostReferenceMetadata(ids),
           widget.repository.loadCommunityPostViewCounts(ids),
+          widget.repository.loadCommunityFeedCommentPreviews(ids),
         ]);
         references = extras[0] as List<CommunityPostReferenceMetadata>;
         viewCounts = extras[1] as Map<String, int>;
+        commentPreviews = extras[2] as Map<String, CommunityComment>;
       } else {
         references = const <CommunityPostReferenceMetadata>[];
         viewCounts = const <String, int>{};
+        commentPreviews = const <String, CommunityComment>{};
       }
       if (mounted && generation == _feedGeneration) {
         _referenceByPost
@@ -58,6 +63,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         _viewCountByPost
           ..clear()
           ..addAll(viewCounts);
+        _commentPreviewByPost
+          ..clear()
+          ..addAll(commentPreviews);
         _hasMore = page.hasMore;
         _feedCursorPriority = page.nextPriority;
         _feedCursorCreatedAt = page.nextBefore;
@@ -92,17 +100,21 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
       final ids = page.posts.map((post) => post.id).toList(growable: false);
       final List<CommunityPostReferenceMetadata> references;
       final Map<String, int> viewCounts;
+      final Map<String, CommunityComment> commentPreviews;
       if (widget.repository.useServerCommunityReferenceParity &&
           ids.isNotEmpty) {
         final extras = await Future.wait<Object>([
           widget.repository.loadCommunityPostReferenceMetadata(ids),
           widget.repository.loadCommunityPostViewCounts(ids),
+          widget.repository.loadCommunityFeedCommentPreviews(ids),
         ]);
         references = extras[0] as List<CommunityPostReferenceMetadata>;
         viewCounts = extras[1] as Map<String, int>;
+        commentPreviews = extras[2] as Map<String, CommunityComment>;
       } else {
         references = const <CommunityPostReferenceMetadata>[];
         viewCounts = const <String, int>{};
+        commentPreviews = const <String, CommunityComment>{};
       }
       if (!mounted || generation != _feedGeneration) return;
       final known = visiblePosts.map((post) => post.id).toSet();
@@ -115,6 +127,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           references.map((value) => MapEntry(value.postId, value)),
         );
         _viewCountByPost.addAll(viewCounts);
+        _commentPreviewByPost.addAll(commentPreviews);
         _feed = Future.value(combined);
         _hasMore = page.hasMore;
         _feedCursorPriority = page.nextPriority;
