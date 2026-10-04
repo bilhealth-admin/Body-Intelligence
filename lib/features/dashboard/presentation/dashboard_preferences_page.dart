@@ -14,6 +14,7 @@ import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_preferences_provider.dart';
 part 'dashboard_preferences_actions.dart';
 part 'dashboard_preferences_catalog.dart';
+part 'dashboard_preferences_polish.dart';
 
 @visibleForTesting
 String dashboardPremiumFeatureDestination(bool paid, String featureRoute) =>
@@ -35,6 +36,7 @@ class _DashboardPreferencesPageState
   // progress bar. Batch changes still use the existing blocking presentation.
   bool get _savingLayout => _saving && _savingSection == null;
   final _presetScrollController = ScrollController();
+  final _stableSectionValues = <String, bool>{};
 
   @override
   void dispose() {
@@ -80,13 +82,17 @@ class _DashboardPreferencesPageState
                   ? const LinearProgressIndicator()
                   : const SizedBox.shrink(),
             ),
-            Text(
-              _sectionCopy(
+            _DashboardPreferencesHero(
+              title: _sectionCopy(
+                context,
+                'Customize Today',
+                'تخصيص شاشة اليوم',
+              ),
+              subtitle: _sectionCopy(
                 context,
                 'Choose what appears on Today. Your data stays saved and every card can be restored at any time.',
                 'اختر ما يظهر في شاشة اليوم. تبقى بياناتك محفوظة ويمكن إعادة أي بطاقة في أي وقت.',
               ),
-              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 18),
             Text(
@@ -152,10 +158,9 @@ class _DashboardPreferencesPageState
                             child: ListTile(
                               key: Key('dashboard-preset-${preset.id}'),
                               horizontalTitleGap: 12,
-                              leading: BilSemanticIconBadge(
+                              leading: _DashboardLuxeIconBadge(
                                 kind: _dashboardPresetIconKind(preset.id),
-                                size: 32,
-                                iconSize: 18,
+                                active: selected == preset.id,
                               ),
                               title: Text(
                                 _copy(
@@ -237,10 +242,9 @@ class _DashboardPreferencesPageState
                           child: ListTile(
                             key: const Key('dashboard-preset-custom'),
                             horizontalTitleGap: 12,
-                            leading: const BilSemanticIconBadge(
+                            leading: _DashboardLuxeIconBadge(
                               kind: BilSemanticIconKind.preferences,
-                              size: 32,
-                              iconSize: 18,
+                              active: selected == 'custom',
                             ),
                             title: Text(
                               _copy(
@@ -327,7 +331,11 @@ class _DashboardPreferencesPageState
                               final state = ref.watch(
                                 dashboardSectionVisibleProvider(item.$1),
                               );
-                              if (state.hasError) {
+                              final cachedVisible =
+                                  _stableSectionValues[item.$1];
+                              if (state.hasError &&
+                                  !state.hasValue &&
+                                  cachedVisible == null) {
                                 return ListTile(
                                   key: Key(
                                     'dashboard-section-${item.$1}-error',
@@ -367,7 +375,9 @@ class _DashboardPreferencesPageState
                                   ),
                                 );
                               }
-                              if (state.isLoading) {
+                              if (state.isLoading &&
+                                  !state.hasValue &&
+                                  cachedVisible == null) {
                                 return Semantics(
                                   liveRegion: true,
                                   label: _sectionCopy(
@@ -385,8 +395,18 @@ class _DashboardPreferencesPageState
                                   ),
                                 );
                               }
-                              final visible = state.value!;
-                              return SwitchListTile.adaptive(
+                              final latestVisible = state.value;
+                              if (latestVisible != null) {
+                                _stableSectionValues[item.$1] = latestVisible;
+                              }
+                              final visible =
+                                  latestVisible ??
+                                  cachedVisible ??
+                                  DashboardSectionIds.defaultVisible(item.$1);
+                              return _DashboardPreferenceSurface(
+                                active: visible,
+                                child: SwitchListTile.adaptive(
+
                                 key: Key('dashboard-section-${item.$1}'),
                                 contentPadding:
                                     const EdgeInsetsDirectional.fromSTEB(
@@ -401,10 +421,11 @@ class _DashboardPreferencesPageState
                                 secondary: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    BilSemanticIconBadge(
+                                    _DashboardLuxeIconBadge(
                                       kind: _dashboardSectionIconKind(item.$1),
-                                      size: 30,
-                                      iconSize: 18,
+                                      active: visible,
+                                      size: 36,
+                                      iconSize: 19,
                                     ),
                                     if (_savingSection == item.$1)
                                       SizedBox.square(
@@ -426,7 +447,10 @@ class _DashboardPreferencesPageState
                                   ),
                                 ),
                                 value: visible,
-                                onChanged: _savingLayout || state.isLoading
+                                onChanged:
+                                    _savingLayout ||
+                                        (state.isLoading &&
+                                            cachedVisible == null)
                                     ? null
                                     : (value) => _setSectionVisibility(
                                         context,
@@ -434,6 +458,7 @@ class _DashboardPreferencesPageState
                                         item.$1,
                                         value,
                                       ),
+                                ),
                               );
                             },
                           ),
@@ -449,10 +474,8 @@ class _DashboardPreferencesPageState
                 children: [
                   ListTile(
                     key: const Key('dashboard-edit-nutrition-goals'),
-                    leading: const BilSemanticIconBadge(
+                    leading: const _DashboardLuxeIconBadge(
                       kind: BilSemanticIconKind.goals,
-                      size: 32,
-                      iconSize: 18,
                     ),
                     title: Text(
                       _copy(

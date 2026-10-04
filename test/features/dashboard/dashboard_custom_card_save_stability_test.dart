@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
@@ -17,6 +18,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('custom cards keep cached values instead of flashing on refresh', () {
+    final source = File(
+      'lib/features/dashboard/presentation/dashboard_preferences_page.dart',
+    ).readAsStringSync();
+    expect(source, contains('_stableSectionValues'));
+    expect(source, contains('cachedVisible == null'));
+    expect(source, contains('_DashboardPreferenceSurface('));
+    expect(source, contains('_DashboardLuxeIconBadge('));
+  });
+
   for (final locale in const [Locale('en'), Locale('ar')]) {
     for (final section in DashboardSectionIds.all) {
       for (final failSave in [false, true]) {
