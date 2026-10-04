@@ -112,6 +112,55 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             ),
                           ),
                         ),
+                        if (_selectedImages.isEmpty) ...[
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: SizedBox(
+                              width: 132,
+                              height: 116,
+                              child: OutlinedButton(
+                                key: const Key(
+                                  'community-composer-media-tile',
+                                ),
+                                onPressed: busy ? null : _pickImage,
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.all(12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _selectingImage
+                                        ? const SizedBox.square(
+                                            dimension: 26,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.add_photo_alternate_outlined,
+                                            size: 31,
+                                          ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      communityText(
+                                        context,
+                                        'Media',
+                                        'وسائط',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                         ..._CommunityPostComposerReferenceSections(
                           this,
                         )._buildCommunityHashtagSection(context, busy),
