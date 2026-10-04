@@ -50,7 +50,7 @@ extension _CommunityPostDetailReferenceActions
       if (confirmed != true || !mounted) return;
     }
 
-    setState(() => _managingPost = true);
+    _setDetailState(() => _managingPost = true);
     try {
       if (action == 'delete') {
         await widget.repository.deletePost(widget.post.id);
@@ -85,29 +85,29 @@ extension _CommunityPostDetailReferenceActions
     } catch (_) {
       if (mounted) _showActionError();
     } finally {
-      if (mounted) setState(() => _managingPost = false);
+      if (mounted) _setDetailState(() => _managingPost = false);
     }
   }
 
   Future<void> _togglePostSaved() async {
     if (_savingPost) return;
-    setState(() => _savingPost = true);
+    _setDetailState(() => _savingPost = true);
     try {
       final state = await widget.repository.setPostSaved(
         widget.post.id,
         saved: !_savedPost,
       );
-      if (mounted) setState(() => _savedPost = state.saved);
+      if (mounted) _setDetailState(() => _savedPost = state.saved);
     } catch (_) {
       if (mounted) _showActionError();
     } finally {
-      if (mounted) setState(() => _savingPost = false);
+      if (mounted) _setDetailState(() => _savingPost = false);
     }
   }
 
   Future<void> _sharePost(BuildContext anchorContext) async {
     if (_sharingPost) return;
-    setState(() => _sharingPost = true);
+    _setDetailState(() => _sharingPost = true);
     try {
       final box = anchorContext.findRenderObject() as RenderBox?;
       await SharePlus.instance.share(
@@ -122,7 +122,7 @@ extension _CommunityPostDetailReferenceActions
     } catch (_) {
       if (mounted) _showActionError();
     } finally {
-      if (mounted) setState(() => _sharingPost = false);
+      if (mounted) _setDetailState(() => _sharingPost = false);
     }
   }
 
