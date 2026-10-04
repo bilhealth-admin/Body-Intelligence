@@ -436,11 +436,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(
-        tester.takeException(),
-        isNull,
-        reason: 'feed $tag',
-      );
+      expect(tester.takeException(), isNull, reason: 'feed $tag');
       await tester.tap(find.byKey(const Key('community-create-post')));
       await tester.pumpAndSettle();
       expect(
@@ -448,11 +444,7 @@ void main() {
         findsOneWidget,
         reason: tag,
       );
-      expect(
-        tester.takeException(),
-        isNull,
-        reason: 'composer $tag',
-      );
+      expect(tester.takeException(), isNull, reason: 'composer $tag');
       // Community uses a Material route in this harness; pageBack() only
       // targets CupertinoNavigationBarBackButton and would fail spuriously.
       await tester.binding.handlePopRoute();
