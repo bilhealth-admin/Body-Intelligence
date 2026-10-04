@@ -42,6 +42,9 @@ EXPECTED_ERROR = (
     "The frozen release manifest must contain zero unresolved reviews."
 )
 EXPECTED_FAILURE = ["RELEASE_CONFIGURATION_GATE=FAIL", EXPECTED_ERROR]
+# Dart's nonsemantic stdout observed in Android run37227785435, job111510923333.
+# Accept only that exact bounded banner, never arbitrary compiler diagnostics.
+OBSERVED_DART_BUILD_HOOK_STDOUT = "Running build hooks...Running build hooks..."
 PREBUILD_RECEIPTS = {
     "BIL-store-qa-upstream-qa.txt", "BIL-store-qa-configuration.txt",
     "BIL-apple-release-toolchain.txt", "BIL-apple-release-toolchain.json",
@@ -291,8 +294,9 @@ def freeze_text(manifest, target, platform, digest):
 
 
 def qualify_validator_result(result):
-    # No filter/waiver/continue-on-error: exactly one known failure is mandatory.
-    if (result.returncode != 78 or result.stdout.strip() or
+    # No filter/waiver/continue-on-error: the exact original failure is mandatory.
+    if (result.returncode != 78 or
+            result.stdout.strip() not in ("", OBSERVED_DART_BUILD_HOOK_STDOUT) or
             result.stderr.splitlines() != EXPECTED_FAILURE):
         raise GateError("Unmodified production gate did not report exactly the known review failure")
 

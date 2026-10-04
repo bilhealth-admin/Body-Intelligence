@@ -233,6 +233,41 @@ class StoreQaControlContractTest(unittest.TestCase):
             with self.assertRaises(qa.GateError):
                 qa.qualify_validator_result(result)
 
+    def test_observed_dart_build_hook_stdout_retains_exact_original_fail78(self):
+        qa.qualify_validator_result(completed(
+            78,
+            stdout="Running build hooks...Running build hooks...",
+            stderr="\n".join(qa.EXPECTED_FAILURE) + "\n",
+        ))
+
+    def test_build_hook_banner_cannot_hide_other_output_or_warnings(self):
+        banner = "Running build hooks...Running build hooks..."
+        expected = "\n".join(qa.EXPECTED_FAILURE) + "\n"
+        for output in (
+            "Running build hooks...", banner + "Running build hooks...",
+            "warning: compile warning\n" + banner,
+            banner + "\nwarning: compile warning\n",
+            banner + "RELEASE_CONFIGURATION_GATE=PASS\n",
+        ):
+            with self.subTest(stdout=output), self.assertRaises(qa.GateError):
+                qa.qualify_validator_result(completed(78, stdout=output, stderr=expected))
+        with self.assertRaises(qa.GateError):
+            qa.qualify_validator_result(completed(
+                78, stdout=banner, stderr=expected + "warning: compile warning\n"))
+
+    def test_build_hook_banner_cannot_authorize_other_exit_or_gate_issue(self):
+        banner = "Running build hooks...Running build hooks..."
+        expected = "\n".join(qa.EXPECTED_FAILURE) + "\n"
+        for result in (
+            completed(0, stdout=banner, stderr=expected),
+            completed(1, stdout=banner, stderr=expected),
+            completed(78, stdout=banner, stderr="RELEASE_CONFIGURATION_GATE=PASS\n"),
+            completed(78, stdout=banner, stderr=expected + "unaudited_source_commit: bad\n"),
+            completed(78, stdout=banner, stderr=expected + expected),
+        ):
+            with self.assertRaises(qa.GateError):
+                qa.qualify_validator_result(result)
+
     def test_ephemeral_freeze_keeps_positive8_and_original_fail_visible(self):
         for platform in ("ios", "android"):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temporary:
@@ -254,7 +289,12 @@ class StoreQaControlContractTest(unittest.TestCase):
                     self.assertIn(b"PUBLIC_RELEASE_READY: NO", raw)
                     self.assertEqual(env["BIL_AUDITED_FREEZE_MANIFEST_SHA256"],
                                      hashlib.sha256(raw).hexdigest())
-                    return completed(78, stderr="\n".join(qa.EXPECTED_FAILURE) + "\n")
+                    return completed(
+                        78,
+                        stdout=("Running build hooks...Running build hooks..."
+                                if platform == "android" else ""),
+                        stderr="\n".join(qa.EXPECTED_FAILURE) + "\n",
+                    )
                 stdout, stderr = io.StringIO(), io.StringIO()
                 with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
                     qa.configuration(self.manifest, self.manifest[platform], platform,
@@ -262,6 +302,8 @@ class StoreQaControlContractTest(unittest.TestCase):
                 self.assertIn("RELEASE_CONFIGURATION_GATE=FAIL", stderr.getvalue())
                 self.assertIn("STORE_QA_CONFIGURATION_GATE=PASS", stdout.getvalue())
                 self.assertIn("PUBLIC_RELEASE_READY=NO", stdout.getvalue())
+                if platform == "android":
+                    self.assertIn("Running build hooks...Running build hooks...", stdout.getvalue())
                 self.assertNotIn("RELEASE_CONFIGURATION_GATE=PASS",
                                  stdout.getvalue() + stderr.getvalue())
                 self.assertTrue(all(not path.exists() for path in snapshots))
