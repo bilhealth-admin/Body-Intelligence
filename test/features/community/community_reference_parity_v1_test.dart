@@ -397,7 +397,13 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(repository.followCalls, 1);
-      expect(find.text('Following'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('community-profile-follow-action')),
+          matching: find.text('Following'),
+        ),
+        findsOneWidget,
+      );
 
       final momentsTab = find.byKey(const Key('community-profile-tab-moments'));
       await tester.scrollUntilVisible(
