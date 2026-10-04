@@ -359,6 +359,49 @@ mixin CommunitySocialRepositoryMixin {
     );
   }
 
+  Future<Map<String, CommunityComment>> loadCommunityFeedCommentPreviews(
+    List<String> postIds,
+  ) async {
+    if (postIds.isEmpty) return const <String, CommunityComment>{};
+    if (postIds.length > 100 ||
+        postIds.toSet().length != postIds.length ||
+        postIds.any((postId) => !_uuid.hasMatch(postId))) {
+      throw ArgumentError.value(postIds, 'postIds');
+    }
+
+    final response = await communitySocialClient.rpc(
+      'bil_community_feed_comment_previews_v1',
+      params: {'p_post_ids': postIds},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid Community feed comment previews');
+    }
+
+    final result = <String, CommunityComment>{};
+    for (final raw in response) {
+      if (raw is! Map) {
+        throw const FormatException('Invalid Community feed comment preview');
+      }
+      final row = Map<String, dynamic>.from(raw);
+      final postId = row['post_id'];
+      final comment = row['comment'];
+      if (postId is! String ||
+          !postIds.contains(postId) ||
+          comment is! Map ||
+          result.containsKey(postId)) {
+        throw const FormatException('Invalid Community feed comment preview');
+      }
+      final parsed = CommunityComment.fromJson(
+        Map<String, dynamic>.from(comment),
+      );
+      if (parsed.parentId != null) {
+        throw const FormatException('Invalid Community feed comment root');
+      }
+      result[postId] = parsed;
+    }
+    return Map<String, CommunityComment>.unmodifiable(result);
+  }
+
   Future<List<CommunityCommentThread>> loadPostCommentThreads(
     String postId, {
     DateTime? after,
