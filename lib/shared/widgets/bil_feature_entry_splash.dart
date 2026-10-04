@@ -138,7 +138,7 @@ class _BilFeatureEntrySplash extends StatelessWidget {
     return Directionality(
       textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
       child: Semantics(
-        key: ValueKey('feature-entry-splash-' + kind.name),
+        key: ValueKey('feature-entry-splash-${kind.name}'),
         container: true,
         label: data.title,
         child: DecoratedBox(

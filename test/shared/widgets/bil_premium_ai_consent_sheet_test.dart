@@ -5,8 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (final locale in const [Locale('en'), Locale('ar')]) {
     testWidgets(
-      'premium AI consent keeps full-width actions stable at 2x ' +
-          locale.languageCode,
+      'premium AI consent keeps full-width actions stable at 2x ${locale.languageCode}',
       (tester) async {
         tester.view.physicalSize = const Size(320, 568);
         tester.view.devicePixelRatio = 1;

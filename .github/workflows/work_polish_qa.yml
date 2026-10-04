@@ -6,7 +6,7 @@ on:
       - work/community-reference-parity-20261003
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: bil-work-polish-${{ github.ref }}
@@ -19,7 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -44,6 +43,19 @@ jobs:
             test/features/intelligence_center/ai_coach_starter_prompts_contract_test.dart \
             test/shared/widgets/bil_feature_entry_splash_test.dart \
             test/features/dashboard/dashboard_custom_card_save_stability_test.dart
+      - name: Commit exact formatter output when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- '*.dart'; then
+            echo "Formatter produced no source changes."
+          else
+            git config user.name "bilhealth-admin"
+            git config user.email "bilhealth.app@gmail.com"
+            git add -- '*.dart'
+            git commit -m "style(polish): apply exact Dart formatter"
+            git push origin HEAD:work/community-reference-parity-20261003
+          fi
       - name: Upload exact formatted polish sources
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

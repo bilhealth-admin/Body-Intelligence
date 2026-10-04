@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   for (final kind in BilFeatureEntryKind.values) {
-    testWidgets(kind.name + ' entry splash is bounded and releases destination', (
+    testWidgets('${kind.name} entry splash is bounded and releases destination', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(320, 568);
@@ -32,7 +32,7 @@ void main() {
       );
 
       expect(
-        find.byKey(ValueKey('feature-entry-splash-' + kind.name)),
+        find.byKey(ValueKey('feature-entry-splash-${kind.name}')),
         findsOneWidget,
       );
       expect(find.byKey(const Key('destination')), findsOneWidget);
@@ -41,7 +41,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1200));
       await tester.pump();
       expect(
-        find.byKey(ValueKey('feature-entry-splash-' + kind.name)),
+        find.byKey(ValueKey('feature-entry-splash-${kind.name}')),
         findsNothing,
       );
       expect(find.byKey(const Key('destination')), findsOneWidget);
