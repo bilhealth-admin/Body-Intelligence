@@ -152,14 +152,14 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                       ),
                 label: Text('${stats.likeCount}'),
               ),
-              Chip(
-                avatar: const Icon(Icons.mode_comment_outlined, size: 18),
-                label: Text('${stats.commentCount}'),
+              _CommunityPostDetailMetric(
+                icon: Icons.mode_comment_outlined,
+                value: '${stats.commentCount}',
               ),
               if (viewCount != null)
-                Chip(
-                  avatar: const Icon(Icons.visibility_outlined, size: 18),
-                  label: Text(viewCount.toString()),
+                _CommunityPostDetailMetric(
+                  icon: Icons.visibility_outlined,
+                  value: viewCount.toString(),
                 ),
               IconButton(
                 key: const Key('community-post-detail-save'),
@@ -203,6 +203,34 @@ class _CommunityPostDetailHeader extends StatelessWidget {
           ),
         ],
       ),
+    ),
+  );
+}
+
+
+class _CommunityPostDetailMetric extends StatelessWidget {
+  const _CommunityPostDetailMetric({
+    required this.icon,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 19,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 5),
+        Text(value),
+      ],
     ),
   );
 }
