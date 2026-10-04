@@ -315,6 +315,35 @@ void main() {
     expect(cover, contains("bucket_id='profile-avatars'"));
     expect(cover, contains("owner_id=v_uid::text"));
     expect(cover, contains("set search_path=''"));
+
+    final repository = File(
+      'lib/features/community/data/community_repository_reference_parity_mixin.dart',
+    ).readAsStringSync();
+    final pagination = File(
+      'lib/features/community/presentation/community_feed_pagination.dart',
+    ).readAsStringSync();
+    final card = File(
+      'lib/features/community/presentation/community_post_card.dart',
+    ).readAsStringSync();
+    final detail = File(
+      'lib/features/community/presentation/community_post_detail_page.dart',
+    ).readAsStringSync();
+    final header = File(
+      'lib/features/community/presentation/community_post_detail_header.dart',
+    ).readAsStringSync();
+
+    expect(repository, contains('loadVisibleMembershipTiers'));
+    expect(
+      repository,
+      contains("'bil_community_comment_membership_tiers_v1'"),
+    );
+    expect(pagination, contains('loadVisibleMembershipTiers(authorIds)'));
+    expect(card, contains('authorMembershipTier'));
+    expect(card, contains('_CommunityMembershipTierChip('));
+    expect(detail, contains('_loadAuthorMembershipTier'));
+    expect(detail, contains('loadVisibleMembershipTiers(['));
+    expect(header, contains('authorMembershipTier'));
+    expect(header, contains('_CommunityMembershipTierChip('));
   });
 
   test(
