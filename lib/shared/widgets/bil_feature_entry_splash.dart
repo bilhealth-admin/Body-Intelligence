@@ -163,76 +163,79 @@ class _BilFeatureEntrySplash extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                    Container(
-                      width: 96,
-                      height: 96,
-                      padding: const EdgeInsets.all(2.2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            data.glow.withValues(alpha: .98),
-                            const Color(0xFF7568FF),
-                          ],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: data.glow.withValues(alpha: .30),
-                            blurRadius: 36,
-                            spreadRadius: -8,
+                          Container(
+                            width: 96,
+                            height: 96,
+                            padding: const EdgeInsets.all(2.2),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  data.glow.withValues(alpha: .98),
+                                  const Color(0xFF7568FF),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: data.glow.withValues(alpha: .30),
+                                  blurRadius: 36,
+                                  spreadRadius: -8,
+                                ),
+                              ],
+                            ),
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF071923),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: BilSemanticIconBadge(
+                                  kind: data.icon,
+                                  size: 60,
+                                  iconSize: 29,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: DecoratedBox(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF071923),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: BilSemanticIconBadge(
-                            kind: data.icon,
-                            size: 60,
-                            iconSize: 29,
-                            shape: BoxShape.circle,
+                          const SizedBox(height: 24),
+                          Text(
+                            data.title,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  height: arabic ? 1.28 : 1.12,
+                                  letterSpacing: arabic ? 0 : -.35,
+                                ),
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      data.title,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            height: arabic ? 1.28 : 1.12,
-                            letterSpacing: arabic ? 0 : -.35,
+                          const SizedBox(height: 8),
+                          Text(
+                            data.subtitle,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: const Color(0xFFC5D2E3),
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.35,
+                                ),
                           ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      data.subtitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFFC5D2E3),
-                        fontWeight: FontWeight.w500,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 26),
-                    SizedBox(
-                      width: 116,
-                      child: LinearProgressIndicator(
-                        value: .72,
-                        minHeight: 3,
-                        borderRadius: BorderRadius.circular(99),
-                        color: data.glow,
-                        backgroundColor: Colors.white.withValues(alpha: .10),
-                      ),
-                    ),
+                          const SizedBox(height: 26),
+                          SizedBox(
+                            width: 116,
+                            child: LinearProgressIndicator(
+                              value: .72,
+                              minHeight: 3,
+                              borderRadius: BorderRadius.circular(99),
+                              color: data.glow,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: .10,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
