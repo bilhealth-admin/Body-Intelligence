@@ -588,7 +588,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(enable);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onboarding-ai-consent-accept')));
+    final accept = find.byKey(const Key('onboarding-ai-consent-accept'));
+    await tester.ensureVisible(accept);
+    await tester.pumpAndSettle();
+    expect(accept.hitTestable(), findsOneWidget);
+    await tester.tap(accept);
     await tester.pumpAndSettle();
     expect(find.textContaining('AI remains off'), findsOneWidget);
     expect(

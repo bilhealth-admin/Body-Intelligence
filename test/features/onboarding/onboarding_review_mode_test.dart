@@ -217,7 +217,11 @@ void main() {
       await revealAiButton(tester, const Key('onboarding-cloud-ai-toggle'));
       await tester.tap(find.byKey(const Key('onboarding-cloud-ai-toggle')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-ai-consent-accept')));
+      final accept = find.byKey(const Key('onboarding-ai-consent-accept'));
+      await tester.ensureVisible(accept);
+      await tester.pumpAndSettle();
+      expect(accept.hitTestable(), findsOneWidget);
+      await tester.tap(accept);
       await tester.pump();
 
       expect(remote.setGrantedCalls, 1);
@@ -255,7 +259,11 @@ void main() {
       await revealAiButton(tester, const Key('onboarding-cloud-ai-toggle'));
       await tester.tap(find.byKey(const Key('onboarding-cloud-ai-toggle')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding-ai-consent-accept')));
+      final accept = find.byKey(const Key('onboarding-ai-consent-accept'));
+      await tester.ensureVisible(accept);
+      await tester.pumpAndSettle();
+      expect(accept.hitTestable(), findsOneWidget);
+      await tester.tap(accept);
       await tester.tap(
         find.byKey(const Key('onboarding-cloud-ai-toggle')),
         warnIfMissed: false,
