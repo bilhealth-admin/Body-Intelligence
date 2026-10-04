@@ -19,6 +19,14 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
           .toList(growable: false);
       if (visible.isEmpty) return const SizedBox.shrink();
 
+      final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+      final railHeight = textScale >= 1.7
+          ? 166.0
+          : textScale >= 1.3
+          ? 136.0
+          : 112.0;
+      final cardWidth = textScale >= 1.7 ? 224.0 : 190.0;
+
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 0, 4),
         child: Column(
@@ -39,7 +47,7 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
             ),
             const SizedBox(height: 9),
             SizedBox(
-              height: 112,
+              height: railHeight,
               child: ListView.separated(
                 key: const Key('community-feed-topic-suggestions'),
                 scrollDirection: Axis.horizontal,
@@ -49,7 +57,7 @@ class _CommunityFeedTopicSuggestions extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final topic = visible[index];
                   return SizedBox(
-                    width: 190,
+                    width: cardWidth,
                     child: Card(
                       margin: EdgeInsets.zero,
                       child: InkWell(
