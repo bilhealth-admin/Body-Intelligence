@@ -147,8 +147,8 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                       )
                     : Icon(
                         stats.liked
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
+                            ? Icons.thumb_up_rounded
+                            : Icons.thumb_up_outlined,
                       ),
                 label: Text('${stats.likeCount}'),
               ),
@@ -178,8 +178,8 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                       )
                     : Icon(
                         saved
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded,
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                       ),
               ),
               Builder(
