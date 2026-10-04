@@ -1,10 +1,17 @@
 part of 'community_hub_page.dart';
 
 class _CommunityCreatorPanel extends StatelessWidget {
-  const _CommunityCreatorPanel({required this.creator, required this.isSelf});
+  const _CommunityCreatorPanel({
+    required this.creator,
+    required this.isSelf,
+    this.goldBalance,
+    this.quests = const <CommunityQuest>[],
+  });
 
   final CommunityCreatorProfile creator;
   final bool isSelf;
+  final CommunityGoldBalance? goldBalance;
+  final List<CommunityQuest> quests;
 
   String _badgeLabel(BuildContext context, String key) => switch (key) {
     'profile_complete' => communityText(
@@ -306,6 +313,13 @@ class _CommunityCreatorPanel extends StatelessWidget {
                   ),
                 ],
               ),
+              if (goldBalance != null || quests.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                _CommunityCreatorRewardsSnapshot(
+                  balance: goldBalance,
+                  quests: quests,
+                ),
+              ],
               if (nextLevel != null && nextXp != null) ...[
                 const SizedBox(height: 18),
                 DecoratedBox(
@@ -362,6 +376,148 @@ class _CommunityCreatorPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CommunityCreatorRewardsSnapshot extends StatelessWidget {
+  const _CommunityCreatorRewardsSnapshot({
+    required this.balance,
+    required this.quests,
+  });
+
+  final CommunityGoldBalance? balance;
+  final List<CommunityQuest> quests;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeQuests = quests
+        .where((quest) => quest.state != CommunityQuestState.claimed)
+        .toList(growable: false);
+    final readyCount = quests
+        .where((quest) => quest.state == CommunityQuestState.readyToClaim)
+        .length;
+    final topQuest = activeQuests.isEmpty ? quests.firstOrNull : activeQuests.first;
+
+    return DecoratedBox(
+      key: const Key('community-creator-rewards-snapshot'),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: .34),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const BilGoldCoin(size: 34),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        communityText(
+                          context,
+                          'Creator rewards',
+                          'مكافآت صانع المحتوى',
+                        ),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      if (balance != null)
+                        Text(
+                          '${balance!.balance} BIL Gold',
+                          key: const Key('community-creator-gold-balance'),
+                          textDirection: TextDirection.ltr,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                ),
+                if (readyCount > 0)
+                  Badge(
+                    label: Text('$readyCount'),
+                    child: const Icon(Icons.card_giftcard_rounded),
+                  ),
+                IconButton(
+                  key: const Key('community-creator-rewards-open'),
+                  tooltip: communityText(
+                    context,
+                    'Open rewards',
+                    'فتح المكافآت',
+                  ),
+                  onPressed: () => context.push('/community/rewards'),
+                  icon: const Icon(Icons.chevron_right_rounded),
+                ),
+              ],
+            ),
+            if (topQuest case final quest?) ...[
+              const SizedBox(height: 10),
+              LinearProgressIndicator(
+                key: const Key('community-creator-quest-progress'),
+                value: quest.completionRatio,
+                minHeight: 7,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              const SizedBox(height: 7),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _creatorQuestLabel(context, quest),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${quest.progress}/${quest.targetCount}',
+                    textDirection: TextDirection.ltr,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _creatorQuestLabel(BuildContext context, CommunityQuest quest) =>
+      switch (quest.titleCopyKey) {
+        'quest_invite_friend_title' => communityText(
+          context,
+          'Invite a friend',
+          'دعوة صديق',
+        ),
+        'quest_valuable_post_title' => communityText(
+          context,
+          'Create a valuable post',
+          'إنشاء منشور قيّم',
+        ),
+        'quest_complete_profile_title' => communityText(
+          context,
+          'Complete your Community profile',
+          'أكمل ملف المجتمع',
+        ),
+        _ => communityText(
+          context,
+          'Community reward task',
+          'مهمة مكافآت المجتمع',
+        ),
+      };
 }
 
 class _CreatorToolTile extends StatelessWidget {
