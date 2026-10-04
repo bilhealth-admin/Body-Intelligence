@@ -1,0 +1,35 @@
+name: BIL regional food aliases and recipe locale QA
+
+on:
+  push:
+    branches:
+      - feat/foods-arabic-recipes-25-locales-20261005
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  additions-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout this development commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Test recipe content validator
+        run: python3 -m unittest discover -s tool/catalog/tests -p test_recipe_locale_coverage.py -v
+      - name: Verify actual recipe names, ingredients and steps in all 25 locales
+        run: python3 tool/catalog/audit_recipe_locale_coverage.py
+      - name: Install the existing project Flutter version
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve unchanged dependency lockfile
+        run: |
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.lock
+      - name: Test regional expansion through the existing search assistance
+        run: flutter test --no-pub test/nutrition/food_arabic_regional_lexicon_test.dart
