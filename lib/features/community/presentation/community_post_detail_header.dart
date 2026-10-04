@@ -13,9 +13,11 @@ class _CommunityPostDetailHeader extends StatelessWidget {
     required this.saved,
     required this.saving,
     required this.sharing,
+    required this.managingPost,
     required this.onLike,
     required this.onSave,
     required this.onShare,
+    required this.onPostAction,
     required this.onToggleFollow,
     required this.repository,
   });
@@ -31,9 +33,11 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final bool saved;
   final bool saving;
   final bool sharing;
+  final bool managingPost;
   final VoidCallback onLike;
   final VoidCallback onSave;
   final Future<void> Function(BuildContext) onShare;
+  final ValueChanged<String> onPostAction;
   final VoidCallback onToggleFollow;
   final CommunityRepository repository;
 
@@ -94,6 +98,40 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                               : communityText(context, 'Follow', 'متابعة'),
                         ),
                 ),
+              PopupMenuButton<String>(
+                key: const Key('community-post-detail-actions'),
+                enabled: !managingPost,
+                icon: managingPost
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.more_horiz_rounded),
+                onSelected: onPostAction,
+                itemBuilder: (context) => [
+                  if (post.authorId == repository.currentUserId)
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(
+                        communityText(context, 'Delete', 'حذف'),
+                      ),
+                    )
+                  else ...[
+                    PopupMenuItem(
+                      value: 'report',
+                      child: Text(
+                        communityText(context, 'Report', 'إبلاغ'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'block',
+                      child: Text(
+                        communityText(context, 'Block member', 'حظر العضو'),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
           if (post.locationLabel case final location?) ...[
