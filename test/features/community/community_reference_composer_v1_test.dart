@@ -317,6 +317,10 @@ void main() {
         findsOneWidget,
       );
       expect(
+        find.byKey(const Key('community-composer-media-tile')),
+        findsOneWidget,
+      );
+      expect(
         find.byKey(const Key('community-composer-action-location')),
         findsOneWidget,
       );
