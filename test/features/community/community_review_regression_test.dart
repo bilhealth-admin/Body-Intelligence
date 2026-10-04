@@ -11,6 +11,7 @@ import 'package:body_intelligence_log/features/community/data/community_reposito
 import 'package:body_intelligence_log/features/community/domain/community_comment_threads.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
