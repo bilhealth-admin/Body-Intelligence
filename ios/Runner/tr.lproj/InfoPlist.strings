@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL yalnızca açıkça eşleştirdiğiniz fitness cihazlarına bağlanır; böylece ölçümler yerel olarak içe aktarılabilir.";
 "NSCameraUsageDescription" = "Kamerayı yalnızca barkod taramayı, öğün fotoğrafını incelemeyi veya özel profil ya da ilerleme fotoğrafı eklemeyi seçtiğinizde kullanın.";
 "NSPhotoLibraryUsageDescription" = "BIL yalnızca öğün, profil, ilerleme, topluluk gönderisi veya yiyecek katkısı için seçtiğiniz fotoğrafa erişir; böylece kaydetmeden ya da yüklemeden önce inceleyebilirsiniz.";
-"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca sesle kilo veya öğün kaydetmeyi ya da BIL AI Coach ile doğrudan konuşmayı seçtiğinizde kullanır.";
-"NSSpeechRecognitionUsageDescription" = "BIL, kilo veya öğün kaydı ya da BIL AI Coach için başlattığınız konuşmayı inceleyip gönderebilmeniz için metne dönüştürür.";
+"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca kilo, öğün, topluluk gönderileri veya BIL AI Coach için sesli girişi seçtiğinizde kullanır. Metni kaydetmeden, yayımlamadan veya göndermeden önce inceleyebilirsiniz.";
+"NSSpeechRecognitionUsageDescription" = "BIL, kilo, öğün, topluluk gönderileri veya BIL AI Coach için başlattığınız konuşmayı metne dönüştürür. Metni kaydetmeden, yayımlamadan veya göndermeden önce inceleyebilirsiniz.";

@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('router exposes the typed decision explanation boundary', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();

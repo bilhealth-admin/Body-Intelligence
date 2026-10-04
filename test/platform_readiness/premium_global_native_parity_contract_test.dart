@@ -176,7 +176,10 @@ void main() {
   });
 
   test('routes and production identifiers stay frozen', () {
-    final routes = File('lib/app/router/app_router.dart').readAsStringSync();
+    final routes = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final android = File('android/app/build.gradle.kts').readAsStringSync();
     final ios = File('ios/Runner.xcodeproj/project.pbxproj').readAsStringSync();
 

@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL solo se conecta a los dispositivos de fitness que emparejas de forma explícita para importar las mediciones localmente.";
 "NSCameraUsageDescription" = "Usa la cámara solo cuando elijas escanear un código, revisar una foto de comida o añadir una foto privada de perfil o progreso.";
 "NSPhotoLibraryUsageDescription" = "BIL accede solo a una foto que elijas para una comida, perfil, progreso, publicación de la comunidad o aporte de alimentos, para que la revises antes de guardarla o subirla.";
-"NSMicrophoneUsageDescription" = "BIL usa el micrófono solo cuando eliges registrar el peso o una comida con la voz, o hablar directamente con BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL convierte en texto el habla que inicias para registrar el peso, comidas o usar BIL AI Coach, para que puedas revisarla o enviarla.";
+"NSMicrophoneUsageDescription" = "BIL usa el micrófono solo cuando eliges la entrada de voz para el peso, comidas, publicaciones de la comunidad o BIL AI Coach. Puedes revisar el texto antes de guardarlo, publicarlo o enviarlo.";
+"NSSpeechRecognitionUsageDescription" = "BIL convierte en texto el habla que inicias para el peso, comidas, publicaciones de la comunidad o BIL AI Coach. Puedes revisarlo antes de guardarlo, publicarlo o enviarlo.";

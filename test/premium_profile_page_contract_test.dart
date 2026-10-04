@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('profile route uses the advanced premium profile experience', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final source = [
       'lib/features/profile/premium_profile_page.dart',
       'lib/features/profile/premium_profile_components.dart',

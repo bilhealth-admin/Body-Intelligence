@@ -7,7 +7,10 @@ void main() {
     final shell = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final foodLog = File(
       'lib/features/daily_log/food_log_page.dart',
     ).readAsStringSync();

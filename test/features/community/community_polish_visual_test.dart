@@ -87,6 +87,23 @@ class _VisualRepository extends CommunityRepository {
     unreadBySender: {peer: 3},
   );
   @override
+  Future<List<CommunityNotification>> loadCommunityNotifications({
+    int limit = 30,
+  }) async => [
+    CommunityNotification(
+      id: '99999999-9999-4999-8999-999999999999',
+      kind: CommunityNotificationKind.friendAccepted,
+      actorId: peer,
+      actorDisplayName: name,
+      createdAt: DateTime.utc(2026, 10, 3, 8),
+      entityKind: 'friendship',
+      entityId: '33333333-3333-4333-8333-333333333333',
+      friendshipId: '33333333-3333-4333-8333-333333333333',
+      copyKey: 'friend_accepted_v1',
+      deepLinkPath: '/community/connections',
+    ),
+  ];
+  @override
   Future<CommunityFeedBatch> loadMyPosts({
     DateTime? before,
     String? beforeId,
@@ -687,6 +704,14 @@ void main() {
               await settleVisualAssetImages(tester);
               await tester.pumpAndSettle();
               expect(tester.takeException(), isNull, reason: scene.key);
+              if (scene.key == 'updates') {
+                expect(
+                  find.byKey(const Key('community-activity-filter-all')),
+                  findsOneWidget,
+                  reason:
+                      'Activity evidence must show loaded server-contract rows, not an error fallback',
+                );
+              }
               await _capture(
                 tester,
                 key,

@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "측정값을 기기에 직접 가져올 수 있도록 BIL은 사용자가 명시적으로 페어링한 피트니스 기기에만 연결합니다.";
 "NSCameraUsageDescription" = "바코드 스캔, 식사 사진 검토, 개인 프로필 추가 또는 진행 사진 추가를 선택한 경우에만 카메라를 사용하세요.";
 "NSPhotoLibraryUsageDescription" = "BIL은 식사, 프로필, 진행 기록, 커뮤니티 게시물 또는 식품 제출을 위해 사용자가 선택한 사진에만 접근하며 저장 또는 업로드 전에 검토할 수 있습니다.";
-"NSMicrophoneUsageDescription" = "BIL은 음성으로 체중이나 식사를 기록하거나 BIL AI Coach와 직접 대화하도록 선택한 경우에만 마이크를 사용합니다.";
-"NSSpeechRecognitionUsageDescription" = "BIL은 체중·식사 기록 또는 BIL AI Coach를 위해 시작한 음성을 텍스트로 변환하여 검토하거나 전송할 수 있게 합니다.";
+"NSMicrophoneUsageDescription" = "BIL은 체중, 식사, 커뮤니티 게시물 또는 BIL AI Coach에 음성 입력을 사용하도록 선택한 경우에만 마이크를 사용합니다. 저장, 게시 또는 전송하기 전에 텍스트를 검토할 수 있습니다.";
+"NSSpeechRecognitionUsageDescription" = "BIL은 체중, 식사, 커뮤니티 게시물 또는 BIL AI Coach를 위해 시작한 음성을 텍스트로 변환합니다. 저장, 게시 또는 전송하기 전에 검토할 수 있습니다.";

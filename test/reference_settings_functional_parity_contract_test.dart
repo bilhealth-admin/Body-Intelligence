@@ -11,7 +11,10 @@ void main() {
       'lib/features/settings/reference_preferences_macros.dart',
       'lib/features/settings/reference_preferences_email.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final settings = File(
       'lib/features/settings/reference_settings_home_page.dart',
     ).readAsStringSync();

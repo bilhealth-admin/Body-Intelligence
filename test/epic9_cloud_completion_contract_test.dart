@@ -118,7 +118,9 @@ void main() {
       final deepLinks = source(
         'lib/features/notifications/domain/community_deep_link.dart',
       );
-      final router = source('lib/app/router/app_router.dart');
+      final router =
+          (source('lib/app/router/app_router.dart') +
+          source('lib/app/router/app_community_routes.dart'));
       final redirect = source('lib/app/router/app_route_redirect.dart');
       expect(service, contains('AppEnvironment.pushConfigured'));
       expect(service, contains('bil_disable_push_tokens'));

@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL chỉ kết nối với các thiết bị tập luyện mà bạn chủ động ghép đôi để có thể nhập dữ liệu đo ngay trên thiết bị.";
 "NSCameraUsageDescription" = "Chỉ sử dụng máy ảnh khi bạn chọn quét mã vạch, xem lại ảnh bữa ăn hoặc thêm hồ sơ riêng tư hoặc ảnh tiến trình.";
 "NSPhotoLibraryUsageDescription" = "BIL chỉ truy cập ảnh bạn chọn cho bữa ăn, hồ sơ, tiến trình, bài đăng cộng đồng hoặc đóng góp thực phẩm để bạn xem lại trước khi lưu hoặc tải lên.";
-"NSMicrophoneUsageDescription" = "BIL chỉ sử dụng micrô khi bạn chọn ghi cân nặng hoặc bữa ăn bằng giọng nói, hoặc trò chuyện trực tiếp với BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL chuyển lời nói bạn bắt đầu để ghi cân nặng, bữa ăn hoặc dùng BIL AI Coach thành văn bản để bạn xem lại hoặc gửi.";
+"NSMicrophoneUsageDescription" = "BIL chỉ sử dụng micrô khi bạn chọn nhập bằng giọng nói cho cân nặng, bữa ăn, bài đăng cộng đồng hoặc BIL AI Coach. Bạn có thể xem lại văn bản trước khi lưu, đăng hoặc gửi.";
+"NSSpeechRecognitionUsageDescription" = "BIL chuyển lời nói bạn bắt đầu cho cân nặng, bữa ăn, bài đăng cộng đồng hoặc BIL AI Coach thành văn bản. Bạn có thể xem lại trước khi lưu, đăng hoặc gửi.";

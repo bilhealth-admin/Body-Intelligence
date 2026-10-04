@@ -77,7 +77,10 @@ void main() {
   );
 
   test('health recommendation surfaces expose reviewable sources', () {
-    final route = File('lib/app/router/app_router.dart').readAsStringSync();
+    final route = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final plan = File(
       'lib/features/onboarding/onboarding_detail_steps.dart',
     ).readAsStringSync();

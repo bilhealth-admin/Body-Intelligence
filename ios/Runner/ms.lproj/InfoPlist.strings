@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL hanya bersambung dengan peranti kecergasan yang anda gandingkan sendiri supaya ukuran boleh diimport secara setempat.";
 "NSCameraUsageDescription" = "Gunakan kamera hanya apabila anda memilih untuk mengimbas kod bar, menyemak foto makan atau menambah profil peribadi atau foto kemajuan.";
 "NSPhotoLibraryUsageDescription" = "BIL hanya mengakses foto yang anda pilih untuk hidangan, profil, kemajuan, siaran komuniti atau sumbangan makanan supaya anda boleh menyemaknya sebelum disimpan atau dimuat naik.";
-"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya apabila anda memilih untuk merekod berat atau hidangan melalui suara, atau bercakap terus dengan BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL menukar pertuturan yang anda mulakan untuk rekod berat, hidangan atau BIL AI Coach kepada teks supaya anda boleh menyemak atau menghantarnya.";
+"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya apabila anda memilih input suara untuk berat, hidangan, siaran komuniti atau BIL AI Coach. Anda boleh menyemak teks sebelum menyimpan, menerbitkan atau menghantarnya.";
+"NSSpeechRecognitionUsageDescription" = "BIL menukar pertuturan yang anda mulakan untuk berat, hidangan, siaran komuniti atau BIL AI Coach kepada teks. Anda boleh menyemaknya sebelum menyimpan, menerbitkan atau menghantarnya.";

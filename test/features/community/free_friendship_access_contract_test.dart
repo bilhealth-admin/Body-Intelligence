@@ -49,7 +49,10 @@ void main() {
   });
 
   test('all existing community entry points share the Free bypass', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final gate = File(
       'lib/features/commerce/presentation/premium_route_glass_gate.dart',
     ).readAsStringSync();

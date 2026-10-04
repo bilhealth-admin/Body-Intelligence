@@ -56,7 +56,10 @@ void main() {
     final edge = File(
       'supabase/functions/ai-coach-global-reset/server.ts',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     expect(gateway, contains("'ai-coach-global-reset'"));
     expect(gateway, contains('BilMobileIntegrityService.instance'));
     expect(gateway, contains('.protect('));

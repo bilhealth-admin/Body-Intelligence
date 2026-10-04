@@ -15,7 +15,9 @@ void main() {
   test(
     'account conflict route preserves data and only offers safe sign out',
     () {
-      final router = source('lib/app/router/app_router.dart');
+      final router =
+          (source('lib/app/router/app_router.dart') +
+          source('lib/app/router/app_community_routes.dart'));
       final page = source('lib/features/auth/account_data_conflict_page.dart');
 
       expect(router, contains("path: '/account-data-conflict'"));

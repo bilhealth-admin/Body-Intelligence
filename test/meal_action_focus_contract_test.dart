@@ -26,7 +26,10 @@ void main() {
         'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
       ).readAsStringSync(),
     ].join('\n');
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final diary = _librarySource('lib/features/daily_log/daily_log_page.dart');
     final mealEntry = File(
       'lib/features/daily_log/daily_log_meal_entry.dart',

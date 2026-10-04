@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL maakt alleen verbinding met fitnessapparaten die u uitdrukkelijk koppelt, zodat metingen lokaal kunnen worden geïmporteerd.";
 "NSCameraUsageDescription" = "Gebruik de camera alleen als u ervoor kiest een streepjescode te scannen, een maaltijdfoto te bekijken of een privéprofiel of voortgangsfoto toe te voegen.";
 "NSPhotoLibraryUsageDescription" = "BIL opent alleen een foto die u kiest voor een maaltijd, profiel, voortgang, communitybericht of voedselbijdrage, zodat u die vóór opslaan of uploaden kunt controleren.";
-"NSMicrophoneUsageDescription" = "BIL gebruikt de microfoon alleen wanneer je je gewicht of een maaltijd met je stem registreert, of rechtstreeks met BIL AI Coach praat.";
-"NSSpeechRecognitionUsageDescription" = "BIL zet spraak die je start voor gewichts- of maaltijdregistratie of BIL AI Coach om in tekst, zodat je die kunt controleren of verzenden.";
+"NSMicrophoneUsageDescription" = "BIL gebruikt de microfoon alleen wanneer je spraakinvoer kiest voor gewicht, maaltijden, communityberichten of BIL AI Coach. Je kunt de tekst controleren voordat je deze opslaat, publiceert of verzendt.";
+"NSSpeechRecognitionUsageDescription" = "BIL zet spraak die je start voor gewicht, maaltijden, communityberichten of BIL AI Coach om in tekst. Je kunt de tekst controleren voordat je deze opslaat, publiceert of verzendt.";

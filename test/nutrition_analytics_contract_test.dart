@@ -14,7 +14,10 @@ void main() {
   ].map((path) => File(path).readAsStringSync()).join('\n');
 
   test('nutrition analytics is routed without replacing food search', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final analytics = File(
       'lib/features/analytics/analytics_page.dart',
     ).readAsStringSync();
@@ -86,7 +89,10 @@ void main() {
   });
 
   test('selected-day export is wired through route into range page', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final page = File(
       'lib/features/settings/local_export_range_page.dart',
     ).readAsStringSync();

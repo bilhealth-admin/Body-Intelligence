@@ -64,7 +64,10 @@ void main() {
     final names = File(
       'lib/app/localization/bil_locale_names.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final languagePage = File(
       'lib/features/settings/language_settings_page.dart',
     ).readAsStringSync();

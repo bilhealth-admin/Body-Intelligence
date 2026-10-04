@@ -168,7 +168,9 @@ void main() {
     });
 
     test('Water is a focused route instead of a full inline diary editor', () {
-      final router = source('lib/app/router/app_router.dart');
+      final router =
+          (source('lib/app/router/app_router.dart') +
+          source('lib/app/router/app_community_routes.dart'));
       final shell = source('lib/app/router/responsive_app_shell.dart');
       final diary = [
         'lib/features/daily_log/daily_log_page.dart',
@@ -191,7 +193,9 @@ void main() {
 
     test('Progress navigation exposes reference nutrition tabs and content', () {
       final shell = source('lib/app/router/responsive_app_shell.dart');
-      final router = source('lib/app/router/app_router.dart');
+      final router =
+          (source('lib/app/router/app_router.dart') +
+          source('lib/app/router/app_community_routes.dart'));
       final analytics = source(
         'lib/features/analytics/nutrition_analytics_page.dart',
       );

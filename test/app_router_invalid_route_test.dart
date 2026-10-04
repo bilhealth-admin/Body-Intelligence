@@ -9,7 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('production router installs a controlled error builder', () {
-    final source = File('lib/app/router/app_router.dart').readAsStringSync();
+    final source = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     expect(
       source,
       contains('errorBuilder: (_, _) => const InvalidRoutePage()'),
@@ -18,7 +21,10 @@ void main() {
   });
 
   test('daily return route accepts only bounded internal destinations', () {
-    final source = File('lib/app/router/app_router.dart').readAsStringSync();
+    final source = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     for (final path in ResponsiveAppShell.paths) {
       expect(ResponsiveAppShell.safeQuickAddReturnPath(path), path);
     }

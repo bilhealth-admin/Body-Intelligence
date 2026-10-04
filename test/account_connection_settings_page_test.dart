@@ -8,7 +8,10 @@ void main() {
     final page = File(
       'lib/features/settings/account_connection_settings_page.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final privacy = File(
       'lib/features/settings/sharing_privacy_settings_page.dart',
     ).readAsStringSync();

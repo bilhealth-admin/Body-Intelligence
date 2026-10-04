@@ -20,7 +20,10 @@ void main() {
     final dailyLog = File(
       'lib/features/daily_log/presentation/daily_log_today_sections.dart',
     ).readAsStringSync();
-    final route = File('lib/app/router/app_router.dart').readAsStringSync();
+    final route = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
 
     expect(settings, contains("context.go('/connected-health/steps/history')"));
     expect(

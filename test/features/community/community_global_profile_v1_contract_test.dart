@@ -58,7 +58,10 @@ void main() {
       'lib/features/community/presentation/community_member_profile_drafts.dart',
       'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
 
     expect(repository, contains('bil_community_profile_projection_v1'));
     expect(repository, contains('bil_community_profile_connections_v2'));
@@ -81,9 +84,14 @@ void main() {
     final page = File(
       'lib/features/community/presentation/community_profile_page.dart',
     ).readAsStringSync();
-    final models = File(
-      'lib/features/community/domain/community_models.dart',
-    ).readAsStringSync();
+    final models = [
+      File(
+        'lib/features/community/domain/community_models.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/community/domain/community_content_models.dart',
+      ).readAsStringSync(),
+    ].join('\n');
 
     expect(page, contains('community-profile-show-posts'));
     expect(page, contains('community-profile-show-friends'));

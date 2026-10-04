@@ -19,9 +19,14 @@ void main() {
     final service = File(
       'lib/features/notifications/services/bil_notification_service.dart',
     ).readAsStringSync();
-    final page = File(
-      'lib/features/notifications/presentation/notification_settings_page.dart',
-    ).readAsStringSync();
+    final page = [
+      File(
+        'lib/features/notifications/presentation/notification_settings_page.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/notifications/presentation/notification_settings_copy_helpers.dart',
+      ).readAsStringSync(),
+    ].join('\n');
     final actions = File(
       'lib/features/notifications/presentation/notification_settings_actions.dart',
     ).readAsStringSync();

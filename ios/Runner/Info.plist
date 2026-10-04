@@ -174,9 +174,9 @@
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>BIL writes weight records only after you separately approve Health write access.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>BIL uses the microphone only when you choose voice input for weight, a meal, or speak directly with BIL AI Coach.</string>
+	<string>BIL uses the microphone only when you choose voice input for weight, a meal, a Community post, or BIL AI Coach. You can review the text before saving, posting, or sending it.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>BIL converts speech you initiate for weight or meal logging, or BIL AI Coach, into text so you can review or send it.</string>
+	<string>BIL converts speech you initiate for weight, meals, Community posts, or BIL AI Coach into text so you can review it before saving, posting, or sending it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

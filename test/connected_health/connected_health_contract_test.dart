@@ -405,7 +405,10 @@ void main() {
   });
 
   test('management route is registered', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     expect(router, contains("path: '/connected-health'"));
     expect(router, contains('ConnectedHealthPage'));
     final healthRouteStart = router.indexOf("path: '/connected-health'");

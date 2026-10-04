@@ -100,7 +100,10 @@ void main() {
     final landing = File(
       'lib/features/community/presentation/community_invite_landing_page.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
 
     expect(landing, contains('relationshipAccepted'));
     expect(landing, contains('community-open-inviter-profile'));

@@ -4,5 +4,5 @@
 "NSBluetoothPeripheralUsageDescription" = "BIL hanya terhubung ke perangkat kebugaran yang Anda pasangkan sendiri agar pengukuran dapat diimpor secara lokal.";
 "NSCameraUsageDescription" = "Gunakan kamera hanya ketika Anda memilih untuk memindai kode batang, meninjau foto makanan, atau menambahkan profil pribadi atau foto kemajuan.";
 "NSPhotoLibraryUsageDescription" = "BIL hanya mengakses foto yang Anda pilih untuk makanan, profil, kemajuan, postingan komunitas, atau kiriman makanan agar dapat Anda tinjau sebelum disimpan atau diunggah.";
-"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya saat Anda memilih pencatatan berat badan atau makanan dengan suara, atau berbicara langsung dengan BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL mengubah ucapan yang Anda mulai untuk pencatatan berat badan, makanan, atau BIL AI Coach menjadi teks agar dapat Anda tinjau atau kirim.";
+"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya saat Anda memilih masukan suara untuk berat badan, makanan, postingan komunitas, atau BIL AI Coach. Anda dapat meninjau teks sebelum menyimpan, memposting, atau mengirimkannya.";
+"NSSpeechRecognitionUsageDescription" = "BIL mengubah ucapan yang Anda mulai untuk berat badan, makanan, postingan komunitas, atau BIL AI Coach menjadi teks. Anda dapat meninjaunya sebelum menyimpan, memposting, atau mengirimkannya.";

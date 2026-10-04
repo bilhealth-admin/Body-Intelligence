@@ -43,7 +43,10 @@ void main() {
       final repository = _librarySource(
         'lib/features/community/data/community_repository.dart',
       );
-      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final router = [
+        File('lib/app/router/app_router.dart').readAsStringSync(),
+        File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+      ].join('\n');
       final settings = File(
         'lib/features/settings/settings_page.dart',
       ).readAsStringSync();

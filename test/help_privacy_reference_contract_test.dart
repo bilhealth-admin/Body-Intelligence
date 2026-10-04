@@ -12,7 +12,10 @@ void main() {
       final deletion = File(
         'lib/features/settings/account_deletion_page.dart',
       ).readAsStringSync();
-      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final router = [
+        File('lib/app/router/app_router.dart').readAsStringSync(),
+        File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+      ].join('\n');
 
       expect(help, contains("context.push('/help/delete-account')"));
       expect(help, isNot(contains("_email('BIL account deletion request')")));

@@ -111,7 +111,10 @@ void main() {
     final pathwaysPage = File(
       'lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final dashboard = File(
       'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
     ).readAsStringSync();

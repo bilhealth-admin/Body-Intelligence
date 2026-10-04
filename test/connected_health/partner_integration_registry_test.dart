@@ -62,7 +62,10 @@ void main() {
   });
 
   test('capability route and complete setup locale catalog are present', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final page = File(
       'lib/features/connected_health/partner_capabilities_page.dart',
     ).readAsStringSync();

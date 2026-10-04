@@ -218,7 +218,10 @@ void main() {
     final water = File(
       'lib/features/daily_log/daily_water_page.dart',
     ).readAsStringSync();
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
 
     expect(page, contains('DailyWaterShortcut('));
     expect(page, isNot(contains('DailyWaterSection(')));

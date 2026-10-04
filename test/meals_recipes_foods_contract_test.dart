@@ -12,7 +12,10 @@ void main() {
       'lib/features/nutrition/presentation/recipes_tab.dart',
       'lib/features/nutrition/presentation/meals_recipes_components.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     for (final contract in const [
       "Key('my-meals-tab')",
       "Key('my-recipes-tab')",

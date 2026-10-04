@@ -41,7 +41,9 @@ void main() {
   );
 
   test('community routes cover profile discovery relationships and chat', () {
-    final router = source('lib/app/router/app_router.dart');
+    final router =
+        (source('lib/app/router/app_router.dart') +
+        source('lib/app/router/app_community_routes.dart'));
     for (final route in <String>[
       '/community',
       '/community/profile',

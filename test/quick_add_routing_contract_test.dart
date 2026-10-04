@@ -56,7 +56,10 @@ void main() {
       // Quick Add's Log food action is a standalone surface. It exposes the
       // meal selector there while leaving the legacy Daily Log pages intact.
       expect(shell, isNot(contains("focus=meal&meal=dinner")));
-      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final router = [
+        File('lib/app/router/app_router.dart').readAsStringSync(),
+        File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+      ].join('\n');
       expect(
         router,
         contains(

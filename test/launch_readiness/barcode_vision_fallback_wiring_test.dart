@@ -20,7 +20,10 @@ void main() {
       'supabase/functions/barcode-lookup/index.ts',
     ).readAsStringSync();
     final foodPage = _librarySource('lib/features/nutrition/food_page.dart');
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     final coach = _librarySource(
       'lib/features/intelligence_center/presentation/'
       'intelligence_center_page.dart',

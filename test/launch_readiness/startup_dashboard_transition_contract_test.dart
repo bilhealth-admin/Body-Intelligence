@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('startup and first dashboard entry cannot animate side by side', () {
-    final source = File('lib/app/router/app_router.dart').readAsStringSync();
+    final source = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
 
     expect(
       source,

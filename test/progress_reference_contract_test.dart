@@ -48,7 +48,10 @@ void main() {
   });
 
   test('current progress route preserves real weight management', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final router = [
+      File('lib/app/router/app_router.dart').readAsStringSync(),
+      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
+    ].join('\n');
     expect(router, contains("path: '/history'"));
     expect(router, contains('const ProgressPage()'));
     expect(router, contains("path: '/weight-history'"));
