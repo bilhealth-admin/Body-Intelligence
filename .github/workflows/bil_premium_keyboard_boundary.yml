@@ -1,0 +1,59 @@
+name: BIL Premium keyboard access boundary
+on:
+  push:
+    branches: [work/community-reference-parity-20261003]
+    paths:
+      - lib/features/commerce/presentation/premium_route_glass_gate.dart
+      - test/features/commerce/premium_route_keyboard_access_test.dart
+      - .github/workflows/bil_premium_keyboard_boundary.yml
+  pull_request:
+    paths:
+      - lib/features/commerce/presentation/premium_route_glass_gate.dart
+      - test/features/commerce/premium_route_keyboard_access_test.dart
+      - .github/workflows/bil_premium_keyboard_boundary.yml
+permissions:
+  contents: read
+concurrency:
+  group: premium-keyboard-boundary-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  keyboard-access:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies and record source
+        run: |
+          mkdir -p "$RUNNER_TEMP/premium-keyboard"
+          git rev-parse HEAD > "$RUNNER_TEMP/premium-keyboard/source-sha.txt"
+          flutter --version --machine > "$RUNNER_TEMP/premium-keyboard/toolchain.json"
+          flutter pub get
+      - name: Exact formatting with non-mutating suggestions
+        run: |
+          set -o pipefail
+          dart format --output=show --summary=none test/features/commerce/premium_route_keyboard_access_test.dart > "$RUNNER_TEMP/premium-keyboard/formatted-test.dart"
+          dart format --output=show --summary=none lib/features/commerce/presentation/premium_route_glass_gate.dart > "$RUNNER_TEMP/premium-keyboard/formatted-gate.dart"
+          dart format --output=none --set-exit-if-changed lib/features/commerce/presentation/premium_route_glass_gate.dart test/features/commerce/premium_route_keyboard_access_test.dart 2>&1 | tee "$RUNNER_TEMP/premium-keyboard/format.log"
+      - name: Analyze gate and new regression
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          flutter analyze --no-pub lib/features/commerce/presentation/premium_route_glass_gate.dart test/features/commerce/premium_route_keyboard_access_test.dart 2>&1 | tee "$RUNNER_TEMP/premium-keyboard/analyze.log"
+      - name: Enforce keyboard boundary and paid control
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --concurrency=1 --reporter expanded test/features/commerce/premium_route_keyboard_access_test.dart --timeout 2m 2>&1 | tee "$RUNNER_TEMP/premium-keyboard/regressions.log"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: premium-keyboard-${{ github.sha }}
+          path: ${{ runner.temp }}/premium-keyboard/
+          if-no-files-found: error
+          retention-days: 14
