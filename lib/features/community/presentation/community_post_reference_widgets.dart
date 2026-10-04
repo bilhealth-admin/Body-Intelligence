@@ -118,3 +118,35 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
     );
   }
 }
+
+
+class _CommunityMembershipTierChip extends StatelessWidget {
+  const _CommunityMembershipTierChip({
+    required this.tier,
+    this.compact = false,
+  });
+
+  final String tier;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final premium = tier == 'premium';
+    return Chip(
+      key: ValueKey('community-author-membership-tier-$tier'),
+      visualDensity: compact ? VisualDensity.compact : null,
+      materialTapTargetSize: compact
+          ? MaterialTapTargetSize.shrinkWrap
+          : MaterialTapTargetSize.padded,
+      avatar: Icon(
+        premium ? Icons.workspace_premium_outlined : Icons.person_outline,
+        size: compact ? 15 : 17,
+      ),
+      label: Text(
+        premium
+            ? communityText(context, 'Premium', 'Premium')
+            : communityText(context, 'Free', 'مجاني'),
+      ),
+    );
+  }
+}
