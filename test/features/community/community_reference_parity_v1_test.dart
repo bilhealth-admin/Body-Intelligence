@@ -344,6 +344,9 @@ void main() {
       final creator = File(
         'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
       ).readAsStringSync();
+      final hub = File(
+        'lib/features/community/presentation/community_hub_page.dart',
+      ).readAsStringSync();
 
       expect(
         previewMigration,
@@ -367,6 +370,9 @@ void main() {
       expect(creator, contains("'community-creator-rewards-snapshot'"));
       expect(creator, contains("'community-creator-gold-balance'"));
       expect(creator, contains("'community-creator-quest-progress'"));
+      expect(hub, contains("'community-search'"));
+      expect(hub, contains('loadMyProfileOverview()'));
+      expect(hub, contains('BilAccountAvatar('));
     },
   );
 
