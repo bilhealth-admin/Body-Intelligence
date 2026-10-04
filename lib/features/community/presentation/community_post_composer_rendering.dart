@@ -120,9 +120,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                               width: 132,
                               height: 116,
                               child: OutlinedButton(
-                                key: const Key(
-                                  'community-composer-media-tile',
-                                ),
+                                key: const Key('community-composer-media-tile'),
                                 onPressed: busy ? null : _pickImage,
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.all(12),
@@ -146,11 +144,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                                           ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      communityText(
-                                        context,
-                                        'Media',
-                                        'وسائط',
-                                      ),
+                                      communityText(context, 'Media', 'وسائط'),
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
