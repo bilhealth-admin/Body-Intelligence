@@ -44,6 +44,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   bool _followBusy = false;
   int? _viewCount;
   CommunityProfileOverview? _authorProfile;
+  String? _authorMembershipTier;
   final Set<String> _busyComments = <String>{};
   final Set<String> _membershipTierResolvedUsers = <String>{};
   final Map<String, String> _membershipTierByUser = <String, String>{};
@@ -55,6 +56,21 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     super.initState();
     unawaited(_recordView());
     unawaited(_loadAuthorProfile());
+    unawaited(_loadAuthorMembershipTier());
+  }
+
+  Future<void> _loadAuthorMembershipTier() async {
+    if (!widget.repository.useServerCommunityReferenceParity) return;
+    try {
+      final tiers = await widget.repository.loadVisibleMembershipTiers([
+        widget.post.authorId,
+      ]);
+      if (mounted) {
+        setState(() => _authorMembershipTier = tiers[widget.post.authorId]);
+      }
+    } on Object {
+      // Membership tier is opt-in presentation and never blocks post reading.
+    }
   }
 
   Future<void> _loadAuthorProfile() async {
