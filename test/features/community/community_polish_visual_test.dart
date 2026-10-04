@@ -11,6 +11,7 @@ import 'package:body_intelligence_log/features/community/domain/community_conten
 import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
 import 'package:body_intelligence_log/features/community/domain/community_reference_parity.dart';
 import 'package:body_intelligence_log/features/community/domain/community_rewards.dart';
+import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_attention_scope.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
@@ -231,6 +232,81 @@ class _VisualRepository extends CommunityRepository {
   ];
   @override
   Future<int> markVisibleMessagesRead(List<String> ids) async => ids.length;
+}
+
+class _FeedReferenceVisualRepository extends _VisualRepository {
+  _FeedReferenceVisualRepository(super.arabic);
+
+  @override
+  bool get useServerCommunityReferenceParity => true;
+
+  @override
+  Future<List<CommunityTopic>> loadCommunityTopics() async => [
+    const CommunityTopic(
+      slug: 'success-stories',
+      titleCopyKey: 'community_topic_success_stories',
+      descriptionCopyKey: 'community_topic_success_stories_body',
+      iconKey: 'trophy',
+      featured: true,
+      followerCount: 184,
+      postCount: 42,
+      following: false,
+    ),
+    const CommunityTopic(
+      slug: 'nutrition',
+      titleCopyKey: 'community_topic_nutrition',
+      descriptionCopyKey: 'community_topic_nutrition_body',
+      iconKey: 'nutrition',
+      featured: true,
+      followerCount: 231,
+      postCount: 67,
+      following: true,
+    ),
+  ];
+
+  @override
+  Future<List<CommunityPostReferenceMetadata>>
+  loadCommunityPostReferenceMetadata(List<String> postIds) async => [
+    for (final postId in postIds)
+      CommunityPostReferenceMetadata(
+        postId: postId,
+        title: arabic ? 'لحظة تستحق المشاركة' : 'A moment worth sharing',
+        hashtags: const ['progress'],
+        topics: const [
+          CommunityPostTopicReference(
+            slug: 'success-stories',
+            titleCopyKey: 'community_topic_success_stories',
+            postCount: 42,
+          ),
+        ],
+        collaborators: const <CommunityPostCollaborator>[],
+      ),
+  ];
+
+  @override
+  Future<Map<String, int>> loadCommunityPostViewCounts(
+    List<String> postIds,
+  ) async => {for (final postId in postIds) postId: 292};
+
+  @override
+  Future<Map<String, CommunityComment>> loadCommunityFeedCommentPreviews(
+    List<String> postIds,
+  ) async {
+    if (postIds.isEmpty) return const <String, CommunityComment>{};
+    return {
+      postIds.first: CommunityComment(
+        id: 'abababab-abab-4bab-8bab-abababababab',
+        authorId: peer,
+        authorName: name,
+        authorHandle: 'sample_member',
+        body: arabic
+            ? 'استمر، هذه الخطوة الصغيرة مهمة.'
+            : 'Keep going — this small step matters.',
+        createdAt: DateTime.utc(2026, 9, 29, 8, 15),
+        replyCount: 4,
+      ),
+    };
+  }
 }
 
 class _ReferenceVisualRepository extends _VisualRepository {
@@ -507,6 +583,7 @@ void main() {
             addTearDown(tester.view.resetDevicePixelRatio);
             addTearDown(tester.view.resetPhysicalSize);
             final repository = _VisualRepository(arabic);
+            final feedRepository = _FeedReferenceVisualRepository(arabic);
             final referenceRepository = _ReferenceVisualRepository(arabic);
             final controller = CommunityAttentionController(
               () async => const CommunityAttention(
@@ -524,7 +601,7 @@ void main() {
                 : BilFlagshipTheme.light(isArabic: arabic);
             final scenes = <String, Widget>{
               'welcome': const Scaffold(body: CommunityWelcome()),
-              'feed': CommunityHubPage(repository: repository),
+              'feed': CommunityHubPage(repository: feedRepository),
               'profile': CommunityProfilePage(repository: repository),
               'member_profile': CommunityMemberProfilePage(
                 userId: _VisualRepository.peer,
