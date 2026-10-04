@@ -1,4 +1,5 @@
 import 'community_attention_scope.dart';
+import 'bil_gold_coin.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import '../domain/community_feed_modes.dart';
 import '../domain/community_models.dart';
 import '../domain/community_reference_parity.dart';
 import '../domain/community_polls.dart';
+import '../domain/community_rewards.dart';
 import '../domain/community_post_context.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_topics.dart';
