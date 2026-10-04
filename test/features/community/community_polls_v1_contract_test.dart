@@ -102,9 +102,10 @@ void main() {
     final card = File(
       'lib/features/community/presentation/community_post_card.dart',
     ).readAsStringSync();
-    final detail = File(
+    final detail = [
       'lib/features/community/presentation/community_post_detail_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_post_detail_rendering.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final panel = File(
       'lib/features/community/presentation/community_poll_panel.dart',
     ).readAsStringSync();
