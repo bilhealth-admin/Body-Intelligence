@@ -296,13 +296,15 @@ class _FeedReferenceVisualRepository extends _VisualRepository {
     return {
       postIds.first: CommunityComment(
         id: 'abababab-abab-4bab-8bab-abababababab',
-        authorId: peer,
+        authorId: _VisualRepository.peer,
         authorName: name,
         authorHandle: 'sample_member',
         body: arabic
             ? 'استمر، هذه الخطوة الصغيرة مهمة.'
             : 'Keep going — this small step matters.',
         createdAt: DateTime.utc(2026, 9, 29, 8, 15),
+        likeCount: 0,
+        liked: false,
         replyCount: 4,
       ),
     };
