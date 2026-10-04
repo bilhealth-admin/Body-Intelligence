@@ -10,6 +10,7 @@ class _CommunityPostCard extends StatefulWidget {
     this.referenceMetadata,
     this.viewCount,
     this.commentPreview,
+    this.authorMembershipTier,
     this.onSavedChanged,
     this.showModerationStatus = false,
   });
@@ -22,6 +23,7 @@ class _CommunityPostCard extends StatefulWidget {
   final CommunityPostReferenceMetadata? referenceMetadata;
   final int? viewCount;
   final CommunityComment? commentPreview;
+  final String? authorMembershipTier;
   final ValueChanged<bool>? onSavedChanged;
   final bool showModerationStatus;
 
@@ -247,6 +249,13 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                         textDirection: TextDirection.ltr,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
+                    if (widget.authorMembershipTier case final tier?) ...[
+                      const SizedBox(height: 4),
+                      _CommunityMembershipTierChip(
+                        tier: tier,
+                        compact: true,
+                      ),
+                    ],
                     if (widget.post.authorId == widget.currentUserId &&
                         (widget.showModerationStatus ||
                             widget.post.moderationStatus !=
