@@ -8,6 +8,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
         _voiceCapturing ||
         _selectingImage ||
         _completed;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
     return PopScope<bool>(
       canPop: (!_publishing && !_savingDraft) || _completed,
       child: ScaffoldMessenger(
@@ -15,6 +16,12 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
           key: const Key('community-post-editor-page'),
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
+            leading: IconButton(
+              key: const Key('community-post-editor-close'),
+              tooltip: communityText(context, 'Close', 'إغلاق'),
+              onPressed: busy ? null : () => Navigator.maybePop(context),
+              icon: const Icon(Icons.close_rounded),
+            ),
             title: Text(
               communityText(
                 context,
@@ -155,6 +162,37 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: OutlinedButton(
+                            key: const Key('community-composer-media-tile'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: Size(
+                                textScale >= 1.5 ? 108 : 84,
+                                textScale >= 1.5 ? 108 : 84,
+                              ),
+                              padding: const EdgeInsets.all(10),
+                            ),
+                            onPressed: busy || _selectedImages.length >= 4
+                                ? null
+                                : _pickImage,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 24,
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  communityText(context, 'Media', 'وسائط'),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                         ..._CommunityPostComposerReferenceSections(
                           this,
                         )._buildCommunityHashtagSection(context, busy),
