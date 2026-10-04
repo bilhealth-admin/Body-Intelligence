@@ -9,6 +9,7 @@ class _CommunityPostCard extends StatefulWidget {
     required this.onAction,
     this.referenceMetadata,
     this.viewCount,
+    this.commentPreview,
     this.onSavedChanged,
     this.showModerationStatus = false,
   });
@@ -20,6 +21,7 @@ class _CommunityPostCard extends StatefulWidget {
   final ValueChanged<String> onAction;
   final CommunityPostReferenceMetadata? referenceMetadata;
   final int? viewCount;
+  final CommunityComment? commentPreview;
   final ValueChanged<bool>? onSavedChanged;
   final bool showModerationStatus;
 
@@ -353,6 +355,69 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             ),
           ],
           const SizedBox(height: 4),
+          if (widget.commentPreview case final preview?) ...[
+            const SizedBox(height: 5),
+            InkWell(
+              key: Key('community-post-comment-preview-${widget.post.id}'),
+              borderRadius: BorderRadius.circular(14),
+              onTap: _socialActionsAvailable ? _openDetail : null,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 7,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BilAccountAvatar(
+                      radius: 16,
+                      networkUrl: preview.authorAvatarUrl,
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            preview.authorName ??
+                                communityText(
+                                  context,
+                                  'BIL member',
+                                  'عضو BIL',
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            preview.body,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  height: 1.35,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (preview.replyCount > 0) ...[
+                      const SizedBox(width: 7),
+                      Text(
+                        '+${preview.replyCount}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
