@@ -1,133 +1,60 @@
-name: BIL Community reference gap QA
-
+name: BIL requested UX regression QA
 on:
   push:
-    branches:
-      - work/community-reference-parity-20261003
-
+    branches: [work/community-reference-parity-20261003]
 permissions:
   contents: write
-
 concurrency:
-  group: community-reference-gap-${{ github.ref }}
+  group: bil-requested-ux-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
-  qa:
+  consent-today-splashes:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
           cache: true
-      - name: Resolve dependencies
-        run: flutter pub get
-      - name: Apply exact Community formatter
-        run: |
-          dart format lib/features/community test/features/community
-          git diff --check
-      - name: Commit exact formatter output only
-        shell: bash
+      - run: flutter pub get
+      - name: Exact formatter and source checkpoint
         run: |
           set -euo pipefail
+          dart format test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
+          git diff --check
           if ! git diff --quiet -- '*.dart'; then
-            git config user.name "bil-community-qa"
-            git config user.email "actions@users.noreply.github.com"
-            git add lib/features/community test/features/community
-            git commit -m "style(community): close complete Community formatter drift"
+            git config user.name bil-community-qa
+            git config user.email actions@users.noreply.github.com
+            git add test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
+            git commit -m "style(test): format real modal consent matrix"
             git push origin HEAD:work/community-reference-parity-20261003
           fi
           echo "TESTED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-          echo "Tested source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
-      - name: Strict current Community formatting
-        run: dart format --output=none --set-exit-if-changed lib/features/community test/features/community
-      - name: Analyze complete source
+          echo "TESTED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          dart format --output=none --set-exit-if-changed test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
+      - name: Full source analysis
         run: flutter analyze --no-pub
-      - name: Verify changed production source-size boundaries
+      - name: Actual modal locale scale and explicit decisions
+        run: flutter test --no-pub --reporter expanded test/shared/widgets/bil_premium_ai_consent_sheet_test.dart --timeout 2m
+      - name: Consent orchestration and shared presentation
+        if: ${{ !cancelled() }}
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          paths = [
-            'lib/features/community/presentation/community_feed_tab.dart',
-            'lib/features/community/presentation/community_feed_reference_suggestions.dart',
-            'lib/features/community/presentation/community_feed_pagination.dart',
-            'lib/features/community/presentation/community_post_card.dart',
-            'lib/features/community/presentation/community_post_reference_widgets.dart',
-            'lib/features/community/presentation/community_post_detail_page.dart',
-            'lib/features/community/presentation/community_post_detail_reference_actions.dart',
-            'lib/features/community/presentation/community_post_detail_rendering.dart',
-            'lib/features/community/presentation/community_post_detail_header.dart',
-            'lib/features/community/presentation/community_circles_page.dart',
-            'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
-            'lib/features/community/presentation/community_post_composer_toolbar.dart',
-            'lib/features/community/presentation/community_post_composer_rendering.dart',
-            'lib/features/community/data/community_social_repository_mixin.dart',
-            'lib/features/community/data/community_repository_reference_parity_mixin.dart',
-          ]
-          for path in paths:
-              lines = len(Path(path).read_text().splitlines())
-              print(path, lines)
-              assert lines <= 700, (path, lines)
-          PY
-      - name: Composer locale and image regression matrix
+          flutter test --no-pub --reporter expanded \
+            test/features/intelligence_center/remote_ai_consent_orchestration_test.dart \
+            test/features/intelligence_center/coach_remote_consent_preflight_test.dart \
+            test/features/onboarding/premium_consent_surface_contract_test.dart \
+            test/shared/widgets/premium_trust_and_clinical_surface_test.dart
+      - name: Today saves must not flash or move controls
+        if: ${{ !cancelled() }}
+        run: flutter test --no-pub --reporter expanded test/features/dashboard/dashboard_custom_card_save_stability_test.dart --timeout 2m
+      - name: Feature entry splash boundaries
+        if: ${{ !cancelled() }}
+        run: flutter test --no-pub --reporter expanded test/shared/widgets/bil_feature_entry_splash_test.dart --timeout 2m
+      - name: Real onboarding accessibility and consent flows
+        if: ${{ !cancelled() }}
         run: |
-          flutter test --no-pub \
-            test/features/community/community_post_image_support_test.dart \
-            --timeout 2m
-      - name: Focused reference parity contracts
-        run: |
-          flutter test --no-pub \
-            test/features/community/community_reference_parity_v1_test.dart \
-            test/features/community/community_reference_composer_v1_test.dart \
-            test/features/community/community_topics_v1_contract_test.dart \
-            test/features/community/community_circles_v1_contract_test.dart \
-            test/features/community/community_polls_v1_contract_test.dart \
-            test/features/community/community_comment_threads_v3_contract_test.dart \
-            test/features/community/community_rewards_center_test.dart \
-            test/features/community/community_activity_inbox_v2_contract_test.dart
-      - name: Community visual and large-text matrix
-        env:
-          BIL_COMMUNITY_CAPTURE_DIR: artifacts/community-reference
-        run: |
-          flutter test --no-pub \
-            test/features/community/community_polish_visual_test.dart \
-            --timeout 2m
-      - name: Preserve exact review source snapshot
-        if: always()
-        run: |
-          python3 - <<'PY'
-          import hashlib, json, subprocess
-          from pathlib import Path
-          from zipfile import ZipFile, ZIP_DEFLATED
-          paths = subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
-          prefixes = ('lib/features/community/', 'test/features/community/', 'lib/features/commerce/', 'test/features/commerce/', 'lib/features/dashboard/', 'test/features/dashboard/', 'lib/features/intelligence_center/', 'test/features/intelligence_center/', 'lib/features/onboarding/', 'test/features/onboarding/', 'lib/shared/widgets/', 'test/shared/widgets/', 'lib/app/router/', 'supabase/migrations/', 'tool/community/', '.github/workflows/')
-          selected = [p for p in paths if p.startswith(prefixes) and p.endswith(('.dart','.sql','.yml','.yaml','.py','.sh','.mjs','.md','.json'))]
-          out = Path('artifacts/review-source'); out.mkdir(parents=True,exist_ok=True)
-          sha = subprocess.check_output(['git','rev-parse','HEAD']).decode().strip()
-          manifest = {'tested_sha':sha,'files':{}}
-          with ZipFile(out/'review-source.zip','w',ZIP_DEFLATED) as archive:
-              for name in selected:
-                  data=Path(name).read_bytes()
-                  manifest['files'][name]=hashlib.sha256(data).hexdigest()
-                  archive.writestr(name,data)
-              archive.writestr('manifest.json',json.dumps(manifest,indent=2))
-          print(sha,len(selected),'tracked source files; no environment or credentials collected')
-          PY
-      - name: Preserve rendered visual evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: community-reference-visual-${{ github.run_id }}
-          path: artifacts/community-reference
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Preserve source review evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: community-review-source-${{ github.run_id }}
-          path: artifacts/review-source
-          if-no-files-found: error
-          retention-days: 3
+          flutter test --no-pub --reporter expanded \
+            test/features/onboarding/onboarding_accessibility_layout_test.dart \
+            test/features/onboarding/onboarding_flow_widget_test.dart \
+            test/features/onboarding/onboarding_review_mode_test.dart --timeout 2m
