@@ -9,7 +9,12 @@ class _CommunityPostDetailHeader extends StatelessWidget {
     required this.followBusy,
     required this.viewCount,
     required this.liking,
+    required this.saved,
+    required this.saving,
+    required this.sharing,
     required this.onLike,
+    required this.onSave,
+    required this.onShare,
     required this.onToggleFollow,
     required this.repository,
   });
@@ -21,7 +26,12 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final bool followBusy;
   final int? viewCount;
   final bool liking;
+  final bool saved;
+  final bool saving;
+  final bool sharing;
   final VoidCallback onLike;
+  final VoidCallback onSave;
+  final Future<void> Function(BuildContext) onShare;
   final VoidCallback onToggleFollow;
   final CommunityRepository repository;
 
@@ -113,7 +123,10 @@ class _CommunityPostDetailHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               TextButton.icon(
                 key: const Key('community-post-detail-like'),
@@ -130,16 +143,53 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                       ),
                 label: Text('${stats.likeCount}'),
               ),
-              const SizedBox(width: 8),
-              Icon(Icons.mode_comment_outlined, size: 19),
-              const SizedBox(width: 5),
-              Text('${stats.commentCount}'),
-              if (viewCount != null) ...[
-                const SizedBox(width: 12),
-                const Icon(Icons.visibility_outlined, size: 19),
-                const SizedBox(width: 5),
-                Text(viewCount.toString()),
-              ],
+              Chip(
+                avatar: const Icon(Icons.mode_comment_outlined, size: 18),
+                label: Text('${stats.commentCount}'),
+              ),
+              if (viewCount != null)
+                Chip(
+                  avatar: const Icon(Icons.visibility_outlined, size: 18),
+                  label: Text(viewCount.toString()),
+                ),
+              IconButton(
+                key: const Key('community-post-detail-save'),
+                tooltip: saved
+                    ? communityText(
+                        context,
+                        'Remove from saved',
+                        'إزالة من المحفوظات',
+                      )
+                    : communityText(context, 'Save post', 'حفظ المنشور'),
+                onPressed: saving ? null : onSave,
+                icon: saving
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        saved
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
+                      ),
+              ),
+              Builder(
+                builder: (shareContext) => IconButton(
+                  key: const Key('community-post-detail-share'),
+                  tooltip: communityText(
+                    context,
+                    'Share post',
+                    'مشاركة المنشور',
+                  ),
+                  onPressed: sharing ? null : () => onShare(shareContext),
+                  icon: sharing
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.share_outlined),
+                ),
+              ),
             ],
           ),
         ],
