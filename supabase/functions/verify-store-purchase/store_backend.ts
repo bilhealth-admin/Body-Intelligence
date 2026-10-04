@@ -1777,24 +1777,49 @@ async function reconcile(
   const supplied = request.headers.get("x-bil-reconciliation-secret") ?? "";
   const readEnvironment = dependencies.readEnvironment ?? env;
   const expected = readEnvironment("BIL_RECONCILIATION_SECRET");
-  if (!expected || supplied.length !== expected.length) {
-    throw new Error("reconciliation_forbidden");
+  let authorized = false;
+  const { admin } = (dependencies.clients ?? clients)();
+  if (expected && supplied.length === expected.length) {
+    const left = new TextEncoder().encode(supplied);
+    const right = new TextEncoder().encode(expected);
+    let mismatch = 0;
+    for (let index = 0; index < left.length; index += 1) {
+      mismatch |= left[index] ^ right[index];
+    }
+    authorized = mismatch === 0;
   }
-  const left = new TextEncoder().encode(supplied);
-  const right = new TextEncoder().encode(expected);
-  let mismatch = 0;
-  for (let index = 0; index < left.length; index += 1) {
-    mismatch |= left[index] ^ right[index];
+  if (!authorized) {
+    // Production cron secrets live in Vault. The service-role-only RPC performs
+    // the constant-time comparison so secret rotation is independent of any
+    // older Edge Function environment value and never enters source code.
+    const { data: vaultAuthorized, error: authorizationError } = await admin
+      .rpc(
+        "bil_validate_store_reconciliation_secret",
+        { p_presented: supplied },
+      );
+    authorized = !authorizationError && vaultAuthorized === true;
   }
-  if (mismatch !== 0) throw new Error("reconciliation_forbidden");
-  const cursor = body.after_cursor ?? body.after_owner_id;
+  if (!authorized) throw new Error("reconciliation_forbidden");
+  const schedulerRun = body.source === "pg_cron" &&
+    body.after_cursor == null && body.after_owner_id == null;
+  let cursor = body.after_cursor ?? body.after_owner_id;
+  if (schedulerRun) {
+    const { data: schedulerCursor, error: schedulerCursorError } = await admin
+      .rpc("bil_get_store_reconciliation_scheduler_cursor");
+    if (
+      schedulerCursorError ||
+      (schedulerCursor != null && typeof schedulerCursor !== "string")
+    ) {
+      throw new Error("reconciliation_checkpoint_read_failed");
+    }
+    cursor = schedulerCursor;
+  }
   if (
     cursor != null && (typeof cursor !== "string" || cursor.length > 512 ||
       /[\u0000-\u001F\u007F]/.test(cursor))
   ) {
     throw new Error("invalid_reconciliation_cursor");
   }
-  const { admin } = (dependencies.clients ?? clients)();
   const { data: page, error } = await admin.rpc(
     "bil_list_store_subscription_snapshots_page",
     {
@@ -1903,7 +1928,7 @@ async function reconcile(
       }
     }
   }
-  return json({
+  const result = {
     reconciled,
     superseded,
     failed,
@@ -1915,7 +1940,26 @@ async function reconcile(
     voided_google_lookup_unavailable: voidedGoogleLookupUnavailable,
     boost_refunds_reconciled: boostRefundsReconciled,
     boost_refunds_failed: boostRefundsFailed,
-  });
+  };
+  if (schedulerRun) {
+    const { data: checkpointed, error: checkpointError } = await admin.rpc(
+      "bil_finish_store_reconciliation_scheduler_run",
+      {
+        p_next_cursor: result.next_cursor,
+        p_has_more: result.has_more,
+        p_examined: result.examined,
+        p_reconciled: result.reconciled,
+        p_superseded: result.superseded,
+        p_failed: result.failed,
+        p_boost_refunds_reconciled: result.boost_refunds_reconciled,
+        p_boost_refunds_failed: result.boost_refunds_failed,
+      },
+    );
+    if (checkpointError || checkpointed !== true) {
+      throw new Error("reconciliation_checkpoint_write_failed");
+    }
+  }
+  return json(result);
 }
 
 export async function handler(

@@ -664,3 +664,69 @@ Deno.test("reconciliation skips a verified snapshot when its subscription revisi
   assertEquals(captured?.p_expected_revision, 7);
   assertEquals(captured?.p_expected_latest_transaction_id, "old-token");
 });
+
+Deno.test("cron reconciliation rotates stale Edge secret through Vault RPC and advances its durable cursor", async () => {
+  const calls: RpcCall[] = [];
+  const admin = {
+    rpc: (name: string, args: Record<string, unknown> = {}) => {
+      calls.push({ name, args });
+      if (name === "bil_validate_store_reconciliation_secret") {
+        return Promise.resolve({
+          data: args.p_presented === "vault-secret",
+          error: null,
+        });
+      }
+      if (name === "bil_get_store_reconciliation_scheduler_cursor") {
+        return Promise.resolve({ data: "saved-cursor", error: null });
+      }
+      if (name === "bil_list_store_subscription_snapshots_page") {
+        assertEquals(args.p_after_cursor, "saved-cursor");
+        return Promise.resolve({ data: [], error: null });
+      }
+      if (name === "bil_finish_store_reconciliation_scheduler_run") {
+        return Promise.resolve({ data: true, error: null });
+      }
+      throw new Error(`Unexpected RPC ${name}`);
+    },
+  };
+  const dependencies: StoreBackendHandlerDependencies = {
+    clients: (() => ({
+      admin,
+      auth: {},
+    })) as unknown as StoreBackendHandlerDependencies["clients"],
+    readEnvironment: (name) =>
+      name === "BIL_RECONCILIATION_SECRET" ? "stale-edge-secret" : "",
+  };
+
+  const response = await handler(
+    request(
+      { action: "reconcile", source: "pg_cron" },
+      { "x-bil-reconciliation-secret": "vault-secret" },
+    ),
+    dependencies,
+  );
+
+  assertEquals(response.status, 200);
+  assertEquals(await response.json(), {
+    reconciled: 0,
+    superseded: 0,
+    failed: 0,
+    examined: 0,
+    has_more: false,
+    next_cursor: null,
+    voided_google_lookup_unavailable: false,
+    boost_refunds_reconciled: 0,
+    boost_refunds_failed: 0,
+  });
+  assertEquals(
+    calls.map((call) => call.name),
+    [
+      "bil_validate_store_reconciliation_secret",
+      "bil_get_store_reconciliation_scheduler_cursor",
+      "bil_list_store_subscription_snapshots_page",
+      "bil_finish_store_reconciliation_scheduler_run",
+    ],
+  );
+  assertEquals(calls[3].args.p_has_more, false);
+  assertEquals(calls[3].args.p_next_cursor, null);
+});
