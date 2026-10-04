@@ -1,0 +1,86 @@
+name: BIL Community reference gap QA
+
+on:
+  push:
+    branches:
+      - work/community-reference-parity-20261003
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-reference-gap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Verify exact Dart formatting
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            lib/features/community/data/community_social_repository_mixin.dart \
+            lib/features/community/presentation/community_hub_page.dart \
+            lib/features/community/presentation/community_feed_tab.dart \
+            lib/features/community/presentation/community_feed_reference_suggestions.dart \
+            lib/features/community/presentation/community_feed_pagination.dart \
+            lib/features/community/presentation/community_post_card.dart \
+            lib/features/community/presentation/community_member_profile_page.dart \
+            lib/features/community/presentation/community_member_profile_creator_widgets.dart \
+            lib/features/community/presentation/community_post_composer_page.dart \
+            lib/features/community/presentation/community_post_composer_rendering.dart \
+            lib/features/community/presentation/community_post_composer_toolbar.dart \
+            test/features/community/community_reference_parity_v1_test.dart \
+            test/features/community/community_reference_composer_v1_test.dart
+      - name: Analyze complete source
+        run: flutter analyze --no-pub
+      - name: Verify source-size boundaries
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          paths = [
+            'lib/features/community/presentation/community_feed_tab.dart',
+            'lib/features/community/presentation/community_feed_reference_suggestions.dart',
+            'lib/features/community/presentation/community_feed_pagination.dart',
+            'lib/features/community/presentation/community_post_card.dart',
+            'lib/features/community/presentation/community_member_profile_creator_widgets.dart',
+            'lib/features/community/presentation/community_post_composer_toolbar.dart',
+            'lib/features/community/presentation/community_post_composer_rendering.dart',
+            'lib/features/community/data/community_social_repository_mixin.dart',
+          ]
+          for path in paths:
+              lines = len(Path(path).read_text().splitlines())
+              print(path, lines)
+              assert lines <= 700, (path, lines)
+          PY
+      - name: Focused reference parity contracts
+        run: |
+          flutter test --no-pub \
+            test/features/community/community_reference_parity_v1_test.dart \
+            test/features/community/community_reference_composer_v1_test.dart \
+            test/features/community/community_topics_v1_contract_test.dart \
+            test/features/community/community_circles_v1_contract_test.dart \
+            test/features/community/community_polls_v1_contract_test.dart \
+            test/features/community/community_comment_threads_v3_contract_test.dart \
+            test/features/community/community_rewards_center_test.dart \
+            test/features/community/community_activity_inbox_v2_contract_test.dart
+      - name: Community visual and large-text matrix
+        run: |
+          flutter test --no-pub \
+            test/features/community/community_polish_visual_test.dart \
+            --timeout 2m
+      - name: Composer locale and image regression matrix
+        run: |
+          flutter test --no-pub \
+            test/features/community/community_post_image_support_test.dart \
+            --timeout 2m
