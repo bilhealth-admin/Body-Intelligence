@@ -434,7 +434,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.tap(find.text('Close'));
+      tester.state<NavigatorState>(find.byType(Navigator).first).pop();
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('community-profile-tab-moments')));
