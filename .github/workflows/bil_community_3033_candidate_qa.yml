@@ -1,7 +1,7 @@
 name: BIL Community 30-33 committed candidate QA
 on:
   push:
-    branches: [fix/community-3033-ready, staging/community-final-qa-20261003]
+    branches: [fix/community-3033-ready, staging/community-final-qa-20261003, fix/community-acceptance-notifications-20261003]
   workflow_dispatch:
 permissions:
   contents: read
