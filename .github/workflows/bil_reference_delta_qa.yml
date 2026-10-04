@@ -1,4 +1,5 @@
 name: BIL reference delta targeted QA
+# Final verification trigger after localization/layout closure.
 
 on:
   push:
