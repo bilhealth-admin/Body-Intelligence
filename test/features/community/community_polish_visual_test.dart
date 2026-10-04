@@ -706,10 +706,20 @@ void main() {
               expect(tester.takeException(), isNull, reason: scene.key);
               if (scene.key == 'updates') {
                 expect(
-                  find.byKey(const Key('community-activity-filter-all')),
+                  find.byKey(const Key('community-activity-filter-updates')),
                   findsOneWidget,
                   reason:
                       'Activity evidence must show loaded server-contract rows, not an error fallback',
+                );
+                expect(
+                  find.widgetWithText(
+                    ListTile,
+                    arabic
+                        ? '${repository.name} قبل طلب صداقتك'
+                        : '${repository.name} accepted your friend request',
+                  ),
+                  findsOneWidget,
+                  reason: 'Activity must render the loaded acceptance event',
                 );
               }
               await _capture(
