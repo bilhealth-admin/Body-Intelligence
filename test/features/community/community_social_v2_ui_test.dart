@@ -258,7 +258,21 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TabBar), findsNothing);
-      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(3));
+      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(4));
+      for (final key in const [
+        'community-search',
+        'community-messages',
+        'community-updates',
+        'community-settings',
+      ]) {
+        expect(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byKey(Key(key)),
+          ),
+          findsOneWidget,
+        );
+      }
       expect(find.byKey(const Key('community-my-bil-code')), findsNothing);
       expect(
         tester
