@@ -64,6 +64,11 @@ final class CloudRuntimeAccessGate {
     }
 
     final subscription = await _entitlementRepository.current();
+    if (_client.auth.currentUser?.id != ownerId) {
+      return const CloudRuntimeAccessDecision(
+        CloudRuntimeAccessDisposition.notAuthenticated,
+      );
+    }
     if (!subscription.grants(CommerceEntitlement.cloudSync)) {
       return CloudRuntimeAccessDecision(
         CloudRuntimeAccessDisposition.entitlementMissing,
@@ -74,13 +79,23 @@ final class CloudRuntimeAccessGate {
     try {
       final rows = await _client
           .from('bil_consent_receipts')
-          .select('granted, recorded_at')
+          .select('granted, recorded_at, policy_version')
           .eq('user_id', ownerId)
           .eq('purpose', consentPurpose)
-          .eq('policy_version', consentPolicyVersion)
-          .eq('granted', true)
+          // Never filter out a newer denial or unfamiliar-policy receipt.
+          // An explicit refusal also wins if two receipts share a timestamp.
+          .order('recorded_at', ascending: false)
+          .order('granted', ascending: true)
+          .order('policy_version', ascending: false)
           .limit(1);
-      if (rows.isEmpty) {
+      if (_client.auth.currentUser?.id != ownerId) {
+        return const CloudRuntimeAccessDecision(
+          CloudRuntimeAccessDisposition.notAuthenticated,
+        );
+      }
+      if (rows.isEmpty ||
+          rows.first['granted'] != true ||
+          rows.first['policy_version'] != consentPolicyVersion) {
         return CloudRuntimeAccessDecision(
           CloudRuntimeAccessDisposition.consentMissing,
           ownerId: ownerId,

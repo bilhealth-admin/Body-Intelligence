@@ -14,7 +14,16 @@ void main() {
       expect(source, contains('CommerceEntitlement.cloudSync'));
       expect(source, contains("consentPurpose = 'cloud_sync'"));
       expect(source, contains("consentPolicyVersion = '1'"));
-      expect(source, contains(".eq('granted', true)"));
+      // A grant-only query was proven to suppress newer explicit refusals.
+      expect(source, isNot(contains(".eq('granted', true)")));
+      expect(source, contains(".order('recorded_at', ascending: false)"));
+      expect(source, contains(".order('granted', ascending: true)"));
+      expect(source, contains(".order('policy_version', ascending: false)"));
+      expect(source, contains("rows.first['granted'] != true"));
+      expect(
+        source,
+        contains("rows.first['policy_version'] != consentPolicyVersion"),
+      );
     },
   );
 

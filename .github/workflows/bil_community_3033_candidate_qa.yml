@@ -229,6 +229,42 @@ jobs:
           set -euo pipefail
           psql -d community_qa -c 'CREATE DATABASE bil_notification_qa_candidate'
           node tool/release/test_notification_delivery_preferences_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/notification-authority-sql.log
+      - name: Verify accepted collaborator current privacy with genuine three-actor SQL
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_collab_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_collab_qa_candidate'
+          node tool/release/test_community_collaborator_privacy_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/collaborator-privacy-sql.log
+      - name: Verify unfiltered FK coverage without changing original security or indexes
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_fk_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_fk_qa_candidate'
+          node tool/release/test_prebuild_fk_lookup_indexes_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/fk-lookup-sql.log
+      - name: Verify latest cloud consent RPC and RLS with genuine concurrent sessions
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_cloud_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_cloud_qa_candidate'
+          node tool/release/test_cloud_sync_consent_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/cloud-consent-sql.log
       - name: Run provider payload tests with mocked transports only
         if: ${{ !cancelled() }}
         run: |

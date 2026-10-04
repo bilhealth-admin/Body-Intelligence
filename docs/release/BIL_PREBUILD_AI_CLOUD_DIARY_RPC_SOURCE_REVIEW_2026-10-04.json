@@ -1,0 +1,849 @@
+{
+  "schema_version": 1,
+  "checked_at_utc": "2026-10-04T17:06:31Z",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "source_head": "8e804b7faa4ecffdd4dd6b3d9267adb62e6a7e5a",
+  "production_project": "tgmanzhqulksykhslrzb",
+  "scope": "Finite individual source review of the assigned 23 authenticated-executable privileged RPCs plus necessary helpers and deployed AI consent/provider payload source. Catalog metadata and function definitions only.",
+  "boundaries": {
+    "personal_rows_read": false,
+    "cloud_keys_read": false,
+    "reviewer_credentials_read": false,
+    "rpcs_executed": false,
+    "production_mutation": false,
+    "tests_run": false,
+    "app_build": false,
+    "native_purchase": false,
+    "store_edit": false
+  },
+  "status_definitions": {
+    "SOURCE_REVIEWED": "Complete assigned direct function body read, current definition MD5 and EXECUTE/search_path catalog refreshed, necessary dependencies identified. Does not mean PASS, operational clearance, or absence of all vulnerabilities.",
+    "UNREVIEWED": "No assigned direct body remains unread; dependency/product/runtime gaps are individually retained.",
+    "CONFIRMED_SOURCE_GAP": "Required or documented guard absent in read current source; separate runtime exploit/behavior proof must not be inferred."
+  },
+  "functions": [
+    {
+      "signature": "bil_can_manage_ai_coach()",
+      "definition_md5": "9fd0e80d62ffe443579b2fc1ce7e5dff",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "active private.bil_ai_coach_admins row for auth.uid()"
+      ],
+      "dependencies": [
+        "private.bil_ai_coach_admins"
+      ],
+      "reason": "Owner-derived administrator predicate; no caller-supplied owner or row projection.",
+      "remaining_gaps": [],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_claim_sensitive_request(text,text,text)",
+      "definition_md5": "749b40bd8defe37203d00c3b40e65ba9",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "action allowlist",
+        "owner-scoped fixed rate-limit tuple",
+        "owner/action/idempotency-key conflict scope"
+      ],
+      "dependencies": [
+        "bil_consume_rate_limit",
+        "bil_sensitive_request_receipts"
+      ],
+      "reason": "Receipts cannot be claimed for another owner; duplicate returns false rather than repeating work.",
+      "remaining_gaps": [
+        "Duplicate does not compare persisted payload_digest. No current app/Edge callsite found in the bounded source search; actual consumer conflict contract remains unproved."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_consume_rate_limit(text,integer,integer)",
+      "definition_md5": "f04a5971bdc425bec4d1c41b38b9cc7d",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "exact action/limit/window whitelist",
+        "owner-scoped atomic bucket increment",
+        "exception above configured limit"
+      ],
+      "dependencies": [
+        "bil_rate_limit_buckets"
+      ],
+      "reason": "Caller cannot choose an arbitrary higher threshold; actor is auth.uid().",
+      "remaining_gaps": [
+        "No new operational or concurrent rate-limit execution performed in this audit."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_create_support_request(text,text,text,jsonb)",
+      "definition_md5": "45ebafeb8544c4213ee1d86940f9f9cc",
+      "search_path": "public, pg_temp",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "category allowlist and bounded subject/message/context",
+        "paid queue resolved from caller's active entitlement",
+        "new row owner is auth.uid()"
+      ],
+      "dependencies": [
+        "bil_support_requests",
+        "bil_entitlements"
+      ],
+      "reason": "No target-owner parameter or arbitrary paid queue input.",
+      "remaining_gaps": [
+        "No rate-limit or idempotency check in this function. Resource-abuse behavior and intended support-throttle contract remain unproved."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_dismiss_admin_notice(uuid,uuid)",
+      "definition_md5": "ee7661e34dc99675176a98ad5a4adb42",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "p_owner_id must equal auth.uid()",
+        "notification id required",
+        "UPDATE only caller's unseen notice"
+      ],
+      "dependencies": [
+        "bil_admin_notices"
+      ],
+      "reason": "Updates own seen state only; no credit or entitlement grant.",
+      "remaining_gaps": [],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_dismiss_ai_coach_reset_notice(uuid,uuid)",
+      "definition_md5": "d82273c6defc7763703ed7c05eeebee8",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "p_owner_id must equal auth.uid()",
+        "reset id required",
+        "UPDATE only caller's unseen reset notice"
+      ],
+      "dependencies": [
+        "bil_ai_coach_reset_notices"
+      ],
+      "reason": "Updates own seen state only.",
+      "remaining_gaps": [],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_estimate_vision_cost(text,text,integer,integer)",
+      "definition_md5": "cdace87fc0984e33c501ef034ffa3139",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "negative/missing token inputs return null",
+        "effective pricing window and latest LIMIT 1"
+      ],
+      "dependencies": [
+        "bil_vision_model_pricing"
+      ],
+      "reason": "Returns computed price, not private owner data; no mutation.",
+      "remaining_gaps": [
+        "Pricing result does not establish actual provider billing or transaction settlement."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_finalize_food_submission(uuid,text)",
+      "definition_md5": "f2f5510724152b31c22d801489a90b0e",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "private moderation authority required",
+        "decision allowlist",
+        "submission FOR UPDATE",
+        "self-review denied",
+        "valid pending/needs_changes lifecycle"
+      ],
+      "dependencies": [
+        "private.bil_resolve_community_moderation_authority",
+        "bil_community_food_submissions",
+        "bil_community_audit_events",
+        "moderation member-state trigger"
+      ],
+      "reason": "Privileged moderation is explicit; another user's submission is intentional moderator access, not ordinary authenticated permission.",
+      "remaining_gaps": [
+        "Dependent suspension/admin helper and moderation table contract reviewed statically; no moderation operation executed here."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_get_ai_usage_status()",
+      "definition_md5": "b45a650a762d9a6d03b9b85c9e754ab2",
+      "search_path": "public, pg_temp",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "owner advisory lock before reconciliation/read",
+        "unserialized helper derives actor from auth.uid()"
+      ],
+      "dependencies": [
+        "bil_get_ai_usage_status_unserialized",
+        "bil_resolve_ai_allowance_plan",
+        "bil_resolve_ai_trial_anchor",
+        "private.bil_current_ai_month_start"
+      ],
+      "reason": "Own usage/credits and reservation reconciliation; downstream UUID helpers are not executable by anon/authenticated.",
+      "remaining_gaps": [
+        "This audit did not execute usage reconciliation or prove provider/purchase behavior."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_get_existing_cloud_key()",
+      "definition_md5": "2c72ff0c54dc5e530318b22a307fe5d7",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "latest caller cloud_sync consent must be true",
+        "key reference selected by owner_id=auth.uid()",
+        "Vault lookup restricted to owner's referenced secret id"
+      ],
+      "dependencies": [
+        "bil_consent_receipts",
+        "bil_cloud_key_refs",
+        "vault.decrypted_secrets"
+      ],
+      "reason": "Intended owner encryption-key retrieval; no cloud-key values were queried.",
+      "remaining_gaps": [
+        "Server accepts the latest consent of any policy version; client requires policy 1. Timestamp tie and latest-choice/version behavior require an explicit contract and operational proof."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_get_or_create_cloud_key()",
+      "definition_md5": "ef2419f9a11dc3877ef7a249e117036c",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "latest caller cloud_sync consent must be true",
+        "owner advisory lock before first-key creation",
+        "owner-scoped reference and Vault id",
+        "cryptographic random 32-byte key"
+      ],
+      "dependencies": [
+        "bil_consent_receipts",
+        "bil_cloud_key_refs",
+        "vault.create_secret",
+        "vault.decrypted_secrets"
+      ],
+      "reason": "No other owner key target can be supplied; key values were never read.",
+      "remaining_gaps": [
+        "Consent is read before owner key lock and not reread after waiting. Withdrawal/key-creation overlap not executed; policy-version discrepancy same as existing-key RPC."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_get_vision_usage()",
+      "definition_md5": "d722bba923fcbbc952e77baa8cc47b0c",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "own subscription and own UTC-month usage",
+        "configured plan quota"
+      ],
+      "dependencies": [
+        "bil_subscriptions",
+        "bil_vision_monthly_usage",
+        "bil_vision_quota_config"
+      ],
+      "reason": "Legacy own-account usage projection, not another owner's data.",
+      "remaining_gaps": [
+        "Legacy subscription predicate omits verified_at/provider/environment and active cancelled/admin overlay parity. Current deployed analyze-meal v103 and current client use the shared AI quota path instead; no current paid-route failure established from this legacy body."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_list_reviewable_products()",
+      "definition_md5": "a983ad48d6d30727e3b32f4438041471",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "private moderation authority required",
+        "pending/needs_changes only",
+        "own submission excluded",
+        "LIMIT 40"
+      ],
+      "dependencies": [
+        "private.bil_resolve_community_moderation_authority",
+        "bil_community_food_submissions"
+      ],
+      "reason": "Full review projection is intentional authorized moderator access, not ordinary user access.",
+      "remaining_gaps": [
+        "No moderation RPC executed in this read-only audit."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_mark_conversation_read(uuid)",
+      "definition_md5": "002efbcba8fdd38d275de465e532dad0",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "recipient_id=auth.uid()",
+        "sender matches supplied sender",
+        "unread and not recipient-deleted only"
+      ],
+      "dependencies": [
+        "bil_messages"
+      ],
+      "reason": "Only caller's received-message read markers can change; null actor matches no row.",
+      "remaining_gaps": [
+        "No explicit suspension/block check. This is a historical read marker rather than new-message delivery; broader messaging-policy compatibility is not certified."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_publish_diary_snapshot(date,jsonb,integer)",
+      "definition_md5": "c8c7ba80b0293611aec3920020e6bc08",
+      "search_path": "public, pg_temp",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "date bounded",
+        "object payload <=256 KiB",
+        "revision >=1",
+        "owner/date PK and owner-derived insert",
+        "incoming revision >= stored revision"
+      ],
+      "dependencies": [
+        "bil_shared_diary_snapshots"
+      ],
+      "reason": "Cannot publish under another owner; snapshot storage is distinct from visibility authorization.",
+      "remaining_gaps": [
+        "Equal revision may replace payload. Intended equal-revision retry semantics and separate explicit share/publication consent need behavioral evidence; no other-owner exposure established."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_read_shared_diary(uuid,date,text)",
+      "definition_md5": "770df8a3c1a71b930fdc4b3a22b2fe64",
+      "search_path": "",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "supplied share-key attempts consume 30/hour caller limit",
+        "bidirectional block rejection",
+        "self/public/valid hashed locked key/accepted mutual friendship authorization",
+        "requested owner/date projection"
+      ],
+      "dependencies": [
+        "bil_consume_rate_limit",
+        "bil_diary_share_settings",
+        "bil_shared_diary_snapshots",
+        "bil_blocks",
+        "bil_friendships"
+      ],
+      "reason": "Non-owner access requires explicit diary sharing authority or friend/key condition.",
+      "remaining_gaps": [
+        "No Community suspension/private-profile check. Diary sharing is a separate explicit contract; whether these states should revoke it requires a product privacy decision and ordinary-actor negative tests."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_reclaim_stale_vision_reservations()",
+      "definition_md5": "61f7217c1c190da325304860e05ac896",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "only caller's reserved requests older than configured TTL",
+        "refund aggregate grouped by own usage period",
+        "reserved count floored at zero"
+      ],
+      "dependencies": [
+        "bil_vision_request_receipts",
+        "bil_vision_monthly_usage",
+        "bil_vision_runtime_config"
+      ],
+      "reason": "No arbitrary owner target; own stale reservations only.",
+      "remaining_gaps": [
+        "Legacy reservation race/recovery behavior not executed here."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_record_ai_coach_feedback(text,boolean,text,text,text)",
+      "definition_md5": "b29563e1521bed0cbcdcd7b18b57623e",
+      "search_path": "public, pg_temp",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "bounded response id/locale and runtime/reason allowlists",
+        "cloud feedback requires caller's succeeded usage event",
+        "owner/response unique upsert"
+      ],
+      "dependencies": [
+        "bil_ai_coach_feedback",
+        "bil_ai_usage_events"
+      ],
+      "reason": "Cloud feedback cannot cite another owner's succeeded request.",
+      "remaining_gaps": [
+        "No per-call rate limit; intended local-feedback trust and resource-abuse behavior are not operationally cleared."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_record_consent(text,text,boolean)",
+      "definition_md5": "4f88642822691f7687204f0664626a55",
+      "search_path": "public, pg_temp",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "purpose allowlist",
+        "bounded policy version",
+        "owner/purpose/version upsert",
+        "null granted becomes false"
+      ],
+      "dependencies": [
+        "bil_consent_receipts"
+      ],
+      "reason": "Cannot write consent for another owner; consent is an explicit caller choice.",
+      "remaining_gaps": [
+        "Multiple policy-version rows/latest timestamp ordering and concurrent grant/withdraw require consumers to use the agreed authoritative latest-choice contract. No consent function was executed here."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_request_account_deletion(text)",
+      "definition_md5": "7cf6d8102a604d8e8d582f8712c653c9",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "owner advisory lock",
+        "existing pending/processing request returned idempotently",
+        "3/day for a new request",
+        "bounded reason",
+        "own push tokens disabled"
+      ],
+      "dependencies": [
+        "bil_account_deletion_requests",
+        "bil_consume_rate_limit",
+        "bil_push_device_tokens"
+      ],
+      "reason": "Enqueues only caller deletion and disables caller tokens.",
+      "remaining_gaps": [
+        "This is not proof of completed Auth/storage/provider erasure. Worker completion, retry, retained/legal data and user readback remain separate boundaries."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_reserve_vision_request(text,text)",
+      "definition_md5": "29dd77f0e59e6481cc15d37f1809c5d5",
+      "search_path": "public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "bounded idempotency key and digest",
+        "own receipt digest conflict rejects",
+        "own image/month deduplication",
+        "own usage FOR UPDATE",
+        "configured quota exhaustion",
+        "owner/key and owner/image/month uniqueness"
+      ],
+      "dependencies": [
+        "bil_reclaim_stale_vision_reservations",
+        "bil_subscriptions",
+        "bil_vision_request_receipts",
+        "bil_vision_monthly_usage",
+        "bil_vision_quota_config"
+      ],
+      "reason": "Legacy owner quota reservation, no third-party target.",
+      "remaining_gaps": [
+        "Legacy plan verification/consent differs from current shared AI flow. A refunded receipt is read before usage lock and not reread afterward; concurrent re-reservation accounting is a source-level race hypothesis, not a reproduced failure. Current deployed Vision uses bil_reserve_ai_vision instead."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_set_diary_share_settings(text,text)",
+      "definition_md5": "a261acd981dbe04f28069203107e5d8e",
+      "search_path": "public, pg_temp",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "visibility allowlist",
+        "locked key must be 64 hex",
+        "non-locked state clears key",
+        "owner-derived PK upsert"
+      ],
+      "dependencies": [
+        "bil_diary_share_settings"
+      ],
+      "reason": "Explicit own diary visibility; no arbitrary target-owner input.",
+      "remaining_gaps": [
+        "No claim that owner-selected public/friends sharing fulfills every Community profile/suspension contract."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    },
+    {
+      "signature": "bil_sync_records(text,bigint,jsonb)",
+      "definition_md5": "ed69ff3622647ed1b32ad3843676f611",
+      "search_path": "pg_catalog, public",
+      "owner": "postgres",
+      "security_definer": true,
+      "authenticated_execute": true,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guards": [
+        "auth.uid() is non-null",
+        "bounded device id",
+        "array <=100 operations",
+        "owner advisory lock",
+        "revoked existing owner device rejected",
+        "actor fixes every record/operation owner",
+        "entity/mutation/revision/payload bounds",
+        "server sequence and cursor pagination LIMIT 100"
+      ],
+      "dependencies": [
+        "bil_cloud_devices",
+        "bil_cloud_records",
+        "bil_cloud_operations",
+        "bil_cloud_change_sequence",
+        "bil_cloud_records_touch/bil_set_server_updated_at"
+      ],
+      "reason": "Owner isolation is explicit, but server privacy consent is absent from the RPC and inspected touch trigger.",
+      "remaining_gaps": [
+        "CONFIRMED SOURCE GAP: no cloud_sync receipt/version/withdrawal check, although client gate requires current consent. Direct authenticated EXECUTE exists. Ordinary denied-consent invocation has NOT been performed by this agent; root assigned isolated reproduction elsewhere.",
+        "Direct own-record SELECT remains granted; current RLS is owner-scoped, not consent-scoped. Device owner CRUD and revocation-authority contract require review; no cross-owner exposure claim.",
+        "100 operations each permitting ~1 MiB has no total batch byte/rate cap. No measured DoS/latency claim."
+      ],
+      "behavioral_clearance": "NOT_EXECUTED_BY_THIS_READ_ONLY_AUDIT"
+    }
+  ],
+  "helper_receipts": [
+    {
+      "signature": "bil_admin_private.active_plan(uuid)",
+      "definition_md5": "1ab3f0ba44e7760fca7de33940703dca",
+      "search_path": "",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Active unrevoked owner admin plan with creation/expiry bounds."
+    },
+    {
+      "signature": "private.bil_current_ai_month_start(uuid,timestamp with time zone)",
+      "definition_md5": "58e9efea3def1d198f42b48242e96a72",
+      "search_path": "",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Trial anchor or UTC month for supplied trusted owner."
+    },
+    {
+      "signature": "private.bil_resolve_community_moderation_authority(uuid)",
+      "definition_md5": "fa473bfe2a2a2cba6170f782232b189a",
+      "search_path": "",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Active private administrator or designated community moderator; direct caller supplies auth.uid()."
+    },
+    {
+      "signature": "bil_get_ai_usage_status_unserialized()",
+      "definition_md5": "7fc35fde9f214179c078deecab5c418f",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "auth.uid-owned stale reservation refund and own weekly/monthly/paid balances; no arbitrary actor."
+    },
+    {
+      "signature": "bil_resolve_ai_allowance_plan(uuid)",
+      "definition_md5": "67eb2d7c613e1e7854c109a466e8682c",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Active admin -> active closed-test overlay -> trial -> valid store AI plan -> free; trusted UUID helper."
+    },
+    {
+      "signature": "bil_resolve_ai_trial_anchor(uuid)",
+      "definition_md5": "95344e301ff40459019fb500a7c97654",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Valid own AI trial started-at anchor."
+    },
+    {
+      "signature": "bil_is_current_ai_trial(uuid)",
+      "definition_md5": "de1492b6ca2c29cc2dc9fdf7748f7f68",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Valid product/plan/start/expiry and production or verified previous-trial mirror constraints."
+    },
+    {
+      "signature": "bil_valid_ai_trial_window(text,timestamp with time zone,timestamp with time zone)",
+      "definition_md5": "41da8dd2fe3eb4779890c2619d617167",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Production exact seven-day window; sandbox positive <=seven days."
+    },
+    {
+      "signature": "bil_stamp_ai_usage_event_period()",
+      "definition_md5": "09db9e7f6b5ba2dba3fa217beeaf077e",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Creation-period and plan stamps for usage events."
+    },
+    {
+      "signature": "bil_sync_ai_monthly_usage_from_event()",
+      "definition_md5": "54398a34c0df8d1e96f68eb7589e105a",
+      "search_path": "public",
+      "authenticated_execute": false,
+      "anon_execute": false,
+      "disposition": "SOURCE_REVIEWED",
+      "guard": "Owner/month reservation delta and configured monthly ceiling."
+    }
+  ],
+  "additional_consent_helper": {
+    "signature": "bil_has_remote_ai_consent(uuid)",
+    "definition_md5": "9ea82dae5426243576e14714f7d47efd",
+    "search_path": "public, pg_temp",
+    "authenticated_execute": false,
+    "anon_execute": false,
+    "guard": "Latest owner remote_ai receipt must be granted=true and policy_version=3; owner supplied by authenticated Edge service."
+  },
+  "cloud_acl_receipt": {
+    "rls_enabled": true,
+    "anon_crud": false,
+    "authenticated_cloud_records_and_operations": "SELECT only; RLS actor-owned, not receipt-conditioned",
+    "authenticated_cloud_devices": "Owner-scoped SELECT/INSERT/UPDATE/DELETE",
+    "authenticated_cloud_key_refs": "No CRUD",
+    "authenticated_consent_receipts": "Owner SELECT only; mutation via consent RPC",
+    "cloud_trigger": "Only bil_cloud_records_touch -> bil_set_server_updated_at, MD5 fde1094a97378c035b1b8640b0697a50; timestamp write, no consent guard",
+    "source_anchors": [
+      "lib/features/cloud_platform/services/cloud_runtime_access_gate.dart:43",
+      "lib/features/cloud_platform/services/cloud_runtime_access_gate.dart:77",
+      "lib/features/cloud_platform/services/supabase_cloud_transport.dart:59"
+    ]
+  },
+  "deployed_ai": {
+    "coach": {
+      "version": 106,
+      "bundle_sha256": "f26e76601bf786c85fd2a3c516a8fb38c0843da22d450341af15eed81dd39e93",
+      "source_chain": [
+        "server.ts:976 Auth.getUser",
+        "server.ts:982 mobile-integrity boundary",
+        "server.ts:989 service-only current-policy3 remote consent",
+        "server.ts:1012 authoritative shared usage reservation",
+        "server.ts:1044 providerContext=context",
+        "server.ts:1055 context JSON in system instruction",
+        "server.ts:1076 Gemini call"
+      ],
+      "payload": "Bounded latest 12 messages (each <=4000 characters), context JSON <=20000 characters, optional bounded WAV <=45 seconds. Server forwards bounded context rather than enforcing mobile category projection; actual client projects question-scoped approved wellness categories after its consent preflight.",
+      "client_anchors": [
+        "lib/features/intelligence_center/services/local_model_gateway_io.dart:284",
+        "lib/features/intelligence_center/services/local_model_gateway_io.dart:312",
+        "lib/features/intelligence_center/services/local_model_gateway_io.dart:338",
+        "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart:9"
+      ]
+    },
+    "vision": {
+      "version": 103,
+      "bundle_sha256": "15416dd9ac2a1033863d507c8ec1aad5bae7d675820b95c705c6c166042038f1",
+      "source_chain": [
+        "index.ts:139 Auth.getUser",
+        "index.ts:141 latest owner meal_vision_ai receipt",
+        "consent.ts requires policy1 and granted=true",
+        "index.ts:181 non-food throttle",
+        "index.ts:192 shared bil_reserve_ai_vision",
+        "providers/builders.ts selected image plus localized meal prompt"
+      ],
+      "provider_selector": {
+        "env": "BIL_MEAL_VISION_PROVIDER",
+        "default": "legacy_gateway",
+        "direct_allowlist": [
+          "openai",
+          "gemini",
+          "mistral"
+        ]
+      },
+      "payload": "Selected bounded JPEG/PNG/WebP image plus localized meal prompt; no additional profile context in the direct Gemini request builder."
+    },
+    "actual_provider_identity": "Previously verified and committed root evidence: paid bil-health project; Vertex Express base https://aiplatform.googleapis.com/v1beta1/publishers/google. This audit read no secret/config values and sent no provider request.",
+    "runtime_success": "UNVERIFIED; source guards and endpoint identity do not prove a genuine consented AI response."
+  },
+  "vertex_primary_terms_map": [
+    {
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview",
+      "sections": [
+        "Preview introduction",
+        "Endpoint URL in express mode",
+        "Enable and manage billing"
+      ],
+      "facts": "Express mode is documented as Preview, uses publisher-model API-key endpoints and transitions out of the 90-day free tier after billing. Its Preview label references Pre-GA terms.",
+      "bil_boundary": "Endpoint identity/paid billing previously evidenced; applicable express-mode contractual exception remains unverified."
+    },
+    {
+      "url": "https://cloud.google.com/terms/service-terms",
+      "sections": [
+        "General 5(d) Pre-GA Data Processing",
+        "AI/ML 18 Training Restriction",
+        "AI/ML 20(d) Age",
+        "AI/ML 20(e) Healthcare",
+        "AI/ML 20(h) Prompts/Output"
+      ],
+      "facts": "Pre-GA data-processing/CDPA coverage is absent unless expressly provided by written notice/documentation; personal or regulated data should not be processed under the default rule. Training requires prior customer permission/instruction. Under-18-directed or likely-accessed apps, clinical use and substitute professional medical advice are restricted. Handling clauses do not establish zero retention.",
+      "bil_boundary": "HIGH legal/privacy clearance GAP, potentially release BLOCKER: prove applicable written/documentation exception and actual wellness/18+ conditions; no BIL-specific legal violation inferred."
+    },
+    {
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention",
+      "sections": [
+        "Training restriction",
+        "Customer data retention",
+        "In-memory caching"
+      ],
+      "facts": "Managed models exclude training absent permission/instruction. Abuse monitoring may log prompts; request-response logging is separately configurable. Default isolated in-memory caching has a 24-hour TTL; Google describes it as compatible with its zero-data-retention definition. Interactions/grounding/Live API have separate retention conditions, but those APIs are not present in the inspected generateContent request.",
+      "bil_boundary": "Project logging/caching/abuse exemption not read. Do not infer ephemeral real-time processing or zero retained logs from default guidance; no installed BIL retention duration measured."
+    },
+    {
+      "url": "https://cloud.google.com/terms/data-processing-addendum",
+      "sections": [
+        "4 Roles",
+        "5 Instructions",
+        "6 Deletion",
+        "7 Security"
+      ],
+      "facts": "The applicable CDPA describes processor/controller roles, instructed processing and deletion/security obligations.",
+      "bil_boundary": "Public terms are not evidence of BIL-specific accepted coverage, especially the Pre-GA exception boundary."
+    },
+    {
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/interactions/developer-guide",
+      "sections": [
+        "Preview notice"
+      ],
+      "facts": "A different Interactions API feature explicitly permits personal-data processing under its CDPA notice.",
+      "bil_boundary": "This demonstrates that express documentation exceptions can exist; it does NOT prove that BIL's generateContent Express path has the same exception. Do not transfer the exception across APIs."
+    }
+  ],
+  "store_readonly_receipt": {
+    "apple_age_advertising": {
+      "evidence_path": "G:/BIL_Project/audit-work/20261004/apple-declaration-reconciliation.json",
+      "checked_at": "2026-10-04T07:59:51.673Z",
+      "result": "UPDATED_AND_READ_BACK",
+      "advertising": true,
+      "age_rating": "EIGHTEEN_PLUS",
+      "native_transaction_proof": false
+    },
+    "source_truthful_disclosure_maps": [
+      "docs/release/BIL_STORE_METADATA_DELTA_MAP_2026-10-04.md",
+      "docs/release/BIL_STORE_DATA_DISCLOSURE_RECONCILIATION_2026-10-04.json"
+    ],
+    "native_commerce": "UNVERIFIED; catalog/backend/host evidence cannot prove StoreKit/Play purchase, restore, persistence or changed-native-artifact behavior.",
+    "signing_inspector_source": "Existing official GET-only signing inspector was read; it inspects app identity/certificate/profile metadata and cannot prove private signing-key possession or commerce. Not rerun for redundant unchanged evidence.",
+    "credentials_console_boundary": "No reviewer credential values read, typed or transmitted; root owns pending explicit Play App-access transmission approval."
+  }
+}

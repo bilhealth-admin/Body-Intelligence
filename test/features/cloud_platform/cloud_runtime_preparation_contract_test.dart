@@ -26,7 +26,11 @@ void main() {
       startup,
       contains('ref.invalidate(cloudRuntimePreparationProvider)'),
     );
-    expect(gate, contains("select('granted, recorded_at')"));
+    // The current-policy field is necessary to reject an unfamiliar latest
+    // receipt; actual host tests prove newer denial/tie/version behavior.
+    expect(gate, contains("select('granted, recorded_at, policy_version')"));
+    expect(gate, contains(".order('recorded_at', ascending: false)"));
+    expect(gate, contains(".order('granted', ascending: true)"));
     expect(gate, contains('consentGrantedAt'));
   });
 }

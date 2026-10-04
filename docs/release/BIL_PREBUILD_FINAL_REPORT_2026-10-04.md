@@ -1,5 +1,12 @@
 # BIL prebuild audit results
 
+Historical checkpoint: source `57989acd`, Production readback through
+16:51 UTC. The later [incremental boundary repairs and reviewer save](BIL_PREBUILD_LATEST_BOUNDARY_REPAIRS_2026-10-04.md)
+supersede the pending App access, collaborator and five-FK findings below.
+The dated evidence receipt remains unchanged; it does not certify later source
+changes or migration applications. Consult the incremental checkpoint for
+the latest exact-SHA QA/application status and unresolved release decisions.
+
 **NOT READY FOR BUILD.** Source fixes, comprehensive code-only QA and focused
 Production RPC tests have current passing evidence. Mandatory native purchase,
 store disclosure/reviewer and remaining security/privacy clearance boundaries

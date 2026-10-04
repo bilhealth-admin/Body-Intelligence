@@ -48,13 +48,22 @@ final class CloudSyncConsentRepository {
     try {
       final rows = await _client
           .from('bil_consent_receipts')
-          .select('granted, recorded_at')
+          .select('granted, recorded_at, policy_version')
           .eq('user_id', user.id)
           .eq('purpose', CloudRuntimeAccessGate.consentPurpose)
-          .eq('policy_version', CloudRuntimeAccessGate.consentPolicyVersion)
+          .order('recorded_at', ascending: false)
+          .order('granted', ascending: true)
+          .order('policy_version', ascending: false)
           .limit(1);
+      if (_client.auth.currentUser?.id != user.id) {
+        return const CloudSyncConsentState(
+          availability: CloudSyncConsentAvailability.unavailable,
+        );
+      }
       final row = rows.isEmpty ? null : rows.first;
-      final granted = row?['granted'] == true;
+      final granted =
+          row?['granted'] == true &&
+          row?['policy_version'] == CloudRuntimeAccessGate.consentPolicyVersion;
       final recordedAt = DateTime.tryParse(
         '${row?['recorded_at'] ?? ''}',
       )?.toUtc();
