@@ -119,7 +119,6 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
   }
 }
 
-
 class _CommunityMembershipTierChip extends StatelessWidget {
   const _CommunityMembershipTierChip({
     required this.tier,

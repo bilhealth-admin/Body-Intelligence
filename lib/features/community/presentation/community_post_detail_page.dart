@@ -340,6 +340,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       if (mounted) setState(() => _likingPost = false);
     }
   }
+
   Future<void> _submitComment() async {
     final text = _composer.text.trim();
     if (_submitting || _refreshing) return;

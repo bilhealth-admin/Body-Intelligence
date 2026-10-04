@@ -125,5 +125,4 @@ extension _CommunityPostDetailReferenceActions
       if (mounted) _setDetailState(() => _sharingPost = false);
     }
   }
-
 }

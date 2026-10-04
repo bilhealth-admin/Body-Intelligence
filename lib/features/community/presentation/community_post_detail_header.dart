@@ -70,10 +70,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                       ),
                     if (authorMembershipTier case final tier?) ...[
                       const SizedBox(height: 4),
-                      _CommunityMembershipTierChip(
-                        tier: tier,
-                        compact: true,
-                      ),
+                      _CommunityMembershipTierChip(tier: tier, compact: true),
                     ],
                     Text(
                       '${MaterialLocalizations.of(context).formatShortDate(post.createdAt.toLocal())} · ${TimeOfDay.fromDateTime(post.createdAt.toLocal()).format(context)}',
@@ -112,16 +109,12 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                   if (post.authorId == repository.currentUserId)
                     PopupMenuItem(
                       value: 'delete',
-                      child: Text(
-                        communityText(context, 'Delete', 'حذف'),
-                      ),
+                      child: Text(communityText(context, 'Delete', 'حذف')),
                     )
                   else ...[
                     PopupMenuItem(
                       value: 'report',
-                      child: Text(
-                        communityText(context, 'Report', 'إبلاغ'),
-                      ),
+                      child: Text(communityText(context, 'Report', 'إبلاغ')),
                     ),
                     PopupMenuItem(
                       value: 'block',
@@ -245,12 +238,8 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   );
 }
 
-
 class _CommunityPostDetailMetric extends StatelessWidget {
-  const _CommunityPostDetailMetric({
-    required this.icon,
-    required this.value,
-  });
+  const _CommunityPostDetailMetric({required this.icon, required this.value});
 
   final IconData icon;
   final String value;

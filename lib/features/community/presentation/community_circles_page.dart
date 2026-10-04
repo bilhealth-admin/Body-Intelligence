@@ -449,10 +449,7 @@ class _CommunityCircleCover extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            scheme.primaryContainer,
-            scheme.secondaryContainer,
-          ],
+          colors: [scheme.primaryContainer, scheme.secondaryContainer],
         ),
         border: Border.all(color: scheme.outlineVariant),
       ),
@@ -465,6 +462,7 @@ class _CommunityCircleCover extends StatelessWidget {
     );
   }
 }
+
 class _CircleMetric extends StatelessWidget {
   const _CircleMetric({
     required this.icon,
