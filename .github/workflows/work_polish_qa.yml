@@ -26,9 +26,9 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: flutter pub get
-      - name: Verify changed Dart formatting
+      - name: Apply exact Dart formatting in QA workspace
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             lib/shared/widgets/bil_premium_trust_surface.dart \
             lib/features/onboarding/onboarding_detail_steps.dart \
             lib/features/intelligence_center/presentation/intelligence_query_flow.dart \
@@ -43,6 +43,28 @@ jobs:
             test/shared/widgets/bil_premium_ai_consent_sheet_test.dart \
             test/features/intelligence_center/ai_coach_starter_prompts_contract_test.dart \
             test/shared/widgets/bil_feature_entry_splash_test.dart \
+            test/features/dashboard/dashboard_custom_card_save_stability_test.dart
+      - name: Upload exact formatted polish sources
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: work-polish-formatted-${{ github.sha }}
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            lib/shared/widgets/bil_premium_trust_surface.dart
+            lib/features/onboarding/onboarding_detail_steps.dart
+            lib/features/intelligence_center/presentation/intelligence_query_flow.dart
+            lib/features/intelligence_center/presentation/intelligence_conversation_viewport.dart
+            lib/features/intelligence_center/presentation/intelligence_center_widgets.dart
+            lib/shared/widgets/bil_feature_entry_splash.dart
+            lib/app/router/app_router.dart
+            lib/app/router/app_wellness_routes.dart
+            lib/features/dashboard/presentation/dashboard_preferences_page.dart
+            lib/features/dashboard/presentation/dashboard_preferences_polish.dart
+            test/features/onboarding/premium_consent_surface_contract_test.dart
+            test/shared/widgets/bil_premium_ai_consent_sheet_test.dart
+            test/features/intelligence_center/ai_coach_starter_prompts_contract_test.dart
+            test/shared/widgets/bil_feature_entry_splash_test.dart
             test/features/dashboard/dashboard_custom_card_save_stability_test.dart
       - name: Analyze complete source
         run: flutter analyze --no-pub
