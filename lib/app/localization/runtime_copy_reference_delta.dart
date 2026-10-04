@@ -501,7 +501,11 @@ abstract final class ReferenceDeltaRuntimeCopy {
     if (index < 0) return null;
     var tag = BilLocalePolicy.canonicalSupportedTag(localeTag);
     if (tag == null) {
-      final language = localeTag.replaceAll('_', '-').toLowerCase().split('-').first;
+      final language = localeTag
+          .replaceAll('_', '-')
+          .toLowerCase()
+          .split('-')
+          .first;
       final matches = supported.where(
         (candidate) => candidate.toLowerCase() == language,
       );

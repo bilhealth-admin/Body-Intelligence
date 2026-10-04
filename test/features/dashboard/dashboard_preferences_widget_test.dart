@@ -139,7 +139,13 @@ void main() {
           isNot('Customize Today'),
           reason: 'no English fallback for $locale',
         );
-        expect(find.text(translated!), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.text(translated!),
+          ),
+          findsOneWidget,
+        );
         for (final nutrient in const [
           'Protein',
           'Carbohydrates',

@@ -34,20 +34,23 @@ void main() {
     }
   });
 
-  test('locale aliases retain language and script, with no invented fallback', () {
-    const source = 'Creator rewards';
-    for (final alias in const {
-      'pt_BR': 'pt-BR',
-      'pt_PT': 'pt-PT',
-      'zh_Hans': 'zh-Hans',
-      'zh_Hant': 'zh-Hant',
-    }.entries) {
-      expect(
-        ReferenceDeltaRuntimeCopy.resolve(source, alias.key),
-        ReferenceDeltaRuntimeCopy.resolve(source, alias.value),
-      );
-    }
-    expect(ReferenceDeltaRuntimeCopy.resolve('Unknown source', 'en'), isNull);
-    expect(ReferenceDeltaRuntimeCopy.resolve(source, 'xx'), isNull);
-  });
+  test(
+    'locale aliases retain language and script, with no invented fallback',
+    () {
+      const source = 'Creator rewards';
+      for (final alias in const {
+        'pt_BR': 'pt-BR',
+        'pt_PT': 'pt-PT',
+        'zh_Hans': 'zh-Hans',
+        'zh_Hant': 'zh-Hant',
+      }.entries) {
+        expect(
+          ReferenceDeltaRuntimeCopy.resolve(source, alias.key),
+          ReferenceDeltaRuntimeCopy.resolve(source, alias.value),
+        );
+      }
+      expect(ReferenceDeltaRuntimeCopy.resolve('Unknown source', 'en'), isNull);
+      expect(ReferenceDeltaRuntimeCopy.resolve(source, 'xx'), isNull);
+    },
+  );
 }

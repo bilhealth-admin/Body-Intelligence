@@ -82,7 +82,13 @@ void main() {
               );
               await tester.pumpAndSettle();
               final tile = tester.widget<ListTile>(preset);
-              _expectBadgeGap(tester, preset, find.byWidget(tile.title!), 32);
+              _expectBadgeGap(
+                tester,
+                preset,
+                find.byWidget(tile.title!),
+                34,
+                iconSize: 21,
+              );
               final title = tester.getRect(find.byWidget(tile.title!));
               final subtitle = tester.getRect(find.byWidget(tile.subtitle!));
               final card = tester.getRect(preset);
@@ -108,7 +114,7 @@ void main() {
               await tester.pumpAndSettle();
               final tile = tester.widget<SwitchListTile>(section);
               final title = find.byWidget(tile.title!);
-              _expectBadgeGap(tester, section, title, 30);
+              _expectBadgeGap(tester, section, title, 28, iconSize: 19);
               final paragraph = tester.renderObject<RenderParagraph>(title);
               expect(paragraph.didExceedMaxLines, isFalse);
               final titleRect = tester.getRect(title);
@@ -292,15 +298,16 @@ void _expectBadgeGap(
   WidgetTester tester,
   Finder tile,
   Finder text,
-  double size,
-) {
+  double size, {
+  double iconSize = 18,
+}) {
   final badge = find.descendant(
     of: tile,
     matching: find.byType(BilSemanticIconBadge),
   );
   expect(badge, findsOneWidget);
   expect(tester.getSize(badge), Size.square(size));
-  expect(tester.widget<BilSemanticIconBadge>(badge).iconSize, 18);
+  expect(tester.widget<BilSemanticIconBadge>(badge).iconSize, iconSize);
   final badgeRect = tester.getRect(badge);
   final textRect = tester.getRect(text);
   final direction = Directionality.of(tester.element(tile));

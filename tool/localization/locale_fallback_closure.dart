@@ -14,6 +14,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_community_mo
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_expansion.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_reference.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_reference_delta.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_apple_ai_privacy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
@@ -136,6 +137,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...CommunityModerationRuntimeCopy.supplementalSources,
     ...CommunitySocialRuntimeCopy.sources,
     ...CommunityReferenceRuntimeCopy.sources,
+    ...ReferenceDeltaRuntimeCopy.sources,
     ...CommunityExpansionRuntimeCopy.sources,
     ...AppleAiPrivacyRuntimeCopy.values.keys,
     ...AdminNotificationRuntimeCopy.values.keys,
