@@ -241,7 +241,6 @@ class _CommunityNotificationsPageState
       '/community/connections',
       '/community/people',
       '/community/messages',
-      '/community/notifications',
       '/community/rewards',
     };
     if (liveRoutes.contains(notification.deepLinkPath)) {

@@ -142,7 +142,9 @@ void main() {
     });
   }
 
-  testWidgets('rapid repeated tap has one in-flight seen write', (tester) async {
+  testWidgets('rapid repeated tap has one in-flight seen write', (
+    tester,
+  ) async {
     final repository = _NotificationRepository();
     final write = Completer<int>();
     repository.writes.add(write);
