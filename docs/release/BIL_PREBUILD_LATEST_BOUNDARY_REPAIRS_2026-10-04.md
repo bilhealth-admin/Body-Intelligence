@@ -14,6 +14,7 @@ are unchanged. No app build or store submission is authorized or performed.
 | HIGH: old current-policy grant hides newer refusal in runtime/settings | Three actual host-gate tests fail before repair; grant/version filters select old approval instead of latest denial/unknown-policy/tied denial | Actual runtime and consent repository fetch deterministic latest receipt, validate current policy and recheck session ownership. Seven focused host/source assertions pass, including current grant/revoke, network failure and logout during read. Host HTTP/Auth are fixtures, not Production/native proof |
 | MEDIUM: five unfiltered auth-user FK lookups lack coverage | Current catalog and ordinary equality EXPLAIN show partial indexes do not cover all FK rows; five different IS NOT NULL partials do cover equality | Five nonunique full BTrees, bounded locks/timeouts and strict drift guards. Local PG17 proves exact coverage/index capability, three drift/replay failures and unchanged constraints/RLS/ACLs/original indexes. No measured latency or speedup claim |
 | BLOCKER: later-completed cross-version AI refusal is stamped before the grant | Genuine ordinary-role transactions reproduce transaction-start `now()` misordering for Remote AI policy 2 versus 3 and Meal Vision policy 0 versus 1; the actual unchanged Coach helper still permits the request after refusal | Separate forward-only writer repair serializes one AI purpose/owner and stamps after waiting. Local PG17: 19 scoped checks, including two BEFORE failures and three AFTER overlapping-session cases. Exact readers, Edge functions, cloud lock branch, ACLs and policies unchanged. Production deployment remains gated |
+| LOW: moderator hidden-post list accepts an unbounded NULL limit | Exact unchanged Production definition in isolated PG17 returns 125 qualifying rows for an ordinary approved moderator passing NULL, versus 100 for explicit 100; nonmoderator remains denied | Forward predicate-only NULL rejection retains default 100, authority-first denial, filters, ordering, owner, ACL and search path. 25 isolated checks and independent source peer review pass. This is not moderation-write, native or Production execution proof; deployment remains gated |
 
 The first host repair run caught an actual ordering mistake: PostgREST's
 default `.order('granted')` was descending. The implementation now explicitly
@@ -30,6 +31,11 @@ An additional permanent empty-loopback fixture covers the newly confirmed AI
 receipt-ordering defect. A deterministic timestamp-tie bypass was not proved;
 that hypothesis is not reported as a failure. The repair does not cancel a
 provider request already admitted and does not change unknown store declarations.
+The final narrowly scoped SQL fixture covers the reproduced hidden-list NULL
+defect. Two initial harness errors concerned whitespace/rendering fingerprints;
+database-computed hashes now preserve exact source bytes and the single approved
+predicate delta. No production query, permission or behavioral assertion was
+weakened. No additional speculative repairs are included.
 
 Local validation with the repository's Flutter 3.44.6 / Dart 3.12.2 is complete:
 2411 Dart files formatted with zero changes; full `flutter analyze --no-pub`

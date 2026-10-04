@@ -277,6 +277,18 @@ jobs:
           set -euo pipefail
           psql -d community_qa -c 'CREATE DATABASE bil_ai_consent_qa_candidate'
           node tool/release/test_ai_consent_completion_order_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/ai-consent-completion-sql.log
+      - name: Verify hidden-post moderation list rejects unbounded NULL with genuine SQL
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_hidden_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_hidden_qa_candidate'
+          node tool/release/test_community_hidden_posts_limit_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/hidden-posts-limit-sql.log
       - name: Run provider payload tests with mocked transports only
         if: ${{ !cancelled() }}
         run: |
