@@ -223,6 +223,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           },
                         ),
                         const SizedBox(height: 18),
+                        SizedBox(key: _circleAnchor, height: 0),
                         Text(
                           communityText(
                             context,
@@ -304,6 +305,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           },
                         ),
                         const SizedBox(height: 18),
+                        SizedBox(key: _locationAnchor, height: 0),
                         Text(
                           communityText(
                             context,
@@ -465,10 +467,12 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           ),
                         ],
                         const SizedBox(height: 18),
+                        SizedBox(key: _collaborationAnchor, height: 0),
                         ..._CommunityPostComposerReferenceSections(
                           this,
                         )._buildCommunityCollaboratorSection(context, busy),
                         const SizedBox(height: 8),
+                        SizedBox(key: _pollAnchor, height: 0),
                         _CommunityComposerSwitchRow(
                           key: const Key('community-composer-poll-toggle'),
                           value: widget.draft.pollEnabled,
