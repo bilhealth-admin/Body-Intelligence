@@ -35,6 +35,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                       stats: _stats,
                       referenceMetadata: widget.referenceMetadata,
                       authorProfile: _authorProfile,
+                      authorMembershipTier: _authorMembershipTier,
                       followBusy: _followBusy,
                       viewCount: _viewCount,
                       liking: _likingPost,
