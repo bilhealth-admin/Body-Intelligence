@@ -578,9 +578,9 @@ class _CoachStarterPrompts extends StatelessWidget {
                   'Start with your real BIL data',
                   'ابدأ من بيانات BIL الحقيقية',
                 ),
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 4),
               Text(

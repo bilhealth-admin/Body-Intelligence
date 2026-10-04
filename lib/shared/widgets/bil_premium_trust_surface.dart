@@ -272,7 +272,6 @@ class BilPremiumConsentToggle extends StatelessWidget {
   }
 }
 
-
 /// A concise disclosure row used by the Remote AI consent sheet.
 @immutable
 class BilPremiumAiConsentPoint {
@@ -477,10 +476,7 @@ class _BilPremiumAiConsentSheet extends StatelessWidget {
                             ),
                           ),
                           onPressed: () => Navigator.pop(context, true),
-                          child: Text(
-                            allowLabel,
-                            textAlign: TextAlign.center,
-                          ),
+                          child: Text(allowLabel, textAlign: TextAlign.center),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -528,10 +524,7 @@ class _BilPremiumAiConsentSheet extends StatelessWidget {
 }
 
 class _BilPremiumAiConsentRow extends StatelessWidget {
-  const _BilPremiumAiConsentRow({
-    required this.point,
-    required this.dark,
-  });
+  const _BilPremiumAiConsentRow({required this.point, required this.dark});
 
   final BilPremiumAiConsentPoint point;
   final bool dark;

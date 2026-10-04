@@ -64,10 +64,7 @@ class _BilFeatureEntrySplashGateState extends State<BilFeatureEntrySplashGate>
       children: [
         AbsorbPointer(
           absorbing: !_finished,
-          child: ExcludeSemantics(
-            excluding: !_finished,
-            child: widget.child,
-          ),
+          child: ExcludeSemantics(excluding: !_finished, child: widget.child),
         ),
         if (!_finished)
           Positioned.fill(
@@ -107,32 +104,32 @@ class _BilFeatureEntrySplash extends StatelessWidget {
         Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
     final data = switch (kind) {
       BilFeatureEntryKind.recipes => (
-          icon: BilSemanticIconKind.recipes,
-          title: arabic ? 'وصفات BIL' : 'BIL Recipes',
-          subtitle: arabic
-              ? 'وصفات موثوقة، مرتبة لتصل لما يناسبك بسرعة'
-              : 'Trusted recipes, organized for fast discovery',
-          glow: const Color(0xFFF0B45B),
-          field: const Color(0xFF40240D),
-        ),
+        icon: BilSemanticIconKind.recipes,
+        title: arabic ? 'وصفات BIL' : 'BIL Recipes',
+        subtitle: arabic
+            ? 'وصفات موثوقة، مرتبة لتصل لما يناسبك بسرعة'
+            : 'Trusted recipes, organized for fast discovery',
+        glow: const Color(0xFFF0B45B),
+        field: const Color(0xFF40240D),
+      ),
       BilFeatureEntryKind.videos => (
-          icon: BilSemanticIconKind.exercise,
-          title: arabic ? 'فيديوهات BIL' : 'BIL Videos',
-          subtitle: arabic
-              ? 'تدريب مرئي واضح من مكتبتك الموثوقة'
-              : 'Clear visual training from your trusted library',
-          glow: const Color(0xFF64D8FF),
-          field: const Color(0xFF12394E),
-        ),
+        icon: BilSemanticIconKind.exercise,
+        title: arabic ? 'فيديوهات BIL' : 'BIL Videos',
+        subtitle: arabic
+            ? 'تدريب مرئي واضح من مكتبتك الموثوقة'
+            : 'Clear visual training from your trusted library',
+        glow: const Color(0xFF64D8FF),
+        field: const Color(0xFF12394E),
+      ),
       BilFeatureEntryKind.sleep => (
-          icon: BilSemanticIconKind.sleep,
-          title: arabic ? 'ذكاء النوم' : 'Sleep Intelligence',
-          subtitle: arabic
-              ? 'افهم نومك من السجلات والقياسات الحقيقية'
-              : 'Understand sleep from your real records and measurements',
-          glow: const Color(0xFF9D91FF),
-          field: const Color(0xFF29235B),
-        ),
+        icon: BilSemanticIconKind.sleep,
+        title: arabic ? 'ذكاء النوم' : 'Sleep Intelligence',
+        subtitle: arabic
+            ? 'افهم نومك من السجلات والقياسات الحقيقية'
+            : 'Understand sleep from your real records and measurements',
+        glow: const Color(0xFF9D91FF),
+        field: const Color(0xFF29235B),
+      ),
     };
 
     return Directionality(

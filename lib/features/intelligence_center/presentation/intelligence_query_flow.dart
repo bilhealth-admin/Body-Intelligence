@@ -594,10 +594,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         points: [
           BilPremiumAiConsentPoint(
             icon: Icons.tune_rounded,
-            title: tr(
-              'Only the context you choose',
-              'فقط السياق الذي تختاره',
-            ),
+            title: tr('Only the context you choose', 'فقط السياق الذي تختاره'),
             body: tr(
               'Your question; selected weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns.',
               'سؤالك؛ وما تختاره من الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 رسالة.',

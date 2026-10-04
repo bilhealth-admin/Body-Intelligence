@@ -112,9 +112,7 @@ class _DashboardLuxeIconBadge extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(size * .31),
-        border: Border.all(
-          color: accent.withValues(alpha: active ? .48 : .25),
-        ),
+        border: Border.all(color: accent.withValues(alpha: active ? .48 : .25)),
         boxShadow: active
             ? [
                 BoxShadow(

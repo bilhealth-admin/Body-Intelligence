@@ -406,58 +406,60 @@ class _DashboardPreferencesPageState
                               return _DashboardPreferenceSurface(
                                 active: visible,
                                 child: SwitchListTile.adaptive(
-
-                                key: Key('dashboard-section-${item.$1}'),
-                                contentPadding:
-                                    const EdgeInsetsDirectional.fromSTEB(
-                                      12,
-                                      6,
-                                      12,
-                                      6,
-                                    ),
-                                horizontalTitleGap: 12,
-                                minLeadingWidth: 0,
-                                minTileHeight: 64,
-                                secondary: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    _DashboardLuxeIconBadge(
-                                      kind: _dashboardSectionIconKind(item.$1),
-                                      active: visible,
-                                      size: 36,
-                                      iconSize: 19,
-                                    ),
-                                    if (_savingSection == item.$1)
-                                      SizedBox.square(
-                                        key: Key(
-                                          'dashboard-section-${item.$1}-saving',
-                                        ),
-                                        dimension: 30,
-                                        child: const CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                  key: Key('dashboard-section-${item.$1}'),
+                                  contentPadding:
+                                      const EdgeInsetsDirectional.fromSTEB(
+                                        12,
+                                        6,
+                                        12,
+                                        6,
                                       ),
-                                  ],
-                                ),
-                                title: Text(
-                                  _sectionCopy(context, item.$3, item.$4),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
+                                  minTileHeight: 64,
+                                  secondary: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      _DashboardLuxeIconBadge(
+                                        kind: _dashboardSectionIconKind(
+                                          item.$1,
+                                        ),
+                                        active: visible,
+                                        size: 36,
+                                        iconSize: 19,
+                                      ),
+                                      if (_savingSection == item.$1)
+                                        SizedBox.square(
+                                          key: Key(
+                                            'dashboard-section-${item.$1}-saving',
+                                          ),
+                                          dimension: 30,
+                                          child:
+                                              const CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                        ),
+                                    ],
                                   ),
-                                ),
-                                value: visible,
-                                onChanged:
-                                    _savingLayout ||
-                                        (state.isLoading &&
-                                            cachedVisible == null)
-                                    ? null
-                                    : (value) => _setSectionVisibility(
-                                        context,
-                                        ref,
-                                        item.$1,
-                                        value,
-                                      ),
+                                  title: Text(
+                                    _sectionCopy(context, item.$3, item.$4),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  value: visible,
+                                  onChanged:
+                                      _savingLayout ||
+                                          (state.isLoading &&
+                                              cachedVisible == null)
+                                      ? null
+                                      : (value) => _setSectionVisibility(
+                                          context,
+                                          ref,
+                                          item.$1,
+                                          value,
+                                        ),
                                 ),
                               );
                             },
