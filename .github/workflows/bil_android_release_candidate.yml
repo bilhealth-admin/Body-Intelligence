@@ -16,6 +16,16 @@ on:
         required: true
         type: boolean
         default: true
+      reuse_sealed_android_32:
+        description: Upload ONLY the already signed build32 from run37229040573; never rebuild
+        required: true
+        type: boolean
+        default: false
+      upload_only_owner_state_checked:
+        description: Owner freshly checked pending Play changes and review state for upload-only recovery
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -28,6 +38,7 @@ env:
 
 jobs:
   signed-android-aab:
+    if: ${{ !inputs.reuse_sealed_android_32 }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -482,3 +493,102 @@ jobs:
         if: always()
         shell: bash
         run: rm -f android/app/upload-keystore.jks android/key.properties
+
+  upload-only-sealed-android-32:
+    if: ${{ inputs.reuse_sealed_android_32 }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Require explicit sealed-artifact recovery and fresh owner state check
+        shell: bash
+        env:
+          OWNER_STATE_CHECKED: ${{ inputs.upload_only_owner_state_checked }}
+          NATIVE_GATES_REQUIRED: ${{ inputs.run_native_crypto_checks }}
+        run: |
+          set -euo pipefail
+          test "$OWNER_STATE_CHECKED" = true
+          test "$NATIVE_GATES_REQUIRED" = true
+          test "$BIL_STORE_QA_BUILD_NUMBER" = 32
+          test "$BIL_STORE_QA_MANIFEST_SHA256" = 5e16a9cbe08884aad1fceeb16a269d7fc92a0e6310dc2f2e0fc4cec5d360fada
+
+      - name: Checkout upload controller only; no app checkout or build
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.sha }}
+          path: control
+          persist-credentials: false
+
+      - name: Verify original sealed artifact identity and all successful native build gates
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/runs/37229040573 > original-run.json
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/jobs/111514615723 > original-job.json
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/11313338798 > original-artifact.json
+          python3 - <<'PY'
+          import json,pathlib
+          run=json.loads(pathlib.Path('original-run.json').read_text())
+          job=json.loads(pathlib.Path('original-job.json').read_text())
+          artifact=json.loads(pathlib.Path('original-artifact.json').read_text())
+          controller='5f14ba8358ffe3061cc6300b988ca4075e8afe7f'
+          assert run['id']==37229040573 and run['head_sha']==controller
+          assert run['repository']['full_name']=='bilhealth-admin/Body-Intelligence'
+          assert run['head_repository']['full_name']=='bilhealth-admin/Body-Intelligence'
+          assert run['status']=='completed' and run['conclusion']=='failure'
+          assert job['id']==111514615723 and job['run_id']==run['id'] and job['head_sha']==controller
+          failures=[s['name'] for s in job['steps'] if s['conclusion']!='success']
+          assert failures==['Upload exact verified AAB to Google Play testing only'], failures
+          for name in ('Run native AES-GCM gate on Android emulator','Build signed Android App Bundle',
+                       'Verify final AAB SDK, optional hardware, 16 KB packaging, and ELF alignment',
+                       'Capture release evidence','Reject forbidden bundled crypto implementations in signed AAB',
+                       'Upload signed release candidate'):
+              matching=[s for s in job['steps'] if s['name']==name]
+              assert len(matching)==1 and matching[0]['conclusion']=='success', name
+          assert artifact['id']==11313338798 and artifact['expired'] is False
+          assert artifact['name']=='bil-android-store-qa-aab-32-3f0085e6-'+controller
+          assert artifact['size_in_bytes']==182398159
+          assert artifact['digest']=='sha256:a7cd8ec1ee310e027886359179db3134dc0b0abb4b8c6e25e4849a3eecf97603'
+          assert artifact['workflow_run']['id']==run['id'] and artifact['workflow_run']['head_sha']==controller
+          print('ORIGINAL_SIGNED_BUILD_AND_NATIVE_GATES=VERIFIED_NO_RERUN')
+          PY
+
+      - name: Download the exact sealed build32 artifact; no recompilation
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: 11313338798
+          run-id: 37229040573
+          github-token: ${{ github.token }}
+          repository: bilhealth-admin/Body-Intelligence
+          path: sealed
+          merge-multiple: true
+
+      - name: Run only the changed upload-controller contract tests
+        working-directory: control
+        run: python3 -m unittest tool.release.test_store_qa_play_upload -v
+
+      - name: Upload the identical verified signed build32 with no review or production rollout
+        shell: bash
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+        run: |
+          set -euo pipefail
+          python3 control/tool/release/store_qa_play_upload.py \
+            --manifest control/docs/release/BIL_STORE_QA_CANDIDATE_2026-10-04.json \
+            --sealed-artifact-root sealed \
+            --owner-publishing-state-checked \
+            | tee BIL-store-qa-play-upload-only.txt
+
+      - name: Preserve upload-only exact-artifact receipt even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android32-upload-only-receipt-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            BIL-store-qa-play-upload-only.txt
+            original-run.json
+            original-job.json
+            original-artifact.json

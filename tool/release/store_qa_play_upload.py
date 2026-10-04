@@ -37,6 +37,20 @@ COMMIT_QUERY = "changesNotSentForReview=true&changesInReviewBehavior=ERROR_IF_IN
 SA_ENV = "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64"
 SOURCE_SHA = "3f0085e6e6686f2e87e9cf14789e9e578ea64159"
 MANIFEST_DIGEST_ENV = "BIL_STORE_QA_MANIFEST_SHA256"
+OBSERVED_NO_REVIEW_VALIDATION_ERROR = {
+    "http_code": 400, "code": 400, "status": "INVALID_ARGUMENT",
+    "message": "Changes cannot be sent for review automatically. Please set the query "
+               "parameter changesNotSentForReview to true. Once committed, the changes "
+               "in this edit can be sent for review from the Google Play Console UI.",
+}
+SEALED_ANDROID32 = {
+    "run_id": 37229040573, "job_id": 111514615723, "artifact_id": 11313338798,
+    "archive_digest": "sha256:a7cd8ec1ee310e027886359179db3134dc0b0abb4b8c6e25e4849a3eecf97603",
+    "controller_sha": "5f14ba8358ffe3061cc6300b988ca4075e8afe7f",
+    "manifest_sha256": "5e16a9cbe08884aad1fceeb16a269d7fc92a0e6310dc2f2e0fc4cec5d360fada",
+    "aab_sha256": "9819aabf66c0ed86d1fc3a88e583158b707b50282113fb2f2e38cfaa4f8aa11a",
+    "aab_byte_length": 183645353,
+}
 
 
 class SafeFailure(Exception):
@@ -281,6 +295,68 @@ def inspect_aab(path: Path) -> dict:
         raise SafeFailure("SIGNED_AAB_REFERENCE_INVALID") from None
 
 
+def verify_sealed_android32(root: Path) -> tuple[Path, dict]:
+    """Only the already signed/verified exact build32 may use upload recovery."""
+    root = root.resolve()
+    if not root.is_dir():
+        raise SafeFailure("SEALED_ANDROID32_ARTIFACT_ROOT_REQUIRED")
+
+    def receipt(name: str) -> Path:
+        matches = list(root.rglob(name))
+        if (len(matches) != 1 or not matches[0].is_file() or matches[0].is_symlink()
+                or root not in matches[0].resolve().parents):
+            raise SafeFailure("SEALED_ANDROID32_RECEIPT_MISSING_OR_DUPLICATED")
+        return matches[0]
+
+    def raw(name: str) -> bytes:
+        path = receipt(name)
+        if path.stat().st_size > 2_097_152:
+            raise SafeFailure("SEALED_ANDROID32_RECEIPT_TOO_LARGE")
+        return path.read_bytes()
+
+    aab = receipt("app-release.aab")
+    artifact = inspect_aab(aab)
+    if artifact != {"byte_length": SEALED_ANDROID32["aab_byte_length"],
+                    "sha256": SEALED_ANDROID32["aab_sha256"]}:
+        raise SafeFailure("SEALED_ANDROID32_AAB_IDENTITY_MISMATCH")
+    text = {
+        "BIL-source-head.txt": SOURCE_SHA,
+        "BIL-control-head.txt": SEALED_ANDROID32["controller_sha"],
+        "BIL-build-number.txt": "BUILD_NUMBER=32",
+        "BIL-android-aab.size": str(SEALED_ANDROID32["aab_byte_length"]),
+        "BIL-android-upload-certificate.txt": "ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH",
+    }
+    if any(raw(name).decode().strip() != expected for name, expected in text.items()):
+        raise SafeFailure("SEALED_ANDROID32_SOURCE_VERSION_OR_CERTIFICATE_MISMATCH")
+    checksum = raw("BIL-android-aab.sha256").decode().strip().split(maxsplit=1)
+    if (len(checksum) != 2 or checksum[0] != SEALED_ANDROID32["aab_sha256"]
+            or checksum[1] != "build/app/outputs/bundle/release/app-release.aab"):
+        raise SafeFailure("SEALED_ANDROID32_CHECKSUM_RECEIPT_MISMATCH")
+    if (hashlib.sha256(raw("BIL-store-qa-manifest.json")).hexdigest()
+            != SEALED_ANDROID32["manifest_sha256"]
+            or not raw("BIL-android-signature.txt").strip()):
+        raise SafeFailure("SEALED_ANDROID32_MANIFEST_OR_SIGNATURE_MISMATCH")
+    version = decode_json(raw("BIL-android-artifact-version.json"))
+    if version != {"package": PACKAGE, "version_name": "1.0.0", "version_code": "32"}:
+        raise SafeFailure("SEALED_ANDROID32_NATIVE_VERSION_MISMATCH")
+    checkpoint = decode_json(raw("BIL-store-qa-source-android.json"))
+    if checkpoint != {
+        "source_sha": SOURCE_SHA, "controller_sha": SEALED_ANDROID32["controller_sha"],
+        "platform": "android", "build_number": 32, "generated_native_configuration": [],
+        "manifest_sha256": SEALED_ANDROID32["manifest_sha256"], "phase": "STORE_QA_ONLY",
+        "configuration_gate": "PASS", "original_production_gate": "FAIL",
+        "unresolved_review_count": 8,
+    }:
+        raise SafeFailure("SEALED_ANDROID32_CONFIGURATION_CHECKPOINT_MISMATCH")
+    gate_lines = raw("BIL-android-gate-status.txt").decode().splitlines()
+    for required in ("NATIVE_CRYPTO_GATE=PASS", "UPSTREAM_EXACT_SOURCE_QA=VERIFIED",
+                     "RELEASE_PHASE=STORE_QA_ONLY", "PUBLIC_RELEASE_READY=NO"):
+        if gate_lines.count(required) != 1:
+            raise SafeFailure("SEALED_ANDROID32_NATIVE_GATE_RECEIPT_MISMATCH")
+    return aab, dict(SEALED_ANDROID32, source_sha=SOURCE_SHA,
+                     version="1.0.0", build_number=32, rebuild_performed=False)
+
+
 class PlayClient:
     def __init__(self, token: str, transport: Transport):
         self.token = token
@@ -495,7 +571,19 @@ def run(manifest: dict, aab: Path | None, client: PlayClient, *, preflight: bool
                 staged = snapshot(client, edit_id)
                 verify_preserved(before, staged, update, android, artifact)
                 report["step"] = "VALIDATE_OWN_EDIT"
-                client.json("POST", root + ":validate")
+                try:
+                    client.json("POST", root + ":validate")
+                    report["precommit_validation"] = "SUCCESS"
+                except SafeFailure as error:
+                    # Live Discovery: validate has no no-review query parameter.
+                    # Official Edits workflow: commit itself performs validation.
+                    # Only this exact observed contradiction delegates validation
+                    # to the unchanged, protected no-review commit below.
+                    if (error.code != "GOOGLE_HTTP_400"
+                            or error.google_api_error != OBSERVED_NO_REVIEW_VALIDATION_ERROR):
+                        raise
+                    report["precommit_validation"] = "NO_REVIEW_PARAMETER_UNSUPPORTED_USE_PROTECTED_COMMIT"
+                    report["precommit_validation_api_error"] = error.google_api_error
                 report["commit_attempted"] = True
                 report["committed"] = None  # Never assert false for an ambiguous write.
                 report["step"] = "COMMIT_NO_REVIEW"
@@ -524,6 +612,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--aab")
+    parser.add_argument("--sealed-artifact-root",
+                        help="Upload-only recovery of the hard-pinned already signed build32")
     parser.add_argument("--credentials", help="Existing service-account JSON reference; values never logged")
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--owner-publishing-state-checked", action="store_true",
@@ -531,13 +621,23 @@ def main(argv: list[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     try:
         manifest = load_manifest(Path(arguments.manifest), os.environ)
-        if not arguments.preflight and (not arguments.aab or not arguments.owner_publishing_state_checked):
+        sealed = None
+        aab = Path(arguments.aab) if arguments.aab else None
+        if arguments.sealed_artifact_root:
+            if arguments.preflight or arguments.aab or manifest["android"]["build_number"] != 32:
+                raise SafeFailure("SEALED_ANDROID32_RECOVERY_BOUNDARY_REJECTED")
+            aab, sealed = verify_sealed_android32(Path(arguments.sealed_artifact_root))
+            if os.environ.get(MANIFEST_DIGEST_ENV) != SEALED_ANDROID32["manifest_sha256"]:
+                raise SafeFailure("SEALED_ANDROID32_MANIFEST_IDENTITY_MISMATCH")
+        if not arguments.preflight and (aab is None or not arguments.owner_publishing_state_checked):
             raise SafeFailure("UPLOAD_REQUIRES_AAB_AND_OWNER_PUBLISHING_STATE_CHECK")
         transport = Transport()
         client = PlayClient(authenticate(load_credentials(arguments.credentials), transport), transport)
-        report = run(manifest, Path(arguments.aab) if arguments.aab else None, client,
+        report = run(manifest, aab, client,
                      preflight=arguments.preflight,
                      publishing_state_checked=arguments.owner_publishing_state_checked)
+        if sealed:
+            report["sealed_artifact_recovery"] = sealed
         print(json.dumps(report, sort_keys=True))
         return 0
     except SafeFailure as error:

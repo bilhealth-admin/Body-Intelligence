@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import subprocess
 import tempfile
+import textwrap
 import unittest
 from unittest import mock
 
@@ -642,6 +643,63 @@ class StoreQaControlContractTest(unittest.TestCase):
             qa.upload_play(self.manifest, self.manifest["android"], "candidate.aab", MANIFEST,
                            self.environment("android"), HERE, runner)
         runner.assert_not_called()
+
+
+class IosAdMobSourceContractTests(unittest.TestCase):
+    """Source/controller fixtures only, not signed/native AdMob proof."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.workflow = (HERE.parent.parent / ".github/workflows/bil_ios_signed_release.yml").read_text()
+        step = cls.workflow.split(
+            "      - name: Preserve production AdMob plugin and validate configuration\n", 1
+        )[1].split("      - name: Configure manual App Store distribution signing\n", 1)[0]
+        cls.assertion = textwrap.dedent(
+            step.split("          python3 - <<'PY'\n", 1)[1].split("          PY\n", 1)[0]
+        )
+        cls.immutable_fixture = subprocess.run(
+            ["git", "show", qa.SOURCE_SHA + ":ios/Runner/Info.plist"],
+            cwd=HERE.parent.parent, check=True, capture_output=True,
+        ).stdout
+
+    def run_assertion(self, fixture):
+        with mock.patch.object(Path, "read_bytes", return_value=fixture):
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                exec(compile(self.assertion, "iOS AdMob source workflow assertion", "exec"), {})
+        return output.getvalue()
+
+    def test_exact_immutable_source_succeeds_despite_indented_key(self):
+        self.assertIn(b"\t<key>GADApplicationIdentifier</key>", self.immutable_fixture)
+        self.assertNotIn(b"<key>GADApplicationIdentifier</key>", self.immutable_fixture.splitlines())
+        self.assertEqual(self.run_assertion(self.immutable_fixture),
+                         "ADMOB_IOS_SOURCE_PLACEHOLDER_GATE=PASS\n")
+
+    def test_xml_indentation_does_not_change_semantic_binding(self):
+        self.assertEqual(self.run_assertion(self.immutable_fixture.replace(b"\t", b"    ")),
+                         "ADMOB_IOS_SOURCE_PLACEHOLDER_GATE=PASS\n")
+
+    def test_missing_duplicate_and_wrong_bindings_fail_closed(self):
+        key = b"<key>GADApplicationIdentifier</key>"
+        binding = b"$(BIL_ADMOB_IOS_APP_ID)"
+        fixtures = {
+            "missing": self.immutable_fixture.replace(key, b"<key>NotAdMob</key>"),
+            "duplicate": self.immutable_fixture.replace(
+                key, key + b"<string>" + binding + b"</string>" + key, 1),
+            "resolved_id_instead_of_binding": self.immutable_fixture.replace(
+                binding, b"ca-app-pub-9688223318643509~4090504347"),
+            "wrong_binding": self.immutable_fixture.replace(binding, b"$(WRONG_ADMOB_ID)"),
+            "binding_whitespace": self.immutable_fixture.replace(binding, binding + b" "),
+        }
+        for case, fixture in fixtures.items():
+            with self.subTest(case=case), self.assertRaises(SystemExit):
+                self.run_assertion(fixture)
+
+    def test_native_and_final_signed_artifact_gates_remain_required(self):
+        self.assertIn("test \"$RUN_NATIVE_CRYPTO_CHECKS\" = true", self.workflow)
+        self.assertIn("integration_test/system_crypto_bridge_integration_test.dart", self.workflow)
+        self.assertIn('--ios-info-plist "$SIGNED_APP/Info.plist"', self.workflow)
+        self.assertIn("grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m",
+                      self.workflow)
 
 
 if __name__ == "__main__":

@@ -56,6 +56,7 @@ class FakePlay:
         self.upload_override = None
         self.upload_failure = None
         self.commit_failure = None
+        self.validate_failure = None
         self.corrupt_non_internal_on_readback = False
         self.normalize_internal_name_on_readback = False
         self.corrupt_internal_on_readback = None
@@ -92,6 +93,8 @@ class FakePlay:
             state["tracks"] = [body if x["track"] == "internal" else x for x in state["tracks"]]
             return copy.deepcopy(body)
         if ":validate" in resource:
+            if self.validate_failure:
+                raise self.validate_failure
             return {"id": edit_id}
         if ":commit" in resource:
             if self.commit_failure:
@@ -159,6 +162,121 @@ class StoreQaPlayUploadTest(unittest.TestCase):
         report = self.run_upload(manifest("draft"))
         self.assertEqual("NOT_INSTALLABLE_DRAFT", report["installation_boundary"])
         self.assertEqual(old, self.client.live["tracks"][0]["releases"][0])
+
+    def test_exact_observed_no_review_validate_error_delegates_to_protected_validating_commit(self):
+        self.client.validate_failure = upload.SafeFailure(
+            "GOOGLE_HTTP_400", google_api_error=copy.deepcopy(upload.OBSERVED_NO_REVIEW_VALIDATION_ERROR))
+        report = self.run_upload()
+        self.assertTrue(report["committed"])
+        self.assertEqual("NO_REVIEW_PARAMETER_UNSUPPORTED_USE_PROTECTED_COMMIT", report["precommit_validation"])
+        self.assertEqual(upload.OBSERVED_NO_REVIEW_VALIDATION_ERROR, report["precommit_validation_api_error"])
+        commits = [path for _, path, _ in self.client.operations if ":commit" in path]
+        self.assertEqual([f"/applications/{upload.PACKAGE}/edits/edit1:commit?" + upload.COMMIT_QUERY], commits)
+        self.assertFalse(report["native_billing_proved"])
+        self.assertFalse(report["public_release_ready"])
+        self.assertEqual(1, self.client.upload_count)
+
+    def test_every_other_precommit_validation_error_aborts_without_commit(self):
+        exact = upload.OBSERVED_NO_REVIEW_VALIDATION_ERROR
+        cases = [("GOOGLE_HTTP_400", None), ("GOOGLE_HTTP_403", exact),
+                 ("GOOGLE_WRITE_OUTCOME_UNKNOWN", exact)]
+        for key, value in (("http_code", 403), ("code", 403), ("status", "FAILED_PRECONDITION"),
+                           ("message", exact["message"] + " Other validation failure."),
+                           ("reasons", ["CHANGES_ALREADY_IN_REVIEW"])):
+            changed = dict(exact, **{key: value})
+            cases.append(("GOOGLE_HTTP_400", changed))
+        for code, diagnostic in cases:
+            with self.subTest(code=code, diagnostic=diagnostic):
+                self.client = FakePlay()
+                self.client.validate_failure = upload.SafeFailure(code, google_api_error=diagnostic)
+                report = self.assert_rejected(code)
+                self.assertEqual("VALIDATE_OWN_EDIT", report["step"])
+                self.assertFalse(report["commit_attempted"])
+                self.assertFalse(any(":commit" in path for _, path, _ in self.client.operations))
+                self.assertEqual(["edit1"], self.client.deleted)
+
+    def test_no_review_validation_fallback_never_ignores_commit_error_or_retries(self):
+        self.client.validate_failure = upload.SafeFailure(
+            "GOOGLE_HTTP_400", google_api_error=copy.deepcopy(upload.OBSERVED_NO_REVIEW_VALIDATION_ERROR))
+        self.client.commit_failure = "GOOGLE_HTTP_400"
+        report = self.assert_rejected("GOOGLE_HTTP_400")
+        self.assertTrue(report["commit_attempted"])
+        self.assertIsNone(report["committed"])
+        self.assertEqual("COMMIT_NO_REVIEW", report["step"])
+        self.assertEqual(1, len([path for _, path, _ in self.client.operations if ":commit" in path]))
+        self.assertEqual(1, self.client.upload_count)
+
+    def make_sealed_receipt_fixture(self):
+        """Receipt shape only: actual sealed AAB hash is separately mocked."""
+        root = Path(self.temporary.name) / "sealed"
+        root.mkdir()
+        (root / "app-release.aab").write_bytes(self.aab.read_bytes())
+        text = {
+            "BIL-source-head.txt": upload.SOURCE_SHA,
+            "BIL-control-head.txt": upload.SEALED_ANDROID32["controller_sha"],
+            "BIL-build-number.txt": "BUILD_NUMBER=32",
+            "BIL-android-aab.size": str(upload.SEALED_ANDROID32["aab_byte_length"]),
+            "BIL-android-upload-certificate.txt": "ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH",
+            "BIL-android-aab.sha256": upload.SEALED_ANDROID32["aab_sha256"] + "  build/app/outputs/bundle/release/app-release.aab",
+            "BIL-android-signature.txt": "MOCK_SIGNATURE_RECEIPT_NOT_NATIVE_PROOF",
+            "BIL-android-gate-status.txt": "NATIVE_CRYPTO_GATE=PASS\nUPSTREAM_EXACT_SOURCE_QA=VERIFIED\nRELEASE_PHASE=STORE_QA_ONLY\nPUBLIC_RELEASE_READY=NO",
+        }
+        for name, value in text.items():
+            (root / name).write_text(value + "\n", encoding="utf-8")
+        repository = Path(__file__).resolve().parents[2]
+        manifest_bytes = (repository / "docs/release/BIL_STORE_QA_CANDIDATE_2026-10-04.json").read_bytes()
+        self.assertEqual(upload.SEALED_ANDROID32["manifest_sha256"], hashlib.sha256(manifest_bytes).hexdigest())
+        (root / "BIL-store-qa-manifest.json").write_bytes(manifest_bytes)
+        (root / "BIL-android-artifact-version.json").write_text(json.dumps(
+            {"package": upload.PACKAGE, "version_name": "1.0.0", "version_code": "32"}))
+        checkpoint = {
+            "source_sha": upload.SOURCE_SHA, "controller_sha": upload.SEALED_ANDROID32["controller_sha"],
+            "platform": "android", "build_number": 32, "generated_native_configuration": [],
+            "manifest_sha256": upload.SEALED_ANDROID32["manifest_sha256"], "phase": "STORE_QA_ONLY",
+            "configuration_gate": "PASS", "original_production_gate": "FAIL", "unresolved_review_count": 8,
+        }
+        (root / "BIL-store-qa-source-android.json").write_text(json.dumps(checkpoint))
+        return root
+
+    def test_sealed_recovery_receipts_bind_original_source_controller_hash_and_build(self):
+        root = self.make_sealed_receipt_fixture()
+        expected = {"byte_length": upload.SEALED_ANDROID32["aab_byte_length"],
+                    "sha256": upload.SEALED_ANDROID32["aab_sha256"]}
+        with mock.patch.object(upload, "inspect_aab", return_value=expected):
+            aab, receipt = upload.verify_sealed_android32(root)
+        self.assertEqual((root / "app-release.aab").resolve(), aab)
+        self.assertEqual(37229040573, receipt["run_id"])
+        self.assertEqual(11313338798, receipt["artifact_id"])
+        self.assertEqual(upload.SOURCE_SHA, receipt["source_sha"])
+        self.assertEqual(32, receipt["build_number"])
+        self.assertFalse(receipt["rebuild_performed"])
+        # Real hashing must reject this tiny fixture; it is not native proof.
+        with self.assertRaisesRegex(upload.SafeFailure, "SEALED_ANDROID32_AAB_IDENTITY_MISMATCH"):
+            upload.verify_sealed_android32(root)
+
+    def test_sealed_recovery_rejects_changed_receipt_duplicate_file_and_wrong_native_gate(self):
+        root = self.make_sealed_receipt_fixture()
+        expected = {"byte_length": upload.SEALED_ANDROID32["aab_byte_length"],
+                    "sha256": upload.SEALED_ANDROID32["aab_sha256"]}
+        for name, changed, code in (
+            ("BIL-control-head.txt", "a" * 40, "SEALED_ANDROID32_SOURCE_VERSION_OR_CERTIFICATE_MISMATCH"),
+            ("BIL-build-number.txt", "BUILD_NUMBER=31", "SEALED_ANDROID32_SOURCE_VERSION_OR_CERTIFICATE_MISMATCH"),
+            ("BIL-android-gate-status.txt", "NATIVE_CRYPTO_GATE=NOT_RUN_OWNER_WAIVED", "SEALED_ANDROID32_NATIVE_GATE_RECEIPT_MISMATCH"),
+            ("BIL-store-qa-source-android.json", "{}", "SEALED_ANDROID32_CONFIGURATION_CHECKPOINT_MISMATCH"),
+            ("BIL-android-artifact-version.json", "{}", "SEALED_ANDROID32_NATIVE_VERSION_MISMATCH"),
+        ):
+            with self.subTest(name=name):
+                original = (root / name).read_bytes()
+                (root / name).write_text(changed)
+                with mock.patch.object(upload, "inspect_aab", return_value=expected), \
+                        self.assertRaisesRegex(upload.SafeFailure, code):
+                    upload.verify_sealed_android32(root)
+                (root / name).write_bytes(original)
+        duplicate = root / "duplicate"
+        duplicate.mkdir()
+        (duplicate / "app-release.aab").write_bytes(self.aab.read_bytes())
+        with self.assertRaisesRegex(upload.SafeFailure, "SEALED_ANDROID32_RECEIPT_MISSING_OR_DUPLICATED"):
+            upload.verify_sealed_android32(root)
 
     def test_preflight_only_lists_all_numbers_and_deletes_its_own_edit(self):
         self.client.live["apks"] = [{"versionCode": 40}]

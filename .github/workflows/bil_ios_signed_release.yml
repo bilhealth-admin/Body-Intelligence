@@ -360,8 +360,19 @@ jobs:
           printf '%s\n' \
             'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
             > ios/Flutter/ReleaseAdMob.xcconfig
-          grep -Fqx '<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
-          grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
+          python3 - <<'PY'
+          import pathlib
+          import plistlib
+          import xml.etree.ElementTree as element_tree
+
+          source = pathlib.Path('ios/Runner/Info.plist').read_bytes()
+          keys = element_tree.fromstring(source).findall('./dict/key')
+          if sum(key.text == 'GADApplicationIdentifier' for key in keys) != 1:
+              raise SystemExit('iOS source must contain exactly one AdMob application ID key.')
+          if plistlib.loads(source).get('GADApplicationIdentifier') != '$(BIL_ADMOB_IOS_APP_ID)':
+              raise SystemExit('iOS source must retain the exact production AdMob build-setting binding.')
+          print('ADMOB_IOS_SOURCE_PLACEHOLDER_GATE=PASS')
+          PY
           grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
           grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
 
