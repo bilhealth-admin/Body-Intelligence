@@ -1,0 +1,64 @@
+name: BIL store lifecycle adversarial contracts
+on:
+  push:
+    branches: [work/community-reference-parity-20261003]
+    paths:
+      - supabase/functions/verify-store-purchase/**
+      - .github/workflows/bil_store_lifecycle_adversarial_contracts.yml
+  pull_request:
+    paths:
+      - supabase/functions/verify-store-purchase/**
+      - .github/workflows/bil_store_lifecycle_adversarial_contracts.yml
+permissions:
+  contents: read
+concurrency:
+  group: store-lifecycle-adversarial-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  remaining-store-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
+        with:
+          deno-version: v2.9.7
+      - name: Cover lifecycle contracts outside the existing prebuild subset
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-store-lifecycle"
+          mkdir -p "$OUT"
+          git rev-parse HEAD > "$OUT/source-sha.txt"
+          deno --version > "$OUT/toolchain.txt"
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
+          test -z "${APPLE_PRIVATE_KEY:-}"
+          test -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}"
+          cd supabase/functions
+          deno test --allow-env --allow-read --frozen --lock=deno.lock \
+            verify-store-purchase/apple_certificate_verifier_test.ts \
+            verify-store-purchase/apple_notification_handler_test.ts \
+            verify-store-purchase/apple_purchase_reconciliation_test.ts \
+            verify-store-purchase/apple_refund_trial_matrix_test.ts \
+            verify-store-purchase/apple_subscription_selection_test.ts \
+            verify-store-purchase/google_play_notification_test.ts \
+            verify-store-purchase/store_credentials_test.ts \
+            verify-store-purchase/store_environment_test.ts \
+            verify-store-purchase/store_ownership_persistence_test.ts \
+            verify-store-purchase/store_persistence_payload_test.ts \
+            verify-store-purchase/store_server_rpc_boundary_test.ts \
+            2>&1 | tee "$OUT/contracts.log"
+          git diff --exit-code
+      - name: Record boundaries without upgrading contract evidence to device proof
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/bil-store-lifecycle"
+          printf '%s\n' 'NO_APP_BUILD' 'NO_STORE_UPLOAD' 'NO_PRODUCTION_CREDENTIALS' 'TEST_RUNTIME_NETWORK_DENIED' 'MOCKED_PROVIDER_AND_SQL_RESPONSES_ONLY' 'NOT_A_GENUINE_STORE_TRANSACTION' > "$RUNNER_TEMP/bil-store-lifecycle/boundary.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: store-lifecycle-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-store-lifecycle/
+          if-no-files-found: error
+          retention-days: 14

@@ -256,9 +256,11 @@ class _PremiumRouteGateContents extends ConsumerWidget {
       children: [
         KeyedSubtree(
           key: const ValueKey('premium-route-protected-content'),
-          child: AbsorbPointer(
-            absorbing: true,
-            child: ExcludeSemantics(child: child),
+          child: ExcludeFocus(
+            child: AbsorbPointer(
+              absorbing: true,
+              child: ExcludeSemantics(child: child),
+            ),
           ),
         ),
         Positioned.fill(child: _PremiumRouteGlassVeil(isDark: isDark)),
@@ -344,7 +346,9 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
       children: [
         KeyedSubtree(
           key: const ValueKey('premium-route-protected-content'),
-          child: AbsorbPointer(child: ExcludeSemantics(child: child)),
+          child: ExcludeFocus(
+            child: AbsorbPointer(child: ExcludeSemantics(child: child)),
+          ),
         ),
         Positioned.fill(
           child: ColoredBox(
