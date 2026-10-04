@@ -74,7 +74,7 @@ void main() {
         find.byKey(const Key('community-post-composer')),
         'Saved draft',
       );
-      await tester.pageBack();
+      await tester.tap(find.byKey(const Key('community-post-editor-close')));
       await tester.pumpAndSettle();
       expect(find.text('A saved community post'), findsOneWidget);
       await tester.tap(find.byKey(const Key('community-create-post')));
