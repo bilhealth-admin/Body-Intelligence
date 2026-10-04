@@ -714,17 +714,13 @@ void main() {
                     'community-post-comments-66666666-6666-4666-8666-666666666666',
                   ),
                 );
-                await tester.scrollUntilVisible(
-                  comments,
-                  180,
-                  scrollable: find
-                      .descendant(
-                        of: find.byKey(
-                          const PageStorageKey('community-feed-scroll-for_you'),
-                        ),
-                        matching: find.byType(Scrollable),
-                      )
-                      .first,
+                await tester.ensureVisible(comments);
+                await tester.pumpAndSettle();
+                final commentsRect = tester.getRect(comments);
+                expect(
+                  commentsRect.bottom,
+                  lessThanOrEqualTo(tester.view.physicalSize.height),
+                  reason: 'comment action must be on-screen before tap',
                 );
                 await tester.tap(comments);
                 await tester.pumpAndSettle();
