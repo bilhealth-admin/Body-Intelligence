@@ -305,6 +305,10 @@ void main() {
 
       expect(find.byKey(const Key('community-composer-title')), findsOneWidget);
       expect(
+        find.byKey(const Key('community-post-editor-close')),
+        findsOneWidget,
+      );
+      expect(
         find.byKey(const Key('community-composer-voice-input')),
         findsOneWidget,
       );
