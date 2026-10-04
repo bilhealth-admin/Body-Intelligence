@@ -8,11 +8,8 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-final class _AuditRewardsRepository extends CommunityRepository {
-  _AuditRewardsRepository(super.client);
-
+final class _AuditRewardsRepository implements CommunityRepository {
   @override
   Future<CommunityGoldBalance> loadGoldBalance() async =>
       const CommunityGoldBalance(balance: 50);
@@ -27,6 +24,11 @@ final class _AuditRewardsRepository extends CommunityRepository {
   @override
   Future<List<CommunityQuest>> loadCommunityQuests() async =>
       const <CommunityQuest>[];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnsupportedError(
+    'Unstubbed Rewards repository operation: ${invocation.memberName}',
+  );
 }
 
 double _contrast(Color foreground, Color background) {
@@ -54,12 +56,6 @@ void main() {
             tester.view.physicalSize = size;
             addTearDown(tester.view.resetDevicePixelRatio);
             addTearDown(tester.view.resetPhysicalSize);
-            final client = SupabaseClient(
-              'https://rewards-audit.invalid',
-              'synthetic-test-only',
-              authOptions: const AuthClientOptions(autoRefreshToken: false),
-            );
-            addTearDown(client.dispose);
             await tester.pumpWidget(
               MaterialApp(
                 theme: dark
@@ -81,7 +77,7 @@ void main() {
                   child: child!,
                 ),
                 home: CommunityRewardsPage(
-                  repository: _AuditRewardsRepository(client),
+                  repository: _AuditRewardsRepository(),
                 ),
               ),
             );
