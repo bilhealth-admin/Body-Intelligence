@@ -48,11 +48,8 @@ void main() {
     for (final dark in <bool>[false, true]) {
       for (final scale in <double>[1.0, 1.6, 2.0]) {
         for (final size in <Size>[const Size(320, 568), const Size(414, 896)]) {
-          final label = '${arabic ? 'ar' : 'en'} '
-              '${dark ? 'dark' : 'light'} $scale ${size.width}';
-          testWidgets('Rewards readable without clipping: $label', (
-            tester,
-          ) async {
+          final label = '$arabic/$dark/$scale/${size.width}';
+          testWidgets('Rewards contrast/layout: $label', (tester) async {
             tester.view.devicePixelRatio = 1;
             tester.view.physicalSize = size;
             addTearDown(tester.view.resetDevicePixelRatio);
