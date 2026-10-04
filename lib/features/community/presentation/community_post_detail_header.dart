@@ -6,6 +6,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
     required this.stats,
     required this.referenceMetadata,
     required this.authorProfile,
+    required this.authorMembershipTier,
     required this.followBusy,
     required this.viewCount,
     required this.liking,
@@ -23,6 +24,7 @@ class _CommunityPostDetailHeader extends StatelessWidget {
   final CommunityPostStats stats;
   final CommunityPostReferenceMetadata? referenceMetadata;
   final CommunityProfileOverview? authorProfile;
+  final String? authorMembershipTier;
   final bool followBusy;
   final int? viewCount;
   final bool liking;
@@ -62,6 +64,13 @@ class _CommunityPostDetailHeader extends StatelessWidget {
                         textDirection: TextDirection.ltr,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
+                    if (authorMembershipTier case final tier?) ...[
+                      const SizedBox(height: 4),
+                      _CommunityMembershipTierChip(
+                        tier: tier,
+                        compact: true,
+                      ),
+                    ],
                     Text(
                       '${MaterialLocalizations.of(context).formatShortDate(post.createdAt.toLocal())} · ${TimeOfDay.fromDateTime(post.createdAt.toLocal()).format(context)}',
                       style: Theme.of(context).textTheme.bodySmall,
