@@ -1,0 +1,93 @@
+name: BIL pre-build store and backend contracts
+on:
+  push:
+    branches: [staging/community-final-qa-20261003, fix/community-acceptance-notifications-20261003]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-prebuild-store-backend-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  backend-fault-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282
+        with:
+          deno-version: v2.9.7
+      - name: Verify exact backend contracts without live credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-prebuild-backend"
+          mkdir -p "$OUT"
+          git rev-parse HEAD > "$OUT/source-sha.txt"
+          deno --version > "$OUT/toolchain.txt"
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
+          test -z "${GOOGLE_GENERATIVE_AI_API_KEY:-}"
+          cd supabase/functions
+          deno test --allow-env --allow-read --allow-net --frozen --lock=deno.lock \
+            food-search/index_test.ts \
+            analyze-meal/consent_test.ts \
+            analyze-meal/providers/providers_test.ts \
+            app-attest/index_test.ts \
+            play-integrity/index_test.ts \
+            community-push-dispatch/server_test.ts \
+            push-provider-gateway/server_test.ts \
+            verify-store-purchase/apple_purchase_ownership_test.ts \
+            verify-store-purchase/google_account_binding_test.ts \
+            verify-store-purchase/apple_subscription_lifecycle_test.ts \
+            verify-store-purchase/google_play_subscription_lifecycle_test.ts \
+            verify-store-purchase/mobile_integrity_test.ts \
+            _shared/account_deletion_storage_test.ts \
+            2>&1 | tee "$OUT/contracts.log"
+          AI_COACH_LOCK="$RUNNER_TEMP/bil-prebuild-ai-coach-deno.lock"
+          python3 - "$AI_COACH_LOCK" <<'PY'
+          import json,pathlib,sys
+          lock=json.loads(pathlib.Path('deno.lock').read_text())
+          config=json.loads(pathlib.Path('ai-coach/deno.json').read_text())
+          dependencies=sorted(set(config.get('imports',{}).values()))
+          assert dependencies
+          assert all(value in lock.get('specifiers',{}) for value in dependencies)
+          lock['workspace']={'dependencies':dependencies}
+          pathlib.Path(sys.argv[1]).write_text(json.dumps(lock,indent=2)+'\n')
+          PY
+          cd ai-coach
+          deno test --allow-env --allow-read --allow-net --frozen --lock="$AI_COACH_LOCK" \
+            server_test.ts mobile_integrity_test.ts 2>&1 | tee "$OUT/ai-coach.log"
+          cd "$GITHUB_WORKSPACE"
+          git diff --exit-code
+          printf '%s\n' 'MOCKED_BACKEND_CONTRACTS_ONLY' 'NO_GENUINE_STORE_TRANSACTION' 'NO_APP_BUILD' 'NO_PRODUCTION_WRITES' > "$OUT/boundary.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-prebuild-backend-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-prebuild-backend/
+          if-no-files-found: error
+          retention-days: 14
+  store-get-only:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Read store catalogs and reviewer-field presence, never create an edit
+        shell: pwsh
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+        run: pwsh -NoProfile -File tool/prebuild/read_store_catalogs.ps1 -OutputDir "$env:RUNNER_TEMP/bil-prebuild-store"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-prebuild-store-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-prebuild-store/
+          if-no-files-found: error
+          retention-days: 14
