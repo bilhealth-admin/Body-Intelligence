@@ -24,6 +24,56 @@ jobs:
           cache: true
       - name: Resolve dependencies
         run: flutter pub get
+      - name: Repair missing visual fixture seam and lazy navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('test/features/community/community_polish_visual_test.dart')
+          text = path.read_text()
+          def replace_once(old, new, label):
+              global text
+              if new in text:
+                  return
+              if text.count(old) != 1:
+                  raise SystemExit(f'{label}: source changed; inspect before retrying')
+              text = text.replace(old, new, 1)
+          old = '  String get currentUserId => owner;\n'
+          new = old + '''  @override
+            Future<Map<String, String>> loadVisibleMembershipTiers(
+              List<String> userIds,
+            ) async => const <String, String>{};
+          '''.replace('\n  ', '\n')
+          replace_once(old, new, 'membership fixture')
+          old = '                await tester.ensureVisible(comments);\n'
+          new = '''                await tester.scrollUntilVisible(
+                            comments.hitTestable(),
+                            180,
+                            scrollable: find.descendant(
+                              of: find.byKey(
+                                const PageStorageKey('community-feed-scroll-for_you'),
+                              ),
+                              matching: find.byType(Scrollable),
+                            ).first,
+                          );
+          '''
+          replace_once(old, new, 'lazy comment navigation')
+          old = '                await tester.tap(comments);\n'
+          new = '''                expect(comments.hitTestable(), findsOneWidget);
+                          await tester.tap(comments);
+          '''
+          replace_once(old, new, 'hit test requirement')
+          old = "                  reason: 'post details/comments',\n                );\n"
+          new = old + '''                expect(
+                            find.byKey(const Key('community-post-detail-list')),
+                            findsOneWidget,
+                          );
+          '''
+          replace_once(old, new, 'detail route assertion')
+          path.write_text(text)
+          print('Applied only guarded visual fixture/navigation repairs.')
+          PY
       - name: Apply exact Dart formatting
         run: |
           dart format \
@@ -48,19 +98,22 @@ jobs:
             test/features/community/community_reference_parity_v1_test.dart \
             test/features/community/community_polish_visual_test.dart \
             test/features/community/community_reference_composer_v1_test.dart
-      - name: Commit exact formatter output when needed
+      - name: Commit guarded repairs and exact formatting
         shell: bash
         run: |
           set -euo pipefail
+          git diff --check
           if git diff --quiet -- '*.dart'; then
-            echo "Formatter produced no source changes."
+            echo "No source changes."
           else
-            git config user.name "bilhealth-admin"
-            git config user.email "bilhealth.app@gmail.com"
+            git config user.name "bil-community-qa"
+            git config user.email "actions@users.noreply.github.com"
             git add -- '*.dart'
-            git commit -m "style(community): apply exact Dart formatter"
+            git commit -m "test(community): repair visual fixture and lazy hit testing"
             git push origin HEAD:work/community-reference-parity-20261003
           fi
+          echo "TESTED_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "Tested source: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
       - name: Analyze complete source
         run: flutter analyze --no-pub
       - name: Verify source-size boundaries
@@ -101,6 +154,8 @@ jobs:
             test/features/community/community_rewards_center_test.dart \
             test/features/community/community_activity_inbox_v2_contract_test.dart
       - name: Community visual and large-text matrix
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: artifacts/community-reference
         run: |
           flutter test --no-pub \
             test/features/community/community_polish_visual_test.dart \
@@ -110,3 +165,11 @@ jobs:
           flutter test --no-pub \
             test/features/community/community_post_image_support_test.dart \
             --timeout 2m
+      - name: Preserve rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: community-reference-visual-${{ github.run_id }}
+          path: artifacts/community-reference
+          if-no-files-found: warn
+          retention-days: 7
