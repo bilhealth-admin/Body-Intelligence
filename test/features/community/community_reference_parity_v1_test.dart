@@ -427,7 +427,15 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Community badges'), findsOneWidget);
       expect(find.text('Profile complete'), findsOneWidget);
-      expect(find.text('Earned'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(
+            const Key('community-creator-badge-profile_complete'),
+          ),
+          matching: find.text('Earned'),
+        ),
+        findsOneWidget,
+      );
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
 
