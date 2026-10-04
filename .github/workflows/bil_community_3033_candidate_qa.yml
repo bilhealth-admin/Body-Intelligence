@@ -24,7 +24,7 @@ jobs:
           mkdir -p /tmp/bil-candidate
           git merge-base --is-ancestor 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD
           git rev-parse HEAD > /tmp/bil-candidate/source-sha.txt
-          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --no-binary > /tmp/bil-candidate/source.patch
+          git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD > /tmp/bil-candidate/source.patch
           git diff 9f439cae97d72b784880a1b1ac4ef1d33ede30c1 HEAD --name-only > /tmp/bil-candidate/changed-paths.txt
           python3 - <<'PY'
           import hashlib,json,pathlib,subprocess,zipfile
