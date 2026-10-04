@@ -441,8 +441,8 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       )
                     : Icon(
                         _stats.liked
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
+                            ? Icons.thumb_up_rounded
+                            : Icons.thumb_up_outlined,
                       ),
                 label: Text(
                   '${_stats.likeCount}',
@@ -495,8 +495,8 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       )
                     : Icon(
                         _saved
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded,
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                       ),
               ),
               Builder(
