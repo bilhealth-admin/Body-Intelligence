@@ -16,13 +16,16 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
         : visibleMessages
               .where((message) => !message.id.startsWith('welcome'))
               .toList(growable: false);
-    final showStarters = !visibleMessages.any(
-      (message) => message.role == IntelligenceMessageRole.user,
-    );
+    // Suggested actions belong to the available-context introduction, not to
+    // message history. Pending/failed context must not advertise saved data.
+    final showStarters =
+        dailyBrief != null &&
+        !visibleMessages.any(
+          (message) => message.role == IntelligenceMessageRole.user,
+        );
     final ids = <String>[
       if (dailyBrief != null) 'coach-session-brief',
       ...presentedMessages.map((message) => message.id),
-      if (showStarters) 'coach-starter-prompts',
       if (showLiveVoiceDraft) 'coach-live-draft',
       if (showReplyThinking) 'coach-reply-thinking',
       if (showReplyFailure) 'coach-reply-failure',
@@ -34,19 +37,22 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
         final id = ids[index];
         if (id == 'coach-session-brief') {
           final brief = dailyBrief!;
-          return _InlineCoachDecision(
-            brief: brief,
-            onAction: () {
-              if (brief.kind == CoachDailyBriefKind.experiment) {
-                context.push('/experiments');
-              } else {
-                usePrompt(brief.suggestedPrompt);
-              }
-            },
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _InlineCoachDecision(
+                brief: brief,
+                onAction: () {
+                  if (brief.kind == CoachDailyBriefKind.experiment) {
+                    context.push('/experiments');
+                  } else {
+                    usePrompt(brief.suggestedPrompt);
+                  }
+                },
+              ),
+              if (showStarters) _CoachStarterPrompts(onPrompt: usePrompt),
+            ],
           );
-        }
-        if (id == 'coach-starter-prompts') {
-          return _CoachStarterPrompts(onPrompt: usePrompt);
         }
         if (id == 'coach-live-draft') {
           return _LiveVoiceTranscript(
