@@ -376,6 +376,22 @@ void main() {
     },
   );
 
+  test('Community header exposes real search and profile identity entry', () {
+    final hub = File(
+      'lib/features/community/presentation/community_hub_page.dart',
+    ).readAsStringSync();
+    final navigation = File(
+      'lib/features/community/presentation/community_navigation_sheet.dart',
+    ).readAsStringSync();
+
+    expect(hub, contains("Key('community-search')"));
+    expect(hub, contains("context.push('/community/people')"));
+    expect(hub, contains('loadMyProfileOverview()'));
+    expect(hub, contains('BilAccountAvatar('));
+    expect(hub, contains("Key('community-settings')"));
+    expect(navigation, contains("'Community profile'"));
+  });
+
   testWidgets(
     'profile exposes real Follow, creator badges, views and Reviews',
     (tester) async {
