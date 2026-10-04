@@ -96,6 +96,30 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final circle = circles[index];
+              final textScale = MediaQuery.textScalerOf(context).scale(1);
+              final headerAction =
+                  textScale < 1.4 && MediaQuery.sizeOf(context).width >= 390;
+              final membershipButton = OutlinedButton.icon(
+                key: Key('community-circle-membership-${circle.slug}'),
+                onPressed: _busy.contains(circle.slug)
+                    ? null
+                    : () => _toggleMembership(circle),
+                icon: Icon(
+                  circle.activeMember
+                      ? Icons.logout_rounded
+                      : circle.pending
+                      ? Icons.schedule_rounded
+                      : Icons.group_add_outlined,
+                  size: 18,
+                ),
+                label: Text(
+                  circle.activeMember
+                      ? communityText(context, 'Leave', 'مغادرة')
+                      : circle.pending
+                      ? communityText(context, 'Pending', 'قيد الانتظار')
+                      : communityText(context, 'Join', 'انضمام'),
+                ),
+              );
               return Card(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -108,14 +132,14 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CircleAvatar(child: Icon(_circleIcon(circle.slug))),
+                            _CommunityCircleCover(slug: circle.slug),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -141,18 +165,33 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
                                         ),
                                     ],
                                   ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${circle.postCount} ${communityText(context, 'posts', 'منشورات')}',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
                                   const SizedBox(height: 4),
                                   Text(
                                     _circleDescription(context, circle.slug),
-                                    maxLines: 2,
+                                    maxLines: textScale >= 1.5 ? 3 : 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ),
+                            if (headerAction) ...[
+                              const SizedBox(width: 8),
+                              membershipButton,
+                            ],
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -163,38 +202,7 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
                               value: circle.memberCount,
                               label: communityText(context, 'members', 'أعضاء'),
                             ),
-                            _CircleMetric(
-                              icon: Icons.article_outlined,
-                              value: circle.postCount,
-                              label: communityText(context, 'posts', 'منشورات'),
-                            ),
-                            OutlinedButton.icon(
-                              key: Key(
-                                'community-circle-membership-${circle.slug}',
-                              ),
-                              onPressed: _busy.contains(circle.slug)
-                                  ? null
-                                  : () => _toggleMembership(circle),
-                              icon: Icon(
-                                circle.activeMember
-                                    ? Icons.logout_rounded
-                                    : circle.pending
-                                    ? Icons.schedule_rounded
-                                    : Icons.group_add_outlined,
-                                size: 18,
-                              ),
-                              label: Text(
-                                circle.activeMember
-                                    ? communityText(context, 'Leave', 'مغادرة')
-                                    : circle.pending
-                                    ? communityText(
-                                        context,
-                                        'Pending',
-                                        'قيد الانتظار',
-                                      )
-                                    : communityText(context, 'Join', 'انضمام'),
-                              ),
-                            ),
+                            if (!headerAction) membershipButton,
                             if (circle.activeMember &&
                                 widget.onComposeCircle != null)
                               IconButton.filledTonal(
@@ -424,6 +432,39 @@ class _CommunityCirclePageState extends State<_CommunityCirclePage> {
   );
 }
 
+class _CommunityCircleCover extends StatelessWidget {
+  const _CommunityCircleCover({required this.slug});
+
+  final String slug;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: Key('community-circle-cover-$slug'),
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.primaryContainer,
+            scheme.secondaryContainer,
+          ],
+        ),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        _circleIcon(slug),
+        size: 30,
+        color: scheme.onPrimaryContainer,
+      ),
+    );
+  }
+}
 class _CircleMetric extends StatelessWidget {
   const _CircleMetric({
     required this.icon,
