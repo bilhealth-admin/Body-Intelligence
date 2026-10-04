@@ -97,6 +97,20 @@ Future<_EditorFixture> _pumpEditor(WidgetTester tester) async {
       ),
     ),
   );
+  // Drift's watched initial query needs the real event loop. Advancing the
+  // widget clock through the application's timeout before it completes is not
+  // evidence of a production hydration failure.
+  for (
+    var attempt = 0;
+    attempt < 100 && find.byType(ListView).evaluate().isEmpty;
+    attempt++
+  ) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump();
+  }
+  expect(find.byType(ListView), findsOneWidget);
   await tester.pumpAndSettle();
   return _EditorFixture(database: database, router: router);
 }

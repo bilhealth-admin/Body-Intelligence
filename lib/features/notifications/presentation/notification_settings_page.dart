@@ -18,6 +18,7 @@ import 'notification_settings_copy.dart';
 part 'notification_settings_components.dart';
 part 'notification_settings_actions.dart';
 part 'notification_settings_copy_helpers.dart';
+part 'notification_settings_delivery_controls.dart';
 
 class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({
@@ -25,11 +26,13 @@ class NotificationSettingsPage extends ConsumerStatefulWidget {
     this.reminderStore,
     this.deliveryStore,
     this.notificationService,
+    this.communityPushService,
   });
 
   final DailyReminderStore? reminderStore;
   final NotificationDeliveryPreferencesStore? deliveryStore;
   final BilNotificationService? notificationService;
+  final CommunityPushService? communityPushService;
 
   @override
   ConsumerState<NotificationSettingsPage> createState() =>
@@ -53,6 +56,8 @@ class _NotificationSettingsPageState
   bool _saving = false;
   bool _pushSaving = false;
   bool _pushLoadError = false;
+  bool _pushLoading = false;
+  NotificationCategory? _savingCategory;
 
   void _updateState(VoidCallback update) => setState(update);
   Object? _loadError;
@@ -159,7 +164,10 @@ class _NotificationSettingsPageState
         widget.notificationService ??
         BilNotificationService(FlutterLocalNotificationsPlugin());
     _load();
-    if (CommunityPushService.isAvailable &&
+    if (widget.communityPushService != null) {
+      _pushService = widget.communityPushService;
+      _loadPushPreferences();
+    } else if (CommunityPushService.isAvailable &&
         AppEnvironment.supabaseRuntimeReady &&
         Supabase.instance.client.auth.currentUser != null) {
       _pushService = CommunityPushService(Supabase.instance.client);
@@ -254,41 +262,52 @@ class _NotificationSettingsPageState
                     ).colorScheme.primaryContainer.withValues(alpha: 0.7),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              _phoneNotificationsEnabled == true
-                                  ? Icons.notifications_active_rounded
-                                  : Icons.notifications_none_rounded,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _copy.title,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.w700),
+                          Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  shape: BoxShape.circle,
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _permissionStatusText,
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                child: Icon(
+                                  _phoneNotificationsEnabled == true
+                                      ? Icons.notifications_active_rounded
+                                      : Icons.notifications_none_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _copy.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _permissionStatusText,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(height: 8),
                           if (_requiresSystemSettings ||
                               _phoneNotificationsEnabled != true)
                             FilledButton.tonal(
@@ -321,286 +340,9 @@ class _NotificationSettingsPageState
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Card(
-                    child: SwitchListTile.adaptive(
-                      key: const Key('all-daily-reminders'),
-                      value: _allDailyEnabled,
-                      onChanged: _saving ? null : _setAllDaily,
-                      secondary: const BilSemanticIconBadge(
-                        kind: BilSemanticIconKind.notifications,
-                      ),
-                      title: Text(
-                        _ui(
-                          'Enable all daily reminders',
-                          'تشغيل كل التذكيرات اليومية',
-                          'Activer tous les rappels quotidiens',
-                          'Activar todos los recordatorios diarios',
-                          'Tüm günlük hatırlatıcıları etkinleştir',
-                        ),
-                      ),
-                      subtitle: Text(
-                        _ui(
-                          'You can still adjust every reminder below.',
-                          'يمكنك تخصيص كل تذكير أدناه.',
-                          'Vous pouvez toujours régler chaque rappel ci-dessous.',
-                          'Puedes ajustar cada recordatorio abajo.',
-                          'Aşağıda her hatırlatıcıyı ayrı ayrı ayarlayabilirsiniz.',
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        _ReferencePushToggle(
-                          enabled: !_saving,
-                          value: delivery.allows(
-                            NotificationCategory.newMessage,
-                          ),
-                          label: _referenceLabel('I receive a new message'),
-                          onChanged: (value) => _toggleCategory(
-                            NotificationCategory.newMessage,
-                            value,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        _ReferencePushToggle(
-                          enabled: !_saving,
-                          value: delivery.allows(
-                            NotificationCategory.friendRequest,
-                          ),
-                          label: _referenceLabel(
-                            'I receive a new friend request',
-                          ),
-                          onChanged: (value) => _toggleCategory(
-                            NotificationCategory.friendRequest,
-                            value,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        _ReferencePushToggle(
-                          enabled: !_saving,
-                          value: delivery.allows(
-                            NotificationCategory.friendAccepted,
-                          ),
-                          label: _referenceLabel(
-                            'Someone accepts my friend request',
-                          ),
-                          onChanged: (value) => _toggleCategory(
-                            NotificationCategory.friendAccepted,
-                            value,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        _ReferencePushToggle(
-                          enabled: !_saving,
-                          value: delivery.allows(
-                            NotificationCategory.friendWorkout,
-                          ),
-                          label: _referenceLabel(
-                            'One of my friends logs a workout',
-                          ),
-                          onChanged: (value) => _toggleCategory(
-                            NotificationCategory.friendWorkout,
-                            value,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        _ReferencePushToggle(
-                          enabled: !_saving,
-                          value: delivery.allows(
-                            NotificationCategory.friendStreak,
-                          ),
-                          label: _referenceLabel(
-                            'One of my friends hits a login streak',
-                          ),
-                          onChanged: (value) => _toggleCategory(
-                            NotificationCategory.friendStreak,
-                            value,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        _ReferencePushToggle(
-                          enabled: !_saving,
-                          value: delivery.allows(NotificationCategory.stepGoal),
-                          label: _referenceLabel('I reach my step goal'),
-                          onChanged: (value) => _toggleCategory(
-                            NotificationCategory.stepGoal,
-                            value,
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        SwitchListTile(
-                          value: delivery.quietHoursEnabled,
-                          title: Text(_quietText('Do not notify me between')),
-                          subtitle: Text(
-                            '${_formatMinutes(delivery.quietStartMinutes)} – ${_formatMinutes(delivery.quietEndMinutes)}',
-                          ),
-                          onChanged: (value) => _saveDelivery(
-                            delivery.copyWith(quietHoursEnabled: value),
-                          ),
-                        ),
-                        if (delivery.quietHoursEnabled)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextButton(
-                                  onPressed: () =>
-                                      _chooseQuietTime(start: true),
-                                  child: Text(
-                                    '${_quietText('Starts')} ${_formatMinutes(delivery.quietStartMinutes)}',
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: TextButton(
-                                  onPressed: () =>
-                                      _chooseQuietTime(start: false),
-                                  child: Text(
-                                    '${_quietText('Ends')} ${_formatMinutes(delivery.quietEndMinutes)}',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      _quietText(
-                        'Push categories control lock-screen delivery. Updates can still appear inside BIL.',
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
+                  ..._communityDeliveryControls(delivery),
                   const SizedBox(height: 18),
-                  if (_pushService != null) ...[
-                    Card(
-                      child: Column(
-                        children: [
-                          if (_pushLoadError)
-                            ListTile(
-                              leading: const Icon(Icons.cloud_off_outlined),
-                              title: Text(
-                                _ui(
-                                  'Cloud notification settings could not be loaded.',
-                                  'تعذر تحميل إعدادات الإشعارات السحابية.',
-                                  'Impossible de charger les réglages de notification cloud.',
-                                  'No se pudieron cargar los ajustes de notificación en la nube.',
-                                  'Bulut bildirim ayarları yüklenemedi.',
-                                ),
-                              ),
-                              trailing: TextButton(
-                                onPressed: _loadPushPreferences,
-                                child: Text(
-                                  _ui(
-                                    'Retry',
-                                    'إعادة المحاولة',
-                                    'Réessayer',
-                                    'Reintentar',
-                                    'Tekrar dene',
-                                  ),
-                                ),
-                              ),
-                            )
-                          else ...[
-                            SwitchListTile(
-                              key: const Key('community-cloud-push'),
-                              value: _pushPreferences?.enabled ?? false,
-                              onChanged:
-                                  _pushSaving ||
-                                      !(_pushPreferences?.providerReady ??
-                                          false)
-                                  ? null
-                                  : _setPushEnabled,
-                              secondary: const BilSemanticIconBadge(
-                                kind: BilSemanticIconKind.community,
-                              ),
-                              title: Text(
-                                _ui(
-                                  'Private community notifications',
-                                  'إشعارات المجتمع الخاصة',
-                                  'Notifications privées de la communauté',
-                                  'Notificaciones privadas de la comunidad',
-                                  'Özel topluluk bildirimleri',
-                                ),
-                              ),
-                              subtitle: Text(
-                                _pushPreferences != null &&
-                                        !_pushPreferences!.providerReady
-                                    ? _ui(
-                                        'Remote notification delivery is not configured in this build.',
-                                        'إرسال الإشعارات البعيدة غير مهيأ في هذا الإصدار.',
-                                        'Les notifications distantes ne sont pas configurées dans cette version.',
-                                        'Las notificaciones remotas no están configuradas en esta versión.',
-                                        'Uzak bildirim teslimi bu sürümde yapılandırılmadı.',
-                                      )
-                                    : _ui(
-                                        'Friend requests and messages in your time zone.',
-                                        'طلبات الأصدقاء والرسائل حسب منطقتك الزمنية.',
-                                        'Demandes d’amis et messages selon votre fuseau horaire.',
-                                        'Solicitudes y mensajes según tu zona horaria.',
-                                        'Saat diliminize göre arkadaşlık istekleri ve mesajlar.',
-                                      ),
-                              ),
-                            ),
-                            if (_pushPreferences?.enabled ?? false)
-                              SwitchListTile(
-                                key: const Key('sensitive-lock-screen-preview'),
-                                value:
-                                    _pushPreferences?.sensitivePreviewAllowed ??
-                                    false,
-                                onChanged: _pushSaving
-                                    ? null
-                                    : _setSensitivePreview,
-                                secondary: const BilSemanticIconBadge(
-                                  kind: BilSemanticIconKind.privacy,
-                                ),
-                                title: Text(
-                                  _ui(
-                                    'Allow sensitive previews',
-                                    'السماح بمعاينة حساسة',
-                                    'Autoriser les aperçus sensibles',
-                                    'Permitir vistas previas sensibles',
-                                    'Hassas önizlemelere izin ver',
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  _ui(
-                                    'Off by default. Health measurements are never shown without explicit consent.',
-                                    'متوقف افتراضيًا. لا تظهر القياسات الصحية دون موافقة صريحة.',
-                                    'Désactivé par défaut. Les mesures de santé exigent un consentement explicite.',
-                                    'Desactivado por defecto. Las mediciones requieren consentimiento explícito.',
-                                    'Varsayılan olarak kapalıdır. Sağlık ölçümleri açık onay olmadan gösterilmez.',
-                                  ),
-                                ),
-                              ),
-                            if (_pushPreferences != null)
-                              ListTile(
-                                leading: const BilSemanticIconBadge(
-                                  kind: BilSemanticIconKind.time,
-                                ),
-                                title: Text(_pushPreferences!.timeZone),
-                                subtitle: Text(
-                                  _ui(
-                                    'Delivery time zone',
-                                    'المنطقة الزمنية للإرسال',
-                                    'Fuseau horaire de livraison',
-                                    'Zona horaria de entrega',
-                                    'Teslimat saat dilimi',
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                  ..._dailyDeliveryControls(delivery),
                   ...reminders.expand(
                     (reminder) => [
                       Padding(

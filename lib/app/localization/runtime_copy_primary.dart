@@ -2,6 +2,41 @@
 /// architecture source-size ceiling.
 abstract final class RuntimeCopyPrimary {
   static const values = <String, Map<String, String>>{
+    "Apply saved categories": {
+      "ar": "تطبيق الفئات المحفوظة",
+      "en": "Apply saved categories",
+      "fr": "Appliquer les catégories enregistrées",
+      "es": "Aplicar categorías guardadas",
+      "tr": "Kayıtlı kategorileri uygula",
+    },
+    "Quiet hours for daily reminders": {
+      "ar": "ساعات الهدوء للتذكيرات اليومية",
+      "en": "Quiet hours for daily reminders",
+      "fr": "Heures de silence pour les rappels quotidiens",
+      "es": "Horas de silencio para los recordatorios diarios",
+      "tr": "Günlük hatırlatıcılar için sessiz saatler",
+    },
+    "Remote notification delivery is unavailable on this device.": {
+      "ar": "إرسال إشعارات المجتمع غير متاح على هذا الجهاز.",
+      "en": "Remote notification delivery is unavailable on this device.",
+      "fr":
+          "Les notifications distantes ne sont pas disponibles sur cet appareil.",
+      "es":
+          "Las notificaciones remotas no están disponibles en este dispositivo.",
+      "tr": "Bu cihazda uzak bildirim teslimi kullanılamıyor.",
+    },
+    "Category selections are saved. They are active only when community notifications and phone permission are on.": {
+      "ar":
+          "تُحفظ اختيارات الفئات، وتعمل فقط عند تشغيل إشعارات المجتمع والسماح بإشعارات الهاتف.",
+      "en":
+          "Category selections are saved. They are active only when community notifications and phone permission are on.",
+      "fr":
+          "Les catégories sont conservées et actives seulement avec les notifications de communauté et l’autorisation du téléphone.",
+      "es":
+          "Las categorías se conservan y solo se activan con las notificaciones de comunidad y el permiso del teléfono.",
+      "tr":
+          "Kategori seçimleri kaydedilir; yalnızca topluluk bildirimleri ve telefon izni açıkken etkinleşir.",
+    },
     'Today': {
       'ar': 'اليوم',
       'en': 'Today',

@@ -1,6 +1,14 @@
 part of 'dashboard_preferences_page.dart';
 
 extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
+  bool get _hasCurrentNutrientAccess =>
+      ref
+          .read(verifiedSubscriptionAccessProvider)
+          .asData
+          ?.value
+          .grants(CommerceEntitlement.advancedIntelligence) ??
+      false;
+
   Future<bool> _guardedSave(
     Future<void> Function() operation, {
     String? section,
@@ -204,6 +212,9 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
     WidgetRef ref,
     Set<String> current,
   ) async {
+    if (!mounted || !_hasCurrentNutrientAccess) {
+      return;
+    }
     final repository = ref.read(preferencesRepositoryProvider);
     final selected = current
         .where(DashboardNutrientGoalIds.dashboardCards.contains)
@@ -255,24 +266,25 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    _copy(
-                      context,
-                      en: 'Add nutrient goal cards',
-                      ar: 'إضافة بطاقات أهداف المغذيات',
-                      fr: 'Ajouter des cartes de nutriments',
-                      es: 'Añadir tarjetas de nutrientes',
-                      tr: 'Besin hedefi kartları ekle',
-                    ),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   Flexible(
                     child: ListView(
                       shrinkWrap: true,
                       children: [
+                        Center(
+                          child: Text(
+                            _copy(
+                              context,
+                              en: 'Add nutrient goal cards',
+                              ar: 'إضافة بطاقات أهداف المغذيات',
+                              fr: 'Ajouter des cartes de nutriments',
+                              es: 'Añadir tarjetas de nutrientes',
+                              tr: 'Besin hedefi kartları ekle',
+                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
                         for (final id
                             in DashboardNutrientGoalIds.dashboardCards)
                           CheckboxListTile(
@@ -306,6 +318,9 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
                       onPressed: savingCards
                           ? null
                           : () async {
+                              if (!mounted || !_hasCurrentNutrientAccess) {
+                                return;
+                              }
                               setSheetState(() => savingCards = true);
                               try {
                                 await repository.setMany({
@@ -358,65 +373,69 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
       useSafeArea: true,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              _sectionCopy(
-                sheetContext,
-                'Add nutrient goal cards',
-                'إضافة بطاقات أهداف المغذيات',
-              ),
-              style: Theme.of(
-                sheetContext,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            const Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: PremiumLabelBadge(
-                key: Key('dashboard-nutrient-premium-page-label'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            DecoratedBox(
-              key: const Key('dashboard-nutrient-glass-group'),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  sheetContext,
-                ).colorScheme.surfaceContainerLow.withValues(alpha: .82),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0x66D79A1E)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final label in const [
-                      'Protein',
-                      'Carbohydrates',
-                      'Fat',
-                      'Fiber',
-                      'Sodium',
-                      'Potassium',
-                    ])
-                      Chip(label: Text(context.strings.text(label))),
-                  ],
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  _sectionCopy(
+                    sheetContext,
+                    'Add nutrient goal cards',
+                    'إضافة بطاقات أهداف المغذيات',
+                  ),
+                  style: Theme.of(
+                    sheetContext,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
-              ),
+                const SizedBox(height: 8),
+                const Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: PremiumLabelBadge(
+                    key: Key('dashboard-nutrient-premium-page-label'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DecoratedBox(
+                  key: const Key('dashboard-nutrient-glass-group'),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      sheetContext,
+                    ).colorScheme.surfaceContainerLow.withValues(alpha: .82),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0x66D79A1E)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final label in const [
+                          'Protein',
+                          'Carbohydrates',
+                          'Fat',
+                          'Fiber',
+                          'Sodium',
+                          'Potassium',
+                        ])
+                          Chip(label: Text(context.strings.text(label))),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: () => Navigator.pop(sheetContext, true),
+                  icon: const Icon(Icons.workspace_premium_rounded),
+                  label: Text(sheetContext.strings.text('Continue')),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(sheetContext, true),
-              icon: const Icon(Icons.workspace_premium_rounded),
-              label: Text(sheetContext.strings.text('Continue')),
-            ),
-          ],
+          ),
         ),
       ),
     );

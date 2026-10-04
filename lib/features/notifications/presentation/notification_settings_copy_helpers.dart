@@ -48,11 +48,11 @@ extension _NotificationSettingsCopyHelpers on _NotificationSettingsPageState {
 
   String _quietText(String english) {
     const values = <String, Map<String, String>>{
-      'Do not notify me between': {
-        'ar': 'عدم إرسال إشعارات بين',
-        'fr': 'Ne pas me notifier entre',
-        'es': 'No notificarme entre',
-        'tr': 'Şu saatler arasında bildirim gönderme',
+      'Quiet hours for daily reminders': {
+        'ar': 'ساعات الهدوء للتذكيرات اليومية',
+        'fr': 'Heures de silence pour les rappels quotidiens',
+        'es': 'Horas de silencio para los recordatorios diarios',
+        'tr': 'Günlük hatırlatıcılar için sessiz saatler',
       },
       'Starts': {
         'ar': 'يبدأ',

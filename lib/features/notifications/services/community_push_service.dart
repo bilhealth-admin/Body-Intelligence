@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../domain/community_push_preferences.dart';
+import '../domain/community_push_delivery_categories.dart';
 import '../domain/notification_delivery_preferences.dart';
 
 abstract interface class PushTokenProvider {
@@ -161,14 +162,66 @@ class CommunityPushService {
     await _registerToken(token, deliveryPreferences);
   }
 
-  Future<void> syncDeliveryPreferences(
-    NotificationDeliveryPreferences deliveryPreferences,
-  ) async {
-    if (!isAvailable || _client.auth.currentUser == null) return;
-    await _client.rpc(
-      'bil_set_push_delivery_categories_v2',
-      params: _categoryParams(deliveryPreferences),
+  Future<CommunityPushDeliveryCategories> syncDeliveryPreferences(
+    NotificationDeliveryPreferences deliveryPreferences, {
+    required CommunityPushDeliveryCategories expectedState,
+  }) async {
+    final owner = _categoryOwner();
+    if (owner != expectedState.ownerId) {
+      throw const AuthException('Notification owner changed');
+    }
+    final response = await _client.rpc(
+      'bil_set_my_push_delivery_categories_v1',
+      params: {
+        ..._categoryParams(deliveryPreferences),
+        'p_expected_revision': expectedState.revision,
+      },
     );
+    _verifyCategoryOwner(owner);
+    final receipt = CommunityPushDeliveryCategories.fromReceipt(
+      response,
+      expectedOwnerId: owner,
+    );
+    final desired = deliveryPreferences.enabledCategories
+        .where(NotificationDeliveryPreferences.supportedCategories.contains)
+        .toSet();
+    final previous = expectedState.desired;
+    final unchanged =
+        previous != null &&
+        previous.length == desired.length &&
+        previous.containsAll(desired);
+    final expectedRevision = expectedState.revision + (unchanged ? 0 : 1);
+    if (!receipt.verified ||
+        receipt.revision != expectedRevision ||
+        receipt.desired!.length != desired.length ||
+        !receipt.desired!.containsAll(desired)) {
+      throw StateError('Notification category save was not verified');
+    }
+    return receipt;
+  }
+
+  Future<CommunityPushDeliveryCategories> loadDeliveryCategories() async {
+    final owner = _categoryOwner();
+    final response = await _client.rpc(
+      'bil_get_my_push_delivery_categories_v1',
+    );
+    _verifyCategoryOwner(owner);
+    return CommunityPushDeliveryCategories.fromReceipt(
+      response,
+      expectedOwnerId: owner,
+    );
+  }
+
+  String _categoryOwner() {
+    final owner = _client.auth.currentUser?.id;
+    if (owner == null) throw const AuthException('Sign-in required');
+    return owner;
+  }
+
+  void _verifyCategoryOwner(String owner) {
+    if (_client.auth.currentUser?.id != owner) {
+      throw const AuthException('Notification owner changed');
+    }
   }
 
   Future<void> setSensitivePreviewAllowed(bool allowed) => _client.rpc(
@@ -190,6 +243,8 @@ class CommunityPushService {
       );
     }
     final response = await _client.rpc('bil_get_push_preferences');
+    final categories = await loadDeliveryCategories();
+    _verifyCategoryOwner(user.id);
     final rows = (response as List).cast<Map<String, dynamic>>();
     final row = rows.isEmpty ? null : rows.first;
     return CommunityPushPreferences(
@@ -197,22 +252,13 @@ class CommunityPushService {
       timeZone: row?['timezone'] as String? ?? 'UTC',
       sensitivePreviewAllowed:
           row?['sensitive_preview_allowed'] as bool? ?? false,
+      deliveryCategories: categories,
     );
   }
 
   Map<String, bool> _categoryParams(
     NotificationDeliveryPreferences deliveryPreferences,
-  ) => {
-    'p_message_enabled': deliveryPreferences.allows(
-      NotificationCategory.newMessage,
-    ),
-    'p_friend_request_enabled': deliveryPreferences.allows(
-      NotificationCategory.friendRequest,
-    ),
-    'p_friend_accepted_enabled': deliveryPreferences.allows(
-      NotificationCategory.friendAccepted,
-    ),
-  };
+  ) => deliveryPreferences.pushCategoryParameters;
 
   Future<void> _requestAndRegisterCurrentToken(
     NotificationDeliveryPreferences deliveryPreferences,

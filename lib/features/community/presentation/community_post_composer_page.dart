@@ -94,6 +94,7 @@ class _CommunityPostComposerPageState
   bool _voiceCapturing = false;
   bool _selectingImage = false;
   bool _completed = false;
+  bool _operationRecovery = false;
   TextDirection? _composerDirection;
   String? _composerError;
   String? _submitError;
@@ -334,8 +335,20 @@ class _CommunityPostComposerPageState
           Localizations.localeOf(context).toLanguageTag(),
         ),
       );
+    } on CommunityPublishOperationConflict {
+      if (!mounted) return;
+      setState(() {
+        _operationRecovery = true;
+        _submitError = communityText(
+          context,
+          'A previous publishing attempt is still unresolved. Retry its original content or cancel the pending attempt before changing it.',
+          'لم تُحسم محاولة النشر السابقة. أعد المحاولة بمحتواها الأصلي أو ألغِ المحاولة المعلّقة قبل تغييره.',
+        );
+      });
     } catch (_) {
       if (!mounted) return;
+      _operationRecovery =
+          widget.repository.useServerIdempotentCommunityPublishing;
       setState(
         () => _submitError = communityText(
           context,
@@ -345,6 +358,46 @@ class _CommunityPostComposerPageState
           _selectedImages.isEmpty
               ? 'تعذر نشر المشاركة الآن. احتفظنا بالنص لتعيد المحاولة.'
               : 'تعذر النشر الآن. احتفظنا بالنص والصورة لتعيد المحاولة.',
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _publishing = false);
+    }
+  }
+
+  Future<void> _cancelPendingPublish() async {
+    if (_publishing || !_operationRecovery) return;
+    setState(() => _publishing = true);
+    try {
+      final cancelled = await widget.repository.cancelPendingPublishOperation();
+      if (!mounted) return;
+      setState(() {
+        _operationRecovery = false;
+        _submitError = cancelled
+            ? null
+            : communityText(
+                context,
+                'The previous attempt was already published. Check My posts before publishing again.',
+                'نُشرت المحاولة السابقة بالفعل. تحقق من منشوراتي قبل النشر مجددًا.',
+              );
+      });
+    } on CommunityPublishOperationUnavailable {
+      if (!mounted) return;
+      setState(() {
+        _operationRecovery = false;
+        _submitError = communityText(
+          context,
+          'The previous publishing operation completed, but its post is no longer available. This cancellation did not delete any media.',
+          'اكتملت عملية النشر السابقة، لكن منشورها لم يعد متاحًا. لم يحذف هذا الإلغاء أي وسائط.',
+        );
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _submitError = communityText(
+          context,
+          'Could not finish verifying cancellation. Retry before publishing again.',
+          'تعذر إكمال التحقق من الإلغاء. أعد المحاولة قبل النشر مجددًا.',
         ),
       );
     } finally {

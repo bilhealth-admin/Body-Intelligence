@@ -417,6 +417,8 @@ void main() {
       plan: CommercePlan.pro,
       entitlements: const {CommerceEntitlement.advancedIntelligence},
       authority: EntitlementAuthority.verifiedServer,
+      startedAt: DateTime.utc(2026, 10, 3),
+      currentPeriodEndsAt: DateTime.utc(2026, 10, 5),
       isPurchasable: true,
       canRestorePurchases: true,
     );
@@ -426,6 +428,9 @@ void main() {
           databaseProvider.overrideWithValue(database),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(premium),
+          ),
+          verifiedEntitlementClockProvider.overrideWithValue(
+            () => DateTime.utc(2026, 10, 4),
           ),
         ],
         child: const MaterialApp(
@@ -483,6 +488,8 @@ void main() {
       plan: CommercePlan.pro,
       entitlements: const {CommerceEntitlement.advancedIntelligence},
       authority: EntitlementAuthority.verifiedServer,
+      startedAt: DateTime.utc(2026, 10, 3),
+      currentPeriodEndsAt: DateTime.utc(2026, 10, 5),
       isPurchasable: true,
       canRestorePurchases: true,
     );
@@ -492,6 +499,9 @@ void main() {
           preferencesRepositoryProvider.overrideWithValue(repository),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(premium),
+          ),
+          verifiedEntitlementClockProvider.overrideWithValue(
+            () => DateTime.utc(2026, 10, 4),
           ),
         ],
         child: const MaterialApp(
@@ -534,6 +544,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Save cards'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 
   testWidgets('section loading never renders a default switch value', (

@@ -24,7 +24,11 @@ void main() {
       'lib/features/notifications/presentation/notification_settings_actions.dart',
     ).readAsStringSync();
     expect(service, contains('bil_register_push_token_v2'));
-    expect(service, contains('bil_set_push_delivery_categories_v2'));
+    expect(service, contains('bil_set_my_push_delivery_categories_v1'));
+    expect(service, contains('bil_get_my_push_delivery_categories_v1'));
+    expect(service, contains('p_expected_revision'));
+    expect(service, contains('_verifyCategoryOwner(owner)'));
+    expect(service, isNot(contains('bil_set_push_delivery_categories_v2')));
     expect(service, contains('permissionGranted'));
     expect(service, contains('existingPermissionToken'));
     expect(service, contains('CommunityPushRegistrationPolicyStore'));

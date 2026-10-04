@@ -242,9 +242,7 @@ class _BoostCard extends StatelessWidget {
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
           ),
-          onPressed: boost.state == AiBoostPurchaseState.ready
-              ? boost.purchaseBoost
-              : null,
+          onPressed: boost.canPurchase ? boost.purchaseBoost : null,
           icon: Icon(
             boost.state == AiBoostPurchaseState.pending
                 ? Icons.hourglass_top_rounded
@@ -268,16 +266,47 @@ class _BoostCard extends StatelessWidget {
                   ),
           ),
         ),
+        if (boost.canRetry) ...[
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: boost.retryPendingTransaction,
+            child: Text(
+              t(
+                'Check existing store transaction',
+                'التحقق من معاملة المتجر الحالية',
+                'Vérifier la transaction existante',
+                'Comprobar la transacción existente',
+                'Mevcut mağaza işlemini kontrol et',
+              ),
+            ),
+          ),
+        ],
         if (boost.errorCode != null) ...[
           const SizedBox(height: 8),
           Text(
-            t(
-              'The store product is unavailable or verification failed. No tokens were granted.',
-              'منتج المتجر غير متاح أو فشل التحقق. لم يُمنح أي رصيد.',
-              'Le produit est indisponible ou la vérification a échoué.',
-              'El producto no está disponible o falló la verificación.',
-              'Ürün kullanılamıyor veya doğrulama başarısız.',
-            ),
+            boost.errorCode == 'store_finish_pending'
+                ? t(
+                    'Your Boost was verified. Store confirmation is still pending; check the existing transaction before buying again.',
+                    'تم التحقق من Boost. تأكيد المتجر ما زال معلقًا؛ تحقق من المعاملة الحالية قبل الشراء مجددًا.',
+                    'Boost vérifié. La confirmation du magasin reste en attente.',
+                    'Boost verificado. La confirmación de la tienda sigue pendiente.',
+                    'Boost doğrulandı. Mağaza onayı bekleniyor.',
+                  )
+                : boost.errorCode == 'purchase_cancelled'
+                ? t(
+                    'Purchase cancelled. You can try again.',
+                    'تم إلغاء الشراء. يمكنك المحاولة مجددًا.',
+                    'Achat annulé. Vous pouvez réessayer.',
+                    'Compra cancelada. Puedes volver a intentarlo.',
+                    'Satın alma iptal edildi. Tekrar deneyebilirsiniz.',
+                  )
+                : t(
+                    'The store or verification did not finish. Your balance will be refreshed from BIL; check an existing transaction before buying again.',
+                    'لم يكتمل المتجر أو التحقق. سيُحدّث الرصيد من BIL؛ تحقق من المعاملة الحالية قبل الشراء مجددًا.',
+                    'Le produit est indisponible ou la vérification a échoué.',
+                    'El producto no está disponible o falló la verificación.',
+                    'Ürün kullanılamıyor veya doğrulama başarısız.',
+                  ),
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ],

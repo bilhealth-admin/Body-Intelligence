@@ -53,6 +53,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   bool changingConsent = false;
   bool changingContextFocus = false;
   Set<CoachContextFocus>? contextFocuses;
+  int _lastBoostCreditsRevision = 0;
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !mounted) return;
+    boost.initialize();
     setState(() {
       contextFocuses = null;
       usage = _loadUsage();
@@ -74,7 +76,8 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
 
   void _boostChanged() {
     if (!mounted) return;
-    if (boost.state == AiBoostPurchaseState.verified) {
+    if (boost.verifiedCreditsRevision != _lastBoostCreditsRevision) {
+      _lastBoostCreditsRevision = boost.verifiedCreditsRevision;
       usage = _loadUsage();
       ref.invalidate(aiCoachCreditAccessProvider);
       ref.invalidate(aiBoostVisionAccessProvider);
@@ -98,14 +101,11 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
       storedContext,
     ).focuses.map((focus) => focus.name).toList(growable: false);
     try {
-      final consent = await client.rpc('bil_get_remote_ai_consent');
-      final consentMap = Map<String, Object?>.from(consent as Map);
-      result['remote_ai_consent'] =
-          consentMap['granted'] == true &&
-          consentMap['policy_version']?.toString() == '3';
-      result['cloud_voice_consent'] =
-          consentMap['granted'] == true &&
-          consentMap['policy_version']?.toString() == '3';
+      final granted = await sharedRemoteAiConsentCoordinator(
+        client,
+      ).isGranted(forceServerRead: true);
+      result['remote_ai_consent'] = granted;
+      result['cloud_voice_consent'] = granted;
       result['consent_status_available'] = true;
     } on Object {
       result['remote_ai_consent'] = false;
@@ -135,20 +135,15 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     if (changingConsent) return;
     setState(() => changingConsent = true);
     try {
-      await Supabase.instance.client.rpc(
-        'bil_record_consent',
-        params: <String, Object?>{
-          'p_purpose': 'remote_ai',
-          'p_policy_version': '3',
-          'p_granted': granted,
-        },
-      );
-      // The settings write is authoritative. Drop any session-cached positive
-      // receipt so a revoke cannot be reused by the conversation flow.
-      sharedRemoteAiConsentCoordinator().invalidate();
+      final coordinator = sharedRemoteAiConsentCoordinator();
+      final verified = await (granted
+          ? coordinator.grantAndVerify()
+          : coordinator.revokeAndVerify());
+      if (!verified) throw StateError('consent_readback_failed');
       if (mounted) setState(() => usage = _loadUsage());
     } on Object {
       if (!mounted) return;
+      if (!granted) setState(() => usage = _loadUsage());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../notifications/services/bil_notification_service.dart';
+import '../../intelligence_center/services/remote_ai_consent_coordinator.dart';
 
 enum OnboardingRemoteAiResult {
   granted,
@@ -55,8 +56,6 @@ final class SupabaseOnboardingRemoteAiGateway
     implements OnboardingRemoteAiGateway {
   const SupabaseOnboardingRemoteAiGateway();
 
-  static const _rpcTimeout = Duration(seconds: 8);
-
   SupabaseClient? get _client {
     if (!AppEnvironment.supabaseRuntimeReady) return null;
     return Supabase.instance.client;
@@ -69,11 +68,10 @@ final class SupabaseOnboardingRemoteAiGateway
       return OnboardingRemoteAiResult.authenticationRequired;
     }
     try {
-      final raw = await client!
-          .rpc('bil_get_remote_ai_consent')
-          .timeout(_rpcTimeout);
-      if (raw is! Map) return OnboardingRemoteAiResult.failed;
-      return raw['granted'] == true && raw['policy_version'] == '3'
+      final granted = await sharedRemoteAiConsentCoordinator(
+        client!,
+      ).isGranted(forceServerRead: true);
+      return granted
           ? OnboardingRemoteAiResult.granted
           : OnboardingRemoteAiResult.declined;
     } on Object {
@@ -88,16 +86,11 @@ final class SupabaseOnboardingRemoteAiGateway
       return OnboardingRemoteAiResult.authenticationRequired;
     }
     try {
-      await client!
-          .rpc(
-            'bil_record_consent',
-            params: <String, Object?>{
-              'p_purpose': 'remote_ai',
-              'p_policy_version': '3',
-              'p_granted': granted,
-            },
-          )
-          .timeout(_rpcTimeout);
+      final coordinator = sharedRemoteAiConsentCoordinator(client!);
+      final verified = await (granted
+          ? coordinator.grantAndVerify()
+          : coordinator.revokeAndVerify());
+      if (!verified) return OnboardingRemoteAiResult.failed;
       return granted
           ? OnboardingRemoteAiResult.granted
           : OnboardingRemoteAiResult.declined;

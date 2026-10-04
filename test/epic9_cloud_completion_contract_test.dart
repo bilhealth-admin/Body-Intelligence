@@ -60,11 +60,27 @@ void main() {
   test(
     'authenticated repository covers privacy social safety and moderation loops',
     () {
+      const repositoryRoot = 'lib/features/community/data/';
+      final repositoryEntry = source(
+        '${repositoryRoot}community_repository.dart',
+      );
+      final repositoryParts = RegExp(
+        r"^part '([^']+)';",
+        multiLine: true,
+      ).allMatches(repositoryEntry).map((match) => match.group(1)!).toList();
+      expect(
+        repositoryParts,
+        containsAll(<String>[
+          'community_repository_profile_moderation_mixin.dart',
+          'community_repository_connections_messaging_mixin.dart',
+        ]),
+      );
       final repository = <String>[
-        source('lib/features/community/data/community_repository.dart'),
+        repositoryEntry,
         source(
           'lib/features/community/data/community_social_repository_mixin.dart',
         ),
+        ...repositoryParts.map((part) => source('$repositoryRoot$part')),
       ].join('\n');
       for (final method in <String>[
         'searchProfiles',
@@ -84,6 +100,29 @@ void main() {
       ]) {
         expect(repository, contains(method), reason: method);
       }
+      final profileRepository = source(
+        '${repositoryRoot}community_repository_profile_moderation_mixin.dart',
+      );
+      final profileWrite = profileRepository.substring(
+        profileRepository.indexOf('Future<void> saveMyProfile('),
+        profileRepository.indexOf('void invalidateCommunityModeratorStatus()'),
+      );
+      expect(profileWrite, contains('CommunityTextPolicy.enforceAll'));
+      expect(
+        profileWrite,
+        contains("await _client.from('bil_public_profiles').upsert"),
+      );
+      expect(profileWrite, contains("'user_id': _user.id"));
+      expect(profileWrite, contains("'profile_visibility': visibility.name"));
+      expect(profileWrite, contains("onConflict: 'user_id'"));
+      expect(
+        profileWrite.indexOf('CommunityTextPolicy.enforceAll'),
+        lessThan(
+          profileWrite.indexOf(
+            "await _client.from('bil_public_profiles').upsert",
+          ),
+        ),
+      );
     },
   );
 
@@ -158,7 +197,55 @@ void main() {
       expect(androidActivity, contains('"providerStatus"'));
       expect(androidActivity, contains('"takeInitialPayload"'));
       expect(androidActivity, contains('override fun onNewIntent'));
-      expect(service, contains('!await _androidProviderReady()'));
+      expect(
+        service,
+        contains(
+          'bool get ready => configured && tokenRegistration && remoteTapRouting',
+        ),
+      );
+      expect(service, contains('PushProviderCapability.unavailable()'));
+      expect(service, contains('on MissingPluginException'));
+      expect(service, contains('on PlatformException'));
+      final enable = service.substring(
+        service.indexOf('Future<void> setEnabled('),
+        service.indexOf('/// Reconciles a durable provider token'),
+      );
+      expect(
+        enable,
+        contains('final capability = await _tokenProvider.capability();'),
+      );
+      expect(
+        enable,
+        contains(
+          "if (!capability.ready) throw StateError('Push provider is not ready');",
+        ),
+      );
+      expect(
+        enable.indexOf('if (!capability.ready)'),
+        lessThan(enable.indexOf('await _requestAndRegisterCurrentToken(')),
+      );
+      final resume = service.substring(
+        service.indexOf('Future<void> refreshRegistrationIfEnabled('),
+        service.indexOf('Future<void> syncDeliveryPreferences('),
+      );
+      final resumeSteps = <String>[
+        'if (!isAvailable) return;',
+        'if (user == null) return;',
+        'if (await _registrationPolicyStore.isExplicitlyDisabled(user.id)) return;',
+        'final capability = await _tokenProvider.capability();',
+        'if (!capability.ready || !capability.permissionGranted) return;',
+        'final token = await _tokenProvider.existingPermissionToken();',
+        'if (token == null || token.isEmpty) return;',
+        'await _registerToken(token, deliveryPreferences);',
+      ];
+      var previousStep = -1;
+      for (final step in resumeSteps) {
+        expect(resume, contains(step), reason: step);
+        final position = resume.indexOf(step);
+        expect(position, greaterThan(previousStep), reason: step);
+        previousStep = position;
+      }
+      expect(resume, isNot(contains('_tokenProvider.requestToken(')));
       expect(android, contains('android:scheme="bil"'));
       expect(android, contains('.BILFirebaseMessagingService'));
       expect(android, contains('com.google.firebase.MESSAGING_EVENT'));

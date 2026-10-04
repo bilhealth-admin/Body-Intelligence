@@ -272,6 +272,10 @@ SubscriptionState _premium() => SubscriptionState(
   plan: CommercePlan.pro,
   entitlements: const {CommerceEntitlement.advancedIntelligence},
   authority: EntitlementAuthority.verifiedServer,
+  // A paid fixture must carry the same bounded period as a genuine verified
+  // server snapshot; the production Access view rejects missing boundaries.
+  startedAt: DateTime.now().toUtc().subtract(const Duration(days: 1)),
+  currentPeriodEndsAt: DateTime.now().toUtc().add(const Duration(days: 7)),
   isPurchasable: true,
   canRestorePurchases: true,
 );

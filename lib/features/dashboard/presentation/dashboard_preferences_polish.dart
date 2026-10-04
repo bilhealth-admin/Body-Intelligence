@@ -1,5 +1,53 @@
 part of 'dashboard_preferences_page.dart';
 
+class _DashboardResponsiveActionTile extends StatelessWidget {
+  const _DashboardResponsiveActionTile({
+    required this.tileKey,
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+    required this.trailing,
+    required this.onTap,
+  });
+
+  final Key tileKey;
+  final Widget leading;
+  final Widget title;
+  final Widget subtitle;
+  final Widget trailing;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+      // Keep the normal 100% ListTile unchanged. At narrow large-text widths,
+      // side accessories otherwise reserve most of the label's line width.
+      final stacked = scale > 1 && constraints.maxWidth < 340 * scale;
+      return ListTile(
+        key: tileKey,
+        leading: stacked ? null : leading,
+        title: stacked
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [leading, trailing],
+                  ),
+                  const SizedBox(height: 8),
+                  title,
+                ],
+              )
+            : title,
+        subtitle: subtitle,
+        trailing: stacked ? null : trailing,
+        onTap: onTap,
+      );
+    },
+  );
+}
+
 class _DashboardPreferencesHero extends StatelessWidget {
   const _DashboardPreferencesHero({
     required this.title,

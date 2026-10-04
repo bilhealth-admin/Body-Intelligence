@@ -53,10 +53,10 @@ class _DashboardPreferencesPageState
 
   @override
   Widget build(BuildContext context) {
-    final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
-    final entitlementResolved = verifiedSubscription.hasValue;
+    final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
+    final entitlementResolved = verifiedSubscription.asData != null;
     final paid =
-        verifiedSubscription.value?.grants(
+        verifiedSubscription.asData?.value.grants(
           CommerceEntitlement.advancedIntelligence,
         ) ??
         false;
@@ -526,8 +526,8 @@ class _DashboardPreferencesPageState
                         'إضافة بطاقات أهداف المغذيات، ميزة Premium مقفلة',
                       ),
                 button: entitlementResolved || verifiedSubscription.hasError,
-                child: ListTile(
-                  key: const Key('dashboard-add-nutrient-goal-cards'),
+                child: _DashboardResponsiveActionTile(
+                  tileKey: const Key('dashboard-add-nutrient-goal-cards'),
                   leading: Consumer(
                     builder: (context, ref, _) {
                       final state = ref.watch(
@@ -635,12 +635,15 @@ class _DashboardPreferencesPageState
                         )
                       : const Icon(Icons.chevron_right_rounded),
                   onTap: () {
-                    if (verifiedSubscription.hasError) {
+                    final currentAccess = ref.read(
+                      verifiedSubscriptionAccessProvider,
+                    );
+                    if (currentAccess.hasError) {
                       ref.invalidate(verifiedSubscriptionStateProvider);
                       return;
                     }
-                    if (!entitlementResolved || _saving) return;
-                    if (!paid) {
+                    if (currentAccess.asData == null || _saving) return;
+                    if (!_hasCurrentNutrientAccess) {
                       _showLockedNutrientPreview(context);
                       return;
                     }

@@ -33,11 +33,7 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
   String get languageCode =>
       Localizations.localeOf(context).languageCode.toLowerCase();
   bool get arabic => languageCode == 'ar';
-  String copy(String key) {
-    final authored = _bodyContextCopy[languageCode]?[key];
-    if (authored != null) return authored;
-    return dailyBodyContextCopy(context, key);
-  }
+  String copy(String key) => dailyBodyContextCopy(context, key);
 
   String labelFor(String value) => copy(value);
 
@@ -191,74 +187,3 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
     );
   }
 }
-
-const _bodyContextCopy = <String, Map<String, String>>{
-  'ar': {
-    'title': 'سياق الجسم',
-    'poorSleep': 'نوم أقل من المعتاد',
-    'greatSleep': 'نوم ممتاز',
-    'travel': 'سفر',
-    'fasting': 'صيام',
-    'highSodiumMeal': 'وجبة عالية الصوديوم',
-    'hardWorkout': 'تمرين قوي',
-    'psychologicalStress': 'إجهاد نفسي',
-    'illnessSymptoms': 'مرض أو أعراض',
-    'medication': 'تناول دواء',
-    'lessWater': 'شرب ماء أقل من المعتاد',
-    'moreWater': 'شرب ماء أكثر من المعتاد',
-    'constipation': 'إمساك',
-    'nothingNotable': 'لا يوجد شيء مميز',
-    'other': 'أخرى',
-  },
-  'fr': {
-    'title': 'Contexte corporel',
-    'poorSleep': 'Moins dormi que d’habitude',
-    'greatSleep': 'Excellent sommeil',
-    'travel': 'Voyage',
-    'fasting': 'Jeûne',
-    'highSodiumMeal': 'Repas riche en sodium',
-    'hardWorkout': 'Entraînement intense',
-    'psychologicalStress': 'Stress psychologique',
-    'illnessSymptoms': 'Maladie ou symptômes',
-    'medication': 'Prise de médicament',
-    'lessWater': 'Moins d’eau que d’habitude',
-    'moreWater': 'Plus d’eau que d’habitude',
-    'constipation': 'Constipation',
-    'nothingNotable': 'Rien à signaler',
-    'other': 'Autre',
-  },
-  'es': {
-    'title': 'Contexto corporal',
-    'poorSleep': 'Menos sueño de lo habitual',
-    'greatSleep': 'Sueño excelente',
-    'travel': 'Viaje',
-    'fasting': 'Ayuno',
-    'highSodiumMeal': 'Comida alta en sodio',
-    'hardWorkout': 'Entrenamiento intenso',
-    'psychologicalStress': 'Estrés psicológico',
-    'illnessSymptoms': 'Enfermedad o síntomas',
-    'medication': 'Medicación',
-    'lessWater': 'Menos agua de lo habitual',
-    'moreWater': 'Más agua de lo habitual',
-    'constipation': 'Estreñimiento',
-    'nothingNotable': 'Nada destacable',
-    'other': 'Otro',
-  },
-  'tr': {
-    'title': 'Vücut bağlamı',
-    'poorSleep': 'Her zamankinden az uyku',
-    'greatSleep': 'Mükemmel uyku',
-    'travel': 'Seyahat',
-    'fasting': 'Oruç',
-    'highSodiumMeal': 'Yüksek sodyumlu öğün',
-    'hardWorkout': 'Yoğun egzersiz',
-    'psychologicalStress': 'Psikolojik stres',
-    'illnessSymptoms': 'Hastalık veya belirtiler',
-    'medication': 'İlaç kullanımı',
-    'lessWater': 'Her zamankinden az su',
-    'moreWater': 'Her zamankinden fazla su',
-    'constipation': 'Kabızlık',
-    'nothingNotable': 'Dikkate değer bir şey yok',
-    'other': 'Diğer',
-  },
-};

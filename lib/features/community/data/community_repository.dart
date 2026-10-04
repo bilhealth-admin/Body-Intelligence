@@ -18,6 +18,7 @@ import '../domain/community_rewards.dart';
 import '../domain/community_text_policy.dart';
 import '../domain/community_topics.dart';
 import '../services/community_post_image_picker.dart';
+import '../services/community_publish_operation_service.dart';
 import 'community_post_cloud_store.dart';
 import 'community_feed_repository_mixin.dart';
 import 'community_social_repository_mixin.dart';
@@ -64,6 +65,13 @@ class CommunityRepository
 
   bool get useServerCommunityReferenceParity =>
       _client.auth.currentUser != null;
+
+  @override
+  bool get useServerIdempotentCommunityPublishing =>
+      _postStore == null && _client.auth.currentUser != null;
+
+  Future<bool> cancelPendingPublishOperation() =>
+      CommunityPublishOperationService(_client, _user.id).cancelPending();
 
   @override
   Future<T> runCommunitySocialMutation<T>(Future<T> Function() mutation) =>

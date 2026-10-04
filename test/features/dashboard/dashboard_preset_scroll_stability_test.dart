@@ -26,12 +26,19 @@ void main() {
         addTearDown(tester.view.reset);
         final database = AppDatabase.forTesting(NativeDatabase.memory());
         addTearDown(database.close);
+        addTearDown(() async {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        });
         final repository = _DeferredPresetRepository(database, failSave);
         await repository.set('dashboard.preset', 'calorie');
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
               preferencesRepositoryProvider.overrideWithValue(repository),
+              verifiedEntitlementClockProvider.overrideWithValue(
+                () => DateTime.utc(2026, 10, 4),
+              ),
               verifiedSubscriptionStateProvider.overrideWithValue(
                 AsyncData(
                   SubscriptionState(
@@ -40,6 +47,8 @@ void main() {
                       CommerceEntitlement.advancedIntelligence,
                     },
                     authority: EntitlementAuthority.verifiedServer,
+                    startedAt: DateTime.utc(2026, 10, 1),
+                    currentPeriodEndsAt: DateTime.utc(2026, 11, 1),
                     isPurchasable: true,
                     canRestorePurchases: true,
                   ),

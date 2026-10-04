@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "recovered_at_utc": "2026-10-04T09:01:14Z",
+  "recovery_method": "Copy-Item of the two exact validated existing metadata files; no regeneration or label changes",
+  "source_root": "G:/BIL_Project/body_intelligence_log/artifacts/meal_catalog",
+  "files": [
+    {
+      "filename": "recipe_canonical_100_verified.json",
+      "sha256": "6662e70c45c9abe68e4889d96dd50bc372bb042363910f751f9bc48ba9f3f716",
+      "bytes": 1915502,
+      "original_file_last_modified_utc_observed": "2026-08-30T06:20:21.1268828Z",
+      "record_count": 100,
+      "image_status_counts_preserved": {
+        "generated-visual-reviewed": 82,
+        "human-reviewed": 18
+      }
+    },
+    {
+      "filename": "existing_recipe_canonical_seeds.json",
+      "sha256": "279ca4d3e95b37d2d98ae7fa73f6f148f4545fe04d415d8b3943705afc96b02a",
+      "bytes": 55251,
+      "original_file_last_modified_utc_observed": "2026-08-10T20:29:19.9010524Z",
+      "record_count": 18,
+      "image_status_counts_preserved": {
+        "existing-unreviewed": 18
+      }
+    }
+  ],
+  "boundaries": [
+    "Original file modification times are observations, not newly certified review dates.",
+    "Historical visual and nutrition labels are preserved metadata, not fresh acceptance or nutrition proof.",
+    "Tests verify nonempty exact record counts and unique fingerprints, with exact image hashes against current assets.",
+    "The 82 generated-state records are checked across every generated-* status, including generated-visual-reviewed.",
+    "No image bytes were copied or generated, no runtime catalog was replaced, and no marketed claims were changed.",
+    "No historical visual truth matrix or independent visual approvals were recovered; their current-byte mismatches remain unresolved.",
+    "These fixtures do not establish current reference parity, device behavior, StoreKit, Google Play Billing, or Production behavior."
+  ]
+}

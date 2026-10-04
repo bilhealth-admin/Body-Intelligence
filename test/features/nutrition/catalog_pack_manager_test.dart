@@ -43,7 +43,10 @@ void main() {
       sizeBytes: bytes.length,
       access: CatalogPackAccess.pro,
     );
-    final manager = CatalogPackManager(rootResolver: () async => root);
+    final manager = CatalogPackManager(
+      rootResolver: () async => root,
+      allowLoopbackHttpForTesting: true,
+    );
 
     final installed = await manager.install(pack);
     expect(await File(installed.path).readAsBytes(), bytes);
@@ -65,7 +68,10 @@ void main() {
       await root.delete(recursive: true);
     });
 
-    final manager = CatalogPackManager(rootResolver: () async => root);
+    final manager = CatalogPackManager(
+      rootResolver: () async => root,
+      allowLoopbackHttpForTesting: true,
+    );
     final pack = CatalogPack(
       id: 'tampered',
       version: '1',
@@ -94,7 +100,10 @@ void main() {
       await root.delete(recursive: true);
     });
 
-    final manager = CatalogPackManager(rootResolver: () async => root);
+    final manager = CatalogPackManager(
+      rootResolver: () async => root,
+      allowLoopbackHttpForTesting: true,
+    );
     final pack = CatalogPack(
       id: 'usda-core',
       version: '2026.08',

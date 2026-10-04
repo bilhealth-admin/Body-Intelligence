@@ -43,7 +43,7 @@ void main() {
     }
   });
 
-  test('Apple privacy manifest matches the current linked-data boundary', () {
+  test('Apple app-owned privacy manifest matches the linked-data boundary', () {
     final manifest = File(
       'ios/Runner/PrivacyInfo.xcprivacy',
     ).readAsStringSync();
@@ -59,6 +59,7 @@ void main() {
       'NSPrivacyCollectedDataTypeFitness',
       'NSPrivacyCollectedDataTypeUserID',
       'NSPrivacyCollectedDataTypeDeviceID',
+      'NSPrivacyCollectedDataTypeContacts',
       'NSPrivacyCollectedDataTypeOtherUserContent',
       'NSPrivacyCollectedDataTypeCustomerSupport',
       'NSPrivacyCollectedDataTypeEmailsOrTextMessages',
@@ -100,15 +101,86 @@ void main() {
       );
     }
 
+    // These are app-owned declarations only. Linked SDKs supply their own
+    // manifests; Runner's values do not certify the Xcode aggregate or labels.
     for (final excluded in <String>[
       'NSPrivacyCollectedDataTypeAudioData',
       'NSPrivacyCollectedDataTypeAdvertisingData',
       'NSPrivacyCollectedDataTypeCrashData',
-      'NSPrivacyCollectedDataTypeContacts',
       'NSPrivacyCollectedDataTypePreciseLocation',
     ]) {
       expect(manifest, isNot(contains(excluded)));
     }
+  });
+
+  test('app-owned Community UUID relationships are disclosed as Contacts', () {
+    final manifest = File(
+      'ios/Runner/PrivacyInfo.xcprivacy',
+    ).readAsStringSync();
+    final contacts = _declarationFor(
+      manifest,
+      'NSPrivacyCollectedDataTypeContacts',
+    );
+    expect(contacts, isNotEmpty);
+    expect(
+      contacts,
+      contains('NSPrivacyCollectedDataTypePurposeAppFunctionality'),
+    );
+    expect(
+      contacts,
+      contains('NSPrivacyCollectedDataTypePurposeProductPersonalization'),
+    );
+
+    final connections = _librarySource(
+      'lib/features/community/data/community_repository.dart',
+    );
+    final social = File(
+      'lib/features/community/data/community_social_repository_mixin.dart',
+    ).readAsStringSync();
+    expect(connections, contains("rpc('bil_follow_member'"));
+    expect(connections, contains("'p_followed_id': userId"));
+    expect(social, contains("'bil_social_request_friend_v2'"));
+    expect(social, contains("'p_user_id': addresseeId"));
+
+    final foundation = File(
+      'supabase/migrations/202608020002_bil_community_foundation.sql',
+    ).readAsStringSync();
+    final follows = File(
+      'supabase/migrations/202608040002_bil_community_cloud_completion.sql',
+    ).readAsStringSync();
+    for (final field in ['requester_id', 'addressee_id']) {
+      expect(
+        foundation,
+        contains('$field uuid not null references auth.users(id)'),
+      );
+    }
+    for (final field in ['follower_id', 'followed_id']) {
+      expect(
+        follows,
+        contains('$field uuid not null references auth.users(id)'),
+      );
+    }
+    final friendWrite = File(
+      'supabase/migrations/20261003011205_community_profileless_friend_request_e2e_20261003.sql',
+    ).readAsStringSync();
+    final followWrite = File(
+      'supabase/migrations/20260924071037_community_current_build_backend_repairs.sql',
+    ).readAsStringSync();
+    expect(friendWrite, contains('v_actor uuid := (select auth.uid())'));
+    expect(friendWrite, contains('values (v_actor, p_addressee_id)'));
+    expect(followWrite, contains('values (v_actor, p_followed_id)'));
+
+    final feed = File(
+      'supabase/migrations/20261003093710_community_feed_modes_v1.sql',
+    ).readAsStringSync();
+    expect(feed, contains("when p_mode<>'for_you' then 0"));
+    expect(
+      feed,
+      contains('f.requester_id=v_uid and f.addressee_id=p.author_id'),
+    );
+    expect(feed, contains('f.follower_id=v_uid and f.followed_id=p.author_id'));
+    expect(feed, contains('then 40 else 0 end'));
+    expect(feed, contains('then 30 else 0 end'));
   });
 
   test('source evidence supports search, support, performance and diagnostics', () {
@@ -310,11 +382,30 @@ void main() {
     }
     expect(coachUi, contains('.grantAndVerify()'));
     expect(coachConsentCoordinator, contains("'p_policy_version': '3'"));
+    final grantStart = coachConsentCoordinator.indexOf(
+      'Future<bool> _grantCurrent(',
+    );
+    final revokeStart = coachConsentCoordinator.indexOf(
+      'Future<bool> _revokeCurrent(',
+    );
+    expect(grantStart, greaterThanOrEqualTo(0));
+    expect(revokeStart, greaterThan(grantStart));
+    final grant = coachConsentCoordinator.substring(grantStart, revokeStart);
+    final write = grant.indexOf('await write().timeout(');
+    final readback = grant.indexOf('final receipt = await read().timeout(');
+    final verified = grant.indexOf('!isCurrentRemoteAiConsentGranted(receipt)');
+    final clearDenial = grant.indexOf('await _persistDenial(owner, false);');
+    expect(write, greaterThanOrEqualTo(0));
+    expect(readback, greaterThan(write));
+    expect(verified, greaterThan(readback));
+    expect(clearDenial, greaterThan(verified));
+    expect(grant, contains('_syncOwner() != owner'));
+    expect(grant, contains('_generation != generation'));
     expect(
-      coachConsentCoordinator,
-      contains('return _readCurrent(owner, generation);'),
+      grant.indexOf('_granted = true;'),
+      greaterThan(clearDenial),
       reason:
-          'Grant must finish with an authoritative policy-receipt readback.',
+          'Allow requires a current server receipt before durable denial clears.',
     );
     expect(
       mealConsent,
@@ -335,7 +426,7 @@ void main() {
     expect(mealConsentMigration, contains('to authenticated;'));
   });
 
-  test('public website and iOS release stay tracking-free', () {
+  test('public site has no beacons and iOS source has no ATT prompt', () {
     final siteApp = File('public_site/app.js').readAsStringSync();
     final siteIndex = File('public_site/index.html').readAsStringSync();
     final infoPlist = File('ios/Runner/Info.plist').readAsStringSync();

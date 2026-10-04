@@ -41,7 +41,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
     useSafeArea: true,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (sheetContext) => Padding(
+    builder: (sheetContext) => SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -83,7 +83,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
         useSafeArea: true,
         showDragHandle: true,
         isScrollControlled: true,
-        builder: (sheetContext) => Padding(
+        builder: (sheetContext) => SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -100,38 +100,42 @@ class _CommunityCreatorPanel extends StatelessWidget {
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 14),
-              _CreatorMetricRow(
-                icon: Icons.article_outlined,
-                label: communityText(
-                  sheetContext,
-                  'Approved moments',
-                  'اللحظات المعتمدة',
+              if (creator.postsVisible && creator.approvedPosts != null)
+                _CreatorMetricRow(
+                  icon: Icons.article_outlined,
+                  label: communityText(
+                    sheetContext,
+                    'Approved moments',
+                    'اللحظات المعتمدة',
+                  ),
+                  value: creator.approvedPosts.toString(),
                 ),
-                value: creator.approvedPosts.toString(),
-              ),
-              _CreatorMetricRow(
-                icon: Icons.people_outline_rounded,
-                label: communityText(sheetContext, 'Followers', 'المتابعون'),
-                value: creator.followers.toString(),
-              ),
-              _CreatorMetricRow(
-                icon: Icons.favorite_border_rounded,
-                label: communityText(
-                  sheetContext,
-                  'Likes received',
-                  'الإعجابات المستلمة',
+              if (creator.followersVisible && creator.followers != null)
+                _CreatorMetricRow(
+                  icon: Icons.people_outline_rounded,
+                  label: communityText(sheetContext, 'Followers', 'المتابعون'),
+                  value: creator.followers.toString(),
                 ),
-                value: creator.likesReceived.toString(),
-              ),
-              _CreatorMetricRow(
-                icon: Icons.mode_comment_outlined,
-                label: communityText(
-                  sheetContext,
-                  'Comments received',
-                  'التعليقات المستلمة',
+              if (creator.postsVisible && creator.likesReceived != null)
+                _CreatorMetricRow(
+                  icon: Icons.favorite_border_rounded,
+                  label: communityText(
+                    sheetContext,
+                    'Likes received',
+                    'الإعجابات المستلمة',
+                  ),
+                  value: creator.likesReceived.toString(),
                 ),
-                value: creator.commentsReceived.toString(),
-              ),
+              if (creator.postsVisible && creator.commentsReceived != null)
+                _CreatorMetricRow(
+                  icon: Icons.mode_comment_outlined,
+                  label: communityText(
+                    sheetContext,
+                    'Comments received',
+                    'التعليقات المستلمة',
+                  ),
+                  value: creator.commentsReceived.toString(),
+                ),
               _CreatorMetricRow(
                 icon: Icons.group_add_outlined,
                 label: communityText(
@@ -227,7 +231,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (creator.contributor)
+                if (creator.postsVisible && creator.contributor == true)
                   Chip(
                     avatar: const Icon(Icons.edit_note_rounded, size: 18),
                     label: Text(communityText(context, 'Contributor', 'مساهم')),
@@ -267,51 +271,65 @@ class _CommunityCreatorPanel extends StatelessWidget {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 10),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                childAspectRatio: 2.5,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                children: [
-                  _CreatorToolTile(
-                    key: const Key('community-creator-center'),
-                    icon: Icons.dashboard_customize_outlined,
-                    label: communityText(
-                      context,
-                      'Creator Center',
-                      'مركز صانع المحتوى',
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final largeText = MediaQuery.textScalerOf(context).scale(14);
+                  final columns = constraints.maxWidth >= 420 && largeText <= 21
+                      ? 2
+                      : 1;
+                  final width =
+                      (constraints.maxWidth - (columns - 1) * 10) / columns;
+                  final tools = <Widget>[
+                    _CreatorToolTile(
+                      key: const Key('community-creator-center'),
+                      icon: Icons.dashboard_customize_outlined,
+                      label: communityText(
+                        context,
+                        'Creator Center',
+                        'مركز صانع المحتوى',
+                      ),
+                      onTap: () => _openCreatorCenter(context),
                     ),
-                    onTap: () => _openCreatorCenter(context),
-                  ),
-                  _CreatorToolTile(
-                    key: const Key('community-creator-rewards'),
-                    icon: Icons.monetization_on_outlined,
-                    label: communityText(
-                      context,
-                      'Creator Rewards',
-                      'مكافآت صانع المحتوى',
+                    _CreatorToolTile(
+                      key: const Key('community-creator-rewards'),
+                      icon: Icons.monetization_on_outlined,
+                      label: communityText(
+                        context,
+                        'Creator Rewards',
+                        'مكافآت صانع المحتوى',
+                      ),
+                      onTap: () => context.push('/community/rewards'),
                     ),
-                    onTap: () => context.push('/community/rewards'),
-                  ),
-                  _CreatorToolTile(
-                    key: const Key('community-creator-certification'),
-                    icon: Icons.verified_user_outlined,
-                    label: communityText(context, 'Certification', 'الاعتماد'),
-                    onTap: () => _openCertification(context),
-                  ),
-                  _CreatorToolTile(
-                    key: const Key('community-creator-home'),
-                    icon: Icons.public_rounded,
-                    label: communityText(
-                      context,
-                      'Community home',
-                      'الصفحة الرئيسية للمجتمع',
+                    _CreatorToolTile(
+                      key: const Key('community-creator-certification'),
+                      icon: Icons.verified_user_outlined,
+                      label: communityText(
+                        context,
+                        'Certification',
+                        'الاعتماد',
+                      ),
+                      onTap: () => _openCertification(context),
                     ),
-                    onTap: () => context.go('/community'),
-                  ),
-                ],
+                    _CreatorToolTile(
+                      key: const Key('community-creator-home'),
+                      icon: Icons.public_rounded,
+                      label: communityText(
+                        context,
+                        'Community home',
+                        'الصفحة الرئيسية للمجتمع',
+                      ),
+                      onTap: () => context.go('/community'),
+                    ),
+                  ];
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      for (final tool in tools)
+                        SizedBox(width: width, child: tool),
+                    ],
+                  );
+                },
               ),
               if (goldBalance != null || quests.isNotEmpty) ...[
                 const SizedBox(height: 14),
@@ -535,25 +553,25 @@ class _CreatorToolTile extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     borderRadius: BorderRadius.circular(16),
     onTap: onTap,
-    child: Ink(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
           ),
-        ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(label, style: Theme.of(context).textTheme.labelLarge),
+            ),
+          ],
+        ),
       ),
     ),
   );

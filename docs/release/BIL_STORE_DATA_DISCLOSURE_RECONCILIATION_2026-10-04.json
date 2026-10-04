@@ -1,0 +1,796 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-04",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "production_project": "tgmanzhqulksykhslrzb",
+  "status": "PREBUILD_RECONCILIATION_REQUIRED_NOT_RELEASE_CERTIFICATION",
+  "field_level_delta_map": {
+    "path": "docs/release/BIL_STORE_METADATA_DELTA_MAP_2026-10-04.md",
+    "scope": "Partial ready-to-apply map of confirmed current Console/source-provider mismatches; not complete store answers or release certification",
+    "unknowns_not_to_guess": [
+      "All-user/all-region/all-distributed-version SDK Optionality",
+      "Actual iOS tracking and ATT behavior",
+      "SDK Developer Advertising actually configured use",
+      "Exact Android25.4/native producer mapping for currently unselected Crash Logs and Other Performance",
+      "Actual provider processor and retention conditions"
+    ]
+  },
+  "source_snapshot": {
+    "branch": "codex/prebuild-hardening-20261004",
+    "base_head": "ec40c6d9d411732bf40ecadf7017e68c6a805e48",
+    "dirty_worktree": true,
+    "scope": "Authored dirty-source snapshot at the stated base parent, plus explicitly attributed dated Console observations. The eventual clean commit and QA receipt bind the final documents externally; this base is not the resulting candidate SHA. No artifact was built.",
+    "protected_release_sha": "555496ebb6d6d3952c9e69e7bb6b9788269b39fa",
+    "preserve_android_build": 31,
+    "preserve_ios_build": 34
+  },
+  "evidence_rules": {
+    "source_fact": "A current producer, destination or gate in source; not a device/SDK transport experiment.",
+    "console_observation": "Read directly by the parent auditor on 2026-10-04; not independently re-read by this contract writer.",
+    "required_reconciliation": "A source/provider disclosure conflict or a missing fact that must be resolved before a truthful store declaration.",
+    "not_proved": [
+      "Signed-artifact SDK resolution",
+      "native SDK traffic before consent",
+      "all-region SDK opt-out",
+      "complete expanded current App Store privacy answers",
+      "every remaining Play Console field",
+      "native purchases",
+      "GitHub private signing-key/profile identity and native signing operation"
+    ],
+    "policy": "Never infer no collection from encryption, no AD_ID permission, contextual ads, disabled BIL analytics, or a client-side feature flag. Never infer third-party sharing or tracking exemptions without their actual conditions."
+  },
+  "primary_sources": [
+    {
+      "id": "gma_android",
+      "url": "https://developers.google.com/admob/android/privacy/play-data-disclosure",
+      "read_date": "2026-10-04",
+      "documented_sdk": "25.5.0",
+      "summary": "GMA documents automatic collection and sharing of IP-derived general location, interactions, diagnostics and identifiers for advertising, analytics and fraud prevention. Blocking Android ad ID alone does not establish that other data stops."
+    },
+    {
+      "id": "play_rules",
+      "url": "https://support.google.com/googleplay/android-developer/answer/10787469",
+      "read_date": "2026-10-04",
+      "summary": "SDK transfers count. IP-derived approximate location must be declared. Optional requires a choice for every user/device/region and every distributed version. Service-provider or user-initiated sharing exceptions require their conditions. Ephemeral requires real-time-only memory processing; retained logs or profiling do not qualify. Social graph is Contacts."
+    },
+    {
+      "id": "gma_ios",
+      "url": "https://developers.google.com/admob/ios/privacy/data-disclosure",
+      "read_date": "2026-10-04",
+      "summary": "Google lists possible IP/coarse location, non-user-related crash logs, user-associated performance, device identifiers, advertising data and interactions. It identifies advertising/analytics uses and requires checking actual SDK privacy manifests and mediation partners."
+    },
+    {
+      "id": "apple_rules",
+      "url": "https://developer.apple.com/app-store/app-privacy-details/",
+      "read_date": "2026-10-04",
+      "summary": "Disclose developer and integrated partner collection. Ongoing optional collection is still disclosed. Contacts includes social graph. Linked and tracking are separate; tracking involves cross-company advertising/measurement linkage or data brokers. Apple-only framework collection is not automatically developer collection."
+    },
+    {
+      "id": "gemini_terms",
+      "url": "https://ai.google.dev/gemini-api/terms",
+      "read_date": "2026-10-04",
+      "summary": "Current terms effective March 23, 2026 distinguish unpaid and paid handling. Unpaid may allow model improvement and human review; sensitive personal data must not be submitted there. Paid API treatment requires the actual API project to have active Cloud Billing and permits limited abuse/safety logging under the processor terms; it does not prove zero retention. Clinical practice and medical advice are prohibited; wellness-only boundaries still require behavior evidence."
+    }
+  ],
+  "release_configuration": {
+    "android_ads_enabled": {
+      "value": true,
+      "evidence": [
+        ".github/workflows/bil_android_release_candidate.yml:118",
+        ".github/workflows/bil_android_release_candidate.yml:213"
+      ]
+    },
+    "ios_ads_enabled": {
+      "value": true,
+      "evidence": [
+        ".github/workflows/bil_ios_signed_release.yml:241",
+        ".github/workflows/bil_ios_signed_release.yml:441"
+      ]
+    },
+    "ads_policy": {
+      "evidence": [
+        "lib/features/ads/domain/ad_policy.dart",
+        "lib/features/ads/services/admob_contextual_ad_gateway.dart:109",
+        "lib/features/ads/services/admob_contextual_ad_gateway.dart:121",
+        "lib/features/ads/services/admob_contextual_ad_gateway.dart:137"
+      ],
+      "facts": [
+        "Dart banner path is restricted to verified signed-in adult Free users and generalDiscovery placement.",
+        "UMP canRequestAds is read before banner initialization/loading.",
+        "AdRequest(nonPersonalizedAds:true); setSameAppKeyEnabled(false).",
+        "No health data, private chat or explicit personalized profile payload is passed to this AdRequest."
+      ],
+      "limitation": "These source restrictions do not prove all native SDK collection is absent for guests/declines, or that cross-company tracking cannot occur in every configured partner."
+    },
+    "dependency": {
+      "flutter_plugin": "google_mobile_ads 9.1.0",
+      "android_plugin_dependency": "play-services-ads 25.4.0; user-messaging-platform 4.0.0",
+      "ios_plugin_dependency_range": "Google-Mobile-Ads-SDK ~>13.7",
+      "evidence": [
+        "pubspec.lock",
+        "google_mobile_ads-9.1.0/android/build.gradle:71",
+        "google_mobile_ads-9.1.0/android/build.gradle:73",
+        "google_mobile_ads-9.1.0/ios/google_mobile_ads.podspec:18"
+      ],
+      "limitation": "Plugin cache dependency inspection is not the resolved final native artifact. Android disclosure page describes 25.5.0; iOS resolved Podfile.lock is unavailable in this checkout."
+    },
+    "own_observability": {
+      "evidence": [
+        "lib/app/services/app_observability.dart:78",
+        "lib/app/services/app_observability.dart:91"
+      ],
+      "facts": [
+        "BIL product analytics reports uploadsData=false.",
+        "BIL crash reporter is local-only."
+      ],
+      "limitation": "These implementations do not disable Google Mobile Ads SDK diagnostics or its analytics."
+    }
+  },
+  "current_play_console_observations": {
+    "attribution": "Parent auditor actual visible step-5 preview/readback on 2026-10-04, relayed in task messages.",
+    "overall_sharing": "No data shared with third parties",
+    "location_selected_count": "0/2",
+    "live_csv_readback": {
+      "evidence_filename": "data_safety_export (13).csv",
+      "exported_at_utc": "2026-10-04T11:01:10.570411Z",
+      "bytes": 176302,
+      "rows": 782,
+      "sha256": "68774b01d8a74eb62e7094528714a71106687051ff031ba2f29db76da4d13a56",
+      "attribution": "Root exported the actual current Console; this writer independently read Import-Csv schema, selected types and the eight scoped handling groups without importing or modifying the CSV.",
+      "selected_type_count": 18,
+      "selected_type_ids": [
+        "PSL_NAME", "PSL_EMAIL", "PSL_USER_ACCOUNT", "PSL_PHONE", "PSL_OTHER_PERSONAL",
+        "PSL_PURCHASE_HISTORY", "PSL_OTHER_MESSAGES", "PSL_PHOTOS", "PSL_AUDIO",
+        "PSL_HEALTH", "PSL_FITNESS", "PSL_CONTACTS", "PSL_PERFORMANCE_DIAGNOSTICS",
+        "PSL_USER_INTERACTION", "PSL_IN_APP_SEARCH_HISTORY", "PSL_USER_GENERATED_CONTENT",
+        "PSL_OTHER_APP_ACTIVITY", "PSL_DEVICE_ID"
+      ],
+      "blank_semantics": "The CSV uses an empty string for unselected/unanswered rows. Preserve it as blank, not a fabricated literal false. Collection/sharing IDs containing ONLY are MULTIPLE_CHOICE checkboxes labelled Collected and Shared; both may be selected.",
+      "reviewed_type_ids": [
+        "PSL_APPROX_LOCATION", "PSL_USER_INTERACTION", "PSL_PERFORMANCE_DIAGNOSTICS",
+        "PSL_DEVICE_ID", "PSL_CRASH_LOGS", "PSL_OTHER_PERFORMANCE", "PSL_AUDIO",
+        "PSL_IN_APP_SEARCH_HISTORY"
+      ],
+      "not_selected_with_all_handling_rows_blank": ["PSL_APPROX_LOCATION", "PSL_CRASH_LOGS", "PSL_OTHER_PERFORMANCE"],
+      "selected_handling": [
+        {"type": "PSL_USER_INTERACTION", "collected": "true", "shared": "", "ephemeral": "false", "optional": "true", "required": "", "collection_purposes": ["PSL_APP_FUNCTIONALITY", "PSL_ANALYTICS", "PSL_FRAUD_PREVENTION_SECURITY"], "sharing_purposes": []},
+        {"type": "PSL_PERFORMANCE_DIAGNOSTICS", "collected": "true", "shared": "", "ephemeral": "false", "optional": "true", "required": "", "collection_purposes": ["PSL_APP_FUNCTIONALITY", "PSL_ANALYTICS", "PSL_FRAUD_PREVENTION_SECURITY"], "sharing_purposes": []},
+        {"type": "PSL_DEVICE_ID", "collected": "true", "shared": "", "ephemeral": "false", "optional": "true", "required": "", "collection_purposes": ["PSL_APP_FUNCTIONALITY", "PSL_FRAUD_PREVENTION_SECURITY", "PSL_ACCOUNT_MANAGEMENT"], "sharing_purposes": []},
+        {"type": "PSL_AUDIO", "collected": "true", "shared": "", "ephemeral": "false", "optional": "true", "required": "", "collection_purposes": ["PSL_APP_FUNCTIONALITY"], "sharing_purposes": []},
+        {"type": "PSL_IN_APP_SEARCH_HISTORY", "collected": "true", "shared": "", "ephemeral": "true", "optional": "true", "required": "", "collection_purposes": ["PSL_APP_FUNCTIONALITY"], "sharing_purposes": []}
+      ],
+      "exact_sdk_baseline_delta": {
+        "status": "PROPOSED_NOT_IMPORTED_PARTIAL_MAP_NOT_COMPLETE_STORE_ANSWERS",
+        "scope": "Only four documented AdMob technical groups. All other types, existing selected purposes, account/health/photos/audio/search declarations and user-control choices remain unchanged.",
+        "row_count": 26,
+        "before_value_for_every_row": "",
+        "rows": [
+          {"question_id": "PSL_DATA_TYPES_LOCATION", "response_id": "PSL_APPROX_LOCATION", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:PSL_DATA_USAGE_COLLECTION_AND_SHARING", "response_id": "PSL_DATA_USAGE_ONLY_COLLECTED", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:PSL_DATA_USAGE_COLLECTION_AND_SHARING", "response_id": "PSL_DATA_USAGE_ONLY_SHARED", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:PSL_DATA_USAGE_EPHEMERAL", "response_id": "", "value": "false"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_ANALYTICS", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_FRAUD_PREVENTION_SECURITY", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ANALYTICS", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_FRAUD_PREVENTION_SECURITY", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_APPROX_LOCATION:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_USER_INTERACTION:PSL_DATA_USAGE_COLLECTION_AND_SHARING", "response_id": "PSL_DATA_USAGE_ONLY_SHARED", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_USER_INTERACTION:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_USER_INTERACTION:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ANALYTICS", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_USER_INTERACTION:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_FRAUD_PREVENTION_SECURITY", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_USER_INTERACTION:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:PSL_DATA_USAGE_COLLECTION_AND_SHARING", "response_id": "PSL_DATA_USAGE_ONLY_SHARED", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ANALYTICS", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_FRAUD_PREVENTION_SECURITY", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:PSL_DATA_USAGE_COLLECTION_AND_SHARING", "response_id": "PSL_DATA_USAGE_ONLY_SHARED", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_ANALYTICS", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_COLLECTION_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ANALYTICS", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_FRAUD_PREVENTION_SECURITY", "value": "true"},
+          {"question_id": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_SHARING_PURPOSE", "response_id": "PSL_ADVERTISING", "value": "true"}
+        ],
+        "not_a_complete_import": "New Approximate Location USER_CONTROL required/optional remains unverified and blank; existing Optional answers are observed, not certified. Do not choose them from this delta or claim a final save/import is validated.",
+        "no_ephemeral_exemption": "The new Location baseline uses false rather than asserting an unproved real-time-only retention exemption; this does not claim a measured SDK retention duration.",
+        "android_subtype_boundary": "Fresh official Android25.5 disclosure lists launch time/hang rate/energy under Diagnostics, not Crash Logs. No confirmed row delta for unselected PSL_CRASH_LOGS or PSL_OTHER_PERFORMANCE follows from that page or the separately inspected iOS vendor CrashData row. Exact native25.4 and additional producer inventory remain unproved.",
+        "speech_boundary": "Keep current PSL_AUDIO rows unchanged. Actual installed Android recognizer transport, retention and applicable user-initiated/processor sharing exception remain unverified; do not set audio Advertising or all-shared from AdMob.",
+        "search_boundary": "PSL_IN_APP_SEARCH_HISTORY EPHEMERAL=true is observed but retention proof remains missing. Current source food-search479/513/523-536 forwards query to optional translator/USDA; no retained-query proof or real-time-only provider/Edge deletion proof was found in this bounded path. Do not manufacture a true-to-false row change solely from missing evidence."
+      }
+    },
+    "known_fields": [
+      {
+        "type": "Diagnostics",
+        "optional": true,
+        "purposes": [
+          "App functionality",
+          "Analytics",
+          "Fraud prevention, security, and compliance"
+        ],
+        "advertising_purpose": false
+      },
+      {
+        "type": "App interactions",
+        "optional": true,
+        "purposes": [
+          "App functionality",
+          "Analytics",
+          "Fraud prevention, security, and compliance"
+        ],
+        "advertising_purpose": false
+      },
+      {
+        "type": "Device or other IDs",
+        "optional": true,
+        "purposes": [
+          "App functionality",
+          "Fraud prevention, security, and compliance",
+          "Account management"
+        ],
+        "advertising_purpose": false,
+        "analytics_purpose": false
+      },
+      {
+        "type": "Other in-app messages",
+        "optional": true,
+        "purposes": [
+          "App functionality"
+        ]
+      },
+      {
+        "type": "Photos",
+        "optional": true,
+        "purposes": [
+          "App functionality"
+        ]
+      },
+      {
+        "type": "Voice or sound recordings",
+        "optional": true,
+        "purposes": [
+          "App functionality"
+        ]
+      },
+      {
+        "type": "Contacts",
+        "optional": true,
+        "purposes": [
+          "App functionality"
+        ]
+      },
+      {
+        "type": "Health info / Fitness info",
+        "optional": true,
+        "purposes": [
+          "App functionality",
+          "Personalisation"
+        ]
+      },
+      {
+        "type": "Other user-generated content",
+        "optional": true,
+        "purposes": [
+          "App functionality",
+          "Personalisation"
+        ]
+      },
+      {
+        "type": "Other actions",
+        "optional": true,
+        "purposes": [
+          "App functionality",
+          "Fraud prevention, security, and compliance"
+        ]
+      },
+      {
+        "type": "In-app search history",
+        "selected": true,
+        "ephemeral_selected": true,
+        "preview_visibility": "Hidden as ephemeral; actual retention is not established by the checkbox"
+      }
+    ],
+    "unobserved_fields": [
+      "Exact Android25.4/native/additional-SDK producer behavior behind unselected Crash logs and Other app performance categories",
+      "All remaining personal/account/financial/usage fields",
+      "Entire sharing/collection/purpose/ephemeral detail for every category",
+      "Currently distributed older-version data behavior"
+    ]
+  },
+  "ads_play_reconciliation": {
+    "severity": "BLOCKER",
+    "result": "CURRENT_DECLARATION_CONFLICTS_WITH_ADS_DISCLOSURE_BASELINE",
+    "source": "gma_android",
+    "required_baseline": [
+      {
+        "type": "Approximate location",
+        "producer": "Ad request transport IP; no GPS permission is needed for coarse IP inference",
+        "collected": true,
+        "shared": true
+      },
+      {
+        "type": "App interactions",
+        "producer": "Google Mobile Ads SDK",
+        "collected": true,
+        "shared": true
+      },
+      {
+        "type": "Diagnostics / actual applicable performance categories",
+        "producer": "Google Mobile Ads SDK",
+        "collected": true,
+        "shared": true
+      },
+      {
+        "type": "Device or other IDs",
+        "producer": "Google Mobile Ads SDK; do not equate AD_ID removal to removal of every identifier",
+        "collected": true,
+        "shared": true
+      }
+    ],
+    "baseline_purposes_for_each_sdk_group": [
+      "Advertising or marketing",
+      "Analytics",
+      "Fraud prevention, security, and compliance"
+    ],
+    "precise_corrections": [
+      "Add the omitted approximate-location SDK flow.",
+      "Reconcile No third-party sharing with AdMob's documented sharing; do not automatically apply Supabase's processor exception to AdMob.",
+      "Add omitted Advertising/marketing purposes for the SDK groups; retain separately proven BIL purposes.",
+      "Reconcile Device/other IDs Analytics purpose.",
+      "Do not mark these SDK flows ephemeral without actual retention evidence."
+    ],
+    "optionality": {
+      "result": "UNVERIFIED_ALL_USERS_ALL_REGIONS",
+      "existing_console": "Optional",
+      "source_support": [
+        "Local guest continuation exists.",
+        "Dart banner requests require verified sign-in, adult Free status, and UMP allowance."
+      ],
+      "missing_proof": [
+        "Native SDK initialization/measurement behavior before Dart consent",
+        "Actual collection choices for every region/device",
+        "Behavior of every currently distributed Play version"
+      ],
+      "action": "Do not merely choose Required or Optional from this contract. Verify the complete installed SDK lifecycle and real controls. If any user/version requires the data collection, the Optional answer is unsupported."
+    },
+    "health_ads_boundary": "Never select Advertising/marketing or AdMob sharing for health, fitness, measurements, private messages, AI context or photos solely because unrelated technical SDK data is used for ads."
+  },
+  "bil_data_flows": [
+    {
+      "id": "account",
+      "evidence": [
+        "lib/features/auth/supabase_auth_service.dart:435",
+        "lib/features/auth/supabase_auth_service.dart:441",
+        "lib/features/auth/account_gateway_page.dart:47"
+      ],
+      "producer_destination": "User-chosen authentication/profile fields -> Supabase Auth/BIL account",
+      "play_types": [
+        "Name",
+        "Email address",
+        "Phone number when provided",
+        "User IDs",
+        "Other personal info when synchronized"
+      ],
+      "apple_types": [
+        "Name",
+        "Email Address",
+        "Phone Number when provided",
+        "User ID",
+        "Other Data Types where applicable"
+      ],
+      "purposes": [
+        "App functionality",
+        "Account management"
+      ],
+      "optionality": "Source supports sign-in-only collection with local guest continuation; verify other distributed versions before final Play Optional answer.",
+      "linked": "Yes for owner-bound account data",
+      "tracking": "No BIL advertising-linkage producer found in this inspected path; third-party OAuth/native SDK behavior remains separately reviewable.",
+      "sharing": "Supabase service-provider exception requires actual on-behalf processing terms; Auth collection is still declared."
+    },
+    {
+      "id": "selective_cloud",
+      "evidence": [
+        "lib/features/cloud_platform/providers/cloud_sync_providers.dart:273",
+        "lib/features/cloud_platform/services/cloud_manual_sync_service.dart:136",
+        "lib/features/cloud_platform/services/cloud_sync_consent_repository.dart",
+        "lib/features/cloud_platform/services/app_database_cloud_outbox_producer.dart:201"
+      ],
+      "producer_destination": "Explicit selective-sync opt-in -> encrypted owner-bound Supabase cloud records",
+      "actual_enabled_entities": [
+        "Profile",
+        "Weight",
+        "Hydration"
+      ],
+      "actual_profile_fields": [
+        "Gender",
+        "Age",
+        "Height",
+        "Current/target weight",
+        "Activity level",
+        "Exercise",
+        "Medical conditions",
+        "Body measurements",
+        "Date of birth",
+        "Country/region",
+        "Goal priorities"
+      ],
+      "play_types": [
+        "Health info",
+        "Fitness info",
+        "Other personal info",
+        "User IDs",
+        "Device or other IDs for sync revision"
+      ],
+      "apple_types": [
+        "Health",
+        "Fitness",
+        "Other Data Types",
+        "User ID",
+        "Device ID"
+      ],
+      "purposes": [
+        "App functionality",
+        "Personalisation where used"
+      ],
+      "optionality": "Explicit opt-in source; local functionality remains separate. Host/native withdrawal and installed-version evidence must accompany final metadata.",
+      "linked": "Yes, owner/device revisions remain linked",
+      "tracking": "No health-to-ad-targeting path identified here",
+      "sharing": "Processor exemption is conditional, not an assertion of no off-device collection.",
+      "not_proved": "Encrypted payloads are not established as end-to-end inaccessible to BIL; do not claim such an exemption."
+    },
+    {
+      "id": "remote_ai",
+      "evidence": [
+        "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart",
+        "lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart",
+        "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+        "supabase/functions/ai-coach/server.ts:814",
+        "supabase/functions/ai-coach/server.ts:1130",
+        "supabase/functions/analyze-meal/index.ts:105"
+      ],
+      "producer_destination": "Explicit current-policy AI consent -> authenticated BIL Edge -> configured AI provider",
+      "payload": [
+        "Question/transcript",
+        "Bounded relevant conversation/context",
+        "Selected nutrition/water, weight/goal, training/activity, sleep context",
+        "Meal photo only when image analysis is chosen"
+      ],
+      "play_types": [
+        "Other in-app messages",
+        "Health info",
+        "Fitness info",
+        "Photos when chosen",
+        "User IDs / Other actions for owner-linked usage ledger"
+      ],
+      "apple_types": [
+        "Emails or Text Messages",
+        "Health",
+        "Fitness",
+        "Photos or Videos when chosen",
+        "User ID",
+        "Other Data Types / Product Interaction for actual usage metadata"
+      ],
+      "purposes": [
+        "App functionality",
+        "Personalisation",
+        "Fraud/security for quota and provider-safety metadata"
+      ],
+      "optionality": "Explicit opt-in/decline source; failed withdrawal now has a durable owner-scoped deny repair pending exact-candidate QA.",
+      "linked": "BIL Auth and usage rows linked; absence of email in the AI payload alone does not prove every provider record is unlinked.",
+      "tracking": "No ad-targeting use of AI payload in inspected source",
+      "sharing": "Use processor or consent-based sharing exceptions only after proving their conditions for the actual provider/project.",
+      "unresolved": [
+        "Applicable processor agreement",
+        "Provider and Edge request-log retention"
+      ],
+      "current_provider_readback": {
+        "observed_date": "2026-10-04",
+        "deployed_vision_selector": "gemini",
+        "evidence": "Owner-authorized read-only Supabase CLI secret metadata: SHA256 for BIL_MEAL_VISION_PROVIDER matched only the public enum string gemini; no key value or digest was disclosed. Deployed v103 selector trims/lowercases this actual variable; absent would be legacy_gateway.",
+        "key_project_verified": true,
+        "key_project": "bil-health",
+        "key_project_evidence": "Full SHA256 of the existing BIL Vision Vertex Server key read privately in the actual Cloud Console matches the read-only Production BIL_GEMINI_API_KEY metadata digest. The separately named Gemini API Key does not match. The standard SHA256 implementation passed its known-vector self-check. No raw key or key digest is included in this document; the display was closed and private in-memory strings cleared.",
+        "key_api_restriction_visible": "Agent Platform API",
+        "vision_endpoint_override_present": true,
+        "vision_model_override_present": true,
+        "vision_endpoint": "https://aiplatform.googleapis.com/v1beta1/publishers/google",
+        "vision_endpoint_identity_verified": true,
+        "vision_endpoint_evidence": "Fresh owner-authorized Supabase CLI metadata had the full64hex SHA256 schema. The single v1beta1 Express base derived from Google's official generateContent endpoint and publisher-model format matched the entire deployed BIL_GEMINI_VISION_ENDPOINT digest. The raw key and digest are not included. No setting was changed and no provider request was made.",
+        "vision_endpoint_reference": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/express-mode/rest/v1beta1/publishers.models/generateContent",
+        "provider_service": "Vertex Express / current Gemini Enterprise Agent Platform",
+        "vision_model": "gemini-3.7-flash",
+        "coach_primary_model": "gemini-3.8-flash",
+        "coach_fallback_model": "gemini-3.7-flash",
+        "coach_endpoint": "Same verified nonempty Vision override, as required by deployed v106 endpoint precedence",
+        "region_boundary": "Global aiplatform endpoint; no regional-processing guarantee proved",
+        "billing": "Actual Google Cloud Console showed Paid account and the Account management project grid links BIL Health / bil-health to that billing account",
+        "boundary": "Project, paid billing, full-digest endpoint identity and public model override identities are verified, not successful provider processing. The key label alone was not used as service proof. No key creation, rotation, export, setting change, account/payment change, provider request or legal agreement acceptance occurred. Applicable signed processor terms, project retention/logging settings and native/full AI runtime proof remain unverified."
+      },
+      "prohibition": "Do not label AI handling zero-retention, fully ephemeral, or training-excluded solely from an API key, quota table, pricing constants or UI consent."
+    },
+    {
+      "id": "community",
+      "evidence": [
+        "lib/features/community/data/community_repository.dart",
+        "lib/features/community/data/community_repository_connections_messaging_mixin.dart:16",
+        "lib/features/community/data/community_repository_publishing_mixin.dart:496"
+      ],
+      "producer_destination": "Explicit Community use -> BIL Supabase social graph, posts, messages, moderation and Storage",
+      "play_types": [
+        "Other user-generated content",
+        "Other in-app messages",
+        "Photos",
+        "Contacts for follower/friend graph",
+        "Name",
+        "User IDs",
+        "Other actions"
+      ],
+      "apple_types": [
+        "Other User Content",
+        "Emails or Text Messages",
+        "Photos or Videos",
+        "Contacts for social graph",
+        "Name",
+        "User ID",
+        "Product Interaction where stored"
+      ],
+      "purposes": [
+        "App functionality",
+        "Personalisation for actual feed/creator features",
+        "Fraud/security for moderation and abuse records"
+      ],
+      "optionality": "User-selected social features; ongoing stored data still requires Apple disclosure.",
+      "linked": "Yes, author/owner/recipient IDs are stored",
+      "tracking": "No social/health AdRequest payload producer found",
+      "sharing": "User-initiated public/social transfers may qualify only where intended recipients and consent are prominent. Private data is not exempt merely because RLS exists.",
+      "location": "Composer submits a user-typed location_label, not a GPS read. Classify actual structured location content separately; do not invent precise-GPS collection from the permission name."
+    },
+    {
+      "id": "notifications",
+      "evidence": [
+        "lib/features/notifications/services/community_push_service.dart:128",
+        "lib/features/notifications/services/community_push_service.dart:235"
+      ],
+      "producer_destination": "Permission/owner preferences -> owner-bound APNs/FCM token registration and provider delivery",
+      "play_types": [
+        "Device or other IDs",
+        "User IDs"
+      ],
+      "apple_types": [
+        "Device ID",
+        "User ID"
+      ],
+      "purposes": [
+        "App functionality",
+        "Developer communications when applicable"
+      ],
+      "optionality": "User preference/permission controls; prove actual token disable/readback in final candidate.",
+      "linked": "Yes, owner-bound token registry",
+      "tracking": "Push delivery alone is not evidence of cross-company advertising tracking",
+      "sharing": "Provider-processing exception requires actual scope/terms; do not merge tokens with the AdMob purpose."
+    },
+    {
+      "id": "commerce",
+      "evidence": [
+        "supabase/functions/verify-store-purchase/store_backend.ts:625",
+        "lib/features/commerce/repositories/server_entitlement_repository.dart"
+      ],
+      "producer_destination": "Store purchase identifiers/verification -> owner-bound BIL entitlement and credit ledger",
+      "play_types": [
+        "Purchase history",
+        "User IDs",
+        "Other actions for anti-replay/verification"
+      ],
+      "apple_types": [
+        "Purchase History",
+        "User ID",
+        "Other Data Types where applicable"
+      ],
+      "purposes": [
+        "App functionality",
+        "Fraud prevention, security, and compliance",
+        "Account management where actually used"
+      ],
+      "optionality": "Optional purchase path; existing paid ledger is still collection.",
+      "linked": "Yes",
+      "tracking": "No purchase-to-ads producer found in this inspected path",
+      "exclusions": "Native store-hosted payment credentials are not a BIL payment-card collection path. Do not add Payment Info without an actual producer."
+    },
+    {
+      "id": "search",
+      "evidence": [
+        "supabase/functions/food-search/index.ts:127",
+        "supabase/functions/food-search/index.ts:165"
+      ],
+      "producer_destination": "Authenticated user search -> BIL gateway -> USDA/catalog provider",
+      "play_types": [
+        "In-app search history"
+      ],
+      "apple_types": [
+        "Search History when retained beyond request servicing"
+      ],
+      "purposes": [
+        "App functionality"
+      ],
+      "optionality": "User-initiated search",
+      "linked": "BIL request authenticated; provider/log unlinking has not been established.",
+      "ephemeral": "UNVERIFIED; current Play checkbox says ephemeral, but absence of a search-history table does not establish request/provider log deletion.",
+      "sharing": "Assess actual processor or user-initiated exception; no blanket no-sharing assertion."
+    },
+    {
+      "id": "speech",
+      "evidence": [
+        "android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt:117",
+        "ios/Runner/BILSpeechBridge.swift:106",
+        "ios/Runner/BILSpeechBridge.swift:112"
+      ],
+      "producer_destination": "User-started microphone recognition -> installed Android recognition service / Apple Speech framework -> transcript",
+      "play_types": [
+        "Voice or sound recordings where recognition transmits off-device",
+        "Other in-app messages / UGC for submitted transcript"
+      ],
+      "apple_types": [
+        "Transcript category at BIL destination; Audio Data only if developer/partner collection is established, not automatically Apple-only framework collection"
+      ],
+      "purposes": [
+        "App functionality"
+      ],
+      "optionality": "Explicit start/permission; installed provider's actual processing must be checked.",
+      "facts": [
+        "Android bridge does not force an on-device recognizer.",
+        "iOS bridge does not require on-device recognition.",
+        "BIL/Gemini receives a transcript on the inspected Coach path, not raw recorded audio."
+      ],
+      "limitation": "Do not assert all speech recognition is local-only, or that raw audio is stored by BIL without evidence."
+    }
+  ],
+  "apple_reconciliation": {
+    "current_console_answers": {
+      "attribution": "Root auditor directly read the actual current App Store Connect privacy DOM on 2026-10-04; no edit/save/publish performed.",
+      "url": "https://appstoreconnect.apple.com/apps/6805349703/distribution/privacy",
+      "visible_publication_age": "Published 11 days ago",
+      "visible_types_count": 20,
+      "visible_types": [
+        "Search History", "Other User Content", "Emails or Text Messages",
+        "User ID", "Name", "Other Data Types", "Health", "Photos or Videos",
+        "Customer Support", "Purchase History", "Device ID", "Phone Number",
+        "Fitness", "Product Interaction", "Performance Data", "Email Address",
+        "Crash Data", "Other Diagnostic Data", "Other Usage Data", "Coarse Location"
+      ],
+      "absent_types": ["Contacts", "Advertising Data"],
+      "observed_details": [
+        {"type": "Coarse Location", "purposes": ["App Functionality"], "linked_row": true},
+        {"type": "Device ID", "purposes": ["App Functionality", "Analytics"], "linked_row": true},
+        {"type": "Product Interaction", "purposes": ["App Functionality"], "linked_row": true},
+        {"type": "Performance Data", "purposes": ["App Functionality"], "linked_row": true},
+        {"type": "Other Diagnostic Data", "purposes": ["App Functionality"], "linked_row": true},
+        {"type": "Crash Data", "purposes": ["App Functionality"], "linked_row": false, "evidence": "Actual See Details preview on 2026-10-04 places Crash Data under Data Not Linked to You"},
+        {"type": "User ID", "purposes": ["App Functionality", "Analytics"], "linked_row": true},
+        {"type": "Other Usage Data", "purposes": ["Analytics"], "linked_row": true},
+        {"type": "Other Data Types", "purposes": ["App Functionality", "Product Personalization", "Analytics"], "linked_row": true}
+      ],
+      "observed_advertising_purposes": "Not present among the inspected category purposes; do not extrapolate to unread expanded fields.",
+      "expanded_product_preview": {
+        "observed_date": "2026-10-04",
+        "tracking_section_visible": false,
+        "linked_preview": ["Search History", "Other User Content", "Emails or Text Messages", "Photos or Videos", "Customer Support", "User ID", "Device ID", "Name", "Phone Number", "Email Address", "Other Data", "Health", "Fitness", "Purchases", "Product Interaction", "Other Usage Data", "Performance Data", "Other Diagnostic Data", "Coarse Location"],
+        "unlinked_preview": ["Crash Data", "User ID", "Device ID", "Other Data"],
+        "boundary": "The actual Product Page Preview Details was read without edit/save/publish. Absence of a displayed tracking section does not prove the installed SDK cannot track or establish every unexpanded per-type answer. Linked/unlinked duplicates reflect the published union, not authority to erase one producer."
+      },
+      "unread": ["Explicit complete per-type tracking answers", "Unexpanded data handling details"]
+    },
+    "source_manifest": {
+      "path": "ios/Runner/PrivacyInfo.xcprivacy",
+      "own_tracking": false,
+      "own_tracking_domains": [],
+      "own_declared_categories_count": 18,
+      "candidate_contacts_repair": "ios/Runner/PrivacyInfo.xcprivacy:91 now declares BIL social-graph Contacts linked=true, tracking=false, AppFunctionality+ProductPersonalization. Exact-candidate test remains owned/scheduled by the root auditor.",
+      "note": "The app manifest's category list is not the complete integrated-SDK privacy report."
+    },
+    "verified_vendor_manifest": {
+      "attribution": "Independent static auditor inspected both device and simulator vendor manifests in memory; this writer independently verified the official Package.swift download URL/checksum and current Runner Contacts row.",
+      "vendor_version": "Google Mobile Ads iOS 13.7.0",
+      "package_source": "https://github.com/googleads/swift-package-manager-google-mobile-ads/blob/13.7.0/Package.swift",
+      "archive_url": "https://dl.google.com/googleadmobadssdk/e89ba382a6244f5c/googlemobileadsios-spm-13.7.0.zip",
+      "archive_sha256": "e89ba382a6244f5c8d92941015b12d98678689ebe14960eaa4c1d5951784a9c2",
+      "manifest_paths": [
+        "GoogleMobileAds.framework/PrivacyInfo.xcprivacy (device)",
+        "GoogleMobileAds.framework/PrivacyInfo.xcprivacy (simulator)"
+      ],
+      "rows": [
+        {"type": "OtherDiagnosticData", "linked": false, "tracking": false},
+        {"type": "CoarseLocation", "linked": true, "tracking": false},
+        {"type": "PerformanceData", "linked": false, "tracking": false},
+        {"type": "CrashData", "linked": false, "tracking": false},
+        {"type": "AdvertisingData", "linked": true, "tracking": false},
+        {"type": "ProductInteraction", "linked": true, "tracking": false},
+        {"type": "DeviceID", "linked": true, "tracking": true}
+      ],
+      "purposes": {
+        "all_except_CrashData": ["ThirdPartyAdvertising", "DeveloperAdvertising", "Analytics"],
+        "CrashData": ["Analytics"]
+      },
+      "boundary": "Exact vendor archive evidence, not the resolved BIL archive or proof of which optional/configurable SDK uses run in BIL. DeviceID tracking=true must be specifically reconciled, not erased by the app's own tracking=false declaration. Review DeveloperAdvertising against actual configured use rather than silently dropping it or asserting BIL uses its own marketing."
+    },
+    "required_additions_to_review": [
+      "Add absent Contacts for BIL's actual social graph; source manifest repair alone does not update the Console.",
+      "Add absent Advertising Data for the integrated AdMob impressions flow.",
+      "Coarse Location already exists: reconcile its App Functionality-only purpose with actual AdMob uses rather than claiming the category missing.",
+      "Crash Data already exists and the expanded product preview lists it as unlinked: reconcile its App Functionality-only purpose with vendor Analytics and any actual BIL producer; the preview is not final native transport proof.",
+      "Reconcile Third-Party Advertising and Analytics purposes for applicable SDK categories, and Developer Advertising where actual configured vendor use supports it.",
+      "Do not flip all diagnostic/performance categories to unlinked solely from the vendor manifest if BIL has a separate linked producer; reconcile the union of actual producers."
+    ],
+    "linked": "BIL owner-bound records are linked. The verified vendor 13.7 manifest distinguishes linked coarse location/advertising/interactions/device IDs from unlinked diagnostic/performance/crash rows. Do not replace those distinctions with a blanket linked or unlinked answer; verify the final resolved SDK/configuration.",
+    "tracking_att": {
+      "result": "UNVERIFIED_EXACT_PARTNER_CONFIGURATION",
+      "source_intent": "Non-personalized AdRequest; SameAppKey disabled; no ATT request or NSUserTrackingUsageDescription found in current BIL path. Verified vendor 13.7 manifest nevertheless declares DeviceID tracking=true.",
+      "needed": [
+        "Reconcile the verified vendor DeviceID tracking=true row with actual BIL SDK configuration; inspect every additional resolved SDK/mediation manifest",
+        "Prove no cross-company advertising/measurement linkage before asserting Tracking=false",
+        "If tracking occurs, correct consent and ATT behavior before release"
+      ],
+      "warning": "No IDFA request is not proof of no tracking. Conversely, the presence of an advertising SDK alone does not prove tracking."
+    },
+    "manifest_rule": "Do not automatically duplicate third-party SDK declarations in Runner's manifest or claim the app manifest invalid solely because an SDK-owned row is absent. Reconcile App Store answers against the aggregate report.",
+    "historical_documents_requiring_candidate_reconciliation": [
+      "docs/APP_STORE_PRIVACY_DATA_INVENTORY.md previously used iOS-ads-disabled assumptions; another auditor owns its candidate reconciliation.",
+      "docs/apple_preparation/APP_PRIVACY_RELEASE_MATRIX_2026-10-02.md is a historical 17-category/older-artifact record, not current Console evidence.",
+      "docs/apple_preparation/APP_PRIVACY_DRAFT.md is a historical local-only draft, not the current release data-flow contract."
+    ],
+    "artifact_boundary": "No build permitted: a final archive privacy report and exact native dependency/signature inventory remain release evidence gaps. This contract does not manufacture them."
+  },
+  "signing_inventory": {
+    "scope": "Read-only configured local Android upload-certificate listing with existing keystore password held only in the child process environment",
+    "local_android_upload_keystore_present": true,
+    "certificate_records_obtained": 1,
+    "validity_not_before": "2026-08-16T03:49:21+03:00",
+    "validity_not_after": "2054-01-01T02:49:21+02:00",
+    "sha1": "4B:EF:18:61:AA:B6:F1:69:20:EE:70:91:C7:67:1C:96:A4:F4:74:26",
+    "sha256": "3F:2B:98:2C:EA:87:67:A9:23:6E:36:6E:54:DB:D8:53:58:65:32:1E:9A:43:39:D0:47:11:09:63:DE:AE:7A:65",
+    "key_algorithm": "4096-bit RSA",
+    "certificate_signature_algorithm": "SHA384withRSA",
+    "integrity": "Configured password accepted by keytool; public certificate listing exited zero. No private-key export or signing operation was performed.",
+    "operations": "Existing key.properties password read privately, supplied using keytool -storepass:env, and removed from the process environment afterward. No credential printed, committed or exported. No signing, build, upload, certificate creation or store mutation.",
+    "play_console_readback": {
+      "observed_date": "2026-10-04",
+      "source": "Actual Google Play Console App signing page; read only, no key reset, certificate creation or release action",
+      "upload_key_sha256_matches_local": true,
+      "upload_key_sha1_matches_local": true,
+      "app_signing_sha256": "DE:CA:D2:7C:36:64:0E:2E:07:54:63:2A:BE:EF:A9:ED:ED:ED:9E:F6:D7:93:D9:50:0A:EB:B4:49:3D:43:08:F4",
+      "app_signing_evidence": "Current console Digital Asset Links JSON for com.bilhealth.bodyintelligencelog",
+      "live_www_assetlinks_status": 200,
+      "live_www_assetlinks_includes_console_app_signing_sha256": true,
+      "assetlinks_boundary": "The fetched www JSON also preserves two other fingerprints. Their identity was not independently established here; neither was removed. JSON inclusion is not an actual installed-device deep-link routing test."
+    },
+    "apple_signing_readback": {
+      "observed_date": "2026-10-04",
+      "method": "Existing AscClient signer; read-only official App Store Connect GET endpoints with origin/no-redirect guards; all three returned HTTP200",
+      "app_id": "6805349703",
+      "bundle_id": "com.bilhealth.bodyintelligencelog",
+      "certificate_id": "XFKGQ3N7AU",
+      "certificate_type": "DISTRIBUTION",
+      "expires_at": "2027-08-26T11:52:01Z",
+      "certificate_team_matches_source": true,
+      "team_id": "43F9Y5Y96K",
+      "certificate_sha256": "60:DF:21:06:B7:DD:9B:FE:5C:1F:66:8F:AD:97:FB:0A:DC:10:63:55:32:87:A6:5F:3A:15:F0:BF:D5:17:1A:66",
+      "app_store_profiles": [
+        {"id": "7DW2VH2W73", "state": "INVALID", "expires_at": "2027-08-26T11:52:01Z"},
+        {"id": "QF9L7AX67V", "state": "ACTIVE", "expires_at": "2027-08-26T11:52:01Z"}
+      ],
+      "profile_binding": "Both exact-BIL IOS_APP_STORE profiles reference the inspected certificate, bundle and seed team. The obsolete INVALID record was not deleted or recreated; an ACTIVE exact-BIL record exists.",
+      "boundary": "Public certificate validity/profile metadata only. No private key, JWT, certificate bytes or profile content persisted in this report. The opaque GitHub signing secrets were not matched and no native signing operation was attempted."
+    },
+    "distinction": "Local upload certificate and actual Console upload certificate match. The distinct actual Console app-signing fingerprint is present in live www assetlinks. Apple official certificate/team and exact-BIL ACTIVE profile metadata were read back. Existing GitHub secret names still do not establish private signing-key/profile identity or availability; native signing was not executed."
+  },
+  "closure_checklist": [
+    "Read and reconcile the entire current Play data form; retain exact observed-vs-unknown distinctions.",
+    "Correct Ads sharing/location/purpose contradictions, then save and independently read back actual Console fields.",
+    "Resolve SDK-global Optional/Required and ephemeral flags from actual installed lifecycle/retention and all distributed versions.",
+    "The deployed key is bound to paid bil-health and the actual endpoint is full-digest verified Vertex Express v1beta1. Verify applicable signed processor terms and project-level logging/retention before claiming sharing/training/retention exemptions. Provider runtime success remains unproved.",
+    "Read current App Store privacy answers and reconcile integrated Ads + social graph categories/purposes/linkage/tracking.",
+    "Update superseded privacy inventory documents without editing the protected release branch or frozen artifact bindings.",
+    "Rebind this contract to the exact committed candidate and verify disclosures against that candidate.",
+    "Do not sign owner legal declarations, build artifacts or submit reviews under this contract."
+  ],
+  "release_decision": "NOT READY FOR BUILD while these store-critical conflicts or mandatory evidence gaps remain unresolved"
+}

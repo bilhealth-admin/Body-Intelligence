@@ -169,10 +169,7 @@ void main() {
       final settings = File(
         'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
       ).readAsStringSync();
-      expect(
-        settings,
-        contains('sharedRemoteAiConsentCoordinator().invalidate()'),
-      );
+      expect(settings, contains('coordinator.revokeAndVerify()'));
       final page = File(
         'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
       ).readAsStringSync();

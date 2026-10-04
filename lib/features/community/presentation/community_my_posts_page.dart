@@ -30,6 +30,8 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
   bool _hasMore = false;
   bool _loadingMore = false;
   bool _deleting = false;
+  int _loadGeneration = 0;
+  bool _refreshing = false;
 
   void _refreshProfile() {
     if (!widget.showProfileHeader) return;
@@ -45,13 +47,22 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
   );
 
   Future<void> _loadInitial() async {
-    final batch = await widget.repository.loadMyPosts(limit: _pageSize);
-    _posts
-      ..clear()
-      ..addAll(batch.posts);
-    _before = batch.nextBefore;
-    _beforeId = batch.nextBeforeId;
-    _hasMore = batch.hasMore;
+    final generation = ++_loadGeneration;
+    _refreshing = true;
+    _loadingMore = false;
+    widget.repository.invalidateCommunityModeratorStatus();
+    try {
+      final batch = await widget.repository.loadMyPosts(limit: _pageSize);
+      if (!mounted || generation != _loadGeneration) return;
+      _posts
+        ..clear()
+        ..addAll(batch.posts);
+      _before = batch.nextBefore;
+      _beforeId = batch.nextBeforeId;
+      _hasMore = batch.hasMore;
+    } finally {
+      if (generation == _loadGeneration) _refreshing = false;
+    }
   }
 
   Future<void> _refresh() async {
@@ -68,9 +79,15 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
   }
 
   Future<void> _loadMore() async {
-    if (_loadingMore || !_hasMore || _before == null || _beforeId == null) {
+    if (_loadingMore ||
+        _refreshing ||
+        _deleting ||
+        !_hasMore ||
+        _before == null ||
+        _beforeId == null) {
       return;
     }
+    final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
       final batch = await widget.repository.loadMyPosts(
@@ -78,7 +95,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
         beforeId: _beforeId,
         limit: _pageSize,
       );
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       final known = _posts.map((post) => post.id).toSet();
       setState(() {
         _posts.addAll(batch.posts.where((post) => known.add(post.id)));
@@ -87,9 +104,11 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
         _hasMore = batch.hasMore;
       });
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && generation == _loadGeneration) _showFailure();
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _loadingMore = false);
+      }
     }
   }
 
@@ -123,7 +142,12 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
     try {
       await widget.repository.deletePost(post.id);
       if (!mounted) return;
-      setState(() => _posts.removeWhere((item) => item.id == post.id));
+      setState(() {
+        _loadGeneration++;
+        _loadingMore = false;
+        _refreshing = false;
+        _posts.removeWhere((item) => item.id == post.id);
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

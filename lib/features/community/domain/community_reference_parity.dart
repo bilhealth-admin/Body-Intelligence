@@ -67,14 +67,18 @@ class CommunityCreatorProfile {
     required this.certificationStatus,
     this.nextCommunityLevel,
     this.nextLevelMinXp,
+    this.postsVisible = true,
+    this.followersVisible = true,
   });
 
   final String userId;
-  final bool contributor;
-  final int approvedPosts;
-  final int followers;
-  final int likesReceived;
-  final int commentsReceived;
+  final bool postsVisible;
+  final bool followersVisible;
+  final bool? contributor;
+  final int? approvedPosts;
+  final int? followers;
+  final int? likesReceived;
+  final int? commentsReceived;
   final int qualifiedReferrals;
   final int communityXp;
   final int communityLevel;
@@ -97,8 +101,14 @@ class CommunityCreatorProfile {
   factory CommunityCreatorProfile.fromJson(Map<String, dynamic> json) {
     final userId = json['user_id'];
     final contributor = json['contributor'];
+    final postsVisible = json['posts_visible'];
+    final followersVisible = json['followers_visible'];
     final rawBadges = json['badges'];
-    if (userId is! String || contributor is! bool || rawBadges is! List) {
+    if (userId is! String ||
+        postsVisible is! bool ||
+        followersVisible is! bool ||
+        (postsVisible ? contributor is! bool : contributor != null) ||
+        rawBadges is! List) {
       throw const FormatException('Invalid Community creator projection');
     }
     final badges = List<CommunityCreatorBadge>.unmodifiable(
@@ -109,6 +119,19 @@ class CommunityCreatorProfile {
         return CommunityCreatorBadge.fromJson(Map<String, dynamic>.from(raw));
       }),
     );
+    if ((!postsVisible &&
+            badges.any(
+              (badge) => const {
+                'first_moment',
+                'contributor',
+                'conversation_starter',
+                'appreciated',
+              }.contains(badge.badgeKey),
+            )) ||
+        (!followersVisible &&
+            badges.any((badge) => badge.badgeKey == 'connector'))) {
+      throw const FormatException('Community creator privacy mismatch');
+    }
     final earned = _communityReferenceInt(
       json['earned_badge_count'],
       'earned_badge_count',
@@ -128,22 +151,23 @@ class CommunityCreatorProfile {
       return _communityReferenceInt(value, key);
     }
 
+    int? visibleInt(String key, bool visible) {
+      if (visible) return _communityReferenceInt(json[key], key);
+      if (json[key] != null) {
+        throw const FormatException('Community creator privacy mismatch');
+      }
+      return null;
+    }
+
     return CommunityCreatorProfile(
       userId: userId,
-      contributor: contributor,
-      approvedPosts: _communityReferenceInt(
-        json['approved_posts'],
-        'approved_posts',
-      ),
-      followers: _communityReferenceInt(json['followers'], 'followers'),
-      likesReceived: _communityReferenceInt(
-        json['likes_received'],
-        'likes_received',
-      ),
-      commentsReceived: _communityReferenceInt(
-        json['comments_received'],
-        'comments_received',
-      ),
+      contributor: contributor as bool?,
+      postsVisible: postsVisible,
+      followersVisible: followersVisible,
+      approvedPosts: visibleInt('approved_posts', postsVisible),
+      followers: visibleInt('followers', followersVisible),
+      likesReceived: visibleInt('likes_received', postsVisible),
+      commentsReceived: visibleInt('comments_received', postsVisible),
       qualifiedReferrals: _communityReferenceInt(
         json['qualified_referrals'],
         'qualified_referrals',

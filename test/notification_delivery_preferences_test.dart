@@ -40,6 +40,7 @@ void main() {
     final page = [
       'lib/features/notifications/presentation/notification_settings_page.dart',
       'lib/features/notifications/presentation/notification_settings_actions.dart',
+      'lib/features/notifications/presentation/notification_settings_delivery_controls.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final service = File(
       'lib/features/notifications/services/bil_notification_service.dart',

@@ -31,6 +31,15 @@ const _helpSurface = <String>{
 };
 
 void main() {
+  test('Urdu medical disclaimer retains all three safety limitations', () {
+    const source =
+        'No. BIL supports wellness tracking and does not diagnose, prescribe, or replace a qualified clinician.';
+    expect(
+      RuntimeCopy.resolve(source, 'ur'),
+      'نہیں۔ BIL صحت و تندرستی کی نگرانی میں مدد کرتا ہے۔ یہ بیماری کی تشخیص نہیں کرتا، علاج تجویز نہیں کرتا اور کسی مستند معالج کا متبادل نہیں ہے۔',
+    );
+  });
+
   test('help surface has direct copy for every extended locale', () {
     for (final source in _helpSurface) {
       for (final locale in ExtendedRuntimeCopy.supported) {

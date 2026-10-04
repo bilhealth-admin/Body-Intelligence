@@ -30,6 +30,8 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   int? _historyBeforeId;
   bool _historyHasMore = false;
   bool _historyLoadingMore = false;
+  int _loadGeneration = 0;
+  bool _refreshing = false;
   String? _claimingQuest;
   CommunityQuestCadence? _cadenceFilter;
   _HistoryFilter _historyFilter = _HistoryFilter.all;
@@ -57,39 +59,51 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   Future<_RewardsSnapshot> _load() async {
     final repository = _repository;
     if (repository == null) return const _RewardsSnapshot.signedOut();
-
-    final values = await Future.wait<Object>([
-      repository.loadGoldBalance(),
-      repository.loadCommunityQuests(),
-      repository.loadGoldHistory(limit: _historyPageSize),
-    ]);
-    final balance = values[0] as CommunityGoldBalance;
-    final quests = values[1] as List<CommunityQuest>;
-    final history = values[2] as List<CommunityGoldLedgerEntry>;
-
-    _history
-      ..clear()
-      ..addAll(history);
-    if (history.isEmpty) {
-      _historyBefore = null;
-      _historyBeforeId = null;
-      _historyHasMore = false;
-    } else {
-      _historyBefore = history.last.createdAt;
-      _historyBeforeId = history.last.id;
-      _historyHasMore = history.length == _historyPageSize;
+    final generation = ++_loadGeneration;
+    _refreshing = true;
+    _historyLoadingMore = false;
+    try {
+      final values = await Future.wait<Object>([
+        repository.loadGoldBalance(),
+        repository.loadCommunityQuests(),
+        repository.loadGoldHistory(limit: _historyPageSize),
+      ]);
+      final balance = values[0] as CommunityGoldBalance;
+      final quests = values[1] as List<CommunityQuest>;
+      final history = values[2] as List<CommunityGoldLedgerEntry>;
+      if (!mounted || generation != _loadGeneration) {
+        return _RewardsSnapshot(balance: balance, quests: quests);
+      }
+      _history
+        ..clear()
+        ..addAll(history);
+      if (history.isEmpty) {
+        _historyBefore = null;
+        _historyBeforeId = null;
+        _historyHasMore = false;
+      } else {
+        _historyBefore = history.last.createdAt;
+        _historyBeforeId = history.last.id;
+        _historyHasMore = history.length == _historyPageSize;
+      }
+      return _RewardsSnapshot(balance: balance, quests: quests);
+    } finally {
+      if (generation == _loadGeneration) _refreshing = false;
     }
-    return _RewardsSnapshot(balance: balance, quests: quests);
   }
 
   void _retry() {
     final next = _load();
-    setState(() => _snapshot = next);
+    setState(() {
+      _snapshot = next;
+    });
   }
 
   Future<void> _reloadAfterMutation() async {
     final next = _load();
-    setState(() => _snapshot = next);
+    setState(() {
+      _snapshot = next;
+    });
     try {
       await next;
     } on Object {
@@ -178,11 +192,13 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
     final repository = _repository;
     if (repository == null ||
         _historyLoadingMore ||
+        _refreshing ||
         !_historyHasMore ||
         _historyBefore == null ||
         _historyBeforeId == null) {
       return;
     }
+    final generation = _loadGeneration;
     setState(() => _historyLoadingMore = true);
     try {
       final next = await repository.loadGoldHistory(
@@ -190,7 +206,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         beforeId: _historyBeforeId,
         limit: _historyPageSize,
       );
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       final known = _history.map((entry) => entry.id).toSet();
       setState(() {
         _history.addAll(next.where((entry) => known.add(entry.id)));
@@ -203,7 +219,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         }
       });
     } catch (_) {
-      if (mounted) {
+      if (mounted && generation == _loadGeneration) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -217,7 +233,9 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         );
       }
     } finally {
-      if (mounted) setState(() => _historyLoadingMore = false);
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _historyLoadingMore = false);
+      }
     }
   }
 

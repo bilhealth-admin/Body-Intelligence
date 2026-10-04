@@ -25,6 +25,115 @@ abstract final class ExtendedRuntimeCopy {
     "uk",
   };
   static const values = <String, Map<String, String>>{
+    "Apply saved categories": {
+      "de": "Gespeicherte Kategorien anwenden",
+      "it": "Applica le categorie salvate",
+      "pt-BR": "Aplicar categorias salvas",
+      "pt-PT": "Aplicar categorias guardadas",
+      "ur": "محفوظ زمرے لاگو کریں",
+      "fa": "اعمال دسته‌های ذخیره‌شده",
+      "hi": "सहेजी गई श्रेणियाँ लागू करें",
+      "id": "Terapkan kategori tersimpan",
+      "ms": "Gunakan kategori tersimpan",
+      "ja": "保存したカテゴリを適用",
+      "ko": "저장된 카테고리 적용",
+      "zh-Hans": "应用已保存的类别",
+      "zh-Hant": "套用已儲存的類別",
+      "ru": "Применить сохранённые категории",
+      "bn": "সংরক্ষিত বিভাগ প্রয়োগ করুন",
+      "vi": "Áp dụng danh mục đã lưu",
+      "th": "ใช้หมวดหมู่ที่บันทึกไว้",
+      "pl": "Zastosuj zapisane kategorie",
+      "nl": "Opgeslagen categorieën toepassen",
+      "uk": "Застосувати збережені категорії",
+    },
+    "Quiet hours for daily reminders": {
+      "de": "Ruhezeiten für tägliche Erinnerungen",
+      "it": "Orari silenziosi per i promemoria giornalieri",
+      "pt-BR": "Horário de silêncio para lembretes diários",
+      "pt-PT": "Horário de silêncio para lembretes diários",
+      "ur": "روزانہ یاد دہانیوں کے لیے خاموش اوقات",
+      "fa": "ساعات سکوت برای یادآوری‌های روزانه",
+      "hi": "दैनिक रिमाइंडर के लिए शांत समय",
+      "id": "Jam tenang untuk pengingat harian",
+      "ms": "Waktu senyap untuk peringatan harian",
+      "ja": "毎日のリマインダーの通知を控える時間",
+      "ko": "일일 알림의 방해 금지 시간",
+      "zh-Hans": "每日提醒的静音时段",
+      "zh-Hant": "每日提醒的靜音時段",
+      "ru": "Тихие часы для ежедневных напоминаний",
+      "bn": "দৈনিক অনুস্মারকের জন্য নীরব সময়",
+      "vi": "Giờ yên lặng cho lời nhắc hằng ngày",
+      "th": "ช่วงเวลางดแจ้งเตือนสำหรับการเตือนรายวัน",
+      "pl": "Godziny ciszy dla codziennych przypomnień",
+      "nl": "Stille uren voor dagelijkse herinneringen",
+      "uk": "Тихі години для щоденних нагадувань",
+    },
+    "Remote notification delivery is unavailable on this device.": {
+      "de":
+          "Die Zustellung von Push-Benachrichtigungen ist auf diesem Gerät nicht verfügbar.",
+      "it":
+          "La ricezione delle notifiche remote non è disponibile su questo dispositivo.",
+      "pt-BR":
+          "O envio de notificações remotas não está disponível neste dispositivo.",
+      "pt-PT":
+          "O envio de notificações remotas não está disponível neste dispositivo.",
+      "ur": "اس آلے پر ریموٹ اطلاعات کی ترسیل دستیاب نہیں ہے۔",
+      "fa": "ارسال اعلان‌های راه دور در این دستگاه در دسترس نیست.",
+      "hi": "इस डिवाइस पर रिमोट सूचनाओं की डिलीवरी उपलब्ध नहीं है।",
+      "id": "Pengiriman notifikasi jarak jauh tidak tersedia di perangkat ini.",
+      "ms": "Penghantaran pemberitahuan jauh tidak tersedia pada peranti ini.",
+      "ja": "この端末ではリモート通知を受け取れません。",
+      "ko": "이 기기에서는 원격 알림을 받을 수 없습니다.",
+      "zh-Hans": "此设备无法接收远程通知。",
+      "zh-Hant": "此裝置無法接收遠端通知。",
+      "ru": "Доставка удалённых уведомлений недоступна на этом устройстве.",
+      "bn": "এই ডিভাইসে দূরবর্তী বিজ্ঞপ্তি পাঠানো উপলব্ধ নয়।",
+      "vi": "Thiết bị này không hỗ trợ gửi thông báo từ xa.",
+      "th": "อุปกรณ์นี้ไม่รองรับการส่งการแจ้งเตือนระยะไกล",
+      "pl":
+          "Dostarczanie powiadomień zdalnych jest niedostępne na tym urządzeniu.",
+      "nl": "Externe meldingen zijn niet beschikbaar op dit apparaat.",
+      "uk": "Доставлення віддалених сповіщень недоступне на цьому пристрої.",
+    },
+    "Category selections are saved. They are active only when community notifications and phone permission are on.": {
+      "de":
+          "Die Kategorieauswahl wird gespeichert. Sie ist nur aktiv, wenn Community-Benachrichtigungen und die Benachrichtigungsberechtigung des Telefons eingeschaltet sind.",
+      "it":
+          "Le categorie scelte vengono salvate. Sono attive solo quando le notifiche della community e l’autorizzazione del telefono sono abilitate.",
+      "pt-BR":
+          "As categorias selecionadas são salvas. Elas só ficam ativas quando as notificações da comunidade e a permissão do celular estão ativadas.",
+      "pt-PT":
+          "As categorias selecionadas são guardadas. Só ficam ativas quando as notificações da comunidade e a permissão do telemóvel estão ativadas.",
+      "ur":
+          "منتخب زمرے محفوظ رہتے ہیں۔ وہ صرف تب فعال ہوتے ہیں جب کمیونٹی کی اطلاعات اور فون کی اجازت فعال ہوں۔",
+      "fa":
+          "دسته‌های انتخاب‌شده ذخیره می‌شوند. فقط زمانی فعال هستند که اعلان‌های انجمن و مجوز اعلان تلفن روشن باشند.",
+      "hi":
+          "चुनी गई श्रेणियाँ सहेजी जाती हैं। वे तभी सक्रिय होती हैं जब समुदाय की सूचनाएँ और फ़ोन की अनुमति चालू हों।",
+      "id":
+          "Pilihan kategori disimpan. Kategori hanya aktif saat notifikasi komunitas dan izin ponsel diaktifkan.",
+      "ms":
+          "Pilihan kategori disimpan. Kategori hanya aktif apabila pemberitahuan komuniti dan kebenaran telefon dihidupkan.",
+      "ja": "選択したカテゴリは保存されます。コミュニティ通知と端末の通知許可が両方有効な場合にのみ通知されます。",
+      "ko": "선택한 카테고리는 저장됩니다. 커뮤니티 알림과 휴대전화 알림 권한이 모두 켜져 있을 때만 활성화됩니다.",
+      "zh-Hans": "类别选择会保存。仅在开启社区通知并允许手机通知权限时生效。",
+      "zh-Hant": "類別選擇會儲存。僅在開啟社群通知並允許手機通知權限時生效。",
+      "ru":
+          "Выбранные категории сохраняются. Они активны, только когда включены уведомления сообщества и разрешение на уведомления в телефоне.",
+      "bn":
+          "নির্বাচিত বিভাগগুলো সংরক্ষিত থাকে। কমিউনিটির বিজ্ঞপ্তি ও ফোনের অনুমতি চালু থাকলেই সেগুলো সক্রিয় হয়।",
+      "vi":
+          "Các danh mục đã chọn được lưu lại. Chúng chỉ hoạt động khi bật thông báo cộng đồng và quyền thông báo trên điện thoại.",
+      "th":
+          "หมวดหมู่ที่เลือกจะถูกบันทึกไว้ และจะทำงานเฉพาะเมื่อเปิดการแจ้งเตือนชุมชนและอนุญาตการแจ้งเตือนบนโทรศัพท์",
+      "pl":
+          "Wybrane kategorie są zapisywane. Są aktywne tylko wtedy, gdy włączone są powiadomienia społeczności i uprawnienie do powiadomień w telefonie.",
+      "nl":
+          "Geselecteerde categorieën worden opgeslagen. Ze zijn alleen actief als communitymeldingen en de meldingsmachtiging op de telefoon zijn ingeschakeld.",
+      "uk":
+          "Вибрані категорії зберігаються. Вони активні лише тоді, коли увімкнено сповіщення спільноти та дозвіл на сповіщення в телефоні.",
+    },
     "Welcome to AI Coach": {
       "de": "Willkommen bei AI Coach",
       "it": "Benvenuto in AI Coach",
@@ -25915,7 +26024,8 @@ abstract final class ExtendedRuntimeCopy {
           "Não. BIL oferece suporte ao rastreamento de bem-estar e não diagnostica, prescreve ou substitui um médico qualificado.",
       "pt-PT":
           "Não. BIL suporta o rastreio do bem-estar e não diagnostica, prescreve ou substitui um médico qualificado.",
-      "ur": "نہیں۔ BIL",
+      "ur":
+          "نہیں۔ BIL صحت و تندرستی کی نگرانی میں مدد کرتا ہے۔ یہ بیماری کی تشخیص نہیں کرتا، علاج تجویز نہیں کرتا اور کسی مستند معالج کا متبادل نہیں ہے۔",
       "fa":
           "خیر. BIL از ردیابی سلامتی پشتیبانی می‌کند و پزشک متخصص را تشخیص، تجویز یا جایگزین نمی‌کند.",
       "hi":

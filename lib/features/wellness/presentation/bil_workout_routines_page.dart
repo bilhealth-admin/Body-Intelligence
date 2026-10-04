@@ -509,10 +509,24 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       _initialItemHandled = true;
       return;
     }
-    _initialItemHandled = true;
     final item = matches.first;
+    final access = ref.read(verifiedSubscriptionAccessProvider);
+    // A paid deep link is an intent, not proof of a Free subscription. Keep
+    // that intent until the real authority resolves; build observes this
+    // provider and retries without opening Plans for a loading paid member.
+    if (!WorkoutFreePreviewPolicy.isPreview(item) &&
+        (access.isLoading || access.hasError)) {
+      return;
+    }
+    _initialItemHandled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final currentAccess = ref.read(verifiedSubscriptionAccessProvider);
+      if (!WorkoutFreePreviewPolicy.isPreview(item) &&
+          (currentAccess.isLoading || currentAccess.hasError)) {
+        _initialItemHandled = false;
+        return;
+      }
       if (_isLocked(item)) {
         final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
         context.push(

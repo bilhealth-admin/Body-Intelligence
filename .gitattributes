@@ -1,2 +1,5 @@
 # The v4 manifest is content-addressed and pinned byte-for-byte by both clients.
 assets/catalogs/recipes/v1/recipe-thumbnails-v4.json -text
+# Preserve the original CRLF evidence; recognize CR as its line terminator.
+test/fixtures/historical_recipe_audits/recipe_canonical_100_verified.json -text whitespace=cr-at-eol
+test/fixtures/historical_recipe_audits/existing_recipe_canonical_seeds.json -text

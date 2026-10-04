@@ -98,6 +98,18 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                 ),
               ),
             ],
+            if (_operationRecovery)
+              TextButton(
+                key: const Key('community-cancel-pending-publish'),
+                onPressed: busy ? null : _cancelPendingPublish,
+                child: Text(
+                  communityText(
+                    context,
+                    'Cancel pending attempt',
+                    'إلغاء المحاولة المعلّقة',
+                  ),
+                ),
+              ),
             if (_publishing && _selectedImages.isNotEmpty) ...[
               const LinearProgressIndicator(
                 key: Key('community-post-upload-progress'),

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/domain/community_comment_threads.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
@@ -250,7 +253,122 @@ Widget _app(CommunityRepository repository) => MaterialApp(
   home: CommunityHubPage(repository: repository),
 );
 
+final class _ReplyRaceRepository extends _SocialV2Repository {
+  final pendingReplies = Completer<List<CommunityComment>>();
+  bool refreshed = false;
+  int replyLoads = 0;
+
+  @override
+  bool get useServerThreadedCommunityComments => true;
+
+  @override
+  Future<List<CommunityCommentThread>> loadPostCommentThreads(
+    String postId, {
+    DateTime? after,
+    String? afterId,
+    int limit = 20,
+  }) async => [
+    CommunityCommentThread(
+      root: comments.first.copyWith(replyCount: refreshed ? 0 : 4),
+      replies: refreshed ? [] : [comments[1]],
+      replyCount: refreshed ? 0 : 4,
+    ),
+  ];
+
+  @override
+  Future<List<CommunityComment>> loadCommentReplies(
+    String rootId, {
+    DateTime? after,
+    String? afterId,
+    int limit = 20,
+  }) {
+    replyLoads++;
+    return pendingReplies.future;
+  }
+}
+
 void main() {
+  testWidgets('late reply page cannot override an authoritative refresh', (
+    tester,
+  ) async {
+    final repository = _ReplyRaceRepository();
+    await tester.pumpWidget(_app(repository));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const Key('community-post-comments-${_SocialV2Repository.postId}'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('One-level reply'), findsNothing);
+    await tester.tap(
+      find.byKey(
+        const Key(
+          'community-comment-view-replies-${_SocialV2Repository.rootId}',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('One-level reply'), findsOneWidget);
+    final more = find.byKey(
+      const Key('community-comment-load-replies-${_SocialV2Repository.rootId}'),
+    );
+    final detailScrollable = find
+        .descendant(
+          of: find.byKey(const Key('community-post-detail-list')),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    // The ListView owns the first Scrollable. Descendants also include the
+    // read-only selectable comment TextFields' internal scrollables.
+    expect(detailScrollable, findsOneWidget);
+    expect(
+      tester.widget<Scrollable>(detailScrollable).axisDirection,
+      AxisDirection.down,
+    );
+    expect(
+      tester
+          .state<ScrollableState>(detailScrollable)
+          .position
+          .viewportDimension,
+      greaterThan(200),
+    );
+    await tester.scrollUntilVisible(more, 300, scrollable: detailScrollable);
+    expect(more.hitTestable(), findsOneWidget);
+    await tester.tap(more.hitTestable());
+    await tester.pump();
+    expect(repository.replyLoads, 1);
+    repository.refreshed = true;
+    await tester
+        .widget<RefreshIndicator>(find.byType(RefreshIndicator).last)
+        .onRefresh();
+    await tester.pump();
+    // The same root still exists; only its authoritative replies were removed.
+    expect(find.text('Root comment can be selected'), findsOneWidget);
+    expect(find.text('One-level reply'), findsNothing);
+    repository.pendingReplies.complete([
+      CommunityComment(
+        id: '77777777-7777-4777-8777-777777777777',
+        authorId: _SocialV2Repository.authorId,
+        parentId: _SocialV2Repository.rootId,
+        body: 'Stale blocked reply',
+        createdAt: DateTime.utc(2026, 9, 8, 10, 2),
+        likeCount: 0,
+        liked: false,
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.text('Stale blocked reply'), findsNothing);
+    expect(
+      find.byKey(
+        const Key(
+          'community-comment-hide-replies-${_SocialV2Repository.rootId}',
+        ),
+      ),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'Community opens on posts with one settings entry and preserves BIL Code inside it',
     (tester) async {

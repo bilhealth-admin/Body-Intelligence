@@ -1,0 +1,2169 @@
+{
+  "schemaVersion": 1,
+  "claims": {
+    "marketedRecipeCount": 0,
+    "marketedRecipeImageCount": 0,
+    "marketedNutritionVerifiedCount": 0
+  },
+  "records": [
+    {
+      "canonicalId": "lentil-soup",
+      "contentFingerprint": "e7ffa051d3787df514874ade38e136be810ee4d980048e102e6e604b7efebca1",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "regional"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 35
+      },
+      "ingredients": [
+        {
+          "itemId": "red-lentils",
+          "quantity": 1,
+          "unit": "cup"
+        },
+        {
+          "itemId": "onion",
+          "quantity": 1,
+          "unit": "item"
+        },
+        {
+          "itemId": "carrot",
+          "quantity": 1,
+          "unit": "item"
+        },
+        {
+          "itemId": "cumin",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "water-or-unsalted-stock",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "lentil-soup-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "lentil-soup-step-2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "lentil-soup-step-3"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Red lentil soup",
+          "ingredients": [
+            "1 cup red lentils",
+            "1 onion",
+            "1 carrot",
+            "Cumin",
+            "Water or unsalted stock"
+          ],
+          "steps": [
+            "Rinse the lentils.",
+            "Simmer all ingredients until tender.",
+            "Blend to the preferred texture and season after tasting."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "شوربة العدس الأحمر",
+          "ingredients": [
+            "كوب عدس أحمر",
+            "حبة بصل",
+            "حبة جزر",
+            "كمون",
+            "ماء أو مرق دون ملح"
+          ],
+          "steps": [
+            "اغسل العدس.",
+            "اطبخ المكونات على نار هادئة حتى تنضج.",
+            "اخفقها للقوام المفضل وتبّل بعد التذوق."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/lentil_soup.jpg",
+        "sha256": "2c1012e4bec9ee441406d73d6a1d294b3c7b8dc42dfba1c5cf5c9a7b9a37e431",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "yogurt-oats",
+      "contentFingerprint": "048169570e5e1eacfe4fe7cde72f2a99e0f00692b6c13a96233600b5200580a5",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "breakfast"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 5
+      },
+      "ingredients": [
+        {
+          "itemId": "plain-yogurt",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "rolled-oats",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "fresh-fruit",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "optional-nuts-or-seeds",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "yogurt-oats-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "yogurt-oats-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Yogurt oat bowl",
+          "ingredients": [
+            "Plain yogurt",
+            "Rolled oats",
+            "Fresh fruit",
+            "Optional nuts or seeds"
+          ],
+          "steps": [
+            "Combine yogurt and oats.",
+            "Top with fruit and optional nuts or seeds."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "وعاء الشوفان واللبن",
+          "ingredients": [
+            "لبن زبادي سادة",
+            "رقائق شوفان",
+            "فاكهة طازجة",
+            "مكسرات أو بذور اختيارية"
+          ],
+          "steps": [
+            "اخلط اللبن مع الشوفان.",
+            "أضف الفاكهة والمكسرات أو البذور."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/yogurt_oat_bowl.jpg",
+        "sha256": "3fbbbaf3f52b82919852368db8059a9ad4d40ef170c8dfc34e1c3639fd5b85cb",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "chickpea-salad",
+      "contentFingerprint": "b09de5d08778b4565707a8b05c499a69122bf31c91c02d58d095d730ecb23de7",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "plant"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 15
+      },
+      "ingredients": [
+        {
+          "itemId": "cooked-chickpeas",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "parsley",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "lemon-juice",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "chickpea-salad-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "chickpea-salad-step-2"
+        },
+        {
+          "order": 3,
+          "instructionKey": "chickpea-salad-step-3"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Chickpea herb salad",
+          "ingredients": [
+            "Cooked chickpeas",
+            "Tomato",
+            "Cucumber",
+            "Parsley",
+            "Lemon juice"
+          ],
+          "steps": [
+            "Drain and rinse the chickpeas.",
+            "Chop the vegetables and parsley.",
+            "Combine and dress with lemon just before serving."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "سلطة الحمص والأعشاب",
+          "ingredients": [
+            "حمص مطبوخ",
+            "طماطم",
+            "خيار",
+            "بقدونس",
+            "عصير ليمون"
+          ],
+          "steps": [
+            "صفّ الحمص واغسله.",
+            "قطّع الخضار والبقدونس.",
+            "اخلط المكونات وأضف الليمون قبل التقديم."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/chickpea_herb_salad.jpg",
+        "sha256": "089888af8261ae0bed8efec77d12db441470c8275a76600c8e82368076e0814d",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "shakshuka",
+      "contentFingerprint": "e289567c25774af5dce2e29d7b764e6c59dacbea8e49658bb772e39837f25f02",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "breakfast"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "regional"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "itemId": "eggs",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomatoes",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "onion",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "parsley",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cumin",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "shakshuka-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "shakshuka-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Herbed shakshuka",
+          "ingredients": [
+            "Eggs",
+            "Tomatoes",
+            "Onion",
+            "Parsley",
+            "Cumin"
+          ],
+          "steps": [
+            "Cook the tomato base.",
+            "Add eggs and cover until just set."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "شكشوكة بالأعشاب",
+          "ingredients": [
+            "بيض",
+            "طماطم",
+            "بصل",
+            "بقدونس",
+            "كمون"
+          ],
+          "steps": [
+            "اطبخ قاعدة الطماطم.",
+            "أضف البيض وغطّه حتى ينضج."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/shakshuka.jpg",
+        "sha256": "e3c0674dd749b18fa8c572ffcdb137699045fe41a1a0510a94211d0d2aaa5791",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "grilled-fish-vegetables",
+      "contentFingerprint": "68bebda89f647ae14ce38c22c5d2aae1ac9efa2e5ff1bdbb876cf7b72e0b6014",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 30
+      },
+      "ingredients": [
+        {
+          "itemId": "fish-fillet",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "zucchini",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomatoes",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "lemon",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "herbs",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "grilled-fish-vegetables-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "grilled-fish-vegetables-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Grilled fish & vegetables",
+          "ingredients": [
+            "Fish fillet",
+            "Zucchini",
+            "Tomatoes",
+            "Lemon",
+            "Herbs"
+          ],
+          "steps": [
+            "Season the fish and vegetables.",
+            "Grill until safely cooked."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "سمك مشوي مع الخضار",
+          "ingredients": [
+            "فيليه سمك",
+            "كوسا",
+            "طماطم",
+            "ليمون",
+            "أعشاب"
+          ],
+          "steps": [
+            "تبّل السمك والخضار.",
+            "اشوِها حتى تنضج بأمان."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/grilled_fish_vegetables.jpg",
+        "sha256": "c1bec4af75bccdd17d45d7eba3f5d6e0cdb868ff06c1c7b2cb7b5d0ecce51ac1",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "chicken-shawarma-bowl",
+      "contentFingerprint": "cd7101593deaec7b2189c34ace9f1bfbcac0a4041f5ab83c80e65f54d007d276",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "regional"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 35
+      },
+      "ingredients": [
+        {
+          "itemId": "chicken-breast",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cooked-grain",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cabbage",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "yogurt",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "chicken-shawarma-bowl-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "chicken-shawarma-bowl-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Chicken shawarma grain bowl",
+          "ingredients": [
+            "Chicken breast",
+            "Cooked grain",
+            "Cabbage",
+            "Tomato",
+            "Yogurt"
+          ],
+          "steps": [
+            "Cook the seasoned chicken.",
+            "Arrange with grains and vegetables."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "وعاء شاورما الدجاج والحبوب",
+          "ingredients": [
+            "صدر دجاج",
+            "حبوب مطبوخة",
+            "ملفوف",
+            "طماطم",
+            "لبن"
+          ],
+          "steps": [
+            "اطبخ الدجاج المتبل.",
+            "رتبه مع الحبوب والخضار."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/chicken_shawarma_bowl.jpg",
+        "sha256": "3839b38c893df03555c48001fc77de66f32fd13a335215cd6e6bbdae580a8f82",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "vegetable-lentil-stew",
+      "contentFingerprint": "25776a7c8c49118e3fea5f8aa83bd0c316c38c547abeafb79e1816be8b5e064a",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "plant"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 40
+      },
+      "ingredients": [
+        {
+          "itemId": "brown-lentils",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "carrot",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "spinach",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cumin",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "vegetable-lentil-stew-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "vegetable-lentil-stew-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Vegetable lentil stew",
+          "ingredients": [
+            "Brown lentils",
+            "Carrot",
+            "Tomato",
+            "Spinach",
+            "Cumin"
+          ],
+          "steps": [
+            "Simmer lentils and vegetables.",
+            "Add spinach near the end."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "يخنة العدس والخضار",
+          "ingredients": [
+            "عدس بني",
+            "جزر",
+            "طماطم",
+            "سبانخ",
+            "كمون"
+          ],
+          "steps": [
+            "اطبخ العدس والخضار بهدوء.",
+            "أضف السبانخ قرب النهاية."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/vegetable_lentil_stew.jpg",
+        "sha256": "c31864d9563891b92ef0941e620e1aacd4c566f1ec2fa7e5ee9de3cf3cc5f1f3",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "hummus-falafel-plate",
+      "contentFingerprint": "743ce687569d04e3d0397f1b72bc57c7d6c06b797f5fca492775c2ce90b3090e",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "regional"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 35
+      },
+      "ingredients": [
+        {
+          "itemId": "chickpeas",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tahini",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "flatbread",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "hummus-falafel-plate-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "hummus-falafel-plate-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Hummus & baked falafel plate",
+          "ingredients": [
+            "Chickpeas",
+            "Tahini",
+            "Cucumber",
+            "Tomato",
+            "Flatbread"
+          ],
+          "steps": [
+            "Blend the hummus.",
+            "Bake falafel and serve with salad."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "طبق الحمص والفلافل المخبوزة",
+          "ingredients": [
+            "حمص",
+            "طحينة",
+            "خيار",
+            "طماطم",
+            "خبز عربي"
+          ],
+          "steps": [
+            "اخلط الحمص.",
+            "اخبز الفلافل وقدّمها مع السلطة."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/hummus_falafel_plate.jpg",
+        "sha256": "b13b5a1a08bd1e7ef533c6ab831331d4d3300ded9fe156f5d7a951ea85ebf7ac",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "quinoa-tabbouleh",
+      "contentFingerprint": "6b3126c78ff1ac1a3d183fb7bac181615f22cd352a442d86382c9cdf4a921c7b",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "plant"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 20
+      },
+      "ingredients": [
+        {
+          "itemId": "cooked-quinoa",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "parsley",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "lemon",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "quinoa-tabbouleh-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "quinoa-tabbouleh-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Quinoa tabbouleh",
+          "ingredients": [
+            "Cooked quinoa",
+            "Parsley",
+            "Tomato",
+            "Cucumber",
+            "Lemon"
+          ],
+          "steps": [
+            "Cool the quinoa.",
+            "Combine with chopped vegetables and lemon."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "تبولة الكينوا",
+          "ingredients": [
+            "كينوا مطبوخة",
+            "بقدونس",
+            "طماطم",
+            "خيار",
+            "ليمون"
+          ],
+          "steps": [
+            "برّد الكينوا.",
+            "اخلطها مع الخضار المقطعة والليمون."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/quinoa_tabbouleh.jpg",
+        "sha256": "ec9faf2b883735a9bbe1b70f3073aec8e79dc0a53b2247993415b92b9a3a96f7",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "overnight-oats-figs",
+      "contentFingerprint": "c3daacd53e1650a88bc48e66246a290974e53625d1cfe98a290ddb45bd7823c1",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "breakfast"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 5
+      },
+      "ingredients": [
+        {
+          "itemId": "rolled-oats",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "milk-or-yogurt",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "figs",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "chia-seeds",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "overnight-oats-figs-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "overnight-oats-figs-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Overnight oats with figs",
+          "ingredients": [
+            "Rolled oats",
+            "Milk or yogurt",
+            "Figs",
+            "Chia seeds"
+          ],
+          "steps": [
+            "Combine oats and liquid.",
+            "Chill overnight and add figs."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "شوفان منقوع مع التين",
+          "ingredients": [
+            "شوفان",
+            "حليب أو لبن",
+            "تين",
+            "بذور الشيا"
+          ],
+          "steps": [
+            "اخلط الشوفان والسائل.",
+            "برّده طوال الليل وأضف التين."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/overnight_oats_figs.jpg",
+        "sha256": "8f3c00b5c5bf8abc2ebb598f943ee67b6ba7468851593312a66b77fbcb2c1406",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "spinach-omelet",
+      "contentFingerprint": "899e3377f2c15250a5ccbbbaa01d2168a95dc817287296531e4e48459d191a1b",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "breakfast"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 12
+      },
+      "ingredients": [
+        {
+          "itemId": "eggs",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "spinach",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "black-pepper",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "spinach-omelet-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "spinach-omelet-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Spinach omelet",
+          "ingredients": [
+            "Eggs",
+            "Spinach",
+            "Tomato",
+            "Black pepper"
+          ],
+          "steps": [
+            "Wilt the spinach.",
+            "Add beaten eggs and cook gently."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "عجة السبانخ",
+          "ingredients": [
+            "بيض",
+            "سبانخ",
+            "طماطم",
+            "فلفل أسود"
+          ],
+          "steps": [
+            "ذبّل السبانخ.",
+            "أضف البيض المخفوق واطبخه بهدوء."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/spinach_omelet.jpg",
+        "sha256": "e17ff86e832aea7982bac315cbc31f1cd8d4464eb0fd847c9b3c5d8ab9e3d95e",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "shrimp-rice-bowl",
+      "contentFingerprint": "975c57ce4a1c58b8cd68f71c9f4c4e7515d51e68912bcec8ed81cb49eadd69ed",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "itemId": "shrimp",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cooked-rice",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cabbage",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "carrot",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "edamame",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "shrimp-rice-bowl-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "shrimp-rice-bowl-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Shrimp rice bowl",
+          "ingredients": [
+            "Shrimp",
+            "Cooked rice",
+            "Cabbage",
+            "Carrot",
+            "Edamame"
+          ],
+          "steps": [
+            "Cook shrimp until opaque.",
+            "Arrange with rice and vegetables."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "وعاء الأرز والروبيان",
+          "ingredients": [
+            "روبيان",
+            "أرز مطبوخ",
+            "ملفوف",
+            "جزر",
+            "إدامامي"
+          ],
+          "steps": [
+            "اطبخ الروبيان حتى يصبح معتمًا.",
+            "رتبه مع الأرز والخضار."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/shrimp_rice_bowl.jpg",
+        "sha256": "834766ed47c0a43d8959fe259a483f80a9e7b6e972c6f3ccbcf77ce8b8f3e6e0",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "tofu-stir-fry",
+      "contentFingerprint": "4fe35e03badb10802cb55f109899f7c7821c6f3c7dcf655c89d2b1492c2509d8",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "plant"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "itemId": "firm-tofu",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "broccoli",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "bell-pepper",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "snap-peas",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "tofu-stir-fry-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "tofu-stir-fry-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Tofu vegetable stir-fry",
+          "ingredients": [
+            "Firm tofu",
+            "Broccoli",
+            "Bell pepper",
+            "Snap peas"
+          ],
+          "steps": [
+            "Brown the tofu.",
+            "Stir-fry vegetables and combine."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "توفو مقلي سريعًا مع الخضار",
+          "ingredients": [
+            "توفو متماسك",
+            "بروكلي",
+            "فلفل حلو",
+            "بازلاء"
+          ],
+          "steps": [
+            "حمّر التوفو.",
+            "قلّب الخضار سريعًا ثم اخلطها."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/tofu_vegetable_stir_fry.jpg",
+        "sha256": "be0b8e0b629b29cdad5774a38703f9c796986ff10293d9fc077001b23bc5a4fd",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "bean-corn-salad",
+      "contentFingerprint": "b74b8a85a095db3c5ea0dc2c35731b655453c355f6ba904320d7dc83efb5e129",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "plant"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 12
+      },
+      "ingredients": [
+        {
+          "itemId": "black-beans",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "corn",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "red-onion",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "lime",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "bean-corn-salad-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "bean-corn-salad-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Bean & corn salad",
+          "ingredients": [
+            "Black beans",
+            "Corn",
+            "Tomato",
+            "Red onion",
+            "Lime"
+          ],
+          "steps": [
+            "Rinse beans.",
+            "Combine everything and dress with lime."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "سلطة الفاصوليا والذرة",
+          "ingredients": [
+            "فاصوليا سوداء",
+            "ذرة",
+            "طماطم",
+            "بصل أحمر",
+            "ليمون أخضر"
+          ],
+          "steps": [
+            "اغسل الفاصوليا.",
+            "اخلط المكونات وأضف الليمون."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/bean_corn_salad.jpg",
+        "sha256": "6deea9acbaea7ffdd48f74885b1b5b98c9b770a0c185e3455a4a03163ad8d1e3",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "chicken-sweet-potato",
+      "contentFingerprint": "1cbb8fa635b93ee286e3b73125d11ebe4b449f9e72dbbd4d750200d763511d78",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 40
+      },
+      "ingredients": [
+        {
+          "itemId": "chicken-breast",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "sweet-potato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "green-beans",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "herbs",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "chicken-sweet-potato-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "chicken-sweet-potato-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Chicken & sweet potato tray",
+          "ingredients": [
+            "Chicken breast",
+            "Sweet potato",
+            "Green beans",
+            "Herbs"
+          ],
+          "steps": [
+            "Arrange on a tray.",
+            "Roast until the chicken is safely cooked."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "صينية الدجاج والبطاطا الحلوة",
+          "ingredients": [
+            "صدر دجاج",
+            "بطاطا حلوة",
+            "فاصوليا خضراء",
+            "أعشاب"
+          ],
+          "steps": [
+            "رتب المكونات في صينية.",
+            "اخبزها حتى ينضج الدجاج بأمان."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/chicken_sweet_potato.jpg",
+        "sha256": "6fbfa8d4fb33f17440dce7f402d5576c04ccd2bf25ddb19917e85ea39c073e69",
+        "width": 349,
+        "height": 348,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "mediterranean-chicken-bowl",
+      "contentFingerprint": "45d67c158e47e771c2451dba309031db65bdd75e381318e0cd5fba63976ee480",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "regional"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 30
+      },
+      "ingredients": [
+        {
+          "itemId": "chicken",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cooked-grain",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "tomato",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "yogurt",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "mediterranean-chicken-bowl-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "mediterranean-chicken-bowl-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Mediterranean chicken bowl",
+          "ingredients": [
+            "Chicken",
+            "Cooked grain",
+            "Tomato",
+            "Cucumber",
+            "Yogurt"
+          ],
+          "steps": [
+            "Cook the chicken.",
+            "Build the bowl with vegetables."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "وعاء الدجاج المتوسطي",
+          "ingredients": [
+            "دجاج",
+            "حبوب مطبوخة",
+            "طماطم",
+            "خيار",
+            "لبن"
+          ],
+          "steps": [
+            "اطبخ الدجاج.",
+            "رتب الوعاء مع الخضار."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/mediterranean_chicken_bowl.jpg",
+        "sha256": "62da65ce273d82e2ca7563452f5e41ed194008d29187adeafadfc1f48469b3b6",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "roasted-quinoa-bowl",
+      "contentFingerprint": "6b00858d2e95d94aaecf97cd9ee71a439387fbd706bcdcd3d1659e9fd2652977",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "plant"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 35
+      },
+      "ingredients": [
+        {
+          "itemId": "cooked-quinoa",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "seasonal-vegetables",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "lemon",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "herbs",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "roasted-quinoa-bowl-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "roasted-quinoa-bowl-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Roasted vegetable quinoa bowl",
+          "ingredients": [
+            "Cooked quinoa",
+            "Seasonal vegetables",
+            "Lemon",
+            "Herbs"
+          ],
+          "steps": [
+            "Roast the vegetables.",
+            "Serve over quinoa with lemon."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "وعاء الكينوا والخضار المشوية",
+          "ingredients": [
+            "كينوا مطبوخة",
+            "خضار موسمية",
+            "ليمون",
+            "أعشاب"
+          ],
+          "steps": [
+            "اشوِ الخضار.",
+            "قدمها فوق الكينوا مع الليمون."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/roasted_quinoa_bowl.jpg",
+        "sha256": "d6540f54161bdab08429b29bb8d39ccdecf30b01522e93f694c948796c5f1bc9",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    },
+    {
+      "canonicalId": "salmon-avocado-bowl",
+      "contentFingerprint": "5d505cb44e78be890cfadc8ceeab3bb6dbb50c24b4bd3e122609ae8b551d444f",
+      "origin": "bil-original",
+      "primaryLocale": "en",
+      "region": "global",
+      "countryTags": [
+        "global"
+      ],
+      "mealTypes": [
+        "lunch"
+      ],
+      "allergens": [],
+      "dietTags": [
+        "quick"
+      ],
+      "budgetTier": "unknown",
+      "serving": {
+        "count": null,
+        "size": null,
+        "unit": null
+      },
+      "timing": {
+        "prepMinutes": null,
+        "cookMinutes": null,
+        "totalMinutes": 25
+      },
+      "ingredients": [
+        {
+          "itemId": "salmon",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cooked-grain",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "avocado",
+          "quantity": null,
+          "unit": null
+        },
+        {
+          "itemId": "cucumber",
+          "quantity": null,
+          "unit": null
+        }
+      ],
+      "method": [
+        {
+          "order": 1,
+          "instructionKey": "salmon-avocado-bowl-step-1"
+        },
+        {
+          "order": 2,
+          "instructionKey": "salmon-avocado-bowl-step-2"
+        }
+      ],
+      "localizations": {
+        "en": {
+          "title": "Salmon avocado bowl",
+          "ingredients": [
+            "Salmon",
+            "Cooked grain",
+            "Avocado",
+            "Cucumber"
+          ],
+          "steps": [
+            "Cook salmon safely.",
+            "Arrange with grain and vegetables."
+          ],
+          "translationStatus": "native-reviewed"
+        },
+        "ar": {
+          "title": "وعاء السلمون والأفوكادو",
+          "ingredients": [
+            "سلمون",
+            "حبوب مطبوخة",
+            "أفوكادو",
+            "خيار"
+          ],
+          "steps": [
+            "اطبخ السلمون بأمان.",
+            "رتبه مع الحبوب والخضار."
+          ],
+          "translationStatus": "native-reviewed"
+        }
+      },
+      "nutrition": {
+        "status": "pending",
+        "servings": null,
+        "sourceRefs": [],
+        "reviewedAt": null,
+        "perServing": {
+          "kcal": null,
+          "proteinG": null,
+          "carbohydrateG": null,
+          "fatG": null,
+          "fiberG": null,
+          "sugarG": null,
+          "sodiumMg": null,
+          "potassiumMg": null
+        }
+      },
+      "image": {
+        "status": "existing-unreviewed",
+        "assetPath": "assets/images/professional/recipes/salmon_avocado_bowl.jpg",
+        "sha256": "6ce6450c74290392b2fdcb3324b8977835f8186144ffdc7be12b009e11d02e22",
+        "width": 512,
+        "height": 512,
+        "provenance": "existing asset; provenance and human review pending",
+        "promptId": null
+      }
+    }
+  ]
+}

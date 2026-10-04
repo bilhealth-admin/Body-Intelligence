@@ -67,15 +67,24 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
   }
 
   Future<List<CommunityNotification>> loadCommunityNotifications({
+    DateTime? before,
+    String? beforeId,
+    List<CommunityNotificationKind>? kinds,
     int limit = 30,
   }) async {
     if (limit < 1 || limit > 100) throw ArgumentError.value(limit, 'limit');
+    if ((before == null) != (beforeId == null) ||
+        (beforeId != null && !CommunityRepository._uuid.hasMatch(beforeId)) ||
+        (kinds != null &&
+            (kinds.isEmpty || kinds.toSet().length != kinds.length))) {
+      throw ArgumentError('Invalid Community activity cursor or kinds');
+    }
     final response = await _client.rpc(
       'bil_list_community_activity_v2',
       params: {
-        'p_before': null,
-        'p_before_id': null,
-        'p_kinds': null,
+        'p_before': before?.toUtc().toIso8601String(),
+        'p_before_id': beforeId,
+        'p_kinds': kinds?.map((kind) => kind.wireValue).toList(growable: false),
         'p_limit': limit,
       },
     );

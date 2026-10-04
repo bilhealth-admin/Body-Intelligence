@@ -142,11 +142,13 @@ final class _ReferenceComposerRepository extends CommunityRepository {
 }
 
 final class _FakeSpeechToText extends SpeechToText {
-  _FakeSpeechToText()
+  _FakeSpeechToText({this.transcript = 'Community voice draft'})
     : super(
         methods: const MethodChannel('bil/community/voice/test'),
         events: const EventChannel('bil/community/voice/test/events'),
       );
+
+  final String transcript;
 
   bool _listening = false;
 
@@ -170,11 +172,7 @@ final class _FakeSpeechToText extends SpeechToText {
   }) async {
     _listening = true;
     onResult(
-      const SpeechRecognitionResult(
-        'Community voice draft',
-        isFinal: true,
-        localeId: 'en-US',
-      ),
+      SpeechRecognitionResult(transcript, isFinal: true, localeId: 'en-US'),
     );
     _listening = false;
   }
@@ -466,4 +464,51 @@ void main() {
     expect(accepted, 'Community voice draft');
     expect(tester.takeException(), isNull);
   });
+
+  for (final initial in ['', 'Community voice draft']) {
+    testWidgets(
+      'voice manual edits update acceptance after final result "$initial"',
+      (tester) async {
+        final service = CommunityComposerVoiceInputService(
+          _FakeSpeechToText(transcript: initial),
+          permissionGate: (_) async => true,
+        );
+        String? accepted;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: FilledButton(
+                  onPressed: () async {
+                    accepted = await service.capture(context);
+                  },
+                  child: const Text('Voice'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Voice'));
+        await tester.pumpAndSettle();
+        final accept = find.byKey(const Key('community-use-voice-transcript'));
+        final editor = find.byKey(const Key('community-voice-transcript'));
+        expect(
+          tester.widget<FilledButton>(accept).onPressed,
+          initial.isEmpty ? isNull : isNotNull,
+        );
+        await tester.enterText(editor, '   ');
+        await tester.pump();
+        expect(tester.widget<FilledButton>(accept).onPressed, isNull);
+        expect(accepted, isNull);
+        await tester.enterText(editor, '  Manually reviewed transcript  ');
+        tester.testTextInput.hide();
+        await tester.pumpAndSettle();
+        expect(tester.widget<FilledButton>(accept).onPressed, isNotNull);
+        await tester.tap(accept);
+        await tester.pumpAndSettle();
+        expect(accepted, 'Manually reviewed transcript');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }

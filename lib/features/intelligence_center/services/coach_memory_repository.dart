@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../data/repositories/preferences_repository.dart';
+import 'remote_ai_consent_coordinator.dart';
 
 class CoachMemoryRepository {
   CoachMemoryRepository({required this.preferences, SupabaseClient? cloud})
@@ -176,8 +177,7 @@ class CoachMemoryRepository {
     final client = cloud;
     if (client == null) return false;
     try {
-      final raw = await client.rpc('bil_get_remote_ai_consent');
-      return raw is Map && raw['granted'] == true;
+      return await sharedRemoteAiConsentCoordinator(client).isGranted();
     } on Object {
       return false;
     }

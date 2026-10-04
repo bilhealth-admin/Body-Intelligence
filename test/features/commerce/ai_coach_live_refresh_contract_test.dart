@@ -43,7 +43,21 @@ void main() {
     expect(query, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
     expect(plans, contains('store.state == VerifiedStoreState.verified'));
     expect(plans, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
-    expect(settings, contains('boost.state == AiBoostPurchaseState.verified'));
+    // The actual Settings runtime regression proves verified credits refresh
+    // even when native finish is pending; display state is not that authority.
+    expect(
+      settings,
+      contains('AiBoostPurchaseService()..addListener(_boostChanged)'),
+    );
+    expect(
+      settings,
+      contains('boost.verifiedCreditsRevision != _lastBoostCreditsRevision'),
+    );
+    expect(
+      settings,
+      contains('_lastBoostCreditsRevision = boost.verifiedCreditsRevision;'),
+    );
+    expect(settings, contains('ref.invalidate(aiBoostVisionAccessProvider);'));
     expect(settings, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
     expect(
       resetNotices,

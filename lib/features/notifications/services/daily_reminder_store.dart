@@ -9,6 +9,7 @@ class DailyReminderStore {
 
   Future<List<DailyReminder>> load() async {
     final preferences = await SharedPreferences.getInstance();
+    await preferences.reload();
     final encoded = preferences.getString(_key);
     if (encoded == null) return defaults;
     try {
@@ -55,7 +56,7 @@ class DailyReminderStore {
 
   Future<void> save(List<DailyReminder> reminders) async {
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(
+    final saved = await preferences.setString(
       _key,
       jsonEncode(
         reminders
@@ -70,6 +71,9 @@ class DailyReminderStore {
             .toList(growable: false),
       ),
     );
+    if (!saved) {
+      throw StateError('Daily reminder preferences were not persisted');
+    }
   }
 
   static const defaults = <DailyReminder>[

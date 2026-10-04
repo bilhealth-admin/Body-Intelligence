@@ -1,6 +1,11 @@
 part of 'community_repository.dart';
 
 mixin _CommunityProfileModerationRepositoryMixin {
+  Session? _moderatorSession;
+  Future<bool>? _moderatorLookup;
+  DateTime? _moderatorValidUntil;
+  int _moderatorGeneration = 0;
+
   SupabaseClient get _client;
 
   User get _user;
@@ -169,13 +174,58 @@ mixin _CommunityProfileModerationRepositoryMixin {
     }, onConflict: 'user_id');
   }
 
-  Future<bool> isCommunityModerator() async {
-    if (_client.auth.currentUser == null) return false;
-    final response = await _client.rpc('bil_is_community_moderator');
-    if (response is! bool) {
-      throw const FormatException('Invalid community moderator result');
+  void invalidateCommunityModeratorStatus() {
+    _moderatorGeneration++;
+    _moderatorSession = null;
+    _moderatorLookup = null;
+    _moderatorValidUntil = null;
+  }
+
+  Future<bool> isCommunityModerator() {
+    final session = _client.auth.currentSession;
+    if (session == null) {
+      invalidateCommunityModeratorStatus();
+      return Future.value(false);
     }
-    return response;
+    final cached = _moderatorLookup;
+    final validUntil = _moderatorValidUntil;
+    if (cached != null &&
+        identical(session, _moderatorSession) &&
+        (validUntil == null || validUntil.isAfter(DateTime.now()))) {
+      return cached;
+    }
+    _moderatorSession = session;
+    _moderatorValidUntil = null;
+    return _moderatorLookup = _loadModeratorForSession(
+      session,
+      ++_moderatorGeneration,
+    );
+  }
+
+  Future<bool> _loadModeratorForSession(Session session, int generation) async {
+    try {
+      final response = await _client
+          .rpc('bil_is_community_moderator')
+          .timeout(const Duration(seconds: 15));
+      if (response is! bool) {
+        throw const FormatException('Invalid community moderator result');
+      }
+      if (!identical(session, _client.auth.currentSession) ||
+          !identical(session, _moderatorSession) ||
+          generation != _moderatorGeneration) {
+        return false;
+      }
+      // This is a short-lived menu affordance, never an authorization grant.
+      // Every moderation mutation is still verified independently by the server.
+      _moderatorValidUntil = DateTime.now().add(const Duration(minutes: 1));
+      return response;
+    } on Object {
+      if (identical(session, _moderatorSession) &&
+          generation == _moderatorGeneration) {
+        invalidateCommunityModeratorStatus();
+      }
+      rethrow;
+    }
   }
 
   Future<List<CommunityPost>> loadPendingPostsForModeration({

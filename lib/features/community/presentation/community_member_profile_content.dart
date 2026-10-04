@@ -3,8 +3,11 @@ part of 'community_hub_page.dart';
 extension _CommunityMemberProfileContentSlivers
     on _CommunityMemberProfilePageState {
   List<Widget> _profileContentSlivers(CommunityProfileOverview profile) {
+    final postsVisible = profile.isSelf || profile.showPosts;
+    final posts = postsVisible ? _posts : const <CommunityPost>[];
+    final reviews = postsVisible ? _reviews : const <CommunityProfileReview>[];
     final moments = profile.isSelf
-        ? _posts
+        ? posts
               .where(
                 (post) => switch (_momentFilter) {
                   _CommunityProfileMomentFilter.all => true,
@@ -20,7 +23,7 @@ extension _CommunityMemberProfileContentSlivers
                 },
               )
               .toList(growable: false)
-        : _posts;
+        : posts;
     final tabs = SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -69,7 +72,7 @@ extension _CommunityMemberProfileContentSlivers
     if (_contentTab == _CommunityProfileContentTab.reviews) {
       return <Widget>[
         tabs,
-        if (_reviews.isEmpty)
+        if (reviews.isEmpty)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(40),
@@ -99,12 +102,12 @@ extension _CommunityMemberProfileContentSlivers
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverList.builder(
-              itemCount: _reviews.length,
+              itemCount: reviews.length,
               itemBuilder: (context, index) =>
-                  _CommunityProfileReviewTile(review: _reviews[index]),
+                  _CommunityProfileReviewTile(review: reviews[index]),
             ),
           ),
-        if (_reviewHasMore)
+        if (postsVisible && _reviewHasMore)
           SliverToBoxAdapter(
             child: Center(
               child: Padding(
@@ -132,7 +135,10 @@ extension _CommunityMemberProfileContentSlivers
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-          child: Row(
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 communityText(context, 'Moments', 'اللحظات'),
@@ -140,7 +146,6 @@ extension _CommunityMemberProfileContentSlivers
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
-              const SizedBox(width: 10),
               if (profile.isSelf)
                 DropdownButton<_CommunityProfileMomentFilter>(
                   key: const Key('community-profile-moment-filter'),
@@ -177,7 +182,6 @@ extension _CommunityMemberProfileContentSlivers
                   communityText(context, 'All', 'الكل'),
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-              const Spacer(),
               Icon(
                 _gridMode
                     ? Icons.grid_view_rounded
@@ -229,7 +233,7 @@ extension _CommunityMemberProfileContentSlivers
                 post: moments[index],
                 repository: _repository!,
                 referenceMetadata: _referenceByPost[moments[index].id],
-                viewCount: _viewCounts[moments[index].id] ?? 0,
+                viewCount: _viewCounts[moments[index].id],
               ),
               childCount: moments.length,
             ),
@@ -252,28 +256,29 @@ extension _CommunityMemberProfileContentSlivers
                   showModerationStatus: profile.isSelf,
                   onAction: (action) => _managePost(moments[index], action),
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: 12,
-                    end: 12,
-                    bottom: 8,
+                if (_viewCounts.containsKey(moments[index].id))
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 12,
+                      end: 12,
+                      bottom: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.visibility_outlined, size: 15),
+                        const SizedBox(width: 4),
+                        Text(
+                          _viewCounts[moments[index].id].toString(),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.visibility_outlined, size: 15),
-                      const SizedBox(width: 4),
-                      Text(
-                        (_viewCounts[moments[index].id] ?? 0).toString(),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
         ),
-      if (_hasMore)
+      if (postsVisible && _hasMore)
         SliverToBoxAdapter(
           child: Center(
             child: Padding(
@@ -308,7 +313,7 @@ class _CommunityProfilePostTile extends StatelessWidget {
   final CommunityPost post;
   final CommunityRepository repository;
   final CommunityPostReferenceMetadata? referenceMetadata;
-  final int viewCount;
+  final int? viewCount;
 
   Future<void> _open(BuildContext context) => pushCommunityPage<void>(
     context,
@@ -370,25 +375,41 @@ class _CommunityProfilePostTile extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Row(
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  const Icon(Icons.favorite_border_rounded, size: 16),
-                  const SizedBox(width: 3),
-                  Text('${post.likeCount}'),
-                  const SizedBox(width: 10),
-                  const Icon(Icons.mode_comment_outlined, size: 16),
-                  const SizedBox(width: 3),
-                  Text('${post.commentCount}'),
-                  const SizedBox(width: 10),
-                  const Icon(Icons.visibility_outlined, size: 16),
-                  const SizedBox(width: 3),
-                  Text(
-                    viewCount.toString(),
-                    key: Key('community-profile-post-views-${post.id}'),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.favorite_border_rounded, size: 16),
+                      const SizedBox(width: 3),
+                      Text('${post.likeCount}'),
+                    ],
                   ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.mode_comment_outlined, size: 16),
+                      const SizedBox(width: 3),
+                      Text('${post.commentCount}'),
+                    ],
+                  ),
+                  if (viewCount != null)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.visibility_outlined, size: 16),
+                        const SizedBox(width: 3),
+                        Text(
+                          viewCount.toString(),
+                          key: Key('community-profile-post-views-${post.id}'),
+                        ),
+                      ],
+                    ),
                   if (post.moderationStatus !=
                       CommunityPostModerationStatus.approved) ...[
-                    const Spacer(),
                     Icon(
                       post.moderationStatus ==
                               CommunityPostModerationStatus.pending

@@ -79,7 +79,7 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(verifiedSubscriptionStateProvider);
+    final state = ref.watch(verifiedSubscriptionAccessProvider);
     return state.when(
       loading: () => Scaffold(
         appBar: AppBar(title: Text(title)),
@@ -185,6 +185,14 @@ class MealCalorieGoalsPage extends ConsumerWidget {
     String meal,
     double? current,
   ) async {
+    bool mayEdit() =>
+        ref
+            .read(verifiedSubscriptionAccessProvider)
+            .asData
+            ?.value
+            .grants(CommerceEntitlement.advancedIntelligence) ==
+        true;
+    if (!mayEdit()) return;
     final controller = TextEditingController(
       text: current?.toStringAsFixed(0) ?? '',
     );
@@ -197,6 +205,12 @@ class MealCalorieGoalsPage extends ConsumerWidget {
         builder: (dialogContext, setDialogState) {
           Future<void> commit(String raw) async {
             if (saving) return;
+            // A modal can outlive the paid route beneath it. Recheck the exact
+            // verified cutoff before any local write, not the raw 30s snapshot.
+            if (!mayEdit()) {
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+              return;
+            }
             final value = double.tryParse(raw.replaceAll(',', '.'));
             if (raw.isNotEmpty &&
                 (value == null ||
@@ -359,6 +373,10 @@ class _MealMacroDisplayPageState extends ConsumerState<MealMacroDisplayPage> {
 
   Future<void> _save(bool enabled, MealMacroDisplayMode mode) async {
     if (saving) return;
+    final access = ref.read(verifiedSubscriptionAccessProvider).asData?.value;
+    if (access?.grants(CommerceEntitlement.advancedIntelligence) != true) {
+      return;
+    }
     setState(() {
       saving = true;
       saveError = null;

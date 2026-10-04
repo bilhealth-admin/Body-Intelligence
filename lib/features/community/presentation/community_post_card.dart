@@ -32,7 +32,7 @@ class _CommunityPostCard extends StatefulWidget {
 }
 
 class _CommunityPostCardState extends State<_CommunityPostCard> {
-  late final Future<bool> _moderator = widget.repository.isCommunityModerator();
+  late Future<bool> _moderator = widget.repository.isCommunityModerator();
   late CommunityPostStats _stats = CommunityPostStats(
     postId: widget.post.id,
     likeCount: widget.post.likeCount,
@@ -52,6 +52,9 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   @override
   void didUpdateWidget(covariant _CommunityPostCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Parent/session refresh must replace even an already-completed role proof.
+    // The repository shares this lookup across cards for the current session.
+    _moderator = widget.repository.isCommunityModerator();
     if (oldWidget.post.id != widget.post.id ||
         oldWidget.post.likeCount != widget.post.likeCount ||
         oldWidget.post.liked != widget.post.liked ||

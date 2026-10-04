@@ -11,6 +11,7 @@ import '../domain/community_attention.dart';
 import 'community_copy.dart';
 
 part 'community_notifications_filters.dart';
+part 'community_notifications_rendering.dart';
 
 class CommunityNotificationsPage extends StatefulWidget {
   const CommunityNotificationsPage({this.repository, super.key});
@@ -26,6 +27,7 @@ enum _ActivityFilter { updates, reactions, comments, followers }
 
 class _CommunityNotificationsPageState
     extends State<CommunityNotificationsPage> {
+  static const _pageSize = 30;
   CommunityRepository? _repository;
   late Future<_CommunityUpdates> _updates;
   final Set<String> _markingSeen = <String>{};
@@ -33,6 +35,20 @@ class _CommunityNotificationsPageState
   CommunityAttentionController? _attentionController;
   int? _lastCommunityUpdates;
   _ActivityFilter _filter = _ActivityFilter.updates;
+  int _loadGeneration = 0;
+  bool _loadingFirst = false;
+  bool _loadingMore = false;
+  bool _hasMore = false;
+  DateTime? _before;
+  String? _beforeId;
+
+  void _selectFilter(_ActivityFilter filter) {
+    if (_filter == filter) return;
+    setState(() {
+      _filter = filter;
+      _updates = _load();
+    });
+  }
 
   @override
   void initState() {
@@ -81,20 +97,97 @@ class _CommunityNotificationsPageState
   }
 
   Future<_CommunityUpdates> _load() async {
+    final generation = ++_loadGeneration;
+    _loadingFirst = true;
+    _loadingMore = false;
+    _hasMore = false;
+    _before = null;
+    _beforeId = null;
     final repository = _repository;
-    if (repository == null) return const _CommunityUpdates.signedOut();
-    final values = await Future.wait<Object>([
-      repository.loadAttention(),
-      repository.loadCommunityNotifications(),
-    ]);
-    final attention = values[0] as CommunityAttention;
-    final notifications = values[1] as List<CommunityNotification>;
-    return _CommunityUpdates(
-      incomingRequests: attention.incomingRequests,
-      unreadMessages: attention.unreadMessages,
-      communityUpdates: attention.communityUpdates,
-      notifications: notifications,
-    );
+    try {
+      if (repository == null) return const _CommunityUpdates.signedOut();
+      final values = await Future.wait<Object>([
+        repository.loadAttention(),
+        repository.loadCommunityNotifications(
+          kinds: _CommunityNotificationsFilters(this).filterKinds,
+          limit: _pageSize,
+        ),
+      ]);
+      final attention = values[0] as CommunityAttention;
+      final notifications = values[1] as List<CommunityNotification>;
+      if (mounted && generation == _loadGeneration) {
+        _setCursor(notifications);
+      }
+      return _CommunityUpdates(
+        incomingRequests: attention.incomingRequests,
+        unreadMessages: attention.unreadMessages,
+        communityUpdates: attention.communityUpdates,
+        notifications: notifications,
+      );
+    } finally {
+      if (generation == _loadGeneration) _loadingFirst = false;
+    }
+  }
+
+  void _setCursor(List<CommunityNotification> notifications) {
+    _hasMore = notifications.length == _pageSize;
+    _before = notifications.lastOrNull?.createdAt;
+    _beforeId = notifications.lastOrNull?.id;
+  }
+
+  Future<void> _loadMore(_CommunityUpdates visible) async {
+    final repository = _repository;
+    if (repository == null ||
+        _loadingFirst ||
+        _loadingMore ||
+        !_hasMore ||
+        _before == null ||
+        _beforeId == null) {
+      return;
+    }
+    final generation = _loadGeneration;
+    setState(() => _loadingMore = true);
+    try {
+      final page = await repository.loadCommunityNotifications(
+        before: _before,
+        beforeId: _beforeId,
+        kinds: _CommunityNotificationsFilters(this).filterKinds,
+        limit: _pageSize,
+      );
+      if (!mounted || generation != _loadGeneration) return;
+      final known = visible.notifications.map((item) => item.id).toSet();
+      setState(() {
+        _setCursor(page);
+        _updates = Future.value(
+          _CommunityUpdates(
+            incomingRequests: visible.incomingRequests,
+            unreadMessages: visible.unreadMessages,
+            communityUpdates: visible.communityUpdates,
+            notifications: [
+              ...visible.notifications,
+              ...page.where((item) => known.add(item.id)),
+            ],
+          ),
+        );
+      });
+    } catch (_) {
+      if (!mounted || generation != _loadGeneration) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'BIL could not check your updates safely. Try again.',
+              'تعذر على BIL التحقق من تحديثاتك بأمان. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _loadingMore = false);
+      }
+    }
   }
 
   void _retry() {
@@ -395,273 +488,7 @@ class _CommunityNotificationsPageState
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(
-        communityText(context, 'Community updates', 'تحديثات المجتمع'),
-      ),
-      actions: [
-        IconButton(
-          tooltip: communityText(context, 'Notifications', 'الإشعارات'),
-          onPressed: () => context.push('/notification-settings'),
-          icon: const Icon(Icons.tune_rounded),
-        ),
-        if (_repository != null)
-          IconButton(
-            onPressed: _retry,
-            tooltip: communityText(context, 'Refresh', 'تحديث'),
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-      ],
-    ),
-    body: FutureBuilder<_CommunityUpdates>(
-      future: _updates,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done &&
-            !snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return _CenteredUpdatesState(
-            icon: Icons.cloud_off_outlined,
-            title: communityText(
-              context,
-              'Community updates are unavailable',
-              'تحديثات المجتمع غير متاحة',
-            ),
-            body: communityText(
-              context,
-              'BIL could not check your updates safely. Try again.',
-              'تعذر على BIL التحقق من تحديثاتك بأمان. حاول مجددًا.',
-            ),
-            action: FilledButton.icon(
-              onPressed: _retry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
-            ),
-          );
-        }
-        final live = CommunityAttentionScope.controllerOf(context);
-        final persisted = snapshot.requireData;
-        final updates = live?.owner != null && !live!.stale
-            ? _CommunityUpdates(
-                incomingRequests: live.value.incomingRequests,
-                unreadMessages: live.value.unreadMessages,
-                communityUpdates: live.value.communityUpdates,
-                notifications: persisted.notifications,
-              )
-            : persisted;
-        if (updates.signedOut) {
-          return _CenteredUpdatesState(
-            icon: Icons.lock_person_outlined,
-            title: communityText(
-              context,
-              'Sign in required',
-              'تسجيل الدخول مطلوب',
-            ),
-            body: communityText(
-              context,
-              'Sign in to check private community updates.',
-              'سجّل الدخول للتحقق من تحديثات المجتمع الخاصة.',
-            ),
-            action: FilledButton.icon(
-              onPressed: () => context.push('/login'),
-              icon: const Icon(Icons.login_rounded),
-              label: Text(communityText(context, 'Sign in', 'تسجيل الدخول')),
-            ),
-          );
-        }
-        if (updates.isEmpty) {
-          return _CenteredUpdatesState(
-            icon: Icons.notifications_none_rounded,
-            title: communityText(
-              context,
-              'No community updates',
-              'لا توجد تحديثات للمجتمع',
-            ),
-            body: communityText(
-              context,
-              'Friend requests, accepted connections, and unread messages will appear here.',
-              'ستظهر طلبات الصداقة والطلبات المقبولة والرسائل غير المقروءة هنا.',
-            ),
-            action: FilledButton.icon(
-              onPressed: () => _openAndRefresh('/community/people'),
-              icon: const Icon(Icons.person_add_alt_1_rounded),
-              label: Text(
-                communityText(context, 'Find people', 'البحث عن أشخاص'),
-              ),
-            ),
-          );
-        }
-        final filteredNotifications = updates.notifications
-            .where(_CommunityNotificationsFilters(this).matchesFilter)
-            .toList(growable: false);
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (updates.notifications.isNotEmpty) ...[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final filter in _ActivityFilter.values) ...[
-                      ChoiceChip(
-                        key: Key('community-activity-filter-${filter.name}'),
-                        selected: _filter == filter,
-                        label: Text(
-                          _CommunityNotificationsFilters(
-                            this,
-                          ).filterLabel(filter),
-                        ),
-                        onSelected: (_) => setState(() => _filter = filter),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (filteredNotifications.isEmpty &&
-                updates.notifications.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  communityText(
-                    context,
-                    'No updates in this category yet.',
-                    'لا توجد تحديثات في هذه الفئة بعد.',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            for (final notification in filteredNotifications)
-              Card(
-                color: notification.seen
-                    ? null
-                    : Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: 0.35),
-                child: ListTile(
-                  leading: BilAccountAvatar(
-                    radius: 20,
-                    networkUrl: notification.actorAvatarUrl,
-                  ),
-                  title: Text(_notificationTitle(notification)),
-                  subtitle: Text(
-                    notification.seen
-                        ? communityText(context, 'Seen', 'تمت المشاهدة')
-                        : communityText(context, 'New', 'جديد'),
-                  ),
-                  trailing: _notificationTrailing(notification),
-                  onTap:
-                      notification.kind ==
-                          CommunityNotificationKind.collaborationInvite
-                      ? null
-                      : () => _openNotification(notification),
-                ),
-              ),
-            if (_filter == _ActivityFilter.updates &&
-                updates.incomingRequests > 0)
-              ListTile(
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.friends,
-                ),
-                title: Text(
-                  communityText(context, 'Friend requests', 'طلبات الصداقة'),
-                ),
-                subtitle: Text('${updates.incomingRequests}'),
-                trailing: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
-                ),
-                onTap: () => _openAndRefresh('/community/connections'),
-              ),
-            if (_filter == _ActivityFilter.updates &&
-                updates.unreadMessages > 0)
-              ListTile(
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.messages,
-                ),
-                title: Text(
-                  communityText(
-                    context,
-                    'Unread messages',
-                    'الرسائل غير المقروءة',
-                  ),
-                ),
-                subtitle: Text('${updates.unreadMessages}'),
-                trailing: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
-                ),
-                onTap: () => _openAndRefresh('/community/messages'),
-              ),
-          ],
-        );
-      },
-    ),
-  );
-}
-
-class _CenteredUpdatesState extends StatelessWidget {
-  const _CenteredUpdatesState({
-    required this.icon,
-    required this.title,
-    required this.body,
-    this.action,
-  });
-
-  final IconData icon;
-  final String title;
-  final String body;
-  final Widget? action;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 56, color: Theme.of(context).colorScheme.secondary),
-          const SizedBox(height: 16),
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(body, textAlign: TextAlign.center),
-          if (action != null) ...[const SizedBox(height: 24), action!],
-        ],
-      ),
-    ),
-  );
-}
-
-class _CommunityUpdates {
-  const _CommunityUpdates({
-    this.incomingRequests = 0,
-    this.unreadMessages = 0,
-    this.communityUpdates = 0,
-    this.notifications = const <CommunityNotification>[],
-  }) : signedOut = false;
-
-  const _CommunityUpdates.signedOut()
-    : incomingRequests = 0,
-      unreadMessages = 0,
-      communityUpdates = 0,
-      notifications = const <CommunityNotification>[],
-      signedOut = true;
-
-  final int incomingRequests;
-  final int unreadMessages;
-  final int communityUpdates;
-  final List<CommunityNotification> notifications;
-  final bool signedOut;
-
-  bool get isEmpty =>
-      incomingRequests == 0 &&
-      unreadMessages == 0 &&
-      communityUpdates == 0 &&
-      notifications.isEmpty;
+  Widget build(BuildContext context) => _CommunityNotificationsRendering(
+    this,
+  ).buildCommunityNotifications(context);
 }

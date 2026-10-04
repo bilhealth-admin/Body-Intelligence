@@ -36,12 +36,16 @@ final class CommunityComposerVoiceInputService {
     var transcript = '';
     var finalResult = false;
     var failed = false;
+    var captureClosed = false;
+    String? acceptedText;
+    DialogRoute<void>? activeRoute;
     StateSetter? refresh;
     Timer? timeout;
     final editor = TextEditingController();
     try {
       final available = await _speech.initialize(
         onError: (_) {
+          if (captureClosed) return;
           failed = true;
           refresh?.call(() {});
         },
@@ -66,6 +70,7 @@ final class CommunityComposerVoiceInputService {
 
       await _speech.listen(
         onResult: (result) {
+          if (captureClosed) return;
           transcript = result.recognizedWords.trim();
           finalResult = result.isFinal;
           editor.value = TextEditingValue(
@@ -85,6 +90,7 @@ final class CommunityComposerVoiceInputService {
       );
 
       timeout = Timer(const Duration(seconds: 46), () async {
+        if (captureClosed) return;
         if (_speech.isListening) {
           await _speech.stop();
         }
@@ -94,8 +100,7 @@ final class CommunityComposerVoiceInputService {
 
       if (!context.mounted) return null;
 
-      var accepted = false;
-      await showDialog<void>(
+      final route = DialogRoute<void>(
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) => StatefulBuilder(
@@ -117,6 +122,7 @@ final class CommunityComposerVoiceInputService {
                 minLines: 3,
                 maxLines: 8,
                 maxLength: 1200,
+                onChanged: (_) => setDialogState(() {}),
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   labelText: _copy(
@@ -138,6 +144,7 @@ final class CommunityComposerVoiceInputService {
                 TextButton(
                   onPressed: () {
                     unawaited(() async {
+                      captureClosed = true;
                       refresh = null;
                       await _speech.cancel();
                       if (dialogContext.mounted) {
@@ -153,7 +160,9 @@ final class CommunityComposerVoiceInputService {
                       ? null
                       : () {
                           unawaited(() async {
-                            accepted = true;
+                            if (editor.text.trim().isEmpty) return;
+                            acceptedText = editor.text.trim();
+                            captureClosed = true;
                             refresh = null;
                             if (_speech.isListening) await _speech.stop();
                             if (dialogContext.mounted) {
@@ -169,12 +178,15 @@ final class CommunityComposerVoiceInputService {
           },
         ),
       );
-
-      return accepted ? editor.text.trim() : null;
+      final popped = Navigator.of(context, rootNavigator: true).push(route);
+      activeRoute = route;
+      await popped;
+      return acceptedText;
     } on Object {
       if (context.mounted) _showUnavailable(context);
       return null;
     } finally {
+      captureClosed = true;
       refresh = null;
       timeout?.cancel();
       if (_speech.isListening) {
@@ -184,8 +196,14 @@ final class CommunityComposerVoiceInputService {
           // Native recognizer may already have completed.
         }
       }
-      await _speech.dispose();
-      editor.dispose();
+      try {
+        await _speech.dispose();
+      } finally {
+        // The pop result precedes the route's reverse transition. A focused
+        // TextField still owns controller listeners until that route is gone.
+        if (activeRoute != null) await activeRoute.completed;
+        editor.dispose();
+      }
     }
   }
 

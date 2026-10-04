@@ -1,13 +1,17 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_reference.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
 import 'package:body_intelligence_log/features/community/domain/community_reference_parity.dart';
+import 'package:body_intelligence_log/features/community/domain/community_rewards.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,7 +21,7 @@ const _postId = '33333333-3333-4333-8333-333333333333';
 const _reviewId = '44444444-4444-4444-8444-444444444444';
 
 class _ReferenceParityRepository extends CommunityRepository {
-  _ReferenceParityRepository()
+  _ReferenceParityRepository({this.selfProfile = false})
     : super(
         SupabaseClient(
           'https://community-reference.invalid',
@@ -25,6 +29,8 @@ class _ReferenceParityRepository extends CommunityRepository {
           authOptions: const AuthClientOptions(autoRefreshToken: false),
         ),
       );
+
+  final bool selfProfile;
 
   bool following = false;
   int followCalls = 0;
@@ -35,14 +41,21 @@ class _ReferenceParityRepository extends CommunityRepository {
   bool get useServerCommunityReferenceParity => true;
 
   @override
-  String get currentUserId => _viewer;
+  String get currentUserId => selfProfile ? _creatorId : _viewer;
+
+  @override
+  Future<CommunityGoldBalance> loadGoldBalance() async =>
+      throw StateError('Synthetic rewards unavailable');
+
+  @override
+  Future<List<CommunityQuest>> loadCommunityQuests() async => [];
 
   @override
   Future<CommunityProfileOverview> loadProfileOverview(String userId) async =>
       CommunityProfileOverview(
         userId: _creatorId,
         displayName: 'BIL Creator',
-        isSelf: false,
+        isSelf: selfProfile,
         relationship: CommunityRelationshipStatus.none,
         allowFriendRequests: true,
         allowFollows: true,
@@ -264,6 +277,8 @@ void main() {
   test('creator projection parses badge and level progress strictly', () {
     final projection = CommunityCreatorProfile.fromJson({
       'user_id': _creatorId,
+      'posts_visible': true,
+      'followers_visible': true,
       'contributor': true,
       'approved_posts': 8,
       'followers': 12,
@@ -537,4 +552,115 @@ void main() {
       expect(tester.widget<Text>(viewCount).data, '37');
     },
   );
+
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'creator center metrics remain reachable on 320x568 at 200% in $language',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(320, 568));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(language),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: CommunityMemberProfilePage(
+              userId: _creatorId,
+              repository: _ReferenceParityRepository(selfProfile: true),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final center = find.byKey(const Key('community-creator-center'));
+        await tester.scrollUntilVisible(
+          center,
+          160,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.ensureVisible(center);
+        await tester.pumpAndSettle();
+        expect(tester.getSize(center).height, greaterThanOrEqualTo(48));
+        final label = find.descendant(of: center, matching: find.byType(Text));
+        expect(
+          tester.renderObject<RenderParagraph>(label).didExceedMaxLines,
+          isFalse,
+          reason: 'Creator tool meaning must not be truncated at 200%',
+        );
+        await tester.tap(center);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final lastMetric = find.text(
+          language == 'ar' ? 'الدعوات المؤهلة' : 'Qualified referrals',
+        );
+        await tester.ensureVisible(lastMetric);
+        await tester.pumpAndSettle();
+        expect(lastMetric, findsOneWidget);
+        expect(tester.getRect(lastMetric).bottom, lessThanOrEqualTo(568));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'all creator badges are reachable on 320x568 at 200% in $language',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(320, 568));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(language),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: CommunityMemberProfilePage(
+              userId: _creatorId,
+              repository: _ReferenceParityRepository(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final badges = find.byKey(const Key('community-creator-badges'));
+        await tester.scrollUntilVisible(
+          badges,
+          180,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.ensureVisible(badges);
+        await tester.pumpAndSettle();
+        await tester.tap(badges);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final lastBadge = find.byKey(
+          const Key('community-creator-badge-referral_builder'),
+        );
+        await tester.ensureVisible(lastBadge);
+        await tester.pumpAndSettle();
+        expect(tester.getRect(lastBadge).bottom, lessThanOrEqualTo(568));
+        expect(tester.getRect(lastBadge).top, greaterThanOrEqualTo(0));
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }

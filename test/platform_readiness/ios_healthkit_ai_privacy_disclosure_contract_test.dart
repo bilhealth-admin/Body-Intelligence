@@ -34,10 +34,31 @@ void main() {
     expect(queryFlow, contains('.grantAndVerify()'));
     expect(consentCoordinator, contains("'p_purpose': 'remote_ai'"));
     expect(consentCoordinator, contains("'p_policy_version': '3'"));
+    final grant = consentCoordinator.substring(
+      consentCoordinator.indexOf('Future<bool> _grantCurrent('),
+      consentCoordinator.indexOf('Future<bool> _revokeCurrent('),
+    );
+    final persisted = grant.indexOf('await write().timeout(');
+    final readback = grant.indexOf('final receipt = await read().timeout(');
+    final verified = grant.indexOf(
+      'if (!isCurrentRemoteAiConsentGranted(receipt)',
+    );
+    final clearDenial = grant.indexOf('await _persistDenial(owner, false);');
+    final unlocked = grant.indexOf('_granted = true;');
+    expect(persisted, greaterThanOrEqualTo(0));
+    expect(readback, greaterThan(persisted));
+    expect(verified, greaterThan(readback));
+    expect(clearDenial, greaterThan(verified));
+    expect(unlocked, greaterThan(clearDenial));
     expect(
-      consentCoordinator,
-      contains('return _readCurrent(owner, generation);'),
-      reason: 'Consent grants must be verified by an authoritative readback.',
+      grant.substring(verified, clearDenial),
+      contains('_syncOwner() != owner ||\n        _generation != generation'),
+    );
+    expect(grant.substring(verified, clearDenial), contains('return false;'));
+    expect(
+      grant.substring(clearDenial, unlocked),
+      contains('await _persistDenial(owner, true);\n      return false;'),
+      reason: 'A newer denial or owner change must not unlock cloud AI.',
     );
     expect(server, contains('bil_has_remote_ai_consent'));
   });

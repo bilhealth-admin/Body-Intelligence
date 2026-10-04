@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "status": "VERIFIED_LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH",
+  "verification_scope": "PUBLIC_ENDPOINT_AVAILABILITY_AND_DEPLOYED_STATIC_ASSET_BYTE_IDENTITY",
+  "legal_approval": "NOT_CLAIMED",
+  "method": "GET_ONLY_NO_STORE_OR_SITE_MUTATION",
+  "verified_at_utc": "2026-10-04T12:33:15.784Z",
+  "domain": "bilhealth.com",
+  "local_asset": {
+    "path": "public_site/app.js",
+    "bytes": 91515,
+    "sha256": "fe4e2d57c36c870af6a63ae241206bef4b19afe1b1732796e813275c0cf5c533"
+  },
+  "remote_asset": {
+    "url": "https://www.bilhealth.com/app.js",
+    "final_url": "https://www.bilhealth.com/app.js",
+    "http_status": 200,
+    "content_type": "text/javascript",
+    "redirected": false,
+    "bytes": 91515,
+    "sha256": "fe4e2d57c36c870af6a63ae241206bef4b19afe1b1732796e813275c0cf5c533",
+    "byte_identical_to_local": true
+  },
+  "routes": [
+    {
+      "name": "privacy",
+      "path": "/privacy",
+      "url": "https://www.bilhealth.com/privacy",
+      "final_url": "https://www.bilhealth.com/privacy",
+      "http_status": 200,
+      "content_type": "text/html",
+      "redirected": false,
+      "bytes": 7832,
+      "sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+      "response_sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2"
+    },
+    {
+      "name": "terms",
+      "path": "/terms",
+      "url": "https://www.bilhealth.com/terms",
+      "final_url": "https://www.bilhealth.com/terms",
+      "http_status": 200,
+      "content_type": "text/html",
+      "redirected": false,
+      "bytes": 7832,
+      "sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+      "response_sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2"
+    },
+    {
+      "name": "support",
+      "path": "/support",
+      "url": "https://www.bilhealth.com/support",
+      "final_url": "https://www.bilhealth.com/support",
+      "http_status": 200,
+      "content_type": "text/html",
+      "redirected": false,
+      "bytes": 7832,
+      "sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+      "response_sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2"
+    },
+    {
+      "name": "account_deletion",
+      "path": "/account-deletion",
+      "url": "https://www.bilhealth.com/account-deletion",
+      "final_url": "https://www.bilhealth.com/account-deletion",
+      "http_status": 200,
+      "content_type": "text/html",
+      "redirected": false,
+      "bytes": 7832,
+      "sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2",
+      "response_sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2"
+    }
+  ],
+  "content_assertions": {
+    "privacy_en_adults_only": "BIL is intended only for adults aged 18 or older",
+    "privacy_ar_adults_only": "التطبيق مخصص فقط للبالغين بعمر 18 عامًا فأكثر",
+    "terms_en_minimum_age": "You must be at least 18 years old",
+    "terms_ar_minimum_age": "يجب أن يكون عمرك 18 عامًا على الأقل"
+  },
+  "evidence_report": "docs/release/BIL_PREBUILD_REPAIR_CONTRACTS_2026-10-04.md",
+  "additional_byte_identity": {
+    "index": {
+      "url": "https://www.bilhealth.com/",
+      "final_url": "https://www.bilhealth.com/",
+      "http_status": 200,
+      "content_type": "text/html",
+      "redirected": false,
+      "bytes": 7832,
+      "sha256": "b565165cf2b76c22894caa210e0967f825c3d5a199d932e242f205755350f6b2"
+    },
+    "app_ads": {
+      "url": "https://www.bilhealth.com/app-ads.txt",
+      "final_url": "https://www.bilhealth.com/app-ads.txt",
+      "http_status": 200,
+      "content_type": "text/plain",
+      "redirected": false,
+      "bytes": 59,
+      "sha256": "f8043dbc228db374437c11be71a2fcb39c749798422c4f8521af4e766c45142c"
+    },
+    "preserved_associations": {
+      "apple-app-site-association": {
+        "url": "https://www.bilhealth.com/.well-known/apple-app-site-association",
+        "final_url": "https://www.bilhealth.com/.well-known/apple-app-site-association",
+        "http_status": 200,
+        "content_type": "application/json",
+        "redirected": false,
+        "bytes": 515,
+        "sha256": "0c86e04570c17ceb004dbb464d649d3841ca3712e93987c036de175cbce967c4"
+      },
+      "assetlinks.json": {
+        "url": "https://www.bilhealth.com/.well-known/assetlinks.json",
+        "final_url": "https://www.bilhealth.com/.well-known/assetlinks.json",
+        "http_status": 200,
+        "content_type": "application/json",
+        "redirected": false,
+        "bytes": 567,
+        "sha256": "5c6ae8e11182a7b60a5264a793e81cf8fd3cc69cd581ba4ad66f61e263786143"
+      }
+    }
+  },
+  "deployment": "STATIC_READY_FILES_WRANGLER_4_125_0_NO_BUNDLE_KEEP_VARS_NO_APP_BUILD"
+}

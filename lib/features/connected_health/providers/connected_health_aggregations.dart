@@ -265,6 +265,9 @@ List<GlobalHealthSignal> aggregateConnectedSleepSignals(
           timeZoneId: template.provenance.timeZoneId,
         ),
         attributes: <String, Object?>{
+          // Keep the original native device/source evidence in this display
+          // projection. The raw records and provenance are not rewritten.
+          ...template.attributes,
           'endedAt': last.toIso8601String(),
           'sourceSessionIds': [for (final row in rows) row.provenance.recordId],
           'measuredStages': [

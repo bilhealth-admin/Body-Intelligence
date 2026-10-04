@@ -193,6 +193,42 @@ jobs:
           set -o pipefail
           mkdir -p /tmp/bil-boundaries
           psql -h 127.0.0.1 -p 5432 -U postgres -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-boundaries/sql-tests.log
+      - name: Verify privacy and write hardening against exact SQL with concurrent sessions
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_prebuild_qa_privacy
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_prebuild_qa_privacy'
+          node tool/release/test_community_prebuild_hardening_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/prebuild-privacy-sql.log
+      - name: Verify atomic publishing, media ownership and genuine concurrent operations
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_atomic_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_atomic_qa_candidate'
+          node tool/release/test_community_atomic_publish_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/atomic-publish-sql.log
+      - name: Verify authoritative notification preferences and opted-out retries with genuine SQL
+        if: ${{ !cancelled() }}
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+          PGDATABASE: bil_notification_qa_candidate
+        run: |
+          set -euo pipefail
+          psql -d community_qa -c 'CREATE DATABASE bil_notification_qa_candidate'
+          node tool/release/test_notification_delivery_preferences_isolated.mjs 2>&1 | tee /tmp/bil-boundaries/notification-authority-sql.log
       - name: Run provider payload tests with mocked transports only
         if: ${{ !cancelled() }}
         run: |

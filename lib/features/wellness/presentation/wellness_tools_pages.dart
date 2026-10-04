@@ -21,6 +21,7 @@ import '../domain/exercise_energy_engine.dart';
 import '../domain/sleep_schedule.dart';
 import '../domain/static_workout_artwork.dart';
 import 'wellness_copy.dart';
+import 'sleep_stage_copy.dart';
 
 part 'sleep_tracker_page.dart';
 part 'sleep_tracker_experience.dart';

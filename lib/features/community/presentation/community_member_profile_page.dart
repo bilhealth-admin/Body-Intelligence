@@ -58,6 +58,8 @@ class _CommunityMemberProfilePageState
   bool _reviewHasMore = false;
   bool _loadingMore = false;
   bool _loadingMoreReviews = false;
+  int _loadGeneration = 0;
+  bool _refreshing = false;
   bool _gridMode = true;
   bool _relationshipBusy = false;
   bool _followBusy = false;
@@ -71,100 +73,111 @@ class _CommunityMemberProfilePageState
   Future<void> _loadInitial() async {
     final repository = _repository;
     if (repository == null) return;
-
-    final core = await Future.wait<Object>([
-      repository.loadProfileOverview(widget.userId),
-      repository.loadProfilePosts(userId: widget.userId, limit: _pageSize),
-    ]);
-    final profile = core[0] as CommunityProfileOverview;
-    final batch = core[1] as CommunityFeedBatch;
-
-    CommunityCreatorProfile? creator;
-    CommunityGoldBalance? goldBalance;
-    List<CommunityQuest> quests = const <CommunityQuest>[];
-    List<CommunityProfileReview> reviews = const <CommunityProfileReview>[];
-    List<CommunityDraftSummary> drafts = const <CommunityDraftSummary>[];
-    Map<String, int> counts = const <String, int>{};
-    List<CommunityPostReferenceMetadata> references =
-        const <CommunityPostReferenceMetadata>[];
-
-    if (repository.useServerCommunityReferenceParity) {
-      final postIds = batch.posts
-          .map((post) => post.id)
-          .toList(growable: false);
-      final extras = await Future.wait<Object>([
-        repository.loadCommunityCreatorProfile(widget.userId),
-        repository.loadCommunityProfileReviews(
-          userId: widget.userId,
-          limit: _pageSize,
-        ),
-        profile.isSelf
-            ? repository.listMyCommunityDrafts(limit: 5)
-            : Future<List<CommunityDraftSummary>>.value(
-                const <CommunityDraftSummary>[],
-              ),
-        repository.loadCommunityPostViewCounts(postIds),
-        postIds.isEmpty
-            ? Future<List<CommunityPostReferenceMetadata>>.value(
-                const <CommunityPostReferenceMetadata>[],
-              )
-            : repository.loadCommunityPostReferenceMetadata(postIds),
+    repository.invalidateCommunityModeratorStatus();
+    final generation = ++_loadGeneration;
+    _refreshing = true;
+    _loadingMore = false;
+    _loadingMoreReviews = false;
+    try {
+      final core = await Future.wait<Object>([
+        repository.loadProfileOverview(widget.userId),
+        repository.loadProfilePosts(userId: widget.userId, limit: _pageSize),
       ]);
-      creator = extras[0] as CommunityCreatorProfile;
-      reviews = extras[1] as List<CommunityProfileReview>;
-      drafts = extras[2] as List<CommunityDraftSummary>;
-      counts = extras[3] as Map<String, int>;
-      references = extras[4] as List<CommunityPostReferenceMetadata>;
-      _coverUrl = await repository.loadCommunityProfileCoverUrl(widget.userId);
-      if (profile.isSelf) {
-        try {
-          final rewards = await Future.wait<Object>([
-            repository.loadGoldBalance(),
-            repository.loadCommunityQuests(),
-          ]);
-          goldBalance = rewards[0] as CommunityGoldBalance;
-          quests = rewards[1] as List<CommunityQuest>;
-        } on Object {
-          // Creator rewards are an enhancement to the self-profile. The
-          // profile itself remains usable when reward policy is unavailable.
-          goldBalance = null;
-          quests = const <CommunityQuest>[];
+      final profile = core[0] as CommunityProfileOverview;
+      final batch = core[1] as CommunityFeedBatch;
+      final postsVisible = profile.isSelf || profile.showPosts;
+      String? coverUrl;
+
+      CommunityCreatorProfile? creator;
+      CommunityGoldBalance? goldBalance;
+      List<CommunityQuest> quests = const <CommunityQuest>[];
+      List<CommunityProfileReview> reviews = const <CommunityProfileReview>[];
+      List<CommunityDraftSummary> drafts = const <CommunityDraftSummary>[];
+      Map<String, int> counts = const <String, int>{};
+      List<CommunityPostReferenceMetadata> references =
+          const <CommunityPostReferenceMetadata>[];
+
+      if (repository.useServerCommunityReferenceParity) {
+        final postIds = (postsVisible ? batch.posts : const <CommunityPost>[])
+            .map((post) => post.id)
+            .toList(growable: false);
+        final extras = await Future.wait<Object>([
+          repository.loadCommunityCreatorProfile(widget.userId),
+          repository.loadCommunityProfileReviews(
+            userId: widget.userId,
+            limit: _pageSize,
+          ),
+          profile.isSelf
+              ? repository.listMyCommunityDrafts(limit: 5)
+              : Future<List<CommunityDraftSummary>>.value(
+                  const <CommunityDraftSummary>[],
+                ),
+          repository.loadCommunityPostViewCounts(postIds),
+          postIds.isEmpty
+              ? Future<List<CommunityPostReferenceMetadata>>.value(
+                  const <CommunityPostReferenceMetadata>[],
+                )
+              : repository.loadCommunityPostReferenceMetadata(postIds),
+        ]);
+        creator = extras[0] as CommunityCreatorProfile;
+        reviews = extras[1] as List<CommunityProfileReview>;
+        drafts = extras[2] as List<CommunityDraftSummary>;
+        counts = extras[3] as Map<String, int>;
+        references = extras[4] as List<CommunityPostReferenceMetadata>;
+        coverUrl = await repository.loadCommunityProfileCoverUrl(widget.userId);
+        if (profile.isSelf) {
+          try {
+            final rewards = await Future.wait<Object>([
+              repository.loadGoldBalance(),
+              repository.loadCommunityQuests(),
+            ]);
+            goldBalance = rewards[0] as CommunityGoldBalance;
+            quests = rewards[1] as List<CommunityQuest>;
+          } on Object {
+            // Creator rewards are an enhancement to the self-profile. The
+            // profile itself remains usable when reward policy is unavailable.
+            goldBalance = null;
+            quests = const <CommunityQuest>[];
+          }
         }
       }
-    } else {
-      _coverUrl = null;
+      if (!mounted || generation != _loadGeneration) return;
+      _coverUrl = coverUrl;
+      _profile = profile;
+      _creator = creator;
+      _goldBalance = goldBalance;
+      _quests = List<CommunityQuest>.unmodifiable(quests);
+      _posts
+        ..clear()
+        ..addAll(postsVisible ? batch.posts : const <CommunityPost>[]);
+      _viewCounts
+        ..clear()
+        ..addAll(counts);
+      _referenceByPost
+        ..clear()
+        ..addEntries(references.map((value) => MapEntry(value.postId, value)));
+      _reviews
+        ..clear()
+        ..addAll(postsVisible ? reviews : const <CommunityProfileReview>[]);
+      _draftSummaries
+        ..clear()
+        ..addAll(drafts);
+      _before = postsVisible ? batch.nextBefore : null;
+      _beforeId = postsVisible ? batch.nextBeforeId : null;
+      _hasMore = postsVisible && batch.hasMore;
+      _reviewHasMore = postsVisible && reviews.length == _pageSize;
+      _reviewBefore = postsVisible ? reviews.lastOrNull?.createdAt : null;
+      _reviewBeforeId = postsVisible ? reviews.lastOrNull?.reviewId : null;
+    } finally {
+      if (generation == _loadGeneration) _refreshing = false;
     }
-
-    _profile = profile;
-    _creator = creator;
-    _goldBalance = goldBalance;
-    _quests = List<CommunityQuest>.unmodifiable(quests);
-    _posts
-      ..clear()
-      ..addAll(batch.posts);
-    _viewCounts
-      ..clear()
-      ..addAll(counts);
-    _referenceByPost
-      ..clear()
-      ..addEntries(references.map((value) => MapEntry(value.postId, value)));
-    _reviews
-      ..clear()
-      ..addAll(reviews);
-    _draftSummaries
-      ..clear()
-      ..addAll(drafts);
-    _before = batch.nextBefore;
-    _beforeId = batch.nextBeforeId;
-    _hasMore = batch.hasMore;
-    _reviewHasMore = reviews.length == _pageSize;
-    _reviewBefore = reviews.lastOrNull?.createdAt;
-    _reviewBeforeId = reviews.lastOrNull?.reviewId;
   }
 
   Future<void> _refresh() async {
     final future = _loadInitial();
-    setState(() => _loading = future);
+    setState(() {
+      _loading = future;
+    });
     try {
       await future;
     } on Object {
@@ -176,11 +189,14 @@ class _CommunityMemberProfilePageState
     final repository = _repository;
     if (repository == null ||
         _loadingMore ||
+        _refreshing ||
+        (_profile?.isSelf != true && _profile?.showPosts != true) ||
         !_hasMore ||
         _before == null ||
         _beforeId == null) {
       return;
     }
+    final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
       final batch = await repository.loadProfilePosts(
@@ -189,6 +205,7 @@ class _CommunityMemberProfilePageState
         beforeId: _beforeId,
         limit: _pageSize,
       );
+      if (!mounted || generation != _loadGeneration) return;
       final known = _posts.map((post) => post.id).toSet();
       final incoming = batch.posts
           .where((post) => known.add(post.id))
@@ -207,7 +224,7 @@ class _CommunityMemberProfilePageState
         references = extras[1] as List<CommunityPostReferenceMetadata>;
       }
 
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       setState(() {
         _posts.addAll(incoming);
         _viewCounts.addAll(counts);
@@ -219,9 +236,11 @@ class _CommunityMemberProfilePageState
         _hasMore = batch.hasMore;
       });
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && generation == _loadGeneration) _showFailure();
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _loadingMore = false);
+      }
     }
   }
 
@@ -229,11 +248,14 @@ class _CommunityMemberProfilePageState
     final repository = _repository;
     if (repository == null ||
         _loadingMoreReviews ||
+        _refreshing ||
+        (_profile?.isSelf != true && _profile?.showPosts != true) ||
         !_reviewHasMore ||
         _reviewBefore == null ||
         _reviewBeforeId == null) {
       return;
     }
+    final generation = _loadGeneration;
     setState(() => _loadingMoreReviews = true);
     try {
       final page = await repository.loadCommunityProfileReviews(
@@ -242,7 +264,7 @@ class _CommunityMemberProfilePageState
         beforeId: _reviewBeforeId,
         limit: _pageSize,
       );
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       final known = _reviews.map((review) => review.reviewId).toSet();
       setState(() {
         _reviews.addAll(page.where((review) => known.add(review.reviewId)));
@@ -253,9 +275,11 @@ class _CommunityMemberProfilePageState
         }
       });
     } catch (_) {
-      if (mounted) _showFailure();
+      if (mounted && generation == _loadGeneration) _showFailure();
     } finally {
-      if (mounted) setState(() => _loadingMoreReviews = false);
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _loadingMoreReviews = false);
+      }
     }
   }
 

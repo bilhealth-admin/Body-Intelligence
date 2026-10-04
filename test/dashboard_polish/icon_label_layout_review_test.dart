@@ -156,72 +156,86 @@ void main() {
             await tester.pumpAndSettle();
           });
 
-          testWidgets('Body context icon spacing and route: $description', (
-            tester,
-          ) async {
-            _setSurface(tester, width);
-            final database = AppDatabase.forTesting(NativeDatabase.memory());
-            addTearDown(() async {
+          testWidgets(
+            'Body context without note icon and route: $description',
+            (tester) async {
+              _setSurface(tester, width);
+              final database = AppDatabase.forTesting(NativeDatabase.memory());
+              addTearDown(() async {
+                await tester.pumpWidget(const SizedBox.shrink());
+                await tester.pumpAndSettle();
+                await database.close();
+              });
+              final router = GoRouter(
+                initialLocation: '/daily-log',
+                routes: [
+                  GoRoute(
+                    path: '/daily-log',
+                    builder: (_, _) => const DailyLogPage(),
+                  ),
+                  GoRoute(
+                    path: '/daily-log/body-context',
+                    builder: (_, _) =>
+                        const Scaffold(body: Text('body-context-destination')),
+                  ),
+                ],
+              );
+              addTearDown(router.dispose);
+              await tester.pumpWidget(
+                _subject(
+                  database: database,
+                  locale: locale,
+                  scale: scale,
+                  platform: platform,
+                  router: router,
+                ),
+              );
+              await tester.pumpAndSettle();
+              final bodyContext = find.byKey(
+                const Key('daily-log-body-context-link'),
+              );
+              await tester.scrollUntilVisible(
+                bodyContext,
+                350,
+                scrollable: find.byType(Scrollable).first,
+              );
+              await tester.ensureVisible(bodyContext);
+              await tester.pumpAndSettle();
+              final tile = tester.widget<ListTile>(
+                find.descendant(
+                  of: bodyContext,
+                  matching: find.byType(ListTile),
+                ),
+              );
+              // Owner-requested presentation change: the note badge is removed,
+              // while the actual whole-tile navigation affordance stays intact.
+              expect(tile.leading, isNull);
+              expect(
+                find.descendant(
+                  of: bodyContext,
+                  matching: find.byType(BilSemanticIconBadge),
+                ),
+                findsNothing,
+              );
+              expect(tile.trailing, isA<Icon>());
+              expect(tile.onTap, isNotNull);
+              expect(
+                tester.getSize(bodyContext).height,
+                greaterThanOrEqualTo(48),
+              );
+              expect(tile.subtitle, isNull);
+              expect(tester.takeException(), isNull);
+              if (capture) {
+                await _capture(tester, 'body-context-${locale.languageCode}');
+              }
+              await tester.tap(find.byWidget(tile.title!));
+              await tester.pumpAndSettle();
+              expect(find.text('body-context-destination'), findsOneWidget);
+              expect(tester.takeException(), isNull);
               await tester.pumpWidget(const SizedBox.shrink());
               await tester.pumpAndSettle();
-              await database.close();
-            });
-            final router = GoRouter(
-              initialLocation: '/daily-log',
-              routes: [
-                GoRoute(
-                  path: '/daily-log',
-                  builder: (_, _) => const DailyLogPage(),
-                ),
-                GoRoute(
-                  path: '/daily-log/body-context',
-                  builder: (_, _) =>
-                      const Scaffold(body: Text('body-context-destination')),
-                ),
-              ],
-            );
-            addTearDown(router.dispose);
-            await tester.pumpWidget(
-              _subject(
-                database: database,
-                locale: locale,
-                scale: scale,
-                platform: platform,
-                router: router,
-              ),
-            );
-            await tester.pumpAndSettle();
-            final bodyContext = find.byKey(
-              const Key('daily-log-body-context-link'),
-            );
-            await tester.scrollUntilVisible(
-              bodyContext,
-              350,
-              scrollable: find.byType(Scrollable).first,
-            );
-            await tester.ensureVisible(bodyContext);
-            await tester.pumpAndSettle();
-            final tile = tester.widget<ListTile>(
-              find.descendant(of: bodyContext, matching: find.byType(ListTile)),
-            );
-            _expectBadgeGap(
-              tester,
-              bodyContext,
-              find.byWidget(tile.title!),
-              32,
-            );
-            expect(tile.subtitle, isNull);
-            expect(tester.takeException(), isNull);
-            if (capture) {
-              await _capture(tester, 'body-context-${locale.languageCode}');
-            }
-            await tester.tap(find.byWidget(tile.title!));
-            await tester.pumpAndSettle();
-            expect(find.text('body-context-destination'), findsOneWidget);
-            expect(tester.takeException(), isNull);
-            await tester.pumpWidget(const SizedBox.shrink());
-            await tester.pumpAndSettle();
-          });
+            },
+          );
         }
       }
     }

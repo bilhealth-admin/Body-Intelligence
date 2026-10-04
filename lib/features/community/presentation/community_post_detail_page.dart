@@ -292,7 +292,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   }
 
   Future<void> _loadMoreReplies(CommunityComment root) async {
+    if (_refreshing) return;
     if (!_loadingReplyThreads.add(root.id)) return;
+    final generation = _loadGeneration;
     setState(() => _expandedThreads.add(root.id));
     try {
       final loaded = _loadedReplies(root.id);
@@ -305,7 +307,13 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         limit: 20,
       );
       final tiers = await _fetchMembershipTiers(page);
-      if (!mounted) return;
+      if (!mounted ||
+          generation != _loadGeneration ||
+          !_comments.any(
+            (comment) => comment.id == root.id && comment.parentId == null,
+          )) {
+        return;
+      }
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
         _membershipTierResolvedUsers.addAll(
@@ -315,7 +323,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         _comments.addAll(page.where((comment) => known.add(comment.id)));
       });
     } catch (_) {
-      if (mounted) _showActionError();
+      if (mounted && generation == _loadGeneration) _showActionError();
     } finally {
       if (mounted) {
         setState(() => _loadingReplyThreads.remove(root.id));

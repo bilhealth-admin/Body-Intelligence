@@ -23,6 +23,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   set _feedCursorPostId(String? value);
 
   Future<List<CommunityPost>> _loadFirst() async {
+    widget.repository.invalidateCommunityModeratorStatus();
     final generation = ++_feedGeneration;
     _feedRefreshing = true;
     _loadingMore = false;

@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../commerce/domain/commerce_entitlement.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../../connected_health/connected_health_model.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -64,6 +66,10 @@ Future<void> saveExerciseCaloriePreferences(
   WidgetRef ref,
   ExerciseCaloriePreferences preferences,
 ) async {
+  final access = ref.read(verifiedSubscriptionAccessProvider).asData?.value;
+  if (access?.grants(CommerceEntitlement.advancedIntelligence) != true) {
+    return;
+  }
   final repository = ref.read(preferencesRepositoryProvider);
   await repository.setMany({
     exerciseCaloriesIncludedPreferenceKey: preferences.includeInRemainingGoal

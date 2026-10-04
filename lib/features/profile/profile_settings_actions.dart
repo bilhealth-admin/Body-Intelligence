@@ -10,7 +10,7 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
     exercises = profile.exercises;
     age.text = profile.age.toString();
     height.text = profile.height.toStringAsFixed(1);
-    weight.text = profile.currentWeight.toStringAsFixed(1);
+    weight.text = profile.currentWeight.toString();
     target.text = profile.targetWeight.toStringAsFixed(1);
     neck.text = _optionalText(profile.neck);
     waist.text = _optionalText(profile.waist);
@@ -21,12 +21,59 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
   }
 
   Future<void> _finishHydration() async {
-    await Future.wait([
-      _loadLatestMeasurements(),
-      _loadExperiencePreferences(),
-    ]);
-    if (!mounted) return;
-    _updateState(() => formHydrated = true);
+    final generation = ++hydrationGeneration;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    try {
+      final values = await Future.wait<Object?>([
+        ref.read(bodyMeasurementRepositoryProvider).getLatest(),
+        ref.read(weightRepositoryProvider).watchLatestWeight().first,
+        preferences.get('weeklyExerciseSessions'),
+        preferences.get('exerciseType'),
+        preferences.get('displayName'),
+        ref.read(dietaryPreferencesRepositoryProvider).read(),
+      ], eagerError: true).timeout(widget.hydrationTimeout);
+      if (!mounted || generation != hydrationGeneration) return;
+      final latest = values[0] as BodyMeasurementEntry?;
+      final latestWeight = values[1] as WeightEntry?;
+      final dietary = values[5] as DietaryPreferences;
+      _updateState(() {
+        if (latest != null) {
+          neck.text = _optionalText(latest.neckCm);
+          waist.text = _optionalText(latest.waistCm);
+          hips.text = _optionalText(latest.hipsCm);
+          chest.text = _optionalText(latest.chestCm);
+          arm.text = _optionalText(latest.armCm);
+          thigh.text = _optionalText(latest.thighCm);
+        }
+        if (latestWeight != null) weight.text = latestWeight.weight.toString();
+        hydratedWeight = double.parse(weight.text);
+        final sessions = int.tryParse(values[2] as String? ?? '') ?? 3;
+        weeklyExerciseSessions = sessions >= 1 && sessions <= 7 ? sessions : 3;
+        final savedExerciseType = values[3] as String?;
+        exerciseType =
+            const {
+              'walking',
+              'strength',
+              'cardio',
+              'swimming',
+              'cycling',
+              'mixed',
+            }.contains(savedExerciseType)
+            ? savedExerciseType!
+            : 'mixed';
+        displayName.text = (values[4] as String?)?.trim() ?? '';
+        dietApproach = dietary.approach;
+        dietaryPattern = dietary.pattern;
+        dietaryRequirements = dietary.requirements.toSet();
+        dietaryAllergens = dietary.allergens.toSet();
+        dietaryExcludedIngredients = dietary.excludedIngredients.toSet();
+        formHydrated = true;
+      });
+    } catch (_) {
+      if (mounted && generation == hydrationGeneration) {
+        _updateState(() => hydrationFailed = true);
+      }
+    }
   }
 
   String _optionalText(double? centimeters) {
@@ -36,53 +83,34 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
   }
 
   double? _optionalNumberCm(TextEditingController controller) {
-    final raw = controller.text.trim().replaceAll(',', '.');
+    final raw = _numericText(controller.text);
     if (raw.isEmpty) return null;
     final value = double.parse(raw);
     return UnitConverter.heightToCm(value, measurementSystem);
   }
 
-  Future<void> _loadLatestMeasurements() async {
-    final latest = await ref
-        .read(bodyMeasurementRepositoryProvider)
-        .getLatest();
-    if (!mounted || latest == null) return;
-    _updateState(() {
-      neck.text = _optionalText(latest.neckCm);
-      waist.text = _optionalText(latest.waistCm);
-      hips.text = _optionalText(latest.hipsCm);
-      chest.text = _optionalText(latest.chestCm);
-      arm.text = _optionalText(latest.armCm);
-      thigh.text = _optionalText(latest.thighCm);
-    });
+  String? validateAge(String? value) {
+    final text = _numericText(value ?? '');
+    final parsed = RegExp(r'^[0-9]{1,3}$').hasMatch(text)
+        ? int.tryParse(text, radix: 10)
+        : null;
+    return parsed == null || !BilAdultEligibility.isEligibleAge(parsed)
+        ? '${BilAdultEligibility.minimumAge} – ${BilAdultEligibility.maximumSupportedAge}'
+        : null;
   }
 
-  Future<void> _loadExperiencePreferences() async {
-    if (experiencePreferencesLoaded) return;
-    experiencePreferencesLoaded = true;
-    final repository = ref.read(preferencesRepositoryProvider);
-    final values = await Future.wait([
-      repository.get('weeklyExerciseSessions'),
-      repository.get('exerciseType'),
-      repository.get('displayName'),
-    ]);
-    final dietary = await ref.read(dietaryPreferencesRepositoryProvider).read();
-    if (!mounted) return;
-    _updateState(() {
-      weeklyExerciseSessions = int.tryParse(values[0] ?? '') ?? 3;
-      exerciseType = values[1] ?? 'mixed';
-      dietApproach = dietary.approach;
-      dietaryPattern = dietary.pattern;
-      dietaryRequirements = dietary.requirements.toSet();
-      dietaryAllergens = dietary.allergens.toSet();
-      dietaryExcludedIngredients = dietary.excludedIngredients.toSet();
-      displayName.text = values[2]?.trim() ?? '';
-    });
-  }
+  String _numericText(String value) => value
+      .trim()
+      .replaceAll(',', '.')
+      .replaceAll('٫', '.')
+      .replaceAllMapped(RegExp('[٠-٩۰-۹]'), (match) {
+        final digit = match[0]!.codeUnitAt(0);
+        return (digit - (digit >= 0x06f0 ? 0x06f0 : 0x0660)).toString();
+      });
 
   String? validate(String? value, double min, double max) {
-    final parsed = double.tryParse((value ?? '').replaceAll(',', '.'));
-    return parsed == null || parsed < min || parsed > max
+    final parsed = double.tryParse(_numericText(value ?? ''));
+    return parsed == null || !parsed.isFinite || parsed < min || parsed > max
         ? '$min – $max'
         : null;
   }
@@ -110,6 +138,7 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
   );
 
   Future<void> leave() async {
+    if (saving) return;
     if (dirty) {
       final discard = await showDialog<bool>(
         context: context,
@@ -140,79 +169,107 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
   }
 
   Future<void> save(UserProfileData profile) async {
+    if (saving || !formHydrated) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
     _updateState(() => saving = true);
     try {
-      final currentWeight = double.parse(weight.text.replaceAll(',', '.'));
-      final targetWeight = double.parse(target.text.replaceAll(',', '.'));
+      final database = ref.read(databaseProvider);
+      final profiles = ref.read(userProfileRepositoryProvider);
+      final measurements = ref.read(bodyMeasurementRepositoryProvider);
+      final weights = ref.read(weightRepositoryProvider);
+      final goals = ref.read(goalRepositoryProvider);
+      final preferences = ref.read(preferencesRepositoryProvider);
+      final dietaryRepository = ref.read(dietaryPreferencesRepositoryProvider);
+      final nameSync = ref.read(displayNameSyncProvider);
+      final editedWeight = double.parse(_numericText(weight.text));
+      final weightChanged = editedWeight != hydratedWeight;
+      final targetWeight = double.parse(_numericText(target.text));
+      final profileAge = int.parse(_numericText(age.text), radix: 10);
+      final profileHeight = double.parse(_numericText(height.text));
+      final profileGender = gender;
+      final profileActivity = activity;
+      final profileExercises = exercises;
+      final preferenceSnapshot = {
+        'weeklyExerciseSessions': exercises
+            ? weeklyExerciseSessions.toString()
+            : '0',
+        'exerciseType': exerciseType,
+        ...DisplayNameSync.localEdit(displayName.text),
+      };
+      final dietary = DietaryPreferences(
+        pattern: dietaryPattern,
+        approach: dietApproach,
+        requirements: dietaryRequirements.toSet(),
+        allergens: dietaryAllergens.toSet(),
+        excludedIngredients: dietaryExcludedIngredients.toSet(),
+      );
       final neckCm = _optionalNumberCm(neck);
       final waistCm = _optionalNumberCm(waist);
       final hipsCm = _optionalNumberCm(hips);
       final chestCm = _optionalNumberCm(chest);
       final armCm = _optionalNumberCm(arm);
       final thighCm = _optionalNumberCm(thigh);
-      await ref
-          .read(userProfileRepositoryProvider)
-          .save(
-            gender: gender,
-            age: int.parse(age.text),
-            height: double.parse(height.text.replaceAll(',', '.')),
-            currentWeight: currentWeight,
-            targetWeight: targetWeight,
-            activityLevel: activity,
-            exercises: exercises,
-            medicalConditions: profile.medicalConditions,
-            waist: waistCm,
-            neck: neckCm,
-            chest: chestCm,
-            arm: armCm,
-            thigh: thighCm,
+      await database.transaction(() async {
+        final latestWeight =
+            await (database.select(database.weightEntries)
+                  ..where((row) => row.deletedAt.isNull())
+                  ..orderBy([(row) => OrderingTerm.desc(row.date)])
+                  ..limit(1))
+                .getSingleOrNull();
+        final currentWeight = weightChanged
+            ? editedWeight
+            : latestWeight?.weight ?? editedWeight;
+        final activeGoal = await goals.getActive();
+        await profiles.save(
+          gender: profileGender,
+          age: profileAge,
+          height: profileHeight,
+          currentWeight: currentWeight,
+          targetWeight: targetWeight,
+          activityLevel: profileActivity,
+          exercises: profileExercises,
+          medicalConditions: profile.medicalConditions,
+          waist: waistCm,
+          neck: neckCm,
+          chest: chestCm,
+          arm: armCm,
+          thigh: thighCm,
+        );
+        if (weightChanged) {
+          await weights.addWeight(
+            currentWeight,
+            measurementContext: 'unspecified',
           );
-      await ref
-          .read(bodyMeasurementRepositoryProvider)
-          .saveForDay(
-            date: DateTime.now(),
-            neckCm: neckCm,
-            waistCm: waistCm,
-            hipsCm: hipsCm,
-            chestCm: chestCm,
-            armCm: armCm,
-            thighCm: thighCm,
-          );
+        }
+        await measurements.saveForDay(
+          date: DateTime.now(),
+          neckCm: neckCm,
+          waistCm: waistCm,
+          hipsCm: hipsCm,
+          chestCm: chestCm,
+          armCm: armCm,
+          thighCm: thighCm,
+        );
+        await goals.save(
+          uuid: activeGoal?.uuid,
+          profileUuid: profile.uuid,
+          type: targetWeight < currentWeight
+              ? 'lose'
+              : targetWeight > currentWeight
+              ? 'gain'
+              : 'maintain',
+          targetWeight: targetWeight,
+          targetDate: activeGoal?.targetDate,
+        );
+        await dietaryRepository.saveInCurrentTransaction(dietary);
+        await preferences.setManyInCurrentTransaction(preferenceSnapshot);
+      });
+      unawaited(nameSync.synchronize());
+      if (!mounted) return;
       ref.invalidate(bodyMeasurementHistoryProvider);
-      final activeGoal = ref.read(activeGoalProvider).value;
-      await ref
-          .read(goalRepositoryProvider)
-          .save(
-            uuid: activeGoal?.uuid,
-            profileUuid: profile.uuid,
-            type: targetWeight < currentWeight
-                ? 'lose'
-                : targetWeight > currentWeight
-                ? 'gain'
-                : 'maintain',
-            targetWeight: targetWeight,
-            targetDate: activeGoal?.targetDate,
-          );
-      final preferences = ref.read(preferencesRepositoryProvider);
-      await preferences.set(
-        'weeklyExerciseSessions',
-        exercises ? weeklyExerciseSessions.toString() : '0',
-      );
-      await preferences.set('exerciseType', exerciseType);
-      await ref
-          .read(dietaryPreferencesRepositoryProvider)
-          .save(
-            DietaryPreferences(
-              pattern: dietaryPattern,
-              approach: dietApproach,
-              requirements: dietaryRequirements,
-              allergens: dietaryAllergens,
-              excludedIngredients: dietaryExcludedIngredients,
-            ),
-          );
-      await preferences.setMany(DisplayNameSync.localEdit(displayName.text));
-      unawaited(ref.read(displayNameSyncProvider).synchronize());
+      ref.invalidate(latestWeightProvider);
+      ref.invalidate(weightHistoryProvider);
+      ref.invalidate(todayWeightProvider);
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       if (!mounted) return;
@@ -225,6 +282,19 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
         ),
       );
       context.go('/settings');
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              t(
+                'Could not save. Your changes are still here. Try again.',
+                'تعذّر الحفظ. تغييراتك محفوظة هنا. أعد المحاولة.',
+              ),
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) _updateState(() => saving = false);
     }

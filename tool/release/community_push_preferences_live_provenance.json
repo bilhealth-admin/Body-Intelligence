@@ -1,0 +1,105 @@
+{
+  "status": "SOURCE_AND_ISOLATED_SQL_ONLY",
+  "production_project": "tgmanzhqulksykhslrzb",
+  "inspected_at": "2026-10-04 09:47:17.627528+00",
+  "production_server_version": "17.6",
+  "baseline_path": "tool/release/community_push_preferences_live_baseline.sql",
+  "baseline_sha256": "d2ded84c5848175a891e9452132c4ea93e8207e4bd755aec72a0bd4175813a73",
+  "functions": [
+    {
+      "signature": "auth.uid()",
+      "definition_md5": "ea3b41bf29e2ad573067939329aa088e",
+      "acl": "{=X/supabase_auth_admin,supabase_auth_admin=X/supabase_auth_admin,dashboard_user=X/supabase_auth_admin}"
+    },
+    {
+      "signature": "bil_claim_push_deliveries(uuid,integer)",
+      "definition_md5": "3beaa7da781c0457064dda1485eeaf47",
+      "acl": "{postgres=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "bil_disable_push_tokens()",
+      "definition_md5": "8055f00c4d1722de6de46335b6771433",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "bil_finalize_push_outbox(uuid)",
+      "definition_md5": "43610a2666c56a9b37511eb10a9076c3",
+      "acl": "{postgres=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "bil_get_push_preferences()",
+      "definition_md5": "788164ef199b4b210917541536a00997",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "bil_record_push_delivery_result(uuid,uuid,boolean,text,boolean)",
+      "definition_md5": "632f6404e594694b444cb954a65c7192",
+      "acl": "{postgres=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "bil_register_push_token_v2(text,text,text,boolean,boolean,boolean,boolean)",
+      "definition_md5": "03639e09988db39e15d54cc8cd9cca7b",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}"
+    },
+    {
+      "signature": "bil_register_push_token(text,text,text,boolean)",
+      "definition_md5": "f0bd73e3fddee3f2cd9d467a062f8886",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    },
+    {
+      "signature": "bil_set_push_delivery_categories_v2(boolean,boolean,boolean)",
+      "definition_md5": "ced7d20e6453081e1e69484dedf06f0a",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}"
+    },
+    {
+      "signature": "bil_set_sensitive_push_previews(boolean)",
+      "definition_md5": "421b6f1e2651a63858cdcd6e3565beac",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}"
+    }
+  ],
+  "deployed_dispatcher": {
+    "slug": "community-push-dispatch",
+    "version": 56,
+    "status": "ACTIVE",
+    "ezbr_sha256": "d7f2aae00790ad1e4936f6782ad8d4034cc822b313c4536074b7463225256162",
+    "category_recheck_after_claim": false
+  },
+  "local_postgres": "17.11",
+  "local_success_database": "bil_notification_qa_static_final",
+  "local_success_runner_sha256": "89006021ee0900b2b90eb4dbcd4a673cba98735b486e4c8e04dcd012558ff99d",
+  "proof": [
+    "Exact LIVE baseline fails the same retry=0 assertion for all three categories",
+    "Exact forward SQL passes the unchanged three queued-opt-out regressions",
+    "28 ordinary-role/schema/CAS/readback assertions",
+    "Actual overlapping same-owner writes: one commit, stale revision40001 rejection",
+    "Actual overlapping opt-out/registration retains durable OFF",
+    "Actual overlapping opt-out/service retry claims zero"
+  ],
+  "new_contract": {
+    "getter": "bil_get_my_push_delivery_categories_v1()",
+    "setter": "bil_set_my_push_delivery_categories_v1(boolean,boolean,boolean,bigint)",
+    "expected_revision_required": true,
+    "uninitialized_revision": 0,
+    "uninitialized_desired_flags": null,
+    "uninitialized_synchronized": false,
+    "changed_revision": "previous+1",
+    "identical_revision": "unchanged after valid CAS",
+    "legacy_setter": "unchanged void signature delegates durable legacy full-snapshot LWW write; not CAS safe",
+    "legacy_registration": "same signature/ACL, delegates stored owner category authority",
+    "backfill": "ONLY active-device owners; ANY per category; no master or sensitive-preview changes",
+    "retry": "serializes owner opt-outs and rechecks current owner/token/category at claim time; already-sent provider requests cannot be recalled"
+  },
+  "boundaries": [
+    "NO Production migration apply or E2E execution",
+    "NO real provider token, APNs/FCM/gateway HTTP or OS delivery",
+    "NO signed JWT/Auth-service login tested; exact auth.uid subject reader used in disposable database",
+    "NO Flutter/build/store upload",
+    "No actor field in existing outbox; source_key/deep_link cannot attest current block/suspension safety",
+    "RPC-only one-row-per-Auth-owner state: no direct CRUD grants or bypass roles",
+    "First registration of unknown owner initializes explicit registration parameters; later stale params never overwrite stored choices"
+  ],
+  "primary_docs": [
+    "https://supabase.com/docs/guides/database/functions",
+    "https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-DEADLOCKS"
+  ]
+}

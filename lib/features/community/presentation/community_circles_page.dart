@@ -256,23 +256,40 @@ class _CommunityCirclePage extends StatefulWidget {
 class _CommunityCirclePageState extends State<_CommunityCirclePage> {
   static const _pageSize = 30;
   final List<CommunityPost> _posts = <CommunityPost>[];
+  final Map<String, int> _viewCounts = <String, int>{};
   late Future<void> _loading = _loadFirst();
   DateTime? _before;
   String? _beforeId;
   bool _hasMore = false;
   bool _loadingMore = false;
+  bool _refreshing = false;
+  int _loadGeneration = 0;
 
   Future<void> _loadFirst() async {
-    final page = await widget.repository.loadCommunityCirclePosts(
-      slug: widget.circle.slug,
-      limit: _pageSize,
-    );
-    _posts
-      ..clear()
-      ..addAll(page.posts);
-    _before = page.nextBefore;
-    _beforeId = page.nextBeforeId;
-    _hasMore = page.hasMore;
+    final generation = ++_loadGeneration;
+    _refreshing = true;
+    try {
+      final page = await widget.repository.loadCommunityCirclePosts(
+        slug: widget.circle.slug,
+        limit: _pageSize,
+      );
+      final counts = await _communityBrowseViewCounts(
+        widget.repository,
+        page.posts,
+      );
+      if (!mounted || generation != _loadGeneration) return;
+      _viewCounts
+        ..clear()
+        ..addAll(counts);
+      _posts
+        ..clear()
+        ..addAll(page.posts);
+      _before = page.nextBefore;
+      _beforeId = page.nextBeforeId;
+      _hasMore = page.hasMore;
+    } finally {
+      if (generation == _loadGeneration) _refreshing = false;
+    }
   }
 
   Future<void> _refresh() async {
@@ -286,9 +303,14 @@ class _CommunityCirclePageState extends State<_CommunityCirclePage> {
   }
 
   Future<void> _loadMore() async {
-    if (_loadingMore || !_hasMore || _before == null || _beforeId == null) {
+    if (_loadingMore ||
+        _refreshing ||
+        !_hasMore ||
+        _before == null ||
+        _beforeId == null) {
       return;
     }
+    final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
       final page = await widget.repository.loadCommunityCirclePosts(
@@ -297,14 +319,32 @@ class _CommunityCirclePageState extends State<_CommunityCirclePage> {
         beforeId: _beforeId,
         limit: _pageSize,
       );
-      if (!mounted) return;
+      final counts = await _communityBrowseViewCounts(
+        widget.repository,
+        page.posts,
+      );
+      if (!mounted || generation != _loadGeneration) return;
       final known = _posts.map((post) => post.id).toSet();
       setState(() {
+        _viewCounts.addAll(counts);
         _posts.addAll(page.posts.where((post) => known.add(post.id)));
         _before = page.nextBefore;
         _beforeId = page.nextBeforeId;
         _hasMore = page.hasMore;
       });
+    } catch (_) {
+      if (!mounted || generation != _loadGeneration) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not load older posts. Try again.',
+              'تعذر تحميل المنشورات الأقدم. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _loadingMore = false);
     }
@@ -395,7 +435,7 @@ class _CommunityCirclePageState extends State<_CommunityCirclePage> {
                         post: _posts[index],
                         repository: widget.repository,
                         referenceMetadata: null,
-                        viewCount: 0,
+                        viewCount: _viewCounts[_posts[index].id],
                       ),
                       childCount: _posts.length,
                     ),

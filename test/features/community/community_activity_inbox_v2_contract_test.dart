@@ -4,9 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Activity inbox matches reference filters and keeps safe routes', () {
-    final page = File(
+    final page = [
       'lib/features/community/presentation/community_notifications_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_notifications_rendering.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final filters = File(
       'lib/features/community/presentation/community_notifications_filters.dart',
     ).readAsStringSync();

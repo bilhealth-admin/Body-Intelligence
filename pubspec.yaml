@@ -89,7 +89,12 @@ dev_dependencies:
     sdk: flutter
   # Mock the community HTTP query boundary without network or production data.
   http: 1.6.0
+  # Public purchase-stream seam; exact already-locked version, host tests only.
+  in_app_purchase_platform_interface: 1.4.1
   path_provider_platform_interface: ^2.0.0
+  # Exercise actual durable preference failures independently of the UI cache.
+  # This is the exact already-locked transitive version, not a runtime upgrade.
+  shared_preferences_platform_interface: 2.4.2
   # Inject the existing player interface in lifecycle/network widget tests.
   video_player_platform_interface: ^6.9.0
 

@@ -159,7 +159,30 @@ final class ConnectedHealthSnapshot {
 }
 
 String connectedHealthDisplaySource(ConnectedHealthSignalView signal) {
-  if (connectedHealthSignalHasWearableProvenance(signal)) return 'Apple Watch';
+  // A wearable is not necessarily an Apple Watch. Use the Apple-specific
+  // evidence carried by HealthKit, including revisions without an HKDevice.
+  final attributes = signal.attributes;
+  final kind = attributes['wearableKind']?.toString().trim().toLowerCase();
+  final product = attributes['sourceProductType']
+      ?.toString()
+      .trim()
+      .toLowerCase();
+  final device = [
+    signal.source,
+    attributes['deviceName'],
+    attributes['deviceModel'],
+    attributes['sourceName'],
+  ].whereType<Object>().join(' ').toLowerCase();
+  final manufacturer = attributes['deviceManufacturer']
+      ?.toString()
+      .trim()
+      .toLowerCase();
+  if (kind == 'apple_watch' ||
+      product?.startsWith('watch') == true ||
+      device.contains('apple watch') ||
+      (manufacturer == 'apple inc.' && device.contains('watch'))) {
+    return 'Apple Watch';
+  }
   final normalized = signal.source.trim().toLowerCase();
   if (normalized.contains('health connect')) return 'Health Connect';
   if (normalized.contains('apple') || normalized.contains('healthkit')) {

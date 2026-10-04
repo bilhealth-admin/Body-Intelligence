@@ -229,6 +229,19 @@ final class _VisualCommunityRepository extends CommunityRepository {
       const CommunityAttention();
 
   @override
+  Future<List<CommunityNotification>> loadCommunityNotifications({
+    DateTime? before,
+    String? beforeId,
+    List<CommunityNotificationKind>? kinds,
+    int limit = 30,
+  }) async {
+    if (!emptyUpdates) {
+      throw StateError('Only the empty Activity capture is configured');
+    }
+    return const [];
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async =>
       emptyUpdates
       ? const []
@@ -409,6 +422,7 @@ void main() {
     Widget Function(Widget child)? wrapper,
     Future<void> Function(WidgetTester tester)? interact,
     Future<void> Function(AppDatabase database)? seed,
+    SubscriptionState? verifiedSubscriptionFixture,
     bool captureOverlay = false,
   }) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
@@ -462,35 +476,50 @@ void main() {
         databaseProvider.overrideWithValue(db),
         liveHealthNowProvider.overrideWithValue(() => _visualNow),
         sleepNowProvider.overrideWithValue(() => _visualNow),
+        if (verifiedSubscriptionFixture != null) ...[
+          // The derived expiry-aware access provider must share the same
+          // root scope as its snapshot and clock, not a nested UI-only scope.
+          verifiedEntitlementClockProvider.overrideWithValue(
+            () => _visualNow.toUtc(),
+          ),
+          verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(verifiedSubscriptionFixture),
+          ),
+        ],
       ],
       child: wrapper?.call(app) ?? app,
     );
-    await tester.pumpWidget(databaseScope);
-    await tester.pumpAndSettle();
-    await settleVisualAssetImages(tester);
-    await tester.pumpAndSettle();
-    if (interact != null) {
-      await interact(tester);
+    try {
+      await tester.pumpWidget(databaseScope);
+      await tester.pumpAndSettle();
       await settleVisualAssetImages(tester);
       await tester.pumpAndSettle();
+      if (interact != null) {
+        await interact(tester);
+        await settleVisualAssetImages(tester);
+        await tester.pumpAndSettle();
+      }
+      expect(tester.takeException(), isNull);
+      final captureTarget = captureOverlay
+          ? find.byKey(const Key('visual-capture-root'))
+          : find.byType(Scaffold).first;
+      if (_skipVisualPixelComparison) {
+        expect(captureTarget, findsOneWidget);
+      } else {
+        await expectLater(
+          captureTarget,
+          matchesGoldenFile(
+            'goldens/visual_closure_${_captureIpad ? name.replaceFirst('_phone', '_ipad') : name}.png',
+          ),
+        );
+      }
+    } finally {
+      // Dispose the real page and its expiry timers even when an assertion
+      // fails; cleanup must not depend on a successful golden comparison.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump();
     }
-    expect(tester.takeException(), isNull);
-    final captureTarget = captureOverlay
-        ? find.byKey(const Key('visual-capture-root'))
-        : find.byType(Scaffold).first;
-    if (_skipVisualPixelComparison) {
-      expect(captureTarget, findsOneWidget);
-    } else {
-      await expectLater(
-        captureTarget,
-        matchesGoldenFile(
-          'goldens/visual_closure_${_captureIpad ? name.replaceFirst('_phone', '_ipad') : name}.png',
-        ),
-      );
-    }
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump();
   }
 
   testWidgets('store plans production page phone capture', (tester) async {
@@ -1600,6 +1629,8 @@ void main() {
       plan: CommercePlan.pro,
       entitlements: const {CommerceEntitlement.advancedIntelligence},
       authority: EntitlementAuthority.verifiedServer,
+      startedAt: DateTime.utc(2026, 8, 1),
+      currentPeriodEndsAt: DateTime.utc(2026, 9, 1),
       isPurchasable: true,
       canRestorePurchases: true,
     );
@@ -1608,15 +1639,29 @@ void main() {
       page: const DashboardPreferencesPage(),
       name: 'dashboard_preferences_nutrient_premium_phone',
       captureOverlay: true,
-      wrapper: (child) => ProviderScope(
-        overrides: [
-          verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(premium),
-          ),
-        ],
-        child: child,
-      ),
+      verifiedSubscriptionFixture: premium,
       interact: (tester) async {
+        final scope = ProviderScope.containerOf(
+          tester.element(find.byType(DashboardPreferencesPage)),
+        );
+        expect(
+          scope.read(verifiedEntitlementClockProvider)().toUtc(),
+          _visualNow.toUtc(),
+          reason: 'The dated golden fixture must use its declared clock.',
+        );
+        expect(
+          scope.read(verifiedSubscriptionStateProvider).asData?.value.plan,
+          CommercePlan.pro,
+        );
+        expect(
+          scope
+              .read(verifiedSubscriptionAccessProvider)
+              .asData
+              ?.value
+              .grants(CommerceEntitlement.advancedIntelligence),
+          isTrue,
+          reason: 'The visual fixture must grant real unexpired access.',
+        );
         final trigger = find.byKey(
           const Key('dashboard-add-nutrient-goal-cards'),
         );

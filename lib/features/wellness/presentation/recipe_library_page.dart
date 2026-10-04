@@ -628,16 +628,9 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
     final recipe = matches.first;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final subscription = ref.read(verifiedSubscriptionAccessProvider).value;
-      if (subscription == null || subscription.plan == CommercePlan.free) {
-        final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
-        context.push(
-          storefrontPlan == CommercePlan.premiumAiCoach
-              ? '/plans?focus=boost'
-              : '/plans?focus=subscription',
-        );
-        return;
-      }
+      // A deep link has the same authority boundary as a manual recipe open.
+      // The shared gate owns loading, failure/retry, expiry and verified Free;
+      // an unresolved lookup is never a reason to redirect a paid member.
       _open(recipe);
     });
   }

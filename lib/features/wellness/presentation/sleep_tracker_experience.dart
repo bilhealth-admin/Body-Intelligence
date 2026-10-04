@@ -119,7 +119,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                 '${connectedSleep.signal.value.toStringAsFixed(1)} ${tr('hours', 'ساعة')}',
               ),
               subtitle: Text(
-                '${tr('Measured by', 'مقاس بواسطة')} ${connectedSleep.signal.source} · '
+                '${wellnessSleepMeasuredByLabel(context)} ${connectedHealthDisplaySource(connectedSleep.signal)} · '
                 '${tr('Last sync', 'آخر مزامنة')} ${MaterialLocalizations.of(context).formatShortDate(connectedSleep.lastSyncAt)}',
               ),
               trailing: const Icon(Icons.verified_rounded, color: Colors.green),
@@ -144,7 +144,11 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                       runSpacing: 8,
                       children: [
                         for (final stage in connectedSleep.measuredStages)
-                          Chip(label: Text(stage)),
+                          Chip(
+                            label: Text(
+                              wellnessSleepStageLabel(context, stage),
+                            ),
+                          ),
                       ],
                     ),
                   ],

@@ -1,6 +1,29 @@
 part of 'community_notifications_page.dart';
 
 extension _CommunityNotificationsFilters on _CommunityNotificationsPageState {
+  List<CommunityNotificationKind> get filterKinds => switch (_filter) {
+    _ActivityFilter.updates => const [
+      CommunityNotificationKind.friendRequest,
+      CommunityNotificationKind.friendAccepted,
+      CommunityNotificationKind.rewardEarned,
+      CommunityNotificationKind.questCompleted,
+      CommunityNotificationKind.badgeEarned,
+      CommunityNotificationKind.challengeUpdate,
+      CommunityNotificationKind.collaborationInvite,
+      CommunityNotificationKind.collaborationAccepted,
+    ],
+    _ActivityFilter.reactions => const [
+      CommunityNotificationKind.postLike,
+      CommunityNotificationKind.postSave,
+    ],
+    _ActivityFilter.comments => const [
+      CommunityNotificationKind.comment,
+      CommunityNotificationKind.reply,
+      CommunityNotificationKind.mention,
+    ],
+    _ActivityFilter.followers => const [CommunityNotificationKind.follow],
+  };
+
   bool matchesFilter(CommunityNotification notification) => switch (_filter) {
     _ActivityFilter.updates =>
       notification.kind == CommunityNotificationKind.friendRequest ||

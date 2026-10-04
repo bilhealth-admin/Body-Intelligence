@@ -2,24 +2,60 @@ part of 'notification_settings_page.dart';
 
 class _ReferencePushToggle extends StatelessWidget {
   const _ReferencePushToggle({
+    super.key,
     required this.value,
     required this.label,
     required this.onChanged,
     required this.enabled,
+    this.subtitle,
   });
   final bool value;
   final String label;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
   final bool enabled;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) => CheckboxListTile(
     value: value,
     controlAffinity: ListTileControlAffinity.leading,
     title: Text(label),
+    subtitle: subtitle == null ? null : Text(subtitle!),
     enabled: enabled,
-    onChanged: enabled ? (value) => onChanged(value ?? false) : null,
+    onChanged: enabled && onChanged != null
+        ? (value) => onChanged!(value ?? false)
+        : null,
   );
+}
+
+extension _NotificationCategoryControls on _NotificationSettingsPageState {
+  Widget _categoryToggle(
+    NotificationDeliveryPreferences delivery,
+    NotificationCategory category,
+    String label,
+  ) {
+    final supported = NotificationDeliveryPreferences.supportedCategories
+        .contains(category);
+    return _ReferencePushToggle(
+      key: Key('notification-category-${category.name}'),
+      enabled:
+          supported &&
+          _communityDeliveryActive &&
+          _communityCategoriesVerified &&
+          !_pushSaving &&
+          !(_saving && _savingCategory == category),
+      value:
+          supported &&
+          _communityDeliveryActive &&
+          _communityCategoriesVerified &&
+          (_pushPreferences!.deliveryCategories!.desired!.contains(category)),
+      label: _referenceLabel(label),
+      subtitle: supported && _communityCategoriesVerified
+          ? null
+          : RuntimeCopy.resolve('Unavailable', _languageCode) ?? 'Unavailable',
+      onChanged: supported ? (value) => _toggleCategory(category, value) : null,
+    );
+  }
 }
 
 /* LEGACY_COPY_REMOVED

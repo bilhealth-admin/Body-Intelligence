@@ -10,9 +10,10 @@ void main() {
     final scope = File(
       'lib/features/community/presentation/community_attention_scope.dart',
     ).readAsStringSync();
-    final page = File(
+    final page = [
       'lib/features/community/presentation/community_notifications_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_notifications_rendering.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(attention, contains('communityUpdates'));
     expect(attention, contains('CommunityNotificationKind.friendAccepted'));
     expect(attention, contains("rewardEarned('reward_earned')"));

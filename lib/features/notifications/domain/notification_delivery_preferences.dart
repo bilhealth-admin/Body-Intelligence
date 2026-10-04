@@ -12,15 +12,17 @@ enum NotificationCategory {
 }
 
 class NotificationDeliveryPreferences {
+  // These are the only categories implemented by the production push RPCs.
+  // The reference-only categories stay unavailable rather than promising a
+  // delivery producer that does not exist.
+  static const supportedCategories = {
+    NotificationCategory.newMessage,
+    NotificationCategory.friendRequest,
+    NotificationCategory.friendAccepted,
+  };
+
   const NotificationDeliveryPreferences({
-    this.enabledCategories = const {
-      NotificationCategory.newMessage,
-      NotificationCategory.friendRequest,
-      NotificationCategory.friendAccepted,
-      NotificationCategory.friendWorkout,
-      NotificationCategory.friendStreak,
-      NotificationCategory.stepGoal,
-    },
+    this.enabledCategories = supportedCategories,
     this.quietHoursEnabled = false,
     this.quietStartMinutes = 22 * 60,
     this.quietEndMinutes = 7 * 60,
@@ -32,7 +34,14 @@ class NotificationDeliveryPreferences {
   final int quietEndMinutes;
 
   bool allows(NotificationCategory category) =>
+      supportedCategories.contains(category) &&
       enabledCategories.contains(category);
+
+  Map<String, bool> get pushCategoryParameters => {
+    'p_message_enabled': allows(NotificationCategory.newMessage),
+    'p_friend_request_enabled': allows(NotificationCategory.friendRequest),
+    'p_friend_accepted_enabled': allows(NotificationCategory.friendAccepted),
+  };
 
   bool shouldPresent(NotificationCategory category, DateTime localTime) =>
       allows(category) && !isQuietAt(localTime.hour, localTime.minute);
@@ -64,6 +73,9 @@ class NotificationDeliveryPreferencesStore {
 
   Future<NotificationDeliveryPreferences> load() async {
     final preferences = await SharedPreferences.getInstance();
+    // setString updates the SDK cache even when platform persistence fails.
+    // Reload the actual device record before interpreting an opt-out.
+    await preferences.reload();
     final encoded = preferences.getString(key);
     if (encoded == null) return const NotificationDeliveryPreferences();
     try {
@@ -72,10 +84,8 @@ class NotificationDeliveryPreferencesStore {
           .cast<String>();
       final enabledCategories = names
           .map(NotificationCategory.values.byName)
+          .where(NotificationDeliveryPreferences.supportedCategories.contains)
           .toSet();
-      if (!names.contains(NotificationCategory.friendAccepted.name)) {
-        enabledCategories.add(NotificationCategory.friendAccepted);
-      }
       return NotificationDeliveryPreferences(
         enabledCategories: enabledCategories,
         quietHoursEnabled: value['quietHoursEnabled'] as bool? ?? false,
@@ -83,16 +93,18 @@ class NotificationDeliveryPreferencesStore {
         quietEndMinutes: value['quietEndMinutes'] as int? ?? 7 * 60,
       );
     } on Object {
-      return const NotificationDeliveryPreferences();
+      // Existing unreadable state must not silently turn notifications ON.
+      return const NotificationDeliveryPreferences(enabledCategories: {});
     }
   }
 
   Future<void> save(NotificationDeliveryPreferences value) async {
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(
+    final saved = await preferences.setString(
       key,
       jsonEncode({
         'enabledCategories': value.enabledCategories
+            .where(NotificationDeliveryPreferences.supportedCategories.contains)
             .map((e) => e.name)
             .toList(),
         'quietHoursEnabled': value.quietHoursEnabled,
@@ -100,5 +112,8 @@ class NotificationDeliveryPreferencesStore {
         'quietEndMinutes': value.quietEndMinutes,
       }),
     );
+    if (!saved) {
+      throw StateError('Notification preferences were not persisted');
+    }
   }
 }

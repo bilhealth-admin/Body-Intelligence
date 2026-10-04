@@ -1,13 +1,60 @@
 part of 'notification_settings_page.dart';
 
 extension _NotificationSettingsActions on _NotificationSettingsPageState {
+  Future<void> _applySavedCategories() async {
+    final snapshot = _pushPreferences?.deliveryCategories;
+    if (_pushSaving ||
+        _saving ||
+        !_communityDeliveryActive ||
+        snapshot == null ||
+        !snapshot.initialized ||
+        snapshot.synchronized ||
+        snapshot.desired == null) {
+      return;
+    }
+    final desired = _deliveryPreferences!.copyWith(
+      enabledCategories: snapshot.desired!,
+    );
+    _updateState(() => _pushSaving = true);
+    try {
+      final receipt = await _pushService!.syncDeliveryPreferences(
+        desired,
+        expectedState: snapshot,
+      );
+      if (mounted) {
+        _updateState(() {
+          _pushPreferences = _pushPreferences!.withDeliveryCategories(receipt);
+          _pushLoadError = false;
+        });
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        _updateState(() => _pushLoadError = true);
+        _showPushError();
+        if (error is PostgrestException && error.code == '40001') {
+          await _loadPushPreferences();
+        }
+      }
+    } finally {
+      if (mounted) _updateState(() => _pushSaving = false);
+    }
+  }
+
   Future<void> _loadPushPreferences() async {
-    if (mounted) _updateState(() => _pushLoadError = false);
+    if (!mounted || _pushLoading || _pushService == null) return;
+    _updateState(() => _pushLoading = true);
     try {
       final preferences = await _pushService!.loadPreferences();
-      if (mounted) _updateState(() => _pushPreferences = preferences);
+      if (mounted) {
+        _updateState(() {
+          _pushPreferences = preferences;
+          _pushLoadError = false;
+        });
+      }
     } on Object {
       if (mounted) _updateState(() => _pushLoadError = true);
+    } finally {
+      if (mounted) _updateState(() => _pushLoading = false);
     }
   }
 
@@ -22,7 +69,10 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
       );
       await _loadPushPreferences();
     } on Object {
-      if (mounted) _showPushError();
+      if (mounted) {
+        _updateState(() => _pushLoadError = true);
+        _showPushError();
+      }
     } finally {
       if (mounted) _updateState(() => _pushSaving = false);
     }
@@ -110,28 +160,59 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     if (mounted) await _refreshSystemStatus();
   }
 
-  Future<void> _saveDelivery(NotificationDeliveryPreferences value) async {
+  Future<void> _saveDelivery(
+    NotificationDeliveryPreferences value, {
+    NotificationCategory? category,
+  }) async {
     if (_saving) return;
     final previous = _deliveryPreferences!;
+    final categorySnapshot = _pushPreferences?.deliveryCategories;
+    if (category != null &&
+        (!_communityDeliveryActive || !(categorySnapshot?.verified ?? false))) {
+      return;
+    }
     final reminders = _reminders!;
     _updateState(() {
-      _deliveryPreferences = value;
+      _savingCategory = category;
       _saving = true;
     });
     try {
       await _deliveryStore.save(value);
       await _reconcile(reminders, value);
-      if (_pushService != null) {
+      if (mounted) _updateState(() => _deliveryPreferences = value);
+      if (category != null && _pushService != null) {
         try {
-          await _pushService!.syncDeliveryPreferences(value);
-        } on Object {
-          if (mounted) _showPushError();
+          final receipt = await _pushService!.syncDeliveryPreferences(
+            value,
+            expectedState: categorySnapshot!,
+          );
+          if (mounted) {
+            _updateState(() {
+              _pushPreferences = _pushPreferences!.withDeliveryCategories(
+                receipt,
+              );
+            });
+          }
+        } on Object catch (error) {
+          if (mounted) {
+            _updateState(() => _pushLoadError = true);
+            _showPushError();
+            if (error is PostgrestException && error.code == '40001') {
+              // Another device changed this owner's categories. Refresh truth;
+              // never automatically replay a stale full-category snapshot.
+              await _loadPushPreferences();
+            }
+          }
         }
       }
     } on Object {
       if (mounted) _updateState(() => _deliveryPreferences = previous);
       try {
         await _deliveryStore.save(previous);
+      } on Object {
+        // A persistence failure must not prevent independent OS rollback.
+      }
+      try {
         await _reconcile(reminders, previous);
       } on Object {
         // Best-effort reconciliation; the visible state remains the last
@@ -139,7 +220,12 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
       }
       if (mounted) _showLocalError();
     } finally {
-      if (mounted) _updateState(() => _saving = false);
+      if (mounted) {
+        _updateState(() {
+          _saving = false;
+          _savingCategory = null;
+        });
+      }
     }
   }
 
@@ -147,16 +233,17 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     List<DailyReminder> reminders,
     NotificationDeliveryPreferences delivery,
   ) async {
+    final language = _languageCode;
     for (final reminder in reminders) {
       await _service.schedule(
         reminder,
-        languageCode: _languageCode,
+        languageCode: language,
         preferences: delivery,
       );
     }
     await _service.scheduleDailyGroupSummary(
       reminders,
-      languageCode: _languageCode,
+      languageCode: language,
       preferences: delivery,
     );
   }
@@ -169,11 +256,19 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
     NotificationCategory category,
     bool enabled,
   ) async {
+    if (_saving ||
+        !_communityDeliveryActive ||
+        !_communityCategoriesVerified ||
+        !NotificationDeliveryPreferences.supportedCategories.contains(
+          category,
+        )) {
+      return;
+    }
     final current = _deliveryPreferences!;
-    final categories = {...current.enabledCategories};
+    final categories = {..._pushPreferences!.deliveryCategories!.desired!};
     enabled ? categories.add(category) : categories.remove(category);
     final next = current.copyWith(enabledCategories: categories);
-    await _saveDelivery(next);
+    await _saveDelivery(next, category: category);
   }
 
   Future<void> _update(DailyReminder updated) async {
@@ -184,7 +279,6 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
         if (reminder.kind == updated.kind) updated else reminder,
     ];
     _updateState(() {
-      _reminders = next;
       _saving = true;
     });
     try {
@@ -207,19 +301,12 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
             _deliveryPreferences ?? const NotificationDeliveryPreferences(),
       );
       await _store.save(next);
+      if (mounted) _updateState(() => _reminders = next);
       await _refreshSystemStatus();
     } on Object {
       if (!mounted) return;
       _updateState(() => _reminders = current);
-      try {
-        await _store.save(current);
-        await _reconcile(
-          current,
-          _deliveryPreferences ?? const NotificationDeliveryPreferences(),
-        );
-      } on Object {
-        // Best-effort reconciliation after restoring the durable list.
-      }
+      await _restoreDailyState(current);
       _showLocalError();
     } finally {
       if (mounted) _updateState(() => _saving = false);
@@ -243,7 +330,6 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
           ),
     ];
     _updateState(() {
-      _reminders = next;
       _saving = true;
     });
     try {
@@ -255,26 +341,32 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
         _deliveryPreferences ?? const NotificationDeliveryPreferences(),
       );
       await _store.save(next);
-      if (enabled) {
-        await _service.showActivationConfirmation(languageCode: _languageCode);
-      }
+      if (mounted) _updateState(() => _reminders = next);
       await _refreshSystemStatus();
     } on Object {
       if (!mounted) return;
       _updateState(() => _reminders = previous);
-      try {
-        await _store.save(previous);
-        await _reconcile(
-          previous,
-          _deliveryPreferences ?? const NotificationDeliveryPreferences(),
-        );
-      } on Object {
-        // Best-effort reconciliation after restoring the durable list.
-      }
+      await _restoreDailyState(previous);
       _showLocalError();
       await _refreshSystemStatus();
     } finally {
       if (mounted) _updateState(() => _saving = false);
+    }
+  }
+
+  Future<void> _restoreDailyState(List<DailyReminder> previous) async {
+    try {
+      await _store.save(previous);
+    } on Object {
+      // Scheduling rollback is independent of platform persistence failure.
+    }
+    try {
+      await _reconcile(
+        previous,
+        _deliveryPreferences ?? const NotificationDeliveryPreferences(),
+      );
+    } on Object {
+      // The caller reports failure; native delivery is not claimed successful.
     }
   }
 

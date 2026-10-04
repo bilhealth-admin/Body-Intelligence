@@ -23,7 +23,12 @@ void main() {
     expect(page, contains('snapshot.deviceVerified'));
     expect(page, contains("signal.key != 'sleep'"));
     expect(page, contains("Key('sleep-connected-source')"));
-    expect(page, contains("tr('Measured by'"));
+    expect(page, contains('wellnessSleepMeasuredByLabel(context)'));
+    expect(
+      page,
+      contains('connectedHealthDisplaySource(connectedSleep.signal)'),
+    );
+    expect(page, contains('wellnessSleepStageLabel(context, stage)'));
     expect(page, contains("tr('Last sync'"));
     expect(page, contains("Key('sleep-measured-stages')"));
     expect(page, contains("signal.attributes['measuredStages']"));

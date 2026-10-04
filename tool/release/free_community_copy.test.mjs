@@ -40,4 +40,41 @@ for (const lang of ['en', 'ar']) {
     assert.ok(current.legal[lang]['/privacy'].sections.length > 0);
     assert.ok(current.legal[lang]['/account-deletion'].sections.length > 0);
   });
+  test(`${lang}: privacy declares eligible Android and iOS advertising without health targeting`, () => {
+    const privacy = current.legal[lang]['/privacy'];
+    for (const id of ['data', 'sharing']) {
+      const matches = privacy.sections.filter(([key]) => key === id);
+      assert.equal(matches.length, 1, id);
+      const copy = matches[0][2];
+      assert.match(copy, /Android/);
+      assert.match(copy, /iOS/);
+      assert.match(copy, /Google Mobile Ads/);
+    }
+    const sharing = privacy.sections.find(([key]) => key === 'sharing')[2];
+    assert.match(sharing, /Google UMP/);
+    assert.match(sharing, lang === 'en' ? /Ads are excluded for guests and paid users/ : /لا تظهر الإعلانات للضيف أو للمستخدم المدفوع/);
+    assert.match(sharing, lang === 'en' ? /Health data is not sold/ : /لا تُباع البيانات الصحية/);
+    assert.match(privacy.updated, lang === 'en' ? /4 October 2026/ : /4 أكتوبر 2026/);
+  });
 }
+
+test('public advertising publisher and deployment verification agree', () => {
+  const ads = fs.readFileSync(new URL('../../public_site/app-ads.txt', import.meta.url), 'utf8');
+  assert.match(ads, /^google\.com, pub-9688223318643509, DIRECT, f08c47fec0942fa0\s*$/m);
+  assert.doesNotMatch(ads, /pub-2630397016527111/);
+  const workflow = fs.readFileSync(new URL('../../.github/workflows/bil_public_site_deploy.yml', import.meta.url), 'utf8');
+  assert.equal((workflow.match(/pub-9688223318643509/g) ?? []).length, 2);
+  assert.doesNotMatch(workflow, /pub-2630397016527111/);
+});
+
+test('no-script privacy retains the current Android and iOS provider disclosure', () => {
+  const html = fs.readFileSync(new URL('../../public_site/index.html', import.meta.url), 'utf8');
+  const fallback = html.match(/<noscript>([\s\S]*?)<\/noscript>/)?.[1];
+  assert.ok(fallback, 'Actual no-script legal fallback must remain readable');
+  assert.match(fallback, /Last updated: 4 October 2026/);
+  assert.match(fallback, /Google Mobile Ads.*supported Android and iOS builds/);
+  assert.doesNotMatch(fallback, /Google Mobile Ads.*supported Android builds/);
+  assert.match(fallback, /Health data is not sold or used to personalize advertising/);
+  assert.match(fallback, /account-deletion/);
+  assert.match(fallback, /privacy@bilhealth\.com/);
+});

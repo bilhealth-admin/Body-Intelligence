@@ -3,6 +3,10 @@ part of 'community_repository.dart';
 mixin _CommunityPublishingRepositoryMixin {
   CommunityPostStoreContract get _posts;
 
+  SupabaseClient get _client;
+  User get _user;
+  bool get useServerIdempotentCommunityPublishing;
+
   Future<T> _runCommunityMutation<T>(Future<T> Function() mutation);
 
   Future<void> assertCommunityPublishReady();
@@ -44,6 +48,7 @@ mixin _CommunityPublishingRepositoryMixin {
   });
 
   Future<void> publishPost(String body) async {
+    if (useServerIdempotentCommunityPublishing) return publishRichPost(body);
     await assertCommunityPublishReady();
     await _runCommunityMutation(() => _posts.publishText(body));
   }
@@ -52,6 +57,9 @@ mixin _CommunityPublishingRepositoryMixin {
     String body, {
     required List<String> topicSlugs,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(body, topicSlugs: topicSlugs);
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     if (topicSlugs.isEmpty) {
@@ -84,6 +92,9 @@ mixin _CommunityPublishingRepositoryMixin {
     String body,
     CommunityPostImageDraft image,
   ) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(body, images: [image]);
+    }
     // Run the server guard before CommunityPostCloudStore sends image bytes.
     // Storage and the post INSERT keep their own server guards for race
     // protection. If Storage hides an RLS reason behind its generic error,
@@ -101,6 +112,9 @@ mixin _CommunityPublishingRepositoryMixin {
     CommunityPostImageDraft image, {
     required List<String> topicSlugs,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(body, images: [image], topicSlugs: topicSlugs);
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     try {
@@ -138,6 +152,13 @@ mixin _CommunityPublishingRepositoryMixin {
     List<String> topicSlugs = const [],
     String? circleSlug,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(
+        body,
+        topicSlugs: topicSlugs,
+        circleSlug: circleSlug,
+      );
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
@@ -179,6 +200,14 @@ mixin _CommunityPublishingRepositoryMixin {
     String? circleSlug,
     required CommunityPollDraft poll,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(
+        body,
+        topicSlugs: topicSlugs,
+        circleSlug: circleSlug,
+        poll: poll,
+      );
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
@@ -218,6 +247,14 @@ mixin _CommunityPublishingRepositoryMixin {
     List<String> topicSlugs = const [],
     String? circleSlug,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(
+        body,
+        images: [image],
+        topicSlugs: topicSlugs,
+        circleSlug: circleSlug,
+      );
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
@@ -264,6 +301,15 @@ mixin _CommunityPublishingRepositoryMixin {
     String? circleSlug,
     required CommunityPollDraft poll,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(
+        body,
+        images: [image],
+        topicSlugs: topicSlugs,
+        circleSlug: circleSlug,
+        poll: poll,
+      );
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
@@ -307,6 +353,14 @@ mixin _CommunityPublishingRepositoryMixin {
     List<String> topicSlugs = const [],
     String? circleSlug,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(
+        body,
+        images: images,
+        topicSlugs: topicSlugs,
+        circleSlug: circleSlug,
+      );
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
@@ -351,6 +405,15 @@ mixin _CommunityPublishingRepositoryMixin {
     String? circleSlug,
     required CommunityPollDraft poll,
   }) async {
+    if (useServerIdempotentCommunityPublishing) {
+      return publishRichPost(
+        body,
+        images: images,
+        topicSlugs: topicSlugs,
+        circleSlug: circleSlug,
+        poll: poll,
+      );
+    }
     await assertCommunityPublishReady();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
@@ -417,6 +480,41 @@ mixin _CommunityPublishingRepositoryMixin {
       mentions: mentions,
     ).normalized();
     final normalizedPoll = poll?.normalized();
+    if (useServerIdempotentCommunityPublishing) {
+      final text = body.trim();
+      if (text.isEmpty ||
+          text.length > 1200 ||
+          CommunityRepository._unsafeText.hasMatch(text)) {
+        throw const FormatException('Invalid community post body');
+      }
+      CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.post);
+      await _runCommunityMutation(
+        () => CommunityPublishOperationService(_client, _user.id).publish({
+          'body': text,
+          'topic_slugs': topicSlugs,
+          'circle_slug': circleSlug,
+          'location_label': context.locationLabel,
+          'mentioned_user_ids': context.mentionedUserIds,
+          'title': title?.trim().isEmpty == true ? null : title?.trim(),
+          'hashtags': hashtags,
+          'collaborator_user_ids': collaborators
+              .map((item) => item.userId)
+              .toList(),
+          'poll': normalizedPoll == null
+              ? null
+              : {
+                  'question': normalizedPoll.question,
+                  'options': normalizedPoll.options,
+                  'allow_multiple': normalizedPoll.allowMultiple,
+                  'closes_at': normalizedPoll.closesAt
+                      ?.toUtc()
+                      .toIso8601String(),
+                },
+          'persistent_draft_id': persistentDraftId,
+        }, images),
+      );
+      return;
+    }
     final store = _posts;
     String? postId;
 

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
-import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../connected_health/connected_health_copy.dart';
 import '../../connected_health/connected_health_model.dart';
@@ -305,7 +304,7 @@ class DailyLogNotesShortcut extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            context.strings.text('Body context'),
+            dailyBodyContextCopy(context, 'title'),
             key: const Key('daily-log-body-context-title'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
@@ -318,15 +317,10 @@ class DailyLogNotesShortcut extends ConsumerWidget {
                 contentPadding: const EdgeInsets.all(16),
                 horizontalTitleGap: 12,
                 minTileHeight: 64,
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.notes,
-                  size: 32,
-                  iconSize: 18,
-                ),
                 title: Text(
                   summary.isNotEmpty
                       ? summary
-                      : context.strings.text('Nothing notable'),
+                      : dailyBodyContextCopy(context, 'nothingNotable'),
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),

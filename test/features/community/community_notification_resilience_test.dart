@@ -33,6 +33,9 @@ class _NotificationRepository extends CommunityRepository {
 
   @override
   Future<List<CommunityNotification>> loadCommunityNotifications({
+    DateTime? before,
+    String? beforeId,
+    List<CommunityNotificationKind>? kinds,
     int limit = 30,
   }) async => [
     CommunityNotification(

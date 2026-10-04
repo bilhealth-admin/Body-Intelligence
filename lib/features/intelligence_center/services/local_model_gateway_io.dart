@@ -54,12 +54,17 @@ abstract interface class CoachCloudAccess {
 }
 
 class _SupabaseCoachCloudAccess implements CoachCloudAccess {
-  const _SupabaseCoachCloudAccess(this.client);
+  _SupabaseCoachCloudAccess(this.client)
+    : _ownerId = client.auth.currentUser?.id;
 
   final SupabaseClient client;
+  final String? _ownerId;
 
   @override
-  bool get hasAuthenticatedSession => client.auth.currentSession != null;
+  bool get hasAuthenticatedSession =>
+      client.auth.currentSession != null &&
+      _ownerId != null &&
+      client.auth.currentUser?.id == _ownerId;
 
   @override
   Future<Object?> readRemoteAiConsent() async {
@@ -90,10 +95,28 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
   Future<CoachCloudFunctionResponse> _invokeCoach(
     Map<String, Object?> body,
   ) async {
+    final consent = sharedRemoteAiConsentCoordinator(client);
+    if (!hasAuthenticatedSession ||
+        !await consent.isGranted() ||
+        !hasAuthenticatedSession) {
+      throw const FunctionException(
+        status: 403,
+        details: {'error': 'ai_consent_required'},
+      );
+    }
     final protectedBody = await BilMobileIntegrityService.instance.protect(
       action: 'ai_coach.request',
       payload: body,
     );
+    // Withdrawal may happen while integrity work awaits the native boundary.
+    if (!hasAuthenticatedSession ||
+        !await consent.isGranted() ||
+        !hasAuthenticatedSession) {
+      throw const FunctionException(
+        status: 403,
+        details: {'error': 'ai_consent_required'},
+      );
+    }
     final response = await client.functions.invoke(
       'ai-coach',
       body: protectedBody,

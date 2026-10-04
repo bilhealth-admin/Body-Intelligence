@@ -12,13 +12,16 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout accepted source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
 
-      - name: Install Flutter stable from the official repository
-        shell: bash
-        run: |
-          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
-          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Install the audited Flutter toolchain
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: '3.44.6'
+          channel: stable
+          cache: true
 
       - name: Resolve Flutter and iOS dependencies
         shell: bash
@@ -57,7 +60,7 @@ jobs:
           printf '%s\n' 'UNSIGNED_VALIDATION_ONLY' > BIL-signing-status.txt
 
       - name: Upload unsigned validation evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bil-ios-unsigned-validation-${{ github.sha }}
           if-no-files-found: error

@@ -79,7 +79,7 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
       if (BilHealthScope.excludesKey(signal.key)) continue;
       byKey.update(
         signal.key,
-        (current) => HealthSignalConflictResolver.prefer(current, signal),
+        (current) => _preferRepresentativeSignal(current, signal),
         ifAbsent: () => signal,
       );
     }
@@ -92,5 +92,29 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
       if (!priority.contains(entry.key)) selected.add(entry.value);
     }
     return selected.take(8).toList(growable: false);
+  }
+
+  GlobalHealthSignal _preferRepresentativeSignal(
+    GlobalHealthSignal current,
+    GlobalHealthSignal candidate,
+  ) {
+    // Refresh only metadata for the exact same measured sleep projection.
+    // Legacy cached projections dropped native device evidence. A timestamp
+    // tie must not keep that incomplete cache over the canonical store's
+    // freshly reconstructed attributes. Different identities, device/source
+    // provenance, confidence, units or measurements retain the existing rule.
+    if (current.key == 'sleep' &&
+        current.identity == candidate.identity &&
+        current.canonicalValue == candidate.canonicalValue &&
+        current.canonicalUnit == candidate.canonicalUnit &&
+        current.deleted == candidate.deleted &&
+        current.provenance.sourceId == candidate.provenance.sourceId &&
+        current.provenance.deviceId == candidate.provenance.deviceId &&
+        current.provenance.timeZoneId == candidate.provenance.timeZoneId &&
+        current.provenance.observedAt == candidate.provenance.observedAt &&
+        current.provenance.confidence == candidate.provenance.confidence) {
+      return candidate;
+    }
+    return HealthSignalConflictResolver.prefer(current, candidate);
   }
 }

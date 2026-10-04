@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-04",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "production_project": "tgmanzhqulksykhslrzb",
+  "status": "PREBUILD_IN_PROGRESS_NOT_RELEASE_CERTIFICATION",
+  "protected_release": {
+    "branch": "fix/admob-clean-production-2026-10-02",
+    "sha": "555496ebb6d6d3952c9e69e7bb6b9788269b39fa",
+    "android_build_number": 31,
+    "ios_build_number": 34,
+    "existing_source_and_manifest_bindings": "PRESERVE_UNCHANGED"
+  },
+  "working_branch": "codex/prebuild-hardening-20261004",
+  "owner_authorization": {
+    "source": "Direct owner instruction in the audit conversation on 2026-10-04",
+    "permitted": [
+      "Repair evidence-backed defects on the separate working branch",
+      "Run code-only, host-widget and isolated PostgreSQL tests",
+      "Create a dedicated Google reviewer account with an official administrative gift",
+      "Verify the existing Apple reviewer without changing that account",
+      "Reconcile actual store declarations to current source",
+      "Prepare technical contracts and evidence documents",
+      "Create clean commits and non-force GitHub pushes",
+      "Publish current public static disclosures and link contracts without mobile builds or Worker bundling"
+    ],
+    "not_permitted": [
+      "Any mobile application build, signed or unsigned",
+      "TestFlight, Play or App Store upload or submission",
+      "Protected release branch or frozen-manifest changes",
+      "History rewrite, force push, implementation rollback or revert",
+      "Fake purchases, entitlements, counters, notifications or reviewer bypasses",
+      "Destructive Production experiments",
+      "Application-table grants to manufacture passing tests",
+      "Signing legal owner declarations on the owner's behalf"
+    ]
+  },
+  "production_migration_gate": {
+    "must_precede_apply": [
+      "Targeted staging QA succeeds for the exact committed candidate",
+      "Candidate staging QA succeeds for the exact committed candidate"
+    ],
+    "forward_only_unapplied_migrations": [
+      "20261004073453_community_prebuild_privacy_write_hardening_v1.sql",
+      "20261004074954_community_atomic_publish_operation_v1.sql",
+      "20261004094021_notification_delivery_preferences_authority_v1.sql"
+    ],
+    "must_follow_apply": [
+      "Production migration readback",
+      "Focused Production role-authenticated RPC assertions inside a rolled-back transaction; not Auth-service HTTP login, native E2E or provider delivery",
+      "Zero synthetic residue readback",
+      "Security, grants, RLS, Storage and performance-advisor refresh"
+    ]
+  },
+  "evidence_boundaries": {
+    "local_sql": "Genuine candidate RPCs, live dependency snapshots, ordinary roles and overlapping PostgreSQL17.11 sessions; Production is PostgreSQL17.6, and this is not Production, Auth-service login, provider delivery or Storage HTTP transport",
+    "reviewer_host_widgets": "Ordinary Production authentication and server entitlement/credits with genuine route widgets; not a native store transaction or device sign-in",
+    "store_backend_contracts": "Mocked backend/provider contracts do not establish real StoreKit or Google Play Billing purchases",
+    "visual_tests": "Host layouts and explicit locales/scales only; not native font equivalence or missing original reference images",
+    "secret_inventory": "Presence of secret names is not certificate validity or signed-artifact evidence"
+  },
+  "signatures": {
+    "legal_owner_signature": "NOT_EXECUTED_REQUIRES_OWNER",
+    "application_signing": "NOT_AUTHORIZED_NOT_EXECUTED",
+    "source_commit": "Use the eventual GitHub commit identity and exact SHA; not an owner legal signature"
+  },
+  "decision_rule": "Any unresolved release-critical defect or unproved mandatory release boundary means NOT READY FOR BUILD"
+}

@@ -75,7 +75,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          expected='google.com, pub-2630393550537588, DIRECT, f08c47fec0942fa0'
+          expected='google.com, pub-9688223318643509, DIRECT, f08c47fec0942fa0'
           actual="$(tr -d '\r' < public_site/app-ads.txt | sed '/^[[:space:]]*$/d')"
           test "$actual" = "$expected" || {
             echo 'app-ads.txt does not match the owner-confirmed AdMob publisher record.' >&2
@@ -152,12 +152,32 @@ jobs:
           set -euo pipefail
           python3 tool/release/generate_app_link_associations.py --self-test
           node --test tool/release/bilhealth_site_worker.test.mjs
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          import {
+            hasAasaContract,
+            hasAssetLinksContract,
+          } from './tool/release/bilhealth_site_worker.mjs';
+
+          for (const [name, validate] of [
+            ['apple-app-site-association', hasAasaContract],
+            ['assetlinks.json', hasAssetLinksContract],
+          ]) {
+            const document = JSON.parse(
+              readFileSync(`public_site/.well-known/${name}`, 'utf8'),
+            );
+            if (!validate(document)) {
+              throw new Error(`LIVE_ASSOCIATION_CONTRACT_FAILED: ${name}`);
+            }
+          }
+          console.log('PRESERVED_ASSOCIATION_WORKER_CONTRACT=PASS');
+          JS
 
       - name: Deploy bilhealth.com static assets
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.125.0 deploy --config wrangler.site.jsonc
+          npx --yes wrangler@4.125.0 deploy --config wrangler.site.jsonc --no-bundle --keep-vars
 
       - name: Verify production app-ads and preserved associations
         shell: bash
@@ -171,7 +191,7 @@ jobs:
           import urllib.request
 
           base = pathlib.Path('/tmp/bil-site-origin.txt').read_text().strip()
-          expected_ads = b'google.com, pub-2630393550537588, DIRECT, f08c47fec0942fa0\n'
+          expected_ads = b'google.com, pub-9688223318643509, DIRECT, f08c47fec0942fa0\n'
           well_known = pathlib.Path('public_site/.well-known')
 
           def get_direct(url):

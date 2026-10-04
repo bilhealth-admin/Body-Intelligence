@@ -10,6 +10,8 @@ void main() {
     'lib/features/notifications/presentation/notification_settings_page.dart',
     'lib/features/notifications/presentation/notification_settings_actions.dart',
     'lib/features/notifications/presentation/notification_settings_components.dart',
+    'lib/features/notifications/presentation/notification_settings_copy_helpers.dart',
+    'lib/features/notifications/presentation/notification_settings_delivery_controls.dart',
   ].map((path) => File(path).readAsStringSync()).join('\n');
 
   test('notification core copy resolves across all 25 production locales', () {
@@ -59,6 +61,27 @@ void main() {
     expect(source, contains('reminders == null || busy ? null'));
     expect(source, contains('_loadError != null'));
     expect(source, contains('onPressed: _load'));
-    expect(source, contains('enabled: !_saving'));
+    expect(source, contains('!(_saving && _savingCategory == category)'));
+    expect(source, contains('if (_saving) return;'));
+    expect(source, contains('_communityCategoriesVerified'));
+  });
+
+  test('delivery scope and recovery copy is authored in all 25 locales', () {
+    const keys = [
+      'Quiet hours for daily reminders',
+      'Remote notification delivery is unavailable on this device.',
+      'Category selections are saved. They are active only when community notifications and phone permission are on.',
+      'Apply saved categories',
+    ];
+    for (final key in keys) {
+      for (final locale in RuntimeCopy.supported) {
+        final value = RuntimeCopy.resolve(key, locale);
+        expect(value, isNotNull, reason: '$locale/$key');
+        expect(value!.trim(), isNotEmpty, reason: '$locale/$key');
+        if (locale != 'en') {
+          expect(value, isNot(key), reason: 'English fallback $locale/$key');
+        }
+      }
+    }
   });
 }

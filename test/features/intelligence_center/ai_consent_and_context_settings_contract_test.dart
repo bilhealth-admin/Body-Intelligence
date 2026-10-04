@@ -33,9 +33,30 @@ void main() {
         'lib/features/intelligence_center/presentation/'
         'ai_coach_settings_components.dart',
       ).readAsStringSync();
+      final coordinator = File(
+        'lib/features/intelligence_center/services/'
+        'remote_ai_consent_coordinator.dart',
+      ).readAsStringSync();
 
-      expect(page, contains("'p_policy_version': '3'"));
+      expect(page, contains('sharedRemoteAiConsentCoordinator()'));
+      expect(page, contains('coordinator.grantAndVerify()'));
+      expect(page, contains('coordinator.revokeAndVerify()'));
+      expect(
+        page,
+        contains("if (!verified) throw StateError('consent_readback_failed')"),
+      );
+      expect(coordinator, contains("client.rpc('bil_get_remote_ai_consent')"));
+      expect(
+        "'p_policy_version': '3'".allMatches(coordinator),
+        hasLength(2),
+        reason: 'Both Allow and withdrawal write the current server policy.',
+      );
+      expect(coordinator, contains("'p_purpose': 'remote_ai'"));
+      expect(coordinator, contains("'p_granted': true"));
+      expect(coordinator, contains("'p_granted': false"));
+      expect(coordinator, contains('isCurrentRemoteAiConsentGranted(receipt)'));
       expect(page, isNot(contains("policyVersion = '1'")));
+      expect(coordinator, isNot(contains("'p_policy_version': '1'")));
       expect(page, contains('CoachContextPreferences.storageKey'));
       for (final focus in CoachContextFocus.values) {
         expect(
