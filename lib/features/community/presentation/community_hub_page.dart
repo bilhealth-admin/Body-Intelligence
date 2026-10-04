@@ -97,11 +97,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   _CommunityHubSection _section = _CommunityHubSection.explore;
   StreamSubscription<AuthState>? _authSubscription;
   String? _ownerId;
+  Future<CommunityProfileOverview?>? _profilePreview;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
+    _profilePreview = _repository?.loadMyProfileOverview();
     _watchProductionSession();
   }
 
@@ -111,6 +113,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     if (!identical(oldWidget.repository, widget.repository) ||
         !identical(oldWidget.client, widget.client)) {
       _repository = widget.repository ?? _productionRepository();
+      _profilePreview = _repository?.loadMyProfileOverview();
       _feedKey = GlobalKey<_FeedTabState>();
       _watchProductionSession();
     }
@@ -150,6 +153,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         setState(() {
           _ownerId = nextOwner;
           _repository = nextOwner == null ? null : CommunityRepository(client);
+          _profilePreview = _repository?.loadMyProfileOverview();
           // Discard cached member posts, not just the visible sign-in label.
           _feedKey = GlobalKey<_FeedTabState>();
         });
@@ -181,6 +185,14 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         ),
         actions: [
           IconButton(
+            key: const Key('community-search'),
+            tooltip: communityText(context, 'Find people', 'البحث عن أشخاص'),
+            onPressed: repository == null
+                ? null
+                : () => context.push('/community/people'),
+            icon: const Icon(Icons.search_rounded),
+          ),
+          IconButton(
             key: const Key('community-messages'),
             tooltip: communityText(context, 'Messages', 'الرسائل'),
             onPressed: repository == null
@@ -205,17 +217,23 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               child: Icon(Icons.notifications_none_rounded),
             ),
           ),
-          IconButton(
-            key: const Key('community-settings'),
-            tooltip: communityText(
-              context,
-              'Community actions',
-              'إجراءات المجتمع',
+          FutureBuilder<CommunityProfileOverview?>(
+            future: _profilePreview,
+            builder: (context, snapshot) => IconButton(
+              key: const Key('community-settings'),
+              tooltip: communityText(
+                context,
+                'Community profile and actions',
+                'ملف المجتمع وإجراءاته',
+              ),
+              onPressed: repository == null
+                  ? null
+                  : () => _openNavigation(context, repository),
+              icon: BilAccountAvatar(
+                radius: 14,
+                networkUrl: snapshot.data?.avatarUrl,
+              ),
             ),
-            icon: const Icon(Icons.settings_outlined, size: 21),
-            onPressed: repository == null
-                ? null
-                : () => _openNavigation(context, repository),
           ),
         ],
         bottom: repository == null
@@ -376,6 +394,11 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       }
     } finally {
       _openingNavigation = false;
+      if (mounted) {
+        setState(() {
+          _profilePreview = repository.loadMyProfileOverview();
+        });
+      }
     }
   }
 }
