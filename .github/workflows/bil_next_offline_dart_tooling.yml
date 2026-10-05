@@ -8,8 +8,8 @@ permissions:
 jobs:
   tooling:
     if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -20,22 +20,35 @@ jobs:
         with:
           flutter-version: 3.44.6
           cache: false
-      - name: Package official Dart SDK only and exact changed UTF-8 source
+      - name: Package tested formatter subset and exact changed UTF-8 source
         shell: bash
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
           git merge-base --is-ancestor 3f0085e6e6686f2e87e9cf14789e9e578ea64159 HEAD
-          mkdir -p /tmp/bil-offline-tools
+          mkdir -p /tmp/bil-offline-tools /tmp/bil-formatter
           dart --version 2> /tmp/bil-offline-tools/dart-version.txt
           git rev-parse HEAD > /tmp/bil-offline-tools/source-sha.txt
           SDK="$FLUTTER_ROOT/bin/cache/dart-sdk"
-          test -x "$SDK/bin/dart"
-          tar -cJf /tmp/bil-offline-tools/dart-sdk.tar.xz \
-            --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' \
-            -C "$FLUTTER_ROOT/bin/cache" dart-sdk
-          test "$(stat -c %s /tmp/bil-offline-tools/dart-sdk.tar.xz)" -lt 157286400
-          sha256sum /tmp/bil-offline-tools/dart-sdk.tar.xz > /tmp/bil-offline-tools/sdk-sha256.txt
+          cp -a "$SDK" /tmp/bil-formatter/dart-sdk
+          python3 - <<'PY'
+          import pathlib,shutil
+          sdk=pathlib.Path('/tmp/bil-formatter/dart-sdk')
+          for p in (sdk/'bin/snapshots').glob('*'):
+              if 'dartdev' not in p.name and p.is_file(): p.unlink()
+          for name in ('bin/resources','bin/utils','include'):
+              p=sdk/name
+              if p.is_dir(): shutil.rmtree(p)
+          for p in sdk.rglob('*'):
+              if p.is_file() and p.suffix.lower() in {'.ttf','.otf','.woff','.woff2'}: p.unlink()
+          PY
+          printf 'void main(){print("formatter fixture");}\n' > /tmp/bil-formatter/example.dart
+          /tmp/bil-formatter/dart-sdk/bin/dart format /tmp/bil-formatter/example.dart
+          /tmp/bil-formatter/dart-sdk/bin/dart format --output=none --set-exit-if-changed /tmp/bil-formatter/example.dart
+          printf 'Formatter-only subset. Not a complete SDK or Flutter runtime. No native-test claim.\n' > /tmp/bil-offline-tools/scope.txt
+          tar -cJf /tmp/bil-offline-tools/dart-formatter.tar.xz -C /tmp/bil-formatter dart-sdk
+          test "$(stat -c %s /tmp/bil-offline-tools/dart-formatter.tar.xz)" -lt 83886080
+          sha256sum /tmp/bil-offline-tools/dart-formatter.tar.xz > /tmp/bil-offline-tools/sdk-sha256.txt
           python3 - <<'PY'
           import hashlib,json,pathlib,subprocess,zipfile
           base='3f0085e6e6686f2e87e9cf14789e9e578ea64159'
