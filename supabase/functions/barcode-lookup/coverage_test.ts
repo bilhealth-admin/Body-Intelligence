@@ -65,7 +65,8 @@ Deno.test("OFF retries equivalent spelling once, not the whole world", async () 
   const urls: string[] = [];
   const found = await lookupOff("03017624010701", "ar", ((url, init) => {
     urls.push(String(url));
-    assert(new Headers(init?.headers).get("user-agent")?.includes("support@bilhealth.com"));
+    const headers = (init as { headers?: HeadersInit } | undefined)?.headers;
+    assert(new Headers(headers).get("user-agent")?.includes("support@bilhealth.com"));
     return Promise.resolve(urls.length === 1 ? new Response("", { status: 404 })
       : Response.json({ status: "success", product: { code: gtin, product_name: "Food" } }));
   }) as typeof fetch, new ProviderBackoff());
