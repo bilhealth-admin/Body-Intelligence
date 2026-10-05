@@ -1,0 +1,72 @@
+name: BIL next Coach Community QA ONLY
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-next-qa-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  flutter-baseline:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout the exact test branch commit without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify frozen base and record scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          git merge-base --is-ancestor 3f0085e6e6686f2e87e9cf14789e9e578ea64159 HEAD
+          mkdir -p /tmp/bil-next-qa
+          git rev-parse HEAD > /tmp/bil-next-qa/commit.txt
+          git diff --name-only 3f0085e6e6686f2e87e9cf14789e9e578ea64159 HEAD > /tmp/bil-next-qa/changed-paths.txt
+          printf 'Scope: Linux Flutter host tests only. No device E2E, no IPA/AAB, no signing, no deploy, no production credentials.\n' > /tmp/bil-next-qa/scope.txt
+      - name: Install pinned Flutter from the existing successful QA configuration
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Record toolchain and resolve locked dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version --machine > /tmp/bil-next-qa/toolchain.json
+          flutter pub get --enforce-lockfile 2>&1 | tee /tmp/bil-next-qa/pub-get.log
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Analyze original baseline application
+        shell: bash
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-next-qa/analyze.log
+      - name: Focused notification publishing draft and Coach baseline tests
+        if: ${{ !cancelled() && steps.resolve.outcome != 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m \
+            test/features/community/community_activity_inbox_v2_contract_test.dart \
+            test/features/community/community_activity_pagination_test.dart \
+            test/features/community/community_notification_resilience_test.dart \
+            test/features/community/community_visible_read_receipts_test.dart \
+            test/features/community/community_deep_link_test.dart \
+            test/features/community/community_publish_operation_test.dart \
+            test/features/community/community_publish_preflight_test.dart \
+            test/features/community/community_reference_composer_v1_test.dart \
+            test/features/community/community_profile_identity_contract_test.dart \
+            test/features/community/community_rewards_ai_coach_contract_test.dart \
+            2>&1 | tee /tmp/bil-next-qa/focused.log
+      - name: Upload bounded logs only; never fonts or personal assets
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-next-qa-only-${{ github.sha }}
+          path: /tmp/bil-next-qa
+          retention-days: 1
+          if-no-files-found: error
