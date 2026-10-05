@@ -1,0 +1,31 @@
+name: BIL Iraq Jordan sourced product review
+on:
+  push:
+    branches: [feat/foods-arabic-recipes-25-locales-20261005]
+    paths:
+      - tool/catalog/off_regional_import.py
+      - tool/catalog/tests/test_off_regional_import.py
+      - .github/workflows/bil_regional_product_review_sample.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regional-data:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Test provenance, GTIN, missing nutrients, mass versus volume and isolated catalog
+        run: python3 -m unittest discover -s tool/catalog/tests -p test_off_regional_import.py -v
+      - name: Acquire only two bounded regional pages, without private data or paid services
+        run: python3 tool/catalog/off_regional_import.py --sample --output artifacts/regional-product-review
+      - name: Preserve review-only source and results, never deploy
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iraq-jordan-product-review-${{ github.sha }}
+          path: artifacts/regional-product-review/
+          if-no-files-found: warn
+          retention-days: 14
