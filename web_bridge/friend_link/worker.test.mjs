@@ -1,0 +1,24 @@
+import test from 'node:test';
+import {Script} from 'node:vm';
+import assert from 'node:assert/strict';
+import {parseCode,nativeUri,handle,VERSION} from './worker.mjs';
+const code = '0123456789abcdef0123456789abcdef';
+const req = (path='',method='GET',headers={}) => new Request(`https://bridge.example/open-bil${path}`,{method,headers});
+test('valid BIL code is preserved exactly',()=>assert.equal(parseCode(code),code));
+test('uppercase code normalizes without changing identity',()=>assert.equal(parseCode(code.toUpperCase()),code));
+test('native URL is the existing strict mobile contract',()=>assert.equal(nativeUri(code),`bil://community/member/${code}`));
+test('bad codes cannot produce native URLs',()=>{for(const v of ['', 'x'.repeat(32), 'a'.repeat(31),'a'.repeat(33),'https://evil.test',null])assert.throws(()=>nativeUri(v));});
+test('known code yields manual native button and HTTPS share URL',async()=>{const r=await handle(req(`?code=${code}`));const h=await r.text();assert.equal(r.status,200);assert.match(h,new RegExp(`href="bil://community/member/${code}"`));assert.match(h,new RegExp(`https://bridge.example/open-bil\\?code=${code}`));});
+test('no code shows converter without pretending to know a member',async()=>{const r=await handle(req());assert.equal(r.status,200);assert.doesNotMatch(await r.text(),/id="open-app"/);});
+test('invalid code returns 400 and no native action',async()=>{const r=await handle(req('?code=bad'));assert.equal(r.status,400);assert.doesNotMatch(await r.text(),/id="open-app"/);});
+test('duplicate code is rejected',async()=>assert.equal((await handle(req(`?code=${code}&code=${code}`))).status,400));
+test('arbitrary redirect destination is rejected',async()=>assert.equal((await handle(req(`?code=${code}&next=https://evil.test`))).status,400));
+test('markup injection not reflected',async()=>{const r=await handle(req('?code=%3Cscript%3Ealert(123)%3C%2Fscript%3E'));assert.equal(r.status,400);assert.doesNotMatch(await r.text(),/alert\(123\)/);});
+test('POST is rejected and cannot mutate',async()=>assert.equal((await handle(req('', 'POST'))).status,405));
+test('other site routes are not owned',async()=>assert.equal((await handle(new Request('https://bridge.example/privacy'))).status,404));
+test('HEAD is supported with empty body',async()=>{const r=await handle(req(`?code=${code}`,'HEAD'));assert.equal(r.status,200);assert.equal(await r.text(),'');});
+test('security headers are present and cache does not retain codes',async()=>{const r=await handle(req(`?code=${code}`));assert.equal(r.headers.get('cache-control'),'no-store');assert.equal(r.headers.get('referrer-policy'),'no-referrer');assert.match(r.headers.get('content-security-policy'),/connect-src 'none'/);assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.equal(r.headers.get('x-bil-bridge'),VERSION);});
+test('English and Arabic are explicit',async()=>{assert.match(await (await handle(req(`?code=${code}&lang=en`))).text(),/<html lang="en" dir="ltr">/);assert.match(await (await handle(req(`?code=${code}&lang=ar`))).text(),/<html lang="ar" dir="rtl">/);});
+test('no automatic native launch or timed redirect exists',async()=>{const h=await (await handle(req(`?code=${code}`))).text();assert.doesNotMatch(h,/http-equiv="refresh"|setTimeout|window.location\s*=\s*['"]bil:/);});
+
+test('rendered browser script parses after template escaping',async()=>{const html=await (await handle(req())).text();const js=html.match(/<script[^>]*>([\s\S]*?)<\/script>/)[1];new Script(js);});
