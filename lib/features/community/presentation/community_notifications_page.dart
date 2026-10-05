@@ -1,4 +1,5 @@
 import 'community_attention_scope.dart';
+import 'community_return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,7 +24,7 @@ class CommunityNotificationsPage extends StatefulWidget {
       _CommunityNotificationsPageState();
 }
 
-enum _ActivityFilter { updates, reactions, comments, followers }
+enum _ActivityFilter { all, updates, reactions, comments, followers }
 
 class _CommunityNotificationsPageState
     extends State<CommunityNotificationsPage> {
@@ -34,7 +35,8 @@ class _CommunityNotificationsPageState
   final Set<String> _respondingCollaboration = <String>{};
   CommunityAttentionController? _attentionController;
   int? _lastCommunityUpdates;
-  _ActivityFilter _filter = _ActivityFilter.updates;
+  _ActivityFilter _filter = _ActivityFilter.all;
+  bool _markingPageSeen = false;
   int _loadGeneration = 0;
   bool _loadingFirst = false;
   bool _loadingMore = false;
@@ -202,6 +204,64 @@ class _CommunityNotificationsPageState
     if (mounted) {
       await CommunityAttentionScope.refresh(context);
       if (mounted) _retry();
+    }
+  }
+
+  Future<void> _markLoadedPageSeen(_CommunityUpdates visible) async {
+    final repository = _repository;
+    if (repository == null || _loadingFirst || _markingPageSeen) return;
+    final ids = visible.notifications
+        .where(_CommunityNotificationsFilters(this).matchesFilter)
+        .where((item) => !item.seen && !_markingSeen.contains(item.id))
+        .map((item) => item.id)
+        .toSet()
+        .take(100)
+        .toList(growable: false);
+    if (ids.isEmpty) return;
+    final generation = _loadGeneration;
+    String? ownerAtStart;
+    setState(() {
+      _markingPageSeen = true;
+      _markingSeen.addAll(ids);
+    });
+    try {
+      ownerAtStart = repository.currentUserId;
+      await repository.markCommunityNotificationsSeen(ids);
+      // The RPC is owner-scoped too. Never refresh an old page into a new
+      // account after sign-out, account switching, or a filter change.
+      if (!mounted ||
+          generation != _loadGeneration ||
+          !identical(repository, _repository) ||
+          repository.currentUserId != ownerAtStart) {
+        return;
+      }
+      await CommunityAttentionScope.refresh(context);
+      if (mounted &&
+          generation == _loadGeneration &&
+          repository.currentUserId == ownerAtStart) {
+        _retry();
+      }
+    } catch (_) {
+      if (!mounted || generation != _loadGeneration) return;
+      try {
+        if (repository.currentUserId != ownerAtStart) return;
+      } on Object {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not confirm these updates as read. Please retry.',
+              'تعذر تأكيد قراءة هذه التحديثات. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      _markingSeen.removeAll(ids);
+      if (mounted) setState(() => _markingPageSeen = false);
     }
   }
 

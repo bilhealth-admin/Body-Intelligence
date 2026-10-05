@@ -1,7 +1,8 @@
 part of 'community_notifications_page.dart';
 
 extension _CommunityNotificationsFilters on _CommunityNotificationsPageState {
-  List<CommunityNotificationKind> get filterKinds => switch (_filter) {
+  List<CommunityNotificationKind>? get filterKinds => switch (_filter) {
+    _ActivityFilter.all => null,
     _ActivityFilter.updates => const [
       CommunityNotificationKind.friendRequest,
       CommunityNotificationKind.friendAccepted,
@@ -25,6 +26,7 @@ extension _CommunityNotificationsFilters on _CommunityNotificationsPageState {
   };
 
   bool matchesFilter(CommunityNotification notification) => switch (_filter) {
+    _ActivityFilter.all => true,
     _ActivityFilter.updates =>
       notification.kind == CommunityNotificationKind.friendRequest ||
           notification.kind == CommunityNotificationKind.friendAccepted ||
@@ -46,6 +48,7 @@ extension _CommunityNotificationsFilters on _CommunityNotificationsPageState {
   };
 
   String filterLabel(_ActivityFilter filter) => switch (filter) {
+    _ActivityFilter.all => communityText(context, 'All', 'الكل'),
     _ActivityFilter.updates => communityText(context, 'Updates', 'التحديثات'),
     _ActivityFilter.reactions => communityText(
       context,

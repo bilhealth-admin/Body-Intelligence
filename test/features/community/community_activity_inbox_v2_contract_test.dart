@@ -15,10 +15,12 @@ void main() {
     expect(
       page,
       contains(
-        'enum _ActivityFilter { updates, reactions, comments, followers }',
+        'enum _ActivityFilter { all, updates, reactions, comments, followers }',
       ),
     );
     expect(page, contains('community-activity-filter-'));
+    expect(filters, contains('_ActivityFilter.all => null'));
+    expect(filters, contains('_ActivityFilter.all => true'));
     expect(filters, contains('_ActivityFilter.updates'));
     expect(filters, contains('_ActivityFilter.reactions'));
     expect(filters, contains('_ActivityFilter.comments'));

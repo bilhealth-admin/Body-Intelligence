@@ -3,6 +3,7 @@ part of 'community_notifications_page.dart';
 extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
   Widget buildCommunityNotifications(BuildContext context) => Scaffold(
     appBar: AppBar(
+      leading: const CommunityReturnButton(),
       title: Text(
         communityText(context, 'Community updates', 'تحديثات المجتمع'),
       ),
@@ -106,6 +107,30 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
               ),
               const SizedBox(height: 12),
             ],
+            if (!_loadingFirst &&
+                filteredNotifications.any((item) => !item.seen))
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton.icon(
+                  key: const Key('community-activity-mark-page-read'),
+                  onPressed: _markingPageSeen
+                      ? null
+                      : () => _markLoadedPageSeen(persisted),
+                  icon: _markingPageSeen
+                      ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.done_all_rounded),
+                  label: Text(
+                    communityText(
+                      context,
+                      'Mark this page read',
+                      'تحديد هذه الصفحة كمقروءة',
+                    ),
+                  ),
+                ),
+              ),
             if (_loadingFirst) const Center(child: CircularProgressIndicator()),
             if (!_loadingFirst && filteredNotifications.isEmpty)
               Padding(
@@ -113,10 +138,12 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                 child: Text(
                   communityText(
                     context,
-                    _filter == _ActivityFilter.updates && updates.isEmpty
+                    (_filter == _ActivityFilter.all ||
+                        _filter == _ActivityFilter.updates) && updates.isEmpty
                         ? 'No community updates'
                         : 'No updates in this category yet.',
-                    _filter == _ActivityFilter.updates && updates.isEmpty
+                    (_filter == _ActivityFilter.all ||
+                        _filter == _ActivityFilter.updates) && updates.isEmpty
                         ? 'لا توجد تحديثات للمجتمع'
                         : 'لا توجد تحديثات في هذه الفئة بعد.',
                   ),
@@ -124,7 +151,8 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                 ),
               ),
             if (!_loadingFirst &&
-                _filter == _ActivityFilter.updates &&
+                (_filter == _ActivityFilter.all ||
+                    _filter == _ActivityFilter.updates) &&
                 updates.isEmpty)
               Center(
                 child: FilledButton.icon(
@@ -179,7 +207,8 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                 ),
               ),
             if (!_loadingFirst &&
-                _filter == _ActivityFilter.updates &&
+                (_filter == _ActivityFilter.all ||
+                    _filter == _ActivityFilter.updates) &&
                 updates.incomingRequests > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(
@@ -197,7 +226,8 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                 onTap: () => _openAndRefresh('/community/connections'),
               ),
             if (!_loadingFirst &&
-                _filter == _ActivityFilter.updates &&
+                (_filter == _ActivityFilter.all ||
+                    _filter == _ActivityFilter.updates) &&
                 updates.unreadMessages > 0)
               ListTile(
                 leading: const BilSemanticIconBadge(

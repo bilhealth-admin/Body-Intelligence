@@ -1,4 +1,5 @@
 import 'community_attention_scope.dart';
+import 'community_return_button.dart';
 import 'bil_gold_coin.dart';
 import 'dart:async';
 
@@ -181,6 +182,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     final repository = _repository;
     return Scaffold(
       appBar: AppBar(
+        leading: const CommunityReturnButton(),
         title: Text(
           communityText(context, 'BIL Community', 'مجتمع BIL'),
           maxLines: 1,

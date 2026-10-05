@@ -211,7 +211,7 @@ void main() {
         await _pump(tester, repository, language);
         expect(
           repository.requests.first.kinds,
-          contains(CommunityNotificationKind.friendAccepted),
+          isNull, // The initial All tab must not exclude badge-producing kinds.
         );
         expect(
           repository.requests.first.kinds,

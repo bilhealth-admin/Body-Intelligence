@@ -1,0 +1,27 @@
+{
+  "schema": "bil.next.reference-lock.v1",
+  "base_source_sha": "3f0085e6e6686f2e87e9cf14789e9e578ea64159",
+  "references": {
+    "coach_two_screen_owner_approved": {
+      "sha256": "07f25ba0fffc661e5232a4fba6365ee3ff96cbea69636c2672b97f4fafce63d0",
+      "stored_in_public_repository": false,
+      "status": "required_target_not_matched"
+    },
+    "community_owner_approved_redesign": {
+      "sha256": "db67d1c6bb1f4ecd3c539ada3de72a980c610b7c1d2331c4796b7fa27e3bbea4",
+      "stored_in_public_repository": false,
+      "status": "required_target_not_matched"
+    }
+  },
+  "bottom_navigation_source": "coach_two_screen_owner_approved",
+  "bottom_navigation_order_ltr": ["Home", "AI Coach", "Quick Add", "Community", "More"],
+  "require_native_flutter_captures": true,
+  "require_reference_difference_review": true,
+  "no_layout_omissions_or_unapproved_substitutions": true,
+  "functional_tests_do_not_prove_visual_parity": true,
+  "screenshots_must_not_be_replaced_with_generated_or_html_previews": true,
+  "reference_example_values_are_not_authoritative_business_rules": true,
+  "production_rewards_and_balances_remain_server_authoritative": true,
+  "native_visual_parity_verified": false,
+  "ready_for_updated_store_build": false
+}
