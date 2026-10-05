@@ -1,0 +1,62 @@
+name: BIL offline QA tooling only
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_next_offline_dart_tooling.yml]
+permissions:
+  contents: read
+jobs:
+  tooling:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Package official Dart SDK only and exact changed UTF-8 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          git merge-base --is-ancestor 3f0085e6e6686f2e87e9cf14789e9e578ea64159 HEAD
+          mkdir -p /tmp/bil-offline-tools
+          dart --version 2> /tmp/bil-offline-tools/dart-version.txt
+          git rev-parse HEAD > /tmp/bil-offline-tools/source-sha.txt
+          SDK="$FLUTTER_ROOT/bin/cache/dart-sdk"
+          test -x "$SDK/bin/dart"
+          tar -cJf /tmp/bil-offline-tools/dart-sdk.tar.xz \
+            --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' \
+            -C "$FLUTTER_ROOT/bin/cache" dart-sdk
+          test "$(stat -c %s /tmp/bil-offline-tools/dart-sdk.tar.xz)" -lt 157286400
+          sha256sum /tmp/bil-offline-tools/dart-sdk.tar.xz > /tmp/bil-offline-tools/sdk-sha256.txt
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess,zipfile
+          base='3f0085e6e6686f2e87e9cf14789e9e578ea64159'
+          names=subprocess.check_output(['git','diff','--name-only','-z',base,'HEAD']).decode().split('\0')
+          manifest=[]
+          with zipfile.ZipFile('/tmp/bil-offline-tools/source-delta.zip','w',zipfile.ZIP_DEFLATED) as archive:
+              for name in filter(None,names):
+                  p=pathlib.Path(name)
+                  if p.parts[0] not in {'lib','test','tool','docs','.github'} or p.suffix not in {'.dart','.py','.json','.md','.yml','.yaml'}:
+                      raise RuntimeError('Non-QA delta rejected: '+name)
+                  if not p.is_file() or p.is_symlink(): raise RuntimeError('Unexpected source type')
+                  data=p.read_bytes();data.decode('utf-8')
+                  archive.writestr(name,data)
+                  manifest.append({'path':name,'sha256':hashlib.sha256(data).hexdigest()})
+          pathlib.Path('/tmp/bil-offline-tools/source-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          PY
+      - name: Upload temporary tooling without fonts, secrets or user assets
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-offline-dart-${{ github.sha }}
+          path: /tmp/bil-offline-tools
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
