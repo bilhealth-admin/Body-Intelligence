@@ -1,0 +1,44 @@
+name: BIL search screenshot regression evidence
+on:
+  push:
+    branches: [feat/foods-arabic-recipes-25-locales-20261005]
+    paths:
+      - .github/workflows/bil_search_regression_evidence.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  search-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Archive only versioned search source and regression fixtures
+        run: |
+          python3 - <<'PY'
+          import pathlib, subprocess, zipfile
+          root = pathlib.Path('.')
+          prefixes = ('lib/', 'test/', 'assets/catalogs/', 'tool/catalog/', 'supabase/functions/food-search/', '.github/workflows/')
+          files = subprocess.check_output(['git','ls-files'], text=True).splitlines()
+          with zipfile.ZipFile('search-source.zip','w',zipfile.ZIP_DEFLATED) as archive:
+              for name in files:
+                  path = root / name
+                  if path.is_file() and (name.startswith(prefixes) or path.name == 'AGENTS.md' or name in ('pubspec.yaml','pubspec.lock','analysis_options.yaml')):
+                      if path.stat().st_size < 120*1024*1024:
+                          archive.write(path, name)
+              archive.writestr('EVIDENCE_COMMIT.txt', subprocess.check_output(['git','rev-parse','HEAD'], text=True))
+          print('Evidence archive bytes:', pathlib.Path('search-source.zip').stat().st_size)
+          for name in files:
+              if name.startswith('lib/') and name.endswith('.dart'):
+                  text = pathlib.Path(name).read_text()
+                  if 'No match yet.' in text or 'No result after correction' in text:
+                      print('SCREENSHOT ROUTE:', name)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: search-source-${{ github.sha }}
+          path: search-source.zip
+          retention-days: 3
+          if-no-files-found: error
