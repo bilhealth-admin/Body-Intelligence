@@ -63,7 +63,9 @@ class _InboxRepository extends CommunityRepository {
             entityId: item.entityId,
             copyKey: item.copyKey,
             deepLinkPath: item.deepLinkPath,
-            seenAt: seenIds.contains(item.id) ? DateTime.utc(2026, 10, 5) : null,
+            seenAt: seenIds.contains(item.id)
+                ? DateTime.utc(2026, 10, 5)
+                : null,
           ),
         )
         .toList(growable: false);
@@ -138,7 +140,8 @@ Future<GoRouter> _mount(
   return router;
 }
 
-Finder get _markPage => find.byKey(const Key('community-activity-mark-page-read'));
+Finder get _markPage =>
+    find.byKey(const Key('community-activity-mark-page-read'));
 
 void main() {
   for (final language in ['en', 'ar']) {
@@ -155,7 +158,10 @@ void main() {
         find.byKey(const Key('community-activity-filter-all')),
       );
       expect(all.selected, isTrue);
-      expect(repository.marks, isEmpty); // Reading a list does not acknowledge it.
+      expect(
+        repository.marks,
+        isEmpty,
+      ); // Reading a list does not acknowledge it.
       expect(find.byType(ListTile), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     });
@@ -168,11 +174,15 @@ void main() {
     final liked = _activity(2, CommunityNotificationKind.postLike);
     final repository = _InboxRepository([accepted, liked]);
     await _mount(tester, repository);
-    await tester.tap(find.byKey(const Key('community-activity-filter-updates')));
+    await tester.tap(
+      find.byKey(const Key('community-activity-filter-updates')),
+    );
     await tester.pumpAndSettle();
     await tester.tap(_markPage);
     await tester.pumpAndSettle();
-    expect(repository.marks, [<String>[accepted.id]]);
+    expect(repository.marks, [
+      <String>[accepted.id],
+    ]);
     expect(repository.seenIds.contains(liked.id), isFalse);
     expect(tester.takeException(), isNull);
   });
