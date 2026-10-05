@@ -49,6 +49,9 @@ jobs:
         run: |
           set -euo pipefail
           git diff --name-only -z 3f0085e6e6686f2e87e9cf14789e9e578ea64159 HEAD -- '*.dart' | xargs -0 -r dart format --output=none --set-exit-if-changed 2>&1 | tee /tmp/bil-next-qa/format.log
+      - name: Collect formatter proposal in a separate temporary directory
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: python3 tool/qa_next/format_proposal.py
       - name: Analyze all application source
         if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
         shell: bash
@@ -71,11 +74,147 @@ jobs:
             test/features/community/community_profile_identity_contract_test.dart \
             test/features/community/community_rewards_ai_coach_contract_test.dart \
             2>&1 | tee /tmp/bil-next-qa/focused.log
+      - name: Verify architecture ceilings and serial performance prerequisite
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded test/architecture_source_file_size_guard_test.dart --timeout 2m 2>&1 | tee /tmp/bil-next-qa/architecture.log
+          python3 - <<'PY' 2>&1 | tee /tmp/bil-next-qa/performance.log
+          import importlib.util,pathlib,subprocess,sys
+          spec=importlib.util.spec_from_file_location('portable',pathlib.Path('tool/release/run_portable_release_tests.py'))
+          portable=importlib.util.module_from_spec(spec);spec.loader.exec_module(portable)
+          policy=portable.load_code_only_policy();policy.discover()
+          cmd=[*policy.flutter_test_command(portable.resolve_flutter_executable()),'--timeout','30s',portable.PERFORMANCE_BUDGET_TEST]
+          sys.exit(subprocess.run(cmd,check=False).returncode)
+          PY
       - name: Upload bounded logs only; never fonts or personal assets
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bil-next-qa-only-${{ github.sha }}
           path: /tmp/bil-next-qa
+          retention-days: 1
+          if-no-files-found: error
+  portable-regression:
+    needs: flutter-checks
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - name: Checkout exact tested commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Resolve locked packages
+        run: flutter pub get --enforce-lockfile
+      - name: Execute and disclose the existing code-only test partition
+        env:
+          BIL_QA_SHARD: ${{ matrix.shard }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-next-regression
+          python3 tool/qa_next/run_regression.py 2>&1 | tee /tmp/bil-next-regression/tests.log
+      - name: Upload code-only results and exclusions
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-next-regression-${{ matrix.shard }}-${{ github.sha }}
+          path: /tmp/bil-next-regression
+          retention-days: 1
+          if-no-files-found: error
+  flutter-visual-capture:
+    needs: flutter-checks
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact tested commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Resolve locked packages
+        run: flutter pub get --enforce-lockfile
+      - name: Capture actual current Flutter surfaces with synthetic fixtures
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-next-visual/ui
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-next-visual
+          git rev-parse HEAD > /tmp/bil-next-visual/commit.txt
+          printf 'Current Flutter host render, synthetic data only. NOT device screenshots or approved-reference parity.\n' > /tmp/bil-next-visual/scope.txt
+          flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-next-visual/tests.log
+      - name: Upload rendered PNGs and test log, never fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-next-visual-${{ github.sha }}
+          path: /tmp/bil-next-visual
+          retention-days: 1
+          if-no-files-found: error
+  isolated-sql-contracts:
+    needs: flutter-checks
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d community_qa"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - name: Checkout exact tested commit without credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Test notification and atomic publishing against disposable loopback PostgreSQL
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: isolated-fixture-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-next-sql
+          git rev-parse HEAD > /tmp/bil-next-sql/commit.txt
+          printf 'Synthetic isolated PostgreSQL17 only; no production, HTTP Storage or device push testing.\n' > /tmp/bil-next-sql/scope.txt
+          psql -X -v ON_ERROR_STOP=1 -d community_qa -f tool/release/test_community_attention_isolated.sql 2>&1 | tee /tmp/bil-next-sql/attention.log
+          psql -X -v ON_ERROR_STOP=1 -d community_qa -c 'CREATE DATABASE bil_atomic_qa_next'
+          PGDATABASE=bil_atomic_qa_next node tool/release/test_community_atomic_publish_isolated.mjs 2>&1 | tee /tmp/bil-next-sql/atomic-publish.log
+          psql -X -v ON_ERROR_STOP=1 -d community_qa -c 'CREATE DATABASE bil_notification_qa_next'
+          PGDATABASE=bil_notification_qa_next node tool/release/test_notification_delivery_preferences_isolated.mjs 2>&1 | tee /tmp/bil-next-sql/notification-preferences.log
+          psql -X -v ON_ERROR_STOP=1 -d community_qa -c 'CREATE DATABASE bil_prebuild_qa_next'
+          PGDATABASE=bil_prebuild_qa_next node tool/release/test_community_prebuild_hardening_isolated.mjs 2>&1 | tee /tmp/bil-next-sql/privacy.log
+      - name: Upload isolated SQL results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-next-sql-${{ github.sha }}
+          path: /tmp/bil-next-sql
           retention-days: 1
           if-no-files-found: error

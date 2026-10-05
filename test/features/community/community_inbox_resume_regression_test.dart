@@ -138,8 +138,7 @@ Future<GoRouter> _mount(
   return router;
 }
 
-Finder get _markPage =>
-    find.byKey(const Key('community-activity-mark-page-read'));
+Finder get _markPage => find.byKey(const Key('community-activity-mark-page-read'));
 
 void main() {
   for (final language in ['en', 'ar']) {

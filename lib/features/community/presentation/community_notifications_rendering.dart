@@ -139,11 +139,13 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                   communityText(
                     context,
                     (_filter == _ActivityFilter.all ||
-                        _filter == _ActivityFilter.updates) && updates.isEmpty
+                            _filter == _ActivityFilter.updates) &&
+                        updates.isEmpty
                         ? 'No community updates'
                         : 'No updates in this category yet.',
                     (_filter == _ActivityFilter.all ||
-                        _filter == _ActivityFilter.updates) && updates.isEmpty
+                            _filter == _ActivityFilter.updates) &&
+                        updates.isEmpty
                         ? 'لا توجد تحديثات للمجتمع'
                         : 'لا توجد تحديثات في هذه الفئة بعد.',
                   ),
