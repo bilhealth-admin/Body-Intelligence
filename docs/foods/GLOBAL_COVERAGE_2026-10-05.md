@@ -2,6 +2,7 @@
 
 Development only: feat/foods-arabic-recipes-25-locales-20261005.
 Starting point d97cbd119722d92ec83be55a5c9dc03c07887282.
+Tested code commit: 5dee3787ec912b22cfacf1cdbac3ac09635b14a1.
 No native store builds, uploads, release-branch changes or Production deployment.
 
 ## Competitive research (official product claims, checked 2026-10-05)
@@ -16,9 +17,10 @@ No native store builds, uploads, release-branch changes or Production deployment
 - YAZIO: recipe name/ingredient search and preparation/diet filters; its help
   page claims more than 3,000 recipes, not verified here by independent counting.
   https://help.yazio.com/hc/en-us/articles/12294574525201-How-can-I-apply-a-filter-or-search-through-the-Recipes-tab
-- FatSecret Platform: claims 2.3M unique foods, 62+ country datasets, 26
-  languages and 19,000+ recipes. Commercial platform access is not an open
-  licence to copy its catalog into BIL.
+- FatSecret Platform: the directly opened official page states 2.3M unique
+  foods, 58+ country datasets, 26 languages and 19,000+ recipes. This supersedes
+  the earlier search-derived 62+ figure in this document. Commercial platform
+  access is not an open licence to copy its catalog into BIL.
   https://platform.fatsecret.com/platform-api
 
 BIL is NOT certified to exceed those apps in catalog size, accuracy, latency
@@ -74,24 +76,40 @@ https://www.fao.org/food-composition/tables-and-databases/detail/%28iraq%29-food
 ## Actual regional product acquisition, separate from names
 
 `tool/catalog/off_regional_import.py` builds a SEPARATE ODbL review database
-from a local OFF JSONL export, with bounded memory per source line. Its sample
+from a local OFF JSONL export, processing records incrementally. Its sample
 mode makes only two data-acquisition GET requests, one per target market, up to
 50 products each. It is not a complete regional catalog or a runtime dependency.
 
 The importer preserves exact GTINs, real source URLs, source hashes, market tags,
 original names and missing nutrient values. Invalid GTINs, non-foods and wrong
-markets are rejected; incomplete macros and volume-based records are retained
-for review but NOT silently converted to 100g foods. Valid complete mass-basis
-records get the existing mobile catalog schema with source quality below the
-app's verified threshold. Identical GTIN variants are not double-counted.
+markets are rejected; incomplete macros, unknown basis and volume-based records
+are retained for review but NOT silently converted to 100g foods. Complete
+records with mass evidence get the existing mobile schema with source quality
+below the app's verified threshold. Identical GTIN variants are not double-counted.
 
-Review artifacts contain attribution/licence text, selected public source data,
-SQLite catalog and exact counts/digests. No photos or private BIL data. They are
-not automatically activated, uploaded to BIL Production or included in a build.
 Before activation: preserve ODbL share-alike and visible source attribution,
 review real labels and mass/volume basis, and test the installed-pack flow.
 The current mobile adapter's generic source label needs attribution handling
 before this OFF pack is exposed to end users.
+
+## Executed evidence at tested code commit
+
+- Barcode contract workflow 37248074011: SUCCESS.
+- Arabic/regional/25-locale recipe workflow 37248074017: SUCCESS.
+- Product acquisition workflow 37248074059: FAILED at external acquisition;
+  the preceding importer unit-test step passed. This is NOT a fully green release.
+- Source artifact 11319543974 was downloaded and its ZIP SHA-256 matched:
+  a0dd75998d5e05b806efaaa81b124271e4a06480f415c8997994790291c9c38a.
+- Both country collection entries report unavailable / HTTPError. The artifact
+  does not preserve HTTP status codes, so do not claim a specific 403/429 cause.
+- Actual newly acquired products: ZERO. Newly published products: ZERO.
+  The empty review database is evidence of an unsuccessful acquisition, NOT
+  evidence that Iraq/Jordan lack products or that the markets are fully covered.
+- No new nutrient-bearing recipes were added. The original 1,500 recipes and
+  25-locale structure were retained and audited, not recreated or counted twice.
+- Git compare from d97cbd1 to tested code shows only 13 scoped food/backend/test/
+  workflow/document files changed. No android/ios native files or recipe shards
+  changed. Production Edge Functions were not deployed.
 
 ## Acceptance benchmark still required for a superiority claim
 
@@ -104,10 +122,6 @@ Report by country with denominators. Set a goal of zero false verified matches;
 never treat missing results, translated aliases or cached copies as extra foods.
 No such head-to-head device benchmark has been executed in this checkpoint.
 
-## Evidence status
-
-Read CI logs for the exact HEAD. The initial barcode test run failed on a test
-callback RequestInit typing error; corrected without disabling type checking.
-Only a subsequent green run validates this change. Source acquisition can fail
-independently of code tests; preserve its unavailable result rather than
-reporting zero products as a complete market inventory.
+Remaining: acquire licensed real product/recipe data, review it, complete
+runtime delivery and visible attribution, then test staging and native-device
+flows. The current work is not full market coverage or a store-release approval.
