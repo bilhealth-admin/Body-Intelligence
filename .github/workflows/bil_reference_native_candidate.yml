@@ -1,0 +1,93 @@
+name: BIL reference native candidate
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths:
+      - tool/qa_next/apply_reference_visual_candidate.py
+      - tool/qa_next/coach_header.fragment
+      - lib/shared/widgets/bil_reference_bottom_bar.dart
+      - lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart
+      - test/qa_next/coach_reference_workspace_capture_test.dart
+      - .github/workflows/bil_reference_native_candidate.yml
+permissions:
+  contents: read
+concurrency:
+  group: bil-reference-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  render-and-test:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Resolve original locked packages without upgrade
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-reference
+          flutter --version --machine > /tmp/bil-reference/toolchain.json
+          flutter pub get --enforce-lockfile 2>&1 | tee /tmp/bil-reference/pub.log
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Apply bounded presentation candidate and record actual effective source
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/qa_next/apply_reference_visual_candidate.py 2>&1 | tee /tmp/bil-reference/apply.log
+          cp docs/qa_next/REFERENCE_CANDIDATE_APPLIED.json /tmp/bil-reference/effective-source.json
+          git diff --binary > /tmp/bil-reference/effective-source.patch
+          git diff --exit-code -- supabase ios android pubspec.yaml pubspec.lock
+          printf 'Actual Flutter rendering of candidate source identified in effective-source.json, not the unchanged checkout. Synthetic data only. No store build, deployment, production connection or reference parity claim.\n' > /tmp/bil-reference/scope.txt
+      - name: Analyze effective candidate without suppressing failures
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-reference/analyze.log
+      - name: Render and exercise actual Coach widgets and repository-backed conversation
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        env:
+          BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-reference/coach
+        shell: bash
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/coach_reference_workspace_capture_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/coach-tests.log
+      - name: Render actual Community surfaces and large-text states
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-reference/community
+        shell: bash
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/community-tests.log
+      - name: Preserve focused behavior contracts
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded test/features/community/community_inbox_resume_regression_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/behavior-tests.log
+      - name: Export bounded candidate text for review alongside actual captures
+        if: ${{ always() && steps.candidate.outcome == 'success' }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,zipfile
+          manifest=json.loads(pathlib.Path('/tmp/bil-reference/effective-source.json').read_text())['source_manifest']
+          with zipfile.ZipFile('/tmp/bil-reference/effective-dart-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for item in manifest:
+              p=pathlib.Path(item['path'])
+              if p.suffix!='.dart' or p.parts[0] not in ('lib','test') or p.is_symlink(): raise RuntimeError('unexpected export')
+              z.write(p,p.as_posix())
+          PY
+      - name: Upload genuine Flutter PNGs, source and failure logs; never fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-reference-native-${{ github.sha }}
+          path: /tmp/bil-reference
+          retention-days: 1
+          if-no-files-found: error

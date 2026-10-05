@@ -1,0 +1,33 @@
+class _CoachHero extends StatelessWidget {
+  const _CoachHero({super.key, required this.onBack, required this.onHistory, required this.onMenu, this.interactionEnabled = true});
+  final VoidCallback onBack, onHistory, onMenu;
+  final bool interactionEnabled;
+  @override
+  Widget build(BuildContext context) {
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
+      decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF0C1B2B), Color(0xFF07111B)]), border: Border(bottom: BorderSide(color: Color(0xFF1F344B), width: .6))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          SizedBox(width: 25, child: IconButton(onPressed: onBack, tooltip: MaterialLocalizations.of(context).backButtonTooltip, padding: EdgeInsets.zero, icon: const Icon(Icons.chevron_left_rounded, color: Color(0xFFB1C5E0), size: 23))),
+          const SizedBox(width: 4),
+          _CoachHeroPortrait(size: 39, onTap: interactionEnabled ? onHistory : null),
+          const SizedBox(width: 9),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(intelligenceText(context, 'AI Coach', 'المدرب الذكي'), style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: Color(0xFFF1F6FF))),
+            if (!large) Text(intelligenceText(context, 'Your health partner, always with you', 'شريك صحتك، معك دائمًا'), maxLines: 2, style: const TextStyle(fontSize: 9, color: Color(0xFFAEBED3), height: 1.4)),
+          ])),
+          for (final item in <(IconData, String, VoidCallback)>[
+            (Icons.search_rounded, intelligenceText(context, 'Search conversations', 'ابحث في محادثاتك'), onHistory),
+            (Icons.history_rounded, intelligenceText(context, 'Conversation history', 'سجل المحادثات'), onHistory),
+            (Icons.more_horiz_rounded, intelligenceText(context, 'Coach controls', 'أدوات المدرب'), onMenu),
+          ]) Padding(padding: const EdgeInsetsDirectional.only(start: 4), child: SizedBox(width: 31, height: 33, child: IconButton(onPressed: interactionEnabled ? item.$3 : null, tooltip: item.$2, padding: EdgeInsets.zero, style: IconButton.styleFrom(backgroundColor: const Color(0xFF142335), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)), side: const BorderSide(color: Color(0xFF304359), width: .7)), icon: Icon(item.$1, size: 18, color: const Color(0xFFB4C5DA))))),
+        ]),
+        if (large) Padding(padding: const EdgeInsets.only(top: 6), child: Text(intelligenceText(context, 'Your health partner, always with you', 'شريك صحتك، معك دائمًا'), style: const TextStyle(fontSize: 11, color: Color(0xFFAEBED3)))),
+        const SizedBox(height: 7),
+        const Align(alignment: AlignmentDirectional.centerEnd, child: CommunityGoldBalanceAction(compact: true)),
+      ]),
+    );
+  }
+}
