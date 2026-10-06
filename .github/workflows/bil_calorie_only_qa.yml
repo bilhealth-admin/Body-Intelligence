@@ -26,8 +26,9 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-          fetch-depth: 0
-          filter: blob:none
+          # Fetch complete blobs for this bounded ancestry, not a lazy
+          # promisor checkout. The frozen-base ancestry guard remains below.
+          fetch-depth: 128
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
