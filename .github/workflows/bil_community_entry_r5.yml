@@ -1,0 +1,128 @@
+name: BIL Community entry R5 QA only
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths:
+      - tool/qa_next/community_entry_r5/**
+      - .github/workflows/bil_community_entry_r5.yml
+      - lib/features/community/**
+      - lib/app/router/app_community_routes.dart
+      - lib/app/router/app_router.dart
+      - test/features/community/community_entry*
+      - test/qa_next/community_entry_capture_test.dart
+permissions:
+  contents: read
+concurrency:
+  group: bil-entry-r5-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  source:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      source_sha: ${{ steps.materialize.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Commit exact bounded entry source on QA branch only
+        id: materialize
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tool/qa_next/community_entry_r5/apply.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-entry-r5-source-${{ github.sha }}
+          path: /tmp/bil-entry-r5
+          retention-days: 1
+          if-no-files-found: error
+  entry-checks:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.source.outputs.source_sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve unchanged locked dependencies
+        id: resolve
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-entry-r5
+          git rev-parse HEAD > /tmp/bil-entry-r5/commit.txt
+          flutter --version --machine > /tmp/bil-entry-r5/toolchain.json
+          flutter pub get --enforce-lockfile 2>&1 | tee /tmp/bil-entry-r5/pub.log
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Check committed formatting
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          git diff --name-only -z ad3bc5905f336724584705c40cd9dd4eb22fa4e9 HEAD -- '*.dart' | xargs -0 -r dart format --output=none --set-exit-if-changed 2>&1 | tee /tmp/bil-entry-r5/format.log
+      - name: Analyze all source
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-entry-r5/analyze.log
+      - name: Entry persistence privacy retry account lifecycle and route tests
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m test/features/community/community_entry_flow_test.dart test/features/community/community_entry_repository_test.dart test/features/community/community_entry_route_contract_test.dart test/features/community/community_visible_activity_scope_test.dart test/features/community/community_inbox_resume_regression_test.dart test/features/community/community_session_switch_test.dart test/features/community/community_reference_composer_v1_test.dart test/features/community/community_profile_identity_contract_test.dart test/architecture_source_file_size_guard_test.dart test/localization/bil_25_locale_fallback_closure_test.dart 2>&1 | tee /tmp/bil-entry-r5/tests.log
+      - name: Capture real Flutter entry screens and failure recovery
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        env:
+          BIL_ENTRY_CAPTURE_DIR: /tmp/bil-entry-r5/screens
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/community_entry_capture_test.dart --timeout 2m 2>&1 | tee /tmp/bil-entry-r5/capture.log
+      - name: Verify source stayed unchanged during tests
+        if: always()
+        run: git diff --exit-code
+      - name: Upload only synthetic captures and real logs; never fonts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-entry-r5-checks-${{ needs.source.outputs.source_sha }}
+          path: /tmp/bil-entry-r5
+          retention-days: 1
+          if-no-files-found: error
+  regression:
+    needs: [source, entry-checks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ needs.source.outputs.source_sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - name: Existing full portable partition, no removed assertions
+        env:
+          BIL_QA_SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-next-regression
+          python3 tool/qa_next/run_regression.py 2>&1 | tee /tmp/bil-next-regression/tests.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-entry-r5-regression-${{ matrix.shard }}-${{ needs.source.outputs.source_sha }}
+          path: /tmp/bil-next-regression
+          retention-days: 1
+          if-no-files-found: error
