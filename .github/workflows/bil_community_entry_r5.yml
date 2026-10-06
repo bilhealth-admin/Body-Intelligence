@@ -24,10 +24,54 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        timeout-minutes: 10
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
           fetch-depth: 0
+          filter: blob:none
+      - name: Preserve exact tracked text for offline QA recovery
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-entry-r5
+          git diff --exit-code
+          python3 - <<'PY'
+          import hashlib, json, pathlib, subprocess, zipfile
+          source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip()
+          tracked = subprocess.check_output(['git', 'ls-tree', '-rz', '--full-tree', 'HEAD']).split(b'\0')
+          included, excluded = [], []
+          blocked = {'.ttf', '.otf', '.woff', '.woff2', '.eot', '.p12', '.p8', '.pem', '.key', '.jks', '.keystore', '.mobileprovision'}
+          output = pathlib.Path('/tmp/bil-entry-r5/recovery-source.zip')
+          with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+              for entry in tracked:
+                  if not entry:
+                      continue
+                  metadata, name = entry.split(b'\t', 1)
+                  mode, kind, sha = metadata.decode().split()
+                  name = name.decode('utf-8')
+                  path = pathlib.Path(name)
+                  if kind != 'blob' or mode == '120000' or path.suffix.lower() in blocked or path.name.startswith('.env'):
+                      excluded.append({'path': name, 'git_blob': sha, 'reason': 'non-text-or-sensitive-file-kind'})
+                      continue
+                  data = path.read_bytes()
+                  try:
+                      data.decode('utf-8')
+                  except UnicodeDecodeError:
+                      excluded.append({'path': name, 'git_blob': sha, 'reason': 'binary'})
+                      continue
+                  if b'\0' in data:
+                      excluded.append({'path': name, 'git_blob': sha, 'reason': 'binary'})
+                      continue
+                  blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+                  if blob != sha:
+                      raise SystemExit('Tracked source differs from HEAD: ' + name)
+                  archive.writestr('source/' + name, data)
+                  included.append({'path': name, 'git_blob': sha, 'sha256': hashlib.sha256(data).hexdigest(), 'mode': mode})
+              manifest = {'source_commit': source, 'source_tree': tree, 'scope': 'Exact tracked UTF-8 source; binary assets and fonts excluded. Not a complete checkout or test clearance.', 'files': included, 'excluded': excluded}
+              archive.writestr('SOURCE_SNAPSHOT.json', json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+          print(json.dumps({'source_commit': source, 'source_tree': tree, 'included': len(included), 'excluded': len(excluded), 'archive_sha256': hashlib.sha256(output.read_bytes()).hexdigest()}))
+          PY
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -78,7 +122,7 @@ jobs:
       - name: Verify source stayed unchanged during tests
         if: always()
         run: git diff --exit-code
-      - name: Upload only synthetic captures and real logs; never fonts
+      - name: Upload synthetic captures exact text and real logs; never fonts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

@@ -16,10 +16,12 @@ jobs:
     steps:
       - name: Checkout exact test commit without retained credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        timeout-minutes: 10
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
           fetch-depth: 0
+          filter: blob:none
       - name: Verify frozen base and record scope
         shell: bash
         run: |
