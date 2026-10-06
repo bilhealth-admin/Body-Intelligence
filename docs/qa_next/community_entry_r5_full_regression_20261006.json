@@ -1,0 +1,884 @@
+{
+  "run": {
+    "id": 37504681784,
+    "head_sha": "19c66e1039a09894f46ced6ae1defc14fa025c73",
+    "head_branch": "qa/coach-community-next-20261005",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37504681784",
+    "created_at": "2026-10-06T17:35:06Z",
+    "updated_at": "2026-10-06T17:50:04Z"
+  },
+  "source_tree": "edfb5ab4bcdd37524d1a76a2a005a2245867de9c",
+  "all_discovered_files": 1123,
+  "selected_with_performance": 1087,
+  "performance_files": [
+    "test/performance_budget_test.dart"
+  ],
+  "nonperformance_executed": 1086,
+  "excluded_files": [
+    "test/architecture_source_file_size_guard_test.dart",
+    "test/dashboard_polish/live_health_watch_layout_golden_test.dart",
+    "test/epic11_locale_golden_test.dart",
+    "test/epic15_store_screenshot_golden_test.dart",
+    "test/epic3_visual_matrix_golden_test.dart",
+    "test/epic8_weekly_report_golden_test.dart",
+    "test/epic9_cloud_completion_contract_test.dart",
+    "test/features/commerce/ai_boost_coach_artwork_test.dart",
+    "test/features/commerce/apple_review_asset_package_contract_test.dart",
+    "test/features/commerce/apple_review_product_screenshot_test.dart",
+    "test/features/commerce/bil_store_plans_light_visual_test.dart",
+    "test/features/commerce/premium_ai_market_gate_widget_test.dart",
+    "test/features/community/community_polish_visual_test.dart",
+    "test/features/meal_planner/existing_recipe_canonical_seeds_test.dart",
+    "test/features/meal_planner/generated_recipe_assets_test.dart",
+    "test/features/meal_planner/pending_nutrition_b_test.dart",
+    "test/features/meal_planner/recipe_catalog_1500_contract_test.dart",
+    "test/features/meal_planner/recipe_nutrition_batch_b_test.dart",
+    "test/features/nutrition/existing_recipe_nutrition_batch_a_test.dart",
+    "test/features/nutrition/recipe_nutrition_pending_a_test.dart",
+    "test/features/onboarding/onboarding_visual_golden_test.dart",
+    "test/features/wellness/recipe_library_polish_test.dart",
+    "test/features/wellness/wellness_video_stream_live_test.dart",
+    "test/features/wellness/workout_reference_golden_test.dart",
+    "test/launch_readiness/visual_reference_evidence_truth_contract_test.dart",
+    "test/launch_readiness/webcam_vision_barcode_preparation_contract_test.dart",
+    "test/personal_health_ai_panel_test.dart",
+    "test/premium_dashboard_benchmark_test.dart",
+    "test/qa_next/coach_reference_workspace_capture_test.dart",
+    "test/qa_next/community_entry_capture_test.dart",
+    "test/release/workout_video_completion_monitor_contract_test.dart",
+    "test/release_metadata_test.dart",
+    "test/splash_video_contract_test.dart",
+    "test/visual_closure/actual_data_pages_golden_test.dart",
+    "test/visual_closure/actual_production_pages_golden_test.dart",
+    "test/visual_closure/quick_add_golden_test.dart"
+  ],
+  "name_filters": {
+    "test/premium_splash_experience_test.dart": "^(?!native launch continuity).*$",
+    "test/features/wellness/static_workout_artwork_contract_test.dart": "^six static workout covers are centralized and locally available$",
+    "test/features/dashboard/dashboard_identity_header_layout_test.dart": "^(?!a member photo).*$",
+    "test/shared/widgets/bil_account_avatar_test.dart": "^uses a neutral account fallback and never the AI Coach$",
+    "test/launch_readiness/splash_identity_asset_contract_test.dart": "^iOS launch metadata preserves the complete approved identity$",
+    "test/launch_readiness/epic15_store_materials_contract_test.dart": "^(?!rights manifest preserves current art).*$",
+    "test/android_launch_readiness/android_launch_contract_test.dart": "^(?!Flutter hands native blue).*$"
+  },
+  "four_shards_passed": true,
+  "union_equals_selected_minus_performance": true,
+  "pairwise_disjoint": true,
+  "all_assigned_files_loaded": true,
+  "all_command_exits_zero": true,
+  "all_plans_match_frozen_local_selection": true,
+  "runner_unchanged_from_baseline": "86bc94851b1020b0533956328d577292b39a1da1",
+  "passed": 6006,
+  "failed": 0,
+  "skipped_cases": 0,
+  "shards": [
+    {
+      "passed": 1295,
+      "skipped": 0,
+      "failed": 0,
+      "assigned_files": 272,
+      "attempted_files": 272,
+      "loaded_files": 272,
+      "unique_loaded_files": 272,
+      "results_match_assigned": true,
+      "all_assigned_files_loaded": true,
+      "name_filters_match_assigned": true,
+      "missing_loads": [],
+      "unexpected_loads": [],
+      "command_summaries": 3,
+      "result_commands": 3,
+      "command_exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "failures": [],
+      "shard": 0,
+      "log_sha256": "2430b5bd9c6e11bd318c6724e2c7532ea6ac4fd86a2870a7577afd58dc329c36"
+    },
+    {
+      "passed": 1475,
+      "skipped": 0,
+      "failed": 0,
+      "assigned_files": 272,
+      "attempted_files": 272,
+      "loaded_files": 272,
+      "unique_loaded_files": 272,
+      "results_match_assigned": true,
+      "all_assigned_files_loaded": true,
+      "name_filters_match_assigned": true,
+      "missing_loads": [],
+      "unexpected_loads": [],
+      "command_summaries": 3,
+      "result_commands": 3,
+      "command_exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "failures": [],
+      "shard": 1,
+      "log_sha256": "19f06bc8d5116fd1d1041d3c1d007d2052d1993800b85384ba61a2d9c756cf5b"
+    },
+    {
+      "passed": 1477,
+      "skipped": 0,
+      "failed": 0,
+      "assigned_files": 271,
+      "attempted_files": 271,
+      "loaded_files": 271,
+      "unique_loaded_files": 271,
+      "results_match_assigned": true,
+      "all_assigned_files_loaded": true,
+      "name_filters_match_assigned": true,
+      "missing_loads": [],
+      "unexpected_loads": [],
+      "command_summaries": 2,
+      "result_commands": 2,
+      "command_exit_codes": [
+        0,
+        0
+      ],
+      "failures": [],
+      "shard": 2,
+      "log_sha256": "2548f28ebb0faca3ac21cad2c4d9216d2bd1a1a2c6c14dc478c51a1a33291954"
+    },
+    {
+      "passed": 1759,
+      "skipped": 0,
+      "failed": 0,
+      "assigned_files": 271,
+      "attempted_files": 271,
+      "loaded_files": 271,
+      "unique_loaded_files": 271,
+      "results_match_assigned": true,
+      "all_assigned_files_loaded": true,
+      "name_filters_match_assigned": true,
+      "missing_loads": [],
+      "unexpected_loads": [],
+      "command_summaries": 3,
+      "result_commands": 3,
+      "command_exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "failures": [],
+      "shard": 3,
+      "log_sha256": "13a79a17b40ea537bd0a2f6518b78620015bb89b268062fe8053cf280956f364"
+    }
+  ],
+  "reference_parity": false,
+  "device_e2e": false,
+  "artifacts": [
+    {
+      "id": 11432690111,
+      "name": "bil-entry-r5-regression-3-19c66e1039a09894f46ced6ae1defc14fa025c73",
+      "size_in_bytes": 75598,
+      "digest": "sha256:a175e307f8e0970f4926898be8e7ee956e8930e9a41d5500dd3b96ab2799ba48",
+      "created_at": "2026-10-06T17:48:57Z"
+    },
+    {
+      "id": 11431199032,
+      "name": "bil-entry-r5-regression-1-19c66e1039a09894f46ced6ae1defc14fa025c73",
+      "size_in_bytes": 73286,
+      "digest": "sha256:19b3f3e29cec6ff4e58a897820ba403280dd21ae8d458c45a72b57eddc3f1880",
+      "created_at": "2026-10-06T17:50:01Z"
+    },
+    {
+      "id": 11431094767,
+      "name": "bil-entry-r5-regression-2-19c66e1039a09894f46ced6ae1defc14fa025c73",
+      "size_in_bytes": 71154,
+      "digest": "sha256:40f5dd9ece79fa94038804467c4cf2df534f937c4d618513ec9e8cc139d6c6f9",
+      "created_at": "2026-10-06T17:48:16Z"
+    },
+    {
+      "id": 11431069671,
+      "name": "bil-entry-r5-regression-0-19c66e1039a09894f46ced6ae1defc14fa025c73",
+      "size_in_bytes": 68372,
+      "digest": "sha256:35991fae830b68303d69437136c0056f5b9f386dfc27d589bbb828f8c54854be",
+      "created_at": "2026-10-06T17:47:43Z"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 112410387375,
+      "name": "entry-checks",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 37504681784,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Preserve exact tracked text for offline QA recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Resolve unchanged locked dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Check committed formatting",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Analyze all source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Entry persistence privacy retry account lifecycle and route tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Capture real Flutter entry screens and failure recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Verify source stayed unchanged during tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Upload synthetic captures exact text and real logs; never fonts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        }
+      ]
+    },
+    {
+      "id": 112411879203,
+      "name": "regression (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 37504681784,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run flutter pub get --enforce-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Existing full portable partition, no removed assertions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ]
+    },
+    {
+      "id": 112411879210,
+      "name": "regression (2)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 37504681784,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run flutter pub get --enforce-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Existing full portable partition, no removed assertions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ]
+    },
+    {
+      "id": 112411879243,
+      "name": "regression (1)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 37504681784,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run flutter pub get --enforce-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Existing full portable partition, no removed assertions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ]
+    },
+    {
+      "id": 112411879323,
+      "name": "regression (3)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 37504681784,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run flutter pub get --enforce-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Existing full portable partition, no removed assertions",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ]
+    }
+  ],
+  "entry_capture_ci_local_byte_comparison": [
+    {
+      "file": "entry-ar-dark.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "6efcf5a51767ed43e5756ba8f91eab7175c9c2750d8d17b644a3cba4cad4b462"
+    },
+    {
+      "file": "entry-ar-light.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "cb8d4557021660e68751d92349571840842039b36df468842a2a562025b92a90"
+    },
+    {
+      "file": "entry-en-dark.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "1af6c46ebeba54de778648f46ff02e6e51ed25be913473524bb2095a17c7eef4"
+    },
+    {
+      "file": "entry-en-light.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "8b54518d569b62b5337e0645ce47036ccd7bb524ed1bee97b1045550256e039d"
+    },
+    {
+      "file": "entry-retry-ar-dark.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "6e6fc7c1dda2765a300a0864706a04a5024ff1a38186cd468b6a2c22473519a5"
+    },
+    {
+      "file": "entry-retry-ar-light.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "5390607e15379467b332b0fcf531050f230c5bb8215fbf524d3d71c7cd05e080"
+    },
+    {
+      "file": "entry-retry-en-dark.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "49fd6840e8e2aae7eae96f78f3d07928db7d191182971086de300eded0df6d85"
+    },
+    {
+      "file": "entry-retry-en-light.png",
+      "same_size": true,
+      "same_encoded_bytes": true,
+      "same_rgba_pixels": true,
+      "ci_sha256": "e15480bc62bb786ce5faae1212bcc760909bf0c89db4cdcca85dbd8b03fb6291"
+    }
+  ],
+  "recovery_source": {
+    "source_commit": "19c66e1039a09894f46ced6ae1defc14fa025c73",
+    "source_tree": "edfb5ab4bcdd37524d1a76a2a005a2245867de9c",
+    "included_verified": 4304,
+    "excluded": 1508,
+    "verified_uncompressed_bytes": 69222006,
+    "all_included_paths_blobs_sha256_match_exact_git_tree": true,
+    "complete_checkout": false,
+    "scope": "Exact tracked UTF-8 source; binary assets and fonts excluded. Not a complete checkout or test clearance."
+  },
+  "native_capture": {
+    "run": 37504681893,
+    "artifact": 11431127656,
+    "conclusion": "success",
+    "community_png_count": 144,
+    "coach_png_count": 10,
+    "behavior_passed": 102,
+    "reference_parity_verified": false,
+    "archive_sha256": "328597e1631556e9d09eb6ed8ac78ea50c67ec852795ae45dfefddacf47029de"
+  },
+  "entry_checks": {
+    "job": 112410387375,
+    "conclusion": "success",
+    "format_files": 83,
+    "analyzer_findings": 0,
+    "focused_files": 24,
+    "focused_passed": 275,
+    "capture_scenarios": 4,
+    "capture_png_count": 8
+  },
+  "local_full_regression": {
+    "checkpoint": "19c66e1039a09894f46ced6ae1defc14fa025c73",
+    "finished_utc": "2026-10-06T17:54:26.001573+00:00",
+    "all_discovered": 1123,
+    "selected_with_performance": 1087,
+    "nonperformance": 1086,
+    "partition_sizes": [
+      272,
+      272,
+      271,
+      271
+    ],
+    "excluded": 36,
+    "name_filtered_files": 7,
+    "pairwise_disjoint": true,
+    "union_equals_nonperformance_selection": true,
+    "exclusions_and_filters_unchanged_from": "86bc94851b1020b0533956328d577292b39a1da1",
+    "all_assigned_files_executed": true,
+    "all_worktrees_clean": true,
+    "passed": 6006,
+    "failed": 0,
+    "skipped_cases": 0,
+    "shards": [
+      {
+        "passed": 1295,
+        "skipped": 0,
+        "failed": 0,
+        "assigned_files": 272,
+        "attempted_files": 272,
+        "loaded_files": 272,
+        "unique_loaded_files": 272,
+        "results_match_assigned": true,
+        "all_assigned_files_loaded": true,
+        "name_filters_match_assigned": true,
+        "missing_loads": [],
+        "unexpected_loads": [],
+        "command_summaries": 3,
+        "result_commands": 3,
+        "command_exit_codes": [
+          0,
+          0,
+          0
+        ],
+        "failures": []
+      },
+      {
+        "passed": 1475,
+        "skipped": 0,
+        "failed": 0,
+        "assigned_files": 272,
+        "attempted_files": 272,
+        "loaded_files": 272,
+        "unique_loaded_files": 272,
+        "results_match_assigned": true,
+        "all_assigned_files_loaded": true,
+        "name_filters_match_assigned": true,
+        "missing_loads": [],
+        "unexpected_loads": [],
+        "command_summaries": 3,
+        "result_commands": 3,
+        "command_exit_codes": [
+          0,
+          0,
+          0
+        ],
+        "failures": []
+      },
+      {
+        "passed": 1477,
+        "skipped": 0,
+        "failed": 0,
+        "assigned_files": 271,
+        "attempted_files": 271,
+        "loaded_files": 271,
+        "unique_loaded_files": 271,
+        "results_match_assigned": true,
+        "all_assigned_files_loaded": true,
+        "name_filters_match_assigned": true,
+        "missing_loads": [],
+        "unexpected_loads": [],
+        "command_summaries": 2,
+        "result_commands": 2,
+        "command_exit_codes": [
+          0,
+          0
+        ],
+        "failures": []
+      },
+      {
+        "passed": 1759,
+        "skipped": 0,
+        "failed": 0,
+        "assigned_files": 271,
+        "attempted_files": 271,
+        "loaded_files": 271,
+        "unique_loaded_files": 271,
+        "results_match_assigned": true,
+        "all_assigned_files_loaded": true,
+        "name_filters_match_assigned": true,
+        "missing_loads": [],
+        "unexpected_loads": [],
+        "command_summaries": 3,
+        "result_commands": 3,
+        "command_exit_codes": [
+          0,
+          0,
+          0
+        ],
+        "failures": []
+      }
+    ],
+    "all_shards_passed": true,
+    "device_e2e": false,
+    "reference_parity": false
+  },
+  "local_closure_verification": {
+    "verified_utc": "2026-10-06T17:54:57.966515+00:00",
+    "checkpoint": "19c66e1039a09894f46ced6ae1defc14fa025c73",
+    "tree": "edfb5ab4bcdd37524d1a76a2a005a2245867de9c",
+    "primary_head": "19c66e1039a09894f46ced6ae1defc14fa025c73",
+    "primary_status": "?? docs/qa_next/COMMUNITY_ENTRY_R5_CI_CLOSED_20261006_AR.md\n?? docs/qa_next/community_entry_r5_full_regression_20261006.json",
+    "four_shards": [
+      {
+        "shard": 0,
+        "files": 272,
+        "passed": 1295,
+        "failed": 0,
+        "commands": 3,
+        "wall_seconds": 467.191,
+        "exit_code": 0,
+        "clean": true,
+        "new_oom_events": 0,
+        "new_oom_kills": 0
+      },
+      {
+        "shard": 1,
+        "files": 272,
+        "passed": 1475,
+        "failed": 0,
+        "commands": 3,
+        "wall_seconds": 554.235,
+        "exit_code": 0,
+        "clean": true,
+        "new_oom_events": 0,
+        "new_oom_kills": 0
+      },
+      {
+        "shard": 2,
+        "files": 271,
+        "passed": 1477,
+        "failed": 0,
+        "commands": 2,
+        "wall_seconds": 441.184,
+        "exit_code": 0,
+        "clean": true,
+        "new_oom_events": 0,
+        "new_oom_kills": 0
+      },
+      {
+        "shard": 3,
+        "files": 271,
+        "passed": 1759,
+        "failed": 0,
+        "commands": 3,
+        "wall_seconds": 481.205,
+        "exit_code": 0,
+        "clean": true,
+        "new_oom_events": 0,
+        "new_oom_kills": 0
+      }
+    ],
+    "all_terminal_command_summaries_present": true,
+    "all_unique_assigned_files_loaded": true,
+    "sdk_commit": "ee80f08bbf97172ec030b8751ceab557177a34a6",
+    "new_oom_events": 0,
+    "new_oom_kills": 0,
+    "driver_sha256": "0b2e697f1f1ec2db76ecbf10565f6320ac24615552cbb9b619d790f35cb86eec",
+    "driver_actual_exit_code": 0,
+    "scope": "unchanged portable test selection; no native-device E2E or reference parity claim"
+  },
+  "main_qa_ci": {
+    "run": 37504681772,
+    "head_sha": "19c66e1039a09894f46ced6ae1defc14fa025c73",
+    "status": "completed",
+    "conclusion": "success",
+    "updated_at": "2026-10-06T18:04:53Z",
+    "jobs": [
+      {
+        "id": 112410410122,
+        "name": "flutter-checks",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112411959358,
+        "name": "isolated-sql-contracts",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112411959405,
+        "name": "portable-regression (0)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112411959464,
+        "name": "portable-regression (1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112411959506,
+        "name": "flutter-visual-capture",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112411959515,
+        "name": "portable-regression (2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112411959551,
+        "name": "portable-regression (3)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "isolated_sql": {
+      "job": 112411959358,
+      "environment": "isolated Postgres 17 fixture",
+      "production_write": false,
+      "expected_negative_controls": "Historical live function snapshots reproduce three queued-category opt-out defects before QA forward SQL; identical cases pass after the isolated forward fix.",
+      "source_log": "main-isolated-sql.log",
+      "log_sha256": "2cacafbf0ad1d10dd4bc41e1291a12989298c08c8f886760248a4af8c721e172"
+    }
+  }
+}
