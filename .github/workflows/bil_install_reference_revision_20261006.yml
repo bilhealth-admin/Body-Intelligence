@@ -52,14 +52,13 @@ jobs:
           if os.environ['GITHUB_REF']!=branch: raise RuntimeError('QA branch only')
           changed=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
           untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()
-          allowed=('lib/','test/','tool/prebuild/','tool/localization/','tool/qa_next/')
           files=sorted(set(changed+[p for p in untracked if p.endswith('.dart')]))
-          if not files or any(not p.startswith(allowed) for p in files): raise RuntimeError('Unexpected revision scope')
-          if any(not p.endswith(('.dart','.py')) for p in files): raise RuntimeError('Unexpected file type')
+          expected_files={row['path'] for row in json.loads(pathlib.Path('tool/qa_next/revision_r3_manifest.json').read_text())['files']}
+          if set(files)!=expected_files: raise RuntimeError('Unexpected revision scope')
           subprocess.run(['git','add','--',*files],check=True)
           subprocess.run(['git','config','user.name','BIL isolated QA'],check=True)
           subprocess.run(['git','config','user.email','qa@users.noreply.github.com'],check=True)
-          subprocess.run(['git','commit','-m','fix(qa-only): materialize reference UI with accessible controls and verified regression fixes'],check=True)
+          subprocess.run(['git','commit','-m','fix(qa-only): restore ordered Community gallery and reconcile reference regression journeys'],check=True)
           actual=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
           auth=base64.b64encode(('x-access-token:'+os.environ['GH_TOKEN']).encode()).decode()
           print('::add-mask::'+auth)
@@ -73,6 +72,21 @@ jobs:
       - name: Analyze committed source
         if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-installed/analyze.log
+      - name: Recheck every previously failing file and new gallery cases
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 1 \
+            test/features/community/community_review_regression_test.dart \
+            test/features/community/community_session_switch_test.dart \
+            test/features/community/community_post_moderation_test.dart \
+            test/features/community/community_multi_image_v1_contract_test.dart \
+            test/features/community/community_social_v2_ui_test.dart \
+            test/features/community/community_post_gallery_behavior_test.dart \
+            test/intelligence_center_five_locale_contract_test.dart \
+            test/intelligence_center_composer_contract_test.dart \
+            test/intelligence_center_composer_test.dart \
+            --timeout 2m 2>&1 | tee /tmp/bil-installed/r3-regression.log
       - name: Execute behavior accessibility and locale regression tests
         if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
         run: |
@@ -88,16 +102,17 @@ jobs:
         env:
           BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-installed/community
         run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/community.log
-      - name: Export source changes for exact local inspection
+      - name: Export exact changed text source and unchanged-source proof
         if: ${{ always() && steps.apply.outcome == 'success' }}
         run: |
+          git diff --exit-code
           python3 - <<'PY'
           import pathlib,subprocess,zipfile
-          changed=subprocess.check_output(['git','diff','--name-only','cdd6f747611515ef8c116c2327d22649e07ab249','HEAD'],text=True).splitlines()
+          changed=subprocess.check_output(['git','diff','--name-only','b833cea14e1f5347d9dcff036899d5afd0202e05','HEAD'],text=True).splitlines()
           with zipfile.ZipFile('/tmp/bil-installed/source-delta.zip','w',zipfile.ZIP_DEFLATED) as z:
               for name in changed:
                   p=pathlib.Path(name)
-                  if p.is_file() and p.suffix in ('.dart','.py','.yml') and p.parts[0] in ('lib','test','tool','.github') and not p.is_symlink(): z.write(p,p.as_posix())
+                  if p.is_file() and p.suffix in ('.dart','.py','.yml','.json') and p.parts[0] in ('lib','test','tool','.github') and not p.is_symlink(): z.write(p,p.as_posix())
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
