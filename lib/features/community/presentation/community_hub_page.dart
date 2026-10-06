@@ -370,9 +370,9 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         case 'account':
           await pushCommunityPage<void>(
             context,
-            CommunityMyPostsPage(
+            CommunityMemberProfilePage(
+              userId: repository.currentUserId,
               repository: repository,
-              showProfileHeader: true,
             ),
           );
         case 'saved':
