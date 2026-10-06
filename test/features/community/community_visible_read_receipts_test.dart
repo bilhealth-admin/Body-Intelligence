@@ -39,16 +39,41 @@ class _VisibleRepository extends CommunityRepository {
   }
 
   @override
+  Future<Set<String>> loadReadMessageIds(
+    String other,
+    List<String> ids,
+  ) async => acknowledged.intersection(ids.toSet());
+
+  @override
   Future<void> markConversationRead(String other) =>
       throw StateError('Unbounded conversation read must not be called');
 }
 
+void _testWidget(String name, WidgetTesterCallback body) {
+  testWidgets(name, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
+}
+
 void main() {
-  testWidgets(
+  late _VisibleRepository repository;
+  // Supabase's JSON worker belongs to the real runner, outside widget clocks.
+  setUp(() {
+    repository = _VisibleRepository();
+  });
+  tearDown(() async {
+    await repository.changes.close();
+    await repository.communitySocialClient.dispose();
+  });
+  _testWidget(
     'only visible messages are acknowledged, not cached or offscreen history',
     (tester) async {
-      final repository = _VisibleRepository();
-      addTearDown(repository.changes.close);
       await tester.pumpWidget(
         MaterialApp(
           home: CommunityChatPage(
@@ -59,17 +84,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(repository.acknowledged, isEmpty);
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pumpAndSettle();
       expect(repository.acknowledged, contains('message-59'));
       expect(repository.acknowledged, isNot(contains('message-0')));
       expect(repository.acknowledged.length, lessThan(60));
       expect(tester.takeException(), isNull);
     },
   );
-  testWidgets('backgrounded chat does not mark new messages read', (
+  _testWidget('backgrounded chat does not mark new messages read', (
     tester,
   ) async {
-    final repository = _VisibleRepository();
-    addTearDown(repository.changes.close);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pumpWidget(
       MaterialApp(
@@ -82,7 +108,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(repository.acknowledged, isEmpty);
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(repository.acknowledged, isEmpty);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(repository.acknowledged, isEmpty);
+    await tester.pump(const Duration(milliseconds: 700));
     await tester.pumpAndSettle();
     expect(repository.acknowledged, isNotEmpty);
     expect(tester.takeException(), isNull);

@@ -13,6 +13,8 @@ import 'package:body_intelligence_log/features/connected_health/partner_capabili
 import 'package:body_intelligence_log/features/connected_health/partner_setup_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/dart_library_source.dart';
+
 void main() {
   test('release-polish catalog resolves every source in all 25 locales', () {
     expect(ReleasePolishRuntimeCopy.supported, hasLength(25));
@@ -243,9 +245,9 @@ void main() {
     final premium = File(
       'lib/features/commerce/presentation/premium_logging_intro_page.dart',
     ).readAsStringSync();
-    final communityChat = File(
-      'lib/features/community/presentation/community_chat_page.dart',
-    ).readAsStringSync();
+    final communityChat = readDartLibrarySource(
+      'lib/features/community/presentation/community_people_page.dart',
+    );
     final connections = File(
       'lib/features/community/presentation/community_connections_copy.dart',
     ).readAsStringSync();

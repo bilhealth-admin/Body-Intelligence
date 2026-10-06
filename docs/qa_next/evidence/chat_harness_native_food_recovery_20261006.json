@@ -1,0 +1,121 @@
+{
+  "application_source_sha": "6f4ccc1374d643678bee02db39951cab14c573a4",
+  "application_tree_sha": "46672844386b5cfc97d6eed3bf3a7f1066312b8f",
+  "r5_run": 37542235662,
+  "entry": {
+    "job": 112537727515,
+    "format": {
+      "files": 353,
+      "changed": 0
+    },
+    "analyze_issues": 0,
+    "focused_pass": 276,
+    "capture_cases_pass": 4,
+    "conclusion": "success"
+  },
+  "regression": [
+    {
+      "shard": 0,
+      "job": 112538919946,
+      "primary_pass": 1731,
+      "primary_fail": 2,
+      "serial_pass": [
+        1
+      ],
+      "conclusion": "failure"
+    },
+    {
+      "shard": 1,
+      "job": 112538919873,
+      "primary_pass": 1704,
+      "primary_fail": 0,
+      "serial_pass": [
+        4,
+        1
+      ],
+      "conclusion": "success"
+    },
+    {
+      "shard": 2,
+      "job": 112538919933,
+      "primary_pass": 1695,
+      "primary_fail": 0,
+      "serial_pass": [
+        1,
+        3
+      ],
+      "conclusion": "success"
+    },
+    {
+      "shard": 3,
+      "job": 112538919927,
+      "primary_pass": 1826,
+      "primary_fail": 4,
+      "serial_pass": [
+        11,
+        2
+      ],
+      "conclusion": "failure"
+    }
+  ],
+  "general_run": 37542235704,
+  "general_focused": {
+    "pass": 87,
+    "fail": 2
+  },
+  "native_capture_run": {
+    "id": 37542235602,
+    "conclusion": "success"
+  },
+  "local_native_food": {
+    "git_status": "WIP not committed",
+    "pass": 99,
+    "fail": 0,
+    "analyze_issues": 0,
+    "source_digest": "4f2d44b62fd676a2ff63450eb8eea901a64beb65cf1f73b6f3e43ad21b2fe77a",
+    "evidence_path": "verification/food-native-flow/host-r9",
+    "source_unchanged_during_checks": true
+  },
+  "outage": {
+    "error": "409 Conflict, environment_offline — Environment is not connected",
+    "unconfirmed": [
+      "Whole Coach food host capture fixture write",
+      "Moderation/Earn bridge/copy session52646",
+      "Home/Activity final mixin/lint fixes",
+      "Expanded Coach capability inventory write"
+    ]
+  },
+  "harness_change": {
+    "status": "prepared; local execution unavailable; new commit requires CI results",
+    "application_source_unchanged": true,
+    "production_dwell_milliseconds": 600,
+    "assertion_counts": [
+      {
+        "path": "test/features/community/community_visible_read_receipts_test.dart",
+        "before": 7,
+        "after": 10
+      },
+      {
+        "path": "test/features/community/community_pre_release_visual_contract_test.dart",
+        "before": 37,
+        "after": 37
+      },
+      {
+        "path": "test/epic9_community_release_contract_test.dart",
+        "before": 25,
+        "after": 30
+      },
+      {
+        "path": "test/accessibility/release_accessibility_regression_test.dart",
+        "before": 17,
+        "after": 17
+      },
+      {
+        "path": "test/localization/release_polish_25_locale_contract_test.dart",
+        "before": 79,
+        "after": 79
+      }
+    ],
+    "geometry_contract": "Moved exact implementation from bounds.intersect(visibleRect) to rect.intersect(clip); foreground, route, screen clipping and 50 percent visibility assertions retained or strengthened."
+  }
+}

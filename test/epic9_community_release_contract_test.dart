@@ -61,6 +61,7 @@ void main() {
       final people = [
         'lib/features/community/presentation/community_people_page.dart',
         'lib/features/community/presentation/community_chat_page.dart',
+        'lib/features/community/presentation/community_visible_activity_scope.dart',
       ].map(source).join('\n');
       expect(people, contains('bool _sending = false'));
       expect(people, contains('await repository.markVisibleMessagesRead(ids)'));
@@ -68,9 +69,20 @@ void main() {
         people,
         isNot(contains('await _repository!.markConversationRead')),
       );
+      expect(
+        people,
+        contains('final transcript = CommunityVisibleActivityScope('),
+      );
+      expect(people, contains('onSeen: (ids) => _markSeen(binding, ids)'));
       expect(people, contains('AppLifecycleState.resumed'));
       expect(people, contains('ModalRoute.of(context)?.isCurrent'));
-      expect(people, contains('bounds.intersect(visibleRect)'));
+      expect(people, contains('rect.intersect(clip)'));
+      expect(people, contains('.intersect(screen)'));
+      expect(people, contains('visible.height >= height * .5'));
+      expect(
+        people,
+        contains('visible.width >= rect.width.clamp(0.0, clip.width) * .5'),
+      );
       expect(people, contains('message.isRead'));
       expect(people, contains('Your text is kept'));
       expect(people, contains('AlwaysScrollableScrollPhysics'));

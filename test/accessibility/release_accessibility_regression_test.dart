@@ -34,7 +34,9 @@ void main() {
     );
     expect(dashboardTopBar, contains("key: const Key('dashboard-edit-today')"));
     expect(
-      source('lib/features/community/presentation/community_chat_page.dart'),
+      librarySource(
+        'lib/features/community/presentation/community_people_page.dart',
+      ),
       contains("'Send message'"),
     );
     expect(

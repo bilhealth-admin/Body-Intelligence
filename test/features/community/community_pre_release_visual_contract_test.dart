@@ -21,15 +21,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+late SupabaseClient _preReleaseClient;
+
 final class _PreReleaseCommunityRepository extends CommunityRepository {
-  _PreReleaseCommunityRepository()
-    : super(
-        SupabaseClient(
-          'https://pre-release.invalid',
-          'pre-release-anon-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _PreReleaseCommunityRepository() : super(_preReleaseClient);
+
+  // These layout fixtures represent a signed-in Community member. The page
+  // continues to require the repository's captured owner for private controls.
+  @override
+  String get currentUserId => '11111111-1111-4111-8111-111111111111';
 
   final Completer<List<Map<String, dynamic>>> connections = Completer();
 
@@ -93,7 +93,26 @@ Widget _app({required Locale locale, required Widget home}) => ProviderScope(
   ),
 );
 
+void _testWidget(String name, WidgetTesterCallback body) {
+  testWidgets(name, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
+}
+
 void main() {
+  setUp(() {
+    _preReleaseClient = SupabaseClient(
+      'https://pre-release.invalid',
+      'pre-release-anon-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => _preReleaseClient.dispose());
   test(
     'community copy preserves every canonical locale and script variant',
     () {
@@ -265,7 +284,7 @@ void main() {
     }
   });
 
-  testWidgets('Community taxonomy survives 25 locales at 160 percent text', (
+  _testWidget('Community taxonomy survives 25 locales at 160 percent text', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -290,7 +309,7 @@ void main() {
     }
   });
 
-  testWidgets('full Community Safety copy survives RTL and 160 percent text', (
+  _testWidget('full Community Safety copy survives RTL and 160 percent text', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -317,7 +336,7 @@ void main() {
     }
   });
 
-  testWidgets('new-message recipient stays below the app bar in all locales', (
+  _testWidget('new-message recipient stays below the app bar in all locales', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -391,7 +410,7 @@ void main() {
     }
   });
 
-  testWidgets('friends loading state is labelled instead of a bare spinner', (
+  _testWidget('friends loading state is labelled instead of a bare spinner', (
     tester,
   ) async {
     final repository = _PreReleaseCommunityRepository();
