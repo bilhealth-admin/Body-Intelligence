@@ -164,8 +164,9 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
           : await coordinator?.check().timeout(const Duration(seconds: 20));
       if (_sameOperation(generation, owner)) setState(() => _receipt = receipt);
     } on Object {
-      if (_sameOperation(generation, owner))
+      if (_sameOperation(generation, owner)) {
         setState(() => _failedCheck = true);
+      }
     } finally {
       if (_sameOperation(generation, owner)) setState(() => _checking = false);
     }
@@ -243,7 +244,8 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
     } on Object {
       synced = false;
     }
-    if (!synced && _sameOperation(generation, owner)) {
+    if (!mounted || !_sameOperation(generation, owner)) return;
+    if (!synced) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
