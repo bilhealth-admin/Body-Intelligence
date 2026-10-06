@@ -40,3 +40,4 @@ with tempfile.TemporaryDirectory(prefix='bil-format-proposal-') as tmp:
                                                tofile='b/' + name))
 (out / 'formatter-proposal.patch').write_text(''.join(proposal))
 print('Formatter proposal only; tested source unchanged.')
+print(''.join(proposal), end='')
