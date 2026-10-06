@@ -69,6 +69,18 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
               'البحث عن أصدقاء',
             ),
             _item(
+              '/community/drafts',
+              Icons.drafts_outlined,
+              'Drafts',
+              'المسودات',
+              key: 'community-drafts',
+              subtitle: communityText(
+                context,
+                'Private unfinished posts',
+                'منشورات غير مكتملة وخاصة',
+              ),
+            ),
+            _item(
               'saved',
               Icons.bookmark_border_rounded,
               'Saved posts',
