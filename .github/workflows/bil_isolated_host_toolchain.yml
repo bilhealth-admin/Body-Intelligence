@@ -1,0 +1,102 @@
+name: BIL isolated host tooling
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_isolated_host_toolchain.yml]
+permissions:
+  contents: read
+jobs:
+  tooling:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Prepare locked host dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          mkdir -p /tmp/bil-host-tooling
+          flutter --version --machine > /tmp/bil-host-tooling/pinned-toolchain.json
+      - name: Package pinned host executables and public framework without any font files
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,stat,subprocess,zipfile,zlib
+          out=pathlib.Path('/tmp/bil-host-tooling')
+          sdk=pathlib.Path(os.environ['FLUTTER_ROOT']);pub=pathlib.Path(os.environ['PUB_CACHE'])
+          deny={'.ttf','.otf','.woff','.woff2','.eot','.ttc','.dfont','.pfb','.pfa','.zip','.gz','.xz','.7z','.tar','.sym'}
+          magic={b'\x00\x01\x00\x00',b'OTTO',b'ttcf',b'wOFF',b'wOF2',b'true',b'typ1'}
+          omitted=[];manifest=[]
+          def put(z,p,name):
+              if not p.is_file() or p.is_symlink(): return
+              if p.suffix.lower() in deny or any(x in p.parts for x in ('fonts','font','test_fonts','test_data','.git','.cache')):
+                  omitted.append(name);return
+              if any(x in p.name.lower() for x in ('credential','private_key','service-account','.env','asan','msan','tsan','chrome-dart','dart-sdk-linux')): return
+              with p.open('rb') as f:
+                  head=f.read(4096)
+              if head[:4] in magic: omitted.append(name);return
+              if b'-----BEGIN PRIVATE KEY-----' in head or b'-----BEGIN RSA PRIVATE KEY-----' in head: return
+              z.write(p,name)
+              manifest.append({'path':name,'bytes':p.stat().st_size})
+          with zipfile.ZipFile(out/'flutter-host-no-fonts.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in sdk.rglob('*'):
+                  rel=p.relative_to(sdk).as_posix()
+                  if not (rel.startswith(('bin/','packages/')) or rel in ('version','LICENSE','AUTHORS','README.md')): continue
+                  if rel.startswith('bin/cache/artifacts/engine/') and not any(x in rel for x in ('/linux-x64/','/common/')): continue
+                  if any(x in rel for x in ('/flutter_web_sdk/','/linux-x64-profile/','/linux-x64-release/','/examples/','/integration_test/example/','/test/','/test_fixes/','/test_general.shard/')): continue
+                  put(z,p,'flutter/'+rel)
+              # Only original commit/tree metadata, never Git blob history (which
+              # may contain font bytes). A shallow exact-tag repository is enough
+              # for Flutter's immutable revision discovery.
+              sha=subprocess.check_output(['git','-C',str(sdk),'rev-parse','HEAD'],text=True).strip()
+              commit=subprocess.check_output(['git','-C',str(sdk),'cat-file','commit',sha])
+              tree=commit.splitlines()[0].decode().split()[1]
+              objects=[(sha,'commit',commit)]
+              stack=[tree];seen=set()
+              while stack:
+                  oid=stack.pop()
+                  if oid in seen: continue
+                  seen.add(oid)
+                  data=subprocess.check_output(['git','-C',str(sdk),'cat-file','tree',oid])
+                  objects.append((oid,'tree',data))
+                  raw=subprocess.check_output(['git','-C',str(sdk),'ls-tree','-z',oid])
+                  for row in raw.split(b'\0'):
+                      if not row: continue
+                      bits=row.split(b'\t',1)[0].split()
+                      if bits[1]==b'tree': stack.append(bits[2].decode())
+              z.writestr('flutter/.git/HEAD','ref: refs/heads/stable\n')
+              z.writestr('flutter/.git/refs/heads/stable',sha+'\n')
+              z.writestr('flutter/.git/refs/tags/3.44.6',sha+'\n')
+              z.writestr('flutter/.git/shallow',sha+'\n')
+              z.writestr('flutter/.git/config','[core]\nrepositoryformatversion = 0\nbare = false\n[remote "origin"]\nurl = https://github.com/flutter/flutter.git\n')
+              for oid,kind,data in objects:
+                  raw=(kind+' '+str(len(data))+'\0').encode()+data
+                  if hashlib.sha1(raw).hexdigest()!=oid: raise RuntimeError('Object mismatch')
+                  z.writestr('flutter/.git/objects/'+oid[:2]+'/'+oid[2:],zlib.compress(raw))
+          with zipfile.ZipFile(out/'pub-cache-no-fonts.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in pub.rglob('*'):
+                  rel=p.relative_to(pub).as_posix()
+                  if rel.startswith(('hosted/','hosted-hashes/','git/')): put(z,p,'pub-cache/'+rel)
+          with zipfile.ZipFile(out/'runtime-assets-no-fonts.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for directory in ['assets','.dart_tool']:
+                  for p in pathlib.Path(directory).rglob('*'):
+                      if directory=='.dart_tool' and not (p.name in ('package_config.json','package_graph.json') or p.suffix in ('.so','.dylib','.dll','.json')): continue
+                      put(z,p,p.as_posix())
+          (out/'scope.json').write_text(json.dumps({'repository_commit':os.environ['GITHUB_SHA'],'flutter_revision':sha,'font_files_excluded':True,'credentials_excluded':True,'font_omissions':omitted,'files':manifest},indent=2)+'\n')
+          print('Font-free tooling archive sizes:',[(p.name,p.stat().st_size) for p in out.glob('*.zip')])
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-isolated-host-no-fonts-${{ github.sha }}
+          path: /tmp/bil-host-tooling
+          retention-days: 1
+          if-no-files-found: error
