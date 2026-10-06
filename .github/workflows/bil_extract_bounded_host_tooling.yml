@@ -1,0 +1,71 @@
+name: BIL bounded offline host tooling
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_extract_bounded_host_tooling.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  extract:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Reuse exact completed tooling artifact; export no fonts or model weights
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,io,json,os,pathlib,shutil,urllib.request,zipfile
+          root=pathlib.Path('/tmp/bil-bounded');root.mkdir()
+          api='https://api.github.com/repos/bilhealth-admin/Body-Intelligence/actions/artifacts/11385694788'
+          headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'}
+          with urllib.request.urlopen(urllib.request.Request(api,headers=headers)) as res: meta=json.load(res)
+          if meta['workflow_run']['head_sha']!='330df98baf34b74943de0025af0144355544e3a3': raise RuntimeError('Artifact identity mismatch')
+          with urllib.request.urlopen(urllib.request.Request(api+'/zip',headers=headers)) as res,open('/tmp/input.zip','wb') as target: shutil.copyfileobj(res,target,1024*1024)
+          digest=hashlib.file_digest(open('/tmp/input.zip','rb'),'sha256').hexdigest()
+          if digest!='1cdaa5049705e2fea9882de87b4af931020c38450c1fc9828251a548ae977d6a': raise RuntimeError('Artifact digest mismatch')
+          with zipfile.ZipFile('/tmp/input.zip') as z:
+              for name,folder in [('flutter-host-no-fonts.zip','sdk'),('pub-cache-no-fonts.zip','pub')]:
+                  d=root/folder;d.mkdir()
+                  with z.open(name) as src,open(d/name,'wb') as dst: shutil.copyfileobj(src,dst)
+              with z.open('runtime-assets-no-fonts.zip') as src,open('/tmp/assets.zip','wb') as dst: shutil.copyfileobj(src,dst)
+          d=root/'assets';d.mkdir();manifest=[]
+          with zipfile.ZipFile('/tmp/assets.zip') as src,zipfile.ZipFile(d/'visual-assets-and-package-config.zip','w',zipfile.ZIP_DEFLATED) as dst:
+              for info in src.infolist():
+                  p=pathlib.PurePosixPath(info.filename)
+                  if p.is_absolute() or '..' in p.parts: raise RuntimeError('Invalid archive path')
+                  if p.suffix.lower() not in {'.png','.jpg','.jpeg','.webp','.svg','.json','.so','.yaml','.yml','.txt'}: continue
+                  if info.file_size>12*1024*1024: continue
+                  data=src.read(info)
+                  if data[:4] in {b'\x00\x01\x00\x00',b'OTTO',b'ttcf',b'wOFF',b'wOF2',b'true',b'typ1'}: raise RuntimeError('Font data rejected')
+                  dst.writestr(info.filename,data)
+                  manifest.append({'path':info.filename,'sha256':hashlib.sha256(data).hexdigest()})
+          (d/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          for p in root.rglob('*.zip'):
+              if p.stat().st_size>490*1024*1024: raise RuntimeError('Artifact exceeds safe size')
+              print(p.name,p.stat().st_size,hashlib.file_digest(open(p,'rb'),'sha256').hexdigest())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-bounded-sdk-${{ github.sha }}
+          path: /tmp/bil-bounded/sdk
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-bounded-pub-${{ github.sha }}
+          path: /tmp/bil-bounded/pub
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-bounded-assets-${{ github.sha }}
+          path: /tmp/bil-bounded/assets
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
