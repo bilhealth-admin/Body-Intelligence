@@ -64,7 +64,9 @@ void main() {
       expect(page, contains("'daily-log-action-copy'"));
       expect(page, contains("'daily-log-action-edit'"));
       expect(row, contains('final serving = _servingText('));
-      expect(row, contains('item.calories.round().toString()'));
+      expect(row, contains('MealFoodEvidence.read(item, ownerKey: ownerKey)'));
+      expect(row, contains('.value(TrackedNutrient.calories)'));
+      expect(row, contains("'—'"));
       expect(row, isNot(contains('food.source')));
       expect(row, isNot(contains('Nutrition Facts')));
       expect(row, isNot(contains('MealItemEvidencePresenter')));
@@ -81,6 +83,7 @@ void main() {
           'lib/features/daily_log/daily_log_navigation_actions.dart',
         ].map(source).join('\n');
         final shell = source('lib/app/router/responsive_app_shell.dart');
+        final quickAdd = source('lib/app/router/bil_quick_add_presenter.dart');
         final tile = between(
           search,
           'Widget _mealSearchFoodTile',
@@ -112,19 +115,24 @@ void main() {
           );
         }
         expect(
-          shell,
+          quickAdd,
           contains(
             "'/daily-log?foodLog=1&action=barcode&from=\$cancelledTaskReturn'",
           ),
         );
         expect(
-          shell,
+          quickAdd,
           contains(
             "'/daily-log?foodLog=1&action=voice&from=\$cancelledTaskReturn'",
           ),
         );
-        expect(shell, contains("'/quick-add/meal-camera?from=\$origin'"));
+        expect(
+          shell,
+          contains('showBilQuickAdd(context, originPath: paths[index])'),
+        );
+        expect(quickAdd, contains("'/quick-add/meal-camera?from=\$origin'"));
         expect(shell, isNot(contains('vision=capture&from=\$origin')));
+        expect(quickAdd, isNot(contains('vision=capture&from=\$origin')));
         expect(diary, contains("case 'barcode':"));
         expect(diary, contains('await _scanBarcode();'));
         expect(diary, contains("case 'voice':"));

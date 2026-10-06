@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/app/localization/runtime_copy_next_workspace.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_coach_controls.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_creation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_food_cards.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -144,6 +145,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...NextWorkspaceRuntimeCopy.sources,
     ...CoachControlsRuntimeCopy.sources,
     ...CommunityCreationRuntimeCopy.sources,
+    ...CoachFoodCardRuntimeCopy.sources,
     ...CommunityExpansionRuntimeCopy.sources,
     ...AppleAiPrivacyRuntimeCopy.values.keys,
     ...AdminNotificationRuntimeCopy.values.keys,

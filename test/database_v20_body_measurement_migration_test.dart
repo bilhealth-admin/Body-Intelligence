@@ -5,7 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('schema 19 upgrades to 20 without losing existing data', () async {
+  test('schema 19 upgrades through 22 without losing existing data', () async {
     final directory = await Directory.systemTemp.createTemp('bil-v20-');
     addTearDown(() => directory.delete(recursive: true));
     final file = File('${directory.path}/bil.sqlite');
@@ -16,11 +16,20 @@ void main() {
       "INSERT INTO preferences (key, value) VALUES ('migration-proof', 'kept')",
     );
     await database.customStatement('DROP TABLE body_measurement_entries');
+    // This fixture starts from today's schema and then models schema 19.
+    // Remove later columns as well as the v20 table before setting its version.
+    await database.customStatement(
+      'ALTER TABLE meal_items DROP COLUMN food_evidence_json',
+    );
+    await database.customStatement(
+      'ALTER TABLE foods DROP COLUMN food_evidence_json',
+    );
     await database.customStatement('PRAGMA user_version = 19');
     await database.close();
 
     database = AppDatabase.forTesting(NativeDatabase(file));
     addTearDown(database.close);
+    expect(database.schemaVersion, 22);
     final tables = await database
         .customSelect(
           "SELECT name FROM sqlite_master WHERE type = 'table' "

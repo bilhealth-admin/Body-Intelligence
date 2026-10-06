@@ -195,13 +195,16 @@ void main() {
       // remain exclusively on the selected-food detail page below.
       expect(meals, contains("Key('daily-meal-macros-\$type')"));
       expect(meals, contains("Key('daily-food-row-\${item.id}')"));
-      expect(row, contains('item.calories.round().toString()'));
+      expect(row, contains('MealFoodEvidence.read(item, ownerKey: ownerKey)'));
+      expect(row, contains('.value(TrackedNutrient.calories)'));
+      expect(row, contains("'—'"));
       expect(row, contains('FoodPresentationLocalizer.servingText('));
       expect(row, contains('this.showFoodInsights = false'));
       expect(row, contains('if (showFoodInsights)'));
       expect(row, contains("Key('daily-food-insights-\${item.id}')"));
-      expect(row, contains('formatDiaryMacroGrams(item.protein)'));
-      expect(row, contains('formatDiaryMacroGrams(item.fats)'));
+      expect(row, contains('grams(evidence.value(TrackedNutrient.protein))'));
+      expect(row, contains('grams(evidence.value(TrackedNutrient.fat))'));
+      expect(row, contains("value == null ? '—'"));
       expect(row, isNot(contains('NutrientMetric(')));
 
       expect(detail, contains("Key('daily-log-nutrition-facts')"));

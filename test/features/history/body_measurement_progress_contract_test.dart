@@ -41,8 +41,19 @@ void main() {
     expect(progress, contains('bodyMeasurementHistoryProvider'));
     expect(profile, contains('bodyMeasurementRepositoryProvider'));
     expect(profile, contains('.saveForDay('));
-    expect(database, contains('int get schemaVersion => 21'));
+    expect(database, contains('int get schemaVersion => 22'));
     expect(database, contains('migrator.createTable(bodyMeasurementEntries)'));
+    expect(database, contains('if (from < 22)'));
+    expect(
+      database,
+      contains("_addColumns('foods', <String>['food_evidence_json TEXT'])"),
+    );
+    expect(
+      database,
+      contains(
+        "_addColumns('meal_items', <String>['food_evidence_json TEXT'])",
+      ),
+    );
     for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
       expect(progress, contains("'$locale':"));
     }

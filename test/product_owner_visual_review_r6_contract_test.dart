@@ -19,18 +19,38 @@ void main() {
     expect(summary, contains('maxLines: 2'));
   });
 
-  test('mobile shell has adaptive glass without artificial black spacer', () {
-    final shell = File(
-      'lib/app/router/responsive_app_shell.dart',
-    ).readAsStringSync();
+  test(
+    'mobile shell uses the shared Coach dock without an artificial spacer',
+    () {
+      final shell = File(
+        'lib/app/router/responsive_app_shell.dart',
+      ).readAsStringSync();
 
-    expect(shell, isNot(contains('EdgeInsets.only(bottom: 82)')));
-    expect(shell, contains('Theme.of(context).scaffoldBackgroundColor'));
-    expect(shell, contains('Brightness.dark'));
-    expect(shell, contains('Color(0xF20B1725)'));
-    expect(shell, contains('Color(0xF7FFFFFF)'));
-    expect(shell, contains('BackdropFilter('));
-  });
+      expect(shell, isNot(contains('EdgeInsets.only(bottom: 82)')));
+      expect(shell, contains('Theme.of(context).scaffoldBackgroundColor'));
+      expect(shell, contains('Brightness.dark'));
+      final dock = File(
+        'lib/shared/widgets/bil_reference_bottom_bar.dart',
+      ).readAsStringSync();
+      // The owner's immutable Coach reference supersedes the older glass dock.
+      // Keep the adaptive surface, safe inset and the actual shared delegation.
+      expect(shell, contains('BilReferenceBottomBar('));
+      expect(dock, contains('Theme.of(context).brightness == Brightness.dark'));
+      expect(dock, contains('Color(0xFF121B28)'));
+      expect(dock, contains('Color(0xFFFFFFFF)'));
+      expect(dock, contains('MediaQuery.paddingOf(context).bottom'));
+      expect(dock, contains('height: contentHeight + safeBottom'));
+      for (final label in [
+        'Home',
+        'AI Coach',
+        'Quick Add',
+        'Community',
+        'More',
+      ]) {
+        expect(dock, contains("'$label'"));
+      }
+    },
+  );
 
   test('dashboard dynamic evidence is localized', () {
     final grid = File(

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
+import '../../app/localization/runtime_copy_coach_food_cards.dart';
 
 part 'intelligence_service_locale_copy.dart';
 part 'intelligence_ui_locale_copy.dart';
@@ -23,6 +24,8 @@ String intelligenceTextFor(String localeTag, String english, String arabic) {
   if (authored != null) return authored;
   final exact = RuntimeCopy.resolve(english, normalized);
   if (exact != null) return exact;
+  final foodCard = CoachFoodCardRuntimeCopy.resolve(english, normalized);
+  if (foodCard != null) return foodCard;
   return AppLocalizations(
     BilLocalePolicy.localeFromTag(normalized),
   ).text(english);

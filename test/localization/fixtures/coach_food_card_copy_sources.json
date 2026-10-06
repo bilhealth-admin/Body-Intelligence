@@ -1,0 +1,242 @@
+[
+  {
+    "english": "Unknown",
+    "arabic": "غير معروف"
+  },
+  {
+    "english": "Estimated",
+    "arabic": "تقديري"
+  },
+  {
+    "english": "Food details",
+    "arabic": "تفاصيل الطعام"
+  },
+  {
+    "english": "Nutrition details",
+    "arabic": "تفاصيل المغذيات"
+  },
+  {
+    "english": "Receipt actions",
+    "arabic": "إجراءات الإيصال"
+  },
+  {
+    "english": "Estimated portion",
+    "arabic": "كمية تقديرية"
+  },
+  {
+    "english": "Photo unavailable",
+    "arabic": "الصورة غير متاحة"
+  },
+  {
+    "english": "Yes, log it",
+    "arabic": "نعم، سجّلها"
+  },
+  {
+    "english": "Adjust",
+    "arabic": "تعديل"
+  },
+  {
+    "english": "Edit",
+    "arabic": "تعديل"
+  },
+  {
+    "english": "Undo",
+    "arabic": "تراجع"
+  },
+  {
+    "english": "Working…",
+    "arabic": "جارٍ التنفيذ…"
+  },
+  {
+    "english": "Sources",
+    "arabic": "المصادر"
+  },
+  {
+    "english": "Source",
+    "arabic": "المصدر"
+  },
+  {
+    "english": "Source confidence",
+    "arabic": "الثقة في المصدر"
+  },
+  {
+    "english": "Identity confidence",
+    "arabic": "الثقة في هوية الطعام"
+  },
+  {
+    "english": "Quantity confidence",
+    "arabic": "الثقة في الكمية"
+  },
+  {
+    "english": "Quantity",
+    "arabic": "الكمية"
+  },
+  {
+    "english": "View in Daily Log",
+    "arabic": "عرض في السجل اليومي"
+  },
+  {
+    "english": "This food receipt is unavailable. Review your Daily Log.",
+    "arabic": "إيصال الطعام هذا غير متاح. راجع سجلك اليومي."
+  },
+  {
+    "english": "Your account changed. Return to Coach to continue.",
+    "arabic": "تغير حسابك. ارجع إلى المدرب للمتابعة."
+  },
+  {
+    "english": "The action could not be completed. Your review is kept.",
+    "arabic": "تعذر إكمال الإجراء. احتفظنا بمراجعتك."
+  },
+  {
+    "english": "This meal changed. Review the current entry before editing or undoing.",
+    "arabic": "تغيّرت هذه الوجبة. راجع الإدخال الحالي قبل التعديل أو التراجع."
+  },
+  {
+    "english": "This review is closed.",
+    "arabic": "هذه المراجعة مغلقة."
+  },
+  {
+    "english": "Entry undone",
+    "arabic": "تم التراجع عن الإدخال"
+  },
+  {
+    "english": "Meal updated",
+    "arabic": "تم تحديث الوجبة"
+  },
+  {
+    "english": "Entry removed",
+    "arabic": "تم حذف الإدخال"
+  },
+  {
+    "english": "Meal moved",
+    "arabic": "تم نقل الوجبة"
+  },
+  {
+    "english": "Calorie entry saved",
+    "arabic": "تم حفظ إدخال السعرات"
+  },
+  {
+    "english": "Nutrition entry saved",
+    "arabic": "تم حفظ إدخال المغذيات"
+  },
+  {
+    "english": "Unknown food",
+    "arabic": "طعام غير معروف"
+  },
+  {
+    "english": "Breakfast",
+    "arabic": "الإفطار"
+  },
+  {
+    "english": "Lunch",
+    "arabic": "الغداء"
+  },
+  {
+    "english": "Dinner",
+    "arabic": "العشاء"
+  },
+  {
+    "english": "Snack",
+    "arabic": "وجبة خفيفة"
+  },
+  {
+    "english": "Meal",
+    "arabic": "وجبة"
+  },
+  {
+    "english": "Great! I’ll log your {meal}. Here’s what I understood:",
+    "arabic": "حسنًا! سأسجّل {meal}. هذا ما فهمته:"
+  },
+  {
+    "english": "Shall I log this to your {meal}?",
+    "arabic": "هل أسجّل هذا في {meal}؟"
+  },
+  {
+    "english": "{meal} logged",
+    "arabic": "تم تسجيل {meal}"
+  },
+  {
+    "english": "Reference",
+    "arabic": "مرجع"
+  },
+  {
+    "english": "Food label",
+    "arabic": "ملصق غذائي"
+  },
+  {
+    "english": "Your fixed values",
+    "arabic": "قيمك الثابتة"
+  },
+  {
+    "english": "Calculated recipe",
+    "arabic": "وصفة محسوبة"
+  },
+  {
+    "english": "Calories",
+    "arabic": "السعرات"
+  },
+  {
+    "english": "Protein",
+    "arabic": "البروتين"
+  },
+  {
+    "english": "Carbs",
+    "arabic": "الكربوهيدرات"
+  },
+  {
+    "english": "Fat",
+    "arabic": "الدهون"
+  },
+  {
+    "english": "Fiber",
+    "arabic": "الألياف"
+  },
+  {
+    "english": "Sugar",
+    "arabic": "السكر"
+  },
+  {
+    "english": "Sodium",
+    "arabic": "الصوديوم"
+  },
+  {
+    "english": "Potassium",
+    "arabic": "البوتاسيوم"
+  },
+  {
+    "english": "Calcium",
+    "arabic": "الكالسيوم"
+  },
+  {
+    "english": "Magnesium",
+    "arabic": "المغنيسيوم"
+  },
+  {
+    "english": "Phosphorus",
+    "arabic": "الفوسفور"
+  },
+  {
+    "english": "Iron",
+    "arabic": "الحديد"
+  },
+  {
+    "english": "Vitamin C",
+    "arabic": "فيتامين ج"
+  },
+  {
+    "english": "ml",
+    "arabic": "مل"
+  },
+  {
+    "english": "1 item",
+    "arabic": "حبة واحدة"
+  },
+  {
+    "english": "{count} items",
+    "arabic": "عدد الحبات: {count}"
+  },
+  {
+    "english": "g",
+    "arabic": "غ"
+  }
+]

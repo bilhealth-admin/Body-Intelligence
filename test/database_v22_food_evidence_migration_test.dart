@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
+import 'package:body_intelligence_log/data/repositories/body_measurement_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'package:drift/native.dart';
@@ -38,6 +39,19 @@ void main() {
       await meals.addMealItem(mealId: meal, foodId: food, quantity: 150);
       final before = await database.select(database.mealItems).getSingle();
       final foodBefore = await database.select(database.foods).getSingle();
+      final measurements = BodyMeasurementRepository(database);
+      await measurements.saveForDay(
+        date: DateTime(2026, 10, 5),
+        neckCm: 38,
+        waistCm: 88,
+        hipsCm: 96,
+        chestCm: 102,
+        armCm: 34,
+        thighCm: 57,
+      );
+      await measurements.saveForDay(date: DateTime(2026, 10, 6), waistCm: 87);
+      final measurementsBefore = await measurements.watchHistory().first;
+      expect(measurementsBefore, hasLength(2));
       await database.customStatement(
         "INSERT INTO preferences (key, value) VALUES ('migration-proof', 'retained')",
       );
@@ -57,6 +71,10 @@ void main() {
       expect(database.schemaVersion, 22);
       expect(after, before);
       expect(foodAfter, foodBefore);
+      expect(
+        await BodyMeasurementRepository(database).watchHistory().first,
+        measurementsBefore,
+      );
       expect(after.foodEvidenceJson, isNull);
       expect(foodAfter.foodEvidenceJson, isNull);
       final evidence = MealFoodEvidence.read(after);

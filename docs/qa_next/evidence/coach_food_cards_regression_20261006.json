@@ -1,0 +1,584 @@
+{
+  "schema": "bil.qa.food-cards-regression.v1",
+  "base_qa_sha": "ead7aac78efd15d893896f56b07dcaae260c4358",
+  "authorized_branch": "qa/coach-community-next-20261005",
+  "ios_build": 35,
+  "android_build": 32,
+  "new_ci_status": "pending after publication; prior ead7aac broader failures remain historical failures",
+  "scope": "Actual Flutter host widgets; disposable SQLite and synthetic fixtures; no physical-device or live-production E2E claim.",
+  "full_regression": {
+    "source_digest": "8ec994da789818807c2f48056edff59d5ea33c0e5403232c4d53d570f0ddf167",
+    "source_manifest_sha256": "81e334359e9cf9abb6bb97f00b82f1309d7cd0ea5f01c4f908e200f1417534ee",
+    "execution": {
+      "source_digest": "8ec994da789818807c2f48056edff59d5ea33c0e5403232c4d53d570f0ddf167",
+      "runs": [
+        {
+          "name": "performance",
+          "exit_code": 0,
+          "seconds": 3.891,
+          "source_unchanged": true,
+          "log_sha256": "ed4025c62eeb9a02d8752ad86a7dd8ae09764f74322344ca83d214a74ae94351",
+          "terminal_summaries": [
+            "00:00 +2: All tests passed!"
+          ]
+        },
+        {
+          "name": "shard-0",
+          "exit_code": 0,
+          "seconds": 411.089,
+          "source_unchanged": true,
+          "log_sha256": "78c217f8069dcb390afe48d1e814996c9a06f6c42ec8383f63157446b74e2076",
+          "terminal_summaries": [
+            "00:49 +231: All tests passed!",
+            "00:28 +94: All tests passed!",
+            "01:09 +233: All tests passed!",
+            "00:50 +231: All tests passed!",
+            "00:51 +417: All tests passed!",
+            "00:50 +304: All tests passed!",
+            "01:07 +294: All tests passed!",
+            "00:01 +1: All tests passed!",
+            "00:00 +1: All tests passed!",
+            "00:00 +3: All tests passed!"
+          ]
+        },
+        {
+          "name": "shard-1",
+          "exit_code": 1,
+          "seconds": 623.078,
+          "source_unchanged": true,
+          "log_sha256": "613f2d1f1c66ae49809cfcbb895283f6e1a0ba1b40a3c90daf1cae45db6e6fa1",
+          "terminal_summaries": [
+            "01:00 +158: All tests passed!",
+            "00:44 +136: All tests passed!",
+            "00:51 +275: All tests passed!",
+            "04:17 +236: All tests passed!",
+            "00:50 +355: All tests passed!",
+            "01:08 +187 -2: Some tests failed.",
+            "00:45 +198: All tests passed!",
+            "00:00 +4: All tests passed!",
+            "00:01 +11: All tests passed!",
+            "00:00 +2: All tests passed!"
+          ]
+        },
+        {
+          "name": "shard-2",
+          "exit_code": 1,
+          "seconds": 439.845,
+          "source_unchanged": true,
+          "log_sha256": "8a43a5bcb4cff2bf1ac0fa1a0395a1c1444fd1a019db49496b36b76aa686e432",
+          "terminal_summaries": [
+            "01:17 +203: All tests passed!",
+            "00:35 +130: All tests passed!",
+            "01:11 +271: All tests passed!",
+            "00:47 +161: All tests passed!",
+            "01:12 +475: All tests passed!",
+            "00:50 +144 -1: Some tests failed.",
+            "00:48 +247: All tests passed!",
+            "00:01 +4: All tests passed!",
+            "00:00 +1: All tests passed!"
+          ]
+        },
+        {
+          "name": "shard-3",
+          "exit_code": 1,
+          "seconds": 493.694,
+          "source_unchanged": true,
+          "log_sha256": "a42af656c6da53c434815721e9c97f42c1c89aa5d1e0bdf4939150d0d63fca97",
+          "terminal_summaries": [
+            "01:10 +263: All tests passed!",
+            "00:26 +118: All tests passed!",
+            "01:41 +409 -1: Some tests failed.",
+            "00:40 +139: All tests passed!",
+            "01:41 +411: All tests passed!",
+            "00:58 +226: All tests passed!",
+            "00:57 +282: All tests passed!",
+            "00:00 +4: All tests passed!",
+            "00:00 +1: All tests passed!"
+          ]
+        }
+      ],
+      "source_unchanged": true,
+      "complete": true
+    },
+    "batching": {
+      "reason": "Bound local compiler memory after incomplete prior run; all four assigned partitions and every existing test/name filter preserved.",
+      "max_files_per_process": 40,
+      "repository_runner_sha256": "74a291e5e686a2c5453db332c0a4cbb4a99c3fe2c641094df36f42d0cdba45f3",
+      "local_runner_sha256": "c94b4357d9694bda3c72027e333a619d7c77b0f59c9a2d2dbbc2aa56cd110025"
+    },
+    "partition_counts": [
+      {
+        "shard": 0,
+        "pass": 1809,
+        "fail": 0,
+        "files": 283
+      },
+      {
+        "shard": 1,
+        "pass": 1562,
+        "fail": 2,
+        "files": 283
+      },
+      {
+        "shard": 2,
+        "pass": 1636,
+        "fail": 1,
+        "files": 282
+      },
+      {
+        "shard": 3,
+        "pass": 1853,
+        "fail": 1,
+        "files": 282
+      }
+    ],
+    "performance_pass": 2,
+    "pass_in_full_calls": 6862,
+    "fail_in_full_calls": 4,
+    "distinct_selected_tests_passing_across_full_and_targeted_calls": 6866,
+    "single_full_green_invocation": false,
+    "plans": [
+      {
+        "shard": 0,
+        "plan_sha256": "7ff34cac7dd781746ff5530c2873188a9e3f33a01b8a55e93d3cfa527a8a13a7",
+        "result_sha256": "3de113f1631351ec108444bb3125bef23dcbc2dd1f5a465f2b00fe70096efdf4"
+      },
+      {
+        "shard": 1,
+        "plan_sha256": "2ace5efc515d8ae5bd656ade43b8a20f13a14fe349c74a1dd2193bca59e01317",
+        "result_sha256": "96ad5e3cf6334e0530921704f6aeb8ceed3159b5f0aa5bcf0b11a6ddfdd073a1"
+      },
+      {
+        "shard": 2,
+        "plan_sha256": "0640b4105a6e704170485c0e27b0221940197a6ff49ee3f904793e684f82c2a8",
+        "result_sha256": "e319d51e8f1350a50014329fba011e04d8cc392ee0267cf852b0a9945e90758f"
+      },
+      {
+        "shard": 3,
+        "plan_sha256": "3acba6dba1a675bcba6e07b3e1a566f0027ba16280aebfaa5b70562b91bc5de9",
+        "result_sha256": "433e5a4059abcc6ee3d946115814ddd6c1d7e4addc11f637b56a52939a053936"
+      }
+    ]
+  },
+  "targeted_input_closure": {
+    "execution": {
+      "source_digest": "8ec994da789818807c2f48056edff59d5ea33c0e5403232c4d53d570f0ddf167",
+      "runs": [
+        {
+          "name": "format",
+          "exit_code": 0,
+          "seconds": 0.162,
+          "source_unchanged": true,
+          "log_sha256": "771a54673356ad1edeb6baac9d61ba1659f9f19c188679cec86858bb12f68e11",
+          "endings": [
+            "Formatted 27 files (0 changed) in 0.12 seconds."
+          ]
+        },
+        {
+          "name": "analyze",
+          "exit_code": 0,
+          "seconds": 5.941,
+          "source_unchanged": true,
+          "log_sha256": "1f300d0f5f1911aa4d2dd61afe68b991b5aa50f8817a40704de1c08553e7753e",
+          "endings": [
+            "Analyzing bil_qa...                                             ",
+            "No issues found! (ran in 5.6s)"
+          ]
+        },
+        {
+          "name": "fixture-tests",
+          "exit_code": 0,
+          "seconds": 4.897,
+          "source_unchanged": true,
+          "log_sha256": "1dd6ac6a9539fadb22974d6c830fca18cefe9598c2db316ae99b99d9a59389a6",
+          "endings": [
+            "00:01 +20: /workspace/scratch/8b70e19c9f9a/bil_qa/test/features/wellness/workout_discovery_catalog_repository_test.dart: discovery mutations fail closed duplicate record",
+            "00:01 +21: /workspace/scratch/8b70e19c9f9a/bil_qa/test/features/wellness/workout_discovery_catalog_repository_test.dart: discovery mutations fail closed missing record",
+            "00:01 +22: /workspace/scratch/8b70e19c9f9a/bil_qa/test/features/wellness/workout_discovery_catalog_repository_test.dart: release media changes cannot redefine discovery pins",
+            "00:01 +23: /workspace/scratch/8b70e19c9f9a/bil_qa/test/features/wellness/workout_discovery_catalog_repository_test.dart: (tearDownAll)",
+            "00:01 +23: All tests passed!"
+          ]
+        }
+      ],
+      "complete": true
+    },
+    "workout_tests_pass": 23,
+    "unchanged_review_contract_tests_pass": 6,
+    "review_contract_log_sha256": "6ae187ac477b35dea844930fce489d22854f33d038606d7de52cd181c1cf2b45",
+    "source_or_test_edits_after_full_calls": false,
+    "restored_workout_inputs": [
+      {
+        "worktree": "bil_qa",
+        "path": "artifacts/workout_media/cloudflare_runtime_v2/packs/bil-workouts-home-v1-v1.json",
+        "was_materialized": false,
+        "source_commit": "ead7aac78efd15d893896f56b07dcaae260c4358",
+        "git_blob": "68d56aafa74faa018abfe0b14ef982828e9a9761",
+        "sha256": "bc3ca8b55a28e94bc9faeee5f220f2966a0cd9f1776e297d00e1f8137fe17567",
+        "bytes": 434226
+      },
+      {
+        "worktree": "bil_qa",
+        "path": "artifacts/workout_media/cloudflare_runtime_v2/packs/bil-workouts-gym-six-month-v1-v1.json",
+        "was_materialized": true,
+        "source_commit": "ead7aac78efd15d893896f56b07dcaae260c4358",
+        "git_blob": "5de6c9582cfe4074d15f816859843380256b9c0e",
+        "sha256": "6c21ef8df8c6303fef7c03b283caa8ff098e3a85ac6efc6860d48ffe50ce39b5",
+        "bytes": 223296
+      }
+    ],
+    "restored_review_input": {
+      "reason": "Read-only materialization of exact existing tracked HEAD test input; no store asset, pricing or payment policy modification.",
+      "path": "store_assets/review/apple/v1.0/manifest.json",
+      "source_sha": "ead7aac78efd15d893896f56b07dcaae260c4358",
+      "git_blob": "7e6a551adaac518d01921550f3f5d834cd05ad80",
+      "sha256": "fbb61cd70b5c7cc474ffe72ea47d6305c985b8c0d11c8deb10b0461909bee10d",
+      "bytes": 2729
+    }
+  },
+  "cards": {
+    "execution": {
+      "commands": [
+        {
+          "name": "format",
+          "command": [
+            "dart",
+            "format",
+            "--output=none",
+            "--set-exit-if-changed",
+            "lib/features/intelligence_center/presentation/workspace/coach_food_card_components.dart",
+            "lib/features/intelligence_center/presentation/workspace/coach_food_card_copy.dart",
+            "lib/features/intelligence_center/presentation/workspace/coach_food_card_models.dart",
+            "lib/features/intelligence_center/presentation/workspace/coach_food_receipt_card.dart",
+            "lib/features/intelligence_center/presentation/workspace/coach_food_receipt_content.dart",
+            "lib/features/intelligence_center/presentation/workspace/coach_food_review_card.dart",
+            "test/features/intelligence_center/coach_food_cards_test.dart",
+            "test/features/intelligence_center/coach_food_receipt_binding_test.dart",
+            "test/features/intelligence_center/coach_food_card_lifecycle_test.dart",
+            "test/features/intelligence_center/support/coach_food_cards_fixture.dart",
+            "test/qa_next/coach_food_cards_capture_test.dart",
+            "lib/features/intelligence_center/intelligence_locale_copy.dart",
+            "tool/localization/locale_fallback_closure.dart",
+            "lib/app/localization/runtime_copy_coach_food_cards.dart",
+            "lib/app/localization/runtime_copy_coach_food_cards_0.dart",
+            "lib/app/localization/runtime_copy_coach_food_cards_1.dart",
+            "lib/app/localization/runtime_copy_coach_food_cards_2.dart",
+            "lib/app/localization/runtime_copy_coach_food_cards_3.dart",
+            "test/localization/coach_food_card_copy_test.dart"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 0.215,
+          "log_sha256": "3632b5c14fda2d26d05c8f0f1dda1b8a873fc0067f16b48cf3da2b59c67a5693"
+        },
+        {
+          "name": "analyze",
+          "command": [
+            "flutter",
+            "analyze",
+            "--no-pub"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 5.935,
+          "log_sha256": "1f300d0f5f1911aa4d2dd61afe68b991b5aa50f8817a40704de1c08553e7753e"
+        },
+        {
+          "name": "tests",
+          "command": [
+            "flutter",
+            "test",
+            "--no-pub",
+            "--concurrency=1",
+            "--reporter",
+            "expanded",
+            "--timeout",
+            "2m",
+            "test/features/intelligence_center/coach_food_cards_test.dart",
+            "test/features/intelligence_center/coach_food_receipt_binding_test.dart",
+            "test/features/intelligence_center/coach_food_card_lifecycle_test.dart",
+            "test/qa_next/coach_food_cards_capture_test.dart",
+            "test/localization/coach_food_card_copy_test.dart",
+            "test/localization/bil_25_locale_fallback_closure_test.dart",
+            "test/architecture_source_file_size_guard_test.dart",
+            "test/features/intelligence_center/coach_25_locale_matrix_test.dart"
+          ],
+          "exit_code": 0,
+          "elapsed_seconds": 22.796,
+          "log_sha256": "9b867809369a32e4972bb76576ae17bc0e8a0e1b8fbe31a17de882879800c0cc"
+        }
+      ],
+      "source_unchanged": true,
+      "screens": {
+        "calorie_only_en_320_200.png": "97a5f0edd341cc19745e5c0386fcc32e69daa0f914762949c9b4e080769c8fde",
+        "receipt_actions_en_320_200.png": "d9348f635f9edbb5841d5c5b65c3f60158ab38dbd25928a02e7b5dcdee2e5dc1",
+        "review_ar_320_200.png": "46ed82245cc0cc28d5c9857bb13704a2fb4822870f654a8ea49fe7258fe850f9",
+        "receipt_ar_320_200.png": "aac4a053706d609d4e52a206d5c50841d23be41e7c4d5d65076057ce8cfb09ec",
+        "receipt_evidence_en.png": "314989362fd5d9e5485a8d51bd099e400b918c38692ae94f2e2c43bf404527a5",
+        "receipt_conflict_ar_320_200.png": "1ddaec83dadd56293df9436bc87810f2a30b62947d3a6f2edb344b1a28967d66",
+        "receipt_en_390_100.png": "7787e40f4342422ed685264fd3988710afe17987bd88a21de91e70a131d54566",
+        "receipt_conflict_en_320_200.png": "43ff4c783bb33c8e1a20b4ec04740ee4026785eae59d15a3aa7db686cdb2f5d3",
+        "receipt_ar_390_100.png": "5f8539e89bc1594e54aca0c064991aba08010614f06a474cb2cdf94853b7361e",
+        "review_en_390_100.png": "1b6648e8e502dc302b76470fbadb7c00c582d7e9dca45c5076d54eb73a8e2e7c",
+        "review_actions_en_320_200.png": "1ba8c0afa759612b4e180d3343a6cdb93608f3c3adbb32ec29f8a1d5fc835a30",
+        "receipt_en_320_200.png": "d9348f635f9edbb5841d5c5b65c3f60158ab38dbd25928a02e7b5dcdee2e5dc1",
+        "review_ar_390_100.png": "cb91cebcfc6897b60c21b304cee23ca2bf4f5749aa07d3d6d4c5c63eaacf31a3",
+        "receipt_actions_ar_320_200.png": "aac4a053706d609d4e52a206d5c50841d23be41e7c4d5d65076057ce8cfb09ec",
+        "review_en_320_200.png": "1ba8c0afa759612b4e180d3343a6cdb93608f3c3adbb32ec29f8a1d5fc835a30",
+        "calorie_only_ar_320_200.png": "64561ed9590dec0cfbaa9353ded2f51f055b08d2b0ea0a22f45072bc68828f3a",
+        "receipt_evidence_ar.png": "eacce189831a427138f4c97077b8871c8f35bced6d77b8d0e01b9cce4fc32a34",
+        "review_actions_ar_320_200.png": "46ed82245cc0cc28d5c9857bb13704a2fb4822870f654a8ea49fe7258fe850f9"
+      }
+    },
+    "focused_pass": 86,
+    "png_count": 18,
+    "copy_sources_added": 47,
+    "locale_count": 25,
+    "prior_sources_retained": 220,
+    "card_source_fixture_count": 60,
+    "reference_measurements": {
+      "sha256": "07f25ba0fffc661e5232a4fba6365ee3ff96cbea69636c2672b97f4fafce63d0",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "measurement_method": "Manual visible bounds on the original poster; no generated or current screenshot is used as a golden. Bounds are reference coordinates, not a claim of completed fidelity.",
+      "bounds_pixels": {
+        "left_screen": [
+          26,
+          202,
+          504,
+          1355
+        ],
+        "review_card": [
+          40,
+          463,
+          394,
+          796
+        ],
+        "receipt_card": [
+          40,
+          810,
+          488,
+          1135
+        ],
+        "receipt_inner_panel": [
+          53,
+          866,
+          479,
+          1060
+        ],
+        "egg_thumbnail": [
+          63,
+          925,
+          154,
+          999
+        ],
+        "milk_thumbnail": [
+          167,
+          925,
+          259,
+          999
+        ],
+        "tomato_thumbnail": [
+          274,
+          925,
+          366,
+          999
+        ],
+        "cucumber_thumbnail": [
+          379,
+          925,
+          470,
+          999
+        ]
+      },
+      "logical_scale_for_390_width": 0.8158995815899581,
+      "review_width_logical": 288.8284518828452,
+      "receipt_width_logical": 365.5230125523013,
+      "colors_rgb": {
+        "review_surface": [
+          21,
+          31,
+          45
+        ],
+        "review_lower_surface": [
+          14,
+          24,
+          36
+        ],
+        "receipt_surface": [
+          23,
+          35,
+          48
+        ],
+        "receipt_lower_surface": [
+          22,
+          33,
+          44
+        ],
+        "receipt_inner_panel": [
+          11,
+          21,
+          33
+        ],
+        "adjust_surface": [
+          33,
+          50,
+          69
+        ]
+      },
+      "thumbnail_policy": "No synthetic replacement assets. Image resolver accepts identity-linked existing images; otherwise renderer uses an explicit missing-photo fallback. Original reference remains unchanged."
+    },
+    "current_card_bounds_at_390": {
+      "review": [
+        290,
+        307
+      ],
+      "receipt": [
+        366,
+        304
+      ]
+    },
+    "reference_parity_verified": false,
+    "open_gaps": [
+      "card heights",
+      "identity-linked food photos",
+      "full native conversation host integration and capture"
+    ]
+  },
+  "after_regression_workflow_only_edit": {
+    "path": ".github/workflows/bil_reference_native_candidate.yml",
+    "purpose": "Include the tested card capture in native workflow with concurrency=1; no app/test/tool change.",
+    "before_sha256": "2330023e0aaa3b3bc03ef99e0bdafe2a80dc28e31073c6c8dfd1378c0ea1f545",
+    "after_sha256": "85994c20ae8989ccca06f389ef1e696051da140d5daaeeec0d091a48f666780f"
+  },
+  "source_files": [
+    {
+      "path": ".github/workflows/bil_reference_native_candidate.yml",
+      "sha256": "85994c20ae8989ccca06f389ef1e696051da140d5daaeeec0d091a48f666780f"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach_food_cards.dart",
+      "sha256": "dc4c63705e6ac5b8a61b3961f33b84f7b53b25ff94bb933ca37f5c7e7a83847a"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach_food_cards_0.dart",
+      "sha256": "604815ae6a0fe1ea67db2aa76fd7f82a1c6d779fd6ca42d27ca4eb1c2a7bc931"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach_food_cards_1.dart",
+      "sha256": "088e0938685e60c38f1a3b269f1d1dc48e92e53b9eec61493ef600b534c7421d"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach_food_cards_2.dart",
+      "sha256": "7a1404944785de4711cd6586015c12e8bbaa8e07476c42dac66f5ad2be42ccdd"
+    },
+    {
+      "path": "lib/app/localization/runtime_copy_coach_food_cards_3.dart",
+      "sha256": "7b7c0cea09bfbd7c3a753f475f29690af64316c065270690ad57c53acd1ba24a"
+    },
+    {
+      "path": "lib/features/intelligence_center/intelligence_locale_copy.dart",
+      "sha256": "68e3e6e9c05ae18fb88b2292646278ca338bd464689e6687f35c42466a043854"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_card_components.dart",
+      "sha256": "8fc89e8dc288c2deff4738ec1893ffbaf16c966fe43dd4303f695fd39dd5b426"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_card_copy.dart",
+      "sha256": "5ceb7f743c5df700e0cb2dd8efdbce845406de341040656ed4b6f6b18c8fe716"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_card_models.dart",
+      "sha256": "9e5a7657fa77ece02d2d7c454797e5b1c91fd3c13be28a40cb86bc7119d54daa"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_receipt_card.dart",
+      "sha256": "f316ca4ac183dc38148f09b3660c5ac0a41b8ccc1533861b514bf5b8a973e70c"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_receipt_content.dart",
+      "sha256": "b2fd46a634989f29da96d480db2c3a48c9842148fc7e9ecc8570bd9757e37913"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/workspace/coach_food_review_card.dart",
+      "sha256": "0a84901faffe0349428bb254b7750022a016ee9fd207211a00122af3f309a0f8"
+    },
+    {
+      "path": "test/daily_log_layout_contract_test.dart",
+      "sha256": "3153f0d5d34858dd87e6b6bf52c65b04fd58691499ac43b007a38b6b7a2fd554"
+    },
+    {
+      "path": "test/database_v17_migration_test.dart",
+      "sha256": "60254b0e849ea2ca1b786767519c6e0ccfddf6d8fd94135afd385bac34b65c81"
+    },
+    {
+      "path": "test/database_v20_body_measurement_migration_test.dart",
+      "sha256": "f5778783f4fd19e838c388522a119264d0218e241022303ac5925b37c350a0b3"
+    },
+    {
+      "path": "test/database_v22_food_evidence_migration_test.dart",
+      "sha256": "07351d4d39c0ba1321371152e6b4b04d9f6158551d32a4bd71373e2730f47731"
+    },
+    {
+      "path": "test/features/history/body_measurement_progress_contract_test.dart",
+      "sha256": "ac15360e09b34aa6d27677703383028c0d8f01e6241d92e64c686485ba4a88ef"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_food_card_lifecycle_test.dart",
+      "sha256": "c63ef3e3111ace85e8ac2f33f16d1da996036f1c02676a9c4768c2ac09980ec6"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_food_cards_test.dart",
+      "sha256": "21b07a15a772153c28e8309664fcb1a19a9c29297d7c245690e66ab6b1de31b0"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_food_receipt_binding_test.dart",
+      "sha256": "71ce743957e50f8ec303d641b001e89103a4c9811b4135b3dc6443a0e4c42965"
+    },
+    {
+      "path": "test/features/intelligence_center/support/coach_food_cards_fixture.dart",
+      "sha256": "1f19820edbccc0739e917d22255ae7c0eec860d0ac82ec39dd58ad88209c53e7"
+    },
+    {
+      "path": "test/local_data_lifecycle_test.dart",
+      "sha256": "050eda91926eb55d25ad8f35e56ecec24c1e20ea3cf15ed6406ed4130aa5a4e0"
+    },
+    {
+      "path": "test/localization/coach_food_card_copy_test.dart",
+      "sha256": "4ab77759093999b56de6ca6baddeb0509c9714cff5123c952335520c6fbbeeca"
+    },
+    {
+      "path": "test/localization/fixtures/coach_food_card_copy_sources.json",
+      "sha256": "cfaf6c6f65155a0b5530391fad8527d401b6d857d792b1b1454e04d4a5c7c631"
+    },
+    {
+      "path": "test/product_owner_visual_review_r6_contract_test.dart",
+      "sha256": "dbd9e56db44469ae7ec2faaf5a1e4219099e53853917dc796d1ac649b49a4f56"
+    },
+    {
+      "path": "test/qa_next/coach_food_cards_capture_test.dart",
+      "sha256": "bc68227fc453c173b4c4b742fa961e19970d094fb4859417aa0504f4f4508995"
+    },
+    {
+      "path": "test/reference_surface_acceptance_contract_test.dart",
+      "sha256": "8512c73b6ee07cfb397c17b54a4b02a09188090e48849260bbcf6915952c1240"
+    },
+    {
+      "path": "tool/localization/locale_fallback_closure.dart",
+      "sha256": "337138956c8d862822f6a1f7834b1882ec5ddc966ec28fe1a8b47ed41fc1077f"
+    },
+    {
+      "path": "tool/prebuild/run_code_tests.py",
+      "sha256": "90e62a5182c6f0d8e89722a4892c20cae096c25e54375da66c0ce9ed1ef69471"
+    }
+  ],
+  "limits": {
+    "production_written": false,
+    "store_build_created": false,
+    "billing_trial_changed": false,
+    "paid_resources_used": false,
+    "original_references_committed": false,
+    "native_food_host_included": false,
+    "community_parallel_slices_included": false
+  }
+}

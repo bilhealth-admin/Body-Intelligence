@@ -69,7 +69,7 @@ void main() {
       );
       addTearDown(database.close);
 
-      expect(database.schemaVersion, 21);
+      expect(database.schemaVersion, 22);
       final decision = await database
           .select(database.decisionMemories)
           .getSingle();
@@ -85,7 +85,8 @@ void main() {
               food_source_snapshot,
               food_verified_snapshot,
               serving_size_snapshot,
-              serving_unit_snapshot
+              serving_unit_snapshot,
+              food_evidence_json
             FROM meal_items
             WHERE id = 11
             ''').getSingle();
@@ -93,6 +94,14 @@ void main() {
       expect(migratedMealItem.read<int>('food_verified_snapshot'), 1);
       expect(migratedMealItem.read<double>('serving_size_snapshot'), 30);
       expect(migratedMealItem.read<String>('serving_unit_snapshot'), 'g');
+      expect(
+        migratedMealItem.readNullable<String>('food_evidence_json'),
+        isNull,
+      );
+      final migratedFood = await database
+          .customSelect('SELECT food_evidence_json FROM foods WHERE id = 7')
+          .getSingle();
+      expect(migratedFood.readNullable<String>('food_evidence_json'), isNull);
 
       final foreignKeys = await database
           .customSelect('PRAGMA foreign_key_check')
