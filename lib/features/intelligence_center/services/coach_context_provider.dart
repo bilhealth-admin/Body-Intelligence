@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/database/app_database.dart';
+import '../../../data/database/meal_food_evidence.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/experiment_repository.dart';
@@ -244,7 +245,7 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   );
   final activeFast = FastingSession.tryParse(await fastingFuture);
 
-  final nutrition = _coachNutritionDays(meals);
+  final nutrition = assembleCoachNutritionDays(meals);
 
   final latestWeightKg = weights.isEmpty
       ? profile?.currentWeight
@@ -354,13 +355,11 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
         )
       : null;
   final now = DateTime.now();
-  final todayKey =
-      '${now.year.toString().padLeft(4, '0')}-'
-      '${now.month.toString().padLeft(2, '0')}-'
-      '${now.day.toString().padLeft(2, '0')}';
+  final todayKey = _coachLocalDayKey(now);
   final todayNutrition = nutrition
       .where((day) => day.day == todayKey)
       .firstOrNull;
+  final consumedCalories = todayNutrition?.knownCalories;
   final todayWaterMl = water
       .where((entry) {
         final local = entry.occurredAt.toLocal();
@@ -379,7 +378,7 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
     day: now,
     baseCalorieGoal:
         (resolvedTargets?['caloriesKcal'] as num?)?.toDouble() ?? 0,
-    consumedCalories: todayNutrition?.calories ?? 0,
+    consumedCalories: consumedCalories,
     baseProteinGoal: (resolvedTargets?['proteinG'] as num?)?.toDouble() ?? 0,
     baseCarbohydrateGoal: (resolvedTargets?['carbsG'] as num?)?.toDouble() ?? 0,
     baseFatGoal: (resolvedTargets?['fatG'] as num?)?.toDouble() ?? 0,
@@ -423,7 +422,7 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   final todayContext = <String, Object?>{
     'day': todayKey,
     'nutrition': <String, Object?>{
-      'consumedCaloriesKcal': todayNutrition?.calories ?? 0,
+      'consumedCaloriesKcal': consumedCalories,
       'knownTotals': todayNutrition?.knownTotals.toList() ?? const <String>[],
       'waterMl': todayWaterMl,
     },
@@ -434,8 +433,9 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
       'burnObservedAt': verifiedEnergy?.observedAt.toUtc().toIso8601String(),
       'includedInRemaining': exercisePreferences.includeInRemainingGoal,
       'effectiveCalorieGoalKcal': exerciseResult.effectiveCalorieGoal,
-      'netCaloriesKcal':
-          (todayNutrition?.calories ?? 0) - (verifiedEnergy?.kcal ?? 0),
+      'netCaloriesKcal': consumedCalories == null
+          ? null
+          : consumedCalories - (verifiedEnergy?.kcal ?? 0),
       'remainingCaloriesKcal': exerciseResult.remainingCalories,
       'manualExerciseChangesAllowance': false,
     },

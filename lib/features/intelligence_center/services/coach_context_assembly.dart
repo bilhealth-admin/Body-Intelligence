@@ -95,63 +95,62 @@ Map<String, Object?> _scopeCoachHealth({
   );
 }
 
-List<CoachNutritionDay> _coachNutritionDays(List<MealWithItems> meals) {
+String _coachLocalDayKey(DateTime local) =>
+    '${local.year.toString().padLeft(4, '0')}-'
+    '${local.month.toString().padLeft(2, '0')}-'
+    '${local.day.toString().padLeft(2, '0')}';
+
+/// Builds Coach's existing five-nutrient view from saved item evidence.
+/// Mutable catalog rows are used only for the names of legacy entries.
+List<CoachNutritionDay> assembleCoachNutritionDays(List<MealWithItems> meals) {
+  const nutrients = <String, TrackedNutrient>{
+    'caloriesKcal': TrackedNutrient.calories,
+    'proteinG': TrackedNutrient.protein,
+    'carbsG': TrackedNutrient.carbohydrates,
+    'fatG': TrackedNutrient.fat,
+    'sodiumMg': TrackedNutrient.sodium,
+  };
   final byDay = <String, List<MealWithItems>>{};
   for (final meal in meals) {
-    final date = meal.meal.date;
-    final day =
-        '${date.year.toString().padLeft(4, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-    byDay.putIfAbsent(day, () => []).add(meal);
+    byDay.putIfAbsent(meal.meal.dayKey, () => []).add(meal);
   }
   final nutrition = <CoachNutritionDay>[];
   for (final entry in byDay.entries) {
-    var calories = 0.0;
-    var protein = 0.0;
-    var carbs = 0.0;
-    var fat = 0.0;
-    var sodium = 0.0;
-    var itemCount = 0;
-    final knownTotals = <String>{
-      'caloriesKcal',
-      'proteinG',
-      'carbsG',
-      'fatG',
-      'sodiumMg',
+    final totals = <String, double?>{
+      for (final key in nutrients.keys) key: 0.0,
     };
+    var itemCount = 0;
     final mealJson = <Map<String, Object?>>[];
     for (final meal in entry.value) {
       final items = <Map<String, Object?>>[];
       for (final item in meal.items) {
         itemCount += 1;
-        bool knows(TrackedNutrient nutrient) =>
-            NutrientEvidenceMask.contains(item.nutrientEvidenceMask, nutrient);
-        if (!knows(TrackedNutrient.calories)) {
-          knownTotals.remove('caloriesKcal');
+        final evidence = MealFoodEvidence.read(item, ownerKey: meal.ownerKey);
+        final portion = evidence.portion;
+        final ownerAvailable = meal.ownerKey != null || !evidence.isModern;
+        final values = <String, double?>{
+          for (final nutrient in nutrients.entries)
+            nutrient.key: ownerAvailable ? evidence.value(nutrient.value) : null,
+        };
+        for (final nutrient in values.entries) {
+          final previous = totals[nutrient.key];
+          final value = nutrient.value;
+          final sum = previous == null || value == null
+              ? null
+              : previous + value;
+          totals[nutrient.key] = sum != null && sum.isFinite ? sum : null;
         }
-        if (!knows(TrackedNutrient.protein)) {
-          knownTotals.remove('proteinG');
-        }
-        if (!knows(TrackedNutrient.carbohydrates)) {
-          knownTotals.remove('carbsG');
-        }
-        if (!knows(TrackedNutrient.fat)) knownTotals.remove('fatG');
-        if (!knows(TrackedNutrient.sodium)) knownTotals.remove('sodiumMg');
-        calories += item.calories;
-        protein += item.protein;
-        carbs += item.carbs;
-        fat += item.fats;
-        sodium += item.sodium;
+        final quickAdd = item.foodSourceSnapshot == 'quick_add';
+        final foodName = (ownerAvailable ? portion?.food.name : null) ??
+            (evidence.isModern ? null : meal.foodsById[item.foodId]?.name);
         items.add({
           'itemId': item.id,
-          'food': meal.foodsById[item.foodId]?.name ?? 'historical-food',
-          'quantity': item.quantity,
-          if (knows(TrackedNutrient.calories)) 'caloriesKcal': item.calories,
-          if (knows(TrackedNutrient.protein)) 'proteinG': item.protein,
-          if (knows(TrackedNutrient.carbohydrates)) 'carbsG': item.carbs,
-          if (knows(TrackedNutrient.fat)) 'fatG': item.fats,
-          if (knows(TrackedNutrient.sodium)) 'sodiumMg': item.sodium,
+          if (quickAdd) 'entryType': 'quick_add',
+          if (!quickAdd) 'food': foodName ?? 'historical-food',
+          if (!quickAdd && ownerAvailable && evidence.isValid)
+            'quantity': item.quantity,
+          for (final nutrient in values.entries)
+            if (nutrient.value != null) nutrient.key: nutrient.value,
         });
       }
       mealJson.add({
@@ -164,12 +163,17 @@ List<CoachNutritionDay> _coachNutritionDays(List<MealWithItems> meals) {
       CoachNutritionDay(
         day: entry.key,
         meals: mealJson,
-        calories: calories,
-        protein: protein,
-        carbs: carbs,
-        fat: fat,
-        sodium: sodium,
-        knownTotals: itemCount == 0 ? const <String>{} : knownTotals,
+        calories: totals['caloriesKcal'] ?? 0,
+        protein: totals['proteinG'] ?? 0,
+        carbs: totals['carbsG'] ?? 0,
+        fat: totals['fatG'] ?? 0,
+        sodium: totals['sodiumMg'] ?? 0,
+        knownTotals: itemCount == 0
+            ? const <String>{}
+            : {
+                for (final total in totals.entries)
+                  if (total.value != null) total.key,
+              },
       ),
     );
   }
@@ -218,10 +222,7 @@ List<Map<String, Object?>> _coachActivityHistory(
         continue;
       }
       final local = signal.observedAt.toLocal();
-      final day =
-          '${local.year.toString().padLeft(4, '0')}-'
-          '${local.month.toString().padLeft(2, '0')}-'
-          '${local.day.toString().padLeft(2, '0')}';
+      final day = _coachLocalDayKey(local);
       final row = activityByDay.putIfAbsent(
         day,
         () => <String, Object?>{'day': day},

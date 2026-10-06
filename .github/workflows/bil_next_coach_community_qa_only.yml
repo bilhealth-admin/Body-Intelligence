@@ -86,6 +86,14 @@ jobs:
             test/features/community/community_reference_composer_v1_test.dart \
             test/features/community/community_profile_identity_contract_test.dart \
             test/features/community/community_rewards_ai_coach_contract_test.dart \
+            test/features/intelligence_center/coach_context_food_evidence_test.dart \
+            test/features/intelligence_center/coach_context_food_storage_test.dart \
+            test/features/intelligence_center/coach_context_food_provider_test.dart \
+            test/features/intelligence_center/coach_context_minimal_views_test.dart \
+            test/features/intelligence_center/coach_context_category_isolation_test.dart \
+            test/features/intelligence_center/coach_context_lifecycle_contract_test.dart \
+            test/features/intelligence_center/coach_today_context_parity_test.dart \
+            test/features/intelligence_center/coach_daily_brief_test.dart \
             2>&1 | tee /tmp/bil-next-qa/focused.log
       - name: Verify architecture ceilings and serial performance prerequisite
         if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}

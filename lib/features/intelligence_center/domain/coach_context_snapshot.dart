@@ -44,6 +44,12 @@ class CoachNutritionDay {
   final double sodium;
   final Set<String> knownTotals;
 
+  /// Unknown or invalid consumption must not enter derived energy arithmetic.
+  double? get knownCalories =>
+      knownTotals.contains('caloriesKcal') && calories.isFinite && calories >= 0
+      ? calories
+      : null;
+
   Map<String, Object?> toJson() => {
     'day': day,
     'totals': {

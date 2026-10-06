@@ -1,0 +1,263 @@
+{
+  "schema": "bil.coach.capability.audit.v1",
+  "audit_date": "2026-10-06",
+  "published_application_sha": "6f4ccc1374d643678bee02db39951cab14c573a4",
+  "verified_qa_baseline_sha": "7046710f8625aa1b2b9915cc6beff4011c37fefa",
+  "verified_baseline_run": 37545878945,
+  "execution_during_source_audit": false,
+  "published_counts": {
+    "canonical_tools": 23,
+    "action_types": 24,
+    "transactional_writes": 9,
+    "settings_writes": 2,
+    "reads": 2,
+    "route_only": 9,
+    "auth_side_effect": 1
+  },
+  "food_host_wip_counts": {
+    "canonical_tools": 25,
+    "action_types": 26
+  },
+  "sources": {
+    "registry": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+    "action_types": "lib/features/intelligence_center/domain/intelligence_action.dart",
+    "admission": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+    "permission": "lib/features/intelligence_center/domain/coach_action_permission.dart",
+    "execution": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+    "meal_execution": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+    "meal_recovery": "lib/features/intelligence_center/presentation/intelligence_meal_recovery.dart",
+    "meal_commands": "lib/data/repositories/meal_repository_coach_commands.dart",
+    "meal_food": "lib/data/repositories/meal_repository_coach_food.dart",
+    "meal_journal": "lib/data/repositories/meal_repository_coach_journal.dart",
+    "meal_undo": "lib/data/repositories/meal_repository_coach_undo.dart",
+    "native_repository": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+    "native_execution": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+    "context": "lib/features/intelligence_center/services/coach_context_provider.dart",
+    "context_assembly": "lib/features/intelligence_center/services/coach_context_assembly.dart",
+    "context_domain": "lib/features/intelligence_center/domain/coach_context_snapshot.dart",
+    "meal_evidence": "lib/data/database/meal_food_evidence.dart",
+    "food_basis": "lib/data/database/food_basis_evidence.dart",
+    "food_domain": "lib/features/intelligence_center/domain/food_v2/coach_food_v2.dart",
+    "settings": "lib/app/services/app_settings_provider.dart",
+    "settings_storage": "lib/app/services/app_settings_service.dart",
+    "navigation": "lib/features/intelligence_center/domain/bil_navigation_registry.dart"
+  },
+  "published_tool_groups": [
+    {
+      "ids": [
+        "quick_add_macros"
+      ],
+      "kind": "transactional_write",
+      "handler": "_prepareCoachMealAction / _commitPreparedCoachMealAction",
+      "repository": "MealRepository / CoachMealCommand.quickMacros",
+      "readback": "durable meal operation",
+      "undo": "operation journal + item CAS + transcript recovery",
+      "date": "explicit canonical date or local day",
+      "limits": "1905 يبقى إدخال سعرات فقط؛ لا foods/macros مختلقة. اقتراح السعرات يحتاج تأكيدًا جديدًا."
+    },
+    {
+      "ids": [
+        "update_meal_item",
+        "delete_meal_item",
+        "move_meal_item"
+      ],
+      "kind": "transactional_write",
+      "handler": "_commitPreparedCoachMealAction",
+      "repository": "MealRepository Coach commands",
+      "readback": "durable meal operation",
+      "undo": "operation journal + item CAS + transcript recovery",
+      "date": "published move changes meal type within the same day",
+      "limits": "حراسة quantityGrams من وحدة legacy تدخل ضمن Food host WIP؛ لا تُنسب للمنشور."
+    },
+    {
+      "ids": [
+        "log_water",
+        "log_weight",
+        "update_goal",
+        "save_measurements",
+        "save_memory"
+      ],
+      "kind": "transactional_write",
+      "handler": "_commitPreparedCoachNativeAction",
+      "repository": "CoachNativeCommandRepository.prepare/commit/undo",
+      "readback": "_commitReadback after transaction",
+      "undo": "journal/full snapshot CAS in the active session; transcript recovery missing",
+      "date": "canonical date for water/weight/measurements; targetDate for goal",
+      "limits": "owner/epoch guards موجودة. تحويل pounds إلى kg موجود؛ لا ادعاء تغطية كل اللهجات. استعادة Undo بعد إعادة فتح المحادثة ناقصة."
+    },
+    {
+      "ids": [
+        "set_theme_mode",
+        "set_language"
+      ],
+      "kind": "settings_write",
+      "handler": "_executeAction",
+      "repository": "AppSettingsController / AppSettingsService.save",
+      "readback": "requested value, not independent committed readback",
+      "undo": "closure restoring the prior value; no version CAS or durable recovery",
+      "limits": "الحفظ فعلي؛ readback المستقل وUndo الآمن ما زالا بحاجة للإغلاق."
+    },
+    {
+      "ids": [
+        "read_nutrition_remaining",
+        "read_profile_identity"
+      ],
+      "kind": "read",
+      "handler": "_executeAction",
+      "repository": "coachContextSnapshotProvider",
+      "readback": "current context",
+      "undo": "not applicable",
+      "limits": "identity يقرأ displayName فقط. P0 قيد التنفيذ على CI؛ سياستا no-day/missing-target في nutritionRemainingFor خارج هذه الدفعة."
+    },
+    {
+      "ids": [
+        "navigate",
+        "open_weight_log",
+        "open_meals",
+        "open_meals_yesterday",
+        "open_workouts",
+        "open_plan",
+        "open_report",
+        "manage_subscription",
+        "request_account_deletion"
+      ],
+      "kind": "route_only",
+      "handler": "_openCoachRoute",
+      "repository": null,
+      "readback": "no committed write",
+      "undo": "not applicable",
+      "limits": "yesterday يختار يوم السجل ولا ينسخ وجبة. subscription يفتح plans؛ deletion يفتح help بعد التأكيد. لا شراء أو حذف حساب منفذ."
+    },
+    {
+      "ids": [
+        "sign_out"
+      ],
+      "kind": "auth_side_effect",
+      "handler": "CloudBeforeSignOutSync.runBounded + auth.signOut",
+      "repository": "Supabase auth",
+      "readback": "auth.currentSession == null",
+      "undo": "none",
+      "limits": "تسجيل خروج فعلي؛ لم تُنفذ مكالمة auth خلال هذا التدقيق."
+    }
+  ],
+  "published_navigation_targets": [
+    "dashboard",
+    "daily_log",
+    "nutrition",
+    "weight_history",
+    "measurements",
+    "goals",
+    "analytics",
+    "profile",
+    "settings",
+    "notifications",
+    "ai_coach"
+  ],
+  "wip_only_tools": [
+    {
+      "id": "log_foods",
+      "authority": "owner-bound native immutable CoachFoodReview",
+      "wire_payload": "reviewId only",
+      "nutrition": "13 nullable nutrients; source confidence separate from quantity evidence",
+      "status": "local root WIP; not the published registry"
+    },
+    {
+      "id": "replace_meal_item",
+      "authority": "native replacement review + expected item/meal snapshots",
+      "wire_payload": "reviewId only",
+      "semantics": "same item UUID, revision increment, source and target day open, date/type atomic replacement, Undo restores prior parent",
+      "status": "local root WIP; not the published registry"
+    }
+  ],
+  "food_wip_evidence": {
+    "host_suite": "host-r9",
+    "passed": 99,
+    "source_digest": "4f2d44b62fd676a2ff63450eb8eea901a64beb65cf1f73b6f3e43ad21b2fe77a",
+    "provenance": "root local verified report before execution environment outage; not GitHub clearance",
+    "closed_local_gap": "moving one batch item gives the next correction its new meal context",
+    "fix": "_rememberCoachFoodCommit narrows correctionRows to result.after when meal UUIDs differ"
+  },
+  "app_capabilities_without_coach_write": [
+    {
+      "capability": "recipe serving",
+      "actual_api": "lib/features/recipe_import/services/trusted_recipe_diary_service.dart : TrustedRecipeDiaryService.addServing",
+      "coach": "no canonical commit tool"
+    },
+    {
+      "capability": "sleep and day close/reopen",
+      "actual_api": "lib/data/repositories/daily_log_repository.dart",
+      "coach": "context/read or navigation only"
+    },
+    {
+      "capability": "export",
+      "actual_api": "lib/app/services/data_export_service.dart",
+      "coach": "no scoped export tool"
+    },
+    {
+      "capability": "workouts/plans/fasting/reminders/units",
+      "coach": "module surfaces do not prove command writes; no corresponding canonical tools"
+    },
+    {
+      "capability": "Community composer/chat/follow/moderation",
+      "coach": "independent app UI; no Coach publish/send/follow/policy acceptance"
+    },
+    {
+      "capability": "memory list/delete",
+      "coach": "UI exists; only save_memory is canonical"
+    },
+    {
+      "capability": "voice",
+      "coach": "transcript enters query pipeline; no new hardware/provider execution evidence"
+    },
+    {
+      "capability": "photo/barcode food",
+      "coach": "photo is not a verified native food review-to-commit yet; barcode hands off to diary"
+    }
+  ],
+  "priority_gaps": [
+    {
+      "priority": "P0",
+      "gap": "owner-bound immutable Coach nutrition context and unknown values",
+      "state": "included in this QA change; execution pending",
+      "limits": "five existing context nutrients; nutritionRemainingFor policy unchanged"
+    },
+    {
+      "priority": "P1",
+      "gap": "native food host and Personal BIL integration on one verified SHA",
+      "state": "verified local WIP; runtime recovery required"
+    },
+    {
+      "priority": "P1",
+      "gap": "nonmeal Undo recovery from journal after transcript restore",
+      "state": "missing"
+    },
+    {
+      "priority": "P1",
+      "gap": "settings committed readback and CAS Undo",
+      "state": "missing"
+    },
+    {
+      "priority": "P2",
+      "gap": "food day/type-only dialogue and same-as-yesterday",
+      "state": "not closed"
+    },
+    {
+      "priority": "P2",
+      "gap": "photo/barcode to typed verified food review",
+      "state": "not closed"
+    },
+    {
+      "priority": "P2",
+      "gap": "additional app commands for sleep/day/reminders",
+      "state": "inventory then isolated native slices"
+    }
+  ],
+  "constraints": [
+    "QA branch only",
+    "no Production writes",
+    "no stores/build-number change",
+    "no pricing/Trial/quota changes",
+    "no paid provider calls",
+    "no visual fidelity claim from module existence"
+  ]
+}
