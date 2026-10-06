@@ -55,6 +55,9 @@ class _CommunityNotificationsPageState
   bool _receiptSignedOut = false;
   bool _visibleReadBusy = false;
   Object? _visibleReadOperation;
+  // A failed explicit action waits for the user's explicit retry. The automatic
+  // dwell must not silently issue another write behind the error snackbar.
+  final _manualReceiptIds = <String>{};
 
   void _updateReceiptState(VoidCallback update) => setState(update);
 
@@ -129,6 +132,9 @@ class _CommunityNotificationsPageState
 
   Future<_CommunityUpdates> _load() async {
     final generation = ++_loadGeneration;
+    _visibleReadOperation = null;
+    _visibleReadBusy = false;
+    _manualReceiptIds.clear();
     _loadingFirst = true;
     _loadingMore = false;
     _hasMore = false;
@@ -275,6 +281,7 @@ class _CommunityNotificationsPageState
     String? ownerAtStart;
     setState(() {
       _markingPageSeen = true;
+      _manualReceiptIds.addAll(ids);
       _markingSeen.addAll(ids);
     });
     try {
@@ -321,6 +328,7 @@ class _CommunityNotificationsPageState
   Future<void> _openNotification(CommunityNotification notification) async {
     final repository = _repository;
     if (repository == null || !_markingSeen.add(notification.id)) return;
+    setState(() => _manualReceiptIds.add(notification.id));
     try {
       if (!notification.seen) {
         await repository.markCommunityNotificationsSeen([notification.id]);

@@ -70,7 +70,12 @@ extension _CommunityNotificationReadReceipts
       return {};
     }
     final allowed = visible.notifications
-        .where((row) => !row.seen && !_markingSeen.contains(row.id))
+        .where(
+          (row) =>
+              !row.seen &&
+              !_markingSeen.contains(row.id) &&
+              !_manualReceiptIds.contains(row.id),
+        )
         .map((row) => row.id)
         .toSet();
     final ids = requested.where(allowed.contains).toSet().take(100).toList();
@@ -119,6 +124,7 @@ extension _CommunityNotificationReadReceipts
         ],
       );
       _updateReceiptState(() => _updates = Future.value(readback));
+      if (!mounted) return {};
       await CommunityAttentionScope.refresh(context);
       if (!_receiptIsCurrent(repository, owner, generation)) return {};
       return {

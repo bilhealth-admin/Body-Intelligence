@@ -92,7 +92,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
           ownerId: _loadedOwnerId ?? '',
           unreadIds: {
             for (final row in filteredNotifications)
-              if (!row.seen) row.id,
+              if (!row.seen && !_manualReceiptIds.contains(row.id)) row.id,
           },
           enabled: !_loadingFirst && !_loadingMore && !_markingPageSeen,
           retryKey: _loadGeneration,

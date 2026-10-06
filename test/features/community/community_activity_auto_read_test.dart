@@ -127,7 +127,11 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
   final selected = ValueNotifier(repository);
   addTearDown(selected.dispose);
-  addTearDown(repository.communitySocialClient.dispose);
+  addTearDown(() async {
+    debugPrint('R4 trace: client dispose begins');
+    await repository.communitySocialClient.dispose();
+    debugPrint('R4 trace: client dispose ends');
+  });
   final router = GoRouter(
     initialLocation: '/community/notifications',
     routes: [
@@ -150,6 +154,7 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
     ],
   );
   addTearDown(router.dispose);
+  debugPrint('R4 trace: mount begins');
   await tester.pumpWidget(
     MaterialApp.router(
       routerConfig: router,
@@ -163,14 +168,19 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
       ],
     ),
   );
+  debugPrint('R4 trace: first frame complete');
   await tester.pumpAndSettle();
+  debugPrint('R4 trace: mount settled');
   return selected;
 }
 
 Future<void> _dwell(WidgetTester tester) async {
+  debugPrint('R4 trace: dwell begins');
   await tester.pump(const Duration(milliseconds: 700));
   await tester.pump(const Duration(milliseconds: 20));
+  debugPrint('R4 trace: dwell elapsed');
   await tester.pumpAndSettle();
+  debugPrint('R4 trace: dwell settled');
 }
 
 Finder get _vertical => find
@@ -208,6 +218,7 @@ void main() {
           repository.count - repository.seen.length,
         );
         expect(tester.takeException(), isNull);
+        debugPrint('R4 trace: initial assertions complete');
       },
     );
   }
