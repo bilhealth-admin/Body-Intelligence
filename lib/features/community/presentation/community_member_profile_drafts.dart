@@ -78,9 +78,7 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     key: const Key('community-drafts-page'),
-    appBar: AppBar(
-      title: Text(communityText(context, 'Drafts', 'المسودات')),
-    ),
+    appBar: AppBar(title: Text(communityText(context, 'Drafts', 'المسودات'))),
     body: _repository == null
         ? Center(
             child: Text(
@@ -283,25 +281,25 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
       children: [
         if (!widget.fullPage)
           Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  communityText(context, 'Drafts', 'المسودات'),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    communityText(context, 'Drafts', 'المسودات'),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                tooltip: communityText(context, 'Refresh', 'تحديث'),
-                onPressed: _refresh,
-                icon: const Icon(Icons.refresh_rounded),
-              ),
-            ],
+                IconButton(
+                  tooltip: communityText(context, 'Refresh', 'تحديث'),
+                  onPressed: _refresh,
+                  icon: const Icon(Icons.refresh_rounded),
+                ),
+              ],
+            ),
           ),
-        ),
         Expanded(
           child: FutureBuilder<List<CommunityDraftSummary>>(
             future: _drafts,
