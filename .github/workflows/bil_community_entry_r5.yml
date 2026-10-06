@@ -4,6 +4,8 @@ on:
     branches: [qa/coach-community-next-20261005]
     paths:
       - .github/workflows/bil_community_entry_r5.yml
+      - tool/prebuild/run_code_tests.py
+      - tool/qa_next/run_regression.py
       - lib/features/community/**
       - lib/features/profile/services/profile_photo_service.dart
       - lib/main.dart

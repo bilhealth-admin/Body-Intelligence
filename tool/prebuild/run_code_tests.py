@@ -71,6 +71,14 @@ ENV_CAPTURE_GUARDED = {
     "test/dashboard_polish/dashboard_polish_layout_review_test.dart": "BIL_CAPTURE_DASHBOARD_POLISH",
     "test/dashboard_polish/icon_label_layout_review_test.dart": "BIL_CAPTURE_ICON_POLISH",
 }
+# These reviewed native suites execute every behavioral/layout assertion in the
+# portable partition. Only PNG output is opt-in via a directory-valued variable.
+# Unset those variables: the string "0" would itself be a valid output directory.
+ENV_CAPTURE_DIRECTORIES = {
+    "test/features/community/community_reference_navigation_test.dart": "BIL_NAVIGATION_CAPTURE_DIR",
+    "test/shared/bil_reference_navigation_test.dart": "BIL_NAVIGATION_CAPTURE_DIR",
+    "test/qa_next/community_composer_reference_capture_test.dart": "BIL_COMPOSER_CAPTURE_DIR",
+}
 NON_VISUAL_BYTE_TESTS = {
     "test/launch_readiness/release_source_hygiene_classifier_contract_test.dart":
         "base64-encoded text fixtures for the secret scanner, not images",
@@ -96,6 +104,8 @@ def flutter_test_command(flutter: str) -> list[str]:
     # must not accidentally enable capture in their child Flutter processes.
     for flag in ENV_CAPTURE_GUARDED.values():
         os.environ[flag] = "0"
+    for flag in ENV_CAPTURE_DIRECTORIES.values():
+        os.environ.pop(flag, None)
     return [str(dart), str(snapshot), 'test', '--no-pub', '--concurrency', '1', '--reporter', 'expanded',
             '--dart-define=BIL_CAPTURE_COMMUNITY_REVIEW=false',
             '--dart-define=BIL_CAPTURE_HEALTH_REVIEW=false']
@@ -105,7 +115,8 @@ def discover() -> tuple[list[str], list[str]]:
     all_tests = sorted(p.relative_to(ROOT).as_posix()
                        for p in (ROOT / "test").rglob("*_test.dart"))
     classifications = (set(NOT_RUN) | set(MIXED_NAMES) | set(CAPTURE_GUARDED)
-                       | set(ENV_CAPTURE_GUARDED) | set(NON_VISUAL_BYTE_TESTS))
+                       | set(ENV_CAPTURE_GUARDED) | set(ENV_CAPTURE_DIRECTORIES)
+                       | set(NON_VISUAL_BYTE_TESTS))
     missing = classifications - set(all_tests)
     if missing:
         raise ValueError(f"Audit classifications refer to missing tests: {missing}")
@@ -133,7 +144,8 @@ def main() -> int:
     plan = {"discovered_unit_files": len(all_tests), "ordinary": ordinary,
             "mixed_name_filters": MIXED_NAMES, "NOT RUN": excluded,
             "capture_defines_forced_false": list(CAPTURE_GUARDED.values()),
-            "capture_environment_forced_zero": sorted(set(ENV_CAPTURE_GUARDED.values()))}
+            "capture_environment_forced_zero": sorted(set(ENV_CAPTURE_GUARDED.values())),
+            "capture_directories_unset": sorted(set(ENV_CAPTURE_DIRECTORIES.values()))}
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     (EVIDENCE / f"{args.phase}_test_plan.json").write_text(
         json.dumps(plan, indent=2) + "\n", encoding="utf-8")
