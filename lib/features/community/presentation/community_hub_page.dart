@@ -1,5 +1,4 @@
 import 'community_attention_scope.dart';
-import 'community_return_button.dart';
 import 'bil_gold_coin.dart';
 import 'dart:async';
 
@@ -199,8 +198,9 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               },
             ),
       appBar: AppBar(
-        leading: const CommunityReturnButton(),
-        leadingWidth: 48,
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        titleSpacing: 16,
         title: Text(
           communityText(context, 'BIL Community', 'مجتمع BIL'),
           style: Theme.of(
