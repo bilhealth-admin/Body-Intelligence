@@ -486,6 +486,26 @@ class _CommunityMemberProfilePageState
     }
   }
 
+  Future<void> _openSelfCreatorStats() async {
+    final creator = _creator;
+    if (creator == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        child: _CommunityCreatorPanel(
+          creator: creator,
+          isSelf: true,
+          goldBalance: _goldBalance,
+          quests: _quests,
+        ),
+      ),
+    );
+  }
+
   void _showFailure() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -567,27 +587,40 @@ class _CommunityMemberProfilePageState
                         ),
                       ),
                     ),
-                    if (_creator case final creator?)
+                    if (profile.isSelf)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: _CommunitySelfQuickActions(
+                            draftCount: _draftSummaries.length,
+                            statsAvailable: _creator != null,
+                            onPosts: () => pushCommunityPage<void>(
+                              context,
+                              CommunityMyPostsPage(
+                                repository: _repository!,
+                                showProfileHeader: false,
+                              ),
+                            ),
+                            onDrafts: () => context.push('/community/drafts'),
+                            onSaved: () => pushCommunityPage<void>(
+                              context,
+                              CommunitySavedPostsPage(
+                                repository: _repository!,
+                              ),
+                            ),
+                            onStats: _openSelfCreatorStats,
+                          ),
+                        ),
+                      )
+                    else if (_creator case final creator?)
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                           child: _CommunityCreatorPanel(
                             creator: creator,
-                            isSelf: profile.isSelf,
+                            isSelf: false,
                             goldBalance: _goldBalance,
                             quests: _quests,
-                          ),
-                        ),
-                      ),
-                    if (profile.isSelf)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                          child: _CommunityDraftShortcut(
-                            summary: _draftSummaries.firstOrNull,
-                            onTap: () => _CommunityProfileDraftActions(
-                              this,
-                            ).openDrafts(),
                           ),
                         ),
                       ),
