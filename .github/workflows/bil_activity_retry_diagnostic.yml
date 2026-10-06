@@ -1,0 +1,58 @@
+name: BIL offline receipt diagnostic
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_activity_retry_diagnostic.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve unchanged locked packages
+        run: flutter pub get --enforce-lockfile
+      - name: Observe the failing fixture with temporary diagnostic instrumentation only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-retry-diagnostic
+          python3 - <<'PY' 2>&1 | tee /tmp/bil-retry-diagnostic/diagnostic.log
+          from pathlib import Path
+          import subprocess
+          changed={}
+          def patch(path,old,new,count=1):
+              p=Path(path);s=p.read_text()
+              if s.count(old)!=count: raise RuntimeError('Diagnostic source drift '+path)
+              changed.setdefault(p,p.read_bytes())
+              p.write_text(s.replace(old,new))
+          try:
+              base='lib/features/community/presentation/'
+              patch(base+'community_notification_read_receipts.dart','      final latest = await _updates;', "      debugPrint('RECEIPT remoteSeen=${remote.values.where((r) => r.seen).length} gen=$generation current=$_loadGeneration owner=$_loadedOwnerId');\n      final latest = await _updates;")
+              patch(base+'community_notification_read_receipts.dart','      _updateReceiptState(() => _updates = Future.value(readback));', "      debugPrint('RECEIPT commitSeen=${readback.notifications.where((r) => r.seen).length}');\n      _updateReceiptState(() => _updates = Future.value(readback));")
+              patch(base+'community_visible_activity_scope.dart','    } on Object {', "    } on Object catch (error, stack) {\n      debugPrint('RECEIPT caught $error\\n$stack');")
+              patch(base+'community_notifications_rendering.dart','        final persisted = snapshot.requireData;', "        final persisted = snapshot.requireData;\n        debugPrint('RECEIPT render conn=${snapshot.connectionState} gen=$_loadGeneration seen=${persisted.notifications.where((r) => r.seen).length}');")
+              result=subprocess.run(['timeout','--kill-after=10s','130s','flutter','test','--no-pub','--reporter','expanded','--concurrency','1','test/features/community/community_activity_auto_read_test.dart','--plain-name','offline automatic read is retryable and never clears unread rows','--timeout','20s'],check=False)
+              print('DIAGNOSTIC_EXIT',result.returncode,flush=True)
+          finally:
+              for p,b in changed.items():p.write_bytes(b)
+          subprocess.run(['git','diff','--exit-code'],check=True)
+          # This run is diagnostic only and is never a passing acceptance gate.
+          Path('/tmp/bil-retry-diagnostic/scope.txt').write_text('Synthetic offline fixture with temporary diagnostic print statements only. Original assertions unchanged. Not release or visual-parity evidence.\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-retry-diagnostic-${{ github.sha }}
+          path: /tmp/bil-retry-diagnostic
+          retention-days: 1
+          if-no-files-found: error
