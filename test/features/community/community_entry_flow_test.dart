@@ -39,9 +39,8 @@ CommunityProfile profile(String owner, {String name = 'Existing member'}) =>
     );
 
 class EntryRepositoryFixture extends CommunityRepository {
-  EntryRepositoryFixture({String? owner = ownerA})
-    : owner = owner,
-      super(
+  EntryRepositoryFixture({this.owner = ownerA})
+    : super(
         SupabaseClient(
           'https://entry.invalid',
           'fixture-key',
@@ -88,12 +87,14 @@ class EntryRepositoryFixture extends CommunityRepository {
     required String localeCode,
     required String expectedOwnerId,
   }) async {
-    if (currentUserId != expectedOwnerId)
+    if (currentUserId != expectedOwnerId) {
       throw const CommunityEntryOwnerChanged();
+    }
     writes.add((owner: expectedOwnerId, name: displayName, locale: localeCode));
     if (pendingCreate != null) await pendingCreate;
-    if (currentUserId != expectedOwnerId)
+    if (currentUserId != expectedOwnerId) {
       throw const CommunityEntryOwnerChanged();
+    }
     if (failCreate) throw StateError('Synthetic create failure');
     onCreate?.call();
     if (!skipPersistence) {
@@ -510,8 +511,9 @@ void main() {
       for (final key in CommunityEntryCopyKey.values) {
         final value = CommunityEntryCopy.resolve(tag, key);
         expect(value.trim(), isNotEmpty);
-        if (tag != 'en')
+        if (tag != 'en') {
           expect(value, isNot(CommunityEntryCopy.resolve('en', key)));
+        }
       }
     }
   });
