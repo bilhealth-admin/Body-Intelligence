@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
-import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_attention.dart';

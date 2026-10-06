@@ -171,7 +171,7 @@ extension _CommunityNotificationsReferenceWidgets
             ),
           ),
         ),
-        if (trailing != null) trailing,
+        trailing?,
       ],
     ),
   );

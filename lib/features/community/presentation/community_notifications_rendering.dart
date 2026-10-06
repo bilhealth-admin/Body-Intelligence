@@ -85,10 +85,8 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
           );
         }
 
-        final filters = _CommunityNotificationsFilters(this);
-        final reference = _CommunityNotificationsReferenceWidgets(this);
         final filteredNotifications = updates.notifications
-            .where(filters.matchesFilter)
+            .where(_CommunityNotificationsFilters(this).matchesFilter)
             .toList(growable: false);
         final newNotifications = filteredNotifications
             .where((row) => !row.seen)
@@ -147,7 +145,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                                         : Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w800,
                                   ),
-                          label: Text(filters.filterLabel(filter)),
+                          label: Text(
+                            _CommunityNotificationsFilters(this).filterLabel(filter),
+                          ),
                           onSelected: (_) => _selectFilter(filter),
                         ),
                         const SizedBox(width: 8),
@@ -175,7 +175,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                   ),
                 ] else ...[
                   if (newNotifications.isNotEmpty)
-                    reference._activitySectionLabel(
+                    _CommunityNotificationsReferenceWidgets(this)._activitySectionLabel(
                       context,
                       'New',
                       'جديد',
@@ -198,19 +198,19 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                       ),
                     ),
                   for (final notification in newNotifications)
-                    reference._referenceActivityRow(
+                    _CommunityNotificationsReferenceWidgets(this)._referenceActivityRow(
                       context,
                       notification,
                       marker(notification.id),
                     ),
                   if (earlierNotifications.isNotEmpty)
-                    reference._activitySectionLabel(
+                    _CommunityNotificationsReferenceWidgets(this)._activitySectionLabel(
                       context,
                       'Earlier',
                       'سابقًا',
                     ),
                   for (final notification in earlierNotifications)
-                    reference._referenceActivityRow(
+                    _CommunityNotificationsReferenceWidgets(this)._referenceActivityRow(
                       context,
                       notification,
                       marker(notification.id),
