@@ -78,6 +78,7 @@ jobs:
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-reference/analyze.log
       - name: Exercise actual shared dock and Community Quick Add navigation
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        timeout-minutes: 3
         shell: bash
         run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/reference_navigation_behavior_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/navigation-tests.log
       - name: Render and exercise actual Coach widgets
