@@ -38,11 +38,8 @@ class _NavigationRepository extends CommunityRepository {
     DateTime? before,
     String? beforeId,
     int limit = 40,
-  }) async => const CommunityFeedModeBatch(
-    posts: [],
-    hasMore: false,
-    references: [],
-  );
+  }) async =>
+      const CommunityFeedModeBatch(posts: [], hasMore: false, references: []);
 
   @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
