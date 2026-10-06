@@ -6,8 +6,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: bil-next-qa-only-${{ github.sha }}
-  cancel-in-progress: false
+  group: bil-next-qa-only-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   flutter-checks:
     if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'

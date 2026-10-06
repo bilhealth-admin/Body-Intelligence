@@ -12,8 +12,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: bil-entry-r5-${{ github.sha }}
-  cancel-in-progress: false
+  group: bil-entry-r5-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   entry-checks:
     if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
