@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/bil_locale_policy.dart';
+import '../../app/localization/runtime_copy.dart';
 
 /// One five-destination component shared by the approved Coach and Community
 /// presentation. Routing and Quick Add actions remain owned by the caller.
@@ -24,6 +26,8 @@ class BilReferenceBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
+    final copy = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final labels = [
       for (final source in const [
         'Home',
@@ -32,7 +36,9 @@ class BilReferenceBottomBar extends StatelessWidget {
         'Community',
         'More',
       ])
-        AppLocalizations.of(context).text(source),
+        copy?.text(source) ??
+            RuntimeCopy.resolve(source, BilLocalePolicy.canonicalTag(locale)) ??
+            source,
     ];
     final icons = <IconData>[
       selected == 0 ? Icons.home_rounded : Icons.home_outlined,
@@ -142,6 +148,9 @@ class BilReferenceBottomBar extends StatelessWidget {
                                   alignment: Alignment.center,
                                   decoration: selected == i
                                       ? BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                           boxShadow: [
                                             BoxShadow(
                                               color: blue.withValues(

@@ -3,8 +3,10 @@ import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_next_workspace.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'reference_regression_r2_cases.dart';
 
 void main() {
+  registerReferenceRegressionCases();
   test(
     'workspace copy covers every production locale with exact placeholders',
     () {

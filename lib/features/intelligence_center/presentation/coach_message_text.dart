@@ -110,7 +110,14 @@ class _CoachMessageTextState extends State<CoachMessageText>
         SelectableText(
           _visibleText,
           textDirection: widget.textDirection,
-          style: widget.style,
+          style: (widget.style ?? DefaultTextStyle.of(context).style).copyWith(
+            // A user's writing language can differ from the interface locale.
+            // Use the bundled Arabic face before an OS/test fallback glyph.
+            fontFamilyFallback: <String>[
+              'BILArabic',
+              ...?widget.style?.fontFamilyFallback,
+            ],
+          ),
           // Screen readers receive the complete answer while the visual layer
           // reveals it quickly.
           semanticsLabel: widget.animateReveal ? widget.text : null,

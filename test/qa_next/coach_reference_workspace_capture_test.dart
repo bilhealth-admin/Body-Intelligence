@@ -169,6 +169,9 @@ Future<void> _mount(
         ],
         theme: visualEvidenceTheme(
           BilFlagshipTheme.light(isArabic: language == 'ar'),
+          fontFamily: language == 'ar'
+              ? 'NotoArabicEvidence'
+              : 'RobotoEvidence',
         ),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(

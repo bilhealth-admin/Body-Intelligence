@@ -72,6 +72,13 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
       data: inherited.copyWith(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF07111B),
+        iconTheme: const IconThemeData(color: Color(0xFFB4C5DA)),
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(
+            foregroundColor: const Color(0xFFB4C5DA),
+            disabledForegroundColor: const Color(0xFF738397),
+          ),
+        ),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF318BFF),
           brightness: Brightness.dark,
