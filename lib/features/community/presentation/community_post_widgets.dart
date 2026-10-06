@@ -212,73 +212,82 @@ class _CommunityPostStatusChip extends StatelessWidget {
   }
 }
 
-class _CommunityFeedImage extends StatefulWidget {
+class _CommunityFeedImage extends StatelessWidget {
   const _CommunityFeedImage({required this.post});
 
   final CommunityPost post;
 
   @override
-  State<_CommunityFeedImage> createState() => _CommunityFeedImageState();
-}
-
-class _CommunityFeedImageState extends State<_CommunityFeedImage> {
-  int _index = 0;
-
-  @override
   Widget build(BuildContext context) {
-    final media = widget.post.mediaItems;
+    final media = post.mediaItems;
     if (media.isEmpty) return const SizedBox.shrink();
-    final ratio = media.first.aspectRatio.clamp(0.8, 1.91).toDouble();
-
+    if (media.length == 1) {
+      final item = media.single;
+      return Semantics(
+        image: true,
+        label: communityText(context, 'Post photo', 'صورة المنشور'),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: AspectRatio(
+            key: Key('community-post-image-${post.id}'),
+            aspectRatio: item.aspectRatio.clamp(.9, 1.91).toDouble(),
+            child: _CommunityPostMediaTile(item: item),
+          ),
+        ),
+      );
+    }
+    final visible = media.take(4).toList(growable: false);
     return Semantics(
       image: true,
-      label: communityText(
-        context,
-        media.length == 1 ? 'Post photo' : 'Post photos',
-        media.length == 1 ? 'صورة المنشور' : 'صور المنشور',
-      ),
+      label: communityText(context, 'Post photos', 'صور المنشور'),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            AspectRatio(
-              key: Key('community-post-image-${widget.post.id}'),
-              aspectRatio: ratio,
-              child: PageView.builder(
-                key: Key('community-post-gallery-${widget.post.id}'),
-                itemCount: media.length,
-                onPageChanged: (value) => setState(() => _index = value),
-                itemBuilder: (context, index) {
-                  final item = media[index];
-                  final url = item.url;
-                  return InkWell(
-                    onTap: url == null
-                        ? null
-                        : () => pushCommunityPage<void>(
-                            context,
-                            _CommunityPhotoPage(url: url),
+        borderRadius: BorderRadius.circular(14),
+        child: AspectRatio(
+          key: Key('community-post-image-${post.id}'),
+          aspectRatio: 2.02,
+          child: Stack(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: _CommunityPostMediaTile(item: visible[0]),
+                        ),
+                        if (visible.length > 2) ...[
+                          const SizedBox(height: 3),
+                          Expanded(
+                            child: _CommunityPostMediaTile(item: visible[2]),
                           ),
-                    child: url == null
-                        ? const _CommunityImageFallback()
-                        : Image.network(
-                            url,
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.medium,
-                            gaplessPlayback: true,
-                            errorBuilder: (_, _, _) =>
-                                const _CommunityImageFallback(),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: _CommunityPostMediaTile(item: visible[1]),
+                        ),
+                        if (visible.length > 3) ...[
+                          const SizedBox(height: 3),
+                          Expanded(
+                            child: _CommunityPostMediaTile(item: visible[3]),
                           ),
-                  );
-                },
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-            if (media.length > 1)
               PositionedDirectional(
-                top: 10,
-                end: 10,
+                top: 8,
+                end: 8,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.66),
+                    color: Colors.black.withValues(alpha: .72),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Padding(
@@ -287,42 +296,78 @@ class _CommunityFeedImageState extends State<_CommunityFeedImage> {
                       vertical: 5,
                     ),
                     child: Text(
-                      '${_index + 1}/${media.length}',
+                      '${visible.length}/${media.length}',
                       textDirection: TextDirection.ltr,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
                       ),
                     ),
                   ),
                 ),
               ),
-            if (media.length > 1)
-              PositionedDirectional(
-                start: 0,
-                end: 0,
-                bottom: 8,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (var index = 0; index < media.length; index++)
-                      Container(
-                        width: index == _index ? 16 : 6,
-                        height: 6,
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          color: index == _index
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(999),
+              if (media.length > 4)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: .68),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '+${media.length - 4}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _CommunityPostMediaTile extends StatelessWidget {
+  const _CommunityPostMediaTile({required this.item});
+
+  final CommunityPostMedia item;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = item.url;
+    if (url == null) return const _CommunityImageFallback();
+    final image = url.startsWith('asset://')
+        ? Image.asset(
+            url.substring('asset://'.length),
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+          )
+        : Image.network(
+            url,
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            gaplessPlayback: true,
+            errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+          );
+    return InkWell(
+      onTap: () => pushCommunityPage<void>(
+        context,
+        _CommunityPhotoPage(url: url),
+      ),
+      child: image,
     );
   }
 }
@@ -348,12 +393,27 @@ class _CommunityPhotoPage extends StatelessWidget {
         minScale: 1,
         maxScale: 4,
         child: Center(
-          child: Image.network(
-            url,
-            fit: BoxFit.contain,
-            semanticLabel: communityText(context, 'Post photo', 'صورة المنشور'),
-            errorBuilder: (_, _, _) => const _CommunityImageFallback(),
-          ),
+          child: url.startsWith('asset://')
+              ? Image.asset(
+                  url.substring('asset://'.length),
+                  fit: BoxFit.contain,
+                  semanticLabel: communityText(
+                    context,
+                    'Post photo',
+                    'صورة المنشور',
+                  ),
+                  errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+                )
+              : Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  semanticLabel: communityText(
+                    context,
+                    'Post photo',
+                    'صورة المنشور',
+                  ),
+                  errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+                ),
         ),
       ),
     ),
