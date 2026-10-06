@@ -1,18 +1,18 @@
 name: BIL reference native candidate
 on:
+  workflow_dispatch:
   push:
     branches: [qa/coach-community-next-20261005]
     paths:
-      - tool/qa_next/apply_reference_visual_candidate.py
-      - tool/qa_next/coach_header.fragment
+      - lib/features/community/presentation/**
+      - lib/features/intelligence_center/presentation/**
       - lib/shared/widgets/bil_reference_bottom_bar.dart
-      - lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart
-      - test/qa_next/coach_reference_workspace_capture_test.dart
+      - test/qa_next/**
       - .github/workflows/bil_reference_native_candidate.yml
 permissions:
   contents: read
 concurrency:
-  group: bil-reference-candidate-${{ github.ref }}
+  group: bil-reference-candidate-${{ github.sha }}
   cancel-in-progress: false
 jobs:
   render-and-test:
@@ -28,8 +28,8 @@ jobs:
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
-          cache: false
-      - name: Resolve original locked packages without upgrade
+          cache: true
+      - name: Resolve original locked packages
         id: resolve
         shell: bash
         run: |
@@ -38,21 +38,26 @@ jobs:
           flutter --version --machine > /tmp/bil-reference/toolchain.json
           flutter pub get --enforce-lockfile 2>&1 | tee /tmp/bil-reference/pub.log
           git diff --exit-code -- pubspec.yaml pubspec.lock
-      - name: Apply bounded presentation candidate and record actual effective source
+      - name: Record exact tracked source without transformations
         id: candidate
         shell: bash
         run: |
           set -euo pipefail
-          python3 tool/qa_next/apply_reference_visual_candidate.py 2>&1 | tee /tmp/bil-reference/apply.log
-          cp docs/qa_next/REFERENCE_CANDIDATE_APPLIED.json /tmp/bil-reference/effective-source.json
-          git diff --binary > /tmp/bil-reference/effective-source.patch
-          git diff --exit-code -- supabase ios android pubspec.yaml pubspec.lock
-          printf 'Actual Flutter rendering of candidate source identified in effective-source.json, not the unchanged checkout. Synthetic data only. No store build, deployment, production connection or reference parity claim.\n' > /tmp/bil-reference/scope.txt
-      - name: Analyze effective candidate without suppressing failures
+          python3 tool/qa_next/apply_reference_visual_candidate.py
+          git diff --exit-code
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          root=pathlib.Path('/tmp/bil-reference')
+          files=subprocess.check_output(['git','diff','--name-only','3f0085e6e6686f2e87e9cf14789e9e578ea64159','HEAD'],text=True).splitlines()
+          rows=[{'path':p,'sha256':hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()} for p in files if pathlib.Path(p).is_file() and pathlib.Path(p).suffix=='.dart']
+          root.joinpath('effective-source.json').write_text(json.dumps({'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_manifest':rows,'reference_parity_verified':False,'store_build_created':False,'production_connected':False},indent=2)+'\n')
+          root.joinpath('scope.txt').write_text('Actual Flutter host-rendered widgets from the exact tracked commit. Synthetic fixtures and disposable SQLite. Not a physical-device or live-production E2E claim. No store build or deployment.\n')
+          PY
+      - name: Analyze exact source
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         shell: bash
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-reference/analyze.log
-      - name: Render and exercise actual Coach widgets and repository-backed conversation
+      - name: Render and exercise actual Coach widgets
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         env:
           BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-reference/coach
@@ -64,26 +69,16 @@ jobs:
           BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-reference/community
         shell: bash
         run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/community-tests.log
-      - name: Preserve focused behavior contracts
+      - name: Preserve behavior accessibility and translation contracts
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         shell: bash
         run: |
           set -o pipefail
-          flutter test --no-pub --reporter expanded test/features/community/community_inbox_resume_regression_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/behavior-tests.log
-      - name: Export bounded candidate text for review alongside actual captures
+          flutter test --no-pub --reporter expanded test/features/community/community_inbox_resume_regression_test.dart test/features/community/community_reference_composer_v1_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart test/qa_next/next_workspace_locale_test.dart test/localization/bil_25_locale_fallback_closure_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/behavior-tests.log
+      - name: Verify renderer never changed source
         if: ${{ always() && steps.candidate.outcome == 'success' }}
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import json,pathlib,zipfile
-          manifest=json.loads(pathlib.Path('/tmp/bil-reference/effective-source.json').read_text())['source_manifest']
-          with zipfile.ZipFile('/tmp/bil-reference/effective-dart-source.zip','w',zipfile.ZIP_DEFLATED) as z:
-            for item in manifest:
-              p=pathlib.Path(item['path'])
-              if p.suffix!='.dart' or p.parts[0] not in ('lib','test') or p.is_symlink(): raise RuntimeError('unexpected export')
-              z.write(p,p.as_posix())
-          PY
-      - name: Upload genuine Flutter PNGs, source and failure logs; never fonts
+        run: git diff --exit-code
+      - name: Upload actual Flutter PNGs and failure logs, never fonts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

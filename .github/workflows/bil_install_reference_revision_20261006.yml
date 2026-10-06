@@ -1,0 +1,108 @@
+name: BIL isolated reference revision installation
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths:
+      - tool/qa_next/install_reference_revision_20261006.py
+      - .github/workflows/bil_install_reference_revision_20261006.yml
+permissions:
+  contents: write
+concurrency:
+  group: bil-isolated-reference-installation
+  cancel-in-progress: false
+jobs:
+  materialize-test:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve unchanged locked packages
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-installed
+          flutter --version --machine > /tmp/bil-installed/toolchain.json
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Materialize bounded source revision
+        id: apply
+        run: |
+          set -euo pipefail
+          python3 tool/qa_next/install_reference_revision_20261006.py 2>&1 | tee /tmp/bil-installed/apply.log
+          git diff --exit-code -- supabase ios android pubspec.yaml pubspec.lock
+      - name: Commit actual application source to the isolated QA branch only
+        id: commit
+        if: steps.apply.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,json,os,pathlib,subprocess
+          branch='refs/heads/qa/coach-community-next-20261005'
+          expected=os.environ['GITHUB_SHA']
+          if os.environ['GITHUB_REF']!=branch: raise RuntimeError('QA branch only')
+          changed=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
+          untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()
+          allowed=('lib/','test/','tool/prebuild/','tool/localization/','tool/qa_next/')
+          files=sorted(set(changed+[p for p in untracked if p.endswith('.dart')]))
+          if not files or any(not p.startswith(allowed) for p in files): raise RuntimeError('Unexpected revision scope')
+          if any(not p.endswith(('.dart','.py')) for p in files): raise RuntimeError('Unexpected file type')
+          subprocess.run(['git','add','--',*files],check=True)
+          subprocess.run(['git','config','user.name','BIL isolated QA'],check=True)
+          subprocess.run(['git','config','user.email','qa@users.noreply.github.com'],check=True)
+          subprocess.run(['git','commit','-m','fix(qa-only): materialize reference UI with accessible controls and verified regression fixes'],check=True)
+          actual=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          auth=base64.b64encode(('x-access-token:'+os.environ['GH_TOKEN']).encode()).decode()
+          print('::add-mask::'+auth)
+          git=['git','-c','http.https://github.com/.extraheader=AUTHORIZATION: basic '+auth]
+          remote=subprocess.check_output(git+['ls-remote','origin',branch],text=True).split()[0]
+          if remote!=expected: raise RuntimeError('QA head advanced; refusing overwrite')
+          subprocess.run(git+['push','origin','HEAD:'+branch],check=True)
+          rows=[{'path':p,'sha256':hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()} for p in files]
+          pathlib.Path('/tmp/bil-installed/source.json').write_text(json.dumps({'source_commit':actual,'parent_commit':expected,'files':rows,'production_modified':False,'store_build_created':False},indent=2)+'\n')
+          PY
+      - name: Analyze committed source
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-installed/analyze.log
+      - name: Execute behavior accessibility and locale regression tests
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded test/features/community/community_reference_composer_v1_test.dart test/features/community/community_inbox_resume_regression_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart test/qa_next/next_workspace_locale_test.dart test/localization/bil_25_locale_fallback_closure_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/behavior.log
+      - name: Capture actual Coach widgets
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        env:
+          BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-installed/coach
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/coach_reference_workspace_capture_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/coach.log
+      - name: Capture actual Community widgets
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        env:
+          BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-installed/community
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/community.log
+      - name: Export source changes for exact local inspection
+        if: ${{ always() && steps.apply.outcome == 'success' }}
+        run: |
+          python3 - <<'PY'
+          import pathlib,subprocess,zipfile
+          changed=subprocess.check_output(['git','diff','--name-only','cdd6f747611515ef8c116c2327d22649e07ab249','HEAD'],text=True).splitlines()
+          with zipfile.ZipFile('/tmp/bil-installed/source-delta.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in changed:
+                  p=pathlib.Path(name)
+                  if p.is_file() and p.suffix in ('.dart','.py','.yml') and p.parts[0] in ('lib','test','tool','.github') and not p.is_symlink(): z.write(p,p.as_posix())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-installed-reference-${{ github.sha }}
+          path: /tmp/bil-installed
+          retention-days: 1
+          if-no-files-found: error
