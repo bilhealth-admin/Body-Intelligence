@@ -106,44 +106,44 @@ class BilReferenceBottomBar extends StatelessWidget {
                                 Transform.translate(
                                   offset: const Offset(0, -6),
                                   child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: dark
-                                          ? const [
-                                              Color(0xFF4A657B),
-                                              Color(0xFF17283B),
-                                            ]
-                                          : const [
-                                              Color(0xFF31B7FF),
-                                              Color(0xFF1652FF),
-                                            ],
-                                    ),
-                                    border: Border.all(
-                                      width: 1.2,
-                                      color: dark
-                                          ? const Color(0xFF859EBD)
-                                          : Colors.white,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: blue.withValues(
-                                          alpha: dark ? .1 : .26,
-                                        ),
-                                        blurRadius: 12,
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: dark
+                                            ? const [
+                                                Color(0xFF4A657B),
+                                                Color(0xFF17283B),
+                                              ]
+                                            : const [
+                                                Color(0xFF31B7FF),
+                                                Color(0xFF1652FF),
+                                              ],
                                       ),
-                                    ],
+                                      border: Border.all(
+                                        width: 1.2,
+                                        color: dark
+                                            ? const Color(0xFF859EBD)
+                                            : Colors.white,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: blue.withValues(
+                                            alpha: dark ? .1 : .26,
+                                          ),
+                                          blurRadius: 12,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      icons[i],
+                                      color: dark ? muted : Colors.white,
+                                      size: 31,
+                                    ),
                                   ),
-                                  child: Icon(
-                                    icons[i],
-                                    color: dark ? muted : Colors.white,
-                                    size: 31,
-                                  ),
-                                ),
                                 )
                               else
                                 Container(
