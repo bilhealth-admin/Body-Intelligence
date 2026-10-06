@@ -4,10 +4,14 @@ class _FeedTab extends StatefulWidget {
   const _FeedTab({
     required this.repository,
     required this.imagePicker,
+    this.initialMode = CommunityFeedMode.explore,
+    this.onOpenCircles,
     super.key,
   });
   final CommunityRepository repository;
   final CommunityPostImagePickerContract imagePicker;
+  final CommunityFeedMode initialMode;
+  final VoidCallback? onOpenCircles;
   @override
   State<_FeedTab> createState() => _FeedTabState();
 }
@@ -44,11 +48,22 @@ class _FeedTabState extends State<_FeedTab>
   @override
   void initState() {
     super.initState();
+    _selectedFeedMode = widget.initialMode;
     // Match AI Coach's entry welcome: keep Community's branded first paint
     // visible for at least 2.2 seconds without delaying the feed request itself.
     _entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
       if (mounted) setState(() => _entryWelcomeVisible = false);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant _FeedTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialMode != widget.initialMode &&
+        _selectedFeedMode != widget.initialMode) {
+      _selectedFeedMode = widget.initialMode;
+      _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+    }
   }
 
   @override
@@ -67,7 +82,7 @@ class _FeedTabState extends State<_FeedTab>
   bool _feedRefreshing = false;
 
   @override
-  CommunityFeedMode _selectedFeedMode = CommunityFeedMode.forYou;
+  late CommunityFeedMode _selectedFeedMode;
   @override
   int? _feedCursorPriority;
   @override
@@ -457,77 +472,16 @@ class _FeedTabState extends State<_FeedTab>
                         onRetry: () => _refreshPolicyState(),
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                          16,
-                          10,
-                          16,
-                          4,
-                        ),
-                        child: Row(
-                          children: [
-                            for (final mode in CommunityFeedMode.values) ...[
-                              ChoiceChip(
-                                key: Key(
-                                  'community-feed-mode-${mode.wireValue}',
-                                ),
-                                selected: _selectedFeedMode == mode,
-                                label: Text(_feedModeLabel(mode)),
-                                onSelected: _openingComposer || _managingPost
-                                    ? null
-                                    : (_) => _selectFeedMode(mode),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
                     if (!loading || snapshot.hasData)
                       SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                            16,
-                            8,
-                            16,
-                            4,
-                          ),
-                          child: Card(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withValues(alpha: .35),
-                            child: ListTile(
-                              key: const Key('community-compose-prompt'),
-                              minTileHeight: 64,
-                              leading: const ExcludeSemantics(
-                                child: Text(
-                                  '👋',
-                                  style: TextStyle(fontSize: 26),
-                                ),
-                              ),
-                              title: Text(
-                                communityText(
-                                  context,
-                                  'Share an experience or win',
-                                  'شارك تجربة أو إنجازًا',
-                                ),
-                              ),
-                              trailing: const Icon(Icons.edit_outlined),
-                              onTap: _openingComposer || _managingPost
-                                  ? null
-                                  : () => _openComposer(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_selectedFeedMode == CommunityFeedMode.explore)
-                      SliverToBoxAdapter(
-                        child: _CommunityFeedTopicSuggestions(
+                        child: _CommunityFeedReferenceHeader(
+                          repository: widget.repository,
+                          posts: posts,
                           topics: _suggestedTopics,
-                          onOpen: _openTopic,
+                          enabled: !_openingComposer && !_managingPost,
+                          onCompose: _openComposer,
+                          onOpenTopic: _openTopic,
+                          onOpenCircles: widget.onOpenCircles,
                         ),
                       ),
                     if (loading && snapshot.hasData)
@@ -623,30 +577,7 @@ class _FeedTabState extends State<_FeedTab>
             );
           },
         ),
-        PositionedDirectional(
-          end: 20,
-          bottom: 20,
-          child: SafeArea(
-            top: false,
-            left: false,
-            child: FloatingActionButton(
-              key: const Key('community-create-post'),
-              heroTag: 'bil-community-create-post',
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              shape: const CircleBorder(),
-              tooltip: communityText(
-                context,
-                'Share an experience or win',
-                'شارك تجربة أو إنجازًا',
-              ),
-              onPressed: _openingComposer || _managingPost
-                  ? null
-                  : _openComposer,
-              child: const Icon(Icons.add_rounded),
-            ),
-          ),
-        ),
+
       ],
     );
   }
