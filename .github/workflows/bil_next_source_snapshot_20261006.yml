@@ -10,13 +10,18 @@ jobs:
   source:
     if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Export tracked source only without assets credentials or fonts
+          sparse-checkout: |
+            lib
+            test
+            tool
+            .github
+      - name: Export tracked text only without assets credentials or fonts
         shell: bash
         run: |
           set -euo pipefail
@@ -41,7 +46,7 @@ jobs:
                   archive.writestr(name,content)
                   rows.append({'path':name,'sha256':hashlib.sha256(content).hexdigest()})
           (out/'manifest.json').write_text(json.dumps({'source_commit':sha,'files':rows,'production_modified':False,'store_build_created':False},indent=2)+'\n')
-          (out/'scope.txt').write_text('Exact tracked text snapshot for isolated local review. No fonts, image assets, credentials, deployment, store build, or production connection. Includes mjs QA scripts and R5 entry source; full file hashes identify exactly what is being inspected.\n')
+          (out/'scope.txt').write_text('Exact tracked text snapshot for isolated local review. No fonts, image assets, credentials, deployment, store build, or production connection. Includes mjs QA scripts and R5 entry source; per-file hashes identify all exported content.\n')
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
