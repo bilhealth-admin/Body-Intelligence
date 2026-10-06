@@ -21,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/community_interaction_test_support.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../visual_closure/visual_evidence_font.dart';
@@ -517,11 +518,17 @@ void main() {
                 ? TextDirection.rtl
                 : TextDirection.ltr,
           );
-          expect(find.byKey(const Key('community-settings')), findsOneWidget);
+          for (final action in const [
+            'community-search',
+            'community-updates',
+            'community-settings',
+          ]) {
+            expect(find.byKey(Key(action)), findsOneWidget);
+          }
           expect(find.byType(TabBar), findsNothing);
           expect(
             tester.widget<AppBar>(find.byType(AppBar)).actions,
-            hasLength(4),
+            hasLength(3),
           );
           expect(tester.takeException(), isNull);
           if ((tag == 'ar' || tag == 'en') && scale == 1) {
@@ -557,6 +564,10 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(const Key('community-settings')));
           await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('community-nav-messages')),
+            findsOneWidget,
+          );
           await tester.scrollUntilVisible(
             find.byKey(const Key('community-my-bil-code')),
             180,
@@ -696,6 +707,7 @@ void main() {
       await tester.pumpWidget(_app(repository));
       await tester.pumpAndSettle();
       final button = find.byKey(const Key('community-post-like-$_postId'));
+      await revealCommunityControl(tester, button);
       await tester.tap(button);
       await tester.tap(button);
       await tester.pump();
@@ -824,6 +836,7 @@ void main() {
       await tester.pumpWidget(_app(_ReviewRepository()));
       await tester.pumpAndSettle();
       final button = find.byKey(const Key('community-post-share-$_postId'));
+      await revealCommunityControl(tester, button);
       await tester.tap(button);
       await tester.tap(button);
       await tester.pump();
@@ -862,7 +875,7 @@ void main() {
       scrollable: find
           .descendant(
             of: find.byKey(
-              const PageStorageKey('community-feed-scroll-for_you'),
+              const PageStorageKey('community-feed-scroll-explore'),
             ),
             matching: find.byType(Scrollable),
           )
@@ -918,6 +931,7 @@ void main() {
       await tester.pumpWidget(_app(_ReviewRepository()..withPhotos = true));
       await tester.pumpAndSettle();
       final photo = find.byKey(const Key('community-post-image-$_postId'));
+      await revealCommunityControl(tester, photo);
       final before = tester.getTopLeft(photo);
       await tester.tap(photo);
       await tester.pumpAndSettle();

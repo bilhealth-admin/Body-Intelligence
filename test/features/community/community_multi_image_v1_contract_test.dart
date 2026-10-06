@@ -88,7 +88,14 @@ void main() {
     expect(repository, contains('publishPostWithImagesTopicsCircleAndPoll'));
     expect(composer, contains('community-post-selected-images'));
     expect(composer, contains('_selectedImages.length >= 4'));
-    expect(widgets, contains('PageView.builder'));
+    final gallery = File(
+      'lib/features/community/presentation/community_post_gallery_page.dart',
+    ).readAsStringSync();
+    expect(widgets, contains('CommunityPostGalleryPage('));
+    expect(gallery, contains('PageView.builder'));
+    expect(gallery, contains('InteractiveViewer('));
+    expect(gallery, contains('initialPage: widget.initialIndex'));
+    expect(widgets, contains('gallery: media'));
     expect(widgets, contains('community-post-gallery-'));
   });
 }

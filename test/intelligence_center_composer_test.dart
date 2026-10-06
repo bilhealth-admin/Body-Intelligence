@@ -281,12 +281,12 @@ void main() {
     expect(field.maxLines, 2);
     // The second title belongs to the explicit menu sheet, not this closed-menu
     // conversation. Preserve the owner's single hero instead of restoring a duplicate.
-    expect(find.text('Your BIL Coach'), findsOneWidget);
+    expect(find.text('AI Coach').hitTestable(), findsOneWidget);
     expect(
       find.text('Memory and preferences stay one tap away.'),
       findsNothing,
     );
-    expect(find.text('Speak your language'), findsOneWidget);
+    expect(find.text('Your health partner, always with you'), findsOneWidget);
     expect(find.byKey(const Key('ai-coach-voice-button')), findsOneWidget);
     expect(tester.getBottomLeft(fieldFinder).dy, lessThanOrEqualTo(544));
     expect(fieldFinder.hitTestable(), findsOneWidget);

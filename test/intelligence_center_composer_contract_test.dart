@@ -8,6 +8,8 @@ void main() {
             'intelligence_center_page.dart',
             'intelligence_center_page_message.dart',
             'intelligence_center_widgets.dart',
+            'intelligence_coach_reference_header.dart',
+            'intelligence_reference_workspace_flow.dart',
             'intelligence_coach_menu.dart',
             'intelligence_center_message_widgets.dart',
             'intelligence_center_voice_widgets.dart',
@@ -79,10 +81,15 @@ void main() {
   });
 
   test('compact hero and composer keep the requested one-line contract', () {
-    expect(page, contains("'Your BIL Coach'"));
-    expect(page, contains("'Speak your language'"));
-    expect(page, contains('final coachName = intelligenceText'));
-    expect(page, contains('final voiceTagline = intelligenceText'));
+    expect(
+      page,
+      contains("intelligenceText(context, 'AI Coach', 'المدرب الذكي')"),
+    );
+    expect(page, contains("'Your health partner, always with you'"));
+    expect(page, contains('class _CoachHeaderAction'));
+    expect(page, contains("'Search conversations'"));
+    expect(page, contains('BoxConstraints.tightFor(width: 48, height: 48)'));
+    expect(page, contains("'Conversation history'"));
     expect(page, contains('size: 48'));
     expect(page, isNot(contains("Key('ai-coach-hero-start')")));
     expect(page, contains("Key('ai-coach-voice-button')"));
@@ -139,7 +146,7 @@ void main() {
     expect(page, contains('BilCoachPortrait('));
     expect(page, isNot(contains('BilAccountAvatar(')));
     expect(page, isNot(contains('profilePhotoProvider')));
-    expect(page, contains('colors: [Color(0xFF12394E), Color(0xFF071923)]'));
+    expect(page, contains('colors: [Color(0xFF0C1B2B), Color(0xFF07111B)]'));
     expect(page, contains('final showReplyThinking = sending;'));
     expect(page, contains('Thinking…'));
     expect(page, isNot(contains('Preparing your answer')));

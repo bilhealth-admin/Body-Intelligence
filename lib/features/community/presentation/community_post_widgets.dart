@@ -239,6 +239,7 @@ class _CommunityFeedImage extends StatelessWidget {
     final visible = media.take(4).toList(growable: false);
     return Semantics(
       image: true,
+      key: Key('community-post-gallery-${post.id}'),
       label: communityText(context, 'Post photos', 'صور المنشور'),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
@@ -253,12 +254,22 @@ class _CommunityFeedImage extends StatelessWidget {
                     child: Column(
                       children: [
                         Expanded(
-                          child: _CommunityPostMediaTile(item: visible[0]),
+                          child: _CommunityPostMediaTile(
+                            key: Key('community-post-media-${post.id}-0'),
+                            item: visible[0],
+                            gallery: media,
+                            initialIndex: 0,
+                          ),
                         ),
                         if (visible.length > 2) ...[
                           const SizedBox(height: 3),
                           Expanded(
-                            child: _CommunityPostMediaTile(item: visible[2]),
+                            child: _CommunityPostMediaTile(
+                              key: Key('community-post-media-${post.id}-2'),
+                              item: visible[2],
+                              gallery: media,
+                              initialIndex: 2,
+                            ),
                           ),
                         ],
                       ],
@@ -269,12 +280,22 @@ class _CommunityFeedImage extends StatelessWidget {
                     child: Column(
                       children: [
                         Expanded(
-                          child: _CommunityPostMediaTile(item: visible[1]),
+                          child: _CommunityPostMediaTile(
+                            key: Key('community-post-media-${post.id}-1'),
+                            item: visible[1],
+                            gallery: media,
+                            initialIndex: 1,
+                          ),
                         ),
                         if (visible.length > 3) ...[
                           const SizedBox(height: 3),
                           Expanded(
-                            child: _CommunityPostMediaTile(item: visible[3]),
+                            child: _CommunityPostMediaTile(
+                              key: Key('community-post-media-${post.id}-3'),
+                              item: visible[3],
+                              gallery: media,
+                              initialIndex: 3,
+                            ),
                           ),
                         ],
                       ],
@@ -340,9 +361,16 @@ class _CommunityFeedImage extends StatelessWidget {
 }
 
 class _CommunityPostMediaTile extends StatelessWidget {
-  const _CommunityPostMediaTile({required this.item});
+  const _CommunityPostMediaTile({
+    required this.item,
+    this.gallery,
+    this.initialIndex = 0,
+    super.key,
+  });
 
   final CommunityPostMedia item;
+  final List<CommunityPostMedia>? gallery;
+  final int initialIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -363,8 +391,15 @@ class _CommunityPostMediaTile extends StatelessWidget {
             errorBuilder: (_, _, _) => const _CommunityImageFallback(),
           );
     return InkWell(
-      onTap: () =>
-          pushCommunityPage<void>(context, _CommunityPhotoPage(url: url)),
+      onTap: () => pushCommunityPage<void>(
+        context,
+        gallery == null || gallery!.length < 2
+            ? _CommunityPhotoPage(url: url)
+            : CommunityPostGalleryPage(
+                media: gallery!,
+                initialIndex: initialIndex,
+              ),
+      ),
       child: image,
     );
   }

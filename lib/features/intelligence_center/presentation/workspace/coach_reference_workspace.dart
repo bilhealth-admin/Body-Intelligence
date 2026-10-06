@@ -576,7 +576,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           label: t('Activity synced', 'نشاط متزامن'),
                           detail: _steps(
                             _latestMap(snapshot!.activityHistory, 'day'),
-                            ar,
+                            context,
                           ),
                           onTap: () => onRoute('/connected-health/steps'),
                         ),
@@ -647,10 +647,10 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     return amount is num && amount.isFinite && amount >= 0 ? '$amount ml' : '—';
   }
 
-  String _steps(Map<String, Object?> row, bool ar) {
+  String _steps(Map<String, Object?> row, BuildContext context) {
     final amount = row['steps'];
     return amount is num && amount.isFinite && amount >= 0
-        ? '$amount ${ar ? 'خطوة' : 'steps'}'
+        ? '$amount ${intelligenceText(context, 'steps', 'خطوات')}'
         : '—';
   }
 }

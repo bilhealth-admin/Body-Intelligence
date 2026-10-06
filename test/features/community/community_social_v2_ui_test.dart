@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/features/community/domain/community_models
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/community_interaction_test_support.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _policy = CommunityContentPolicy.fromJson({
@@ -294,14 +295,16 @@ void main() {
     final repository = _ReplyRaceRepository();
     await tester.pumpWidget(_app(repository));
     await tester.pumpAndSettle();
-    await tester.tap(
+    await tapCommunityControl(
+      tester,
       find.byKey(
         const Key('community-post-comments-${_SocialV2Repository.postId}'),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.text('One-level reply'), findsNothing);
-    await tester.tap(
+    await tapCommunityControl(
+      tester,
       find.byKey(
         const Key(
           'community-comment-view-replies-${_SocialV2Repository.rootId}',
@@ -335,7 +338,7 @@ void main() {
     );
     await tester.scrollUntilVisible(more, 300, scrollable: detailScrollable);
     expect(more.hitTestable(), findsOneWidget);
-    await tester.tap(more.hitTestable());
+    await tapCommunityControl(tester, more.hitTestable());
     await tester.pump();
     expect(repository.replyLoads, 1);
     repository.refreshed = true;
@@ -376,10 +379,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TabBar), findsNothing);
-      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(4));
+      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(3));
       for (final key in const [
         'community-search',
-        'community-messages',
         'community-updates',
         'community-settings',
       ]) {
@@ -399,9 +401,13 @@ void main() {
             .label,
         'Shared with BIL members',
       );
-      await tester.tap(find.byKey(const Key('community-settings')));
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-settings')),
+      );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('community-my-bil-code')), findsOneWidget);
+      expect(find.byKey(const Key('community-nav-messages')), findsOneWidget);
     },
   );
 
@@ -413,7 +419,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('@training_partner'), findsOneWidget);
-    await tester.tap(
+    await tapCommunityControl(
+      tester,
       find.byKey(
         const Key('community-post-add-friend-${_SocialV2Repository.postId}'),
       ),
@@ -422,7 +429,8 @@ void main() {
     expect(repository.friendRequests, 1);
     expect(find.text('Request pending'), findsOneWidget);
 
-    await tester.tap(
+    await tapCommunityControl(
+      tester,
       find.byKey(
         const Key('community-post-save-${_SocialV2Repository.postId}'),
       ),
@@ -432,7 +440,10 @@ void main() {
     expect(repository.savedMutations, 1);
     expect(find.byTooltip('Remove from saved'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('community-settings')));
+    await tapCommunityControl(
+      tester,
+      find.byKey(const Key('community-settings')),
+    );
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.byKey(const Key('community-saved-posts')),
@@ -445,12 +456,16 @@ void main() {
           .first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-saved-posts')));
+    await tapCommunityControl(
+      tester,
+      find.byKey(const Key('community-saved-posts')),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Saved posts'), findsOneWidget);
     expect(find.text('A real Community Social v2 post'), findsOneWidget);
 
-    await tester.tap(
+    await tapCommunityControl(
+      tester,
       find.byKey(
         const Key('community-post-save-${_SocialV2Repository.postId}'),
       ),
@@ -503,7 +518,8 @@ void main() {
       await tester.pumpWidget(_app(repository));
       await tester.pumpAndSettle();
 
-      await tester.tap(
+      await tapCommunityControl(
+        tester,
         find.byKey(
           const Key('community-post-comments-${_SocialV2Repository.postId}'),
         ),
@@ -516,7 +532,8 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('One-level reply'), findsNothing);
-      await tester.tap(
+      await tapCommunityControl(
+        tester,
         find.byKey(
           const Key(
             'community-comment-view-replies-${_SocialV2Repository.rootId}',
@@ -526,11 +543,15 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('One-level reply'), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('community-post-detail-like')));
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-post-detail-like')),
+      );
       await tester.pumpAndSettle();
       expect(repository.postLikeMutations, 1);
 
-      await tester.tap(
+      await tapCommunityControl(
+        tester,
         find.byKey(
           const Key('community-comment-like-${_SocialV2Repository.rootId}'),
         ),
@@ -542,10 +563,16 @@ void main() {
         find.byKey(const Key('community-comment-composer')),
         'Retry-safe comment',
       );
-      await tester.tap(find.byKey(const Key('community-comment-submit')));
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-comment-submit')),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Retry-safe comment'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('community-comment-submit')));
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-comment-submit')),
+      );
       await tester.pumpAndSettle();
       expect(repository.submittedClientIds, hasLength(2));
       expect(
@@ -554,7 +581,8 @@ void main() {
       );
       expect(repository.submittedParentIds, everyElement(isNull));
 
-      await tester.tap(
+      await tapCommunityControl(
+        tester,
         find.byKey(
           const Key('community-comment-reply-${_SocialV2Repository.rootId}'),
         ),
@@ -564,27 +592,32 @@ void main() {
         find.byKey(const Key('community-comment-composer')),
         'Bounded reply',
       );
-      await tester.tap(find.byKey(const Key('community-comment-submit')));
+      await tapCommunityControl(
+        tester,
+        find.byKey(const Key('community-comment-submit')),
+      );
       await tester.pumpAndSettle();
       expect(repository.submittedParentIds.last, _SocialV2Repository.rootId);
 
-      await tester.tap(
+      await tapCommunityControl(
+        tester,
         find.byKey(
           const Key('community-comment-actions-${_SocialV2Repository.rootId}'),
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Report'));
+      await tapCommunityControl(tester, find.text('Report'));
       await tester.pumpAndSettle();
       expect(repository.commentReports, 1);
 
-      await tester.tap(
+      await tapCommunityControl(
+        tester,
         find.byKey(
           const Key('community-comment-actions-${_SocialV2Repository.rootId}'),
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Block member'));
+      await tapCommunityControl(tester, find.text('Block member'));
       await tester.pumpAndSettle();
       expect(repository.blocks, 1);
       expect(tester.takeException(), isNull);

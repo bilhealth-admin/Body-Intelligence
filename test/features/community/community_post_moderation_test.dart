@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/community_interaction_test_support.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final class _ModerationRepository extends CommunityRepository {
@@ -249,6 +250,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await revealCommunityControl(
+      tester,
+      find.text('Only I can see this while it is reviewed'),
+    );
     expect(
       find.text('Only I can see this while it is reviewed'),
       findsOneWidget,

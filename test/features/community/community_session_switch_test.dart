@@ -6,6 +6,7 @@ import 'package:body_intelligence_log/features/settings/reference_settings_home_
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/community_interaction_test_support.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -172,4 +173,5 @@ Future<void> _settleFeed(WidgetTester tester, String body) async {
     EnginePhase.sendSemanticsUpdate,
     const Duration(seconds: 3),
   );
+  await revealCommunityControl(tester, find.text(body));
 }
