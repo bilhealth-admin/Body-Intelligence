@@ -70,6 +70,7 @@ void main() {
     final composer = [
       'lib/features/community/presentation/community_post_composer_page.dart',
       'lib/features/community/presentation/community_post_composer_rendering.dart',
+      'lib/features/community/presentation/community_post_composer_option_fields.dart',
       'lib/features/community/presentation/community_post_composer_reference_sections.dart',
       'lib/features/community/presentation/community_post_composer_reference_actions.dart',
       'lib/features/community/presentation/community_post_composer_toolbar.dart',

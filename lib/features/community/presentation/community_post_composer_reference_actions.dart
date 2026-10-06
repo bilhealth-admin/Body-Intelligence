@@ -2,12 +2,93 @@ part of 'community_hub_page.dart';
 
 extension _CommunityPostComposerReferenceActions
     on _CommunityPostComposerPageState {
+  Future<void> _refreshComposerDraftCount() async {
+    final repository = widget.repository;
+    final owner = _composerOwnerId;
+    final visit = _draftVisitGeneration;
+    final generation = ++_draftCountGeneration;
+    bool current() =>
+        mounted &&
+        _sameComposerOwner &&
+        identical(repository, widget.repository) &&
+        owner == _composerOwnerId &&
+        visit == _draftVisitGeneration &&
+        generation == _draftCountGeneration;
+    if (owner == null || !current()) return;
+    try {
+      final rows = await repository.runForCommunityOwner(
+        () => repository.listMyCommunityDrafts(limit: 50),
+        ownerId: owner,
+        isCurrentOwner: current,
+      );
+      if (!current()) return;
+      _setComposerState(() {
+        _draftCount = rows.length;
+        // The API is paginated. A full page is a lower bound, not a total.
+        _draftCountCapped = rows.length == 50;
+      });
+    } on Object {
+      if (!current()) return;
+      _setComposerState(() {
+        _draftCount = null;
+        _draftCountCapped = false;
+      });
+    }
+  }
+
+  Future<void> _openComposerDrafts() async {
+    if (!_checkComposerOwner() ||
+        _publishing ||
+        _savingDraft ||
+        _voiceCapturing ||
+        _selectingImage ||
+        _openingDrafts ||
+        _completed) {
+      return;
+    }
+    final repository = widget.repository;
+    final owner = _composerOwnerId;
+    final visit = ++_draftVisitGeneration;
+    _draftCountGeneration++;
+    bool current() =>
+        mounted &&
+        _sameComposerOwner &&
+        identical(repository, widget.repository) &&
+        owner == _composerOwnerId &&
+        visit == _draftVisitGeneration;
+    FocusScope.of(context).unfocus();
+    _setComposerState(() => _openingDrafts = true);
+    try {
+      // The existing private Drafts route owns its auth generation. Keeping
+      // this editor mounted retains every controller, image and selection.
+      await pushCommunityPage<void>(
+        context,
+        CommunityDraftsPage(repository: repository),
+      );
+    } on Object {
+      if (!current()) return;
+      _setComposerState(
+        () => _submitError = communityText(
+          context,
+          'Could not open drafts. Try again.',
+          'تعذر فتح المسودات. حاول مجددًا.',
+        ),
+      );
+    } finally {
+      if (current()) {
+        _setComposerState(() => _openingDrafts = false);
+        unawaited(_refreshComposerDraftCount());
+      }
+    }
+  }
+
   Future<void> _captureVoiceInput() async {
     if (!_checkComposerOwner() ||
         _publishing ||
         _savingDraft ||
         _voiceCapturing ||
         _selectingImage ||
+        _openingDrafts ||
         _completed) {
       return;
     }
@@ -205,6 +286,7 @@ extension _CommunityPostComposerReferenceActions
         _publishing ||
         _savingDraft ||
         _selectingImage ||
+        _openingDrafts ||
         _completed) {
       return;
     }
@@ -229,6 +311,9 @@ extension _CommunityPostComposerReferenceActions
       _submitError = null;
     });
     final draftId = widget.draft.persistentDraftId ?? const Uuid().v4();
+    // A response can be lost after the private draft was committed. Keep the
+    // same identity for retry, but do not mark it saved before readback.
+    widget.draft.persistentDraftId = draftId;
     try {
       await widget.repository.runForCommunityOwner(
         () => widget.repository.saveMyCommunityDraft(
@@ -245,6 +330,7 @@ extension _CommunityPostComposerReferenceActions
         widget.draft.title = _title.text;
         widget.draft.body = _composer.text;
       });
+      unawaited(_refreshComposerDraftCount());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

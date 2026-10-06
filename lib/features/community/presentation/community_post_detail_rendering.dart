@@ -64,6 +64,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                     if (widget.post.poll case final poll?) ...[
                       const SizedBox(height: 16),
                       _CommunityPollPanel(
+                        ownerIsCurrent: () => _detailOwnerIsCurrent,
                         poll: poll,
                         repository: widget.repository,
                       ),

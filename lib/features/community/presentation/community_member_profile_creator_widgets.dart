@@ -2,12 +2,14 @@ part of 'community_hub_page.dart';
 
 class _CommunityCreatorPanel extends StatelessWidget {
   const _CommunityCreatorPanel({
+    required this.visit,
     required this.creator,
     required this.isSelf,
     this.goldBalance,
     this.quests = const <CommunityQuest>[],
   });
 
+  final _CommunityProfileVisit visit;
   final CommunityCreatorProfile creator;
   final bool isSelf;
   final CommunityGoldBalance? goldBalance;
@@ -41,38 +43,40 @@ class _CommunityCreatorPanel extends StatelessWidget {
     useSafeArea: true,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (sheetContext) => SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            communityText(sheetContext, 'Community badges', 'شارات المجتمع'),
-            style: Theme.of(
-              sheetContext,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 12),
-          for (final badge in creator.badges)
-            ListTile(
-              key: Key('community-creator-badge-${badge.badgeKey}'),
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                child: Icon(
+    builder: (sheetContext) => visit.guard(
+      SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              communityText(sheetContext, 'Community badges', 'شارات المجتمع'),
+              style: Theme.of(
+                sheetContext,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            for (final badge in creator.badges)
+              ListTile(
+                key: Key('community-creator-badge-${badge.badgeKey}'),
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  child: Icon(
+                    badge.earned
+                        ? Icons.verified_rounded
+                        : Icons.lock_outline_rounded,
+                  ),
+                ),
+                title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
+                trailing: Text(
                   badge.earned
-                      ? Icons.verified_rounded
-                      : Icons.lock_outline_rounded,
+                      ? communityText(sheetContext, 'Earned', 'مكتسبة')
+                      : communityText(sheetContext, 'Locked', 'مقفلة'),
                 ),
               ),
-              title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
-              trailing: Text(
-                badge.earned
-                    ? communityText(sheetContext, 'Earned', 'مكتسبة')
-                    : communityText(sheetContext, 'Locked', 'مقفلة'),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     ),
   );
@@ -83,74 +87,81 @@ class _CommunityCreatorPanel extends StatelessWidget {
         useSafeArea: true,
         showDragHandle: true,
         isScrollControlled: true,
-        builder: (sheetContext) => SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                communityText(
-                  sheetContext,
-                  'Creator Center',
-                  'مركز صانع المحتوى',
+        builder: (sheetContext) => visit.guard(
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  communityText(
+                    sheetContext,
+                    'Creator Center',
+                    'مركز صانع المحتوى',
+                  ),
+                  style: Theme.of(
+                    sheetContext,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
                 ),
-                style: Theme.of(
-                  sheetContext,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 14),
-              if (creator.postsVisible && creator.approvedPosts != null)
+                const SizedBox(height: 14),
+                if (creator.postsVisible && creator.approvedPosts != null)
+                  _CreatorMetricRow(
+                    icon: Icons.article_outlined,
+                    label: communityText(
+                      sheetContext,
+                      'Approved moments',
+                      'اللحظات المعتمدة',
+                    ),
+                    value: creator.approvedPosts.toString(),
+                  ),
+                if (creator.followersVisible && creator.followers != null)
+                  _CreatorMetricRow(
+                    icon: Icons.people_outline_rounded,
+                    label: communityText(
+                      sheetContext,
+                      'Followers',
+                      'المتابعون',
+                    ),
+                    value: creator.followers.toString(),
+                  ),
+                if (creator.postsVisible && creator.likesReceived != null)
+                  _CreatorMetricRow(
+                    icon: Icons.favorite_border_rounded,
+                    label: communityText(
+                      sheetContext,
+                      'Likes received',
+                      'الإعجابات المستلمة',
+                    ),
+                    value: creator.likesReceived.toString(),
+                  ),
+                if (creator.postsVisible && creator.commentsReceived != null)
+                  _CreatorMetricRow(
+                    icon: Icons.mode_comment_outlined,
+                    label: communityText(
+                      sheetContext,
+                      'Comments received',
+                      'التعليقات المستلمة',
+                    ),
+                    value: creator.commentsReceived.toString(),
+                  ),
                 _CreatorMetricRow(
-                  icon: Icons.article_outlined,
+                  icon: Icons.group_add_outlined,
                   label: communityText(
                     sheetContext,
-                    'Approved moments',
-                    'اللحظات المعتمدة',
+                    'Qualified referrals',
+                    'الدعوات المؤهلة',
                   ),
-                  value: creator.approvedPosts.toString(),
+                  value: creator.qualifiedReferrals.toString(),
                 ),
-              if (creator.followersVisible && creator.followers != null)
-                _CreatorMetricRow(
-                  icon: Icons.people_outline_rounded,
-                  label: communityText(sheetContext, 'Followers', 'المتابعون'),
-                  value: creator.followers.toString(),
-                ),
-              if (creator.postsVisible && creator.likesReceived != null)
-                _CreatorMetricRow(
-                  icon: Icons.favorite_border_rounded,
-                  label: communityText(
-                    sheetContext,
-                    'Likes received',
-                    'الإعجابات المستلمة',
-                  ),
-                  value: creator.likesReceived.toString(),
-                ),
-              if (creator.postsVisible && creator.commentsReceived != null)
-                _CreatorMetricRow(
-                  icon: Icons.mode_comment_outlined,
-                  label: communityText(
-                    sheetContext,
-                    'Comments received',
-                    'التعليقات المستلمة',
-                  ),
-                  value: creator.commentsReceived.toString(),
-                ),
-              _CreatorMetricRow(
-                icon: Icons.group_add_outlined,
-                label: communityText(
-                  sheetContext,
-                  'Qualified referrals',
-                  'الدعوات المؤهلة',
-                ),
-                value: creator.qualifiedReferrals.toString(),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
 
   Future<void> _openCertification(BuildContext context) async {
+    if (!visit.isCurrent()) return;
     final status = creator.certificationStatus;
     final (title, body, icon) = switch (status) {
       CommunityCreatorCertificationStatus.approved => (
@@ -183,16 +194,18 @@ class _CommunityCreatorPanel extends StatelessWidget {
     };
     await showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        icon: Icon(icon),
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(communityText(dialogContext, 'Close', 'إغلاق')),
-          ),
-        ],
+      builder: (dialogContext) => visit.guard(
+        AlertDialog(
+          icon: Icon(icon),
+          title: Text(title),
+          content: Text(body),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(communityText(dialogContext, 'Close', 'إغلاق')),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -246,7 +259,9 @@ class _CommunityCreatorPanel extends StatelessWidget {
                 ActionChip(
                   key: const Key('community-creator-badges'),
                   avatar: const Icon(Icons.emoji_events_outlined, size: 18),
-                  onPressed: () => _openBadges(context),
+                  onPressed: () {
+                    if (visit.isCurrent()) _openBadges(context);
+                  },
                   label: Text(
                     '$badgeCount ${communityText(context, 'Badges', 'شارات')}',
                   ),
@@ -288,7 +303,9 @@ class _CommunityCreatorPanel extends StatelessWidget {
                         'Creator Center',
                         'مركز صانع المحتوى',
                       ),
-                      onTap: () => _openCreatorCenter(context),
+                      onTap: () {
+                        if (visit.isCurrent()) _openCreatorCenter(context);
+                      },
                     ),
                     _CreatorToolTile(
                       key: const Key('community-creator-rewards'),
@@ -298,7 +315,11 @@ class _CommunityCreatorPanel extends StatelessWidget {
                         'Creator Rewards',
                         'مكافآت صانع المحتوى',
                       ),
-                      onTap: () => context.push('/community/rewards'),
+                      onTap: () {
+                        if (visit.isCurrent()) {
+                          context.push('/community/rewards');
+                        }
+                      },
                     ),
                     _CreatorToolTile(
                       key: const Key('community-creator-certification'),
@@ -318,7 +339,9 @@ class _CommunityCreatorPanel extends StatelessWidget {
                         'Community home',
                         'الصفحة الرئيسية للمجتمع',
                       ),
-                      onTap: () => context.go('/community'),
+                      onTap: () {
+                        if (visit.isCurrent()) context.go('/community');
+                      },
                     ),
                   ];
                   return Wrap(
@@ -334,6 +357,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
               if (goldBalance != null || quests.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 _CommunityCreatorRewardsSnapshot(
+                  visit: visit,
                   balance: goldBalance,
                   quests: quests,
                 ),
@@ -380,7 +404,11 @@ class _CommunityCreatorPanel extends StatelessWidget {
                         ),
                         TextButton(
                           key: const Key('community-task-center-open'),
-                          onPressed: () => context.push('/community/rewards'),
+                          onPressed: () {
+                            if (visit.isCurrent()) {
+                              context.push('/community/rewards');
+                            }
+                          },
                           child: Text(communityText(context, 'Open', 'فتح')),
                         ),
                       ],
@@ -398,10 +426,12 @@ class _CommunityCreatorPanel extends StatelessWidget {
 
 class _CommunityCreatorRewardsSnapshot extends StatelessWidget {
   const _CommunityCreatorRewardsSnapshot({
+    required this.visit,
     required this.balance,
     required this.quests,
   });
 
+  final _CommunityProfileVisit visit;
   final CommunityGoldBalance? balance;
   final List<CommunityQuest> quests;
 
@@ -471,7 +501,9 @@ class _CommunityCreatorRewardsSnapshot extends StatelessWidget {
                     'Open rewards',
                     'فتح المكافآت',
                   ),
-                  onPressed: () => context.push('/community/rewards'),
+                  onPressed: () {
+                    if (visit.isCurrent()) context.push('/community/rewards');
+                  },
                   icon: const Icon(Icons.chevron_right_rounded),
                 ),
               ],

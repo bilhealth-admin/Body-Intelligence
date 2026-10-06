@@ -2,8 +2,12 @@ part of 'community_hub_page.dart';
 
 /// A single, discoverable entry point keeps the landing screen devoted to posts.
 class _CommunityNavigationSheet extends StatefulWidget {
-  const _CommunityNavigationSheet({required this.repository});
+  const _CommunityNavigationSheet({
+    required this.repository,
+    required this.selectedFeedMode,
+  });
   final CommunityRepository repository;
+  final CommunityFeedMode selectedFeedMode;
 
   @override
   State<_CommunityNavigationSheet> createState() =>
@@ -34,6 +38,7 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
+            _CommunityFeedModeControl(selectedMode: widget.selectedFeedMode),
             _item(
               'account',
               Icons.account_circle_outlined,

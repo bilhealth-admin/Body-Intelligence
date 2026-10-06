@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/environment/app_environment.dart';
 import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../../app/services/recoverable_image_picker.dart';
@@ -20,6 +21,7 @@ import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../data/database/database_provider.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/repositories/daily_log_repository.dart';
+import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
@@ -31,8 +33,8 @@ import '../../commerce/providers/commerce_providers.dart';
 import '../../community/presentation/community_gold_balance_action.dart';
 import '../../foods/providers/food_provider.dart';
 import '../domain/intelligence_action.dart';
-import '../domain/bil_tool_registry.dart';
 import '../domain/coach_action_permission.dart';
+import '../domain/coach_action_admission.dart';
 import '../domain/bil_navigation_registry.dart';
 import '../domain/bil_action_receipt.dart';
 import '../domain/coach_context_snapshot.dart';
@@ -49,6 +51,7 @@ import '../services/coach_speech_policy.dart';
 import '../services/coach_voice_turn_policy.dart';
 import '../services/coach_daily_brief.dart';
 import '../services/coach_memory_repository.dart';
+import '../services/coach_native_command_repository.dart';
 import '../services/coach_voice_transcript_normalizer.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
@@ -69,6 +72,7 @@ import '../intelligence_locale_copy.dart';
 import '../ai_coach_chat_copy.dart';
 import 'coach_message_text.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
+import '../../../app/router/bil_quick_add_presenter.dart';
 import 'workspace/coach_reference_workspace.dart';
 import 'coach_anchored_history.dart';
 
@@ -87,7 +91,13 @@ part 'intelligence_vision_flow.dart';
 part 'intelligence_query_flow.dart';
 part 'intelligence_query_decision.dart';
 part 'intelligence_action_flow.dart';
+part 'intelligence_meal_action_flow.dart';
+part 'intelligence_meal_owner.dart';
+part 'intelligence_native_owner.dart';
+part 'intelligence_native_action_flow.dart';
+part 'intelligence_meal_recovery.dart';
 part 'intelligence_action_runtime.dart';
+part 'intelligence_action_confirmation.dart';
 
 /// Single injectable wall clock for conversation copy and seeded messages.
 ///
@@ -134,6 +144,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final catalogGrounding = CoachCatalogGrounding();
   final messages = <IntelligenceMessage>[];
   final executingActionKeys = <String>{};
+  final completedActionOperationIds = <String>{};
   final actionExecutionPhases = <String, _CoachActionExecutionPhase>{};
   String? lastClearWritingLanguageTag;
   Timer? voiceSilenceTimer;
@@ -175,6 +186,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   String? activeConversationId;
   Future<void> conversationPersistenceTail = Future<void>.value();
   int conversationPersistenceEpoch = 0;
+  int conversationLoadGeneration = 0;
   late final PreferencesRepository conversationPreferences;
   late final WeightRepository conversationWeightRepository;
   late final DailyLogRepository conversationDailyLogRepository;
@@ -186,6 +198,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final messageFeedback = <String, bool>{};
   final reportedMessages = <String>{};
   final undoOperations = <String, _CoachUndoOperation>{};
+  final preparedMealActions = <String, _PreparedCoachMealAction>{};
+  final preparedNativeActions = <String, _PreparedCoachNativeAction>{};
+  final recoveredMealOwners = <_CoachMealOwnerHandle>[];
   // Only the latest failed turn owns a retry affordance. The failure remains
   // part of the transcript, while the transient progress row is not rendered
   // as a second error surface.
@@ -377,6 +392,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   void dispose() {
+    _disposePreparedCoachMealActions();
+    _disposePreparedCoachNativeActions();
     voiceCaptureGeneration++;
     if (conversationReady) unawaited(_saveConversation());
     WidgetsBinding.instance.removeObserver(this);

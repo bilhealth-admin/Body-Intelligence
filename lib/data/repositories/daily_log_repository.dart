@@ -301,7 +301,22 @@ class DailyLogRepository {
         );
     double sum(double Function(MealItem) select) =>
         items.fold(0, (total, item) => total + select(item));
-    final carbs = items.isEmpty ? null : sum((item) => item.carbs);
+    double? sumCore(
+      TrackedNutrient nutrient,
+      double Function(MealItem) select,
+    ) =>
+        items.isNotEmpty &&
+            items.every(
+              (item) => NutrientEvidenceMask.coreIsKnown(
+                mask: item.nutrientEvidenceMask,
+                source: item.foodSourceSnapshot,
+                nutrient: nutrient,
+                value: select(item),
+              ),
+            )
+        ? sum(select)
+        : null;
+    final carbs = sumCore(TrackedNutrient.carbohydrates, (item) => item.carbs);
     final fiber = allFiberKnown ? sum((item) => item.fiber) : null;
     return AuthoritativeDailyLedger(
       date: date,
@@ -309,10 +324,10 @@ class DailyLogRepository {
           ? DayLifecycleState.notStarted
           : DayLifecycleState.open,
       weightKg: weight?.weight,
-      calories: items.isEmpty ? null : sum((item) => item.calories),
-      protein: items.isEmpty ? null : sum((item) => item.protein),
+      calories: sumCore(TrackedNutrient.calories, (item) => item.calories),
+      protein: sumCore(TrackedNutrient.protein, (item) => item.protein),
       carbohydrates: carbs,
-      fat: items.isEmpty ? null : sum((item) => item.fats),
+      fat: sumCore(TrackedNutrient.fat, (item) => item.fats),
       fiber: fiber,
       netCarbohydrates: carbs != null && fiber != null
           ? (carbs - fiber).clamp(0, double.infinity)

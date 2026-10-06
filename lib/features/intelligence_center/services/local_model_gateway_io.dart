@@ -493,8 +493,12 @@ update_goal {"targetWeightKg":number,"targetDate"?:"YYYY-MM-DD"};
 save_measurements {"date"?:"YYYY-MM-DD", one or more of "neckCm", "waistCm",
 "hipsCm", "chestCm", "armCm", "thighCm":number};
 quick_add_macros {"mealType":"breakfast|lunch|dinner|snack",
-"calories":number,"protein":number,"carbohydrates":number,"fat":number,
+"calories"?:number|null,"protein"?:number|null,
+"carbohydrates"?:number|null,"fat"?:number|null,
 "date"?:"YYYY-MM-DD"};
+At least one supplied nutrient must be positive. Omit unknown nutrients or
+use null; zero means a known zero. A calorie-only entry such as1905 calories
+without meals supplies calories only; never invent foods, macros or a USDA source.
 update_meal_item {"itemId":integer,"quantityGrams":number};
 move_meal_item {"itemId":integer,"mealType":"breakfast|lunch|dinner|snack"};
 delete_meal_item {"itemId":integer};

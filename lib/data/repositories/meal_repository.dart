@@ -1,8 +1,13 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
 import '../database/nutrient_evidence.dart';
+import '../database/database_scope.dart';
+import 'preferences_repository.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/daily_nutrition_intelligence.dart';
 import '../../features/nutrition/domain/dietary_preferences.dart';
@@ -16,6 +21,10 @@ import '../../features/nutrition/services/nutrition_calculation_engine.dart';
 part 'meal_repository_models.dart';
 part 'meal_repository_copying.dart';
 part 'meal_repository_queries.dart';
+part 'meal_repository_coach_models.dart';
+part 'meal_repository_coach_commands.dart';
+part 'meal_repository_coach_journal.dart';
+part 'meal_repository_coach_undo.dart';
 
 class MealRepository {
   final AppDatabase _database;
@@ -364,25 +373,30 @@ class MealRepository {
     _validateQuantity(quantity);
     await _database.transaction(() async {
       final existing = await _mealItem(id);
-      final food = await _activeFood(existing.foodId);
-      final portion = _calculatePortion(food, quantity);
+      if (existing.deletedAt != null) {
+        throw StateError('Cannot change a deleted meal item');
+      }
+      _validateQuantity(existing.quantity);
+      // A diary item owns its historical nutrition and evidence. A catalog
+      // refresh must not relabel new nutrition as that older source snapshot.
+      final scale = quantity / existing.quantity;
       await (_database.update(
         _database.mealItems,
       )..where((row) => row.id.equals(id))).write(
         MealItemsCompanion(
           quantity: Value(quantity),
-          calories: Value(portion.valueOrZero(FoodNutrient.calories)),
-          protein: Value(portion.valueOrZero(FoodNutrient.protein)),
-          carbs: Value(portion.valueOrZero(FoodNutrient.carbohydrates)),
-          fats: Value(portion.valueOrZero(FoodNutrient.fat)),
-          fiber: Value(portion.valueOrZero(FoodNutrient.fiber)),
-          sodium: Value(portion.valueOrZero(FoodNutrient.sodium)),
-          potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
-          calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
-          magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
-          phosphorus: Value(portion.valueOrZero(FoodNutrient.phosphorus)),
-          sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
-          nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
+          calories: Value(existing.calories * scale),
+          protein: Value(existing.protein * scale),
+          carbs: Value(existing.carbs * scale),
+          fats: Value(existing.fats * scale),
+          fiber: Value(existing.fiber * scale),
+          sodium: Value(existing.sodium * scale),
+          potassium: Value(existing.potassium * scale),
+          calcium: Value(existing.calcium * scale),
+          magnesium: Value(existing.magnesium * scale),
+          phosphorus: Value(existing.phosphorus * scale),
+          sugar: Value(existing.sugar * scale),
+          nutrientEvidenceMask: Value(existing.nutrientEvidenceMask),
           updatedAt: Value(DateTime.now()),
           revision: Value(existing.revision + 1),
           syncStatus: const Value('pending'),

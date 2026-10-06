@@ -20,6 +20,30 @@ class NutrientEvidenceMask {
   static bool contains(int mask, TrackedNutrient nutrient) =>
       mask & bit(nutrient) != 0;
 
+  /// Modern snapshots explicitly distinguish unknown macros from known zero.
+  /// Legacy required core columns predate those bits; keep their historical
+  /// meaning, while downloaded/Quick Add/community rows retain strict evidence.
+  static bool coreIsKnown({
+    required int mask,
+    required String source,
+    required TrackedNutrient nutrient,
+    required double value,
+  }) {
+    final coreMask =
+        bit(TrackedNutrient.calories) |
+        bit(TrackedNutrient.protein) |
+        bit(TrackedNutrient.carbohydrates) |
+        bit(TrackedNutrient.fat);
+    if (mask & coreMask != 0 ||
+        source == 'quick_add' ||
+        source.startsWith('BIL community')) {
+      return contains(mask, nutrient);
+    }
+    return source != 'bil-mobile-catalog' ||
+        contains(mask, nutrient) ||
+        value != 0;
+  }
+
   static int fromValues({
     double? fiber,
     double? sodium,

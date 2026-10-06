@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
 import 'package:body_intelligence_log/app/theme/premium_motion_tokens.dart';
+import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_attention_scope.dart';
 import 'package:body_intelligence_log/features/profile/profile_settings_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:flutter/material.dart';
@@ -113,6 +117,64 @@ Widget shellApp({
 }
 
 void main() {
+  testWidgets('shared More badge follows authoritative readback and owner', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    var current = const CommunityAttention(
+      unreadMessages: 4,
+      incomingRequests: 2,
+      communityUpdates: 3,
+    );
+    Completer<CommunityAttention>? pending;
+    final controller = CommunityAttentionController(
+      () => pending?.future ?? Future.value(current),
+    );
+    controller.setOwner('owner-a');
+    await controller.refresh();
+    await tester.pumpWidget(
+      CommunityAttentionScope(controller: controller, child: shellApp()),
+    );
+    await tester.pumpAndSettle();
+    final more = find.byKey(const Key('shell-more-destination'));
+    expect(find.descendant(of: more, matching: find.text('9')), findsOneWidget);
+    expect(find.bySemanticsLabel('More, 9'), findsOneWidget);
+    expect(controller.value.unreadMessages, 4);
+    expect(controller.value.incomingRequests, 2);
+
+    pending = Completer<CommunityAttention>();
+    final staleRead = controller.refresh();
+    controller.setOwner(null);
+    await tester.pump();
+    expect(
+      find.descendant(of: more, matching: find.byType(Badge)),
+      findsNothing,
+    );
+    pending.complete(const CommunityAttention(unreadMessages: 99));
+    await staleRead;
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: more, matching: find.byType(Badge)),
+      findsNothing,
+    );
+    pending = null;
+    current = const CommunityAttention(incomingRequests: 2);
+    controller.setOwner('owner-b');
+    await controller.refresh();
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: more, matching: find.text('2')), findsOneWidget);
+    expect(find.bySemanticsLabel('More, 2'), findsOneWidget);
+    await tester.tap(more);
+    await tester.pumpAndSettle();
+    expect(find.text('settings'), findsOneWidget);
+    expect(controller.value.incomingRequests, 2);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    controller.dispose();
+  });
+
   test(
     'Quick Add return paths preserve every shell root and reject redirects',
     () {
@@ -320,7 +382,7 @@ void main() {
     expect(find.text('settings'), findsNothing);
   });
 
-  testWidgets('compact dock shows Dashboard, Quick Add, and More only', (
+  testWidgets('compact dock shows the five approved primary destinations', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(600, 900);
@@ -336,6 +398,20 @@ void main() {
     );
     expect(find.byKey(const Key('shell-quick-add')), findsOneWidget);
     expect(find.byKey(const Key('shell-more-destination')), findsOneWidget);
+    expect(find.byKey(const Key('shell-coach-destination')), findsOneWidget);
+    expect(
+      find.byKey(const Key('shell-community-destination')),
+      findsOneWidget,
+    );
+    for (final label in [
+      'Home',
+      'AI Coach',
+      'Quick Add',
+      'Community',
+      'More',
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
     expect(find.text('Diary'), findsNothing);
     expect(find.text('Progress'), findsNothing);
 

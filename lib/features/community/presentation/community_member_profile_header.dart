@@ -2,6 +2,7 @@ part of 'community_hub_page.dart';
 
 class _CommunityMemberProfileHeader extends StatelessWidget {
   const _CommunityMemberProfileHeader({
+    required this.visit,
     required this.profile,
     required this.creator,
     required this.coverUrl,
@@ -12,6 +13,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
     required this.onOpenConnections,
   });
 
+  final _CommunityProfileVisit visit;
   final CommunityProfileOverview profile;
   final CommunityCreatorProfile? creator;
   final String? coverUrl;
@@ -22,6 +24,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
   final ValueChanged<CommunityProfileConnectionKind> onOpenConnections;
 
   Future<void> _shareProfile(BuildContext context) async {
+    if (!visit.isCurrent()) return;
     final handle = profile.handle;
     final text = [
       profile.displayName,
@@ -31,7 +34,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
     try {
       await SharePlus.instance.share(ShareParams(text: text));
     } on Object {
-      if (!context.mounted) return;
+      if (!context.mounted || !visit.isCurrent()) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -58,7 +61,9 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
     ),
     child: IconButton(
       tooltip: tooltip,
-      onPressed: onPressed,
+      onPressed: () {
+        if (visit.isCurrent()) onPressed();
+      },
       color: Colors.white,
       icon: Icon(icon),
     ),
@@ -71,7 +76,11 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
     VoidCallback? onTap,
   }) => InkWell(
     borderRadius: BorderRadius.circular(14),
-    onTap: onTap,
+    onTap: onTap == null
+        ? null
+        : () {
+            if (visit.isCurrent()) onTap();
+          },
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       child: Column(
@@ -140,7 +149,11 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                   child: profile.isSelf
                       ? FilledButton.tonalIcon(
                           key: const Key('community-edit-profile'),
-                          onPressed: () => context.push('/community/profile'),
+                          onPressed: () {
+                            if (visit.isCurrent()) {
+                              context.push('/community/profile');
+                            }
+                          },
                           icon: const Icon(Icons.edit_outlined, size: 18),
                           label: Text(
                             communityText(
@@ -297,12 +310,18 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                       _ProfileRelationshipAction(
                         profile: profile,
                         busy: relationshipBusy,
-                        onRequestFriend: onRequestFriend,
+                        onRequestFriend: () {
+                          if (visit.isCurrent()) onRequestFriend();
+                        },
                       ),
                       if (profile.viewerFollows || profile.allowFollows)
                         OutlinedButton.icon(
                           key: const Key('community-profile-follow-action'),
-                          onPressed: followBusy ? null : onToggleFollow,
+                          onPressed: followBusy
+                              ? null
+                              : () {
+                                  if (visit.isCurrent()) onToggleFollow();
+                                },
                           icon: followBusy
                               ? const SizedBox.square(
                                   dimension: 16,

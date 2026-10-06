@@ -52,7 +52,7 @@ class _NavigationRepository extends CommunityRepository {
 
 Color _dockColor(WidgetTester tester) {
   final dock = tester.widget<DecoratedBox>(
-    find.byKey(const Key('bil-reference-navigation')),
+    find.byKey(const Key('bil-reference-nav-surface')),
   );
   return (dock.decoration as BoxDecoration).gradient!.colors.first;
 }
@@ -89,7 +89,7 @@ void main() {
         final dark = override ?? brightness == Brightness.dark;
         expect(
           _dockColor(tester),
-          dark ? const Color(0xFF172530) : const Color(0xFFFFFFFF),
+          dark ? const Color(0xFF121B28) : const Color(0xFFFFFFFF),
         );
         for (var index = 0; index < 5; index++) {
           final target = find.byKey(Key('bil-reference-nav-$index'));
@@ -118,7 +118,7 @@ void main() {
     expect(_dockColor(tester), const Color(0xFFFFFFFF));
     await tester.pumpWidget(host(Brightness.dark));
     await tester.pumpAndSettle();
-    expect(_dockColor(tester), const Color(0xFF172530));
+    expect(_dockColor(tester), const Color(0xFF121B28));
     await tester.tap(find.byKey(const Key('bil-reference-nav-2')));
     expect(selections, [2]);
     expect(tester.takeException(), isNull);
@@ -128,7 +128,7 @@ void main() {
     for (final brightness in Brightness.values) {
       for (final section in ['explore', 'following', 'circles']) {
         testWidgets(
-          'Community Quick Add opens diary: $language $brightness $section',
+          'Community Quick Add opens the shared sheet then diary: $language $brightness $section',
           (tester) async {
             final repository = _NavigationRepository(client);
             final router = GoRouter(
@@ -150,45 +150,71 @@ void main() {
               ],
             );
             addTearDown(router.dispose);
-            await tester.pumpWidget(
-              ProviderScope(
-                child: MaterialApp.router(
-                  routerConfig: router,
-                  locale: Locale(language),
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates: const [
-                    AppLocalizations.delegate,
-                    ...GlobalMaterialLocalizations.delegates,
-                  ],
-                  theme: ThemeData(brightness: brightness),
+            try {
+              await tester.pumpWidget(
+                ProviderScope(
+                  child: MaterialApp.router(
+                    routerConfig: router,
+                    locale: Locale(language),
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates: const [
+                      AppLocalizations.delegate,
+                      ...GlobalMaterialLocalizations.delegates,
+                    ],
+                    theme: ThemeData(brightness: brightness),
+                  ),
                 ),
-              ),
-            );
-            await tester.pumpAndSettle();
-            await tester.tap(
-              find.byKey(Key('community-hub-$section-tab')).hitTestable(),
-            );
-            await tester.pumpAndSettle();
-            final readsBeforeTap = repository.policyReads;
-            expect(readsBeforeTap, greaterThan(0));
-            expect(
-              _dockColor(tester),
-              brightness == Brightness.dark
-                  ? const Color(0xFF172530)
-                  : const Color(0xFFFFFFFF),
-            );
-            final quickAdd = find.byKey(const Key('bil-reference-nav-2'));
-            expect(quickAdd.hitTestable(), findsOneWidget);
-            await tester.tap(quickAdd);
-            await tester.pumpAndSettle();
-            expect(
-              router.routeInformationProvider.value.uri.path,
-              BilReferenceBottomBar.routes[2],
-            );
-            expect(find.byKey(const Key('diary-target')), findsOneWidget);
-            expect(repository.policyReads, readsBeforeTap);
-            expect(tester.takeException(), isNull);
-            await tester.pumpWidget(const SizedBox.shrink());
+              );
+              await tester.pumpAndSettle();
+              await tester.tap(
+                find.byKey(Key('community-hub-$section-tab')).hitTestable(),
+              );
+              await tester.pumpAndSettle();
+              final readsBeforeTap = repository.policyReads;
+              expect(readsBeforeTap, greaterThan(0));
+              expect(
+                _dockColor(tester),
+                brightness == Brightness.dark
+                    ? const Color(0xFF121B28)
+                    : const Color(0xFFFFFFFF),
+              );
+              final quickAdd = find.byKey(const Key('bil-reference-nav-2'));
+              expect(quickAdd.hitTestable(), findsOneWidget);
+              await tester.tap(quickAdd);
+              await tester.pumpAndSettle();
+              expect(
+                find.byKey(const Key('quick-add-half-sheet')),
+                findsOneWidget,
+              );
+              expect(
+                router.routeInformationProvider.value.uri.path,
+                '/community',
+              );
+              expect(find.byKey(const Key('diary-target')), findsNothing);
+              expect(repository.policyReads, readsBeforeTap);
+              await tester.tap(find.byKey(const Key('quick-add-primary-0')));
+              await tester.pumpAndSettle();
+              expect(
+                find.byKey(const Key('quick-add-half-sheet')),
+                findsNothing,
+              );
+              expect(find.byKey(const Key('diary-target')), findsOneWidget);
+              // A push keeps the source route in the navigator. Read the actual
+              // displayed page's state rather than the root browser URL value.
+              final displayed = GoRouterState.of(
+                tester.element(find.byKey(const Key('diary-target'))),
+              ).uri;
+              expect(displayed.path, BilReferenceBottomBar.routes[2]);
+              expect(displayed.queryParameters, {
+                'foodLog': '1',
+                'from': '/community',
+              });
+              expect(repository.policyReads, readsBeforeTap);
+              expect(tester.takeException(), isNull);
+            } finally {
+              await tester.pumpWidget(const SizedBox.shrink());
+              await tester.pumpAndSettle();
+            }
           },
         );
       }

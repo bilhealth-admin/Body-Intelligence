@@ -23,4 +23,6 @@ final intelligenceCenterNavigationExecutorProvider =
 enum _CoachActionExecutionPhase { idle, running, failed }
 
 String _coachActionExecutionKey(IntelligenceAction action) =>
-    '${action.type.name}:${action.id}';
+    action.operationId == null
+    ? '${action.type.name}:${action.id}'
+    : 'operation:${action.operationId}';

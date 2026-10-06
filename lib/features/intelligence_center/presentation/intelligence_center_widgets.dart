@@ -124,11 +124,13 @@ class _AiCoachEntryWelcome extends StatelessWidget {
 }
 
 final class _CoachUndoOperation {
-  _CoachUndoOperation({required this.receipt, required this.undo});
+  _CoachUndoOperation({required this.receipt, this.undo, this.undoReadback});
 
   final BilActionReceipt receipt;
-  final Future<void> Function() undo;
+  final Future<void> Function()? undo;
+  final Future<BilActionReceipt> Function()? undoReadback;
   bool completed = false;
+  bool running = false;
 }
 
 class _InlineCoachDecision extends StatelessWidget {

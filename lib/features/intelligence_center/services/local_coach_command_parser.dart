@@ -1,6 +1,9 @@
 import '../domain/intelligence_action.dart';
+import '../domain/coach_action_admission.dart';
 import '../intelligence_locale_copy.dart';
 import 'coach_date_resolver.dart';
+
+part 'local_coach_command_quantity.dart';
 
 /// Deterministic, offline command understanding for user-owned BIL data.
 /// Structured values are validated locally and writes still require consent.
@@ -12,6 +15,18 @@ class LocalCoachCommandParser {
   final CoachDateResolver dateResolver;
 
   List<IntelligenceAction> parse(String input, {bool? arabic, String? locale}) {
+    const admission = CoachActionAdmission();
+    return [
+      for (final action in _parse(input, arabic: arabic, locale: locale))
+        if (admission.bind(action) case final binding?) binding.action,
+    ];
+  }
+
+  List<IntelligenceAction> _parse(
+    String input, {
+    bool? arabic,
+    String? locale,
+  }) {
     final code = locale ?? (arabic == true ? 'ar' : 'en');
     String tr(String en, String ar) => intelligenceTextFor(code, en, ar);
     final value = _normalizeForMatching(input);
@@ -22,6 +37,7 @@ class LocalCoachCommandParser {
       return [
         IntelligenceAction(
           id: 'set-theme-$themeMode',
+          toolId: 'set_theme_mode',
           type: IntelligenceActionType.setThemeMode,
           label: tr('Change app appearance', 'تغيير مظهر التطبيق'),
           requiresConfirmation: false,
@@ -34,6 +50,7 @@ class LocalCoachCommandParser {
       return [
         IntelligenceAction(
           id: 'set-language-$requestedLocale',
+          toolId: 'set_language',
           type: IntelligenceActionType.setLanguage,
           label: tr('Change app language', 'تغيير لغة التطبيق'),
           requiresConfirmation: false,
@@ -55,6 +72,7 @@ class LocalCoachCommandParser {
       return [
         IntelligenceAction(
           id: 'request-account-deletion',
+          toolId: 'request_account_deletion',
           type: IntelligenceActionType.requestAccountDeletion,
           label: tr(
             'Review account and data deletion',
@@ -81,6 +99,7 @@ class LocalCoachCommandParser {
       return [
         IntelligenceAction(
           id: 'manage-subscription',
+          toolId: 'manage_subscription',
           type: IntelligenceActionType.manageSubscription,
           label: tr(
             'Open official subscription management',
@@ -92,14 +111,10 @@ class LocalCoachCommandParser {
     }
 
     final number = _firstNumber(value);
-    final hasWaterConcept = _contains(value, const [
-      'water',
-      'eau',
-      'agua',
-      'ماء',
-      'مياه',
-    ]);
-    final hasWaterUnit = _containsWholeToken(value, const ['su', 'ml', 'مل']);
+    final hasWaterConcept = _hasQuantityUnit(
+      value,
+      'water|eau|agua|su|ماء|الماء|مياه|المياه|مويه|المويه|موية|الموية|ميه|الميه',
+    );
     final hasWaterLogIntent = _contains(value, const [
       'log water',
       'add water',
@@ -113,12 +128,13 @@ class LocalCoachCommandParser {
       'افتح سجل الماء',
       'راجع سجل الماء',
     ]);
-    if (hasWaterConcept || hasWaterUnit) {
-      final amount = number?.round();
+    if (hasWaterConcept) {
+      final amount = _waterMilliliters(value);
       if (amount != null && amount >= 1 && amount <= 5000) {
         return [
           IntelligenceAction(
             id: 'add-water-$amount',
+            toolId: 'log_water',
             type: IntelligenceActionType.addWater,
             label: _waterLabel(code, amount),
             requiresConfirmation: true,
@@ -162,6 +178,7 @@ class LocalCoachCommandParser {
       return [
         IntelligenceAction(
           id: 'update-goal-$number',
+          toolId: 'update_goal',
           type: IntelligenceActionType.updateGoal,
           label: tr(
             'Update target weight to $number kg',
@@ -188,20 +205,25 @@ class LocalCoachCommandParser {
       'kilo',
       'ağırlık',
     ]);
-    if (hasWeightConcept) {
-      if (number != null && number >= 20 && number <= 500) {
+    if (hasWeightConcept && _isBodyWeightStatement(value)) {
+      final weight = _bodyWeightKilograms(value);
+      if (weight != null && weight >= 20 && weight <= 500) {
         final date = dateResolver.resolve(
           input,
           referenceLocal: DateTime.now(),
         );
+        if (date == null && dateResolver.hasExplicitDate(input)) {
+          return const [];
+        }
         return [
           IntelligenceAction(
-            id: 'add-weight-$number',
+            id: 'add-weight-$weight',
+            toolId: 'log_weight',
             type: IntelligenceActionType.addWeight,
-            label: _weightLabel(code, number),
+            label: _weightLabel(code, weight),
             requiresConfirmation: true,
             payload: {
-              'weightKg': number,
+              'weightKg': weight,
               if (date != null) 'date': _dateOnly(date),
             },
           ),
@@ -358,11 +380,10 @@ class LocalCoachCommandParser {
   }
 
   double? _firstNumber(String value) {
-    final normalized = value.replaceAll('٫', '.').replaceAll(',', '.');
-    final match = RegExp(
-      r'(?<!\d)(\d{1,3}(?:\.\d{1,2})?)(?!\d)',
-    ).firstMatch(normalized);
-    return match == null ? null : double.tryParse(match.group(1)!);
+    final matches = _quantityNumbers(value);
+    return matches.length == 1
+        ? double.tryParse(matches.single.group(0)!)
+        : null;
   }
 
   String _waterLabel(String locale, int amount) => switch (_code(locale)) {

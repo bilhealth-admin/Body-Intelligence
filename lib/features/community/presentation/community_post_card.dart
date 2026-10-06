@@ -7,6 +7,8 @@ class _CommunityPostCard extends StatefulWidget {
     required this.currentUserId,
     required this.actionsEnabled,
     required this.onAction,
+    this.ownerIsCurrent,
+    this.ownerChanges,
     this.referenceMetadata,
     this.viewCount,
     this.commentPreview,
@@ -20,6 +22,8 @@ class _CommunityPostCard extends StatefulWidget {
   final String currentUserId;
   final bool actionsEnabled;
   final ValueChanged<String> onAction;
+  final ValueGetter<bool>? ownerIsCurrent;
+  final Listenable? ownerChanges;
   final CommunityPostReferenceMetadata? referenceMetadata;
   final int? viewCount;
   final CommunityComment? commentPreview;
@@ -47,6 +51,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
 
   bool get _socialActionsAvailable =>
       widget.actionsEnabled &&
+      (widget.ownerIsCurrent?.call() ?? true) &&
       widget.post.moderationStatus == CommunityPostModerationStatus.approved;
 
   @override
@@ -70,7 +75,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
     }
   }
 
-  Future<void> _toggleLike() async {
+  Future<void> _toggleLike() => _runCardOwner((scope) async {
     if (_liking || !_socialActionsAvailable) return;
     setState(() => _liking = true);
     try {
@@ -78,9 +83,12 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
         widget.post.id,
         liked: !_stats.liked,
       );
-      if (mounted) setState(() => _stats = stats);
+      scope.check();
+      if (mounted && scope.isCurrent) setState(() => _stats = stats);
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !scope.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -93,11 +101,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _liking = false);
+      if (mounted && scope.isCurrent) setState(() => _liking = false);
     }
-  }
+  });
 
-  Future<void> _toggleSaved() async {
+  Future<void> _toggleSaved() => _runCardOwner((scope) async {
     if (_saving || !_socialActionsAvailable) return;
     setState(() => _saving = true);
     try {
@@ -105,12 +113,15 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
         widget.post.id,
         saved: !_saved,
       );
-      if (mounted) {
+      scope.check();
+      if (mounted && scope.isCurrent) {
         setState(() => _saved = result.saved);
         widget.onSavedChanged?.call(result.saved);
       }
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !scope.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -123,11 +134,13 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _saving = false);
+      if (mounted && scope.isCurrent) setState(() => _saving = false);
     }
-  }
+  });
 
-  Future<void> _sharePost(BuildContext anchorContext) async {
+  Future<void> _sharePost(BuildContext anchorContext) => _runCardOwner((
+    scope,
+  ) async {
     if (_sharing ||
         !widget.actionsEnabled ||
         widget.post.moderationStatus !=
@@ -146,8 +159,10 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               : box.localToGlobal(Offset.zero) & box.size,
         ),
       );
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (mounted) {
+      if (mounted && scope.isCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -163,9 +178,9 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
     } finally {
       _sharing = false;
     }
-  }
+  });
 
-  Future<void> _openDetail() async {
+  Future<void> _openDetail() => _runCardOwner((scope) async {
     if (!_socialActionsAvailable || _openingDetail) return;
     _openingDetail = true;
     try {
@@ -175,15 +190,19 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
           post: widget.post,
           initialStats: _stats,
           repository: widget.repository,
+          ownerIsCurrent: widget.ownerIsCurrent,
+          ownerChanges: widget.ownerChanges,
           referenceMetadata: widget.referenceMetadata,
         ),
       );
-      if (!mounted) return;
+      if (!mounted || !scope.isCurrent) return;
+      scope.check();
       try {
         final refreshed = await widget.repository.loadPostStats([
           widget.post.id,
         ]);
-        if (mounted && refreshed.length == 1) {
+        scope.check();
+        if (mounted && scope.isCurrent && refreshed.length == 1) {
           setState(() => _stats = refreshed.single);
         }
       } on Object {
@@ -192,7 +211,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
     } finally {
       _openingDetail = false;
     }
-  }
+  });
 
   @override
   Widget build(BuildContext context) => Container(
@@ -264,6 +283,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       _CommunityPostStatusChip(post: widget.post),
                     ] else if (widget.post.authorId != widget.currentUserId)
                       _CommunityAuthorRelationshipAction(
+                        ownerIsCurrent: widget.ownerIsCurrent,
                         post: widget.post,
                         repository: widget.repository,
                         enabled: widget.actionsEnabled,
@@ -277,7 +297,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                   key: Key('community-post-actions-${widget.post.id}'),
                   icon: const Icon(Icons.more_horiz_rounded),
                   enabled: widget.actionsEnabled,
-                  onSelected: widget.onAction,
+                  onSelected: (action) {
+                    if (widget.ownerIsCurrent?.call() ?? true) {
+                      widget.onAction(action);
+                    }
+                  },
                   itemBuilder: (_) => [
                     if (widget.post.authorId == widget.currentUserId)
                       PopupMenuItem(
@@ -358,6 +382,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
           if (widget.post.poll case final poll?) ...[
             const SizedBox(height: 12),
             _CommunityPollPanel(
+              ownerIsCurrent: widget.ownerIsCurrent,
               poll: poll,
               repository: widget.repository,
               compact: true,

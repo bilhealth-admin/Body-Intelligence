@@ -15,6 +15,7 @@ import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
+import '../../../app/router/bil_quick_add_presenter.dart';
 import '../../profile/services/profile_photo_service.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
@@ -52,14 +53,17 @@ import 'community_sapphire.dart';
 part 'community_feed_tab.dart';
 part 'community_feed_reference_suggestions.dart';
 part 'community_feed_reference_header.dart';
+part 'community_feed_mode_control.dart';
 
 part 'community_post_card.dart';
+part 'community_post_owner_scope.dart';
 part 'community_poll_panel.dart';
 part 'community_feed_pagination.dart';
 part 'community_post_composer_page.dart';
 part 'community_post_composer_owner_scope.dart';
 part 'community_post_composer_reference_actions.dart';
 part 'community_post_composer_reference_sections.dart';
+part 'community_post_composer_option_fields.dart';
 part 'community_post_composer_rendering.dart';
 part 'community_post_composer_toolbar.dart';
 part 'community_post_composer_switch_row.dart';
@@ -78,6 +82,9 @@ part 'community_circles_page.dart';
 part 'community_browse_view_counts.dart';
 part 'community_my_posts_page.dart';
 part 'community_member_profile_page.dart';
+part 'community_member_profile_owner_scope.dart';
+part 'community_member_profile_actions.dart';
+part 'community_member_profile_connections.dart';
 part 'community_member_profile_creator_widgets.dart';
 part 'community_member_profile_header.dart';
 part 'community_member_profile_content.dart';
@@ -113,6 +120,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   GlobalKey<_FeedTabState> _feedKey = GlobalKey<_FeedTabState>();
   bool _openingNavigation = false;
   _CommunityHubSection _section = _CommunityHubSection.explore;
+  CommunityFeedMode _feedMode = CommunityFeedMode.explore;
   StreamSubscription<AuthState>? _authSubscription;
   String? _ownerId;
   Future<CommunityProfileOverview?>? _profilePreview;
@@ -189,18 +197,25 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      CommunitySurface(child: Builder(builder: _buildHub));
+  Widget build(BuildContext context) => CommunitySurface(
+    child: LayoutBuilder(
+      builder: (context, constraints) =>
+          _buildHub(context, constraints.maxWidth),
+    ),
+  );
 
-  Widget _buildHub(BuildContext context) {
+  Widget _buildHub(BuildContext context, double width) {
     final repository = _repository;
+    final topTabsHeight = _communityHubTopTabsHeight(context, width);
     return Scaffold(
       bottomNavigationBar: repository == null
           ? null
           : BilReferenceBottomBar(
               selected: 3,
               onSelected: (index) {
-                if (index != 3) {
+                if (index == 2) {
+                  unawaited(showBilQuickAdd(context, originPath: '/community'));
+                } else if (index != 3) {
                   context.go(BilReferenceBottomBar.routes[index]);
                 }
               },
@@ -211,9 +226,10 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         titleSpacing: 16,
         title: Text(
           communityText(context, 'BIL Community', 'مجتمع BIL'),
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontSize: 27 * (width / 414).clamp(.78, 1.0),
+            fontWeight: FontWeight.w900,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -224,7 +240,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             onPressed: repository == null
                 ? null
                 : () => context.push('/community/people'),
-            icon: const Icon(Icons.search_rounded),
+            icon: const Icon(Icons.search_rounded, size: 32),
           ),
           IconButton(
             key: const Key('community-updates'),
@@ -237,7 +253,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 ? null
                 : () => context.push('/community/notifications'),
             icon: const CommunityUnreadBadge(
-              child: Icon(Icons.notifications_none_rounded),
+              child: Icon(Icons.notifications_none_rounded, size: 32),
             ),
           ),
           FutureBuilder<CommunityProfileOverview?>(
@@ -253,7 +269,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                   ? null
                   : () => _openNavigation(context, repository),
               icon: BilAccountAvatar(
-                radius: 14,
+                radius: 20.5,
                 networkUrl: snapshot.data?.avatarUrl,
               ),
             ),
@@ -262,21 +278,19 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         bottom: repository == null
             ? null
             : PreferredSize(
-                preferredSize: Size.fromHeight(
-                  _communityHubTopTabsHeight(context),
-                ),
+                preferredSize: Size.fromHeight(topTabsHeight),
                 child: SizedBox(
-                  height: _communityHubTopTabsHeight(context),
+                  height: topTabsHeight,
                   child: Row(
                     children: [
                       Expanded(
                         child: _CommunityHubTopTab(
                           key: const Key('community-hub-explore-tab'),
                           label: communityText(context, 'Explore', 'استكشاف'),
-                          selected: _section == _CommunityHubSection.explore,
-                          onTap: () => setState(
-                            () => _section = _CommunityHubSection.explore,
-                          ),
+                          selected:
+                              _section == _CommunityHubSection.explore &&
+                              _feedMode == CommunityFeedMode.explore,
+                          onTap: () => _showFeedMode(CommunityFeedMode.explore),
                         ),
                       ),
                       Expanded(
@@ -288,9 +302,8 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                             'المتابَعون',
                           ),
                           selected: _section == _CommunityHubSection.following,
-                          onTap: () => setState(
-                            () => _section = _CommunityHubSection.following,
-                          ),
+                          onTap: () =>
+                              _showFeedMode(CommunityFeedMode.following),
                         ),
                       ),
                       Expanded(
@@ -316,7 +329,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 repository: repository,
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
-                initialMode: CommunityFeedMode.explore,
+                initialMode: _feedMode,
                 entryWelcomeHandled: widget.entryWelcomeHandled,
                 onOpenCircles: () =>
                     setState(() => _section = _CommunityHubSection.circles),
@@ -326,7 +339,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 repository: repository,
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
-                initialMode: CommunityFeedMode.following,
+                initialMode: _feedMode,
                 entryWelcomeHandled: widget.entryWelcomeHandled,
                 onOpenCircles: () =>
                     setState(() => _section = _CommunityHubSection.circles),
@@ -338,6 +351,17 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               ),
             },
     );
+  }
+
+  void _showFeedMode(CommunityFeedMode mode) {
+    final feed = _feedKey.currentState;
+    if (feed != null && (feed._openingComposer || feed._managingPost)) return;
+    setState(() {
+      _feedMode = mode;
+      _section = mode == CommunityFeedMode.following
+          ? _CommunityHubSection.following
+          : _CommunityHubSection.explore;
+    });
   }
 
   Future<void> _composeCircleFromHub(String slug) async {
@@ -366,9 +390,18 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         showDragHandle: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         constraints: const BoxConstraints(maxWidth: 560),
-        builder: (_) => _CommunityNavigationSheet(repository: repository),
+        builder: (_) => _CommunityNavigationSheet(
+          repository: repository,
+          selectedFeedMode: _feedMode,
+        ),
       );
       if (!context.mounted || destination == null) return;
+      for (final mode in CommunityFeedMode.values) {
+        if (destination == 'feed-mode:${mode.wireValue}') {
+          if (identical(_repository, repository)) _showFeedMode(mode);
+          return;
+        }
+      }
       switch (destination) {
         case '/community/connections':
           await pushCommunityPage<void>(
@@ -454,13 +487,30 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   }
 }
 
-double _communityHubTopTabsHeight(BuildContext context) {
-  final scale = MediaQuery.textScalerOf(context).scale(1);
-  if (scale <= 1.2) return 48;
-  final baseFontSize = Theme.of(context).textTheme.titleMedium?.fontSize ?? 16;
-  final scaledFontSize = MediaQuery.textScalerOf(context).scale(baseFontSize);
-  final threeLineTextHeight = scaledFontSize * 1.6 * 3;
-  return (threeLineTextHeight + 20).clamp(72.0, 190.0);
+double _communityHubTopTabsHeight(BuildContext context, double width) {
+  var height = 48.0;
+  // Reserve the actual localized line height. A fixed three-line allowance
+  // left a large empty band above single-line Arabic/English tabs at 200%.
+  for (final label in [
+    communityText(context, 'Explore', 'استكشاف'),
+    communityText(context, 'Following', 'المتابَعون'),
+    communityText(context, 'Circles', 'الدوائر'),
+  ]) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+      ),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+      locale: Localizations.maybeLocaleOf(context),
+    )..layout(maxWidth: width / 3);
+    if (painter.height + 20 > height) height = painter.height + 20;
+    painter.dispose();
+  }
+  return height;
 }
 
 class _CommunityHubTopTab extends StatelessWidget {
@@ -484,8 +534,6 @@ class _CommunityHubTopTab extends StatelessWidget {
         const SizedBox(height: 9),
         Text(
           label,
-          maxLines: MediaQuery.textScalerOf(context).scale(1) > 1.2 ? 3 : 1,
-          overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: selected ? FontWeight.w900 : FontWeight.w600,

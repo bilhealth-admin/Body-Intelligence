@@ -50,6 +50,9 @@ void main() {
     final shell = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
+    final dock = File(
+      'lib/shared/widgets/bil_reference_bottom_bar.dart',
+    ).readAsStringSync();
     final topNavigation = File(
       'lib/app/router/responsive_app_shell_top_navigation.dart',
     ).readAsStringSync();
@@ -69,7 +72,10 @@ void main() {
     );
     expect(shell, contains("Key('shell-quick-add')"));
     expect(shell, contains('bottomNavigationBar: immersiveCoach'));
-    expect(shell, contains('quickAdd: quickButton'));
+    expect(
+      shell,
+      contains('showBilQuickAdd(context, originPath: paths[index])'),
+    );
     expect(
       shell,
       contains('floatingActionButton: isDashboard ? quickButton : null'),
@@ -84,12 +90,20 @@ void main() {
     expect(topNavigation, contains('height: 48'));
     expect(topNavigation, contains('alignment: Alignment.centerLeft'));
     expect(topNavigation, contains('alignment: Alignment.center'));
-    expect(shell, contains('final dockHeight = 68.0 +'));
-    expect(shell, contains('const quickAddRise = 18.0'));
-    expect(shell, contains('final reservedHeight = dockHeight + quickAddRise'));
-    expect(shell, contains('height: reservedHeight'));
-    expect(shell, contains('Color(0xF20B1725)'));
-    expect(shell, contains('Color(0xF7FFFFFF)'));
+    // The owner's current Coach reference supersedes the old 68dp/18dp dock.
+    // Native widget tests verify these ratios at three widths and 100%/200%.
+    expect(shell, contains('child: BilReferenceBottomBar('));
+    expect(dock, contains('final rise = 6 * opticalScale'));
+    expect(
+      dock,
+      contains('final surfaceHeight = 79 * opticalScale + labelGrowth'),
+    );
+    expect(dock, contains('final contentHeight = rise + surfaceHeight'));
+    expect(dock, contains('height: contentHeight + safeBottom'));
+    expect(dock, contains('MediaQuery.paddingOf(context).bottom'));
+    expect(shell, contains('moreAttentionCount:'));
+    expect(dock, contains('Color(0xFF121B28)'));
+    expect(dock, contains('Color(0xFFFFFFFF)'));
   });
 
   test('Arabic localization includes review findings', () {

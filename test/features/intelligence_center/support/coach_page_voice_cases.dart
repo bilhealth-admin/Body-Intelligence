@@ -58,6 +58,54 @@ Future<void> _waitForCoachCall(
 
 void registerCoachVoiceCases() {
   testWidgets(
+    'Quick Add pauses live voice and retains the unfinished transcript',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final calls = _mockCoachVoice(tester);
+      final gateway = _HeldGateway();
+      await _mount(tester, database: database, gateway: gateway);
+      await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(calls['bil/speech:listen'], 1);
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'bil/speech/events',
+        const StandardMethodCodec().encodeSuccessEnvelope({
+          'type': 'result',
+          'words': 'Keep this unfinished spoken draft',
+          'final': false,
+          'localeId': 'en-US',
+        }),
+        (_) {},
+      );
+      await tester.pump();
+      final cancelledBefore = calls['bil/speech:cancel'] ?? 0;
+      await tester.tap(find.byKey(const Key('bil-reference-nav-2')));
+      await tester.pumpAndSettle();
+      expect(find.byType(BilQuickAddSheet), findsOneWidget);
+      expect(calls['bil/speech:cancel'], cancelledBefore + 1);
+      expect(calls['bil/tts:stop'], greaterThanOrEqualTo(1));
+      // A late result from the cancelled recognizer cannot replace this draft
+      // or start a Coach request while the shared action sheet covers it.
+      await _emitCoachVoice(tester);
+      await tester.pump(const Duration(seconds: 4));
+      expect(gateway.calls, 0);
+      expect(calls['bil/speech:listen'], 1);
+      Navigator.of(tester.element(find.byType(BilQuickAddSheet))).pop();
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))
+            .controller!
+            .text,
+        'Keep this unfinished spoken draft',
+      );
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    },
+  );
+
+  testWidgets(
     'camera permission is single-flight and returning late cannot open a route',
     (tester) async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());

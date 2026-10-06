@@ -36,8 +36,14 @@ class _CommunityMemberProfilePageState
     extends State<CommunityMemberProfilePage> {
   static const _pageSize = 24;
 
-  late final CommunityRepository? _repository =
-      widget.repository ?? _communityProfileProductionRepository();
+  CommunityRepository? _repository;
+  String? _profileOwnerId;
+  String? _profileTargetId;
+  bool _profileOwnerCancelled = false;
+  int _profileBinding = 0;
+  StreamSubscription<AuthState>? _profileAuth;
+  final _profileOwnerChanges = ValueNotifier<int>(0);
+  bool _profileSignalDisposed = false;
   CommunityProfileOverview? _profile;
   CommunityCreatorProfile? _creator;
   CommunityGoldBalance? _goldBalance;
@@ -49,7 +55,7 @@ class _CommunityMemberProfilePageState
   final Map<String, int> _viewCounts = <String, int>{};
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
       <String, CommunityPostReferenceMetadata>{};
-  late Future<void> _loading = _loadInitial();
+  late Future<void> _loading;
   DateTime? _before;
   String? _beforeId;
   DateTime? _reviewBefore;
@@ -68,112 +74,155 @@ class _CommunityMemberProfilePageState
   _CommunityProfileMomentFilter _momentFilter =
       _CommunityProfileMomentFilter.all;
 
+  @override
+  void initState() {
+    super.initState();
+    _bindProfileOwner();
+    _loading = _loadInitial();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityMemberProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository) ||
+        oldWidget.userId != widget.userId) {
+      _endProfileVisit();
+      _bindProfileOwner();
+      _loading = _loadInitial();
+    } else if (_repository != null && !_sameProfileOwner) {
+      _invalidateProfileOwner();
+    }
+  }
+
+  @override
+  void dispose() {
+    _endProfileVisit(dispose: true);
+    super.dispose();
+  }
+
   void _setProfileState(VoidCallback callback) => setState(callback);
 
   Future<void> _loadInitial() async {
-    final repository = _repository;
-    if (repository == null) return;
+    final visit = _captureProfileVisit();
+    if (visit == null) return;
+    final repository = visit.repository;
     repository.invalidateCommunityModeratorStatus();
     final generation = ++_loadGeneration;
     _refreshing = true;
     _loadingMore = false;
     _loadingMoreReviews = false;
     try {
-      final core = await Future.wait<Object>([
-        repository.loadProfileOverview(widget.userId),
-        repository.loadProfilePosts(userId: widget.userId, limit: _pageSize),
-      ]);
-      final profile = core[0] as CommunityProfileOverview;
-      final batch = core[1] as CommunityFeedBatch;
-      final postsVisible = profile.isSelf || profile.showPosts;
-      String? coverUrl;
-
-      CommunityCreatorProfile? creator;
-      CommunityGoldBalance? goldBalance;
-      List<CommunityQuest> quests = const <CommunityQuest>[];
-      List<CommunityProfileReview> reviews = const <CommunityProfileReview>[];
-      List<CommunityDraftSummary> drafts = const <CommunityDraftSummary>[];
-      Map<String, int> counts = const <String, int>{};
-      List<CommunityPostReferenceMetadata> references =
-          const <CommunityPostReferenceMetadata>[];
-
-      if (repository.useServerCommunityReferenceParity) {
-        final postIds = (postsVisible ? batch.posts : const <CommunityPost>[])
-            .map((post) => post.id)
-            .toList(growable: false);
-        final extras = await Future.wait<Object>([
-          repository.loadCommunityCreatorProfile(widget.userId),
-          repository.loadCommunityProfileReviews(
-            userId: widget.userId,
-            limit: _pageSize,
-          ),
-          profile.isSelf
-              ? repository.listMyCommunityDrafts(limit: 5)
-              : Future<List<CommunityDraftSummary>>.value(
-                  const <CommunityDraftSummary>[],
-                ),
-          repository.loadCommunityPostViewCounts(postIds),
-          postIds.isEmpty
-              ? Future<List<CommunityPostReferenceMetadata>>.value(
-                  const <CommunityPostReferenceMetadata>[],
-                )
-              : repository.loadCommunityPostReferenceMetadata(postIds),
+      await visit.run(() async {
+        final core = await Future.wait<Object>([
+          repository.loadProfileOverview(visit.targetId),
+          repository.loadProfilePosts(userId: visit.targetId, limit: _pageSize),
         ]);
-        creator = extras[0] as CommunityCreatorProfile;
-        reviews = extras[1] as List<CommunityProfileReview>;
-        drafts = extras[2] as List<CommunityDraftSummary>;
-        counts = extras[3] as Map<String, int>;
-        references = extras[4] as List<CommunityPostReferenceMetadata>;
-        coverUrl = await repository.loadCommunityProfileCoverUrl(widget.userId);
-        if (profile.isSelf) {
-          try {
-            final rewards = await Future.wait<Object>([
-              repository.loadGoldBalance(),
-              repository.loadCommunityQuests(),
-            ]);
-            goldBalance = rewards[0] as CommunityGoldBalance;
-            quests = rewards[1] as List<CommunityQuest>;
-          } on Object {
-            // Creator rewards are an enhancement to the self-profile. The
-            // profile itself remains usable when reward policy is unavailable.
-            goldBalance = null;
-            quests = const <CommunityQuest>[];
+        visit.check();
+        final profile = core[0] as CommunityProfileOverview;
+        final batch = core[1] as CommunityFeedBatch;
+        final postsVisible = profile.isSelf || profile.showPosts;
+        String? coverUrl;
+
+        CommunityCreatorProfile? creator;
+        CommunityGoldBalance? goldBalance;
+        List<CommunityQuest> quests = const <CommunityQuest>[];
+        List<CommunityProfileReview> reviews = const <CommunityProfileReview>[];
+        List<CommunityDraftSummary> drafts = const <CommunityDraftSummary>[];
+        Map<String, int> counts = const <String, int>{};
+        List<CommunityPostReferenceMetadata> references =
+            const <CommunityPostReferenceMetadata>[];
+
+        if (repository.useServerCommunityReferenceParity) {
+          final postIds = (postsVisible ? batch.posts : const <CommunityPost>[])
+              .map((post) => post.id)
+              .toList(growable: false);
+          final extras = await Future.wait<Object>([
+            repository.loadCommunityCreatorProfile(visit.targetId),
+            repository.loadCommunityProfileReviews(
+              userId: visit.targetId,
+              limit: _pageSize,
+            ),
+            profile.isSelf
+                ? repository.listMyCommunityDrafts(limit: 5)
+                : Future<List<CommunityDraftSummary>>.value(
+                    const <CommunityDraftSummary>[],
+                  ),
+            repository.loadCommunityPostViewCounts(postIds),
+            postIds.isEmpty
+                ? Future<List<CommunityPostReferenceMetadata>>.value(
+                    const <CommunityPostReferenceMetadata>[],
+                  )
+                : repository.loadCommunityPostReferenceMetadata(postIds),
+          ]);
+          visit.check();
+          creator = extras[0] as CommunityCreatorProfile;
+          reviews = extras[1] as List<CommunityProfileReview>;
+          drafts = extras[2] as List<CommunityDraftSummary>;
+          counts = extras[3] as Map<String, int>;
+          references = extras[4] as List<CommunityPostReferenceMetadata>;
+          coverUrl = await repository.loadCommunityProfileCoverUrl(
+            visit.targetId,
+          );
+          visit.check();
+          if (profile.isSelf) {
+            try {
+              final rewards = await Future.wait<Object>([
+                repository.loadGoldBalance(),
+                repository.loadCommunityQuests(),
+              ]);
+              visit.check();
+              goldBalance = rewards[0] as CommunityGoldBalance;
+              quests = rewards[1] as List<CommunityQuest>;
+            } on CommunityOwnerOperationCancelled {
+              rethrow;
+            } on Object {
+              // Creator rewards are an enhancement to the self-profile. The
+              // profile itself remains usable when reward policy is unavailable.
+              goldBalance = null;
+              quests = const <CommunityQuest>[];
+            }
           }
         }
-      }
-      if (!mounted || generation != _loadGeneration) return;
-      _coverUrl = coverUrl;
-      _profile = profile;
-      _creator = creator;
-      _goldBalance = goldBalance;
-      _quests = List<CommunityQuest>.unmodifiable(quests);
-      _posts
-        ..clear()
-        ..addAll(postsVisible ? batch.posts : const <CommunityPost>[]);
-      _viewCounts
-        ..clear()
-        ..addAll(counts);
-      _referenceByPost
-        ..clear()
-        ..addEntries(references.map((value) => MapEntry(value.postId, value)));
-      _reviews
-        ..clear()
-        ..addAll(postsVisible ? reviews : const <CommunityProfileReview>[]);
-      _draftSummaries
-        ..clear()
-        ..addAll(drafts);
-      _before = postsVisible ? batch.nextBefore : null;
-      _beforeId = postsVisible ? batch.nextBeforeId : null;
-      _hasMore = postsVisible && batch.hasMore;
-      _reviewHasMore = postsVisible && reviews.length == _pageSize;
-      _reviewBefore = postsVisible ? reviews.lastOrNull?.createdAt : null;
-      _reviewBeforeId = postsVisible ? reviews.lastOrNull?.reviewId : null;
+        visit.check();
+        if (generation != _loadGeneration) return;
+        _coverUrl = coverUrl;
+        _profile = profile;
+        _creator = creator;
+        _goldBalance = goldBalance;
+        _quests = List<CommunityQuest>.unmodifiable(quests);
+        _posts
+          ..clear()
+          ..addAll(postsVisible ? batch.posts : const <CommunityPost>[]);
+        _viewCounts
+          ..clear()
+          ..addAll(counts);
+        _referenceByPost
+          ..clear()
+          ..addEntries(
+            references.map((value) => MapEntry(value.postId, value)),
+          );
+        _reviews
+          ..clear()
+          ..addAll(postsVisible ? reviews : const <CommunityProfileReview>[]);
+        _draftSummaries
+          ..clear()
+          ..addAll(drafts);
+        _before = postsVisible ? batch.nextBefore : null;
+        _beforeId = postsVisible ? batch.nextBeforeId : null;
+        _hasMore = postsVisible && batch.hasMore;
+        _reviewHasMore = postsVisible && reviews.length == _pageSize;
+        _reviewBefore = postsVisible ? reviews.lastOrNull?.createdAt : null;
+        _reviewBeforeId = postsVisible ? reviews.lastOrNull?.reviewId : null;
+      });
+    } on CommunityOwnerOperationCancelled {
+      // The old visit is complete; it cannot populate the new viewer.
     } finally {
       if (generation == _loadGeneration) _refreshing = false;
     }
   }
 
   Future<void> _refresh() async {
+    if (!_sameProfileOwner) return;
     final future = _loadInitial();
     setState(() {
       _loading = future;
@@ -186,7 +235,8 @@ class _CommunityMemberProfilePageState
   }
 
   Future<void> _loadMore() async {
-    final repository = _repository;
+    final visit = _captureProfileVisit();
+    final repository = visit?.repository;
     if (repository == null ||
         _loadingMore ||
         _refreshing ||
@@ -199,53 +249,63 @@ class _CommunityMemberProfilePageState
     final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
-      final batch = await repository.loadProfilePosts(
-        userId: widget.userId,
-        before: _before,
-        beforeId: _beforeId,
-        limit: _pageSize,
-      );
-      if (!mounted || generation != _loadGeneration) return;
-      final known = _posts.map((post) => post.id).toSet();
-      final incoming = batch.posts
-          .where((post) => known.add(post.id))
-          .toList(growable: false);
-
-      Map<String, int> counts = const <String, int>{};
-      List<CommunityPostReferenceMetadata> references =
-          const <CommunityPostReferenceMetadata>[];
-      if (repository.useServerCommunityReferenceParity && incoming.isNotEmpty) {
-        final ids = incoming.map((post) => post.id).toList(growable: false);
-        final extras = await Future.wait<Object>([
-          repository.loadCommunityPostViewCounts(ids),
-          repository.loadCommunityPostReferenceMetadata(ids),
-        ]);
-        counts = extras[0] as Map<String, int>;
-        references = extras[1] as List<CommunityPostReferenceMetadata>;
-      }
-
-      if (!mounted || generation != _loadGeneration) return;
-      setState(() {
-        _posts.addAll(incoming);
-        _viewCounts.addAll(counts);
-        _referenceByPost.addEntries(
-          references.map((value) => MapEntry(value.postId, value)),
+      await visit!.run(() async {
+        final batch = await repository.loadProfilePosts(
+          userId: visit.targetId,
+          before: _before,
+          beforeId: _beforeId,
+          limit: _pageSize,
         );
-        _before = batch.nextBefore;
-        _beforeId = batch.nextBeforeId;
-        _hasMore = batch.hasMore;
+        visit.check();
+        if (generation != _loadGeneration) return;
+        final known = _posts.map((post) => post.id).toSet();
+        final incoming = batch.posts
+            .where((post) => known.add(post.id))
+            .toList(growable: false);
+
+        Map<String, int> counts = const <String, int>{};
+        List<CommunityPostReferenceMetadata> references =
+            const <CommunityPostReferenceMetadata>[];
+        if (repository.useServerCommunityReferenceParity &&
+            incoming.isNotEmpty) {
+          final ids = incoming.map((post) => post.id).toList(growable: false);
+          final extras = await Future.wait<Object>([
+            repository.loadCommunityPostViewCounts(ids),
+            repository.loadCommunityPostReferenceMetadata(ids),
+          ]);
+          counts = extras[0] as Map<String, int>;
+          references = extras[1] as List<CommunityPostReferenceMetadata>;
+        }
+
+        visit.check();
+        if (generation != _loadGeneration) return;
+        setState(() {
+          _posts.addAll(incoming);
+          _viewCounts.addAll(counts);
+          _referenceByPost.addEntries(
+            references.map((value) => MapEntry(value.postId, value)),
+          );
+          _before = batch.nextBefore;
+          _beforeId = batch.nextBeforeId;
+          _hasMore = batch.hasMore;
+        });
       });
+    } on CommunityOwnerOperationCancelled {
+      // Invalidated profile pagination never applies to a later visit.
     } catch (_) {
-      if (mounted && generation == _loadGeneration) _showFailure();
+      if (visit?.isCurrent() == true && generation == _loadGeneration) {
+        _showFailure();
+      }
     } finally {
-      if (mounted && generation == _loadGeneration) {
+      if (visit?.isCurrent() == true && generation == _loadGeneration) {
         setState(() => _loadingMore = false);
       }
     }
   }
 
   Future<void> _loadMoreReviews() async {
-    final repository = _repository;
+    final visit = _captureProfileVisit();
+    final repository = visit?.repository;
     if (repository == null ||
         _loadingMoreReviews ||
         _refreshing ||
@@ -258,252 +318,36 @@ class _CommunityMemberProfilePageState
     final generation = _loadGeneration;
     setState(() => _loadingMoreReviews = true);
     try {
-      final page = await repository.loadCommunityProfileReviews(
-        userId: widget.userId,
-        before: _reviewBefore,
-        beforeId: _reviewBeforeId,
-        limit: _pageSize,
-      );
-      if (!mounted || generation != _loadGeneration) return;
-      final known = _reviews.map((review) => review.reviewId).toSet();
-      setState(() {
-        _reviews.addAll(page.where((review) => known.add(review.reviewId)));
-        _reviewHasMore = page.length == _pageSize;
-        if (page.isNotEmpty) {
-          _reviewBefore = page.last.createdAt;
-          _reviewBeforeId = page.last.reviewId;
-        }
+      await visit!.run(() async {
+        final page = await repository.loadCommunityProfileReviews(
+          userId: visit.targetId,
+          before: _reviewBefore,
+          beforeId: _reviewBeforeId,
+          limit: _pageSize,
+        );
+        visit.check();
+        if (generation != _loadGeneration) return;
+        final known = _reviews.map((review) => review.reviewId).toSet();
+        setState(() {
+          _reviews.addAll(page.where((review) => known.add(review.reviewId)));
+          _reviewHasMore = page.length == _pageSize;
+          if (page.isNotEmpty) {
+            _reviewBefore = page.last.createdAt;
+            _reviewBeforeId = page.last.reviewId;
+          }
+        });
       });
+    } on CommunityOwnerOperationCancelled {
+      // Invalidated profile pagination never applies to a later visit.
     } catch (_) {
-      if (mounted && generation == _loadGeneration) _showFailure();
+      if (visit?.isCurrent() == true && generation == _loadGeneration) {
+        _showFailure();
+      }
     } finally {
-      if (mounted && generation == _loadGeneration) {
+      if (visit?.isCurrent() == true && generation == _loadGeneration) {
         setState(() => _loadingMoreReviews = false);
       }
     }
-  }
-
-  Future<void> _requestFriend() async {
-    final repository = _repository;
-    final profile = _profile;
-    if (repository == null ||
-        profile == null ||
-        profile.isSelf ||
-        _relationshipBusy) {
-      return;
-    }
-    setState(() => _relationshipBusy = true);
-    try {
-      await repository.requestFriend(profile.userId);
-      final refreshed = await repository.loadProfileOverview(profile.userId);
-      if (!mounted) return;
-      setState(() => _profile = refreshed);
-    } catch (_) {
-      if (mounted) _showFailure();
-    } finally {
-      if (mounted) setState(() => _relationshipBusy = false);
-    }
-  }
-
-  Future<void> _toggleFollow() async {
-    final repository = _repository;
-    final profile = _profile;
-    if (repository == null ||
-        profile == null ||
-        profile.isSelf ||
-        _followBusy ||
-        (!profile.viewerFollows && !profile.allowFollows)) {
-      return;
-    }
-    setState(() => _followBusy = true);
-    try {
-      if (profile.viewerFollows) {
-        await repository.unfollow(profile.userId);
-      } else {
-        await repository.follow(profile.userId);
-      }
-      final values = await Future.wait<Object>([
-        repository.loadProfileOverview(profile.userId),
-        repository.loadCommunityCreatorProfile(profile.userId),
-      ]);
-      if (!mounted) return;
-      setState(() {
-        _profile = values[0] as CommunityProfileOverview;
-        _creator = values[1] as CommunityCreatorProfile;
-      });
-    } catch (_) {
-      if (mounted) _showFailure();
-    } finally {
-      if (mounted) setState(() => _followBusy = false);
-    }
-  }
-
-  Future<void> _openConnections(CommunityProfileConnectionKind kind) async {
-    final repository = _repository;
-    final profile = _profile;
-    if (repository == null || profile == null) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (sheetContext) => _CommunityProfileConnectionsSheet(
-        repository: repository,
-        profile: profile,
-        kind: kind,
-      ),
-    );
-  }
-
-  Future<void> _managePost(CommunityPost post, String action) async {
-    final repository = _repository;
-    if (repository == null || _managingPost) return;
-
-    String? moderationReason;
-    if (action == 'moderate_remove' || action == 'moderate_hide') {
-      moderationReason = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => SimpleDialog(
-          title: Text(
-            action == 'moderate_hide'
-                ? communityText(context, 'Hide post', 'إخفاء المنشور')
-                : communityText(context, 'Remove post', 'إزالة المنشور'),
-          ),
-          children: [
-            for (final reason in const [
-              'spam',
-              'abuse',
-              'misleading',
-              'privacy',
-              'unsafe_or_inappropriate',
-              'other',
-            ])
-              SimpleDialogOption(
-                onPressed: () => Navigator.pop(dialogContext, reason),
-                child: Text(reason),
-              ),
-          ],
-        ),
-      );
-      if (moderationReason == null || !mounted) return;
-    }
-
-    if (action == 'delete' || action == 'block') {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(
-            action == 'delete'
-                ? communityText(context, 'Delete post?', 'حذف المشاركة؟')
-                : communityText(
-                    context,
-                    'Block this member?',
-                    'حظر هذا العضو؟',
-                  ),
-          ),
-          content: Text(
-            action == 'delete'
-                ? communityText(
-                    context,
-                    'This removes your post from Community.',
-                    'سيؤدي ذلك إلى إزالة مشاركتك من المجتمع.',
-                  )
-                : communityText(
-                    context,
-                    'You will no longer see each other in Community or messages.',
-                    'لن يتمكن أي منكما من رؤية الآخر في المجتمع أو الرسائل.',
-                  ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(communityText(context, 'Cancel', 'إلغاء')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(
-                action == 'delete'
-                    ? communityText(context, 'Delete', 'حذف')
-                    : communityText(context, 'Block', 'حظر'),
-              ),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true || !mounted) return;
-    }
-
-    setState(() => _managingPost = true);
-    try {
-      if (action == 'report') {
-        await repository.report(
-          targetKind: 'post',
-          targetId: post.id,
-          reason: 'user_reported_from_profile',
-        );
-      } else if (action == 'delete') {
-        await repository.deletePost(post.id);
-        if (mounted) {
-          setState(() => _posts.removeWhere((item) => item.id == post.id));
-        }
-      } else if (action == 'block') {
-        await repository.blockMember(post.authorId);
-        if (mounted) context.pop();
-      } else if (action == 'moderate_remove') {
-        await repository.removePublishedPostAsModerator(
-          postId: post.id,
-          reason: moderationReason!,
-        );
-        if (mounted) {
-          setState(() => _posts.removeWhere((item) => item.id == post.id));
-        }
-      } else if (action == 'moderate_hide') {
-        await repository.hidePublishedPostAsModerator(
-          postId: post.id,
-          reason: moderationReason!,
-        );
-        if (mounted) {
-          setState(() => _posts.removeWhere((item) => item.id == post.id));
-        }
-      }
-      if (mounted && action == 'report') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              communityText(
-                context,
-                'Report sent for review.',
-                'تم إرسال البلاغ للمراجعة.',
-              ),
-            ),
-          ),
-        );
-      }
-    } catch (_) {
-      if (mounted) _showFailure();
-    } finally {
-      if (mounted) setState(() => _managingPost = false);
-    }
-  }
-
-  Future<void> _openSelfCreatorStats() async {
-    final creator = _creator;
-    if (creator == null) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (sheetContext) => SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-        child: _CommunityCreatorPanel(
-          creator: creator,
-          isSelf: true,
-          goldBalance: _goldBalance,
-          quests: _quests,
-        ),
-      ),
-    );
   }
 
   void _showFailure() {
@@ -538,7 +382,9 @@ class _CommunityMemberProfilePageState
         ),
       ],
     ),
-    body: _repository == null
+    body: _profileOwnerCancelled
+        ? const _CommunityProfileOwnerChangedBody()
+        : _repository == null
         ? Center(
             child: Text(
               communityText(
@@ -566,6 +412,10 @@ class _CommunityMemberProfilePageState
                   ),
                 );
               }
+              final visit = _captureProfileVisit();
+              if (visit == null) {
+                return const _CommunityProfileOwnerChangedBody();
+              }
               final profile = _profile!;
               return RefreshIndicator(
                 onRefresh: _refresh,
@@ -576,6 +426,7 @@ class _CommunityMemberProfilePageState
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: _CommunityMemberProfileHeader(
+                          visit: visit,
                           profile: profile,
                           creator: _creator,
                           coverUrl: _coverUrl,
@@ -594,18 +445,30 @@ class _CommunityMemberProfilePageState
                           child: _CommunitySelfQuickActions(
                             draftCount: _draftSummaries.length,
                             statsAvailable: _creator != null,
-                            onPosts: () => pushCommunityPage<void>(
-                              context,
-                              CommunityMyPostsPage(
-                                repository: _repository!,
-                                showProfileHeader: false,
-                              ),
-                            ),
-                            onDrafts: () => context.push('/community/drafts'),
-                            onSaved: () => pushCommunityPage<void>(
-                              context,
-                              CommunitySavedPostsPage(repository: _repository!),
-                            ),
+                            onPosts: () {
+                              if (!visit.isCurrent()) return;
+                              pushCommunityPage<void>(
+                                context,
+                                CommunityMyPostsPage(
+                                  repository: visit.repository,
+                                  showProfileHeader: false,
+                                ),
+                              );
+                            },
+                            onDrafts: () {
+                              if (visit.isCurrent()) {
+                                context.push('/community/drafts');
+                              }
+                            },
+                            onSaved: () {
+                              if (!visit.isCurrent()) return;
+                              pushCommunityPage<void>(
+                                context,
+                                CommunitySavedPostsPage(
+                                  repository: visit.repository,
+                                ),
+                              );
+                            },
                             onStats: _openSelfCreatorStats,
                           ),
                         ),
@@ -615,6 +478,7 @@ class _CommunityMemberProfilePageState
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                           child: _CommunityCreatorPanel(
+                            visit: visit,
                             creator: creator,
                             isSelf: false,
                             goldBalance: _goldBalance,

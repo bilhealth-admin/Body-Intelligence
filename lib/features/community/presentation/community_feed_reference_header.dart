@@ -56,19 +56,19 @@ class _CommunityFeedReferenceHeaderState
       children: [
         SizedBox(
           height:
-              94 +
+              108 +
               (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(0, 36),
           child: ListView(
             key: const Key('community-reference-stories'),
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 9, 16, 6),
+            padding: const EdgeInsetsDirectional.fromSTEB(8, 13, 8, 6),
             children: [
               FutureBuilder<CommunityProfileOverview?>(
                 future: _profile,
                 builder: (context, snapshot) => _CommunityStoryBubble(
-                  label: communityText(context, 'You', 'أنت'),
+                  label: communityText(context, 'Your story', 'قصتك'),
                   avatarUrl: snapshot.data?.avatarUrl,
-                  accent: true,
+                  accent: false,
                   add: true,
                   onTap: widget.enabled ? () => widget.onCompose() : null,
                 ),
@@ -89,7 +89,7 @@ class _CommunityFeedReferenceHeaderState
           ),
         ),
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(16, 3, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 13, 16, 0),
           child: Material(
             color: dark
                 ? scheme.surfaceContainerHigh.withValues(alpha: .74)
@@ -146,6 +146,7 @@ class _CommunityFeedReferenceHeaderState
             children: [
               Expanded(
                 child: _CommunityComposeAction(
+                  key: const Key('community-compose-photo'),
                   icon: Icons.photo_camera_outlined,
                   label: communityText(context, 'Photo', 'صورة'),
                   onTap: widget.enabled ? () => widget.onCompose() : null,
@@ -153,6 +154,7 @@ class _CommunityFeedReferenceHeaderState
               ),
               Expanded(
                 child: _CommunityComposeAction(
+                  key: const Key('community-compose-poll'),
                   icon: Icons.poll_outlined,
                   label: communityText(context, 'Poll', 'استطلاع'),
                   onTap: widget.enabled ? () => widget.onCompose() : null,
@@ -160,6 +162,7 @@ class _CommunityFeedReferenceHeaderState
               ),
               Expanded(
                 child: _CommunityComposeAction(
+                  key: const Key('community-compose-circles'),
                   icon: Icons.groups_outlined,
                   label: communityText(context, 'Circles', 'الدوائر'),
                   onTap: widget.enabled ? widget.onOpenCircles : null,
@@ -167,8 +170,9 @@ class _CommunityFeedReferenceHeaderState
               ),
               Expanded(
                 child: _CommunityComposeAction(
+                  key: const Key('community-compose-coach'),
                   icon: Icons.auto_awesome_outlined,
-                  label: communityText(context, 'AI Coach', 'AI Coach'),
+                  label: communityText(context, 'AI Help', 'مساعدة AI'),
                   onTap: widget.enabled
                       ? () => context.push('/intelligence-center')
                       : null,
@@ -259,7 +263,7 @@ class _CommunityStoryBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 67,
+      width: 80,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(28),
@@ -277,7 +281,7 @@ class _CommunityStoryBubble extends StatelessWidget {
                       color: accent ? scheme.primary : scheme.outlineVariant,
                     ),
                   ),
-                  child: BilAccountAvatar(radius: 23, networkUrl: avatarUrl),
+                  child: BilAccountAvatar(radius: 29, networkUrl: avatarUrl),
                 ),
                 if (add)
                   PositionedDirectional(
@@ -326,6 +330,7 @@ class _CommunityComposeAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    super.key,
   });
 
   final IconData icon;
@@ -336,23 +341,26 @@ class _CommunityComposeAction extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontSize: 9.5,
-              fontWeight: FontWeight.w700,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

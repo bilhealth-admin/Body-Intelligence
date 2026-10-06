@@ -354,10 +354,26 @@ void main() {
         find.byKey(const Key('community-composer-action-circle')),
         findsOneWidget,
       );
+      // Optional tools now use the reference's expandable rows. Exercise the
+      // actual controls before their retained fields and overflow menu.
+      final mentions = find.byKey(
+        const Key('community-composer-action-mentions'),
+      );
+      await tester.ensureVisible(mentions);
+      await tester.pumpAndSettle();
+      await tester.tap(mentions);
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('community-composer-action-collab')),
         findsOneWidget,
       );
+      final collaboration = find.byKey(
+        const Key('community-composer-action-collab'),
+      );
+      await tester.ensureVisible(collaboration);
+      await tester.pumpAndSettle();
+      await tester.tap(collaboration);
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('community-composer-action-more')),
         findsOneWidget,
@@ -371,6 +387,14 @@ void main() {
         find.byKey(const Key('community-post-composer')),
         'My reference body',
       );
+      await tester.pumpAndSettle();
+      final hashtags = find.byKey(
+        const Key('community-composer-action-hashtags'),
+      );
+      await tester.ensureVisible(hashtags);
+      await tester.pumpAndSettle();
+      await tester.tap(hashtags);
+      await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.byKey(const Key('community-composer-hashtag-input')),
       );

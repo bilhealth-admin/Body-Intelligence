@@ -5,11 +5,13 @@ class _CommunityPollPanel extends StatefulWidget {
     required this.poll,
     required this.repository,
     this.compact = false,
+    this.ownerIsCurrent,
   });
 
   final CommunityPoll poll;
   final CommunityRepository repository;
   final bool compact;
+  final ValueGetter<bool>? ownerIsCurrent;
 
   @override
   State<_CommunityPollPanel> createState() => _CommunityPollPanelState();
@@ -28,14 +30,21 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
   @override
   void didUpdateWidget(covariant _CommunityPollPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!_voting && oldWidget.poll != widget.poll) {
+    if (!identical(oldWidget.repository, widget.repository) ||
+        oldWidget.poll.postId != widget.poll.postId) {
+      _voting = false;
+      _poll = widget.poll;
+      _selection = _selectedIds(widget.poll);
+    } else if (!_voting && oldWidget.poll != widget.poll) {
       _poll = widget.poll;
       _selection = _selectedIds(widget.poll);
     }
   }
 
   Future<void> _choose(CommunityPollOption option) async {
-    if (_voting || _poll.closed) return;
+    if (_voting || _poll.closed || !(widget.ownerIsCurrent?.call() ?? true)) {
+      return;
+    }
     if (_poll.allowMultiple) {
       setState(() {
         if (!_selection.add(option.id)) {
@@ -49,20 +58,39 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
   }
 
   Future<void> _submit() async {
-    if (_voting || _poll.closed || _selection.isEmpty) return;
+    if (_voting ||
+        _poll.closed ||
+        _selection.isEmpty ||
+        !(widget.ownerIsCurrent?.call() ?? true)) {
+      return;
+    }
+    final repository = widget.repository;
+    final postId = _poll.postId;
+    final optionIds = _selection.toList(growable: false);
+    final parentVisit = widget.ownerIsCurrent;
+    final scope = _CommunityPostOwnerScope(
+      repository: repository,
+      isCurrentVisit: () =>
+          mounted &&
+          identical(repository, widget.repository) &&
+          postId == widget.poll.postId &&
+          (parentVisit?.call() ?? true),
+    );
     setState(() => _voting = true);
     try {
-      final updated = await widget.repository.voteCommunityPoll(
-        postId: _poll.postId,
-        optionIds: _selection.toList(growable: false),
+      final updated = await scope.run(
+        () =>
+            repository.voteCommunityPoll(postId: postId, optionIds: optionIds),
       );
-      if (!mounted) return;
+      if (!mounted || !scope.isCurrent) return;
       setState(() {
         _poll = updated;
         _selection = _selectedIds(updated);
       });
+    } on CommunityOwnerOperationCancelled {
+      // The old choice never becomes an action belonging to a later visit.
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !scope.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -75,7 +103,7 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _voting = false);
+      if (mounted && scope.isCurrent) setState(() => _voting = false);
     }
   }
 

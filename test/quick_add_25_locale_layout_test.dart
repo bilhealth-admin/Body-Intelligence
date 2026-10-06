@@ -31,9 +31,10 @@ void main() {
   });
 
   test('production shell wires the approved subtle Quick Add photo', () {
-    final source = File(
+    final source = [
       'lib/app/router/responsive_app_shell.dart',
-    ).readAsStringSync();
+      'lib/app/router/bil_quick_add_presenter.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(
       source,
       contains(

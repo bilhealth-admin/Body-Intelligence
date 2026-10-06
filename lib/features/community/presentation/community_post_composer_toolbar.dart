@@ -2,93 +2,98 @@ part of 'community_hub_page.dart';
 
 extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
   Widget buildCommunityPostComposerToolbar(BuildContext context, bool busy) {
-    void reveal(GlobalKey anchor) {
-      final target = anchor.currentContext;
-      if (target == null) return;
-      Scrollable.ensureVisible(
-        target,
-        duration: MediaQuery.disableAnimationsOf(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 260),
-        curve: Curves.easeOutCubic,
-        alignment: .08,
-      );
-    }
-
-    void revealPoll() {
-      if (!widget.draft.pollEnabled) {
-        _setComposerState(() => widget.draft.pollEnabled = true);
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) reveal(_pollAnchor);
-      });
-    }
-
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
     final saveDraft = OutlinedButton.icon(
       key: const Key('community-post-save-draft'),
-      onPressed: busy
-          ? null
-          : _CommunityPostComposerReferenceActions(this)._savePersistentDraft,
+      onPressed: busy ? null : _savePersistentDraft,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 52),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        foregroundColor: dark
+            ? const Color(0xFF93BEFF)
+            : const Color(0xFF0866FF),
+        side: BorderSide(
+          color: dark ? const Color(0xFF365172) : const Color(0xFFDCE9FA),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
       icon: _savingDraft
           ? const SizedBox.square(
               dimension: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : const Icon(Icons.drafts_outlined),
+          : const Icon(Icons.save_outlined, size: 19),
       label: Text(
         widget.draft.savedPersistently
             ? communityText(context, 'Update draft', 'تحديث المسودة')
             : communityText(context, 'Save draft', 'حفظ المسودة'),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
       ),
     );
-    final addPhoto = OutlinedButton.icon(
-      key: const Key('community-post-add-photo'),
-      onPressed: busy || _selectedImages.length >= 4 ? null : _pickImage,
-      icon: _selectingImage
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const Icon(Icons.add_photo_alternate_outlined),
-      label: Text(
-        communityText(
-          context,
-          _selectedImages.isEmpty
-              ? 'Add photo'
-              : 'Add photo (${_selectedImages.length}/4)',
-          _selectedImages.isEmpty
-              ? 'إضافة صورة'
-              : 'إضافة صورة (${_selectedImages.length}/4)',
+    final publish = DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: busy
+              ? const [Color(0xFF719ED4), Color(0xFF4775B5)]
+              : const [Color(0xFF278BFF), Color(0xFF0061FF)],
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: busy
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x24136CFF),
+                  blurRadius: 16,
+                  offset: Offset(0, 6),
+                ),
+              ],
+      ),
+      child: FilledButton.icon(
+        key: const Key('community-post-publish'),
+        onPressed: busy ? null : _publish,
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white,
+          shadowColor: Colors.transparent,
+          minimumSize: const Size(0, 68),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        icon: _publishing
+            ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.near_me_outlined, size: 25),
+        label: Text(
+          _publishing && _selectedImages.isNotEmpty
+              ? communityText(context, 'Uploading photo…', 'جارٍ رفع الصورة…')
+              : communityText(context, 'Publish', 'نشر'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
     );
-    final publish = FilledButton.icon(
-      key: const Key('community-post-publish'),
-      onPressed: busy ? null : _publish,
-      icon: _publishing
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const Icon(Icons.send_rounded),
-      label: Text(
-        _publishing && _selectedImages.isNotEmpty
-            ? communityText(context, 'Uploading photo…', 'جارٍ رفع الصورة…')
-            : communityText(context, 'Publish', 'نشر'),
-      ),
-    );
-
     return Material(
-      color: Theme.of(context).colorScheme.surface,
-      elevation: 2,
+      color: dark ? CommunitySapphire.canvas(context) : const Color(0xFFFBFDFF),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
             if (_submitError case final error?) ...[
-              const SizedBox(height: 12),
               Semantics(
                 liveRegion: true,
                 child: Text(
@@ -97,6 +102,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
+              const SizedBox(height: 8),
             ],
             if (_operationRecovery)
               TextButton(
@@ -116,104 +122,20 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
               ),
               const SizedBox(height: 8),
             ],
-            SingleChildScrollView(
-              key: const Key('community-composer-reference-action-rail'),
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            if (scale >= 1.4 || MediaQuery.sizeOf(context).width < 350) ...[
+              saveDraft,
+              const SizedBox(height: 10),
+              publish,
+            ] else
+              Row(
+                key: const Key('community-composer-primary-actions'),
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  TextButton.icon(
-                    key: const Key('community-composer-action-location'),
-                    onPressed: busy ? null : () => reveal(_locationAnchor),
-                    icon: const Icon(Icons.location_on_outlined, size: 19),
-                    label: Text(communityText(context, 'Location', 'الموقع')),
-                  ),
-                  TextButton.icon(
-                    key: const Key('community-composer-action-poll'),
-                    onPressed: busy ? null : revealPoll,
-                    icon: const Icon(Icons.poll_outlined, size: 19),
-                    label: Text(communityText(context, 'Poll', 'استطلاع')),
-                  ),
-                  TextButton.icon(
-                    key: const Key('community-composer-action-circle'),
-                    onPressed: busy ? null : () => reveal(_circleAnchor),
-                    icon: const Icon(Icons.groups_2_outlined, size: 19),
-                    label: Text(communityText(context, 'Circle', 'الدائرة')),
-                  ),
-                  TextButton.icon(
-                    key: const Key('community-composer-action-collab'),
-                    onPressed: busy ? null : () => reveal(_collaborationAnchor),
-                    icon: const Icon(Icons.group_add_outlined, size: 19),
-                    label: Text(communityText(context, 'Collab', 'تعاون')),
-                  ),
-                  PopupMenuButton<String>(
-                    key: const Key('community-composer-action-more'),
-                    enabled: !busy,
-                    tooltip: communityText(context, 'More', 'المزيد'),
-                    icon: const Icon(Icons.more_horiz_rounded),
-                    onSelected: (value) {
-                      if (value == 'draft') {
-                        _CommunityPostComposerReferenceActions(
-                          this,
-                        )._savePersistentDraft();
-                      } else if (value == 'photo') {
-                        _pickImage();
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'draft',
-                        child: Text(
-                          widget.draft.savedPersistently
-                              ? communityText(
-                                  context,
-                                  'Update draft',
-                                  'تحديث المسودة',
-                                )
-                              : communityText(
-                                  context,
-                                  'Save draft',
-                                  'حفظ المسودة',
-                                ),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'photo',
-                        enabled: _selectedImages.length < 4,
-                        child: Text(
-                          communityText(context, 'Add photo', 'إضافة صورة'),
-                        ),
-                      ),
-                    ],
-                  ),
+                  Expanded(flex: 41, child: saveDraft),
+                  const SizedBox(width: 24),
+                  Expanded(flex: 59, child: publish),
                 ],
               ),
-            ),
-            const SizedBox(height: 6),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final textScale = MediaQuery.textScalerOf(context).scale(1);
-                final stacked = constraints.maxWidth < 420 || textScale >= 1.4;
-                if (stacked) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      saveDraft,
-                      const SizedBox(height: 8),
-                      addPhoto,
-                      const SizedBox(height: 8),
-                      publish,
-                    ],
-                  );
-                }
-                return Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [saveDraft, addPhoto, publish],
-                );
-              },
-            ),
           ],
         ),
       ),

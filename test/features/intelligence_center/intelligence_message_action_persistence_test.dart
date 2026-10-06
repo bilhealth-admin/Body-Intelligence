@@ -164,6 +164,8 @@ void main() {
     final goal = IntelligenceMessageAction.fromAction(
       const IntelligenceAction(
         id: 'goal-79',
+        toolId: 'update_goal',
+        operationId: 'goal-proposal-79',
         type: IntelligenceActionType.updateGoal,
         label: 'Set goal to 79 kg',
         requiresConfirmation: false,

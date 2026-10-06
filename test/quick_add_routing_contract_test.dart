@@ -6,9 +6,10 @@ void main() {
   test(
     'quick add keeps the approved seven actions without diary duplicates',
     () {
-      final shell = File(
+      final shell = [
         'lib/app/router/responsive_app_shell.dart',
-      ).readAsStringSync();
+        'lib/app/router/bil_quick_add_presenter.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       final sheet = File(
         'lib/app/router/bil_quick_add_sheet.dart',
       ).readAsStringSync();

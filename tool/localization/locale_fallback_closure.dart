@@ -1,4 +1,6 @@
 import 'package:body_intelligence_log/app/localization/runtime_copy_next_workspace.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_controls.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_creation.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -140,6 +142,8 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...CommunityReferenceRuntimeCopy.sources,
     ...ReferenceDeltaRuntimeCopy.sources,
     ...NextWorkspaceRuntimeCopy.sources,
+    ...CoachControlsRuntimeCopy.sources,
+    ...CommunityCreationRuntimeCopy.sources,
     ...CommunityExpansionRuntimeCopy.sources,
     ...AppleAiPrivacyRuntimeCopy.values.keys,
     ...AdminNotificationRuntimeCopy.values.keys,
@@ -234,6 +238,11 @@ Future<Set<String>> _requiredRuntimeSources() async {
       .where((file) => file.path.endsWith('.dart'));
   for (final file in files) {
     final source = await file.readAsString();
+    if (file.path
+        .replaceAll('\\', '/')
+        .startsWith('lib/features/intelligence_center/presentation/')) {
+      values.addAll(coachLiteralRuntimeSources(source));
+    }
     addMatches(
       source,
       RegExp(
@@ -322,6 +331,50 @@ Future<Set<String>> _requiredRuntimeSources() async {
     RegExp(r"\bt\(\s*'((?:\\.|[^'])*)'", multiLine: true),
   );
   return values;
+}
+
+/// Static English arguments of the Coach page's `tr` helper, including new
+/// parts, either quote style, raw strings and adjacent string literals.
+/// Interpolated arguments are runtime values, not literal catalogue keys.
+Set<String> coachLiteralRuntimeSources(String source) {
+  final calls = RegExp(
+    r'''\btr\(\s*((?:(?:r?'(?:\\.|[^'\\])*'|r?"(?:\\.|[^"\\])*")\s*)+),''',
+    multiLine: true,
+  );
+  final strings = RegExp(r'''(r?)('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")''');
+  final result = <String>{};
+  for (final call in calls.allMatches(source)) {
+    final pieces = <String>[];
+    var hasInterpolation = false;
+    for (final token in strings.allMatches(call.group(1)!)) {
+      final quoted = token.group(2)!;
+      final value = quoted.substring(1, quoted.length - 1);
+      final raw = token.group(1) == 'r';
+      if (!raw) {
+        for (var i = 0; i < value.length; i++) {
+          if (value[i] == '\\') {
+            i++;
+          } else if (value[i] == r'$' &&
+              i + 1 < value.length &&
+              RegExp(r'[A-Za-z_{]').hasMatch(value[i + 1])) {
+            hasInterpolation = true;
+          }
+        }
+      }
+      pieces.add(
+        raw
+            ? value
+            : _unescapeDartSingle(value)
+                  .replaceAll(r'\"', '"')
+                  .replaceAll(r'\$', r'$')
+                  .replaceAll(r'\t', '\t'),
+      );
+    }
+    if (!hasInterpolation) {
+      result.add(pieces.join());
+    }
+  }
+  return result;
 }
 
 Future<Set<String>> _dashboardIntelligenceEnglishValues() async {

@@ -11,6 +11,7 @@ import 'package:body_intelligence_log/data/repositories/body_measurement_reposit
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/goal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
@@ -29,7 +30,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+part 'ai_coach_meal_commit_behavior_cases.dart';
+part 'ai_coach_meal_recovery_cases.dart';
+
 void main() {
+  _coachMealCommitBehaviorCases();
+  _coachMealRecoveryCases();
   test(
     'measurement merge is opt-in and ordinary saves retain replacement semantics',
     () async {
@@ -643,7 +649,10 @@ void main() {
         tester,
         type: IntelligenceActionType.deleteMealItem,
         id: 'delete_meal_item',
+        // A missing persisted row fails native preparation before a dialog.
+        confirmation: false,
       );
+      expect(find.byType(AlertDialog), findsNothing);
       final failure = find.textContaining('The action was not completed.');
       await _pumpUntil(tester, () => failure.evaluate().isNotEmpty);
       expect(failure, findsOneWidget);
@@ -836,10 +845,13 @@ Widget _coachApp({
   required LocalModelGateway gateway,
   required AppSettingsService settingsService,
   GoalRepository? goalRepository,
+  CoachNativeOwnerWitness? ownerWitness,
   VoidCallback? onContextBuild,
 }) => ProviderScope(
   overrides: [
     databaseProvider.overrideWithValue(database),
+    if (ownerWitness != null)
+      coachNativeOwnerWitnessProvider.overrideWithValue(ownerWitness),
     goalRepositoryProvider.overrideWithValue(
       goalRepository ?? GoalRepository(database),
     ),

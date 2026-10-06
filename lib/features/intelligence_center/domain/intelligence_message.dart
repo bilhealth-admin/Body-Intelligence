@@ -1,5 +1,6 @@
 import '../../../core/health_evidence/health_evidence_catalog.dart';
 import 'bil_navigation_registry.dart';
+import 'coach_action_admission.dart';
 import 'intelligence_action.dart';
 
 enum IntelligenceMessageRole { bil, user }
@@ -37,10 +38,14 @@ class IntelligenceMessageAction {
     required this.type,
     required this.payload,
     required this.requiresConfirmation,
+    this.toolId,
+    this.operationId,
     this.expiresAt,
   });
 
   final String id;
+  final String? toolId;
+  final String? operationId;
   final String label;
   final IntelligenceActionType type;
   final Map<String, Object?> payload;
@@ -67,6 +72,12 @@ class IntelligenceMessageAction {
     DateTime? now,
   }) {
     if (action.destructive) return null;
+    final binding = const CoachActionAdmission().bind(
+      action,
+      requireOperationId: action.type == IntelligenceActionType.updateGoal,
+    );
+    if (binding == null) return null;
+    action = binding.action;
     final label = action.label.trim();
     if (!_safeId.hasMatch(action.id) || !_isSafeLabel(label)) return null;
     final payload = _safePayloadFor(
@@ -77,6 +88,8 @@ class IntelligenceMessageAction {
     if (payload == null) return null;
     return IntelligenceMessageAction._(
       id: action.id,
+      toolId: action.toolId,
+      operationId: action.operationId,
       label: label,
       type: action.type,
       payload: payload,
@@ -97,18 +110,23 @@ class IntelligenceMessageAction {
   static IntelligenceMessageAction? tryFromJson(
     Map<String, Object?> json, {
     DateTime? now,
+    String migrationScope = '',
   }) {
     final id = json['id']?.toString() ?? '';
     final label = json['label']?.toString().trim() ?? '';
     final rawType = json['type']?.toString();
     final rawRequiresConfirmation = json['requiresConfirmation'];
     final rawExpiresAt = json['expiresAt'];
+    final rawToolId = json['toolId'];
+    final rawOperationId = json['operationId'];
     final type = IntelligenceActionType.values
         .cast<IntelligenceActionType?>()
         .firstWhere((value) => value?.name == rawType, orElse: () => null);
     if (!_safeId.hasMatch(id) ||
         !_isSafeLabel(label) ||
         type == null ||
+        (rawToolId != null && rawToolId is! String) ||
+        (rawOperationId != null && rawOperationId is! String) ||
         (rawRequiresConfirmation != null && rawRequiresConfirmation is! bool)) {
       return null;
     }
@@ -138,8 +156,44 @@ class IntelligenceMessageAction {
     } else if (rawExpiresAt != null) {
       return null;
     }
+    String? toolId = rawToolId as String?;
+    String? operationId = rawOperationId as String?;
+    if (type == IntelligenceActionType.updateGoal) {
+      if (toolId == null) {
+        if (!CoachActionAdmission.isLegacyGoalId(
+          id,
+          payload['targetWeightKg']! as num,
+        )) {
+          return null;
+        }
+        toolId = 'update_goal';
+        operationId ??= CoachActionAdmission.legacyGoalOperationId(
+          scope: migrationScope,
+          id: id,
+          payload: payload,
+          expiresAt: expiresAt!,
+        );
+      }
+      if (!CoachActionAdmission.validOperationId(operationId)) return null;
+    }
+    final candidate = IntelligenceAction(
+      id: id,
+      toolId: toolId,
+      operationId: operationId,
+      type: type,
+      label: label,
+      requiresConfirmation: rawRequiresConfirmation == true,
+      payload: payload,
+    );
+    final binding = const CoachActionAdmission().bind(
+      candidate,
+      requireOperationId: type == IntelligenceActionType.updateGoal,
+    );
+    if (binding == null) return null;
     return IntelligenceMessageAction._(
       id: id,
+      toolId: binding.action.toolId,
+      operationId: operationId,
       label: label,
       type: type,
       payload: payload,
@@ -159,6 +213,11 @@ class IntelligenceMessageAction {
   bool isTrustedAt(DateTime now) =>
       _safeId.hasMatch(id) &&
       _isSafeLabel(label) &&
+      const CoachActionAdmission().bind(
+            toAction(),
+            requireOperationId: type == IntelligenceActionType.updateGoal,
+          ) !=
+          null &&
       (!const {
             IntelligenceActionType.manageSubscription,
             IntelligenceActionType.updateGoal,
@@ -174,14 +233,19 @@ class IntelligenceMessageAction {
 
   IntelligenceAction toAction() => IntelligenceAction(
     id: id,
+    toolId: toolId,
+    operationId: operationId,
     type: type,
     label: label,
     requiresConfirmation: requiresConfirmation,
+    requiresFreshConfirmation: type == IntelligenceActionType.updateGoal,
     payload: payload,
   );
 
   Map<String, Object?> toJson() => <String, Object?>{
     'id': id,
+    if (toolId != null) 'toolId': toolId,
+    if (operationId != null) 'operationId': operationId,
     'label': label,
     'type': type.name,
     'payload': payload,
@@ -214,7 +278,6 @@ class IntelligenceMessageAction {
         });
       case IntelligenceActionType.readNutritionRemaining:
       case IntelligenceActionType.readProfileIdentity:
-      case IntelligenceActionType.signOut:
         if (raw.isNotEmpty) return null;
         return const <String, Object?>{};
       case IntelligenceActionType.openDailyLog:
@@ -266,6 +329,8 @@ class IntelligenceMessageAction {
       case IntelligenceActionType.moveMealItem:
       case IntelligenceActionType.deleteMealItem:
       case IntelligenceActionType.requestAccountDeletion:
+      case IntelligenceActionType.signOut:
+        return null;
       case IntelligenceActionType.updateGoal:
         if (!raw.keys.every(
           const <String>{'targetWeightKg', 'targetDate'}.contains,
@@ -356,13 +421,19 @@ class IntelligenceMessageLink {
       );
 }
 
-List<IntelligenceMessageAction> _decodeMessageActionLinks(Object? raw) {
+List<IntelligenceMessageAction> _decodeMessageActionLinks(
+  Object? raw,
+  String scope,
+) {
   if (raw is! List) return const <IntelligenceMessageAction>[];
   final restored = <IntelligenceMessageAction>[];
-  for (final value in raw.whereType<Map>()) {
+  for (var index = 0; index < raw.length; index++) {
+    final value = raw[index];
+    if (value is! Map) continue;
     if (!value.keys.every((key) => key is String)) continue;
     final action = IntelligenceMessageAction.tryFromJson(
       Map<String, Object?>.from(value),
+      migrationScope: '$scope:$index',
     );
     if (action != null) restored.add(action);
   }
@@ -498,6 +569,7 @@ class IntelligenceMessage {
         // short-lived pre-release alias so no tester transcript is lost.
         actionLinks: _decodeMessageActionLinks(
           json['actionLinks'] ?? json['suggestedActions'],
+          '${json['id']}:${json['createdAt']}',
         ),
       );
 }

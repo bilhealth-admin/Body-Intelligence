@@ -84,6 +84,22 @@ class _CommunityPostComposerPageState
   final _locationAnchor = GlobalKey();
   final _collaborationAnchor = GlobalKey();
   final _pollAnchor = GlobalKey();
+  final _composerSections = <String, ExpansibleController>{
+    for (final section in [
+      'poll',
+      'location',
+      'circles',
+      'mentions',
+      'collaboration',
+      'hashtags',
+    ])
+      section: ExpansibleController(),
+  };
+  bool _openingDrafts = false;
+  int? _draftCount;
+  bool _draftCountCapped = false;
+  int _draftCountGeneration = 0;
+  int _draftVisitGeneration = 0;
   late final _location = TextEditingController(
     text: widget.draft.locationLabel,
   );
@@ -116,6 +132,7 @@ class _CommunityPostComposerPageState
   void initState() {
     super.initState();
     _bindComposerOwner();
+    unawaited(_refreshComposerDraftCount());
   }
 
   @override
@@ -132,6 +149,11 @@ class _CommunityPostComposerPageState
   void dispose() {
     _composerOwnerCancelled = true;
     _composerBinding++;
+    _draftCountGeneration++;
+    _draftVisitGeneration++;
+    for (final controller in _composerSections.values) {
+      controller.dispose();
+    }
     unawaited(_composerAuth?.cancel());
     _composerFocus.dispose();
     _title.dispose();
@@ -151,6 +173,7 @@ class _CommunityPostComposerPageState
         _savingDraft ||
         _voiceCapturing ||
         _selectingImage ||
+        _openingDrafts ||
         _completed) {
       return;
     }
@@ -465,6 +488,7 @@ class _CommunityPostComposerPageState
     if (!_checkComposerOwner() ||
         _publishing ||
         _selectingImage ||
+        _openingDrafts ||
         _completed ||
         _selectedImages.length >= 4) {
       return;

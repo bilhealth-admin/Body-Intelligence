@@ -41,6 +41,7 @@ extension on _IntelligenceCenterPageState {
       onUndo: undoOperations.containsKey(message.id)
           ? () => unawaited(_undoCoachAction(message.id))
           : null,
+      undoInProgress: undoOperations[message.id]?.running ?? false,
       animateReveal: animatedResponseIds.contains(message.id),
       onAction: (action) {
         unawaited(_executeAction(action).then<void>((_) {}));

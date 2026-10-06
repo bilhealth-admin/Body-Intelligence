@@ -129,12 +129,13 @@ class BilToolDescriptor {
           'fat',
         ]) {
           final value = raw[key];
+          if (value == null) continue;
           if (value is! num || !value.isFinite || value < 0) return null;
         }
-        if ((raw['calories']! as num) > 10000 ||
-            (raw['protein']! as num) > 2000 ||
-            (raw['carbohydrates']! as num) > 2000 ||
-            (raw['fat']! as num) > 2000) {
+        if ((raw['calories'] as num? ?? 0) > 10000 ||
+            (raw['protein'] as num? ?? 0) > 2000 ||
+            (raw['carbohydrates'] as num? ?? 0) > 2000 ||
+            (raw['fat'] as num? ?? 0) > 2000) {
           return null;
         }
         if (const [
@@ -142,7 +143,7 @@ class BilToolDescriptor {
           'protein',
           'carbohydrates',
           'fat',
-        ].every((key) => (raw[key] as num) == 0)) {
+        ].every((key) => (raw[key] as num? ?? 0) == 0)) {
           return null;
         }
         final date = raw['date'];
@@ -315,13 +316,7 @@ class BilToolRegistry {
       type: IntelligenceActionType.quickAddMacros,
       risk: BilToolRisk.reversibleWrite,
       trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
-      requiredArguments: {
-        'mealType',
-        'calories',
-        'protein',
-        'carbohydrates',
-        'fat',
-      },
+      requiredArguments: {'mealType'},
       allowedArguments: {
         'date',
         'mealType',
@@ -399,6 +394,7 @@ class BilToolRegistry {
     required String name,
     required Map<String, Object?> arguments,
     required String label,
+    String? actionId,
   }) {
     final descriptor = lookup(name);
     if (descriptor == null) return null;
@@ -410,7 +406,8 @@ class BilToolRegistry {
       _ => validated,
     };
     return IntelligenceAction(
-      id: name,
+      id: actionId ?? name,
+      toolId: name,
       type: descriptor.type,
       label: label,
       requiresConfirmation: descriptor.requiresConfirmation,

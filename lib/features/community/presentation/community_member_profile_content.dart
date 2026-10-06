@@ -3,6 +3,8 @@ part of 'community_hub_page.dart';
 extension _CommunityMemberProfileContentSlivers
     on _CommunityMemberProfilePageState {
   List<Widget> _profileContentSlivers(CommunityProfileOverview profile) {
+    final visit = _captureProfileVisit();
+    if (visit == null) return const [];
     final postsVisible = profile.isSelf || profile.showPosts;
     final posts = postsVisible ? _posts : const <CommunityPost>[];
     final reviews = postsVisible ? _reviews : const <CommunityProfileReview>[];
@@ -238,6 +240,7 @@ extension _CommunityMemberProfileContentSlivers
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => _CommunityProfilePostTile(
+                visit: visit,
                 post: moments[index],
                 repository: _repository!,
                 referenceMetadata: _referenceByPost[moments[index].id],
@@ -257,8 +260,10 @@ extension _CommunityMemberProfileContentSlivers
               children: [
                 _CommunityPostCard(
                   post: moments[index],
-                  repository: _repository!,
-                  currentUserId: _repository!.currentUserId,
+                  repository: visit.repository,
+                  ownerIsCurrent: visit.isCurrent,
+                  ownerChanges: visit.changes,
+                  currentUserId: visit.ownerId,
                   referenceMetadata: _referenceByPost[moments[index].id],
                   actionsEnabled: !_managingPost,
                   showModerationStatus: profile.isSelf,
@@ -312,31 +317,38 @@ extension _CommunityMemberProfileContentSlivers
 
 class _CommunityProfilePostTile extends StatelessWidget {
   const _CommunityProfilePostTile({
+    this.visit,
     required this.post,
     required this.repository,
     required this.referenceMetadata,
     required this.viewCount,
   });
 
+  final _CommunityProfileVisit? visit;
   final CommunityPost post;
   final CommunityRepository repository;
   final CommunityPostReferenceMetadata? referenceMetadata;
   final int? viewCount;
 
-  Future<void> _open(BuildContext context) => pushCommunityPage<void>(
-    context,
-    _CommunityPostDetailPage(
-      post: post,
-      initialStats: CommunityPostStats(
-        postId: post.id,
-        likeCount: post.likeCount,
-        liked: post.liked,
-        commentCount: post.commentCount,
+  Future<void> _open(BuildContext context) async {
+    if (visit?.isCurrent() == false) return;
+    await pushCommunityPage<void>(
+      context,
+      _CommunityPostDetailPage(
+        post: post,
+        initialStats: CommunityPostStats(
+          postId: post.id,
+          likeCount: post.likeCount,
+          liked: post.liked,
+          commentCount: post.commentCount,
+        ),
+        repository: repository,
+        ownerIsCurrent: visit?.isCurrent,
+        ownerChanges: visit?.changes,
+        referenceMetadata: referenceMetadata,
       ),
-      repository: repository,
-      referenceMetadata: referenceMetadata,
-    ),
-  );
+    );
+  }
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -434,205 +446,4 @@ class _CommunityProfilePostTile extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _CommunityProfileConnectionsSheet extends StatefulWidget {
-  const _CommunityProfileConnectionsSheet({
-    required this.repository,
-    required this.profile,
-    required this.kind,
-  });
-
-  final CommunityRepository repository;
-  final CommunityProfileOverview profile;
-  final CommunityProfileConnectionKind kind;
-
-  @override
-  State<_CommunityProfileConnectionsSheet> createState() =>
-      _CommunityProfileConnectionsSheetState();
-}
-
-class _CommunityProfileConnectionsSheetState
-    extends State<_CommunityProfileConnectionsSheet> {
-  late CommunityProfileConnectionKind _activeKind = widget.kind;
-  late Future<List<CommunityProfileConnection>> _connections = _loadConnections(
-    _activeKind,
-  );
-  String? _followBusyUserId;
-
-  Future<List<CommunityProfileConnection>> _loadConnections(
-    CommunityProfileConnectionKind kind,
-  ) => widget.repository.loadProfileConnections(
-    userId: widget.profile.userId,
-    kind: kind,
-  );
-
-  void _switchKind(CommunityProfileConnectionKind kind) {
-    if (kind == _activeKind) return;
-    setState(() {
-      _activeKind = kind;
-      _connections = _loadConnections(kind);
-    });
-  }
-
-  Future<void> _toggleFollow(CommunityProfileConnection member) async {
-    if (_followBusyUserId != null ||
-        member.relationship == CommunityRelationshipStatus.self ||
-        (!member.viewerFollows && !member.allowFollows)) {
-      return;
-    }
-    setState(() => _followBusyUserId = member.userId);
-    try {
-      if (member.viewerFollows) {
-        await widget.repository.unfollow(member.userId);
-      } else {
-        await widget.repository.follow(member.userId);
-      }
-      if (!mounted) return;
-      setState(() => _connections = _loadConnections(_activeKind));
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              communityText(
-                context,
-                'Could not update follow state.',
-                'تعذر تحديث حالة المتابعة.',
-              ),
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _followBusyUserId = null);
-    }
-  }
-
-  Widget _buildList(
-    BuildContext context,
-  ) => FutureBuilder<List<CommunityProfileConnection>>(
-    future: _connections,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState != ConnectionState.done) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (snapshot.hasError) {
-        return Center(
-          child: Text(
-            communityText(
-              context,
-              'This list is unavailable right now.',
-              'هذه القائمة غير متاحة الآن.',
-            ),
-          ),
-        );
-      }
-      final rows = snapshot.data ?? const <CommunityProfileConnection>[];
-      if (rows.isEmpty) {
-        return Center(
-          child: Text(
-            communityText(
-              context,
-              'Nothing to show here yet.',
-              'لا يوجد ما يمكن عرضه هنا بعد.',
-            ),
-          ),
-        );
-      }
-      return ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: rows.length,
-        separatorBuilder: (_, _) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final member = rows[index];
-          return ListTile(
-            leading: BilAccountAvatar(radius: 22, networkUrl: member.avatarUrl),
-            title: Text(member.displayName),
-            subtitle: member.handle == null
-                ? null
-                : Text('@${member.handle!}', textDirection: TextDirection.ltr),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (member.relationship != CommunityRelationshipStatus.self &&
-                    (member.viewerFollows || member.allowFollows))
-                  TextButton(
-                    key: Key('community-connection-follow-${member.userId}'),
-                    onPressed: _followBusyUserId == null
-                        ? () => _toggleFollow(member)
-                        : null,
-                    child: _followBusyUserId == member.userId
-                        ? const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            member.viewerFollows
-                                ? communityText(context, 'Following', 'يتابع')
-                                : communityText(context, 'Follow', 'متابعة'),
-                          ),
-                  ),
-                Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
-                ),
-              ],
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              context.push('/community/profile/${member.userId}');
-            },
-          );
-        },
-      );
-    },
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final socialTabs = widget.kind != CommunityProfileConnectionKind.friends;
-    final initialIndex = widget.kind == CommunityProfileConnectionKind.following
-        ? 1
-        : 0;
-
-    final content = SizedBox(
-      height: MediaQuery.sizeOf(context).height * .72,
-      child: Column(
-        children: [
-          if (socialTabs)
-            TabBar(
-              key: const Key('community-profile-follow-tabs'),
-              onTap: (index) => _switchKind(
-                index == 0
-                    ? CommunityProfileConnectionKind.followers
-                    : CommunityProfileConnectionKind.following,
-              ),
-              tabs: [
-                Tab(text: communityText(context, 'Followers', 'المتابعون')),
-                Tab(text: communityText(context, 'Following', 'يتابع')),
-              ],
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-              child: Text(
-                communityText(context, 'Friends', 'الأصدقاء'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-          const SizedBox(height: 8),
-          Expanded(child: _buildList(context)),
-        ],
-      ),
-    );
-
-    if (!socialTabs) return content;
-    return DefaultTabController(
-      length: 2,
-      initialIndex: initialIndex,
-      child: content,
-    );
-  }
 }

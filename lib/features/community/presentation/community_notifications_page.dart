@@ -4,6 +4,7 @@ import 'community_attention_scope.dart';
 import 'community_visible_activity_scope.dart';
 import 'community_return_button.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
+import '../../../app/router/bil_quick_add_presenter.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

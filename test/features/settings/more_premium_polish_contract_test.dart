@@ -51,13 +51,21 @@ void main() {
     final source = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
-    expect(source, contains('final dockHeight = 68.0'));
-    expect(source, contains('const quickAddRise = 18.0'));
+    final dock = File(
+      'lib/shared/widgets/bil_reference_bottom_bar.dart',
+    ).readAsStringSync();
+    // The owner's current Coach reference supersedes the old 68dp/18dp dock.
+    // Native widget tests verify these ratios at three widths and 100%/200%.
+    expect(source, contains('child: BilReferenceBottomBar('));
+    expect(dock, contains('final rise = 6 * opticalScale'));
     expect(
-      source,
-      contains('final reservedHeight = dockHeight + quickAddRise'),
+      dock,
+      contains('final surfaceHeight = 79 * opticalScale + labelGrowth'),
     );
-    expect(source, contains('height: reservedHeight'));
+    expect(dock, contains('final contentHeight = rise + surfaceHeight'));
+    expect(dock, contains('height: contentHeight + safeBottom'));
+    expect(dock, contains('MediaQuery.paddingOf(context).bottom'));
+    expect(source, contains('moreAttentionCount:'));
     expect(source, contains('Color(0xFF08A6F7)'));
     expect(source, contains('Color(0xFF176CF5)'));
     expect(source, contains('Color(0xFF7048F6)'));

@@ -16,6 +16,7 @@ class CommunityOwnerOperation {
     this.ownerId,
     this._readOwner,
     this._isCurrentOwner,
+    this._beforeDataSend,
     this._parent,
   ) {
     if (_parent != null) return;
@@ -38,6 +39,7 @@ class CommunityOwnerOperation {
   final String? ownerId;
   final String? Function() _readOwner;
   final bool Function()? _isCurrentOwner;
+  final Future<void> Function()? _beforeDataSend;
   final CommunityOwnerOperation? _parent;
   StreamSubscription<AuthState>? _auth;
   bool _cancelled = false;
@@ -66,6 +68,32 @@ class CommunityOwnerOperation {
     (Zone.current[_zoneKey] as CommunityOwnerOperation?)?.check();
   }
 
+  /// Optional local readback runs after SDK token resolution. The common
+  /// owner-only path stays synchronous. Authentication transport never calls
+  /// this hook; validators must read local state, not send another request.
+  static Future<void>? checkBeforeDataSend() {
+    final operation = Zone.current[_zoneKey] as CommunityOwnerOperation?;
+    operation?.check();
+    if (operation == null || !operation._hasDataSendValidation) return null;
+    return operation._validateDataSend();
+  }
+
+  bool get _hasDataSendValidation =>
+      _beforeDataSend != null || _parent?._hasDataSendValidation == true;
+
+  Future<void> _validateDataSend() async {
+    check();
+    if (_parent?._hasDataSendValidation == true) {
+      await _parent!._validateDataSend();
+      check();
+    }
+    final validate = _beforeDataSend;
+    if (validate != null) {
+      await validate();
+      check();
+    }
+  }
+
   /// Nested calls retain both the parent and their own lifetime predicates.
   /// Closing an editor must still cancel its work while its feed stays open.
   /// Without an editor, the repository captures its own session before
@@ -77,6 +105,7 @@ class CommunityOwnerOperation {
     required Future<T> Function(CommunityOwnerOperation operation) action,
     String? Function()? readOwner,
     bool Function()? isCurrentOwner,
+    Future<void> Function()? beforeDataSend,
   }) {
     final parent = Zone.current[_zoneKey] as CommunityOwnerOperation?;
     if (parent != null) {
@@ -93,6 +122,7 @@ class CommunityOwnerOperation {
       ownerId,
       readOwner ?? parent?._readOwner ?? () => client.auth.currentUser?.id,
       isCurrentOwner,
+      beforeDataSend,
       parent,
     );
     return runZoned(() async {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/router/bil_quick_add_sheet.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
@@ -335,6 +336,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CoachReferenceWorkspace), findsOneWidget);
       await tester.tap(find.byKey(const Key('coach-workspace-tab-chat')));
+      await tester.pumpAndSettle();
+      expect(find.text('Keep this unfinished draft'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.byKey(const Key('bil-reference-nav-2')));
+      await tester.pumpAndSettle();
+      expect(find.byType(BilQuickAddSheet), findsOneWidget);
+      expect(
+        jsonDecode((await preferences.get('intelligenceConversationV1'))!),
+        transcript.map((message) => message.toJson()).toList(),
+      );
+      await settleVisualAssetImages(tester);
+      await tester.pumpAndSettle();
+      await _capture(tester, key, 'coach_quick_add_draft_preserved');
+      Navigator.of(tester.element(find.byType(BilQuickAddSheet))).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Keep this unfinished draft'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('bil-reference-nav-2')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('quick-add-primary-0')));
+      await tester.pumpAndSettle();
+      final destination = tester.element(find.text('Route: /daily-log'));
+      expect(GoRouterState.of(destination).uri.path, '/daily-log');
+      expect(GoRouterState.of(destination).uri.queryParameters, {
+        'foodLog': '1',
+        'from': '/intelligence-center',
+      });
+      expect(find.byType(BilQuickAddSheet), findsNothing);
+      Navigator.of(destination).pop();
       await tester.pumpAndSettle();
       expect(find.text('Keep this unfinished draft'), findsOneWidget);
       expect(tester.takeException(), isNull);

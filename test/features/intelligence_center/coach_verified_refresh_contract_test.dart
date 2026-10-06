@@ -7,6 +7,8 @@ void main() {
       [
             'intelligence_center_page.dart',
             'intelligence_action_flow.dart',
+            'intelligence_meal_action_flow.dart',
+            'intelligence_native_action_flow.dart',
             'intelligence_query_flow.dart',
           ]
           .map(

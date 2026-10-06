@@ -10,6 +10,7 @@ class BilActionReceipt {
     this.after = const <String, Object?>{},
     this.source = 'ai_coach',
     this.toolId,
+    this.operationId,
     this.undoable = false,
     this.undoneAt,
   });
@@ -24,6 +25,7 @@ class BilActionReceipt {
   final Map<String, Object?> after;
   final String source;
   final String? toolId;
+  final String? operationId;
   final bool undoable;
   final DateTime? undoneAt;
 
@@ -50,6 +52,7 @@ class BilActionReceipt {
     'after': after,
     'source': source,
     if (toolId != null) 'tool_id': toolId,
+    if (operationId != null) 'operation_id': operationId,
     'undoable': undoable,
     if (undoneAt != null) 'undone_at': undoneAt!.toUtc().toIso8601String(),
     'message_key': messageKey,

@@ -25,6 +25,21 @@ String coachGreetingSeparator({required bool arabic}) =>
 extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
   Future<void> _loadConversation() async {
     if (!mounted) return;
+    final loadGeneration = ++conversationLoadGeneration;
+    final loadEpoch = conversationPersistenceEpoch;
+    final database = ref.read(databaseProvider);
+    final witness = ref.read(coachNativeOwnerWitnessProvider);
+    var ownerCancelled = false;
+    final subscription = witness?.changes.listen((owner) {
+      if (owner != database.localOwnerId) ownerCancelled = true;
+    }, onError: (Object _, StackTrace _) => ownerCancelled = true);
+    bool loadIsCurrent() =>
+        mounted &&
+        loadGeneration == conversationLoadGeneration &&
+        loadEpoch == conversationPersistenceEpoch &&
+        !ownerCancelled &&
+        identical(ref.read(databaseProvider), database) &&
+        (witness == null || witness.readOwner() == database.localOwnerId);
     _updateState(() {
       conversationReady = false;
       conversationLoadFailed = false;
@@ -37,12 +52,13 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         preferences.get('intelligenceConversationActiveIdV1'),
         preferences.get(_conversationHistoryKey),
       ]);
+      if (!loadIsCurrent()) return;
       final stored = storedValues[0];
       final storedContextFingerprint = storedValues[1];
       final storedConversationId = storedValues[2]?.trim();
       final historyArchive = decodeCoachConversationHistory(storedValues[3]);
       final contextRevision = await _coachContextRevision();
-      if (!mounted) return;
+      if (!loadIsCurrent()) return;
       final restored = <IntelligenceMessage>[];
       var storedMessageValues = <Object?>[];
       var storedTranscriptReadable = stored != null && stored.isEmpty;
@@ -114,7 +130,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         throw const FormatException('unrecoverable_conversation_snapshot');
       }
       final displayName = await _resolvedCoachDisplayName();
-      if (!mounted) return;
+      if (!loadIsCurrent()) return;
       final now = ref.read(intelligenceConversationClockProvider)();
       final welcome = _sessionWelcome(displayName, at: now);
       restored.removeWhere((message) => message.id.startsWith('welcome'));
@@ -158,6 +174,8 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         }
       });
       _scrollToLatest(jump: true);
+      await _restoreCoachMealUndoOperations(restored);
+      if (!loadIsCurrent()) return;
       // Keep the fingerprint for diagnostics/migrations, but never rewrite the
       // transcript merely because the current health context changed.
       if (contextFingerprintChanged ||
@@ -183,7 +201,16 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
       // Never treat unread history as an empty chat: a subsequent save would
       // overwrite it. Keep Back and an explicit retry available, and preserve
       // the original snapshot until a read succeeds.
-      if (mounted) _updateState(() => conversationLoadFailed = true);
+      if (loadIsCurrent()) _updateState(() => conversationLoadFailed = true);
+    } finally {
+      if (mounted &&
+          loadGeneration == conversationLoadGeneration &&
+          loadEpoch == conversationPersistenceEpoch &&
+          !conversationReady &&
+          !loadIsCurrent()) {
+        _updateState(() => conversationLoadFailed = true);
+      }
+      unawaited(subscription?.cancel());
     }
   }
 
@@ -405,6 +432,9 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
 
   Future<void> _invalidatePendingConversationSaves() async {
     conversationPersistenceEpoch += 1;
+    _disposePreparedCoachNativeActions(cancelConfirmedCommit: true);
+    _disposePreparedCoachMealActions();
+    if (mounted) _updateState(undoOperations.clear);
     try {
       await conversationPersistenceTail;
     } on Object {

@@ -253,6 +253,7 @@ class IntelligenceCenterEngine {
           ),
           IntelligenceAction(
             id: 'save-memory',
+            toolId: 'save_memory',
             type: IntelligenceActionType.saveMemory,
             label: tr('Remember this about me', 'احفظ هذه المعلومة عني'),
             requiresConfirmation: true,

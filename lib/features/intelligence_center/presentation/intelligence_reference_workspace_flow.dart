@@ -41,7 +41,9 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
       if (!mounted) return;
       await _saveConversation();
       if (!mounted) return;
-      if (index != 1) {
+      if (index == 2) {
+        await showBilQuickAdd(context, originPath: '/intelligence-center');
+      } else if (index != 1) {
         await context.push(BilReferenceBottomBar.routes[index]);
       }
     } finally {

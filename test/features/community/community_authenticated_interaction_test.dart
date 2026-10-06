@@ -1005,7 +1005,7 @@ void main() {
       find.byKey(const Key('community-post-composer')),
       'Draft kept for retry',
     );
-    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.tap(find.byKey(const Key('community-post-publish')));
     await tester.pumpAndSettle();
     expect(repository.publishCalls, 1);
     expect(find.text('Draft kept for retry'), findsOneWidget);
@@ -1028,7 +1028,7 @@ void main() {
       find.byKey(const Key('community-post-composer')),
       'Contact me at person@example.com',
     );
-    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.tap(find.byKey(const Key('community-post-publish')));
     await tester.pumpAndSettle();
 
     expect(repository.publishCalls, 1);

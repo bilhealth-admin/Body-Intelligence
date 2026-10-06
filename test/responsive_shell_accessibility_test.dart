@@ -2,6 +2,7 @@ import 'dart:ui' show Tristate;
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_reference_navigation_glyph.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +36,7 @@ void main() {
               );
               final todayLabel = wide
                   ? strings.text('Today')
-                  : strings.get('dashboard');
+                  : strings.text('Home');
               final moreLabel = strings.text('More');
               Finder button(String label) => find.byWidgetPredicate(
                 (widget) =>
@@ -57,28 +58,74 @@ void main() {
               );
               expect(tester.getSize(more).height, greaterThanOrEqualTo(48));
 
-              final todayIcon = tester.widget<Icon>(
-                find.descendant(of: today, matching: find.byType(Icon)),
-              );
-              expect(
-                todayIcon.icon,
-                platform == TargetPlatform.iOS
-                    ? CupertinoIcons.square_grid_2x2_fill
-                    : Icons.dashboard_rounded,
-              );
-              final plus = find.byKey(const Key('shell-quick-add-icon'));
-              expect(plus, findsOneWidget);
-              expect(
-                tester.widget<Icon>(plus).icon,
-                platform == TargetPlatform.iOS
-                    ? CupertinoIcons.plus
-                    : Icons.add_rounded,
-              );
+              final Icon? todayIcon;
+              if (wide) {
+                todayIcon = tester.widget<Icon>(
+                  find.descendant(of: today, matching: find.byType(Icon)),
+                );
+                expect(
+                  todayIcon.icon,
+                  platform == TargetPlatform.iOS
+                      ? CupertinoIcons.square_grid_2x2_fill
+                      : Icons.dashboard_rounded,
+                );
+                final plus = find.byKey(const Key('shell-quick-add-icon'));
+                expect(plus, findsOneWidget);
+                expect(
+                  tester.widget<Icon>(plus).icon,
+                  platform == TargetPlatform.iOS
+                      ? CupertinoIcons.plus
+                      : Icons.add_rounded,
+                );
+              } else {
+                todayIcon = null;
+                final todayGlyph = tester.widget<BilReferenceNavigationGlyph>(
+                  find.byKey(const Key('bil-reference-nav-glyph-0')),
+                );
+                final plusGlyph = tester.widget<BilReferenceNavigationGlyph>(
+                  find.byKey(const Key('bil-reference-nav-glyph-2')),
+                );
+                expect(todayGlyph.destination, 0);
+                expect(todayGlyph.selected, isTrue);
+                expect(plusGlyph.destination, 2);
+                final surface =
+                    tester
+                            .widget<DecoratedBox>(
+                              find.byKey(
+                                const Key('bil-reference-nav-surface'),
+                              ),
+                            )
+                            .decoration
+                        as BoxDecoration;
+                final background = surface.gradient!.colors.first;
+                expect(
+                  _contrast(todayGlyph.color, background),
+                  greaterThanOrEqualTo(3),
+                );
+                final text = tester.widget<Text>(
+                  find.byKey(const Key('bil-reference-nav-label-0')),
+                );
+                expect(
+                  _contrast(text.style!.color!, background),
+                  greaterThanOrEqualTo(4.5),
+                );
+                for (var index = 0; index < 5; index++) {
+                  final target = find.byKey(Key('bil-reference-nav-$index'));
+                  expect(
+                    tester.getSize(target).width,
+                    greaterThanOrEqualTo(48),
+                  );
+                  expect(
+                    tester.getSize(target).height,
+                    greaterThanOrEqualTo(48),
+                  );
+                }
+              }
 
               if (wide) {
                 final colors = Theme.of(tester.element(today)).colorScheme;
                 expect(
-                  _contrast(todayIcon.color!, colors.primaryContainer),
+                  _contrast(todayIcon!.color!, colors.primaryContainer),
                   greaterThanOrEqualTo(3),
                 );
                 final text = tester.widget<Text>(

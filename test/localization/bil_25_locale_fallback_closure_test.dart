@@ -12,6 +12,32 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../tool/localization/locale_fallback_closure.dart';
 
 void main() {
+  test(
+    'Coach literal audit includes new part helpers and Dart quote forms',
+    () {
+      expect(
+        coachLiteralRuntimeSources(r'''
+        tr('Saved result.', 'نتيجة محفوظة.');
+        tr("Review your data.", 'راجع بياناتك.');
+        tr('First line. ' 'Second line.', 'سطران.');
+        tr('Coach\'s reply', 'إجابة المدرب');
+        tr(r'Literal $token', 'نص حرفي');
+        tr('Runtime $value', 'قيمة');
+        tr('Runtime ${value.count}', 'قيمة');
+        tr('Escaped \$token', 'رمز');
+      '''),
+        {
+          'Saved result.',
+          'Review your data.',
+          'First line. Second line.',
+          "Coach's reply",
+          r'Literal $token',
+          r'Escaped $token',
+        },
+      );
+    },
+  );
+
   test('all tracked 25-locale surfaces close English fallback paths', () async {
     final result = await auditLocaleFallbackClosure();
     expect(result.requiredSourceCount, greaterThanOrEqualTo(578));

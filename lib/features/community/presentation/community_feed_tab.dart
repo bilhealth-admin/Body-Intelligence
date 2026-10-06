@@ -66,8 +66,7 @@ class _FeedTabState extends State<_FeedTab>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialMode != widget.initialMode &&
         _selectedFeedMode != widget.initialMode) {
-      _selectedFeedMode = widget.initialMode;
-      _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+      unawaited(_selectFeedMode(widget.initialMode));
     }
   }
 
@@ -410,16 +409,8 @@ class _FeedTabState extends State<_FeedTab>
     }
   }
 
-  String _feedModeLabel(CommunityFeedMode mode) => switch (mode) {
-    CommunityFeedMode.forYou => communityText(context, 'For You', 'لك'),
-    CommunityFeedMode.following => communityText(
-      context,
-      'Following',
-      'المتابَعون',
-    ),
-    CommunityFeedMode.friends => communityText(context, 'Friends', 'الأصدقاء'),
-    CommunityFeedMode.explore => communityText(context, 'Explore', 'استكشاف'),
-  };
+  String _feedModeLabel(CommunityFeedMode mode) =>
+      _communityFeedModeLabel(context, mode);
 
   String _emptyFeedMessage() => switch (_selectedFeedMode) {
     CommunityFeedMode.following => communityText(
@@ -476,6 +467,7 @@ class _FeedTabState extends State<_FeedTab>
               onRefresh: _refresh,
               child: Semantics(
                 key: const Key('community-public-feed'),
+                value: _feedModeLabel(_selectedFeedMode),
                 label: communityText(
                   context,
                   'Shared with BIL members',
@@ -487,42 +479,6 @@ class _FeedTabState extends State<_FeedTab>
                   ),
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: PopupMenuButton<CommunityFeedMode>(
-                          key: const Key('community-feed-mode-menu'),
-                          tooltip: _feedModeLabel(_selectedFeedMode),
-                          onSelected: _selectFeedMode,
-                          itemBuilder: (_) => [
-                            for (final mode in CommunityFeedMode.values)
-                              PopupMenuItem<CommunityFeedMode>(
-                                key: Key(
-                                  'community-feed-mode-${mode.wireValue}',
-                                ),
-                                value: mode,
-                                child: Text(_feedModeLabel(mode)),
-                              ),
-                          ],
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _feedModeLabel(_selectedFeedMode),
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                ),
-                                const Icon(Icons.expand_more_rounded, size: 18),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                     SliverToBoxAdapter(
                       child: CommunityPolicyNotice(
                         state: _policyState!,

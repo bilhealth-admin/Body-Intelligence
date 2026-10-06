@@ -326,7 +326,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final availableActions = reply.actions;
+      final availableActions = reply.actions
+          .map(const CoachActionAdmission().admitProposal)
+          .whereType<IntelligenceAction>()
+          .toList(growable: false);
       final safeMessage = _presentationSafeMessage(reply.message);
       IntelligenceAction? directNavigationAction;
       if (reply.serviceStatus == CoachServiceStatus.ready) {
@@ -339,7 +342,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       }
       final persistedActions = <String, IntelligenceMessageAction>{
         for (final action in safeMessage.actionLinks)
-          if (action.isTrusted) '${action.type.name}:${action.id}': action,
+          if (action.isTrusted)
+            _coachActionExecutionKey(action.toAction()): action,
       };
       final transientActions = <IntelligenceAction>[];
       for (final action in availableActions) {
@@ -347,7 +351,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         if (persisted == null) {
           transientActions.add(action);
         } else {
-          persistedActions['${persisted.type.name}:${persisted.id}'] =
+          persistedActions[_coachActionExecutionKey(persisted.toAction())] =
               persisted;
           if (action.type == IntelligenceActionType.updateGoal) {
             // Present confirmation immediately, while retaining the bounded
@@ -506,8 +510,14 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       for (final action in message.actionLinks.reversed) {
         if (!action.isTrusted) continue;
         final candidate = action.toAction();
-        final descriptor = const BilToolRegistry().lookup(candidate.id);
-        if (descriptor?.requiresConfirmation == true) return candidate;
+        final binding = const CoachActionAdmission().bind(
+          candidate,
+          requireOperationId: true,
+        );
+        if (binding?.descriptor?.requiresConfirmation == true ||
+            binding?.action.requiresFreshConfirmation == true) {
+          return binding!.action;
+        }
       }
     }
     return null;

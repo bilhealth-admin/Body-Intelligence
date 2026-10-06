@@ -5,12 +5,16 @@ class _CommunityPostDetailPage extends StatefulWidget {
     required this.post,
     required this.initialStats,
     required this.repository,
+    this.ownerIsCurrent,
+    this.ownerChanges,
     this.referenceMetadata,
   });
 
   final CommunityPost post;
   final CommunityPostStats initialStats;
   final CommunityRepository repository;
+  final ValueGetter<bool>? ownerIsCurrent;
+  final Listenable? ownerChanges;
   final CommunityPostReferenceMetadata? referenceMetadata;
 
   @override
@@ -20,6 +24,7 @@ class _CommunityPostDetailPage extends StatefulWidget {
 
 class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   static const _pageSize = 30;
+  late final _detailOwnerScope = _captureDetailScope();
   final _composer = TextEditingController();
   final _composerFocus = FocusNode();
   late CommunityPostStats _stats = widget.initialStats;
@@ -60,34 +65,38 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     unawaited(_loadAuthorMembershipTier());
   }
 
-  Future<void> _loadAuthorMembershipTier() async {
+  Future<void> _loadAuthorMembershipTier() => _runDetailOwner(() async {
     if (!widget.repository.useServerCommunityReferenceParity) return;
     try {
       final tiers = await widget.repository.loadVisibleMembershipTiers([
         widget.post.authorId,
       ]);
-      if (mounted) {
+      _detailOwnerScope.check();
+      if (mounted && _detailOwnerIsCurrent) {
         setState(() => _authorMembershipTier = tiers[widget.post.authorId]);
       }
     } on Object {
       // Membership tier is opt-in presentation and never blocks post reading.
     }
-  }
+  });
 
-  Future<void> _loadAuthorProfile() async {
+  Future<void> _loadAuthorProfile() => _runDetailOwner(() async {
     if (!widget.repository.useServerCommunityReferenceParity) return;
     if (widget.post.authorId == widget.repository.currentUserId) return;
     try {
       final profile = await widget.repository.loadProfileOverview(
         widget.post.authorId,
       );
-      if (mounted) setState(() => _authorProfile = profile);
+      _detailOwnerScope.check();
+      if (mounted && _detailOwnerIsCurrent) {
+        setState(() => _authorProfile = profile);
+      }
     } on Object {
       // The post remains readable if the relationship affordance cannot load.
     }
-  }
+  });
 
-  Future<void> _toggleAuthorFollow() async {
+  Future<void> _toggleAuthorFollow() => _runDetailOwner(() async {
     final profile = _authorProfile;
     if (profile == null ||
         profile.isSelf ||
@@ -99,15 +108,23 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     try {
       if (profile.viewerFollows) {
         await widget.repository.unfollow(profile.userId);
+        _detailOwnerScope.check();
       } else {
         await widget.repository.follow(profile.userId);
+        _detailOwnerScope.check();
       }
+      _detailOwnerScope.check();
       final refreshed = await widget.repository.loadProfileOverview(
         profile.userId,
       );
-      if (mounted) setState(() => _authorProfile = refreshed);
+      _detailOwnerScope.check();
+      if (mounted && _detailOwnerIsCurrent) {
+        setState(() => _authorProfile = refreshed);
+      }
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (mounted) {
+      if (mounted && _detailOwnerIsCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -121,25 +138,27 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _followBusy = false);
+      if (mounted && _detailOwnerIsCurrent) setState(() => _followBusy = false);
     }
-  }
+  });
 
-  Future<void> _recordView() async {
+  Future<void> _recordView() => _runDetailOwner(() async {
     if (!widget.repository.useServerCommunityReferenceParity) return;
     try {
       final count = await widget.repository.recordCommunityPostView(
         widget.post.id,
       );
-      if (mounted) setState(() => _viewCount = count);
+      _detailOwnerScope.check();
+      if (mounted && _detailOwnerIsCurrent) setState(() => _viewCount = count);
     } on Object {
       // Reading a post remains available when non-critical view analytics fail.
     }
-  }
+  });
 
   Future<Map<String, String>> _fetchMembershipTiers(
     Iterable<CommunityComment> comments,
   ) async {
+    _detailOwnerScope.check();
     if (!widget.repository.useServerCommunityReferenceParity) {
       return const <String, String>{};
     }
@@ -150,14 +169,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         .toList(growable: false);
     if (ids.isEmpty) return const <String, String>{};
     try {
-      return await widget.repository.loadCommentMembershipTiers(ids);
+      final tiers = await widget.repository.loadCommentMembershipTiers(ids);
+      _detailOwnerScope.check();
+      return tiers;
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } on Object {
       // Tier display is optional and must never block comment reading.
       return const <String, String>{};
     }
   }
 
-  Future<void> _loadInitial() async {
+  Future<void> _loadInitial() => _runDetailOwner(() async {
     final generation = ++_loadGeneration;
     _refreshing = true;
     _loadingMore = false;
@@ -169,13 +192,14 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           limit: _pageSize,
         ),
       ]);
+      _detailOwnerScope.check();
       final stats = values[0] as List<CommunityPostStats>;
       final threads = values[1] as List<CommunityCommentThread>;
       final loadedComments = <CommunityComment>[
         for (final thread in threads) ...[thread.root, ...thread.replies],
       ];
       final tiers = await _fetchMembershipTiers(loadedComments);
-      if (!mounted || generation != _loadGeneration) return;
+      if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
       if (stats.length == 1) _stats = stats.single;
       _comments
         ..clear()
@@ -195,7 +219,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     } finally {
       if (generation == _loadGeneration) _refreshing = false;
     }
-  }
+  });
 
   void _retry() {
     setState(() {
@@ -203,7 +227,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     });
   }
 
-  Future<void> _refresh() async {
+  Future<void> _refresh() => _runDetailOwner(() async {
     if (_submitting || _busyComments.isNotEmpty || _likingPost) return;
     final future = _loadInitial();
     setState(() {
@@ -214,9 +238,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     } on Object {
       // The mounted FutureBuilder presents a stable retry state.
     }
-  }
+  });
 
-  Future<void> _loadMore() async {
+  Future<void> _loadMore() => _runDetailOwner(() async {
     if (_loadingMore ||
         _refreshing ||
         !_hasMore ||
@@ -233,11 +257,12 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         afterId: _afterId,
         limit: _pageSize,
       );
+      _detailOwnerScope.check();
       final loaded = <CommunityComment>[
         for (final thread in page) ...[thread.root, ...thread.replies],
       ];
       final tiers = await _fetchMembershipTiers(loaded);
-      if (!mounted || generation != _loadGeneration) return;
+      if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
         _membershipTierResolvedUsers.addAll(
@@ -258,14 +283,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           _afterId = page.last.root.id;
         }
       });
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (mounted && generation == _loadGeneration) _showActionError();
+      if (mounted && _detailOwnerIsCurrent && generation == _loadGeneration) {
+        _showActionError();
+      }
     } finally {
-      if (mounted && generation == _loadGeneration) {
+      if (mounted && _detailOwnerIsCurrent && generation == _loadGeneration) {
         setState(() => _loadingMore = false);
       }
     }
-  }
+  });
 
   List<CommunityComment> get _rootComments {
     final roots =
@@ -291,49 +320,56 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     return replies;
   }
 
-  Future<void> _loadMoreReplies(CommunityComment root) async {
-    if (_refreshing) return;
-    if (!_loadingReplyThreads.add(root.id)) return;
-    final generation = _loadGeneration;
-    setState(() => _expandedThreads.add(root.id));
-    try {
-      final loaded = _loadedReplies(root.id);
-      if (loaded.length >= root.replyCount) return;
-      final last = loaded.lastOrNull;
-      final page = await widget.repository.loadCommentReplies(
-        root.id,
-        after: last?.createdAt,
-        afterId: last?.id,
-        limit: 20,
-      );
-      final tiers = await _fetchMembershipTiers(page);
-      if (!mounted ||
-          generation != _loadGeneration ||
-          !_comments.any(
-            (comment) => comment.id == root.id && comment.parentId == null,
-          )) {
-        return;
-      }
-      final known = _comments.map((comment) => comment.id).toSet();
-      setState(() {
-        _membershipTierResolvedUsers.addAll(
-          page.map((comment) => comment.authorId),
+  Future<void> _loadMoreReplies(CommunityComment root) => _runDetailOwner(
+    () async {
+      if (_refreshing) return;
+      if (!_loadingReplyThreads.add(root.id)) return;
+      final generation = _loadGeneration;
+      setState(() => _expandedThreads.add(root.id));
+      try {
+        final loaded = _loadedReplies(root.id);
+        if (loaded.length >= root.replyCount) return;
+        final last = loaded.lastOrNull;
+        final page = await widget.repository.loadCommentReplies(
+          root.id,
+          after: last?.createdAt,
+          afterId: last?.id,
+          limit: 20,
         );
-        _membershipTierByUser.addAll(tiers);
-        _comments.addAll(page.where((comment) => known.add(comment.id)));
-      });
-    } catch (_) {
-      if (mounted && generation == _loadGeneration) _showActionError();
-    } finally {
-      if (mounted) {
-        setState(() => _loadingReplyThreads.remove(root.id));
-      } else {
-        _loadingReplyThreads.remove(root.id);
+        _detailOwnerScope.check();
+        final tiers = await _fetchMembershipTiers(page);
+        if (!_detailOwnerIsCurrent ||
+            generation != _loadGeneration ||
+            !_comments.any(
+              (comment) => comment.id == root.id && comment.parentId == null,
+            )) {
+          return;
+        }
+        final known = _comments.map((comment) => comment.id).toSet();
+        setState(() {
+          _membershipTierResolvedUsers.addAll(
+            page.map((comment) => comment.authorId),
+          );
+          _membershipTierByUser.addAll(tiers);
+          _comments.addAll(page.where((comment) => known.add(comment.id)));
+        });
+      } on CommunityOwnerOperationCancelled {
+        rethrow;
+      } catch (_) {
+        if (mounted && _detailOwnerIsCurrent && generation == _loadGeneration) {
+          _showActionError();
+        }
+      } finally {
+        if (mounted && _detailOwnerIsCurrent) {
+          setState(() => _loadingReplyThreads.remove(root.id));
+        } else {
+          _loadingReplyThreads.remove(root.id);
+        }
       }
-    }
-  }
+    },
+  );
 
-  Future<void> _togglePostLike() async {
+  Future<void> _togglePostLike() => _runDetailOwner(() async {
     if (_likingPost) return;
     setState(() => _likingPost = true);
     try {
@@ -341,15 +377,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         widget.post.id,
         liked: !_stats.liked,
       );
-      if (mounted) setState(() => _stats = stats);
+      _detailOwnerScope.check();
+      if (mounted && _detailOwnerIsCurrent) setState(() => _stats = stats);
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (mounted) _showActionError();
+      if (mounted && _detailOwnerIsCurrent) _showActionError();
     } finally {
-      if (mounted) setState(() => _likingPost = false);
+      if (mounted && _detailOwnerIsCurrent) setState(() => _likingPost = false);
     }
-  }
+  });
 
-  Future<void> _submitComment() async {
+  Future<void> _submitComment() => _runDetailOwner(() async {
     final text = _composer.text.trim();
     if (_submitting || _refreshing) return;
     if (text.isEmpty) {
@@ -385,8 +424,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         parentId: _replyingTo?.id,
         clientId: clientId,
       );
+      _detailOwnerScope.check();
       final tiers = await _fetchMembershipTiers([comment]);
-      if (!mounted) return;
+      if (!mounted || !_detailOwnerIsCurrent) return;
       setState(() {
         _membershipTierResolvedUsers.add(comment.authorId);
         _membershipTierByUser.addAll(tiers);
@@ -421,7 +461,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         _clientBody = null;
       });
     } on CommunityPolicyAccessException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_detailOwnerIsCurrent) return;
       setState(() {
         _composerError = communityText(
           context,
@@ -430,7 +470,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         );
       });
     } on CommunityMembershipAccessException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_detailOwnerIsCurrent) return;
       setState(() {
         _composerError = communityText(
           context,
@@ -439,14 +479,16 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         );
       });
     } on CommunityTextPolicyException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_detailOwnerIsCurrent) return;
       setState(() {
         _composerError = error.localizedMessage(
           Localizations.localeOf(context).toLanguageTag(),
         );
       });
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_detailOwnerIsCurrent) return;
       setState(() {
         _composerError = communityText(
           context,
@@ -455,33 +497,40 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         );
       });
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted && _detailOwnerIsCurrent) setState(() => _submitting = false);
     }
-  }
+  });
 
-  Future<void> _toggleCommentLike(CommunityComment comment) async {
-    if (!_busyComments.add(comment.id)) return;
-    setState(() {});
-    try {
-      final updated = await widget.repository.setCommentLiked(
-        comment,
-        liked: !comment.liked,
-      );
-      if (!mounted) return;
-      final index = _comments.indexWhere((item) => item.id == comment.id);
-      if (index >= 0) setState(() => _comments[index] = updated);
-    } catch (_) {
-      if (mounted) _showActionError();
-    } finally {
-      if (mounted) {
-        setState(() => _busyComments.remove(comment.id));
-      } else {
-        _busyComments.remove(comment.id);
-      }
-    }
-  }
+  Future<void> _toggleCommentLike(CommunityComment comment) =>
+      _runDetailOwner(() async {
+        if (!_busyComments.add(comment.id)) return;
+        setState(() {});
+        try {
+          final updated = await widget.repository.setCommentLiked(
+            comment,
+            liked: !comment.liked,
+          );
+          _detailOwnerScope.check();
+          if (!mounted || !_detailOwnerIsCurrent) return;
+          final index = _comments.indexWhere((item) => item.id == comment.id);
+          if (index >= 0) setState(() => _comments[index] = updated);
+        } on CommunityOwnerOperationCancelled {
+          rethrow;
+        } catch (_) {
+          if (mounted && _detailOwnerIsCurrent) _showActionError();
+        } finally {
+          if (mounted && _detailOwnerIsCurrent) {
+            setState(() => _busyComments.remove(comment.id));
+          } else {
+            _busyComments.remove(comment.id);
+          }
+        }
+      });
 
-  Future<void> _commentAction(CommunityComment comment, String action) async {
+  Future<void> _commentAction(
+    CommunityComment comment,
+    String action,
+  ) => _runDetailOwner(() async {
     if (action == 'reply') {
       setState(() {
         _replyingTo = comment;
@@ -500,7 +549,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     try {
       if (action == 'delete') {
         await widget.repository.deleteComment(comment.id);
-        if (!mounted) return;
+        _detailOwnerScope.check();
+        if (!mounted || !_detailOwnerIsCurrent) return;
         setState(() {
           final isRoot = comment.parentId == null;
           final removedCount = isRoot ? comment.replyCount + 1 : 1;
@@ -542,15 +592,20 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           comment.id,
           reason: 'user_reported_from_post_detail',
         );
+        _detailOwnerScope.check();
       } else if (action == 'block') {
         await widget.repository.blockMember(comment.authorId);
-        if (!mounted) return;
+        _detailOwnerScope.check();
+        if (!mounted || !_detailOwnerIsCurrent) return;
         // The server filters blocked members and their reply threads. Refresh
         // only after releasing this mutation's busy guard.
         _busyComments.remove(comment.id);
         await _refresh();
       }
-      if (mounted && action != 'delete' && action != 'block') {
+      if (mounted &&
+          _detailOwnerIsCurrent &&
+          action != 'delete' &&
+          action != 'block') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -563,16 +618,18 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           ),
         );
       }
+    } on CommunityOwnerOperationCancelled {
+      rethrow;
     } catch (_) {
-      if (mounted) _showActionError();
+      if (mounted && _detailOwnerIsCurrent) _showActionError();
     } finally {
-      if (mounted) {
+      if (mounted && _detailOwnerIsCurrent) {
         setState(() => _busyComments.remove(comment.id));
       } else {
         _busyComments.remove(comment.id);
       }
     }
-  }
+  });
 
   void _showActionError() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -598,6 +655,8 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   void _setDetailState(VoidCallback callback) => setState(callback);
 
   @override
-  Widget build(BuildContext context) =>
-      _CommunityPostDetailRendering(this).buildCommunityPostDetail(context);
+  Widget build(BuildContext context) => _detailOwnerScope.guard(
+    _CommunityPostDetailRendering(this).buildCommunityPostDetail(context),
+    page: true,
+  );
 }

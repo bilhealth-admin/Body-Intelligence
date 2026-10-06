@@ -5,11 +5,13 @@ class _CommunityAuthorRelationshipAction extends StatefulWidget {
     required this.post,
     required this.repository,
     required this.enabled,
+    this.ownerIsCurrent,
   });
 
   final CommunityPost post;
   final CommunityRepository repository;
   final bool enabled;
+  final ValueGetter<bool>? ownerIsCurrent;
 
   @override
   State<_CommunityAuthorRelationshipAction> createState() =>
@@ -23,14 +25,42 @@ class _CommunityAuthorRelationshipActionState
   late bool _canRequest = widget.post.authorCanRequest;
   bool _busy = false;
 
+  @override
+  void didUpdateWidget(covariant _CommunityAuthorRelationshipAction oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository) ||
+        oldWidget.post.id != widget.post.id ||
+        oldWidget.post.authorId != widget.post.authorId) {
+      _relationship = widget.post.authorRelationship;
+      _canRequest = widget.post.authorCanRequest;
+      _busy = false;
+    }
+  }
+
   Future<void> _request() async {
-    if (_busy || !_canRequest || !widget.enabled) return;
+    if (_busy ||
+        !_canRequest ||
+        !widget.enabled ||
+        !(widget.ownerIsCurrent?.call() ?? true)) {
+      return;
+    }
+    final repository = widget.repository;
+    final postId = widget.post.id;
+    final authorId = widget.post.authorId;
+    final parentVisit = widget.ownerIsCurrent;
+    final scope = _CommunityPostOwnerScope(
+      repository: repository,
+      isCurrentVisit: () =>
+          mounted &&
+          identical(repository, widget.repository) &&
+          postId == widget.post.id &&
+          authorId == widget.post.authorId &&
+          (parentVisit?.call() ?? true),
+    );
     setState(() => _busy = true);
     try {
-      final result = await widget.repository.requestFriend(
-        widget.post.authorId,
-      );
-      if (!mounted) return;
+      final result = await scope.run(() => repository.requestFriend(authorId));
+      if (!mounted || !scope.isCurrent) return;
       setState(() {
         _relationship = switch (result) {
           CommunityFriendRequestStatus.pending =>
@@ -44,8 +74,10 @@ class _CommunityAuthorRelationshipActionState
         };
         _canRequest = false;
       });
+    } on CommunityOwnerOperationCancelled {
+      // The original request cannot resume under a replaced card visit.
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !scope.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -58,7 +90,7 @@ class _CommunityAuthorRelationshipActionState
         ),
       );
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted && scope.isCurrent) setState(() => _busy = false);
     }
   }
 

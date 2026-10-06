@@ -65,9 +65,10 @@ void main() {
     final pagination = File(
       'lib/features/community/presentation/community_feed_pagination.dart',
     ).readAsStringSync();
-    final feed = File(
+    final feed = [
       'lib/features/community/presentation/community_feed_tab.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_feed_mode_control.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(repository, contains('bil_community_feed_refs_v1'));
     expect(mixin, contains('loadCommunityFeedMode'));

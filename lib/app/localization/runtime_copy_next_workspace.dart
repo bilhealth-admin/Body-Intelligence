@@ -67,6 +67,18 @@ abstract final class NextWorkspaceRuntimeCopy {
     "Earlier",
     "Your account changed. Return to Community to continue.",
     "Keep the text within 1200 characters. Your text is kept.",
+    "The action could not be validated. Ask Coach to prepare it again.",
+    "This day is closed. Reopen it in Daily Log before making changes.",
+    "This meal changed since the action was prepared. Review it again.",
+    "The account changed. Reopen AI Coach and try again.",
+    "This action was already undone. Nothing was added again.",
+    "Undo could not be completed. Review your current data.",
+    "Calorie-only entry saved. Other nutrients are unknown.",
+    "The change was saved, but its receipt could not be loaded. Retry to read the saved result.",
+    "Macro entry saved. Calories are unknown.",
+    "This record changed since the action was prepared. Review it again.",
+    "Your account changed. Prepare this action again for the current account.",
+    "The action was saved, but its current state could not be verified. Review your data before retrying.",
   ];
   static const sources = <String>[..._primarySources, ...supplementalSources];
   static const _supplemental = <String, List<String>>{

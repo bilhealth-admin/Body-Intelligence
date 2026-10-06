@@ -7,11 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
-import '../theme/premium_motion_tokens.dart';
 import '../theme/bil_navigation_icons.dart';
 import '../../shared/widgets/bil_wordmark.dart';
-import '../../shared/widgets/bil_modal_bottom_sheet.dart';
-import 'bil_quick_add_sheet.dart';
+import '../../shared/widgets/bil_reference_bottom_bar.dart';
+import 'bil_quick_add_presenter.dart';
 
 part 'responsive_app_shell_top_navigation.dart';
 
@@ -38,7 +37,7 @@ class ResponsiveAppShell extends StatelessWidget {
   /// This preserves Discover, Progress, Insights, and More without allowing a
   /// caller-controlled URL or an arbitrary internal route to become a redirect.
   static String? safeQuickAddReturnPath(String? value) =>
-      paths.contains(value) ? value : null;
+      safeBilQuickAddReturnPath(value);
 
   int selectedIndex(BuildContext context) {
     return selectedIndexForUri(GoRouterState.of(context).uri);
@@ -152,101 +151,8 @@ class ResponsiveAppShell extends StatelessWidget {
       context.go(paths[next]);
     }
 
-    Future<void> quickAdd() async {
-      final action = await showBilModalBottomSheet<String>(
-        context: context,
-        // Keep the sheet dismissible from the dimmed area and draggable from
-        // the handle/content on both iOS and Android. The custom sheet owns
-        // its visual handle, so the framework handle is intentionally
-        // disabled.
-        showDragHandle: false,
-        isScrollControlled: true,
-        useSafeArea: true,
-        backgroundColor: Colors.transparent,
-        sheetAnimationStyle: AnimationStyle(
-          duration: PremiumMotionTokens.durationFor(
-            context,
-            PremiumMotionTokens.navigationDuration,
-          ),
-          reverseDuration: PremiumMotionTokens.durationFor(
-            context,
-            PremiumMotionTokens.stateChangeDuration,
-          ),
-        ),
-        builder: (sheetContext) {
-          return BilQuickAddSheet(
-            photoAsset:
-                'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
-            onFood: () {
-              Navigator.of(sheetContext).pop('food');
-            },
-            onBarcode: () {
-              Navigator.of(sheetContext).pop('barcode');
-            },
-            onVoice: () {
-              Navigator.of(sheetContext).pop('voice');
-            },
-            onPhoto: () {
-              Navigator.of(sheetContext).pop('photo');
-            },
-            onExercise: () {
-              Navigator.of(sheetContext).pop('exercise');
-            },
-            onNotes: () {
-              Navigator.of(sheetContext).pop('notes');
-            },
-            onSearch: () {
-              Navigator.of(sheetContext).pop('search');
-            },
-          );
-        },
-      );
-
-      // Navigate only after showModalBottomSheet has completed its reverse
-      // animation. Starting a shell route from inside the sheet can race its
-      // teardown on iOS and leave a blank child, which also prevents Quick Add
-      // barcode/photo actions from opening their capture surfaces.
-      if (!context.mounted || action == null) return;
-      final origin = Uri.encodeComponent(paths[index]);
-      final cancelledTaskReturn = Uri.encodeComponent('/dashboard');
-      switch (action) {
-        case 'food':
-          // Quick Add's Log food action owns a separate entry surface. The
-          // legacy Daily Log and its breakfast/lunch/dinner pages stay on
-          // their original route and are not rebuilt or altered here.
-          // Push the standalone surface after the sheet has fully dismissed.
-          // A push gives the shell a distinct child route and avoids the
-          // transient blank child that can occur when replacing the sheet's
-          // route with `go` on iOS.
-          context.push('/daily-log?foodLog=1&from=$origin');
-          break;
-        case 'barcode':
-          context.push(
-            '/daily-log?foodLog=1&action=barcode&from=$cancelledTaskReturn',
-          );
-          break;
-        case 'voice':
-          context.push(
-            '/daily-log?foodLog=1&action=voice&from=$cancelledTaskReturn',
-          );
-          break;
-        case 'photo':
-          // Photo analysis belongs to the standalone Food Log surface. Keep
-          // the dashboard as the validated return destination and do not
-          // route a meal image through AI Coach or the legacy Daily Log.
-          context.push('/quick-add/meal-camera?from=$origin');
-          break;
-        case 'exercise':
-          context.push('/wellness/workouts');
-          break;
-        case 'notes':
-          context.go('/daily-log/body-context?from=$origin');
-          break;
-        case 'search':
-          if (currentPath != '/nutrition') context.push('/nutrition');
-          break;
-      }
-    }
+    Future<void> quickAdd() =>
+        showBilQuickAdd(context, originPath: paths[index]);
 
     final quickButton = _GlassQuickAdd(
       key: const Key('shell-quick-add'),
@@ -270,17 +176,10 @@ class ResponsiveAppShell extends StatelessWidget {
     }
 
     if (!wide) {
-      final mobileItems = [
-        navigationItem(
-          BilNavigationDestination.today,
-          context.strings.get('dashboard'),
-        ),
-        items[5],
-      ];
       final mobileIndex = switch (index) {
         0 => 0,
-        5 => 1,
-        _ => null,
+        5 => 4,
+        _ => -1,
       };
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: systemUiOverlayStyle,
@@ -298,13 +197,27 @@ class ResponsiveAppShell extends StatelessWidget {
                 ? null
                 : Semantics(
                     label: context.strings.get('primary_navigation'),
-                    child: _GlassBottomNavigation(
+                    child: BilReferenceBottomBar(
                       key: const Key('glass-bottom-navigation'),
-                      selectedIndex: mobileIndex,
-                      items: mobileItems,
-                      quickAdd: quickButton,
+                      selected: mobileIndex,
+                      moreAttentionCount:
+                          CommunityAttentionScope.controllerOf(
+                            context,
+                          )?.value.total ??
+                          0,
+                      destinationKeys: const {
+                        0: Key('shell-dashboard-destination'),
+                        1: Key('shell-coach-destination'),
+                        2: Key('shell-quick-add'),
+                        3: Key('shell-community-destination'),
+                        4: Key('shell-more-destination'),
+                      },
                       onSelected: (next) {
-                        final target = next == 0 ? paths[0] : paths[5];
+                        if (next == 2) {
+                          quickAdd();
+                          return;
+                        }
+                        final target = BilReferenceBottomBar.routes[next];
                         final activePath = GoRouter.of(
                           context,
                         ).routerDelegate.currentConfiguration.uri.path;
@@ -361,262 +274,6 @@ class ResponsiveAppShell extends StatelessWidget {
                 ),
         ),
       ),
-    );
-  }
-}
-
-class _GlassBottomNavigation extends StatelessWidget {
-  const _GlassBottomNavigation({
-    super.key,
-    required this.selectedIndex,
-    required this.items,
-    required this.quickAdd,
-    required this.onSelected,
-  }) : assert(items.length == 2);
-
-  final int? selectedIndex;
-  final List<
-    ({
-      IconData icon,
-      IconData selected,
-      String label,
-      BilNavigationDestination destination,
-    })
-  >
-  items;
-  final Widget quickAdd;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final dark = theme.brightness == Brightness.dark;
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final dockHeight = 68.0 + (textScale - 1).clamp(0.0, 1.0) * 28;
-    const quickAddRise = 18.0;
-    final reservedHeight = dockHeight + quickAddRise;
-    final radius = BorderRadius.circular(30);
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: SizedBox(
-        height: reservedHeight,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(
-              left: 0,
-              right: 0,
-              top: quickAddRise,
-              bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: radius,
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.shadow.withValues(alpha: dark ? .26 : .12),
-                      blurRadius: 30,
-                      spreadRadius: -10,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: radius,
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: dark
-                              ? const [Color(0xF20B1725), Color(0xEA0C2234)]
-                              : const [Color(0xF7FFFFFF), Color(0xF4F8FBFF)],
-                        ),
-                        borderRadius: radius,
-                        border: Border.all(
-                          color: dark
-                              ? Colors.white.withValues(alpha: .13)
-                              : const Color(0xFFDCE7F4),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              top: quickAddRise,
-              bottom: 0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: _GlassBottomDestination(
-                        key: const Key('shell-dashboard-destination'),
-                        item: items[0],
-                        selected: selectedIndex == 0,
-                        onTap: () => onSelected(0),
-                      ),
-                    ),
-                    const SizedBox(width: 96),
-                    Expanded(
-                      child: _GlassBottomDestination(
-                        key: const Key('shell-more-destination'),
-                        item: items[1],
-                        selected: selectedIndex == 1,
-                        onTap: () => onSelected(1),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SizedBox(
-                  width: 104,
-                  child: _GlassBottomQuickAdd(
-                    label: context.strings.text('Quick Add'),
-                    child: quickAdd,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassBottomDestination extends StatelessWidget {
-  const _GlassBottomDestination({
-    super.key,
-    required this.item,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final ({
-    IconData icon,
-    IconData selected,
-    String label,
-    BilNavigationDestination destination,
-  })
-  item;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final foreground = selected ? colors.primary : colors.onSurfaceVariant;
-    final attention = item.destination == BilNavigationDestination.more
-        ? CommunityAttentionScope.controllerOf(context)?.value.total ?? 0
-        : 0;
-    return Semantics(
-      container: true,
-      button: true,
-      selected: selected,
-      label: attention > 0 ? "${item.label}, $attention" : item.label,
-      onTap: onTap,
-      child: ExcludeSemantics(
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(22),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              constraints: const BoxConstraints(minHeight: 48),
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (item.destination == BilNavigationDestination.more)
-                    CommunityUnreadBadge(
-                      child: BilNativeNavigationGlyph(
-                        destination: item.destination,
-                        selected: selected,
-                        color: foreground,
-                        size: 23,
-                      ),
-                    )
-                  else
-                    BilNativeNavigationGlyph(
-                      destination: item.destination,
-                      selected: selected,
-                      color: foreground,
-                      size: 23,
-                    ),
-                  const SizedBox(height: 4),
-                  Flexible(
-                    child: Text(
-                      item.label,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: foreground,
-                        fontWeight: selected
-                            ? FontWeight.w800
-                            : FontWeight.w600,
-                        height: 1.05,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassBottomQuickAdd extends StatelessWidget {
-  const _GlassBottomQuickAdd({required this.label, required this.child});
-
-  final String label;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        child,
-        const SizedBox(height: 2),
-        ExcludeSemantics(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

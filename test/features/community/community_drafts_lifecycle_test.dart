@@ -321,7 +321,11 @@ void main() {
     await tester.tap(find.byKey(const Key('community-post-editor-close')));
     await tester.pumpAndSettle();
     expect(_draft(_draftA), findsOneWidget);
-    expect(repository.listOwners, [_ownerA, _ownerA]);
+    expect(
+      repository.listOwners,
+      [_ownerA, _ownerA, _ownerA],
+      reason: 'The editor also reads its authoritative Drafts header count.',
+    );
     expect(tester.takeException(), isNull);
   });
 
