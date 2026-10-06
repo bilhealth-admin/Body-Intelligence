@@ -131,6 +131,44 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
   }
 
   Future<
+    ({CommunityPersistentDraft draft, CommunityPostImageDraft? image})
+  >
+  loadMyCommunityDraftPreview(String draftId) async {
+    if (!CommunityRepository._uuid.hasMatch(draftId)) {
+      throw ArgumentError.value(draftId, 'draftId');
+    }
+    final response = await _client.rpc(
+      'bil_get_my_community_post_draft_v1',
+      params: {'p_draft_id': draftId},
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid Community draft');
+    }
+    final draft = CommunityPersistentDraft.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+    if (draft.draftId != draftId) {
+      throw const FormatException('Community draft id mismatch');
+    }
+    if (draft.media.isEmpty) return (draft: draft, image: null);
+
+    final metadata = [...draft.media]
+      ..sort((left, right) => left.position.compareTo(right.position));
+    final media = metadata.first;
+    final bytes = await _client.storage
+        .from(_draftBucket)
+        .download(media.objectPath);
+    final image = await validateCommunityPostImageAsync(bytes);
+    if (image.mimeType != media.mimeType ||
+        image.byteLength != media.bytes ||
+        image.width != media.width ||
+        image.height != media.height) {
+      throw const FormatException('Community draft preview media mismatch');
+    }
+    return (draft: draft, image: image);
+  }
+
+  Future<
     ({CommunityPersistentDraft draft, List<CommunityPostImageDraft> images})
   >
   loadMyCommunityDraft(String draftId) async {
