@@ -362,6 +362,10 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       });
       return;
     }
+    if (CommunityTextLimits.exceedsBodyLimit(text)) {
+      setState(() => _composerError = communityBodyLimitText(context));
+      return;
+    }
     // An unchanged retry reuses its id. Editing after an uncertain failure is
     // a different payload and must not collide with the server's idempotency
     // guard (which correctly rejects one id used for two different bodies).

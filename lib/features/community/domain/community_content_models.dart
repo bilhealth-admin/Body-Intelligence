@@ -60,7 +60,7 @@ class CommunityComment {
         (parentId != null && parentId is! String) ||
         body is! String ||
         body.trim().isEmpty ||
-        body.length > 1200 ||
+        CommunityTextLimits.exceedsBodyLimit(body) ||
         parsedAt == null ||
         (authorName != null && authorName is! String) ||
         (avatarUrl != null && avatarUrl is! String) ||

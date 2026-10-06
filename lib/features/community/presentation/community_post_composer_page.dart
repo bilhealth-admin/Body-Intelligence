@@ -58,10 +58,12 @@ class _CommunityPostComposerPage extends StatefulWidget {
     required this.repository,
     required this.imagePicker,
     required this.draft,
+    this.ownerIsCurrent,
   });
   final CommunityRepository repository;
   final CommunityPostImagePickerContract imagePicker;
   final _CommunityComposerDraft draft;
+  final ValueGetter<bool>? ownerIsCurrent;
 
   @override
   State<_CommunityPostComposerPage> createState() =>
@@ -70,6 +72,11 @@ class _CommunityPostComposerPage extends StatefulWidget {
 
 class _CommunityPostComposerPageState
     extends State<_CommunityPostComposerPage> {
+  CommunityRepository? _composerRepository;
+  String? _composerOwnerId;
+  StreamSubscription<AuthState>? _composerAuth;
+  int _composerBinding = 0;
+  bool _composerOwnerCancelled = false;
   late final _title = TextEditingController(text: widget.draft.title);
   late final _composer = TextEditingController(text: widget.draft.body);
   final _composerFocus = FocusNode();
@@ -106,7 +113,26 @@ class _CommunityPostComposerPageState
       const <CommunityMentionCandidate>[];
 
   @override
+  void initState() {
+    super.initState();
+    _bindComposerOwner();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CommunityPostComposerPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository) ||
+        !identical(oldWidget.draft, widget.draft) ||
+        !_sameComposerOwner) {
+      _invalidateComposerOwner();
+    }
+  }
+
+  @override
   void dispose() {
+    _composerOwnerCancelled = true;
+    _composerBinding++;
+    unawaited(_composerAuth?.cancel());
     _composerFocus.dispose();
     _title.dispose();
     _composer.dispose();
@@ -118,7 +144,10 @@ class _CommunityPostComposerPageState
   }
 
   Future<void> _publish() async {
-    if (_publishing ||
+    final owner = _composerOwnerId;
+    if (!_checkComposerOwner() ||
+        owner == null ||
+        _publishing ||
         _savingDraft ||
         _voiceCapturing ||
         _selectingImage ||
@@ -143,12 +172,18 @@ class _CommunityPostComposerPageState
       _composerFocus.requestFocus();
       return;
     }
+    if (CommunityTextLimits.exceedsBodyLimit(text)) {
+      setState(() => _composerError = communityBodyLimitText(context));
+      _composerFocus.requestFocus();
+      return;
+    }
     FocusScope.of(context).unfocus();
     setState(() {
       _composerError = null;
       _submitError = null;
       _publishing = true;
     });
+    var startedPublication = false;
     try {
       final images = List<CommunityPostImageDraft>.unmodifiable(
         _selectedImages,
@@ -198,75 +233,84 @@ class _CommunityPostComposerPageState
           mentions.isNotEmpty ||
           hasReferenceMetadata;
 
-      if (hasPostContext) {
-        await widget.repository.publishRichPost(
-          text,
-          images: images,
-          topicSlugs: topicSlugs,
-          circleSlug: circleSlug,
-          poll: poll,
-          locationLabel: locationLabel,
-          mentions: mentions,
-          title: title,
-          hashtags: hashtags,
-          collaborators: collaborators,
-          persistentDraftId: persistentDraftId,
-        );
-      } else if (poll != null) {
-        if (images.isEmpty) {
-          await widget.repository.publishPostWithTopicsCircleAndPoll(
-            text,
-            topicSlugs: topicSlugs,
-            circleSlug: circleSlug,
-            poll: poll,
-          );
-        } else if (images.length == 1) {
-          await widget.repository.publishPostWithImageTopicsCircleAndPoll(
-            text,
-            images.single,
-            topicSlugs: topicSlugs,
-            circleSlug: circleSlug,
-            poll: poll,
-          );
-        } else {
-          await widget.repository.publishPostWithImagesTopicsCircleAndPoll(
-            text,
-            images,
-            topicSlugs: topicSlugs,
-            circleSlug: circleSlug,
-            poll: poll,
-          );
-        }
-      } else if (images.isEmpty) {
-        if (topicSlugs.isEmpty && circleSlug == null) {
-          await widget.repository.publishPost(text);
-        } else {
-          await widget.repository.publishPostWithTopicsAndCircle(
-            text,
-            topicSlugs: topicSlugs,
-            circleSlug: circleSlug,
-          );
-        }
-      } else if (images.length == 1) {
-        if (topicSlugs.isEmpty && circleSlug == null) {
-          await widget.repository.publishPostWithImage(text, images.single);
-        } else {
-          await widget.repository.publishPostWithImageTopicsAndCircle(
-            text,
-            images.single,
-            topicSlugs: topicSlugs,
-            circleSlug: circleSlug,
-          );
-        }
-      } else {
-        await widget.repository.publishPostWithImagesTopicsAndCircle(
-          text,
-          images,
-          topicSlugs: topicSlugs,
-          circleSlug: circleSlug,
-        );
-      }
-      if (!mounted) return;
+      if (!await _confirmCommunityEntry()) return;
+      if (!mounted || !_checkComposerOwner()) return;
+      startedPublication = true;
+      await widget.repository.runForCommunityOwner(
+        () async {
+          if (hasPostContext) {
+            await widget.repository.publishRichPost(
+              text,
+              images: images,
+              topicSlugs: topicSlugs,
+              circleSlug: circleSlug,
+              poll: poll,
+              locationLabel: locationLabel,
+              mentions: mentions,
+              title: title,
+              hashtags: hashtags,
+              collaborators: collaborators,
+              persistentDraftId: persistentDraftId,
+            );
+          } else if (poll != null) {
+            if (images.isEmpty) {
+              await widget.repository.publishPostWithTopicsCircleAndPoll(
+                text,
+                topicSlugs: topicSlugs,
+                circleSlug: circleSlug,
+                poll: poll,
+              );
+            } else if (images.length == 1) {
+              await widget.repository.publishPostWithImageTopicsCircleAndPoll(
+                text,
+                images.single,
+                topicSlugs: topicSlugs,
+                circleSlug: circleSlug,
+                poll: poll,
+              );
+            } else {
+              await widget.repository.publishPostWithImagesTopicsCircleAndPoll(
+                text,
+                images,
+                topicSlugs: topicSlugs,
+                circleSlug: circleSlug,
+                poll: poll,
+              );
+            }
+          } else if (images.isEmpty) {
+            if (topicSlugs.isEmpty && circleSlug == null) {
+              await widget.repository.publishPost(text);
+            } else {
+              await widget.repository.publishPostWithTopicsAndCircle(
+                text,
+                topicSlugs: topicSlugs,
+                circleSlug: circleSlug,
+              );
+            }
+          } else if (images.length == 1) {
+            if (topicSlugs.isEmpty && circleSlug == null) {
+              await widget.repository.publishPostWithImage(text, images.single);
+            } else {
+              await widget.repository.publishPostWithImageTopicsAndCircle(
+                text,
+                images.single,
+                topicSlugs: topicSlugs,
+                circleSlug: circleSlug,
+              );
+            }
+          } else {
+            await widget.repository.publishPostWithImagesTopicsAndCircle(
+              text,
+              images,
+              topicSlugs: topicSlugs,
+              circleSlug: circleSlug,
+            );
+          }
+        },
+        ownerId: owner,
+        isCurrentOwner: () => _sameComposerOwner,
+      );
+      if (!mounted || !_checkComposerOwner()) return;
       widget.draft.persistentDraftId = null;
       widget.draft.savedPersistently = false;
       widget.draft.title = '';
@@ -296,10 +340,10 @@ class _CommunityPostComposerPageState
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop(true);
+        if (mounted && _sameComposerOwner) Navigator.of(context).pop(true);
       });
     } on CommunityPolicyAccessException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       final message = communityText(
         context,
         error.englishMessage(CommunityPolicyProtectedAction.publishing),
@@ -318,7 +362,7 @@ class _CommunityPostComposerPageState
         ),
       );
     } on CommunityMembershipAccessException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       final message = communityText(
         context,
         error.englishMessage(CommunityPolicyProtectedAction.publishing),
@@ -329,14 +373,14 @@ class _CommunityPostComposerPageState
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
     } on CommunityTextPolicyException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(
         () => _submitError = error.localizedMessage(
           Localizations.localeOf(context).toLanguageTag(),
         ),
       );
     } on CommunityPublishOperationConflict {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(() {
         _operationRecovery = true;
         _submitError = communityText(
@@ -346,9 +390,11 @@ class _CommunityPostComposerPageState
         );
       });
     } catch (_) {
-      if (!mounted) return;
-      _operationRecovery =
-          widget.repository.useServerIdempotentCommunityPublishing;
+      if (!mounted || !_checkComposerOwner()) return;
+      if (startedPublication) {
+        _operationRecovery =
+            widget.repository.useServerIdempotentCommunityPublishing;
+      }
       setState(
         () => _submitError = communityText(
           context,
@@ -361,16 +407,26 @@ class _CommunityPostComposerPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _publishing = false);
+      if (mounted && _sameComposerOwner) setState(() => _publishing = false);
     }
   }
 
   Future<void> _cancelPendingPublish() async {
-    if (_publishing || !_operationRecovery) return;
+    final owner = _composerOwnerId;
+    if (!_checkComposerOwner() ||
+        owner == null ||
+        _publishing ||
+        !_operationRecovery) {
+      return;
+    }
     setState(() => _publishing = true);
     try {
-      final cancelled = await widget.repository.cancelPendingPublishOperation();
-      if (!mounted) return;
+      final cancelled = await widget.repository.runForCommunityOwner(
+        widget.repository.cancelPendingPublishOperation,
+        ownerId: owner,
+        isCurrentOwner: () => _sameComposerOwner,
+      );
+      if (!mounted || !_checkComposerOwner()) return;
       setState(() {
         _operationRecovery = false;
         _submitError = cancelled
@@ -382,7 +438,7 @@ class _CommunityPostComposerPageState
               );
       });
     } on CommunityPublishOperationUnavailable {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(() {
         _operationRecovery = false;
         _submitError = communityText(
@@ -392,7 +448,7 @@ class _CommunityPostComposerPageState
         );
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(
         () => _submitError = communityText(
           context,
@@ -401,12 +457,13 @@ class _CommunityPostComposerPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _publishing = false);
+      if (mounted && _sameComposerOwner) setState(() => _publishing = false);
     }
   }
 
   Future<void> _pickImage() async {
-    if (_publishing ||
+    if (!_checkComposerOwner() ||
+        _publishing ||
         _selectingImage ||
         _completed ||
         _selectedImages.length >= 4) {
@@ -415,7 +472,7 @@ class _CommunityPostComposerPageState
     setState(() => _selectingImage = true);
     try {
       final image = await widget.imagePicker.pick();
-      if (image != null && mounted) {
+      if (image != null && mounted && _checkComposerOwner()) {
         setState(() {
           _selectedImages.add(image);
           widget.draft.images
@@ -425,7 +482,7 @@ class _CommunityPostComposerPageState
         });
       }
     } on CommunityPostImageException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       final (english, arabic) = switch (error.failure) {
         CommunityPostImageFailure.tooLarge => (
           'Photo too large. Choose an image up to 5 MB.',
@@ -443,7 +500,7 @@ class _CommunityPostComposerPageState
       };
       setState(() => _submitError = communityText(context, english, arabic));
     } on Object {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(
         () => _submitError = communityText(
           context,
@@ -452,12 +509,18 @@ class _CommunityPostComposerPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _selectingImage = false);
+      if (mounted && _sameComposerOwner) {
+        setState(() => _selectingImage = false);
+      }
     }
   }
 
   Future<void> _searchMentions() async {
-    if (_publishing || _selectingImage || _completed || _mentionSearching) {
+    if (!_checkComposerOwner() ||
+        _publishing ||
+        _selectingImage ||
+        _completed ||
+        _mentionSearching) {
       return;
     }
     final query = _mentionQuery.text.trim();
@@ -469,10 +532,10 @@ class _CommunityPostComposerPageState
     setState(() => _mentionSearching = true);
     try {
       final results = await widget.repository.searchCommunityMentions(query);
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(() => _mentionResults = results);
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       setState(() => _mentionResults = const <CommunityMentionCandidate>[]);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -486,12 +549,14 @@ class _CommunityPostComposerPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _mentionSearching = false);
+      if (mounted && _sameComposerOwner) {
+        setState(() => _mentionSearching = false);
+      }
     }
   }
 
   void _toggleMention(CommunityMentionCandidate candidate) {
-    if (_publishing || _completed) return;
+    if (!_checkComposerOwner() || _publishing || _completed) return;
     final index = widget.draft.mentions.indexWhere(
       (value) => value.userId == candidate.userId,
     );
@@ -508,5 +573,7 @@ class _CommunityPostComposerPageState
   void _setComposerState(VoidCallback callback) => setState(callback);
 
   @override
-  Widget build(BuildContext context) => buildCommunityPostComposer(context);
+  Widget build(BuildContext context) => _sameComposerOwner
+      ? buildCommunityPostComposer(context)
+      : _buildComposerOwnerChanged(context);
 }

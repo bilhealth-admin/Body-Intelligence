@@ -43,24 +43,28 @@ const _unspecifiedSleep = <String, String>{
   'uk': 'Сон (стадію не вказано)',
 };
 
-GlobalHealthSignal _nativeSleep({Map<String, Object?> attributes = const {}}) =>
-    GlobalHealthSignal(
-      key: 'sleep',
-      canonicalValue: 2.7,
-      canonicalUnit: 'h',
-      provenance: GlobalProvenance(
-        providerId: 'apple-health',
-        sourceId: _sourceId,
-        recordId: 'native-sleep-1',
-        observedAt: DateTime(2026, 10, 4, 1),
-        confidence: 1,
-      ),
-      attributes: {
-        ...attributes,
-        'sleepStage': 'asleepUnspecified',
-        'endedAt': DateTime(2026, 10, 4, 3, 42).toIso8601String(),
-      },
-    );
+GlobalHealthSignal _nativeSleep({Map<String, Object?> attributes = const {}}) {
+  final observedAt = DateTime(2026, 10, 4, 1);
+  return GlobalHealthSignal(
+    key: 'sleep',
+    canonicalValue: 2.7,
+    canonicalUnit: 'h',
+    provenance: GlobalProvenance(
+      providerId: 'apple-health',
+      sourceId: _sourceId,
+      recordId: 'native-sleep-1',
+      observedAt: observedAt,
+      confidence: 1,
+    ),
+    attributes: {
+      ...attributes,
+      'sleepStage': 'asleepUnspecified',
+      // This fixture represents 2.7 elapsed hours. A hand-written 03:42 end
+      // crosses Melbourne's DST jump and represents only 1.7 real hours.
+      'endedAt': observedAt.add(const Duration(minutes: 162)).toIso8601String(),
+    },
+  );
+}
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));

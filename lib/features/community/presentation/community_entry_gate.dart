@@ -217,8 +217,8 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
           .timeout(const Duration(seconds: 20));
       if (!_sameOperation(generation, owner)) return;
       setState(() => _receipt = receipt);
-      // Optional photo never holds the member behind a spinner. The existing
-      // service independently checks local/auth owners before every mutation.
+      // Optional photo never holds the member behind a spinner. Its separate
+      // owner scope also fences upload requests after SDK token refresh.
       unawaited(_syncOptionalPhoto(generation, owner));
     } on CommunityTextPolicyException catch (error) {
       if (_sameOperation(generation, owner)) {
@@ -243,18 +243,25 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
   }
 
   Future<void> _syncOptionalPhoto(int generation, String owner) async {
-    if (!_sameOperation(generation, owner)) return;
+    final repository = _repository;
+    if (repository == null || !_sameOperation(generation, owner)) return;
+    bool isCurrentOwner() =>
+        identical(repository, _repository) && _sameOperation(generation, owner);
     var synced = true;
     try {
-      final override = widget.syncPhoto;
-      if (override != null) {
-        synced = await override();
-      } else if (widget.repository == null) {
-        final result = await ref
-            .read(profilePhotoServiceProvider)
-            .syncStoredPhotoToCommunity();
-        synced = result == null || result.cloudSynced;
-      }
+      synced = await repository.runForCommunityOwner(
+        () async {
+          final override = widget.syncPhoto;
+          if (override != null) return override();
+          if (widget.repository != null) return true;
+          final result = await ref
+              .read(profilePhotoServiceProvider)
+              .syncStoredPhotoToCommunity(isCurrentOwner: isCurrentOwner);
+          return result == null || result.cloudSynced;
+        },
+        ownerId: owner,
+        isCurrentOwner: isCurrentOwner,
+      );
     } on Object {
       synced = false;
     }

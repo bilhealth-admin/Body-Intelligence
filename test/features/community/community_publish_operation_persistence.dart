@@ -39,7 +39,7 @@ void _registerPublishPersistenceTests() {
       () async {
         final platform = _installJournalPlatform();
         final backend = _OperationBackend()..loseCommittedResponse = true;
-        final service = _service(backend);
+        final service = await _service(backend);
         await expectLater(
           service.publish(_fields(), [_image()]),
           throwsA(isA<http.ClientException>()),
@@ -85,7 +85,7 @@ void _registerPublishPersistenceTests() {
     () async {
       final platform = _installJournalPlatform()..rejectWrites = true;
       final backend = _OperationBackend();
-      final service = _service(backend);
+      final service = await _service(backend);
       await expectLater(
         service.publish(_fields(), [_image()]),
         throwsStateError,

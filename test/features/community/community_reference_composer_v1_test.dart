@@ -19,6 +19,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _owner = '11111111-1111-4111-8111-111111111111';
 const _collaborator = '22222222-2222-4222-8222-222222222222';
+late SupabaseClient _testClient;
 
 final _acceptedPolicy = CommunityContentPolicy.fromJson({
   'version': 'community-policy-v1',
@@ -35,14 +36,7 @@ final class _NoImagePicker implements CommunityPostImagePickerContract {
 }
 
 final class _ReferenceComposerRepository extends CommunityRepository {
-  _ReferenceComposerRepository()
-    : super(
-        SupabaseClient(
-          'https://reference-composer.invalid',
-          'reference-composer-test-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _ReferenceComposerRepository() : super(_testClient);
 
   CommunityDraftSaveInput? savedDraft;
   List<CommunityPostImageDraft>? savedImages;
@@ -66,6 +60,23 @@ final class _ReferenceComposerRepository extends CommunityRepository {
 
   @override
   String get currentUserId => _owner;
+
+  @override
+  Future<CommunityProfile?> loadMyProfile() async => CommunityProfile(
+    userId: currentUserId,
+    displayName: 'Existing member',
+    localeCode: 'en',
+    discoverable: false,
+    visibility: CommunityProfileVisibility.private,
+  );
+
+  @override
+  Future<CommunityPublicCode> loadPublicCode() async =>
+      CommunityPublicCode.fromJson({
+        'code': 'aabbccddaabbccddaabbccddaabbccdd',
+        'uri': 'bil://community/member/aabbccddaabbccddaabbccddaabbccdd',
+        'handle': 'existing_member',
+      });
 
   @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
@@ -196,6 +207,15 @@ Widget _app(CommunityRepository repository) => MaterialApp(
 );
 
 void main() {
+  setUp(() {
+    _testClient = SupabaseClient(
+      'https://reference-composer.invalid',
+      'reference-composer-test-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => _testClient.dispose());
+
   test('composer migrations keep persistence private and collaboration durable', () {
     final composer = File(
       'supabase/migrations/20261003211000_community_reference_composer_persistence_v1.sql',

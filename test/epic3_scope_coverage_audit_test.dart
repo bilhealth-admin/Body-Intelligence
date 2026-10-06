@@ -45,6 +45,7 @@ void main() {
     '/community/code/scan': 'community',
     '/community/member/:code': 'community',
     '/community/notifications': 'community',
+    '/community/drafts': 'community',
     '/community/connections': 'community',
     '/community/food-review': 'community',
     '/community/profile': 'community',
@@ -153,6 +154,9 @@ void main() {
     ],
     'community': [
       'lib/features/community/presentation/community_hub_page.dart',
+      'test/features/community/community_drafts_independent_route_test.dart',
+      'test/features/community/community_drafts_lifecycle_test.dart',
+      'test/features/community/community_entry_route_contract_test.dart',
     ],
     'nutrition': [
       'test/features/nutrition/daily_search_closure_contract_test.dart',

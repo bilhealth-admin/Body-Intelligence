@@ -280,23 +280,29 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                               focusNode: _composerFocus,
                               minLines: 1,
                               maxLines: 4,
-                              maxLength: 1200,
+                              maxLength: CommunityTextLimits.bodyCodePointLimit,
+                              maxLengthEnforcement: MaxLengthEnforcement.none,
+                              buildCounter: communityBodyCounter(_composer),
                               enabled: !_submitting && !_refreshing,
                               textDirection:
                                   _composerDirection ??
                                   Directionality.of(context),
                               textCapitalization: TextCapitalization.sentences,
                               onChanged: (value) {
+                                final error =
+                                    CommunityTextLimits.exceedsBodyLimit(value)
+                                    ? communityBodyLimitText(context)
+                                    : null;
                                 final direction =
                                     BilWrittenLanguageResolver.directionFor(
                                       value,
                                       fallback: Directionality.of(context),
                                     );
                                 if (direction != _composerDirection ||
-                                    _composerError != null) {
+                                    _composerError != error) {
                                   _setDetailState(() {
                                     _composerDirection = direction;
-                                    _composerError = null;
+                                    _composerError = error;
                                   });
                                 }
                               },
@@ -307,7 +313,6 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                                   'اكتب تعليقًا',
                                 ),
                                 errorText: _composerError,
-                                counterText: '',
                               ),
                             ),
                           ),

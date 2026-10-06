@@ -60,10 +60,36 @@ void main() {
       gate,
       contains('if (feature == PremiumGateFeature.community) return child;'),
     );
-    final freeCommunityRoutes = RegExp(
-      r"path: '(/community(?:/[^']*)?)'[\s\S]{0,260}PremiumGateFeature\.community",
-    ).allMatches(router).map((match) => match.group(1)!).toSet();
-    expect(freeCommunityRoutes, hasLength(15));
+    final freeCommunityRoutes =
+        RegExp(
+              r"GoRoute\(\s*path: '(/community(?:/[^']*)?)'([\s\S]*?)(?=\bGoRoute\(|$)",
+            )
+            .allMatches(router)
+            .where(
+              (match) => match
+                  .group(2)!
+                  .contains('feature: PremiumGateFeature.community'),
+            )
+            .map((match) => match.group(1)!)
+            .toSet();
+    expect(freeCommunityRoutes, {
+      '/community',
+      '/community/people',
+      '/community/code',
+      '/community/code/scan',
+      '/community/member/:code',
+      '/community/notifications',
+      '/community/drafts',
+      '/community/rewards',
+      '/community/connections',
+      '/community/food-review',
+      '/community/profile',
+      '/community/profile/:userId',
+      '/community/safety',
+      '/community/chat/:userId',
+      '/community/messages',
+      '/community/messages/new',
+    });
     expect(freeCommunityRoutes, contains('/community/profile/:userId'));
     expect(
       router,

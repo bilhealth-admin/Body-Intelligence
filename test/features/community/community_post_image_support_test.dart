@@ -17,6 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+late SupabaseClient _testClient;
+
 final _acceptedPolicy = CommunityContentPolicy.fromJson({
   'version': 'community-policy-v1',
   'locale_code': 'en',
@@ -34,14 +36,7 @@ final class _FakePostImagePicker implements CommunityPostImagePickerContract {
 }
 
 final class _PostImageRepository extends CommunityRepository {
-  _PostImageRepository()
-    : super(
-        SupabaseClient(
-          'https://community-images.invalid',
-          'community-images-anon-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _PostImageRepository() : super(_testClient);
 
   static const userId = '11111111-1111-4111-8111-111111111111';
   int imagePublishCalls = 0;
@@ -53,6 +48,23 @@ final class _PostImageRepository extends CommunityRepository {
 
   @override
   String get currentUserId => userId;
+
+  @override
+  Future<CommunityProfile?> loadMyProfile() async => CommunityProfile(
+    userId: currentUserId,
+    displayName: 'Existing member',
+    localeCode: 'en',
+    discoverable: false,
+    visibility: CommunityProfileVisibility.private,
+  );
+
+  @override
+  Future<CommunityPublicCode> loadPublicCode() async =>
+      CommunityPublicCode.fromJson({
+        'code': 'aabbccddaabbccddaabbccddaabbccdd',
+        'uri': 'bil://community/member/aabbccddaabbccddaabbccddaabbccdd',
+        'handle': 'existing_member',
+      });
 
   @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
@@ -137,6 +149,15 @@ CommunityPostImageDraft _testImage() {
 }
 
 void main() {
+  setUp(() {
+    _testClient = SupabaseClient(
+      'https://community-images.invalid',
+      'community-images-anon-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => _testClient.dispose());
+
   group('community post image validation', () {
     test('accepts decoded PNG and records bounded truthful metadata', () {
       final image = _testImage();

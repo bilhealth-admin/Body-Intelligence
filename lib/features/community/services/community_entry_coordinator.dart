@@ -1,5 +1,6 @@
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
+import 'community_owner_operation.dart';
 
 /// Proof of a saved profile and a validated, server-provided BIL Code.
 /// Not an entitlement, policy-acceptance receipt, or posting permission.
@@ -52,9 +53,23 @@ class CommunityEntryCoordinator {
   Future<CommunityEntryReceipt?> check() async {
     final owner = repository.currentUserId;
     _requireOwner(owner);
-    final profile = await repository.loadMyProfile();
-    _requireOwner(owner);
-    return profile == null ? null : _complete(owner, profile);
+    return _runOwned(owner, () async {
+      final profile = await repository.loadMyProfile();
+      _requireOwner(owner);
+      return profile == null ? null : _complete(owner, profile);
+    });
+  }
+
+  Future<T> _runOwned<T>(String owner, Future<T> Function() action) async {
+    try {
+      return await repository.runForCommunityOwner(
+        action,
+        ownerId: owner,
+        isCurrentOwner: () => isCurrentOwner?.call() ?? true,
+      );
+    } on CommunityOwnerOperationCancelled {
+      throw const CommunityEntryOwnerChanged();
+    }
   }
 
   Future<CommunityEntryReceipt> save({
@@ -66,16 +81,17 @@ class CommunityEntryCoordinator {
     if (_saving != null && _savingOwner == owner) return _saving!;
     _savingOwner = owner;
     late final Future<CommunityEntryReceipt> operation;
-    operation = _save(owner, displayName, localeCode).then(
-      (receipt) {
-        if (identical(_saving, operation)) _saving = null;
-        return receipt;
-      },
-      onError: (Object error, StackTrace stack) {
-        if (identical(_saving, operation)) _saving = null;
-        Error.throwWithStackTrace(error, stack);
-      },
-    );
+    operation = _runOwned(owner, () => _save(owner, displayName, localeCode))
+        .then(
+          (receipt) {
+            if (identical(_saving, operation)) _saving = null;
+            return receipt;
+          },
+          onError: (Object error, StackTrace stack) {
+            if (identical(_saving, operation)) _saving = null;
+            Error.throwWithStackTrace(error, stack);
+          },
+        );
     return _saving = operation;
   }
 

@@ -9,6 +9,10 @@ mixin _CommunityPublishingRepositoryMixin {
 
   Future<T> _runCommunityMutation<T>(Future<T> Function() mutation);
 
+  Future<T> _runCommunityOwnerOperation<T>(
+    Future<T> Function(CommunityOwnerOperation operation) action,
+  );
+
   Future<void> assertCommunityPublishReady();
 
   Future<Never> _rethrowPolicyStateAfterStorageFailure(
@@ -467,8 +471,16 @@ mixin _CommunityPublishingRepositoryMixin {
     List<CommunityMentionCandidate> collaborators =
         const <CommunityMentionCandidate>[],
     String? persistentDraftId,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
+    final text = body.trim();
+    if (text.isEmpty ||
+        CommunityTextLimits.exceedsBodyLimit(text) ||
+        CommunityRepository._unsafeText.hasMatch(text)) {
+      throw const FormatException('Invalid community post body');
+    }
+    CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.post);
     await assertCommunityPublishReady();
+    operation.check();
     _validateTopicSlugs(topicSlugs);
     _validateCircleSlug(circleSlug);
     if (images.length > 4) {
@@ -481,13 +493,6 @@ mixin _CommunityPublishingRepositoryMixin {
     ).normalized();
     final normalizedPoll = poll?.normalized();
     if (useServerIdempotentCommunityPublishing) {
-      final text = body.trim();
-      if (text.isEmpty ||
-          text.length > 1200 ||
-          CommunityRepository._unsafeText.hasMatch(text)) {
-        throw const FormatException('Invalid community post body');
-      }
-      CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.post);
       await _runCommunityMutation(
         () => CommunityPublishOperationService(_client, _user.id).publish({
           'body': text,
@@ -513,6 +518,7 @@ mixin _CommunityPublishingRepositoryMixin {
           'persistent_draft_id': persistentDraftId,
         }, images),
       );
+      operation.check();
       return;
     }
     final store = _posts;
@@ -546,6 +552,7 @@ mixin _CommunityPublishingRepositoryMixin {
       }
 
       if (postId == null) return;
+      operation.check();
 
       final normalizedTitle = title?.trim();
       if ((normalizedTitle?.isNotEmpty ?? false) ||
@@ -559,13 +566,16 @@ mixin _CommunityPublishingRepositoryMixin {
             for (final collaborator in collaborators) collaborator.userId,
           ],
         );
+        operation.check();
       }
 
       if (topicSlugs.isNotEmpty) {
         await setMyCommunityPostTopics(postId: postId, slugs: topicSlugs);
+        operation.check();
       }
       if (circleSlug != null) {
         await setMyCommunityPostCircle(postId: postId, slug: circleSlug);
+        operation.check();
       }
       if (context.locationLabel != null || context.mentions.isNotEmpty) {
         await setMyCommunityPostContext(
@@ -573,20 +583,23 @@ mixin _CommunityPublishingRepositoryMixin {
           locationLabel: context.locationLabel,
           mentions: context.mentions,
         );
+        operation.check();
       }
       if (normalizedPoll != null) {
         await createCommunityPoll(postId: postId, draft: normalizedPoll);
+        operation.check();
       }
       if (persistentDraftId != null) {
         await consumeMyCommunityDraftAfterPublish(
           draftId: persistentDraftId,
           postId: postId,
         );
+        operation.check();
       }
     } on StorageException catch (error, stackTrace) {
       await _rethrowPolicyStateAfterStorageFailure(error, stackTrace);
     } on Object {
-      if (postId != null) {
+      if (postId != null && operation.isCurrent) {
         try {
           await store.delete(postId);
         } on Object {
@@ -595,7 +608,7 @@ mixin _CommunityPublishingRepositoryMixin {
       }
       rethrow;
     }
-  }
+  });
 
   void _validateCircleSlug(String? slug) {
     if (slug != null &&

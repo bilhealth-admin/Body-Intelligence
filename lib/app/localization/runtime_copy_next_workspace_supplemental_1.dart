@@ -32,6 +32,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "Ini hanya memadamkan draf peribadi yang dipilih.",
     "Anda sudah melihat semua pemberitahuan terkini",
     "Terdahulu",
+    "Akaun anda telah berubah. Kembali ke Komuniti untuk meneruskan.",
+    "Hadkan teks kepada 1200 aksara. Teks anda dikekalkan.",
   ],
   "ja": [
     "概要",
@@ -64,6 +66,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "選択した非公開の下書きだけが削除されます。",
     "すべての新しい通知を確認しました",
     "以前の通知",
+    "アカウントが変更されました。続けるにはコミュニティに戻ってください。",
+    "文字数を1200文字以内にしてください。入力した内容は保持されています。",
   ],
   "ko": [
     "개요",
@@ -96,6 +100,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "선택한 비공개 초안만 삭제합니다.",
     "새 알림을 모두 확인했습니다",
     "이전 알림",
+    "계정이 변경되었습니다. 계속하려면 커뮤니티로 돌아가세요.",
+    "텍스트를 1200자 이내로 줄여 주세요. 입력한 내용은 유지됩니다.",
   ],
   "zh-Hans": [
     "概览",
@@ -128,6 +134,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "此操作仅删除所选的私密草稿。",
     "你已查看所有新通知",
     "更早",
+    "你的账号已切换。请返回社区继续。",
+    "请将文本控制在1200个字符以内。你输入的文本已保留。",
   ],
   "zh-Hant": [
     "總覽",
@@ -160,6 +168,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "此操作只會刪除所選的私人草稿。",
     "你已查看所有新通知",
     "更早",
+    "你的帳號已切換。請返回社群繼續。",
+    "請將文字控制在1200個字元以內。你輸入的文字已保留。",
   ],
   "ru": [
     "Обзор",
@@ -192,6 +202,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "Будут удалены только выбранные приватные черновики.",
     "Вы просмотрели все новые уведомления",
     "Ранее",
+    "Аккаунт изменился. Вернитесь в сообщество, чтобы продолжить.",
+    "Ограничьте текст 1200 символами. Ваш текст сохранён.",
   ],
   "bn": [
     "সারসংক্ষেপ",
@@ -224,6 +236,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "এতে কেবল নির্বাচিত ব্যক্তিগত খসড়াগুলো মুছে যাবে।",
     "আপনি সব নতুন বিজ্ঞপ্তি দেখে নিয়েছেন",
     "আগের বিজ্ঞপ্তি",
+    "আপনার অ্যাকাউন্ট বদলে গেছে। চালিয়ে যেতে কমিউনিটিতে ফিরে যান।",
+    "লেখাটি 1200 অক্ষরের মধ্যে রাখুন। আপনার লেখা অক্ষত রাখা হয়েছে।",
   ],
   "vi": [
     "Tổng quan",
@@ -256,6 +270,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "Thao tác này chỉ xóa các bản nháp riêng tư đã chọn.",
     "Bạn đã xem hết thông báo mới",
     "Trước đó",
+    "Tài khoản của bạn đã thay đổi. Hãy quay lại Cộng đồng để tiếp tục.",
+    "Giới hạn nội dung trong 1200 ký tự. Nội dung bạn nhập vẫn được giữ lại.",
   ],
   "th": [
     "ภาพรวม",
@@ -288,6 +304,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "การดำเนินการนี้จะลบเฉพาะฉบับร่างส่วนตัวที่เลือกไว้เท่านั้น",
     "คุณดูการแจ้งเตือนใหม่ทั้งหมดแล้ว",
     "ก่อนหน้านี้",
+    "บัญชีของคุณเปลี่ยนแล้ว กลับไปที่ชุมชนเพื่อดำเนินการต่อ",
+    "จำกัดข้อความไม่เกิน 1200 อักขระ ข้อความของคุณยังคงอยู่",
   ],
   "pl": [
     "Przegląd",
@@ -320,6 +338,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "To usunie tylko wybrane prywatne wersje robocze.",
     "Wszystkie nowe powiadomienia zostały wyświetlone",
     "Wcześniejsze",
+    "Twoje konto się zmieniło. Wróć do Społeczności, aby kontynuować.",
+    "Ogranicz tekst do 1200 znaków. Twój tekst został zachowany.",
   ],
   "nl": [
     "Overzicht",
@@ -352,6 +372,8 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "Dit verwijdert alleen de geselecteerde privéconcepten.",
     "Je bent helemaal bij",
     "Eerder",
+    "Je account is gewijzigd. Ga terug naar de Community om verder te gaan.",
+    "Beperk de tekst tot 1200 tekens. Je tekst blijft behouden.",
   ],
   "uk": [
     "Огляд",
@@ -384,5 +406,7 @@ const _nextWorkspaceSupplementalRows1 = <String, List<String>>{
     "Буде видалено лише вибрані приватні чернетки.",
     "Ви переглянули всі нові сповіщення",
     "Раніше",
+    "Обліковий запис змінився. Поверніться до спільноти, щоб продовжити.",
+    "Обмежте текст 1200 символами. Ваш текст збережено.",
   ],
 };

@@ -12,6 +12,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+late SupabaseClient _testClient;
+
 CommunityContentPolicy _policy(String version) =>
     CommunityContentPolicy.fromJson({
       'version': version,
@@ -26,13 +28,7 @@ final class _PolicyRepository extends CommunityRepository {
     this.stateAfterAcceptance,
     this.postAcceptLoadBarrier,
     this.postAcceptLoadError,
-  }) : super(
-         SupabaseClient(
-           'https://community-policy-test.invalid',
-           'community-policy-test-key',
-           authOptions: const AuthClientOptions(autoRefreshToken: false),
-         ),
-       );
+  }) : super(_testClient);
 
   CommunityPolicyState state;
   final CommunityPolicyState? stateAfterAcceptance;
@@ -71,20 +67,30 @@ final class _PolicyRepository extends CommunityRepository {
 }
 
 final class _PublishGuardRepository extends CommunityRepository {
-  _PublishGuardRepository(this.failure)
-    : super(
-        SupabaseClient(
-          'https://community-publish-test.invalid',
-          'community-publish-test-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _PublishGuardRepository(this.failure) : super(_testClient);
 
   final Object failure;
   int publishCalls = 0;
 
   @override
   String get currentUserId => '11111111-1111-4111-8111-111111111111';
+
+  @override
+  Future<CommunityProfile?> loadMyProfile() async => CommunityProfile(
+    userId: currentUserId,
+    displayName: 'Existing member',
+    localeCode: 'en',
+    discoverable: false,
+    visibility: CommunityProfileVisibility.private,
+  );
+
+  @override
+  Future<CommunityPublicCode> loadPublicCode() async =>
+      CommunityPublicCode.fromJson({
+        'code': 'aabbccddaabbccddaabbccddaabbccdd',
+        'uri': 'bil://community/member/aabbccddaabbccddaabbccddaabbccdd',
+        'handle': 'existing_member',
+      });
 
   @override
   Future<bool> isCommunityModerator() async => false;
@@ -130,6 +136,15 @@ Future<void> _openComposerAndPublish(WidgetTester tester) async {
 }
 
 void main() {
+  setUp(() {
+    _testClient = SupabaseClient(
+      'https://community-policy-test.invalid',
+      'community-policy-test-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => _testClient.dispose());
+
   testWidgets('no active policy is explicit and cannot record acceptance', (
     tester,
   ) async {

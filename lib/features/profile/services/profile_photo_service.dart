@@ -243,7 +243,12 @@ class ProfilePhotoService {
     );
   }
 
-  Future<ProfilePhotoSaveResult?> syncStoredPhotoToCommunity() async {
+  /// A caller can bind optional synchronization to one visit as well as an
+  /// account ID. This rejects A -> B -> A continuations before caching a URL.
+  Future<ProfilePhotoSaveResult?> syncStoredPhotoToCommunity({
+    bool Function()? isCurrentOwner,
+  }) async {
+    _requireActiveOwner(isCurrentOwner);
     final expectedAuthenticatedOwnerId = _authenticatedOwnerId();
     final expectedStorageOwnerId = _preferences.localOwnerId;
     _requireAuthenticatedOwnerMatchesStorage(
@@ -251,6 +256,7 @@ class ProfilePhotoService {
       expectedStorageOwnerId,
     );
     final encoded = await _preferences.get('profilePhoto');
+    _requireActiveOwner(isCurrentOwner);
     if (encoded == null || encoded.isEmpty) return null;
     Uint8List bytes;
     try {
@@ -268,6 +274,7 @@ class ProfilePhotoService {
     final cachedPublicUrl = (await _preferences.get(
       'profilePhotoPublicUrl',
     ))?.trim();
+    _requireActiveOwner(isCurrentOwner);
     if (cachedPublicUrl != null && cachedPublicUrl.isNotEmpty) {
       // The current image already has a public reference. Community profile
       // saves must not create a new cache-busting URL and flicker every avatar.
@@ -281,7 +288,9 @@ class ProfilePhotoService {
       bytes,
       contentType: _contentTypeForStoredBytes(bytes),
       expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
+      isCurrentOwner: isCurrentOwner,
     );
+    _requireActiveOwner(isCurrentOwner);
     return ProfilePhotoSaveResult(
       bytes: bytes,
       cloudSynced: publicUrl != null,
@@ -293,7 +302,9 @@ class ProfilePhotoService {
     Uint8List bytes, {
     required String contentType,
     required String? expectedAuthenticatedOwnerId,
+    bool Function()? isCurrentOwner,
   }) async {
+    _requireActiveOwner(isCurrentOwner);
     if (expectedAuthenticatedOwnerId == null) return null;
     if (!AppEnvironment.supabaseRuntimeReady) return null;
     final client = Supabase.instance.client;
@@ -314,6 +325,7 @@ class ProfilePhotoService {
               cacheControl: '3600',
             ),
           );
+      _requireActiveOwner(isCurrentOwner);
       _requireUnchangedOwners(
         expectedStorageOwnerId: expectedAuthenticatedOwnerId,
         expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
@@ -330,6 +342,7 @@ class ProfilePhotoService {
           .eq('user_id', user.id)
           .select('avatar_url')
           .maybeSingle();
+      _requireActiveOwner(isCurrentOwner);
       _requireUnchangedOwners(
         expectedStorageOwnerId: expectedAuthenticatedOwnerId,
         expectedAuthenticatedOwnerId: expectedAuthenticatedOwnerId,
@@ -339,6 +352,7 @@ class ProfilePhotoService {
       // actually references the uploaded object; Community save retries it.
       if (updated == null || updated['avatar_url'] != publicUrl) return null;
       await _preferences.set('profilePhotoPublicUrl', publicUrl);
+      _requireActiveOwner(isCurrentOwner);
       return publicUrl;
     } on ProfilePhotoIdentityChangedException {
       rethrow;
@@ -346,6 +360,12 @@ class ProfilePhotoService {
       // The chosen photo remains available locally. Community explicitly
       // reports that cloud sync did not complete and can retry on save.
       return null;
+    }
+  }
+
+  void _requireActiveOwner(bool Function()? isCurrentOwner) {
+    if (isCurrentOwner?.call() == false) {
+      throw const ProfilePhotoIdentityChangedException();
     }
   }
 

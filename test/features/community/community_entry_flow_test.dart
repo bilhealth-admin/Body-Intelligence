@@ -9,6 +9,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_entry_welcome.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_welcome.dart';
 import 'package:body_intelligence_log/features/community/services/community_entry_coordinator.dart';
+import 'package:body_intelligence_log/features/community/services/community_owner_operation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -472,6 +473,57 @@ void main() {
       expect(f.repository.profiles[ownerA], isNotNull);
     },
   );
+  for (final change in [
+    'same-owner repository replacement',
+    'route disposal',
+  ]) {
+    _entryTest('optional photo owner scope rejects $change after await', (
+      tester,
+    ) async {
+      final pending = Completer<void>();
+      final repository = _entryRepository();
+      var started = false;
+      var lateMutations = 0;
+      Object? cancellation;
+      final fixture = EntryWidgetFixture(repository)
+        ..syncPhoto = () async {
+          CommunityOwnerOperation.checkCurrent();
+          started = true;
+          await pending.future;
+          try {
+            // The current account ID will still be A. Only the lifetime
+            // predicate in the active zone can reject this continuation.
+            CommunityOwnerOperation.checkCurrent();
+            lateMutations++;
+          } on CommunityOwnerOperationCancelled catch (error) {
+            cancellation = error;
+            rethrow;
+          }
+          return true;
+        };
+      await mountEntry(tester, fixture: fixture);
+      await tester.pumpAndSettle();
+      await submitEntry(tester, 'Saved member');
+      await tester.pumpAndSettle();
+      expect(started, isTrue);
+      expect(find.textContaining('Member destination'), findsOneWidget);
+      expect(repository.profiles[ownerA], isNotNull);
+      if (change == 'same-owner repository replacement') {
+        fixture.update(() => fixture.repository = _entryRepository());
+      } else {
+        fixture.router!.go('/dashboard');
+      }
+      await tester.pumpAndSettle();
+      expect(repository.currentUserId, ownerA);
+      pending.complete();
+      await tester.pumpAndSettle();
+      expect(cancellation, isA<CommunityOwnerOperationCancelled>());
+      expect(lateMutations, 0);
+      expect(repository.profiles[ownerA], isNotNull);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
   _entryTest('cold entry can always go back even while saving', (tester) async {
     final wait = Completer<void>();
     final r = _entryRepository()..pendingCreate = wait.future;

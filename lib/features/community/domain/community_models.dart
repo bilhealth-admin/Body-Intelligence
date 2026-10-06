@@ -1,5 +1,6 @@
 import '../../nutrition/domain/product_identity.dart';
 import 'community_polls.dart';
+import 'community_text_limits.dart';
 
 part 'community_post_author_social.dart';
 part 'community_content_models.dart';

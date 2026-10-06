@@ -16,8 +16,10 @@ import '../domain/community_referral.dart';
 import '../domain/community_reference_parity.dart';
 import '../domain/community_rewards.dart';
 import '../domain/community_text_policy.dart';
+import '../domain/community_text_limits.dart';
 import '../domain/community_topics.dart';
 import '../services/community_post_image_picker.dart';
+import '../services/community_owner_operation.dart';
 import '../services/community_publish_operation_service.dart';
 import 'community_post_cloud_store.dart';
 import 'community_feed_repository_mixin.dart';
@@ -70,8 +72,41 @@ class CommunityRepository
   bool get useServerIdempotentCommunityPublishing =>
       _postStore == null && _client.auth.currentUser != null;
 
-  Future<bool> cancelPendingPublishOperation() =>
-      CommunityPublishOperationService(_client, _user.id).cancelPending();
+  Future<bool> cancelPendingPublishOperation() => _runCommunityOwnerOperation(
+    (_) => CommunityPublishOperationService(_client, _user.id).cancelPending(),
+  );
+
+  Future<T> runForCommunityOwner<T>(
+    Future<T> Function() action, {
+    required String ownerId,
+    required bool Function() isCurrentOwner,
+  }) => CommunityOwnerOperation.run(
+    client: _client,
+    ownerId: ownerId,
+    readOwner: () => currentUserId,
+    isCurrentOwner: isCurrentOwner,
+    action: (_) => action(),
+  );
+
+  @override
+  Future<T> _runCommunityOwnerOperation<T>(
+    Future<T> Function(CommunityOwnerOperation operation) action,
+  ) {
+    String? readOwner() {
+      try {
+        return currentUserId;
+      } on AuthException {
+        return null;
+      }
+    }
+
+    return CommunityOwnerOperation.run(
+      client: _client,
+      ownerId: readOwner(),
+      readOwner: readOwner,
+      action: action,
+    );
+  }
 
   @override
   Future<T> runCommunitySocialMutation<T>(Future<T> Function() mutation) =>
@@ -166,7 +201,10 @@ class CommunityRepository
   @override
   Future<T> _runCommunityMutation<T>(Future<T> Function() mutation) async {
     try {
-      return await mutation();
+      CommunityOwnerOperation.checkCurrent();
+      final result = await mutation();
+      CommunityOwnerOperation.checkCurrent();
+      return result;
     } on PostgrestException catch (error, stackTrace) {
       final message = error.message.toLowerCase();
       final policyFailure = switch (message) {

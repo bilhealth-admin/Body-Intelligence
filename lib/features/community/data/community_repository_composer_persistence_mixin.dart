@@ -7,6 +7,10 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
 
   Future<void> assertCommunityPublishReady();
 
+  Future<T> _runCommunityOwnerOperation<T>(
+    Future<T> Function(CommunityOwnerOperation operation) action,
+  );
+
   static const _draftBucket = 'community-post-images';
   static const _uuidGenerator = Uuid();
 
@@ -131,91 +135,104 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
   }
 
   Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  loadMyCommunityDraftPreview(String draftId) async {
-    if (!CommunityRepository._uuid.hasMatch(draftId)) {
-      throw ArgumentError.value(draftId, 'draftId');
-    }
-    final response = await _client.rpc(
-      'bil_get_my_community_post_draft_v1',
-      params: {'p_draft_id': draftId},
-    );
-    if (response is! Map) {
-      throw const FormatException('Invalid Community draft');
-    }
-    final draft = CommunityPersistentDraft.fromJson(
-      Map<String, dynamic>.from(response),
-    );
-    if (draft.draftId != draftId) {
-      throw const FormatException('Community draft id mismatch');
-    }
-    if (draft.media.isEmpty) return (draft: draft, image: null);
+  loadMyCommunityDraftPreview(String draftId) =>
+      _runCommunityOwnerOperation((operation) async {
+        if (!CommunityRepository._uuid.hasMatch(draftId)) {
+          throw ArgumentError.value(draftId, 'draftId');
+        }
+        final response = await _client.rpc(
+          'bil_get_my_community_post_draft_v1',
+          params: {'p_draft_id': draftId},
+        );
+        operation.check();
+        if (response is! Map) {
+          throw const FormatException('Invalid Community draft');
+        }
+        final draft = CommunityPersistentDraft.fromJson(
+          Map<String, dynamic>.from(response),
+        );
+        if (draft.draftId != draftId) {
+          throw const FormatException('Community draft id mismatch');
+        }
+        if (draft.media.isEmpty) return (draft: draft, image: null);
 
-    final metadata = [...draft.media]
-      ..sort((left, right) => left.position.compareTo(right.position));
-    final media = metadata.first;
-    final bytes = await _client.storage
-        .from(_draftBucket)
-        .download(media.objectPath);
-    final image = await validateCommunityPostImageAsync(bytes);
-    if (image.mimeType != media.mimeType ||
-        image.byteLength != media.bytes ||
-        image.width != media.width ||
-        image.height != media.height) {
-      throw const FormatException('Community draft preview media mismatch');
-    }
-    return (draft: draft, image: image);
-  }
+        final metadata = [...draft.media]
+          ..sort((left, right) => left.position.compareTo(right.position));
+        final media = metadata.first;
+        final bytes = await _client.storage
+            .from(_draftBucket)
+            .download(media.objectPath);
+        operation.check();
+        final image = await validateCommunityPostImageAsync(bytes);
+        operation.check();
+        if (image.mimeType != media.mimeType ||
+            image.byteLength != media.bytes ||
+            image.width != media.width ||
+            image.height != media.height) {
+          throw const FormatException('Community draft preview media mismatch');
+        }
+        return (draft: draft, image: image);
+      });
 
   Future<
     ({CommunityPersistentDraft draft, List<CommunityPostImageDraft> images})
   >
-  loadMyCommunityDraft(String draftId) async {
-    if (!CommunityRepository._uuid.hasMatch(draftId)) {
-      throw ArgumentError.value(draftId, 'draftId');
-    }
-    final response = await _client.rpc(
-      'bil_get_my_community_post_draft_v1',
-      params: {'p_draft_id': draftId},
-    );
-    if (response is! Map) {
-      throw const FormatException('Invalid Community draft');
-    }
-    final draft = CommunityPersistentDraft.fromJson(
-      Map<String, dynamic>.from(response),
-    );
-    if (draft.draftId != draftId) {
-      throw const FormatException('Community draft id mismatch');
-    }
+  loadMyCommunityDraft(String draftId) =>
+      _runCommunityOwnerOperation((operation) async {
+        if (!CommunityRepository._uuid.hasMatch(draftId)) {
+          throw ArgumentError.value(draftId, 'draftId');
+        }
+        final response = await _client.rpc(
+          'bil_get_my_community_post_draft_v1',
+          params: {'p_draft_id': draftId},
+        );
+        operation.check();
+        if (response is! Map) {
+          throw const FormatException('Invalid Community draft');
+        }
+        final draft = CommunityPersistentDraft.fromJson(
+          Map<String, dynamic>.from(response),
+        );
+        if (draft.draftId != draftId) {
+          throw const FormatException('Community draft id mismatch');
+        }
 
-    final images = <CommunityPostImageDraft>[];
-    for (final media in draft.media) {
-      final bytes = await _client.storage
-          .from(_draftBucket)
-          .download(media.objectPath);
-      final image = await validateCommunityPostImageAsync(bytes);
-      if (image.mimeType != media.mimeType ||
-          image.byteLength != media.bytes ||
-          image.width != media.width ||
-          image.height != media.height) {
-        throw const FormatException('Community draft media mismatch');
-      }
-      images.add(image);
-    }
-    return (
-      draft: draft,
-      images: List<CommunityPostImageDraft>.unmodifiable(images),
-    );
-  }
+        final images = <CommunityPostImageDraft>[];
+        for (final media in draft.media) {
+          final bytes = await _client.storage
+              .from(_draftBucket)
+              .download(media.objectPath);
+          operation.check();
+          final image = await validateCommunityPostImageAsync(bytes);
+          operation.check();
+          if (image.mimeType != media.mimeType ||
+              image.byteLength != media.bytes ||
+              image.width != media.width ||
+              image.height != media.height) {
+            throw const FormatException('Community draft media mismatch');
+          }
+          images.add(image);
+        }
+        return (
+          draft: draft,
+          images: List<CommunityPostImageDraft>.unmodifiable(images),
+        );
+      });
 
   Future<String> saveMyCommunityDraft({
     required CommunityDraftSaveInput input,
     required List<CommunityPostImageDraft> images,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
     if (!CommunityRepository._uuid.hasMatch(input.draftId) ||
         images.length > 4) {
       throw ArgumentError('Invalid Community draft');
     }
+    if (CommunityTextLimits.exceedsBodyLimit(input.body)) {
+      throw const FormatException('Invalid Community draft body length');
+    }
+    final owner = _user.id;
     await assertCommunityPublishReady();
+    operation.check();
 
     final draftId = await _client.rpc(
       'bil_upsert_my_community_post_draft_v1',
@@ -238,6 +255,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
         'p_poll_allow_multiple': input.pollAllowMultiple,
       },
     );
+    operation.check();
     if (draftId != input.draftId) {
       throw const FormatException('Invalid Community draft save receipt');
     }
@@ -245,26 +263,30 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
     final validated = <CommunityPostImageDraft>[];
     for (final image in images) {
       validated.add(await validateCommunityPostImageAsync(image.bytes));
+      operation.check();
     }
 
     final uploaded = <String>[];
+    var mediaCommitStarted = false;
     try {
       final items = <Map<String, Object>>[];
       for (final image in validated) {
         final objectId = _uuidGenerator.v4();
-        final path =
-            '${_user.id}/${input.draftId}/$objectId.${image.extension}';
+        final path = '$owner/${input.draftId}/$objectId.${image.extension}';
+        operation.check();
         await _client.storage
             .from(_draftBucket)
             .uploadBinary(
               path,
               image.bytes,
+              retryAttempts: 0,
               fileOptions: FileOptions(
                 upsert: false,
                 contentType: image.mimeType,
                 cacheControl: '86400',
               ),
             );
+        operation.check();
         uploaded.add(path);
         items.add({
           'object_path': path,
@@ -275,10 +297,12 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
         });
       }
 
+      mediaCommitStarted = true;
       final stale = await _client.rpc(
         'bil_set_my_community_post_draft_media_v1',
         params: {'p_draft_id': input.draftId, 'p_items': items},
       );
+      operation.check();
       if (stale is! List || stale.any((value) => value is! String)) {
         throw const FormatException('Invalid Community draft media receipt');
       }
@@ -292,7 +316,10 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
       }
       return input.draftId;
     } on Object {
-      if (uploaded.isNotEmpty) {
+      // Once the metadata RPC starts, a lost reply cannot prove the images
+      // are unreferenced. Keep them private until a verified retry supplies
+      // the authoritative stale-path list instead of deleting saved media.
+      if (!mediaCommitStarted && uploaded.isNotEmpty && operation.isCurrent) {
         try {
           await _client.storage.from(_draftBucket).remove(uploaded);
         } on Object {
@@ -301,12 +328,12 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
       }
       rethrow;
     }
-  }
+  });
 
   Future<void> consumeMyCommunityDraftAfterPublish({
     required String draftId,
     required String postId,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
     if (!CommunityRepository._uuid.hasMatch(draftId) ||
         !CommunityRepository._uuid.hasMatch(postId)) {
       throw ArgumentError('Invalid Community draft publish receipt');
@@ -315,6 +342,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
       'bil_consume_my_community_post_draft_v1',
       params: {'p_draft_id': draftId, 'p_post_id': postId},
     );
+    operation.check();
     if (response is! List || response.any((value) => value is! String)) {
       throw const FormatException(
         'Invalid Community draft publish consumption receipt',
@@ -329,26 +357,30 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
         // can retry independently without leaving a visible duplicate draft.
       }
     }
-  }
+    operation.check();
+  });
 
-  Future<void> deleteMyCommunityDraft(String draftId) async {
-    if (!CommunityRepository._uuid.hasMatch(draftId)) {
-      throw ArgumentError.value(draftId, 'draftId');
-    }
-    final response = await _client.rpc(
-      'bil_delete_my_community_post_draft_v1',
-      params: {'p_draft_id': draftId},
-    );
-    if (response is! List || response.any((value) => value is! String)) {
-      throw const FormatException('Invalid Community draft delete receipt');
-    }
-    final paths = response.cast<String>();
-    if (paths.isNotEmpty) {
-      try {
-        await _client.storage.from(_draftBucket).remove(paths);
-      } on Object {
-        // The draft is already deleted and no longer user-visible.
-      }
-    }
-  }
+  Future<void> deleteMyCommunityDraft(String draftId) =>
+      _runCommunityOwnerOperation((operation) async {
+        if (!CommunityRepository._uuid.hasMatch(draftId)) {
+          throw ArgumentError.value(draftId, 'draftId');
+        }
+        final response = await _client.rpc(
+          'bil_delete_my_community_post_draft_v1',
+          params: {'p_draft_id': draftId},
+        );
+        operation.check();
+        if (response is! List || response.any((value) => value is! String)) {
+          throw const FormatException('Invalid Community draft delete receipt');
+        }
+        final paths = response.cast<String>();
+        if (paths.isNotEmpty) {
+          try {
+            await _client.storage.from(_draftBucket).remove(paths);
+          } on Object {
+            // The draft is already deleted and no longer user-visible.
+          }
+        }
+        operation.check();
+      });
 }

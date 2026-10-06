@@ -58,6 +58,7 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   int searchCalls = 0;
   int searchFailuresRemaining = 0;
   int updatesFailuresRemaining = 0;
+  int attentionLoadCalls = 0;
   bool inboxRead = false;
   bool hasInbox = true;
   int inboxLoadCalls = 0;
@@ -95,6 +96,7 @@ final class _CommunityInteractionRepository extends CommunityRepository {
 
   @override
   Future<CommunityAttention> loadAttention() async {
+    attentionLoadCalls++;
     final friends = await loadFriendshipsWithProfiles();
     final messages = await loadInboxMessages();
     return CommunityAttention(
@@ -148,6 +150,36 @@ final class _CommunityInteractionRepository extends CommunityRepository {
       localeCode: 'en',
       discoverable: true,
       bio: 'Non-personal test profile',
+    );
+  }
+
+  @override
+  Future<CommunityProfileOverview> loadProfileOverview(String userId) async {
+    expect(userId, currentId);
+    return CommunityProfileOverview.fromProfile((await loadMyProfile())!);
+  }
+
+  @override
+  Future<CommunityPublicCode> loadPublicCode() async =>
+      CommunityPublicCode.fromJson({
+        'code': '0123456789abcdef0123456789abcdef',
+        'uri': 'bil://community/member/0123456789abcdef0123456789abcdef',
+        'handle': 'bil_qa_member',
+      });
+
+  @override
+  Future<CommunityFeedBatch> loadProfilePosts({
+    required String userId,
+    DateTime? before,
+    String? beforeId,
+    int limit = 24,
+  }) async {
+    expect(userId, currentId);
+    return CommunityFeedBatch(
+      posts: (await loadFeed(
+        limit: limit,
+      )).where((post) => post.authorId == userId).toList(growable: false),
+      hasMore: false,
     );
   }
 
@@ -632,6 +664,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Friend requests'), findsOneWidget);
     expect(find.text('Unread messages'), findsOneWidget);
+    expect(repository.attentionLoadCalls, 1);
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const Key('community-attention-requests-count')),
+          )
+          .data,
+      '1',
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const Key('community-attention-messages-count')),
+          )
+          .data,
+      '1',
+    );
+    expect(find.text('You are all caught up'), findsNothing);
+    expect(repository.responseCalls, 0);
+    expect(repository.friendshipStatus, 'pending');
+    expect(repository.inboxRead, isFalse);
   });
 
   testWidgets('community updates failure exposes working Retry', (
@@ -643,10 +696,16 @@ void main() {
       _app(CommunityNotificationsPage(repository: repository)),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Community updates are unavailable'), findsOneWidget);
+    expect(find.text('Notifications are unavailable'), findsOneWidget);
+    expect(repository.attentionLoadCalls, 1);
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
+    expect(repository.attentionLoadCalls, 2);
     expect(find.text('Friend requests'), findsOneWidget);
+    expect(find.text('Unread messages'), findsOneWidget);
+    expect(find.text('Notifications are unavailable'), findsNothing);
+    expect(repository.friendshipStatus, 'pending');
+    expect(repository.inboxRead, isFalse);
   });
 
   testWidgets('community updates reload after returning from requests', (
@@ -679,12 +738,76 @@ void main() {
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
     expect(find.text('Friend requests'), findsOneWidget);
+    expect(repository.attentionLoadCalls, 1);
+    expect(repository.friendshipStatus, 'pending');
     await tester.tap(find.text('Friend requests'));
     await tester.pumpAndSettle();
+    expect(repository.friendshipStatus, 'pending');
+    expect(repository.responseCalls, 0);
     await tester.tap(find.text('Accept fixture request'));
     await tester.pumpAndSettle();
-    expect(find.text('No community updates'), findsOneWidget);
+    expect(repository.attentionLoadCalls, 2);
+    expect(repository.friendshipStatus, 'accepted');
+    expect(find.text('Friend requests'), findsNothing);
+    expect(find.text('Unread messages'), findsNothing);
+    expect(find.text('You are all caught up'), findsOneWidget);
   });
+
+  testWidgets(
+    'unread summary refreshes after messages without accepting requests',
+    (tester) async {
+      final repository = _CommunityInteractionRepository();
+      final router = GoRouter(
+        initialLocation: '/community/notifications',
+        routes: [
+          GoRoute(
+            path: '/community/notifications',
+            builder: (_, _) =>
+                CommunityNotificationsPage(repository: repository),
+          ),
+          GoRoute(
+            path: '/community/messages',
+            builder: (context, _) => Scaffold(
+              body: Center(
+                child: FilledButton(
+                  onPressed: () {
+                    repository.inboxRead = true;
+                    context.pop();
+                  },
+                  child: const Text('Read fixture message and return'),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Unread messages'));
+      await tester.pumpAndSettle();
+      expect(repository.inboxRead, isFalse);
+      expect(repository.friendshipStatus, 'pending');
+      expect(repository.responseCalls, 0);
+      await tester.tap(find.text('Read fixture message and return'));
+      await tester.pumpAndSettle();
+      expect(repository.attentionLoadCalls, 2);
+      expect(find.text('Unread messages'), findsNothing);
+      expect(find.text('Friend requests'), findsOneWidget);
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const Key('community-attention-requests-count')),
+            )
+            .data,
+        '1',
+      );
+      expect(find.text('You are all caught up'), findsNothing);
+      expect(repository.friendshipStatus, 'pending');
+      expect(repository.responseCalls, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'community settings opens the member page and its profile edit route',

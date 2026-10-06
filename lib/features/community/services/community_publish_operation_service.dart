@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import 'community_post_image_picker.dart';
+import 'community_owner_operation.dart';
 
 class CommunityPublishOperationConflict implements Exception {
   const CommunityPublishOperationConflict();
@@ -37,36 +38,45 @@ class CommunityPublishOperationService {
   Future<String> publish(
     Map<String, dynamic> fields,
     List<CommunityPostImageDraft> images,
-  ) async {
-    final validated = <CommunityPostImageDraft>[];
-    for (final image in images) {
-      validated.add(await validateCommunityPostImageAsync(image.bytes));
-    }
-    final fingerprint = await compute(_publishFingerprint, (
-      fields: fields,
-      images: validated.map((image) => image.bytes).toList(),
-    ));
-    final running = _inFlight[ownerId];
-    if (running != null || _cancelling.contains(ownerId)) {
-      // Do not issue another mutation while the first outcome is unknown.
-      throw const CommunityPublishOperationConflict();
-    }
-    final future = _publish(fields, validated, fingerprint);
-    _inFlight[ownerId] = future;
-    try {
-      return await future;
-    } finally {
-      if (identical(_inFlight[ownerId], future)) _inFlight.remove(ownerId);
-    }
-  }
+  ) => CommunityOwnerOperation.run(
+    client: client,
+    ownerId: ownerId,
+    action: (operation) async {
+      final validated = <CommunityPostImageDraft>[];
+      for (final image in images) {
+        validated.add(await validateCommunityPostImageAsync(image.bytes));
+        operation.check();
+      }
+      final fingerprint = await compute(_publishFingerprint, (
+        fields: fields,
+        images: validated.map((image) => image.bytes).toList(),
+      ));
+      operation.check();
+      final running = _inFlight[ownerId];
+      if (running != null || _cancelling.contains(ownerId)) {
+        // Do not issue another mutation while the first outcome is unknown.
+        throw const CommunityPublishOperationConflict();
+      }
+      final future = _publish(fields, validated, fingerprint, operation);
+      _inFlight[ownerId] = future;
+      try {
+        return await future;
+      } finally {
+        if (identical(_inFlight[ownerId], future)) _inFlight.remove(ownerId);
+      }
+    },
+  );
 
   Future<String> _publish(
     Map<String, dynamic> fields,
     List<CommunityPostImageDraft> images,
     String fingerprint,
+    CommunityOwnerOperation operation,
   ) async {
     final prefs = await SharedPreferences.getInstance();
+    operation.check();
     await prefs.reload();
+    operation.check();
     var journal = _readJournal(prefs);
     if (journal != null && journal['fingerprint'] != fingerprint) {
       throw const CommunityPublishOperationConflict();
@@ -96,6 +106,7 @@ class CommunityPublishOperationService {
       if (!await prefs.setString(_journalKey, jsonEncode(journal))) {
         throw StateError('Community operation could not be saved safely');
       }
+      operation.check();
     }
     final operationId = journal['operation_id'] as String;
     final payload = Map<String, dynamic>.from(journal['payload'] as Map);
@@ -107,6 +118,7 @@ class CommunityPublishOperationService {
       operationId,
       payload,
     );
+    operation.check();
     if (prepared['status'] == 'committed') {
       await _acknowledge(prefs);
       return operationId;
@@ -116,7 +128,9 @@ class CommunityPublishOperationService {
     }
     final media = payload['media'] as List;
     for (var index = 0; index < images.length; index++) {
+      operation.check();
       await _upload(media[index]['object_path'] as String, images[index]);
+      operation.check();
     }
     final committed = _receipt(
       await client.rpc(
@@ -126,6 +140,7 @@ class CommunityPublishOperationService {
       operationId,
       payload,
     );
+    operation.check();
     if (committed['status'] != 'committed') {
       throw StateError('Community publication was not committed');
     }
@@ -153,6 +168,7 @@ class CommunityPublishOperationService {
     String operationId,
     Map<String, dynamic> payload,
   ) {
+    CommunityOwnerOperation.checkCurrent();
     if (response is! Map ||
         response['operation_id'] != operationId ||
         response['owner_id'] != ownerId ||
@@ -177,6 +193,7 @@ class CommunityPublishOperationService {
 
   Future<void> _upload(String path, CommunityPostImageDraft image) async {
     try {
+      CommunityOwnerOperation.checkCurrent();
       await client.storage
           .from(_bucket)
           .uploadBinary(
@@ -189,7 +206,9 @@ class CommunityPublishOperationService {
               cacheControl: '86400',
             ),
           );
+      CommunityOwnerOperation.checkCurrent();
     } on StorageException catch (error) {
+      CommunityOwnerOperation.checkCurrent();
       if (error.statusCode != '409' &&
           error.statusCode != '400' &&
           error.error != 'Duplicate') {
@@ -198,19 +217,24 @@ class CommunityPublishOperationService {
       // A retry may find the immutable object from a lost upload response.
       // Ownership/path alone is insufficient: verify the actual bytes.
       final existing = await client.storage.from(_bucket).download(path);
+      CommunityOwnerOperation.checkCurrent();
       final matches = await compute(_samePublishImage, (
         expected: image.bytes,
         actual: existing,
       ));
+      CommunityOwnerOperation.checkCurrent();
       if (!matches) throw StateError('Community retry media does not match');
     }
   }
 
   Future<void> _acknowledge(SharedPreferences prefs) async {
+    CommunityOwnerOperation.checkCurrent();
     final removed = await prefs.remove(_journalKey);
+    CommunityOwnerOperation.checkCurrent();
     // Legacy preferences clear their in-memory cache before the platform write
     // completes. Only readback can prove the durable identity was removed.
     await prefs.reload();
+    CommunityOwnerOperation.checkCurrent();
     if (prefs.containsKey(_journalKey)) {
       throw StateError(
         removed
@@ -222,81 +246,94 @@ class CommunityPublishOperationService {
 
   /// Cancellation is serialized on the server with commit. Never delete an
   /// image merely because a receipt lookup returned no row or timed out.
-  Future<bool> cancelPending() async {
-    if (_inFlight.containsKey(ownerId) || !_cancelling.add(ownerId)) {
-      throw const CommunityPublishOperationConflict();
-    }
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.reload();
-      final journal = _readJournal(prefs);
-      if (journal == null) return true;
-      final operationId = journal['operation_id'] as String;
-      final payload = Map<String, dynamic>.from(journal['payload'] as Map);
-      final raw = await client.rpc(
-        'bil_abort_my_community_publish_operation_v1',
-        params: {'p_operation_id': operationId},
-      );
-      if (raw is! Map ||
-          raw['operation_id'] != operationId ||
-          raw['owner_id'] != ownerId) {
-        throw const FormatException('Invalid Community cancellation receipt');
+  Future<bool> cancelPending() => CommunityOwnerOperation.run(
+    client: client,
+    ownerId: ownerId,
+    action: (operation) async {
+      if (_inFlight.containsKey(ownerId) || !_cancelling.add(ownerId)) {
+        throw const CommunityPublishOperationConflict();
       }
-      final result = Map<String, dynamic>.from(raw);
-      if (result['status'] == 'unavailable') {
-        if (result['payload'] is! Map ||
-            _canonicalJson(result['payload']) != _canonicalJson(payload) ||
-            result['post_id'] != operationId ||
-            result['committed'] != false ||
-            result['was_committed'] != true ||
-            result['post_available'] != false ||
-            result['cleanup_allowed'] != false ||
-            result['aborted'] != false ||
-            _canonicalJson(result['media_paths']) != _canonicalJson([])) {
-          throw const FormatException('Unproved unavailable Community post');
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        operation.check();
+        await prefs.reload();
+        operation.check();
+        final journal = _readJournal(prefs);
+        if (journal == null) return true;
+        final operationId = journal['operation_id'] as String;
+        final payload = Map<String, dynamic>.from(journal['payload'] as Map);
+        final raw = await client.rpc(
+          'bil_abort_my_community_publish_operation_v1',
+          params: {'p_operation_id': operationId},
+        );
+        operation.check();
+        if (raw is! Map ||
+            raw['operation_id'] != operationId ||
+            raw['owner_id'] != ownerId) {
+          throw const FormatException('Invalid Community cancellation receipt');
         }
-        // This explicit action abandons only the local pending identity. It
-        // cannot publish anything or authorize removal of any uploaded object.
-        await _acknowledge(prefs);
-        throw const CommunityPublishOperationUnavailable();
-      }
-      if (result['status'] == 'committed') {
+        final result = Map<String, dynamic>.from(raw);
+        if (result['status'] == 'unavailable') {
+          if (result['payload'] is! Map ||
+              _canonicalJson(result['payload']) != _canonicalJson(payload) ||
+              result['post_id'] != operationId ||
+              result['committed'] != false ||
+              result['was_committed'] != true ||
+              result['post_available'] != false ||
+              result['cleanup_allowed'] != false ||
+              result['aborted'] != false ||
+              _canonicalJson(result['media_paths']) != _canonicalJson([])) {
+            throw const FormatException('Unproved unavailable Community post');
+          }
+          // This explicit action abandons only the local pending identity. It
+          // cannot publish anything or authorize removal of any uploaded object.
+          await _acknowledge(prefs);
+          throw const CommunityPublishOperationUnavailable();
+        }
+        if (result['status'] == 'committed') {
+          _receipt(result, operationId, payload);
+          await _acknowledge(prefs);
+          return false;
+        }
+        if (result['status'] != 'aborted' || result['aborted'] != true) {
+          throw const FormatException(
+            'Community cancellation was not verified',
+          );
+        }
+        if (result.containsKey('payload') && result['payload'] == null) {
+          // An absent-operation tombstone wins against a delayed begin. No
+          // upload could start before a verified prepared receipt, so there is
+          // no server-authorized object list to remove in this case.
+          if (result['committed'] != false ||
+              result['post_id'] != null ||
+              _canonicalJson(result['media_paths']) != _canonicalJson([])) {
+            throw const FormatException('Invalid Community abort tombstone');
+          }
+          await _acknowledge(prefs);
+          return true;
+        }
         _receipt(result, operationId, payload);
-        await _acknowledge(prefs);
-        return false;
-      }
-      if (result['status'] != 'aborted' || result['aborted'] != true) {
-        throw const FormatException('Community cancellation was not verified');
-      }
-      if (result.containsKey('payload') && result['payload'] == null) {
-        // An absent-operation tombstone wins against a delayed begin. No
-        // upload could start before a verified prepared receipt, so there is
-        // no server-authorized object list to remove in this case.
-        if (result['committed'] != false ||
-            result['post_id'] != null ||
-            _canonicalJson(result['media_paths']) != _canonicalJson([])) {
-          throw const FormatException('Invalid Community abort tombstone');
+        final expectedPaths = (payload['media'] as List)
+            .map((item) => item['object_path'] as String)
+            .toList();
+        if (_canonicalJson(result['media_paths']) !=
+            _canonicalJson(expectedPaths)) {
+          throw const FormatException(
+            'Community cancellation was not verified',
+          );
+        }
+        if (expectedPaths.isNotEmpty) {
+          operation.check();
+          await client.storage.from(_bucket).remove(expectedPaths);
+          operation.check();
         }
         await _acknowledge(prefs);
         return true;
+      } finally {
+        _cancelling.remove(ownerId);
       }
-      _receipt(result, operationId, payload);
-      final expectedPaths = (payload['media'] as List)
-          .map((item) => item['object_path'] as String)
-          .toList();
-      if (_canonicalJson(result['media_paths']) !=
-          _canonicalJson(expectedPaths)) {
-        throw const FormatException('Community cancellation was not verified');
-      }
-      if (expectedPaths.isNotEmpty) {
-        await client.storage.from(_bucket).remove(expectedPaths);
-      }
-      await _acknowledge(prefs);
-      return true;
-    } finally {
-      _cancelling.remove(ownerId);
-    }
-  }
+    },
+  );
 }
 
 String _publishFingerprint(

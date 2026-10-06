@@ -46,6 +46,7 @@ final class _SocialV2Repository extends CommunityRepository {
   int blocks = 0;
   int friendRequests = 0;
   final List<String> submittedClientIds = [];
+  final List<String> submittedBodies = [];
   final List<String?> submittedParentIds = [];
   final List<CommunityComment> added = [];
 
@@ -197,6 +198,7 @@ final class _SocialV2Repository extends CommunityRepository {
     String? parentId,
   }) async {
     submittedClientIds.add(clientId);
+    submittedBodies.add(body);
     submittedParentIds.add(parentId);
     if (addFailuresRemaining > 0) {
       addFailuresRemaining--;
@@ -289,6 +291,80 @@ final class _ReplyRaceRepository extends _SocialV2Repository {
 }
 
 void main() {
+  group('comment Unicode retention', () {
+    late _SocialV2Repository repository;
+
+    // Keep the Supabase JSON/process lifecycle in the real runner zone.
+    setUp(() => repository = _SocialV2Repository());
+    tearDown(() => repository.communitySocialClient.dispose());
+
+    final boundaries = {
+      'astral emoji': List.filled(1200, '😀').join(),
+      'joined emoji': '${List.filled(1197, 'a').join()}👩‍💻',
+    };
+    for (final boundary in boundaries.entries) {
+      testWidgets('${boundary.key} overflow and retry keep the whole comment', (
+        tester,
+      ) async {
+        await tester.pumpWidget(_app(repository));
+        await tester.pumpAndSettle();
+        await tapCommunityControl(
+          tester,
+          find.byKey(
+            const Key('community-post-comments-${_SocialV2Repository.postId}'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final editor = find.byKey(const Key('community-comment-composer'));
+        final submit = find.byKey(const Key('community-comment-submit'));
+        final body = boundary.value;
+        final overflow = '${body}a';
+        await tester.enterText(editor, overflow);
+        await tester.pumpAndSettle();
+        expect(tester.widget<TextField>(editor).controller!.text, overflow);
+        expect(find.text('1201 / 1200'), findsOneWidget);
+        await tapCommunityControl(tester, submit);
+        await tester.pumpAndSettle();
+        expect(repository.submittedClientIds, isEmpty);
+        expect(repository.submittedBodies, isEmpty);
+        expect(tester.widget<TextField>(editor).controller!.text, overflow);
+
+        repository.addFailuresRemaining = 1;
+        await tester.enterText(editor, body);
+        await tester.pumpAndSettle();
+        expect(find.text('1200 / 1200'), findsOneWidget);
+        await tapCommunityControl(tester, submit);
+        await tester.pumpAndSettle();
+        expect(repository.submittedBodies, [body]);
+        expect(repository.added, isEmpty);
+        expect(tester.widget<TextField>(editor).controller!.text, body);
+
+        // Invalid edits do not mint a new id for an uncertain write. Restoring
+        // the exact failed payload must retain its original idempotency key.
+        await tester.enterText(editor, overflow);
+        await tapCommunityControl(tester, submit);
+        await tester.pumpAndSettle();
+        expect(repository.submittedBodies, [body]);
+        expect(tester.widget<TextField>(editor).controller!.text, overflow);
+        await tester.enterText(editor, body);
+        await tapCommunityControl(tester, submit);
+        await tester.pumpAndSettle();
+        expect(repository.submittedBodies, [body, body]);
+        expect(repository.submittedClientIds, hasLength(2));
+        expect(
+          repository.submittedClientIds.last,
+          repository.submittedClientIds.first,
+        );
+        expect(repository.added.single.body, body);
+        expect(tester.widget<TextField>(editor).controller!.text, isEmpty);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      });
+    }
+  });
+
   testWidgets('late reply page cannot override an authoritative refresh', (
     tester,
   ) async {

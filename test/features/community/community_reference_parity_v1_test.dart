@@ -554,6 +554,85 @@ void main() {
   );
 
   for (final language in ['en', 'ar']) {
+    testWidgets('moment filters wrap and remain usable at 200% in $language', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(320, 568));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: Locale(language),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(2)),
+            child: child!,
+          ),
+          home: CommunityMemberProfilePage(
+            userId: _creatorId,
+            repository: _ReferenceParityRepository(selfProfile: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final filter = find.byKey(const Key('community-profile-moment-filter'));
+      await tester.scrollUntilVisible(
+        filter,
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(filter);
+      await tester.pumpAndSettle();
+      expect(filter.hitTestable(), findsOneWidget);
+      await tester.tap(filter);
+      await tester.pumpAndSettle();
+      final pending = find
+          .text(language == 'ar' ? 'قيد الانتظار' : 'Pending')
+          .last;
+      await tester.ensureVisible(pending);
+      await tester.pumpAndSettle();
+      expect(
+        tester.renderObject<RenderParagraph>(pending).didExceedMaxLines,
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.tap(pending);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: filter,
+          matching: find.text(language == 'ar' ? 'قيد الانتظار' : 'Pending'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('A verified Community moment.'), findsNothing);
+      await tester.tap(filter);
+      await tester.pumpAndSettle();
+      final published = find
+          .text(language == 'ar' ? 'منشور' : 'Published')
+          .last;
+      await tester.ensureVisible(published);
+      await tester.tap(published);
+      await tester.pumpAndSettle();
+      final views = find.byKey(
+        const Key('community-profile-post-views-$_postId'),
+      );
+      await tester.scrollUntilVisible(
+        views,
+        120,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(tester.widget<Text>(views).data, '37');
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets(
       'creator center metrics remain reachable on 320x568 at 200% in $language',
       (tester) async {
@@ -583,11 +662,27 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+        final stats = find.byKey(const Key('community-self-stats'));
+        await tester.scrollUntilVisible(
+          stats,
+          160,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.ensureVisible(stats);
+        await tester.pumpAndSettle();
+        expect(stats.hitTestable(), findsOneWidget);
+        await tester.tap(stats);
+        await tester.pumpAndSettle();
         final center = find.byKey(const Key('community-creator-center'));
         await tester.scrollUntilVisible(
           center,
           160,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: find
+              .descendant(
+                of: find.byType(BottomSheet).last,
+                matching: find.byType(Scrollable),
+              )
+              .first,
         );
         await tester.ensureVisible(center);
         await tester.pumpAndSettle();

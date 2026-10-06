@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
 import 'package:body_intelligence_log/features/community/services/community_post_image_picker.dart';
+import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:body_intelligence_log/features/community/services/community_publish_operation_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +15,9 @@ import 'package:shared_preferences_platform_interface/shared_preferences_platfor
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'community_publish_operation_persistence.dart';
+part 'community_publish_operation_owner_fixture.dart';
+part 'community_publish_operation_owner_cases.dart';
+part 'community_draft_operation_owner_cases.dart';
 
 const _owner = '11111111-1111-4111-8111-111111111111';
 Map<String, dynamic> _fields({String body = 'Authoritative post'}) => {
@@ -27,6 +34,10 @@ Map<String, dynamic> _fields({String body = 'Authoritative post'}) => {
 };
 
 class _OperationBackend {
+  final requests = <http.Request>[];
+  Future<void> Function(http.Request request)? beforeResponse;
+  FutureOr<http.Response?> Function(String rpc, Map<String, dynamic> params)?
+  additionalRpc;
   final operations = <String, Map<String, dynamic>>{};
   final objects = <String, Uint8List>{};
   int rows = 0;
@@ -89,11 +100,18 @@ class _OperationBackend {
   }
 
   Future<http.Response> request(http.Request request) async {
+    requests.add(request);
+    await beforeResponse?.call(request);
     final path = request.url.path;
+    if (path == '/auth/v1/logout') return http.Response('{}', 200);
     if (path.contains('/rest/v1/rpc/')) {
-      final json = jsonDecode(request.body) as Map;
-      final id = json['p_operation_id'] as String;
+      final json = Map<String, dynamic>.from(
+        jsonDecode(request.body) as Map? ?? const {},
+      );
       final rpc = path.split('/').last;
+      final additional = await additionalRpc?.call(rpc, json);
+      if (additional != null) return additional;
+      final id = json['p_operation_id'] as String;
       if (rpc == 'bil_begin_my_community_publish_operation_v1') {
         if (delayServerBegin) {
           delayedBeginId = id;
@@ -229,14 +247,19 @@ class _OperationClient extends http.BaseClient {
   }
 }
 
-CommunityPublishOperationService _service(_OperationBackend backend) {
+Future<CommunityPublishOperationService> _service(
+  _OperationBackend backend,
+) async {
+  final transport = CommunityOwnerHttpClient(_OperationClient(backend));
+  addTearDown(transport.close);
   final client = SupabaseClient(
     'https://operation-fixture.invalid',
     'synthetic-key',
-    httpClient: _OperationClient(backend),
+    httpClient: transport,
     authOptions: const AuthClientOptions(autoRefreshToken: false),
   );
   addTearDown(client.dispose);
+  await client.auth.recoverSession(_cachedOwnerSession(_owner));
   return CommunityPublishOperationService(client, _owner);
 }
 
@@ -251,12 +274,14 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
   _registerPublishPersistenceTests();
+  _registerPublishOwnerTests();
+  _registerDraftOwnerTests();
 
   test(
     'lost committed response retries durable identity with one actual row',
     () async {
       final backend = _OperationBackend()..loseCommittedResponse = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       await expectLater(
         service.publish(_fields(), []),
         throwsA(isA<http.ClientException>()),
@@ -265,7 +290,7 @@ void main() {
       expect(backend.deletes, 0);
       final firstId = backend.operations.keys.single;
       // Simulate a new service after relaunch, retaining the actual local journal.
-      final result = await _service(backend).publish(_fields(), []);
+      final result = await (await _service(backend)).publish(_fields(), []);
       expect(result, firstId);
       expect(backend.rows, 1);
       expect(backend.commits, 1);
@@ -280,7 +305,7 @@ void main() {
   test('receipt mismatch is never treated as success or cleaned up', () async {
     final backend = _OperationBackend()..wrongPayloadReceipt = true;
     await expectLater(
-      _service(backend).publish(_fields(), []),
+      (await _service(backend)).publish(_fields(), []),
       throwsFormatException,
     );
     expect(backend.rows, 0);
@@ -300,7 +325,7 @@ void main() {
         final backend = _OperationBackend()
           ..wrongCommittedPost = mismatch == 'post'
           ..wrongCommittedPayload = mismatch == 'payload';
-        final service = _service(backend);
+        final service = await _service(backend);
         await expectLater(
           service.publish(_fields(), [_image()]),
           throwsFormatException,
@@ -321,7 +346,7 @@ void main() {
     'changed payload requires explicit authoritative cancellation',
     () async {
       final backend = _OperationBackend()..delayServerCommit = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       await expectLater(
         service.publish(_fields(), []),
         throwsA(isA<http.ClientException>()),
@@ -347,7 +372,7 @@ void main() {
 
   test('commit winning cancellation never deletes post media', () async {
     final backend = _OperationBackend()..loseCommittedResponse = true;
-    final service = _service(backend);
+    final service = await _service(backend);
     await expectLater(
       service.publish(_fields(), [_image()]),
       throwsA(isA<http.ClientException>()),
@@ -363,7 +388,7 @@ void main() {
     'lost upload response retries same immutable path and verifies bytes',
     () async {
       final backend = _OperationBackend()..loseUploadResponse = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       final image = _image();
       await expectLater(
         service.publish(_fields(), [image]),
@@ -385,7 +410,7 @@ void main() {
       final backend = _OperationBackend()
         ..corruptStoredBytes = true
         ..loseUploadResponse = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       final image = _image();
       await expectLater(
         service.publish(_fields(), [image]),
@@ -402,7 +427,7 @@ void main() {
     'abort winning delayed commit authorizes only its exact media cleanup',
     () async {
       final backend = _OperationBackend()..delayServerCommit = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       await expectLater(
         service.publish(_fields(), [_image()]),
         throwsA(isA<http.ClientException>()),
@@ -420,7 +445,7 @@ void main() {
     'abort tombstone defeats delayed begin without unproved cleanup',
     () async {
       final backend = _OperationBackend()..delayServerBegin = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       await expectLater(
         service.publish(_fields(), [_image()]),
         throwsA(isA<http.ClientException>()),
@@ -443,7 +468,7 @@ void main() {
 
   test('mismatched abort payload never authorizes image deletion', () async {
     final backend = _OperationBackend()..delayServerCommit = true;
-    final service = _service(backend);
+    final service = await _service(backend);
     await expectLater(
       service.publish(_fields(), [_image()]),
       throwsA(isA<http.ClientException>()),
@@ -468,7 +493,7 @@ void main() {
       final backend = _OperationBackend()
         ..delayServerCommit = true
         ..loseDeleteResponse = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       await expectLater(
         service.publish(_fields(), [_image()]),
         throwsA(isA<http.ClientException>()),
@@ -498,7 +523,7 @@ void main() {
     'only explicit cancellation can abandon verified unavailable post',
     () async {
       final backend = _OperationBackend()..loseCommittedResponse = true;
-      final service = _service(backend);
+      final service = await _service(backend);
       final image = _image();
       await expectLater(
         service.publish(_fields(), [image]),
@@ -542,7 +567,7 @@ void main() {
       'unproved unavailable receipt preserves pending identity $mismatchPayload',
       () async {
         final backend = _OperationBackend()..loseCommittedResponse = true;
-        final service = _service(backend);
+        final service = await _service(backend);
         await expectLater(
           service.publish(_fields(), [_image()]),
           throwsA(isA<http.ClientException>()),

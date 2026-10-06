@@ -138,6 +138,8 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
         context,
         _CommunityPostComposerPage(
           repository: repository,
+          ownerIsCurrent: () =>
+              _sameOwnerOperation(repository, owner, generation),
           imagePicker: CommunityPostImagePicker(),
           draft: _CommunityComposerDraft.fromPersistent(
             loaded.draft,

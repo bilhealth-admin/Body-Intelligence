@@ -139,7 +139,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                   end: 10,
                   child: profile.isSelf
                       ? FilledButton.tonalIcon(
-                          key: const Key('community-profile-edit-action'),
+                          key: const Key('community-edit-profile'),
                           onPressed: () => context.push('/community/profile'),
                           icon: const Icon(Icons.edit_outlined, size: 18),
                           label: Text(
@@ -459,7 +459,7 @@ class _CommunitySelfQuickActions extends StatelessWidget {
             onTap: onDrafts,
           ),
           _CommunitySelfQuickAction(
-            key: const Key('community-self-saved'),
+            key: const Key('community-saved-posts'),
             icon: Icons.bookmark_border_rounded,
             label: communityText(context, 'Saved', 'المحفوظات'),
             onTap: onSaved,

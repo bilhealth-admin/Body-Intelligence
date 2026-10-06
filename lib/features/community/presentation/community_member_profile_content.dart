@@ -147,35 +147,43 @@ extension _CommunityMemberProfileContentSlivers
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
               ),
               if (profile.isSelf)
-                DropdownButton<_CommunityProfileMomentFilter>(
-                  key: const Key('community-profile-moment-filter'),
-                  value: _momentFilter,
-                  underline: const SizedBox.shrink(),
-                  items: [
-                    DropdownMenuItem(
-                      value: _CommunityProfileMomentFilter.all,
-                      child: Text(communityText(context, 'All', 'الكل')),
-                    ),
-                    DropdownMenuItem(
-                      value: _CommunityProfileMomentFilter.published,
-                      child: Text(communityText(context, 'Published', 'منشور')),
-                    ),
-                    DropdownMenuItem(
-                      value: _CommunityProfileMomentFilter.pending,
-                      child: Text(
-                        communityText(context, 'Pending', 'قيد الانتظار'),
+                IntrinsicWidth(
+                  child: DropdownButton<_CommunityProfileMomentFilter>(
+                    key: const Key('community-profile-moment-filter'),
+                    value: _momentFilter,
+                    isExpanded: true,
+                    itemHeight: null,
+                    underline: const SizedBox.shrink(),
+                    items: [
+                      DropdownMenuItem(
+                        value: _CommunityProfileMomentFilter.all,
+                        child: Text(communityText(context, 'All', 'الكل')),
                       ),
-                    ),
-                    DropdownMenuItem(
-                      value: _CommunityProfileMomentFilter.rejected,
-                      child: Text(communityText(context, 'Rejected', 'مرفوض')),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      _setProfileState(() => _momentFilter = value);
-                    }
-                  },
+                      DropdownMenuItem(
+                        value: _CommunityProfileMomentFilter.published,
+                        child: Text(
+                          communityText(context, 'Published', 'منشور'),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: _CommunityProfileMomentFilter.pending,
+                        child: Text(
+                          communityText(context, 'Pending', 'قيد الانتظار'),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: _CommunityProfileMomentFilter.rejected,
+                        child: Text(
+                          communityText(context, 'Rejected', 'مرفوض'),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        _setProfileState(() => _momentFilter = value);
+                      }
+                    },
+                  ),
                 )
               else
                 Text(

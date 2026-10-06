@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_comment_threads.dart';
 import '../domain/community_models.dart';
+import '../domain/community_text_limits.dart';
 import '../domain/community_text_policy.dart';
 import 'community_public_code_failure.dart';
 
@@ -572,7 +573,9 @@ mixin CommunitySocialRepositoryMixin {
       throw ArgumentError('Invalid Community comment identity');
     }
     final text = body.trim();
-    if (text.isEmpty || text.length > 1200 || _unsafeText.hasMatch(text)) {
+    if (text.isEmpty ||
+        CommunityTextLimits.exceedsBodyLimit(text) ||
+        _unsafeText.hasMatch(text)) {
       throw ArgumentError.value(body, 'body');
     }
     CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.comment);

@@ -9,6 +9,67 @@ const _referenceActivityFilters = <_ActivityFilter>[
 
 extension _CommunityNotificationsReferenceWidgets
     on _CommunityNotificationsPageState {
+  Widget _attentionActions(BuildContext context, _CommunityUpdates updates) {
+    final repository = _repository;
+    final owner = _loadedOwnerId;
+    final generation = _loadGeneration;
+
+    Widget action({
+      required String id,
+      required IconData icon,
+      required String label,
+      required int count,
+      required String route,
+    }) => ListTile(
+      key: ValueKey(id),
+      minTileHeight: 48,
+      contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
+      leading: Icon(icon, size: 22),
+      title: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      trailing: Semantics(
+        value: '$count',
+        child: Text(
+          CommunityAttention.badgeText(count),
+          key: ValueKey('$id-count'),
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+      ),
+      onTap: repository == null || owner == null
+          ? null
+          : () => _openAndRefresh(route, repository, owner, generation),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        children: [
+          if (updates.incomingRequests > 0)
+            action(
+              id: 'community-attention-requests',
+              icon: Icons.person_add_alt_1_outlined,
+              label: communityText(context, 'Friend requests', 'طلبات الصداقة'),
+              count: updates.incomingRequests,
+              route: '/community/connections',
+            ),
+          if (updates.unreadMessages > 0)
+            action(
+              id: 'community-attention-messages',
+              icon: Icons.chat_bubble_outline_rounded,
+              label: communityText(
+                context,
+                'Unread messages',
+                'رسائل غير مقروءة',
+              ),
+              count: updates.unreadMessages,
+              route: '/community/messages',
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _referenceActivityRow(
     BuildContext context,
     CommunityNotification notification,

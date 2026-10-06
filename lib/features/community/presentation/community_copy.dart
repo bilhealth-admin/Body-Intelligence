@@ -19,6 +19,12 @@ String communityText(BuildContext context, String en, String ar) =>
       ar,
     );
 
+String communityBodyLimitText(BuildContext context) => communityText(
+  context,
+  'Keep the text within 1200 characters. Your text is kept.',
+  'اجعل النص في حدود 1200 حرف. احتفظنا بالنص كاملًا.',
+);
+
 String communityTextForLanguage(String languageCode, String en, String ar) {
   final canonical =
       BilLocalePolicy.canonicalSupportedTag(languageCode) ?? languageCode;

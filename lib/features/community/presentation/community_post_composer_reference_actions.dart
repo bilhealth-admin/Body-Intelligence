@@ -3,7 +3,8 @@ part of 'community_hub_page.dart';
 extension _CommunityPostComposerReferenceActions
     on _CommunityPostComposerPageState {
   Future<void> _captureVoiceInput() async {
-    if (_publishing ||
+    if (!_checkComposerOwner() ||
+        _publishing ||
         _savingDraft ||
         _voiceCapturing ||
         _selectingImage ||
@@ -17,20 +18,16 @@ extension _CommunityPostComposerReferenceActions
     try {
       final transcript = await CommunityComposerVoiceInputService.platform()
           .capture(context);
-      if (!mounted || transcript == null || transcript.isEmpty) return;
+      if (!mounted ||
+          !_checkComposerOwner() ||
+          transcript == null ||
+          transcript.isEmpty) {
+        return;
+      }
 
       final current = _composer.text.trim();
       final next = current.isEmpty ? transcript : '$current\n$transcript';
-      if (next.length > 1200) {
-        _setComposerState(
-          () => _submitError = communityText(
-            context,
-            'The voice transcript would exceed the 1200-character post limit.',
-            'سيؤدي النص الصوتي إلى تجاوز حد المنشور البالغ 1200 حرفًا.',
-          ),
-        );
-        return;
-      }
+      final exceedsLimit = CommunityTextLimits.exceedsBodyLimit(next);
 
       _setComposerState(() {
         _composer.value = TextEditingValue(
@@ -42,11 +39,13 @@ extension _CommunityPostComposerReferenceActions
           next,
           fallback: Directionality.of(context),
         );
-        _composerError = null;
+        _composerError = exceedsLimit ? communityBodyLimitText(context) : null;
         _submitError = null;
       });
     } finally {
-      if (mounted) _setComposerState(() => _voiceCapturing = false);
+      if (mounted && _sameComposerOwner) {
+        _setComposerState(() => _voiceCapturing = false);
+      }
     }
   }
 
@@ -64,7 +63,9 @@ extension _CommunityPostComposerReferenceActions
   }
 
   void _addHashtag() {
-    if (_publishing || _savingDraft || _completed) return;
+    if (!_checkComposerOwner() || _publishing || _savingDraft || _completed) {
+      return;
+    }
     final normalized = _normalizeHashtag(_hashtagInput.text);
     if (normalized == null) {
       _setComposerState(
@@ -98,7 +99,8 @@ extension _CommunityPostComposerReferenceActions
   }
 
   Future<void> _searchCollaborators() async {
-    if (_publishing ||
+    if (!_checkComposerOwner() ||
+        _publishing ||
         _savingDraft ||
         _selectingImage ||
         _completed ||
@@ -115,10 +117,10 @@ extension _CommunityPostComposerReferenceActions
     _setComposerState(() => _collaboratorSearching = true);
     try {
       final results = await widget.repository.searchCommunityMentions(query);
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       _setComposerState(() => _collaboratorResults = results);
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       _setComposerState(
         () => _collaboratorResults = const <CommunityMentionCandidate>[],
       );
@@ -134,12 +136,16 @@ extension _CommunityPostComposerReferenceActions
         ),
       );
     } finally {
-      if (mounted) _setComposerState(() => _collaboratorSearching = false);
+      if (mounted && _sameComposerOwner) {
+        _setComposerState(() => _collaboratorSearching = false);
+      }
     }
   }
 
   void _toggleCollaborator(CommunityMentionCandidate candidate) {
-    if (_publishing || _savingDraft || _completed) return;
+    if (!_checkComposerOwner() || _publishing || _savingDraft || _completed) {
+      return;
+    }
     final index = widget.draft.collaborators.indexWhere(
       (value) => value.userId == candidate.userId,
     );
@@ -193,7 +199,18 @@ extension _CommunityPostComposerReferenceActions
       );
 
   Future<void> _savePersistentDraft() async {
-    if (_publishing || _savingDraft || _selectingImage || _completed) {
+    final owner = _composerOwnerId;
+    if (!_checkComposerOwner() ||
+        owner == null ||
+        _publishing ||
+        _savingDraft ||
+        _selectingImage ||
+        _completed) {
+      return;
+    }
+    if (CommunityTextLimits.exceedsBodyLimit(_composer.text)) {
+      _setComposerState(() => _composerError = communityBodyLimitText(context));
+      _composerFocus.requestFocus();
       return;
     }
     if (!_hasDraftContent) {
@@ -213,11 +230,15 @@ extension _CommunityPostComposerReferenceActions
     });
     final draftId = widget.draft.persistentDraftId ?? const Uuid().v4();
     try {
-      await widget.repository.saveMyCommunityDraft(
-        input: _currentDraftSaveInput(draftId),
-        images: List<CommunityPostImageDraft>.unmodifiable(_selectedImages),
+      await widget.repository.runForCommunityOwner(
+        () => widget.repository.saveMyCommunityDraft(
+          input: _currentDraftSaveInput(draftId),
+          images: List<CommunityPostImageDraft>.unmodifiable(_selectedImages),
+        ),
+        ownerId: owner,
+        isCurrentOwner: () => _sameComposerOwner,
       );
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       _setComposerState(() {
         widget.draft.persistentDraftId = draftId;
         widget.draft.savedPersistently = true;
@@ -236,7 +257,7 @@ extension _CommunityPostComposerReferenceActions
         ),
       );
     } on CommunityPolicyAccessException catch (error) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       _setComposerState(
         () => _submitError = communityText(
           context,
@@ -245,7 +266,7 @@ extension _CommunityPostComposerReferenceActions
         ),
       );
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_checkComposerOwner()) return;
       _setComposerState(
         () => _submitError = communityText(
           context,
@@ -254,7 +275,9 @@ extension _CommunityPostComposerReferenceActions
         ),
       );
     } finally {
-      if (mounted) _setComposerState(() => _savingDraft = false);
+      if (mounted && _sameComposerOwner) {
+        _setComposerState(() => _savingDraft = false);
+      }
     }
   }
 }

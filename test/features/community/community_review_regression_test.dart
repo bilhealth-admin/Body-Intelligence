@@ -138,6 +138,23 @@ class _ReviewRepository extends CommunityRepository {
   }
 
   @override
+  Future<CommunityProfileOverview> loadProfileOverview(String userId) async {
+    expect(userId, _me);
+    return CommunityProfileOverview.fromProfile((await loadMyProfile())!);
+  }
+
+  @override
+  Future<CommunityFeedBatch> loadProfilePosts({
+    required String userId,
+    DateTime? before,
+    String? beforeId,
+    int limit = 24,
+  }) {
+    expect(userId, _me);
+    return loadMyPosts(before: before, beforeId: beforeId, limit: limit);
+  }
+
+  @override
   Future<CommunityFeedBatch> loadMyPosts({
     DateTime? before,
     String? beforeId,
@@ -912,10 +929,23 @@ void main() {
     expect(find.byKey(const Key('community-navigation-sheet')), findsOneWidget);
     expect(find.byKey(const Key('community-nav-friends')), findsOneWidget);
     expect(find.byKey(const Key('community-my-bil-code')), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('community-saved-posts')),
+      180,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const Key('community-navigation-sheet')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(find.byKey(const Key('community-saved-posts')), findsOneWidget);
-    Navigator.of(
-      tester.element(find.byKey(const Key('community-navigation-sheet'))),
-    ).pop();
+    await tester.tap(find.byKey(const Key('community-saved-posts')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CommunitySavedPostsPage), findsOneWidget);
+    expect(find.byType(CommunityDraftsPage), findsNothing);
+    expect(find.byKey(const Key('community-navigation-sheet')), findsNothing);
+    await tester.tap(find.byType(BackButton).last);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('community-public-feed')), findsOneWidget);
     expect(find.byType(TabBar), findsNothing);

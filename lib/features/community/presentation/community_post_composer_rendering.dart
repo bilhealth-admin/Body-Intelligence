@@ -53,7 +53,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           controller: _composer,
                           focusNode: _composerFocus,
                           enabled: !busy,
-                          maxLength: 1200,
+                          maxLength: CommunityTextLimits.bodyCodePointLimit,
+                          maxLengthEnforcement: MaxLengthEnforcement.none,
+                          buildCounter: communityBodyCounter(_composer),
                           minLines: 3,
                           maxLines: 8,
                           textDirection:
@@ -61,17 +63,21 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           textCapitalization: TextCapitalization.sentences,
                           onChanged: (value) {
                             widget.draft.body = value;
+                            final error =
+                                CommunityTextLimits.exceedsBodyLimit(value)
+                                ? communityBodyLimitText(context)
+                                : null;
                             final direction =
                                 BilWrittenLanguageResolver.directionFor(
                                   value,
                                   fallback: Directionality.of(context),
                                 );
-                            if (_composerError != null ||
+                            if (_composerError != error ||
                                 _submitError != null ||
                                 direction != _composerDirection) {
                               _setComposerState(() {
                                 _composerDirection = direction;
-                                _composerError = null;
+                                _composerError = error;
                                 _submitError = null;
                               });
                             }

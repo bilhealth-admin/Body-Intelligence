@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+late SupabaseClient _testClient;
+
 final _acceptedPolicy = CommunityContentPolicy.fromJson({
   'version': 'community-policy-v1',
   'locale_code': 'en',
@@ -14,17 +16,25 @@ final _acceptedPolicy = CommunityContentPolicy.fromJson({
 });
 
 class _FeedRepository extends CommunityRepository {
-  _FeedRepository()
-    : super(
-        SupabaseClient(
-          'https://unit.invalid',
-          'test',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _FeedRepository() : super(_testClient);
   int calls = 0;
   @override
   String get currentUserId => '11111111-1111-4111-8111-111111111111';
+  @override
+  Future<CommunityProfile?> loadMyProfile() async => CommunityProfile(
+    userId: currentUserId,
+    displayName: 'Existing member',
+    localeCode: 'en',
+    discoverable: false,
+    visibility: CommunityProfileVisibility.private,
+  );
+  @override
+  Future<CommunityPublicCode> loadPublicCode() async =>
+      CommunityPublicCode.fromJson({
+        'code': 'aabbccddaabbccddaabbccddaabbccdd',
+        'uri': 'bil://community/member/aabbccddaabbccddaabbccddaabbccdd',
+        'handle': 'existing_member',
+      });
   @override
   Future<bool> isCommunityModerator() async => false;
   @override
@@ -54,6 +64,15 @@ class _FeedRepository extends CommunityRepository {
 }
 
 void main() {
+  setUp(() {
+    _testClient = SupabaseClient(
+      'https://unit.invalid',
+      'test',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => _testClient.dispose());
+
   testWidgets(
     'feed is for reading; creation is separate and back preserves its draft',
     (tester) async {

@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../domain/community_models.dart';
+import '../domain/community_text_limits.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 
@@ -589,7 +590,8 @@ final class CommunityPostCloudStore
   static String? _validatedBody(String body) {
     final text = body.trim();
     if (text.isEmpty) return null;
-    if (text.length > 1200 || _unsafeText.hasMatch(text)) {
+    if (CommunityTextLimits.exceedsBodyLimit(text) ||
+        _unsafeText.hasMatch(text)) {
       throw const FormatException('Invalid community post body');
     }
     CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.post);
@@ -608,7 +610,7 @@ final class CommunityPostCloudStore
         !_uuid.hasMatch(authorId) ||
         body is! String ||
         body.trim().isEmpty ||
-        body.length > 1200 ||
+        CommunityTextLimits.exceedsBodyLimit(body) ||
         _unsafeText.hasMatch(body) ||
         createdAt is! String ||
         DateTime.tryParse(createdAt) == null ||

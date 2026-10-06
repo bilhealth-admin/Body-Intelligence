@@ -155,10 +155,17 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                     ],
                   ),
                 ),
+                if (!_loadingFirst &&
+                    (updates.incomingRequests > 0 ||
+                        updates.unreadMessages > 0))
+                  _CommunityNotificationsReferenceWidgets(
+                    this,
+                  )._attentionActions(context, updates),
                 if (_loadingFirst) ...[
                   const SizedBox(height: 28),
                   const Center(child: CircularProgressIndicator()),
-                ] else if (filteredNotifications.isEmpty) ...[
+                ] else if (filteredNotifications.isEmpty &&
+                    updates.isEmpty) ...[
                   const SizedBox(height: 72),
                   _CenteredUpdatesState(
                     icon: Icons.notifications_none_rounded,

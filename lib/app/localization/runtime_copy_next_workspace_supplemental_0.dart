@@ -32,6 +32,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "سيؤدي هذا إلى حذف المسودات الخاصة المحددة فقط.",
     "أنت مطّلع على كل جديد",
     "سابقًا",
+    "تغير الحساب. ارجع إلى المجتمع للمتابعة.",
+    "اجعل النص في حدود 1200 حرف. احتفظنا بالنص كاملًا.",
   ],
   "fr": [
     "Vue d’ensemble",
@@ -64,6 +66,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Seuls les brouillons privés sélectionnés seront supprimés.",
     "Vous avez tout vu",
     "Plus tôt",
+    "Votre compte a changé. Revenez à la communauté pour continuer.",
+    "Limitez le texte à 1200 caractères. Votre texte est conservé.",
   ],
   "es": [
     "Resumen",
@@ -96,6 +100,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Esto elimina solo los borradores privados seleccionados.",
     "Estás al día",
     "Anteriores",
+    "Tu cuenta ha cambiado. Vuelve a la comunidad para continuar.",
+    "Limita el texto a 1200 caracteres. Tu texto se conserva.",
   ],
   "tr": [
     "Genel bakış",
@@ -128,6 +134,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Bu işlem yalnızca seçilen özel taslakları siler.",
     "Tüm bildirimleri gördün",
     "Daha önce",
+    "Hesabınız değişti. Devam etmek için Topluluk’a dönün.",
+    "Metni 1200 karakterle sınırlayın. Metniniz korunuyor.",
   ],
   "de": [
     "Übersicht",
@@ -160,6 +168,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Dadurch werden nur die ausgewählten privaten Entwürfe gelöscht.",
     "Du bist auf dem neuesten Stand",
     "Früher",
+    "Dein Konto hat sich geändert. Kehre zur Community zurück, um fortzufahren.",
+    "Begrenze den Text auf 1200 Zeichen. Dein Text bleibt erhalten.",
   ],
   "it": [
     "Panoramica",
@@ -192,6 +202,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Questa operazione elimina solo le bozze private selezionate.",
     "Hai visto tutti gli aggiornamenti",
     "In precedenza",
+    "Il tuo account è cambiato. Torna alla Community per continuare.",
+    "Mantieni il testo entro 1200 caratteri. Il testo viene conservato.",
   ],
   "pt-BR": [
     "Visão geral",
@@ -224,6 +236,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Isso exclui apenas os rascunhos privados selecionados.",
     "Você está em dia",
     "Anteriores",
+    "Sua conta mudou. Volte à Comunidade para continuar.",
+    "Limite o texto a 1200 caracteres. Seu texto está preservado.",
   ],
   "pt-PT": [
     "Visão geral",
@@ -256,6 +270,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Isto elimina apenas os rascunhos privados selecionados.",
     "Estás a par de tudo",
     "Anteriores",
+    "A tua conta mudou. Regressa à Comunidade para continuar.",
+    "Limita o texto a 1200 carateres. O teu texto foi preservado.",
   ],
   "ur": [
     "جائزہ",
@@ -288,6 +304,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "اس سے صرف منتخب نجی مسودے حذف ہوں گے۔",
     "آپ نے تمام نئی اطلاعات دیکھ لی ہیں",
     "پہلے کی اطلاعات",
+    "آپ کا اکاؤنٹ بدل گیا ہے۔ جاری رکھنے کے لیے کمیونٹی میں واپس جائیں۔",
+    "متن 1200 حروف تک رکھیں۔ آپ کا متن محفوظ ہے۔",
   ],
   "fa": [
     "نمای کلی",
@@ -320,6 +338,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "این کار فقط پیش‌نویس‌های خصوصی انتخاب‌شده را حذف می‌کند.",
     "همهٔ اعلان‌های جدید را دیده‌اید",
     "پیش‌تر",
+    "حساب شما تغییر کرده است. برای ادامه به انجمن برگردید.",
+    "متن را به 1200 نویسه محدود کنید. متن شما حفظ شده است.",
   ],
   "hi": [
     "अवलोकन",
@@ -352,6 +372,8 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "इससे केवल चुने हुए निजी ड्राफ़्ट मिटेंगे।",
     "आपने सभी नई सूचनाएँ देख ली हैं",
     "पहले की सूचनाएँ",
+    "आपका खाता बदल गया है। जारी रखने के लिए समुदाय में लौटें।",
+    "टेक्स्ट को 1200 वर्णों तक सीमित रखें। आपका टेक्स्ट सुरक्षित रखा गया है।",
   ],
   "id": [
     "Ringkasan",
@@ -384,5 +406,7 @@ const _nextWorkspaceSupplementalRows0 = <String, List<String>>{
     "Ini hanya menghapus draf pribadi yang dipilih.",
     "Anda sudah melihat semua notifikasi terbaru",
     "Sebelumnya",
+    "Akun Anda telah berubah. Kembali ke Komunitas untuk melanjutkan.",
+    "Batasi teks hingga 1200 karakter. Teks Anda tetap dipertahankan.",
   ],
 };

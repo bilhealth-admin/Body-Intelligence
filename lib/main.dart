@@ -9,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:app_links/app_links.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/environment/app_environment.dart';
@@ -25,6 +26,7 @@ import 'app/services/recoverable_image_picker.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
 import 'features/commerce/providers/commerce_providers.dart';
 import 'features/cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
+import 'features/community/services/community_owner_http_client.dart';
 import 'features/auth/apple_credential_lifecycle.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/auth/oauth_browser_return.dart';
@@ -142,6 +144,7 @@ class _BILBootstrapState extends State<_BILBootstrap> {
     final cloudInitialization = Supabase.initialize(
       url: AppEnvironment.supabaseUrl,
       publishableKey: AppEnvironment.supabaseAnonKey,
+      httpClient: CommunityOwnerHttpClient(http.Client()),
       // BILLinkBootstrap is the single owner of initial/deferred app links.
       // A second AppLinks observer inside Supabase delayed Android startup
       // and could consume the initial auth link before the allow-list router.

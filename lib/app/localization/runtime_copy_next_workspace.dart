@@ -65,6 +65,8 @@ abstract final class NextWorkspaceRuntimeCopy {
     "This removes only the selected private drafts.",
     "You are all caught up",
     "Earlier",
+    "Your account changed. Return to Community to continue.",
+    "Keep the text within 1200 characters. Your text is kept.",
   ];
   static const sources = <String>[..._primarySources, ...supplementalSources];
   static const _supplemental = <String, List<String>>{

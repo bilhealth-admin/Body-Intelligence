@@ -157,6 +157,9 @@ class _FeedTabState extends State<_FeedTab>
 
   Future<void> _openComposer({String? tag, String? circle}) async {
     if (_openingComposer || _managingPost) return;
+    final repository = widget.repository;
+    final owner = _communityDraftOwnerId(repository);
+    if (owner == null) return;
     if (tag != null) {
       _draft.topicSlugs
         ..clear()
@@ -167,37 +170,51 @@ class _FeedTabState extends State<_FeedTab>
     }
     setState(() => _openingComposer = true);
     try {
-      if (!await _ensurePolicyAccepted()) return;
-      if (!mounted) return;
-      final submitted = await pushCommunityPage<bool>(
-        context,
-        _CommunityPostComposerPage(
-          repository: widget.repository,
-          imagePicker: widget.imagePicker,
-          draft: _draft,
-        ),
-      );
-      if (!mounted || submitted != true) return;
-      setState(() {
-        _feed = Future<List<CommunityPost>>.sync(_loadFirst);
-      });
-      final messenger = ScaffoldMessenger.of(context);
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Post submitted for human review. Only you can see it until it is approved.',
-              'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.',
+      await CommunityOwnerOperation.run<void>(
+        client: repository.communitySocialClient,
+        ownerId: owner,
+        readOwner: () => _communityDraftOwnerId(repository),
+        isCurrentOwner: () =>
+            mounted && identical(repository, widget.repository),
+        action: (operation) async {
+          if (!await _ensurePolicyAccepted()) return;
+          operation.check();
+          if (!mounted) return;
+          final submitted = await pushCommunityPage<bool>(
+            context,
+            _CommunityPostComposerPage(
+              repository: repository,
+              ownerIsCurrent: () => operation.isCurrent,
+              imagePicker: widget.imagePicker,
+              draft: _draft,
             ),
-          ),
-          action: SnackBarAction(
-            label: communityText(context, 'My posts', 'منشوراتي'),
-            onPressed: _openMyPosts,
-          ),
-        ),
+          );
+          operation.check();
+          if (!mounted || submitted != true) return;
+          setState(() {
+            _feed = Future<List<CommunityPost>>.sync(_loadFirst);
+          });
+          final messenger = ScaffoldMessenger.of(context);
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                communityText(
+                  context,
+                  'Post submitted for human review. Only you can see it until it is approved.',
+                  'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.',
+                ),
+              ),
+              action: SnackBarAction(
+                label: communityText(context, 'My posts', 'منشوراتي'),
+                onPressed: _openMyPosts,
+              ),
+            ),
+          );
+        },
       );
+    } on AuthException {
+      // A cancelled authenticated visit cannot open or report for its successor.
     } finally {
       if (mounted) setState(() => _openingComposer = false);
     }

@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_voice_candidate.dart';
+import '../domain/community_text_limits.dart';
+import '../presentation/community_body_counter.dart';
+import '../presentation/community_copy.dart';
 
 typedef CommunityVoicePermissionGate =
     Future<bool> Function(BuildContext context);
@@ -107,6 +111,7 @@ final class CommunityComposerVoiceInputService {
           builder: (context, setDialogState) {
             refresh = setDialogState;
             final hasText = editor.text.trim().isNotEmpty;
+            final tooLong = CommunityTextLimits.exceedsBodyLimit(editor.text);
             return AlertDialog(
               icon: Icon(
                 failed
@@ -121,7 +126,9 @@ final class CommunityComposerVoiceInputService {
                 controller: editor,
                 minLines: 3,
                 maxLines: 8,
-                maxLength: 1200,
+                maxLength: CommunityTextLimits.bodyCodePointLimit,
+                maxLengthEnforcement: MaxLengthEnforcement.none,
+                buildCounter: communityBodyCounter(editor),
                 onChanged: (_) => setDialogState(() {}),
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
@@ -136,6 +143,8 @@ final class CommunityComposerVoiceInputService {
                           'Voice input is unavailable right now.',
                           'الإدخال الصوتي غير متاح حاليًا.',
                         )
+                      : tooLong
+                      ? communityBodyLimitText(context)
                       : null,
                   border: const OutlineInputBorder(),
                 ),
@@ -156,11 +165,16 @@ final class CommunityComposerVoiceInputService {
                 ),
                 FilledButton.icon(
                   key: const Key('community-use-voice-transcript'),
-                  onPressed: failed || !hasText
+                  onPressed: failed || !hasText || tooLong
                       ? null
                       : () {
                           unawaited(() async {
-                            if (editor.text.trim().isEmpty) return;
+                            if (editor.text.trim().isEmpty ||
+                                CommunityTextLimits.exceedsBodyLimit(
+                                  editor.text,
+                                )) {
+                              return;
+                            }
                             acceptedText = editor.text.trim();
                             captureClosed = true;
                             refresh = null;
@@ -337,5 +351,5 @@ final class CommunityComposerVoiceInputService {
   }
 
   String _copy(BuildContext context, String english, String arabic) =>
-      Localizations.localeOf(context).languageCode == 'ar' ? arabic : english;
+      communityText(context, english, arabic);
 }
