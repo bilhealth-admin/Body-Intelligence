@@ -200,9 +200,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
           : BilReferenceBottomBar(
               selected: 3,
               onSelected: (index) {
-                if (index == 2) {
-                  _feedKey.currentState?._openComposer();
-                } else if (index != 3) {
+                if (index != 3) {
                   context.go(BilReferenceBottomBar.routes[index]);
                 }
               },

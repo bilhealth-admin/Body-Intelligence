@@ -9,13 +9,15 @@ class BilReferenceBottomBar extends StatelessWidget {
   const BilReferenceBottomBar({
     required this.selected,
     required this.onSelected,
-    this.dark = false,
+    this.dark,
     super.key,
   });
 
   final int selected;
   final ValueChanged<int> onSelected;
-  final bool dark;
+
+  /// Inherit the active surface theme unless a surface explicitly overrides it.
+  final bool? dark;
   static const routes = <String>[
     '/dashboard',
     '/intelligence-center',
@@ -26,6 +28,7 @@ class BilReferenceBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = this.dark ?? Theme.of(context).brightness == Brightness.dark;
     final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
     final copy = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final labels = [
