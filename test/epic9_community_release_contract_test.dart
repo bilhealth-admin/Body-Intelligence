@@ -61,7 +61,8 @@ void main() {
       final people = [
         'lib/features/community/presentation/community_people_page.dart',
         'lib/features/community/presentation/community_chat_page.dart',
-        'lib/features/community/presentation/community_visible_activity_scope.dart',
+        'lib/features/community/presentation/'
+        'community_visible_activity_scope.dart',
       ].map(source).join('\n');
       expect(people, contains('bool _sending = false'));
       expect(people, contains('await repository.markVisibleMessagesRead(ids)'));
