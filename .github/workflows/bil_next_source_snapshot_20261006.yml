@@ -26,7 +26,7 @@ jobs:
           sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
           files=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
           allowed_roots={'lib','test','tool','.github'}
-          allowed_suffix={'.dart','.py','.sh','.yml','.yaml','.json','.fragment','.sql','.ps1','.ts','.md'}
+          allowed_suffix={'.dart','.py','.sh','.yml','.yaml','.json','.fragment','.sql','.ps1','.ts','.mjs','.md'}
           rows=[]
           with zipfile.ZipFile(out/'tracked-text-source.zip','w',zipfile.ZIP_DEFLATED) as archive:
               for name in files:
@@ -41,7 +41,7 @@ jobs:
                   archive.writestr(name,content)
                   rows.append({'path':name,'sha256':hashlib.sha256(content).hexdigest()})
           (out/'manifest.json').write_text(json.dumps({'source_commit':sha,'files':rows,'production_modified':False,'store_build_created':False},indent=2)+'\n')
-          (out/'scope.txt').write_text('Exact tracked text snapshot for isolated local review. No fonts, image assets, credentials, deployment, store build, or production connection.\n')
+          (out/'scope.txt').write_text('Exact tracked text snapshot for isolated local review. No fonts, image assets, credentials, deployment, store build, or production connection. Includes mjs QA scripts; preserves current R3/R4 application source.\n')
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
