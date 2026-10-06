@@ -1,0 +1,50 @@
+name: BIL next isolated source checkpoint
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_next_source_snapshot_20261006.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Export tracked source only without assets credentials or fonts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess,zipfile
+          out=pathlib.Path('/tmp/bil-source-checkpoint');out.mkdir()
+          sha=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          files=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          allowed_roots={'lib','test','tool','.github'}
+          allowed_suffix={'.dart','.py','.sh','.yml','.yaml','.json','.fragment','.sql','.ps1','.ts','.md'}
+          rows=[]
+          with zipfile.ZipFile(out/'tracked-text-source.zip','w',zipfile.ZIP_DEFLATED) as archive:
+              for name in files:
+                  if not name: continue
+                  p=pathlib.Path(name)
+                  if name not in {'pubspec.yaml','pubspec.lock','analysis_options.yaml'} and not (p.parts[0] in allowed_roots and p.suffix in allowed_suffix): continue
+                  if p.is_symlink() or not p.is_file() or any(x in name.lower() for x in ('.env','credential','private_key','.pem','service-account','service_account')): continue
+                  content=p.read_bytes()
+                  try: content.decode('utf-8')
+                  except UnicodeError: continue
+                  if b'-----BEGIN PRIVATE KEY-----' in content or b'-----BEGIN RSA PRIVATE KEY-----' in content: continue
+                  archive.writestr(name,content)
+                  rows.append({'path':name,'sha256':hashlib.sha256(content).hexdigest()})
+          (out/'manifest.json').write_text(json.dumps({'source_commit':sha,'files':rows,'production_modified':False,'store_build_created':False},indent=2)+'\n')
+          (out/'scope.txt').write_text('Exact tracked text snapshot for isolated local review. No fonts, image assets, credentials, deployment, store build, or production connection.\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-next-source-checkpoint-${{ github.sha }}
+          path: /tmp/bil-source-checkpoint
+          retention-days: 1
+          if-no-files-found: error
