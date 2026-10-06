@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -16,6 +17,7 @@ void main() {
         '/community/code/scan',
         '/community/member/:code',
         '/community/notifications',
+        '/community/drafts',
         '/community/rewards',
         '/community/connections',
         '/community/food-review',
@@ -54,4 +56,39 @@ void main() {
       expect(moderator, isNot(contains('PremiumRouteGlassGate(')));
     },
   );
+
+  test('Drafts is a direct private destination distinct from Saved posts', () {
+    final routes = File(
+      'lib/app/router/app_community_routes.dart',
+    ).readAsStringSync();
+    final navigation = File(
+      'lib/features/community/presentation/community_navigation_sheet.dart',
+    ).readAsStringSync();
+    final drafts = File(
+      'lib/features/community/presentation/community_member_profile_drafts.dart',
+    ).readAsStringSync();
+
+    expect(routes, contains("path: '/community/drafts'"));
+    expect(routes, contains('child: CommunitySurface(child: CommunityDraftsPage())'));
+    expect(navigation, contains("'/community/drafts'"));
+    expect(navigation, contains("'Saved posts'"));
+    expect(navigation, contains("'Drafts'"));
+    expect(
+      navigation.indexOf("'/community/drafts'"),
+      isNot(navigation.indexOf("'saved'")),
+    );
+    expect(drafts, contains('class CommunityDraftsPage extends StatefulWidget'));
+    expect(drafts, contains('listMyCommunityDrafts(limit: 50)'));
+    expect(drafts, contains('loadMyCommunityDraft(draftId)'));
+    expect(drafts, contains('_CommunityComposerDraft.fromPersistent('));
+    expect(
+      drafts.substring(
+        drafts.indexOf('class CommunityDraftsPage extends StatefulWidget'),
+        drafts.indexOf(
+          'extension _CommunityProfileDraftActions',
+        ),
+      ),
+      isNot(contains('loadProfileOverview')),
+    );
+  });
 }
