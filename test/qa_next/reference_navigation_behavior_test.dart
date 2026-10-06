@@ -15,14 +15,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _NavigationRepository extends CommunityRepository {
-  _NavigationRepository()
-    : super(
-        SupabaseClient(
-          'https://navigation.invalid',
-          'fixture',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _NavigationRepository(super.client);
 
   int policyReads = 0;
 
@@ -68,6 +61,18 @@ Color _dockColor(WidgetTester tester) {
 }
 
 void main() {
+  late SupabaseClient client;
+  // As in R5, the JSON worker must be born and disposed in the real runner
+  // zone. Its process lifecycle must never depend on a widget's fake clock.
+  setUpAll(() {
+    client = SupabaseClient(
+      'https://navigation.invalid',
+      'fixture',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDownAll(() => client.dispose());
+
   for (final brightness in Brightness.values) {
     for (final override in <bool?>[null, false, true]) {
       testWidgets('dock theme $brightness override $override', (tester) async {
@@ -128,8 +133,7 @@ void main() {
         testWidgets(
           'Community Quick Add opens diary: $language $brightness $section',
           (tester) async {
-            final repository = _NavigationRepository();
-            addTearDown(repository.communitySocialClient.dispose);
+            final repository = _NavigationRepository(client);
             final router = GoRouter(
               initialLocation: '/community',
               routes: [
