@@ -21,7 +21,7 @@ with tempfile.TemporaryDirectory(prefix='bil-format-proposal-') as tmp:
     for name in filter(None, names):
         rel = Path(name)
         if (rel.is_absolute() or '..' in rel.parts or
-                not (rel.is_relative_to('lib') or rel.is_relative_to('test'))):
+                not any(rel.is_relative_to(root) for root in ('lib', 'test', 'tool'))):
             raise ValueError('Unexpected formatter path')
         source = root / rel
         if source.is_symlink() or not source.is_file():

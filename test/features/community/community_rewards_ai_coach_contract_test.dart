@@ -8,8 +8,9 @@ void main() {
       'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
     ).readAsStringSync();
     final widgets = File(
-      'lib/features/intelligence_center/presentation/intelligence_center_widgets.dart',
+      'lib/features/intelligence_center/presentation/intelligence_coach_reference_header.dart',
     ).readAsStringSync();
+    expect(page, contains("part 'intelligence_coach_reference_header.dart';"));
     final action = File(
       'lib/features/community/presentation/community_gold_balance_action.dart',
     ).readAsStringSync();
