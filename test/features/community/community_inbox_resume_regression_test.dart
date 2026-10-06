@@ -198,7 +198,7 @@ void main() {
     await tester.tap(_markPage);
     await tester.pumpAndSettle();
     expect(repository.reads, greaterThan(readsBefore));
-    expect(find.text('Seen'), findsOneWidget);
+    expect(repository.seenIds, hasLength(1));
     expect(_markPage, findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -213,7 +213,7 @@ void main() {
     await tester.tap(_markPage);
     await tester.pumpAndSettle();
     expect(repository.seenIds, isEmpty);
-    expect(find.text('New'), findsOneWidget);
+    expect(_markPage, findsOneWidget);
     expect(find.byType(SnackBar), findsOneWidget);
     repository.failWrite = false;
     await tester.tap(_markPage);
