@@ -205,7 +205,7 @@ void main() {
         final repository = _ActivityRepository([
           for (var i = 1; i <= 35; i++)
             _row(i, CommunityNotificationKind.postLike),
-          _row(100, CommunityNotificationKind.follow),
+          _row(100, CommunityNotificationKind.mention),
           _row(101, CommunityNotificationKind.friendAccepted),
         ]);
         await _pump(tester, repository, language);
@@ -215,11 +215,11 @@ void main() {
         );
         expect(
           repository.requests.first.kinds,
-          isNot(contains(CommunityNotificationKind.follow)),
+          isNot(contains(CommunityNotificationKind.mention)),
         );
-        await _choose(tester, 'followers');
+        await _choose(tester, 'comments');
         expect(repository.requests.last.kinds, [
-          CommunityNotificationKind.follow,
+          CommunityNotificationKind.mention,
         ]);
         expect(repository.requests.last.before, isNull);
         expect(find.textContaining('Peer 100'), findsOneWidget);
@@ -234,11 +234,11 @@ void main() {
         final tiedTime = DateTime.utc(2026, 10, 4);
         final rows = [
           for (var i = 1; i <= 31; i++)
-            _row(i, CommunityNotificationKind.postLike, time: tiedTime),
+            _row(i, CommunityNotificationKind.comment, time: tiedTime),
         ];
         final repository = _ActivityRepository(rows);
         await _pump(tester, repository, language);
-        await _choose(tester, 'reactions');
+        await _choose(tester, 'comments');
         repository.failMore = true;
         await _more(tester);
         await tester.pumpAndSettle();
@@ -274,8 +274,8 @@ void main() {
     tester,
   ) async {
     final rows = [
-      for (var i = 1; i <= 31; i++) _row(i, CommunityNotificationKind.postLike),
-      _row(100, CommunityNotificationKind.follow),
+      for (var i = 1; i <= 31; i++) _row(i, CommunityNotificationKind.comment),
+      _row(100, CommunityNotificationKind.mention),
     ];
     final repository = _ActivityRepository(rows);
     await _pump(tester, repository, 'en');
@@ -286,7 +286,7 @@ void main() {
     // Pending spinner is intentionally not settled. Move back to filters.
     await tester.drag(find.byType(ListView), const Offset(0, 5000));
     await tester.pump();
-    await _choose(tester, 'followers');
+    await _choose(tester, 'reactions');
     expect(find.textContaining('Peer 100'), findsOneWidget);
     late.complete([rows[30]]);
     await tester.pumpAndSettle();
@@ -299,14 +299,14 @@ void main() {
     tester,
   ) async {
     final repository = _ActivityRepository([
-      _row(1, CommunityNotificationKind.follow),
+      _row(1, CommunityNotificationKind.mention),
     ]);
     await _pump(tester, repository, 'en');
     expect(
-      find.byKey(const Key('community-activity-filter-followers')),
+      find.byKey(const Key('community-activity-filter-reactions')),
       findsOneWidget,
     );
-    await _choose(tester, 'followers');
+    await _choose(tester, 'reactions');
     expect(find.textContaining('Peer 1 '), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
