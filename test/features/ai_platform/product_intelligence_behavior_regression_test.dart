@@ -12,13 +12,15 @@ void main() {
     final balancedResult = model.analyze(balanced, tdeeKcal: 2400);
     final lowResult = model.analyze(lowPotassium, tdeeKcal: 2400);
 
+    expect(balancedResult.potassiumDriverKg, isNotNull);
+    expect(balancedResult.waterAndGlycogenNoiseKg, isNotNull);
     expect(
       lowResult.potassiumDriverKg,
-      greaterThan(balancedResult.potassiumDriverKg),
+      greaterThan(balancedResult.potassiumDriverKg!),
     );
     expect(
       lowResult.waterAndGlycogenNoiseKg,
-      greaterThan(balancedResult.waterAndGlycogenNoiseKg),
+      greaterThan(balancedResult.waterAndGlycogenNoiseKg!),
     );
   });
 }

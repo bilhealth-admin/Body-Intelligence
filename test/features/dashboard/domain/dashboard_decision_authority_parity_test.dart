@@ -15,7 +15,7 @@ final class _DelegatingCandidateAuthority
   BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,
@@ -44,7 +44,7 @@ final class _MutatedEvidenceAuthority implements DashboardDecisionAuthority {
   BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,

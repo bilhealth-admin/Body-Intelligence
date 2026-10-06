@@ -204,6 +204,7 @@ class DashboardGrid extends ConsumerWidget {
       for (final item in todayMealItems)
         NutrientDashboardSample(
           evidenceMask: item.nutrientEvidenceMask,
+          source: item.foodSourceSnapshot,
           values: {
             TrackedNutrient.protein: item.protein,
             TrackedNutrient.carbohydrates: item.carbs,
@@ -221,10 +222,6 @@ class DashboardGrid extends ConsumerWidget {
     final persistedFiberGoal = nutrientGoals[DashboardNutrientGoalIds.fiber];
     final persistedPotassiumGoal =
         nutrientGoals[DashboardNutrientGoalIds.potassium];
-    final carbohydrates = todayMealItems.fold<double>(
-      0,
-      (sum, item) => sum + item.carbs,
-    );
     final waterRows = waterAsync.value ?? const [];
     final allMeals = allMealsAsync.value ?? const [];
     final allWater = allWaterAsync.value ?? const [];
@@ -263,9 +260,13 @@ class DashboardGrid extends ConsumerWidget {
         dailyNutritionTarget: scheduledTarget,
       ),
     );
-    final calories = dashboardSnapshot.calories;
-    final protein = dashboardSnapshot.protein;
-    final fats = dashboardSnapshot.fats;
+    // An empty ledger has zero recorded intake. Once food exists, a missing
+    // nutrient remains unavailable instead of inheriting that empty-day zero.
+    final hasItems = dashboardSnapshot.nutrition.hasItems;
+    final calories = hasItems ? dashboardSnapshot.calories : 0.0;
+    final protein = hasItems ? dashboardSnapshot.protein : 0.0;
+    final carbohydrates = hasItems ? dashboardSnapshot.carbohydrates : 0.0;
+    final fats = hasItems ? dashboardSnapshot.fats : 0.0;
     final effectiveTargets = dashboardSnapshot.effectiveTargets;
     final savedMacroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
     final macroGramGoals = scheduledTarget == null
@@ -526,6 +527,11 @@ class DashboardGrid extends ConsumerWidget {
                     'Nutrition interpretation is waiting for a meal observation.',
                     'ينتظر تفسير التغذية تسجيل وجبة.',
                   )
+                : protein == null
+                ? tr(
+                    'Nutrition evidence is incomplete',
+                    'الأدلة الغذائية غير مكتملة',
+                  )
                 : effectiveTargets.protein - protein.round() >= 20
                 ? tr(
                     'Protein is the clearest actionable nutrition gap today.',
@@ -537,6 +543,11 @@ class DashboardGrid extends ConsumerWidget {
                   ),
             nutritionEvidence: meals.isEmpty
                 ? tr('No meals recorded yet', 'لم تُسجّل وجبات بعد')
+                : protein == null
+                ? tr(
+                    'Value unavailable in the logged food evidence.',
+                    'القيمة غير متاحة في أدلة الطعام المسجلة.',
+                  )
                 : tr(
                     '${meals.length} meal records · ${protein.round()} g protein recorded',
                     '${meals.length} سجلات وجبات · ${protein.round()} جم بروتين مسجل',
@@ -576,21 +587,23 @@ class DashboardGrid extends ConsumerWidget {
             insightSummary: arabic
                 ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط.'
                 : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
-            caloriesConsumed: calories.round(),
+            caloriesConsumed: calories?.round(),
             caloriesGoal: exerciseAdjustedTargets.effectiveCalorieGoal.round(),
             baseCaloriesGoal: exerciseAdjustedTargets.baseCalorieGoal.round(),
             caloriesBurned: exerciseEnergy?.kcal.round() ?? 0,
-            netCalories: (calories - (exerciseEnergy?.kcal ?? 0)).round(),
+            netCalories: calories == null
+                ? null
+                : (calories - (exerciseEnergy?.kcal ?? 0)).round(),
             remainingCalories: exerciseAdjustedTargets.remainingCalories
-                .round(),
+                ?.round(),
             burnedCaloriesApplied:
                 exerciseAdjustedTargets.availability ==
                 ExerciseCalorieAvailability.applied,
-            proteinConsumed: protein.round(),
+            proteinConsumed: protein?.round(),
             proteinGoal: exerciseAdjustedTargets.proteinGoal.round(),
-            carbohydratesConsumed: carbohydrates.round(),
+            carbohydratesConsumed: carbohydrates?.round(),
             carbohydratesGoal: exerciseAdjustedTargets.carbohydrateGoal.round(),
-            fatConsumed: fats.round(),
+            fatConsumed: fats?.round(),
             fatGoal: exerciseAdjustedTargets.fatGoal.round(),
             carbohydratesEvidenceValue: evidenced(
               TrackedNutrient.carbohydrates,

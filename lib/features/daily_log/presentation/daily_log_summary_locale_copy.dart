@@ -111,15 +111,9 @@ const _dailySummaryCopy = <String, Map<String, String>>{
 
 double? knownNutrientTotal(
   List<MealItem> items,
-  TrackedNutrient nutrient,
-  double Function(MealItem item) valueOf,
-) {
-  if (items.isEmpty ||
-      items.any(
-        (item) =>
-            !NutrientEvidenceMask.contains(item.nutrientEvidenceMask, nutrient),
-      )) {
-    return null;
-  }
-  return items.fold<double>(0, (total, item) => total + valueOf(item));
-}
+  TrackedNutrient nutrient, {
+  String? ownerKey,
+}) => DailyLogNutritionEvidence.forItems(
+  items,
+  ownerKey: ownerKey,
+).total(nutrient);

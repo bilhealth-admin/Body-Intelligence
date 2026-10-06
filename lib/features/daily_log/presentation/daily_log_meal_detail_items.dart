@@ -62,6 +62,7 @@ class DailyMealDetailItems extends StatelessWidget {
                 _DiaryFoodRow(
                   item: items[index],
                   food: meal?.foodsById[items[index].foodId],
+                  ownerKey: meal?.ownerKey,
                   onEdit: onEdit,
                   onActions: onActions,
                   showLoggedTime: showFoodTimestamps,
@@ -83,6 +84,7 @@ class _DiaryFoodRow extends StatelessWidget {
   const _DiaryFoodRow({
     required this.item,
     required this.food,
+    required this.ownerKey,
     required this.onEdit,
     required this.onActions,
     this.showLoggedTime = false,
@@ -92,6 +94,7 @@ class _DiaryFoodRow extends StatelessWidget {
 
   final MealItem item;
   final Food? food;
+  final String? ownerKey;
   final Future<void> Function(MealItem item, Food food) onEdit;
   final Future<void> Function(MealItem item, Food? food) onActions;
   final bool showLoggedTime;
@@ -104,15 +107,19 @@ class _DiaryFoodRow extends StatelessWidget {
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final name = food == null
-        ? context.strings.text('Historical food')
-        : FoodPresentationLocalizer.foodName(
-            name: food!.name,
-            arabicName: food!.arabicName,
-            localeTag: locale,
-            isCustom: food!.isCustom,
-            source: food!.source,
-          );
+    final evidence = MealFoodEvidence.read(item, ownerKey: ownerKey);
+    final immutableName = evidence.portion?.food.name;
+    final name =
+        immutableName ??
+        (evidence.isModern || food == null
+            ? context.strings.text('Historical food')
+            : FoodPresentationLocalizer.foodName(
+                name: food!.name,
+                arabicName: food!.arabicName,
+                localeTag: locale,
+                isCustom: food!.isCustom,
+                source: food!.source,
+              ));
     final serving = _servingText(
       item.quantity,
       item.servingUnitSnapshot,
@@ -125,20 +132,16 @@ class _DiaryFoodRow extends StatelessWidget {
     final detail = showLoggedTime
         ? '$serving  ·  ${_mealListText(context, 'loggedAt')} $localTime'
         : serving;
-    final hasFiberEvidence = NutrientEvidenceMask.contains(
-      item.nutrientEvidenceMask,
-      TrackedNutrient.fiber,
-    );
     final displayedCarbs = useNetCarbs
-        ? hasFiberEvidence
-              ? (item.carbs - item.fiber).clamp(0, double.infinity).toDouble()
-              : null
-        : item.carbs;
+        ? DailyLogNutritionEvidence.netCarbohydrates(evidence)
+        : evidence.value(TrackedNutrient.carbohydrates);
     final carbLabel = useNetCarbs ? 'NC' : 'C';
+    String grams(double? value) =>
+        value == null ? '—' : '${formatDiaryMacroGrams(value)} g';
     final insight =
-        '$carbLabel ${displayedCarbs == null ? '—' : '${formatDiaryMacroGrams(displayedCarbs)} g'}  '
-        'P ${formatDiaryMacroGrams(item.protein)} g  '
-        'F ${formatDiaryMacroGrams(item.fats)} g';
+        '$carbLabel ${grams(displayedCarbs)}  '
+        'P ${grams(evidence.value(TrackedNutrient.protein))}  '
+        'F ${grams(evidence.value(TrackedNutrient.fat))}';
     return Semantics(
       button: food != null && food?.deletedAt == null,
       hint: _mealListText(context, 'itemActions'),
@@ -203,7 +206,11 @@ class _DiaryFoodRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    item.calories.round().toString(),
+                    evidence
+                            .value(TrackedNutrient.calories)
+                            ?.round()
+                            .toString() ??
+                        '—',
                     textDirection: TextDirection.ltr,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontSize: 16,
@@ -441,22 +448,8 @@ const _mealListCopy = <String, Map<String, String>>{
   },
 };
 
-/// Returns a net-carbohydrate total only when every row carries explicit
-/// fibre evidence. Missing fibre is unknown data, not an assumed zero.
-double? knownNetCarbohydrateTotal(Iterable<MealItem> items) {
-  final rows = items.toList(growable: false);
-  if (rows.isEmpty ||
-      rows.any(
-        (item) => !NutrientEvidenceMask.contains(
-          item.nutrientEvidenceMask,
-          TrackedNutrient.fiber,
-        ),
-      )) {
-    return null;
-  }
-  return rows.fold<double>(
-    0,
-    (total, item) =>
-        total + (item.carbs - item.fiber).clamp(0, double.infinity).toDouble(),
-  );
-}
+/// Both carbohydrate and fibre evidence are required for every recorded row.
+double? knownNetCarbohydrateTotal(
+  Iterable<MealItem> items, {
+  String? ownerKey,
+}) => DailyLogNutritionEvidence.forItems(items, ownerKey: ownerKey).netCarbs;

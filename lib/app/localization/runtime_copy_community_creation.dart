@@ -15,6 +15,8 @@ abstract final class CommunityCreationRuntimeCopy {
     "Could not open drafts. Try again.",
     "Your story",
     "AI Help",
+    "Your drafts are always accessible.",
+    "No poll",
   ];
 
   static const rows = <String, List<String>>{
@@ -32,6 +34,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "تعذر فتح المسودات. حاول مجددًا.",
       "قصتك",
       "مساعدة AI",
+      "مسوداتك متاحة دائمًا.",
+      "بلا استطلاع",
     ],
     "fr": [
       "Créer une publication",
@@ -46,6 +50,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Impossible d’ouvrir les brouillons. Réessayez.",
       "Votre story",
       "Aide IA",
+      "Vos brouillons restent toujours accessibles.",
+      "Aucun sondage",
     ],
     "es": [
       "Crear publicación",
@@ -60,6 +66,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "No se pudieron abrir los borradores. Inténtalo de nuevo.",
       "Tu historia",
       "Ayuda de IA",
+      "Tus borradores siempre están disponibles.",
+      "Sin encuesta",
     ],
     "tr": [
       "Gönderi oluştur",
@@ -74,6 +82,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Taslaklar açılamadı. Tekrar deneyin.",
       "Hikâyen",
       "Yapay zekâ yardımı",
+      "Taslaklarına her zaman erişebilirsin.",
+      "Anket yok",
     ],
     "de": [
       "Beitrag erstellen",
@@ -88,6 +98,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Entwürfe konnten nicht geöffnet werden. Versuche es erneut.",
       "Deine Story",
       "KI-Hilfe",
+      "Deine Entwürfe sind jederzeit zugänglich.",
+      "Keine Umfrage",
     ],
     "it": [
       "Crea un post",
@@ -102,6 +114,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Impossibile aprire le bozze. Riprova.",
       "La tua storia",
       "Aiuto IA",
+      "Le tue bozze sono sempre accessibili.",
+      "Nessun sondaggio",
     ],
     "pt-BR": [
       "Criar publicação",
@@ -116,6 +130,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Não foi possível abrir os rascunhos. Tente novamente.",
       "Sua história",
       "Ajuda de IA",
+      "Seus rascunhos estão sempre acessíveis.",
+      "Sem enquete",
     ],
     "pt-PT": [
       "Criar publicação",
@@ -130,6 +146,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Não foi possível abrir os rascunhos. Tente novamente.",
       "A sua história",
       "Ajuda de IA",
+      "Os teus rascunhos estão sempre acessíveis.",
+      "Sem sondagem",
     ],
     "ur": [
       "پوسٹ بنائیں",
@@ -144,6 +162,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "مسودے نہیں کھل سکے۔ دوبارہ کوشش کریں۔",
       "آپ کی اسٹوری",
       "AI کی مدد",
+      "آپ کے مسودے ہمیشہ دستیاب ہیں۔",
+      "کوئی رائے شماری نہیں",
     ],
     "fa": [
       "ایجاد پست",
@@ -158,6 +178,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "پیش‌نویس‌ها باز نشدند. دوباره تلاش کنید.",
       "داستان شما",
       "کمک هوش مصنوعی",
+      "پیش‌نویس‌های شما همیشه در دسترس هستند.",
+      "بدون نظرسنجی",
     ],
     "hi": [
       "पोस्ट बनाएँ",
@@ -172,6 +194,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "ड्राफ़्ट नहीं खुल सके। फिर से कोशिश करें।",
       "आपकी स्टोरी",
       "AI सहायता",
+      "आपके ड्राफ़्ट हमेशा उपलब्ध हैं।",
+      "कोई पोल नहीं",
     ],
     "id": [
       "Buat postingan",
@@ -186,6 +210,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Draf tidak dapat dibuka. Coba lagi.",
       "Cerita Anda",
       "Bantuan AI",
+      "Draf Anda selalu dapat diakses.",
+      "Tanpa jajak pendapat",
     ],
     "ms": [
       "Cipta siaran",
@@ -200,6 +226,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Draf tidak dapat dibuka. Cuba lagi.",
       "Cerita anda",
       "Bantuan AI",
+      "Draf anda sentiasa boleh diakses.",
+      "Tiada tinjauan",
     ],
     "ja": [
       "投稿を作成",
@@ -214,6 +242,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "下書きを開けませんでした。もう一度お試しください。",
       "あなたのストーリー",
       "AIヘルプ",
+      "下書きにはいつでもアクセスできます。",
+      "投票なし",
     ],
     "ko": [
       "게시물 작성",
@@ -228,6 +258,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "임시 저장 글을 열 수 없습니다. 다시 시도하세요.",
       "내 스토리",
       "AI 도움말",
+      "초안은 언제든지 볼 수 있습니다.",
+      "설문 없음",
     ],
     "zh-Hans": [
       "创建帖子",
@@ -242,6 +274,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "无法打开草稿，请重试。",
       "你的动态",
       "AI 帮助",
+      "你的草稿始终可以访问。",
+      "无投票",
     ],
     "zh-Hant": [
       "建立貼文",
@@ -256,6 +290,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "無法開啟草稿，請再試一次。",
       "你的限時動態",
       "AI 協助",
+      "你的草稿隨時都能查看。",
+      "無投票",
     ],
     "ru": [
       "Создать публикацию",
@@ -270,6 +306,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Не удалось открыть черновики. Попробуйте ещё раз.",
       "Ваша история",
       "Помощь ИИ",
+      "Ваши черновики всегда доступны.",
+      "Без опроса",
     ],
     "bn": [
       "পোস্ট তৈরি করুন",
@@ -284,6 +322,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "খসড়া খোলা যায়নি। আবার চেষ্টা করুন।",
       "আপনার স্টোরি",
       "AI সহায়তা",
+      "আপনার খসড়াগুলো সবসময় দেখা যায়।",
+      "জরিপ নেই",
     ],
     "vi": [
       "Tạo bài viết",
@@ -298,6 +338,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Không thể mở bản nháp. Hãy thử lại.",
       "Tin của bạn",
       "Trợ giúp AI",
+      "Bạn luôn có thể truy cập bản nháp.",
+      "Không có cuộc bình chọn",
     ],
     "th": [
       "สร้างโพสต์",
@@ -312,6 +354,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "เปิดฉบับร่างไม่ได้ โปรดลองอีกครั้ง",
       "สตอรี่ของคุณ",
       "ความช่วยเหลือ AI",
+      "คุณเข้าถึงฉบับร่างได้เสมอ",
+      "ไม่มีโพล",
     ],
     "pl": [
       "Utwórz post",
@@ -326,6 +370,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Nie udało się otworzyć wersji roboczych. Spróbuj ponownie.",
       "Twoja relacja",
       "Pomoc AI",
+      "Twoje wersje robocze są zawsze dostępne.",
+      "Bez ankiety",
     ],
     "nl": [
       "Bericht maken",
@@ -340,6 +386,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Concepten konden niet worden geopend. Probeer het opnieuw.",
       "Je verhaal",
       "AI-hulp",
+      "Je concepten zijn altijd toegankelijk.",
+      "Geen poll",
     ],
     "uk": [
       "Створити допис",
@@ -354,6 +402,8 @@ abstract final class CommunityCreationRuntimeCopy {
       "Не вдалося відкрити чернетки. Спробуйте ще раз.",
       "Ваша історія",
       "Допомога ШІ",
+      "Ваші чернетки завжди доступні.",
+      "Без опитування",
     ],
   };
 

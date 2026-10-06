@@ -145,11 +145,11 @@ class _ReferenceCaloriesCard extends StatelessWidget {
     required this.onEdit,
   });
 
-  final int consumed;
+  final int? consumed;
   final int goal;
   final int baseGoal;
   final int burned;
-  final int net;
+  final int? net;
   final int? remainingOverride;
   final bool burnedApplied;
   final VoidCallback onEdit;
@@ -157,8 +157,18 @@ class _ReferenceCaloriesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasGoal = goal > 0;
-    final remaining = hasGoal ? remainingOverride ?? goal - consumed : null;
-    final progress = hasGoal ? (consumed / goal).clamp(0.0, 1.0) : 0.0;
+    final consumedValue = consumed;
+    final remaining = hasGoal && consumedValue != null
+        ? remainingOverride ?? goal - consumedValue
+        : null;
+    final progress = hasGoal && consumedValue != null
+        ? (consumedValue / goal).clamp(0.0, 1.0)
+        : 0.0;
+    final unavailable = _referenceText(
+      context,
+      'Value unavailable in the logged food evidence.',
+      'القيمة غير متاحة في أدلة الطعام المسجلة.',
+    );
     final scheme = Theme.of(context).colorScheme;
     final localizedConsumed = _referenceText(context, 'consumed', 'المستهلك');
     final consumedLabel = Localizations.localeOf(context).languageCode == 'en'
@@ -174,9 +184,9 @@ class _ReferenceCaloriesCard extends StatelessWidget {
         container: true,
         label:
             '${_referenceText(context, 'Calories', 'السعرات الحرارية')}: '
-            '$consumed $consumedLabel, '
+            '${consumed?.toString() ?? unavailable} $consumedLabel, '
             '${hasGoal ? goal : _referenceText(context, 'Goal or nutrition evidence is unavailable', 'بيانات الهدف أو التغذية غير متاحة')}, '
-            '${remaining ?? 0} $remainingLabel',
+            '${remaining?.toString() ?? unavailable} $remainingLabel',
         child: _ReferenceCard(
           child: Column(
             key: const Key('dashboard-reference-calories-card'),
@@ -234,7 +244,7 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       valueKey: const Key(
                         'dashboard-reference-calorie-consumed-value',
                       ),
-                      value: '$consumed',
+                      value: consumed?.toString() ?? '—',
                       trailing: hasGoal ? '/ $goal' : '/ —',
                       label: consumedLabel,
                       alignment: CrossAxisAlignment.start,
@@ -304,12 +314,15 @@ class _ReferenceCaloriesCard extends StatelessWidget {
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(99),
-                child: LinearProgressIndicator(
-                  key: const Key('dashboard-reference-calories-progress'),
-                  minHeight: 8,
-                  value: progress,
-                  color: const Color(0xFF1475E8),
-                  backgroundColor: scheme.surfaceContainerHighest,
+                child: ExcludeSemantics(
+                  excluding: consumed == null,
+                  child: LinearProgressIndicator(
+                    key: const Key('dashboard-reference-calories-progress'),
+                    minHeight: 8,
+                    value: progress,
+                    color: const Color(0xFF1475E8),
+                    backgroundColor: scheme.surfaceContainerHighest,
+                  ),
                 ),
               ),
             ],
@@ -328,7 +341,7 @@ class _CalorieEquationValue extends StatelessWidget {
   });
 
   final String label;
-  final int value;
+  final int? value;
   final bool verified;
 
   @override
@@ -337,7 +350,10 @@ class _CalorieEquationValue extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '$value',
+          value?.toString() ?? '—',
+          semanticsLabel: value == null
+              ? '$label: ${_referenceText(context, 'Value unavailable in the logged food evidence.', 'القيمة غير متاحة في أدلة الطعام المسجلة.')}'
+              : null,
           maxLines: 1,
           textDirection: TextDirection.ltr,
           style: Theme.of(
@@ -507,9 +523,16 @@ class _ReferenceMacroColumn extends StatelessWidget {
         ? 0.0
         : (value / macro.goal!).clamp(0.0, 1.0);
     final scheme = Theme.of(context).colorScheme;
+    final semanticValue = value == null
+        ? _referenceText(
+            context,
+            'Value unavailable in the logged food evidence.',
+            'القيمة غير متاحة في أدلة الطعام المسجلة.',
+          )
+        : '$value ${macro.unit}';
     return Semantics(
       label:
-          '${macro.label}: ${value ?? 0} ${macro.unit} / ${hasGoal ? macro.goal : '—'} ${macro.unit}',
+          '${macro.label}: $semanticValue / ${hasGoal ? macro.goal : '—'} ${macro.unit}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -529,7 +552,7 @@ class _ReferenceMacroColumn extends StatelessWidget {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: '${value ?? 0} ${macro.unit}',
+                    text: value == null ? '—' : '$value ${macro.unit}',
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -542,11 +565,14 @@ class _ReferenceMacroColumn extends StatelessWidget {
           const SizedBox(height: 9),
           ClipRRect(
             borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              minHeight: 7,
-              value: progress,
-              color: macro.color,
-              backgroundColor: scheme.surfaceContainerHighest,
+            child: ExcludeSemantics(
+              excluding: value == null,
+              child: LinearProgressIndicator(
+                minHeight: 7,
+                value: progress,
+                color: macro.color,
+                backgroundColor: scheme.surfaceContainerHighest,
+              ),
             ),
           ),
         ],

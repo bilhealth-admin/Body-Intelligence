@@ -8,6 +8,7 @@ import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
 import '../../settings/premium_meal_features_page.dart';
+import 'daily_log_nutrition_evidence.dart';
 import 'macro_value_formatter.dart';
 
 part 'daily_log_summary_locale_copy.dart';
@@ -155,23 +156,23 @@ class DailyLogSnapshot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = meals.expand((entry) => entry.items).toList(growable: false);
-    final calories = items.fold<double>(
-      0,
-      (total, item) => total + item.calories,
-    );
-    final protein = items.fold<double>(
-      0,
-      (total, item) => total + item.protein,
-    );
-    final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
-    final fat = items.fold<double>(0, (total, item) => total + item.fats);
+    final evidence = DailyLogNutritionEvidence.forMeals(meals);
+    double? total(TrackedNutrient nutrient) =>
+        evidence.total(nutrient, emptyAsZero: true);
+    final calories = total(TrackedNutrient.calories);
+    final protein = total(TrackedNutrient.protein);
+    final carbs = total(TrackedNutrient.carbohydrates);
+    final fat = total(TrackedNutrient.fat);
     final scheme = Theme.of(context).colorScheme;
     final hasGoal =
         calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
-    final remaining = hasGoal ? calorieGoal! - calories : null;
-    double macroProgress(double consumed, double? goal) {
-      if (goal == null || !goal.isFinite || goal <= 0) return 0.0;
+    final remaining = hasGoal && calories != null
+        ? calorieGoal! - calories
+        : null;
+    double macroProgress(double? consumed, double? goal) {
+      if (consumed == null || goal == null || !goal.isFinite || goal <= 0) {
+        return 0.0;
+      }
       return (consumed / goal).clamp(0.0, 1.0).toDouble();
     }
 
@@ -207,7 +208,8 @@ class DailyLogSnapshot extends StatelessWidget {
                   child: _MacroMetric(
                     color: const Color(0xFF0A8F88),
                     percent:
-                        carbsGoal == null ||
+                        carbs == null ||
+                            carbsGoal == null ||
                             !carbsGoal!.isFinite ||
                             carbsGoal! <= 0
                         ? null
@@ -226,7 +228,10 @@ class DailyLogSnapshot extends StatelessWidget {
                   child: _MacroMetric(
                     color: const Color(0xFF6F1096),
                     percent:
-                        fatGoal == null || !fatGoal!.isFinite || fatGoal! <= 0
+                        fat == null ||
+                            fatGoal == null ||
+                            !fatGoal!.isFinite ||
+                            fatGoal! <= 0
                         ? null
                         : fat / fatGoal! * 100,
                     progress: macroProgress(fat, fatGoal),
@@ -243,7 +248,8 @@ class DailyLogSnapshot extends StatelessWidget {
                   child: _MacroMetric(
                     color: const Color(0xFFC56A00),
                     percent:
-                        proteinGoal == null ||
+                        protein == null ||
+                            proteinGoal == null ||
                             !proteinGoal!.isFinite ||
                             proteinGoal! <= 0
                         ? null
@@ -274,7 +280,7 @@ class _CalorieSummary extends StatelessWidget {
     required this.loading,
   });
 
-  final double calories;
+  final double? calories;
   final double? calorieGoal;
   final double? remaining;
   final bool loading;
@@ -284,7 +290,14 @@ class _CalorieSummary extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final goal =
         calorieGoal != null && calorieGoal!.isFinite && calorieGoal! > 0;
-    final status = !goal
+    final unit = _summaryText(context, 'kcal');
+    // Isolate an RTL unit from the adjacent consumed/goal number sequence.
+    final displayUnit = Directionality.of(context) == TextDirection.rtl
+        ? '\u2068$unit\u2069'
+        : unit;
+    final status = calories == null
+        ? context.strings.text('Unavailable')
+        : !goal
         ? _summaryText(context, 'noGoal')
         : remaining! >= 0
         ? '${remaining!.round()} ${_summaryText(context, 'kcal')} ${_summaryText(context, 'remaining')}'
@@ -317,8 +330,7 @@ class _CalorieSummary extends StatelessWidget {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text:
-                            '${calories.round()} ${_summaryText(context, 'kcal')}',
+                        text: '${calories?.round() ?? '—'} $displayUnit',
                       ),
                       if (goal)
                         TextSpan(
@@ -341,7 +353,7 @@ class _CalorieSummary extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   children: [
-                    if (!loading && goal) ...[
+                    if (!loading && goal && remaining != null) ...[
                       TextSpan(
                         text: '${remaining!.abs().round()} ',
                         style: TextStyle(
@@ -366,7 +378,7 @@ class _CalorieSummary extends StatelessWidget {
                 semanticsLabel: loading ? '…' : status,
                 maxLines: 2,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: goal && remaining! < 0
+                  color: goal && remaining != null && remaining! < 0
                       ? scheme.error
                       : scheme.onSurfaceVariant,
                   fontWeight: FontWeight.w700,
@@ -401,14 +413,19 @@ class _CalorieSummary extends StatelessWidget {
         const SizedBox(height: 12),
         ClipRRect(
           borderRadius: BorderRadius.circular(99),
-          child: LinearProgressIndicator(
-            key: const Key('daily-summary-calories-progress'),
-            minHeight: 7,
-            value: loading || !goal
-                ? 0
-                : (calories / calorieGoal!).clamp(0.0, 1.0).toDouble(),
-            backgroundColor: scheme.surfaceContainerHighest,
-            color: goal && remaining! < 0 ? scheme.error : scheme.primary,
+          child: ExcludeSemantics(
+            excluding: loading || calories == null || !goal,
+            child: LinearProgressIndicator(
+              key: const Key('daily-summary-calories-progress'),
+              minHeight: 7,
+              value: loading || !goal || calories == null
+                  ? 0
+                  : (calories! / calorieGoal!).clamp(0.0, 1.0).toDouble(),
+              backgroundColor: scheme.surfaceContainerHighest,
+              color: goal && remaining != null && remaining! < 0
+                  ? scheme.error
+                  : scheme.primary,
+            ),
           ),
         ),
       ],
@@ -427,18 +444,19 @@ class DailyLogCalorieMacroRing extends StatelessWidget {
     this.dimension = 126,
   });
 
-  final double calories;
+  final double? calories;
   final double? calorieGoal;
-  final double carbs;
-  final double fat;
-  final double protein;
+  final double? carbs;
+  final double? fat;
+  final double? protein;
   final double dimension;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label:
-          '${calories.round()} ${_summaryText(context, 'kcal')}${calorieGoal == null ? '' : ' / ${calorieGoal!.round()}'}',
+      label: calories == null
+          ? '${_summaryText(context, 'calories')}: ${context.strings.text('Unavailable')}'
+          : '${calories!.round()} ${_summaryText(context, 'kcal')}${calorieGoal == null ? '' : ' / ${calorieGoal!.round()}'}',
       child: SizedBox.square(
         dimension: dimension,
         child: Stack(
@@ -461,7 +479,7 @@ class DailyLogCalorieMacroRing extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      calories.round().toString(),
+                      calories?.round().toString() ?? '—',
                       textDirection: TextDirection.ltr,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
@@ -477,6 +495,7 @@ class DailyLogCalorieMacroRing extends StatelessWidget {
                     if (calorieGoal != null)
                       Text(
                         '/ ${calorieGoal!.round()}',
+                        textDirection: TextDirection.ltr,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -500,16 +519,14 @@ class _MacroRingPainter extends CustomPainter {
     required this.track,
   });
 
-  final double carbs;
-  final double fat;
-  final double protein;
+  final double? carbs;
+  final double? fat;
+  final double? protein;
   final Color track;
 
   @override
   void paint(Canvas canvas, Size size) {
     const colors = [Color(0xFF0A8F88), Color(0xFF6F1096), Color(0xFFFFAB32)];
-    final energies = [carbs * 4, fat * 9, protein * 4];
-    final total = energies.fold<double>(0, (sum, value) => sum + value);
     final center = size.center(Offset.zero);
     final radius = (size.shortestSide - 12) / 2;
     final paint = Paint()
@@ -517,6 +534,9 @@ class _MacroRingPainter extends CustomPainter {
       ..strokeWidth = 12
       ..strokeCap = StrokeCap.butt;
     canvas.drawCircle(center, radius, paint..color = track);
+    if (carbs == null || fat == null || protein == null) return;
+    final energies = [carbs! * 4, fat! * 9, protein! * 4];
+    final total = energies.fold<double>(0, (sum, value) => sum + value);
     if (total <= 0) return;
     var start = -1.5707963267948966;
     for (var i = 0; i < energies.length; i++) {

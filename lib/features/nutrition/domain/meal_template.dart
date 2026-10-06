@@ -37,6 +37,11 @@ class MealTemplateItem {
   final double phosphorus;
   final double sugar;
   final int nutrientEvidenceMask;
+  final String? foodEvidenceJson;
+  final String foodSourceSnapshot;
+  final bool foodVerifiedSnapshot;
+  final double servingSizeSnapshot;
+  final String servingUnitSnapshot;
 
   const MealTemplateItem({
     required this.foodId,
@@ -54,5 +59,10 @@ class MealTemplateItem {
     this.phosphorus = 0,
     required this.sugar,
     required this.nutrientEvidenceMask,
+    this.foodEvidenceJson,
+    this.foodSourceSnapshot = 'local',
+    this.foodVerifiedSnapshot = false,
+    this.servingSizeSnapshot = 100,
+    this.servingUnitSnapshot = 'g',
   });
 }

@@ -21,7 +21,7 @@ final class DashboardTruthDecisionContext {
 
   final bool weighedToday;
   final bool loggingComplete;
-  final double protein;
+  final double? protein;
   final int proteinTarget;
   final int waterMl;
   final int waterTarget;
@@ -29,6 +29,7 @@ final class DashboardTruthDecisionContext {
   final BestAction proposedAction;
 
   bool get hasValidDeterministicInputs =>
+      (proposedAction.type != BestActionType.protein || protein != null) &&
       DashboardTrustedTruthDecisionAdapter.inputsAreValid(
         protein: protein,
         proteinTarget: proteinTarget,
@@ -61,14 +62,13 @@ final class DashboardTrustedTruthDecisionAdapter {
   });
 
   static bool inputsAreValid({
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,
     required int trackedDays,
   }) =>
-      protein.isFinite &&
-      protein >= 0 &&
+      (protein == null || (protein.isFinite && protein >= 0)) &&
       proteinTarget > 0 &&
       waterMl >= 0 &&
       waterTarget > 0 &&
@@ -110,7 +110,7 @@ final class DashboardTrustedTruthDecisionAdapter {
             key: 'dashboard.action.input_validation',
             description: 'Dashboard decision inputs passed local validation.',
             source: engineVersion,
-            value: <String, Object>{
+            value: <String, Object?>{
               'protein': value.protein,
               'proteinTarget': value.proteinTarget,
               'waterMl': value.waterMl,
@@ -148,8 +148,8 @@ final class DashboardTrustedTruthDecisionAdapter {
     type: BestActionType.none,
     title: 'No trusted action is available yet',
     reason:
-        'BIL withheld the recommendation because its deterministic inputs '
-        'were incomplete or invalid.',
+        'BIL withheld the recommendation because its deterministic inputs were incomplete or invalid.',
     evidence: ['Trusted Truth gate did not expose a recommendation'],
+    abstentionReason: BestActionAbstentionReason.incompleteOrInvalidEvidence,
   );
 }

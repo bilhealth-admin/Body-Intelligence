@@ -7,6 +7,9 @@ void main() {
     final shell = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
+    final presenter = File(
+      'lib/app/router/bil_quick_add_presenter.dart',
+    ).readAsStringSync();
     final router = [
       File('lib/app/router/app_router.dart').readAsStringSync(),
       File('lib/app/router/app_community_routes.dart').readAsStringSync(),
@@ -15,8 +18,16 @@ void main() {
       'lib/features/daily_log/food_log_page.dart',
     ).readAsStringSync();
 
-    expect(shell, contains('/quick-add/meal-camera?from='));
+    // Shell and Community now share the same reviewed Quick Add presenter.
+    // Preserve the route assertion at its implementation and verify the shell
+    // actually delegates to it with the current origin.
+    expect(
+      shell,
+      contains('showBilQuickAdd(context, originPath: paths[index])'),
+    );
+    expect(presenter, contains('/quick-add/meal-camera?from='));
     expect(shell, isNot(contains('source=camera')));
+    expect(presenter, isNot(contains('source=camera')));
     expect(router, contains("path: '/quick-add/meal-camera'"));
     expect(router, contains('QuickAddMealCameraPage'));
     final cameraPage = File(

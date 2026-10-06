@@ -13,16 +13,23 @@ final class LocalCoachCalorieCommand {
   final CoachDateResolver dateResolver;
 
   static const _number = r'(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?';
+  static const _units =
+      r'kcal|kilocalories?|cal(?:orie)?s?|(?:ال)?سعرات?(?:\s+حرارية)?|'
+      r'(?:ال)?سعرة(?:\s+حرارية)?|كالوري|كيلوكالوري';
   static final _entry = RegExp(
-    '^(?:(?:please\\s+)?(?:log|record|add)\\s+|'
-    '(?:سجل|اضف|دون)(?:\\s+لي)?\\s+)?'
+    '^(?:(?:please\\s+)?(?:log|record|add|save)\\s+|'
+    'i\\s+(?:ate|consumed)\\s+|'
+    '(?:سجل|اضف|دون|احفظ|اكلت|تناولت)(?:\\s+لي)?\\s+)?'
     '($_number)\\s*'
-    '(?:kcal|kilocalories?|calories?|سعرات?(?:\\s+حرارية)?|'
-    'سعرة(?:\\s+حرارية)?|كالوري|كيلوكالوري)'
+    '(?:$_units)'
     '(?:\\s+(?:only|فقط))?'
     '(?:\\s+(?:without (?:meals|foods)|no (?:meals|foods)|'
     'بدون (?:وجبات|اكل|طعام)))?'
     '(?:\\s+(?:only|فقط|please))?\\s*[.!]*\$',
+    unicode: true,
+  );
+  static final _labelEntry = RegExp(
+    '^(?:$_units)\\s*[:=]\\s*($_number)\\s*[.!]*\$',
     unicode: true,
   );
   static final _today = _tokens('today|اليوم|النهارده|النهاردة');
@@ -65,7 +72,7 @@ final class LocalCoachCalorieCommand {
       value = value.replaceAll(_tokens('on|for|في|بتاريخ|ليوم|يوم'), ' ');
     }
     value = value.replaceAll(RegExp(r'\s+'), ' ').trim();
-    final match = _entry.firstMatch(value);
+    final match = _entry.firstMatch(value) ?? _labelEntry.firstMatch(value);
     if (match == null) return null;
     final calories = double.tryParse(match.group(1)!.replaceAll(',', ''));
     if (calories == null ||
@@ -74,7 +81,8 @@ final class LocalCoachCalorieCommand {
         calories > 10000) {
       return null;
     }
-    final day = date ?? DateTime(reference.year, reference.month, reference.day);
+    final day =
+        date ?? DateTime(reference.year, reference.month, reference.day);
     final dayText =
         '${day.year.toString().padLeft(4, '0')}-'
         '${day.month.toString().padLeft(2, '0')}-'

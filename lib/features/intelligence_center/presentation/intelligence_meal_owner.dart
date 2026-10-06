@@ -130,6 +130,9 @@ extension _CoachMealPreparation on _IntelligenceCenterPageState {
           protein: number('protein'),
           carbohydrates: number('carbohydrates'),
           fat: number('fat'),
+          // A date-only proposal has no reported time of day. Freeze its
+          // civil date instead of borrowing the clock from the later commit.
+          occurredAt: date,
         );
       } else {
         final item = await repository.getMealItem(

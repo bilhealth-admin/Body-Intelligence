@@ -58,6 +58,11 @@ class MealTemplateEngine {
             phosphorus: item.phosphorus,
             sugar: item.sugar,
             nutrientEvidenceMask: item.nutrientEvidenceMask,
+            foodEvidenceJson: item.foodEvidenceJson,
+            foodSourceSnapshot: item.foodSourceSnapshot,
+            foodVerifiedSnapshot: item.foodVerifiedSnapshot,
+            servingSizeSnapshot: item.servingSizeSnapshot,
+            servingUnitSnapshot: item.servingUnitSnapshot,
           );
         }),
       ),

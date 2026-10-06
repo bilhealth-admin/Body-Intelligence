@@ -4,6 +4,8 @@
 
 Implementation update: the nine health/meal/memory command boundaries described below were subsequently replaced with atomic journals, authoritative readback and version-checked Undo. See [the native command checkpoint](NATIVE_COMMANDS_COMMUNITY_CHECKPOINT_20261006_AR.md) and its exact evidence; unimplemented capability families in this inventory remain open.
 
+Food evidence update: [the Food/Daily Log/Profile checkpoint](FOOD_EVIDENCE_PROFILE_CHECKPOINT_20261006_AR.md) records atomic Food V2 storage and unknown-nutrition propagation. Native multi-food conversation wiring and Personal BIL rule management remain separate open work.
+
 Audited repository: `bilhealth-admin/Body-Intelligence`, authorized branch
 `qa/coach-community-next-20261005`, HEAD
 `f1e7e09e88e639fc3417d1e7ce822e0906e32e4a` plus the current QA working tree.

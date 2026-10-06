@@ -7,18 +7,22 @@ enum BestActionType {
   none,
 }
 
+enum BestActionAbstentionReason { incompleteOrInvalidEvidence }
+
 class BestAction {
   const BestAction({
     required this.type,
     required this.title,
     required this.reason,
     required this.evidence,
+    this.abstentionReason,
   });
 
   final BestActionType type;
   final String title;
   final String reason;
   final List<String> evidence;
+  final BestActionAbstentionReason? abstentionReason;
 }
 
 class OneBestActionEngine {
@@ -27,7 +31,7 @@ class OneBestActionEngine {
   static BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,
@@ -51,13 +55,17 @@ class OneBestActionEngine {
         evidence: ['Today’s meal record may be incomplete'],
       );
     }
-    final proteinGap = (proteinTarget - protein).round();
-    if (proteinGap >= 20 && !suppressedTypes.contains(BestActionType.protein)) {
+    final proteinGap = protein == null
+        ? null
+        : (proteinTarget - protein).round();
+    if (proteinGap != null &&
+        proteinGap >= 20 &&
+        !suppressedTypes.contains(BestActionType.protein)) {
       return BestAction(
         type: BestActionType.protein,
         title: 'Add about $proteinGap g protein',
         reason: 'Protein is the largest actionable gap in today’s logged plan.',
-        evidence: ['${protein.round()} g logged', '$proteinTarget g target'],
+        evidence: ['${protein!.round()} g logged', '$proteinTarget g target'],
       );
     }
     final waterGap = waterTarget - waterMl;
@@ -125,6 +133,17 @@ class OneBestActionEngine {
           'Two or more explicit low helpfulness ratings for weigh-in reminders',
           'Weigh-in recommendation was intentionally not repeated today',
         ],
+      );
+    }
+    if (protein == null) {
+      return const BestAction(
+        type: BestActionType.none,
+        title: 'No trusted action is available yet',
+        reason:
+            'BIL withheld the recommendation because its deterministic inputs were incomplete or invalid.',
+        evidence: ['Trusted Truth gate did not expose a recommendation'],
+        abstentionReason:
+            BestActionAbstentionReason.incompleteOrInvalidEvidence,
       );
     }
     return BestAction(

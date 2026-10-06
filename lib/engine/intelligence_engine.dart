@@ -43,19 +43,22 @@ class IntelligenceEngine {
     required int calorieTarget,
     required int proteinTarget,
     required int waterTarget,
-    required double calories,
-    required double protein,
+    required double? calories,
+    required double? protein,
     required int waterMl,
     required List<double> chronologicalWeights,
     required double goalWeight,
     int trackedDays = 1,
-    double sodium = 0,
+    double? sodium,
   }) {
-    final adherence = <double>[
-      _ratioScore(calories, calorieTarget.toDouble()),
-      _ratioScore(protein, proteinTarget.toDouble()),
-      _ratioScore(waterMl.toDouble(), waterTarget.toDouble()),
-    ];
+    final nutritionComplete = calories != null && protein != null;
+    final adherence = nutritionComplete
+        ? <double>[
+            _ratioScore(calories, calorieTarget.toDouble()),
+            _ratioScore(protein, proteinTarget.toDouble()),
+            _ratioScore(waterMl.toDouble(), waterTarget.toDouble()),
+          ]
+        : null;
     final confidence = trackedDays == 0
         ? InsightConfidence.insufficient
         : trackedDays >= 7
@@ -63,12 +66,14 @@ class IntelligenceEngine {
         : trackedDays >= 3
         ? InsightConfidence.medium
         : InsightConfidence.low;
-    final score = (adherence.reduce((a, b) => a + b) / adherence.length * 100)
-        .round()
-        .clamp(0, 100);
+    final score = adherence == null
+        ? null
+        : (adherence.reduce((a, b) => a + b) / adherence.length * 100)
+              .round()
+              .clamp(0, 100);
     final insights = <Insight>[];
 
-    if (protein < proteinTarget * 0.8) {
+    if (protein != null && protein < proteinTarget * 0.8) {
       insights.add(
         Insight(
           title: 'Protein below target',
@@ -136,7 +141,7 @@ class IntelligenceEngine {
                 'A rapid scale increase is often influenced by fluid and food mass; this is a hypothesis, not a diagnosis.',
             evidence: [
               '${jump.toStringAsFixed(1)} kg change across four records',
-              if (sodium > 2300)
+              if (sodium != null && sodium > 2300)
                 '${sodium.toStringAsFixed(0)} mg sodium logged',
             ],
             suggestedAction:
@@ -146,6 +151,20 @@ class IntelligenceEngine {
           ),
         );
       }
+    }
+    if (insights.isEmpty && !nutritionComplete) {
+      insights.add(
+        const Insight(
+          title: 'Nutrition evidence is incomplete',
+          explanation:
+              'One or more recorded foods have missing nutrient values.',
+          evidence: [],
+          suggestedAction:
+              'Review missing food values before interpreting nutrition gaps.',
+          priority: InsightPriority.low,
+          confidence: InsightConfidence.insufficient,
+        ),
+      );
     }
     if (insights.isEmpty) {
       insights.add(
@@ -167,7 +186,9 @@ class IntelligenceEngine {
     insights.sort((a, b) => b.priority.index.compareTo(a.priority.index));
     return IntelligenceReport(
       score: trackedDays == 0 ? null : score,
-      scoreConfidence: confidence,
+      scoreConfidence: score == null
+          ? InsightConfidence.insufficient
+          : confidence,
       insights: insights,
       goalDate: goalDate,
       weeklyRateKg: rate,

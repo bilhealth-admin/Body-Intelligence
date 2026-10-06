@@ -62,7 +62,9 @@ void main() {
       physiologyConfidence: 0.55,
     );
 
-    expect(high, greaterThan(low));
+    expect(low, isNotNull);
+    expect(high, isNotNull);
+    expect(high, greaterThan(low!));
   });
 
   test('failed Decision Memory lowers repeated action ranking', () {

@@ -6,14 +6,16 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
 import '../database/nutrient_evidence.dart';
+import '../database/meal_food_evidence.dart';
+import '../database/food_basis_evidence.dart';
 import '../database/database_scope.dart';
+import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'preferences_repository.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/daily_nutrition_intelligence.dart';
 import '../../features/nutrition/domain/dietary_preferences.dart';
 import '../../features/nutrition/domain/meal_builder.dart';
 import '../../features/nutrition/domain/meal_template.dart';
-import '../../features/nutrition/domain/unified_food.dart';
 import '../../features/nutrition/services/daily_nutrition_intelligence_engine.dart';
 import '../../features/nutrition/services/meal_builder_engine.dart';
 import '../../features/nutrition/services/meal_template_engine.dart';
@@ -25,6 +27,8 @@ part 'meal_repository_coach_models.dart';
 part 'meal_repository_coach_commands.dart';
 part 'meal_repository_coach_journal.dart';
 part 'meal_repository_coach_undo.dart';
+part 'meal_repository_coach_food.dart';
+part 'meal_repository_food_portions.dart';
 
 class MealRepository {
   final AppDatabase _database;
@@ -79,11 +83,16 @@ class MealRepository {
     required int mealId,
     required int foodId,
     required double quantity,
+    bool quantityInGrams = false,
   }) async {
     _validateQuantity(quantity);
     await _database.transaction(() async {
       final food = await _activeFood(foodId);
-      final portion = _calculatePortion(food, quantity);
+      final values = _mealFoodPortionValues(
+        food,
+        quantity,
+        quantityInGrams: quantityInGrams,
+      );
       final siblings =
           await (_database.select(_database.mealItems)..where(
                 (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
@@ -96,32 +105,16 @@ class MealRepository {
                 item.position > maximum ? item.position : maximum,
           ) +
           1;
-      await _database
+      final itemId = await _database
           .into(_database.mealItems)
           .insert(
-            MealItemsCompanion.insert(
-              mealId: mealId,
-              foodId: foodId,
-              quantity: Value(quantity),
+            values.copyWith(
+              mealId: Value(mealId),
+              foodId: Value(foodId),
               position: Value(nextPosition),
-              calories: Value(portion.valueOrZero(FoodNutrient.calories)),
-              protein: Value(portion.valueOrZero(FoodNutrient.protein)),
-              carbs: Value(portion.valueOrZero(FoodNutrient.carbohydrates)),
-              fats: Value(portion.valueOrZero(FoodNutrient.fat)),
-              fiber: Value(portion.valueOrZero(FoodNutrient.fiber)),
-              sodium: Value(portion.valueOrZero(FoodNutrient.sodium)),
-              potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
-              calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
-              magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
-              phosphorus: Value(portion.valueOrZero(FoodNutrient.phosphorus)),
-              sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
-              nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
-              foodSourceSnapshot: Value(food.source),
-              foodVerifiedSnapshot: Value(food.verified),
-              servingSizeSnapshot: Value(food.servingSize),
-              servingUnitSnapshot: Value(food.servingUnit),
             ),
           );
+      await _verifyAddedFoodEvidence(itemId);
     });
   }
 
@@ -134,6 +127,7 @@ class MealRepository {
     required DateTime date,
     required String mealType,
     required List<({int foodId, double quantity})> items,
+    bool quantitiesInGrams = true,
   }) async {
     if (items.isEmpty) {
       throw ArgumentError.value(items, 'items', 'Must not be empty');
@@ -152,6 +146,7 @@ class MealRepository {
           mealId: mealId,
           foodId: item.foodId,
           quantity: item.quantity,
+          quantityInGrams: quantitiesInGrams,
         );
       }
       return mealId;
@@ -377,6 +372,7 @@ class MealRepository {
         throw StateError('Cannot change a deleted meal item');
       }
       _validateQuantity(existing.quantity);
+      if (await _updateCoachFoodQuantity(existing, quantity)) return;
       // A diary item owns its historical nutrition and evidence. A catalog
       // refresh must not relabel new nutrition as that older source snapshot.
       final scale = quantity / existing.quantity;
@@ -590,6 +586,9 @@ class MealRepository {
   Future<int> duplicateMealItem(int id) async {
     return _database.transaction(() async {
       final source = await _mealItem(id);
+      if (!MealFoodEvidence.read(source, ownerKey: _coachOwnerKey).isValid) {
+        throw const CoachMealConflict(CoachMealConflictReason.invalidEvidence);
+      }
       final siblings =
           await (_database.select(_database.mealItems)..where(
                 (item) =>
@@ -623,16 +622,14 @@ class MealRepository {
               phosphorus: Value(source.phosphorus),
               sugar: Value(source.sugar),
               nutrientEvidenceMask: Value(source.nutrientEvidenceMask),
+              foodSourceSnapshot: Value(source.foodSourceSnapshot),
+              foodEvidenceJson: Value(source.foodEvidenceJson),
+              foodVerifiedSnapshot: Value(source.foodVerifiedSnapshot),
+              servingSizeSnapshot: Value(source.servingSizeSnapshot),
+              servingUnitSnapshot: Value(source.servingUnitSnapshot),
             ),
           );
     });
-  }
-
-  NutritionPortion _calculatePortion(Food food, double quantityGrams) {
-    return _nutritionEngine.calculate(
-      food: _foodAdapter.adapt(food),
-      grams: quantityGrams,
-    );
   }
 
   Future<MealItem> _mealItem(int id) async {

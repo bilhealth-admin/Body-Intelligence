@@ -74,8 +74,11 @@ Future<void> _tap(WidgetTester tester, Finder target) async {
 }
 
 Future<void> _openDelete(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('List view'));
-  await tester.pumpAndSettle();
+  if (find.byTooltip('List view').evaluate().isNotEmpty) {
+    await tester.tap(find.byTooltip('List view'));
+    await tester.pumpAndSettle();
+  }
+  expect(find.byTooltip('Grid view'), findsOneWidget);
   final menu = find.byType(PopupMenuButton<String>).first;
   await _tap(tester, menu);
   await tester.pumpAndSettle();

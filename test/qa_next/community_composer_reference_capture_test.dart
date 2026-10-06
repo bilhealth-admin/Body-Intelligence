@@ -33,6 +33,7 @@ part 'community_composer_reference_capture_helpers.dart';
 
 void main() {
   late List<CommunityPostImageDraft> photos;
+  late List<CommunityPostImagePreview> previews;
   late _ComposerReferenceAuth auth;
   late _ComposerReferenceRepository repository;
   setUpAll(() async {
@@ -41,13 +42,23 @@ void main() {
       for (final path in _photoAssets)
         validateCommunityPostImage(await File(path).readAsBytes()),
     ];
+    previews = [
+      for (final photo in photos)
+        await createCommunityPostImagePreviewAsync(
+          photo.bytes,
+          expectedMimeType: photo.mimeType,
+          expectedByteLength: photo.byteLength,
+          expectedWidth: photo.width,
+          expectedHeight: photo.height,
+        ),
+    ];
   });
   setUp(() async {
     // Auth HTTP, process/font loading and disposal belong to the real runner.
     auth = _ComposerReferenceAuth();
     await auth.signIn(_other);
     await auth.signIn(_owner);
-    repository = _ComposerReferenceRepository(auth.client, photos);
+    repository = _ComposerReferenceRepository(auth.client, photos, previews);
   });
   tearDown(() async => auth.client.dispose());
 

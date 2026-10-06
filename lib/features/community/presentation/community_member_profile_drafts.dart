@@ -26,6 +26,7 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
   int _generation = 0;
   String? _openingDraftId;
   int? _draftCount;
+  bool _draftCountIsLowerBound = false;
   bool _selecting = false;
 
   @override
@@ -65,6 +66,7 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
     _openingDraftId = null;
     _draftsKey = GlobalKey();
     _draftCount = null;
+    _draftCountIsLowerBound = false;
     _selecting = false;
   }
 
@@ -130,7 +132,12 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
     }
     _openingDraftId = draftId;
     try {
-      final loaded = await repository.loadMyCommunityDraft(draftId);
+      final loaded = await repository.runForCommunityOwner(
+        () => repository.loadMyCommunityDraft(draftId),
+        ownerId: owner,
+        isCurrentOwner: () =>
+            _sameOwnerOperation(repository, owner, generation),
+      );
       if (!mounted || !_sameOwnerOperation(repository, owner, generation)) {
         return;
       }
@@ -193,7 +200,10 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
                   context,
                   'Drafts ({count})',
                   'المسودات ({count})',
-                ).replaceAll('{count}', '$count'),
+                ).replaceAll(
+                  '{count}',
+                  '$count${_draftCountIsLowerBound ? '+' : ''}',
+                ),
         ),
         actions: [
           if (repository != null && owner != null && (count ?? 0) > 0)
@@ -230,6 +240,11 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
                   setState(() => _draftCount = value);
                 }
               },
+              onHasMoreChanged: (value) {
+                if (sameOwner() && value != _draftCountIsLowerBound) {
+                  setState(() => _draftCountIsLowerBound = value);
+                }
+              },
               onSelectionChanged: (value) {
                 if (sameOwner() && value != _selecting) {
                   setState(() => _selecting = value);
@@ -247,6 +262,7 @@ class _CommunityDraftsSheet extends StatefulWidget {
     required this.ownerIsCurrent,
     required this.onOpenDraft,
     this.onCountChanged,
+    this.onHasMoreChanged,
     this.onSelectionChanged,
     this.fullPage = false,
     super.key,
@@ -256,6 +272,7 @@ class _CommunityDraftsSheet extends StatefulWidget {
   final ValueGetter<bool> ownerIsCurrent;
   final ValueChanged<String> onOpenDraft;
   final ValueChanged<int>? onCountChanged;
+  final ValueChanged<bool>? onHasMoreChanged;
   final ValueChanged<bool>? onSelectionChanged;
   final bool fullPage;
 
@@ -263,17 +280,31 @@ class _CommunityDraftsSheet extends StatefulWidget {
   State<_CommunityDraftsSheet> createState() => _CommunityDraftsSheetState();
 }
 
+typedef _CommunityDraftMosaicPreview = ({
+  CommunityPersistentDraft draft,
+  List<CommunityPostImagePreview?> images,
+});
+
 class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
+  static const _pageSize = 20;
+  // At most12 complete results ×4 display-only images ×64KiB =3MiB encoded
+  // bytes. Original uploads never enter this cache or trigger byte eviction.
+  static const _previewCacheSize = 12;
+  static const _parallelPreviews = 2;
+  final List<CommunityDraftSummary> _loadedRows = [];
+  DateTime? _before;
+  String? _beforeId;
+  bool _hasMore = false;
+  bool _loadingMore = false;
+  bool _loadMoreFailed = false;
+  int _activePreviews = 0;
+  final List<Completer<void>> _previewWaiters = [];
   late final CommunityRepository _repository = widget.repository;
   late final String? _ownerId = _communityDraftOwnerId(_repository);
   late Future<List<CommunityDraftSummary>> _drafts = _load();
   final Set<String> _deleting = <String>{};
   final Set<String> _selected = <String>{};
-  final Map<
-    String,
-    Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  >
-  _previews = {};
+  final Map<String, Future<_CommunityDraftMosaicPreview>> _previews = {};
   bool _selecting = false;
   int _generation = 0;
 
@@ -284,32 +315,152 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
       _ownerId != null &&
       _ownerId == _communityDraftOwnerId(_repository);
 
-  Future<List<CommunityDraftSummary>> _load() async {
-    if (!_sameOwner) throw StateError('Community draft owner changed');
-    final generation = _generation;
-    final rows = await _repository.listMyCommunityDrafts(limit: 50);
-    if (!_sameOwner || generation != _generation) {
-      throw StateError('Community draft owner changed');
+  bool _sameGeneration(int generation) =>
+      _sameOwner && generation == _generation;
+
+  Future<T> _runDraftVisit<T>(int generation, Future<T> Function() action) {
+    if (!_sameGeneration(generation)) {
+      throw const CommunityOwnerOperationCancelled();
     }
-    widget.onCountChanged?.call(rows.length);
-    return rows;
+    return _repository.runForCommunityOwner(
+      action,
+      ownerId: _ownerId!,
+      isCurrentOwner: () => _sameGeneration(generation),
+    );
   }
 
-  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  _preview(String draftId) {
-    final cached = _previews[draftId];
-    if (cached != null) return cached;
+  void _reportCount() {
+    widget.onCountChanged?.call(_loadedRows.length);
+    widget.onHasMoreChanged?.call(_hasMore);
+  }
+
+  Future<List<CommunityDraftSummary>> _load() async {
     final generation = _generation;
-    final next = () async {
-      if (!_sameOwner) throw StateError('Community draft owner changed');
-      final value = await _repository.loadMyCommunityDraftPreview(draftId);
-      if (!_sameOwner || generation != _generation) {
-        throw StateError('Community draft owner changed');
+    final rows = await _runDraftVisit(
+      generation,
+      () => _repository.listMyCommunityDrafts(limit: _pageSize),
+    );
+    if (!_sameGeneration(generation)) {
+      throw const CommunityOwnerOperationCancelled();
+    }
+    _loadedRows
+      ..clear()
+      ..addAll(rows);
+    _before = rows.lastOrNull?.updatedAt;
+    _beforeId = rows.lastOrNull?.draftId;
+    _hasMore = rows.length == _pageSize;
+    _reportCount();
+    return List<CommunityDraftSummary>.unmodifiable(_loadedRows);
+  }
+
+  Future<void> _loadMore() async {
+    if (!_sameOwner || !_hasMore || _loadingMore) return;
+    final generation = _generation;
+    final before = _before;
+    final beforeId = _beforeId;
+    if (before == null || beforeId == null) return;
+    setState(() {
+      _loadingMore = true;
+      _loadMoreFailed = false;
+    });
+    try {
+      final rows = await _runDraftVisit(
+        generation,
+        () => _repository.listMyCommunityDrafts(
+          before: before,
+          beforeId: beforeId,
+          limit: _pageSize,
+        ),
+      );
+      if (!_sameGeneration(generation)) return;
+      if (rows.isNotEmpty &&
+          rows.last.updatedAt == before &&
+          rows.last.draftId == beforeId) {
+        throw const FormatException('Community draft cursor did not advance');
       }
-      return value;
-    }();
+      final known = _loadedRows.map((row) => row.draftId).toSet();
+      for (final row in rows) {
+        if (known.add(row.draftId)) _loadedRows.add(row);
+      }
+      _before = rows.lastOrNull?.updatedAt;
+      _beforeId = rows.lastOrNull?.draftId;
+      _hasMore = rows.length == _pageSize;
+      _reportCount();
+      // Keep the completed list future and its Scrollable mounted. Replacing
+      // it here produces a loading frame and loses the user's page position.
+      setState(() {});
+    } on Object {
+      if (_sameGeneration(generation)) {
+        setState(() => _loadMoreFailed = true);
+      }
+    } finally {
+      if (_sameGeneration(generation)) {
+        setState(() => _loadingMore = false);
+      }
+    }
+  }
+
+  Future<void> _acquirePreview(int generation) async {
+    while (_activePreviews >= _parallelPreviews) {
+      final waiter = Completer<void>();
+      _previewWaiters.add(waiter);
+      await waiter.future;
+      if (!_sameGeneration(generation)) {
+        throw const CommunityOwnerOperationCancelled();
+      }
+    }
+    if (!_sameGeneration(generation)) {
+      throw const CommunityOwnerOperationCancelled();
+    }
+    _activePreviews++;
+  }
+
+  void _releasePreview() {
+    _activePreviews--;
+    if (_previewWaiters.isNotEmpty) {
+      _previewWaiters.removeAt(0).complete();
+    }
+  }
+
+  void _wakeCancelledPreviews() {
+    for (final waiter in _previewWaiters) {
+      waiter.complete();
+    }
+    _previewWaiters.clear();
+  }
+
+  Future<_CommunityDraftMosaicPreview> _preview(String draftId) {
+    final cached = _previews.remove(draftId);
+    if (cached != null) {
+      _previews[draftId] = cached;
+      return cached;
+    }
+    final generation = _generation;
+    final next = _runDraftVisit(generation, () async {
+      await _acquirePreview(generation);
+      try {
+        final value = await _repository.loadMyCommunityDraftMosaicPreview(
+          draftId,
+          maxImages: 4,
+        );
+        CommunityOwnerOperation.checkCurrent();
+        return value;
+      } finally {
+        _releasePreview();
+      }
+    });
     _previews[draftId] = next;
+    while (_previews.length > _previewCacheSize) {
+      _previews.remove(_previews.keys.first);
+    }
     return next;
+  }
+
+  void _retryPreview(String draftId) {
+    if (!_sameOwner) return;
+    setState(() {
+      _previews.remove(draftId);
+    });
   }
 
   Future<void> refresh() => _refresh();
@@ -317,7 +468,11 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
   Future<void> _refresh() async {
     if (!_sameOwner) return;
     _generation++;
+    _wakeCancelledPreviews();
     _previews.clear();
+    _loadingMore = false;
+    _loadMoreFailed = false;
+    _selected.clear();
     final next = _load();
     setState(() {
       _drafts = next;
@@ -349,7 +504,11 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
     if (!_sameOwner || !_deleting.add(draftId)) return;
     setState(() {});
     try {
-      await _repository.deleteMyCommunityDraft(draftId);
+      await _repository.runForCommunityOwner(
+        () => _repository.deleteMyCommunityDraft(draftId),
+        ownerId: _ownerId!,
+        isCurrentOwner: () => _sameOwner,
+      );
       if (!_sameOwner) return;
       _selected.remove(draftId);
       await _refresh();
@@ -420,6 +579,8 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
   @override
   void dispose() {
     _generation++;
+    _wakeCancelledPreviews();
+    _previews.clear();
     super.dispose();
   }
 

@@ -16,7 +16,7 @@ class _MacroMetric extends StatelessWidget {
   final Color color;
   final double? percent;
   final double progress;
-  final double grams;
+  final double? grams;
   final double? goal;
   final String label;
   final Key? percentKey;
@@ -27,7 +27,13 @@ class _MacroMetric extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       key: percentKey,
-      value: loading || percent == null ? '—' : '${percent!.round()}%',
+      value: loading
+          ? '—'
+          : grams == null
+          ? context.strings.text('Unavailable')
+          : percent == null
+          ? '—'
+          : '${percent!.round()}%',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +53,9 @@ class _MacroMetric extends StatelessWidget {
               textDirection: TextDirection.ltr,
               children: [
                 Text(
-                  loading ? '—' : '${formatDiaryMacroGrams(grams)} g',
+                  loading || grams == null
+                      ? '—'
+                      : '${formatDiaryMacroGrams(grams!)} g',
                   key: gramsKey,
                   maxLines: 1,
                   textDirection: TextDirection.ltr,
@@ -59,6 +67,7 @@ class _MacroMetric extends StatelessWidget {
                 if (goal != null && goal!.isFinite && goal! > 0)
                   Text(
                     ' / ${formatDiaryMacroGrams(goal!)}',
+                    textDirection: TextDirection.ltr,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -69,13 +78,16 @@ class _MacroMetric extends StatelessWidget {
           const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              minHeight: 6,
-              value: loading ? 0 : progress,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest,
-              color: color,
+            child: ExcludeSemantics(
+              excluding: loading || grams == null || percent == null,
+              child: LinearProgressIndicator(
+                minHeight: 6,
+                value: loading ? 0 : progress,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                color: color,
+              ),
             ),
           ),
         ],

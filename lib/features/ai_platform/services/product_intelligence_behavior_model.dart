@@ -30,7 +30,7 @@ final class ProductIntelligenceBehaviorModel {
     ];
   }
 
-  double plateauRisk({
+  double? plateauRisk({
     required LocalIntelligenceTimeline timeline,
     required double adaptiveTdeeKcal,
     required double? averageIntakeKcal,
@@ -40,8 +40,16 @@ final class ProductIntelligenceBehaviorModel {
     final weighted = timeline.weightedDays;
     if (weighted.length < 2 ||
         averageIntakeKcal == null ||
-        adaptiveTdeeKcal <= 0) {
-      return 1;
+        !averageIntakeKcal.isFinite ||
+        averageIntakeKcal <= 0 ||
+        !adaptiveTdeeKcal.isFinite ||
+        adaptiveTdeeKcal <= 0 ||
+        LocalNutritionEvidence.average(
+              timeline.days,
+              (day) => day.caloriesKcal,
+            ) ==
+            null) {
+      return null;
     }
     final spanDays = math.max(
       1,
@@ -79,21 +87,21 @@ final class ProductIntelligenceBehaviorModel {
     required PhysiologicalNoiseEstimate estimate,
     required double adaptiveTdeeKcal,
     required double? averageIntakeKcal,
-    required double plateauRisk,
+    required double? plateauRisk,
   }) {
-    final logged = timeline.days.where((day) => day.caloriesKcal > 0).toList();
-    final avgProtein = logged.isEmpty
-        ? 0.0
-        : logged.fold<double>(0, (sum, day) => sum + day.proteinG) /
-              logged.length;
-    final avgSodium = logged.isEmpty
-        ? 0.0
-        : logged.fold<double>(0, (sum, day) => sum + day.sodiumMg) /
-              logged.length;
-    final avgPotassium = logged.isEmpty
-        ? 0.0
-        : logged.fold<double>(0, (sum, day) => sum + day.potassiumMg) /
-              logged.length;
+    final logged = timeline.days.where((day) => day.hasNutritionItems).toList();
+    final avgProtein = LocalNutritionEvidence.average(
+      logged,
+      (day) => day.proteinG,
+    );
+    final avgSodium = LocalNutritionEvidence.average(
+      logged,
+      (day) => day.sodiumMg,
+    );
+    final avgPotassium = LocalNutritionEvidence.average(
+      logged,
+      (day) => day.potassiumMg,
+    );
     final avgWater = logged.isEmpty
         ? 0.0
         : logged.fold<double>(0, (sum, day) => sum + day.waterMl) /
@@ -113,26 +121,39 @@ final class ProductIntelligenceBehaviorModel {
     final targetGap = timeline.weightedDays.isEmpty
         ? 0.0
         : timeline.weightedDays.last.weightKg! - timeline.targetWeightKg;
-    final deficit = averageIntakeKcal == null
-        ? 0.0
+    final hasEnergyEvidence =
+        averageIntakeKcal != null &&
+        averageIntakeKcal.isFinite &&
+        averageIntakeKcal > 0 &&
+        adaptiveTdeeKcal.isFinite &&
+        adaptiveTdeeKcal > 0 &&
+        LocalNutritionEvidence.average(logged, (day) => day.caloriesKcal) !=
+            null;
+    final deficit = !hasEnergyEvidence
+        ? null
         : adaptiveTdeeKcal - averageIntakeKcal;
 
     final candidates = <OneBestActionCandidate>[
-      _candidate(
-        id: 'continue-plan',
-        title: 'Continue the current plan',
-        rationale:
-            'Energy balance, body trend, and target gap support stability.',
-        benefit: plateauRisk < 0.55 ? 0.76 : 0.48,
-        confidence: estimate.confidence,
-        burden: 0.05,
-        evidence: <String>[
-          'local-physiology',
-          if (averageIntakeKcal != null) 'local-energy-balance',
-          if (targetGap != 0) 'local-target-gap',
-        ],
-      ),
-      if (avgProtein > 0 && avgProtein < 1.4 * _referenceWeight(timeline))
+      if (hasEnergyEvidence &&
+          plateauRisk != null &&
+          estimate.estimatedTissueChangeKg != null)
+        _candidate(
+          id: 'continue-plan',
+          title: 'Continue the current plan',
+          rationale:
+              'Energy balance, body trend, and target gap support stability.',
+          benefit: plateauRisk < 0.55 ? 0.76 : 0.48,
+          confidence: estimate.confidence,
+          burden: 0.05,
+          evidence: <String>[
+            'local-physiology',
+            'local-energy-balance',
+            if (targetGap != 0) 'local-target-gap',
+          ],
+        ),
+      if (avgProtein != null &&
+          avgProtein > 0 &&
+          avgProtein < 1.4 * _referenceWeight(timeline))
         _candidate(
           id: 'increase-protein',
           title: 'Raise protein consistency',
@@ -143,7 +164,11 @@ final class ProductIntelligenceBehaviorModel {
           burden: 0.18,
           evidence: const ['local-protein', 'local-weight'],
         ),
-      if (avgSodium > 2600 && avgPotassium > 0 && avgPotassium < 3000)
+      if (avgSodium != null &&
+          avgSodium > 2600 &&
+          avgPotassium != null &&
+          avgPotassium > 0 &&
+          avgPotassium < 3000)
         _candidate(
           id: 'rebalance-electrolytes',
           title: 'Rebalance sodium, potassium, and water',
@@ -172,7 +197,10 @@ final class ProductIntelligenceBehaviorModel {
           burden: 0.15,
           evidence: const ['local-sleep'],
         ),
-      if (avgSteps != null && avgSteps < 6000 && deficit < 900)
+      if (avgSteps != null &&
+          avgSteps < 6000 &&
+          deficit != null &&
+          deficit < 900)
         _candidate(
           id: 'increase-activity',
           title: 'Increase low-intensity activity',
@@ -186,7 +214,7 @@ final class ProductIntelligenceBehaviorModel {
           burden: 0.2,
           evidence: const ['local-activity', 'local-energy-balance'],
         ),
-      if (plateauRisk >= 0.6)
+      if (hasEnergyEvidence && plateauRisk != null && plateauRisk >= 0.6)
         _candidate(
           id: 'audit-plateau-inputs',
           title: 'Audit plateau drivers before changing calories',

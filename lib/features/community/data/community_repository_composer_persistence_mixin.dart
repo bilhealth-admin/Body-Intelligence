@@ -106,7 +106,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
     DateTime? before,
     String? beforeId,
     int limit = 20,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
     if ((before == null) != (beforeId == null) ||
         (beforeId != null && !CommunityRepository._uuid.hasMatch(beforeId)) ||
         limit < 1 ||
@@ -121,6 +121,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
         'p_limit': limit,
       },
     );
+    operation.check();
     if (response is! List) {
       throw const FormatException('Invalid Community draft list');
     }
@@ -132,7 +133,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
         return CommunityDraftSummary.fromJson(Map<String, dynamic>.from(raw));
       }),
     );
-  }
+  });
 
   Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
   loadMyCommunityDraftPreview(String draftId) =>
@@ -172,6 +173,76 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
           throw const FormatException('Community draft preview media mismatch');
         }
         return (draft: draft, image: image);
+      });
+
+  /// A bounded list preview. Full editing retains its strict all-image loader.
+  /// A failed optional photo occupies its original slot and does not hide the
+  /// authoritative draft metadata or the other successfully validated photos.
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(String draftId, {int maxImages = 4}) =>
+      _runCommunityOwnerOperation((operation) async {
+        if (!CommunityRepository._uuid.hasMatch(draftId) ||
+            maxImages < 1 ||
+            maxImages > 4) {
+          throw ArgumentError('Invalid Community draft preview');
+        }
+        final owner = _user.id;
+        final response = await _client.rpc(
+          'bil_get_my_community_post_draft_v1',
+          params: {'p_draft_id': draftId},
+        );
+        operation.check();
+        if (response is! Map) {
+          throw const FormatException('Invalid Community draft');
+        }
+        final draft = CommunityPersistentDraft.fromJson(
+          Map<String, dynamic>.from(response),
+        );
+        if (draft.draftId != draftId ||
+            draft.media.length > 4 ||
+            draft.media.map((media) => media.position).toSet().length !=
+                draft.media.length ||
+            draft.media.map((media) => media.objectPath).toSet().length !=
+                draft.media.length ||
+            draft.media.any(
+              (media) =>
+                  !media.objectPath.startsWith('$owner/$draftId/') ||
+                  media.objectPath.split('/').any((part) => part == '..'),
+            )) {
+          throw const FormatException('Community draft preview mismatch');
+        }
+        final metadata = [...draft.media]
+          ..sort((left, right) => left.position.compareTo(right.position));
+        final images = <CommunityPostImagePreview?>[];
+        for (final media in metadata.take(maxImages)) {
+          operation.check();
+          try {
+            final bytes = await _client.storage
+                .from(_draftBucket)
+                .download(media.objectPath);
+            operation.check();
+            final image = await createCommunityPostImagePreviewAsync(
+              bytes,
+              expectedMimeType: media.mimeType,
+              expectedByteLength: media.bytes,
+              expectedWidth: media.width,
+              expectedHeight: media.height,
+            );
+            operation.check();
+            images.add(image);
+          } on CommunityOwnerOperationCancelled {
+            rethrow;
+          } on Object {
+            operation.check();
+            images.add(null);
+          }
+        }
+        return (
+          draft: draft,
+          images: List<CommunityPostImagePreview?>.unmodifiable(images),
+        );
       });
 
   Future<

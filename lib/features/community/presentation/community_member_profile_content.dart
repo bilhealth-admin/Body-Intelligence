@@ -282,6 +282,9 @@ extension _CommunityMemberProfileContentSlivers
                         const SizedBox(width: 4),
                         Text(
                           _viewCounts[moments[index].id].toString(),
+                          key: Key(
+                            'community-profile-post-views-${moments[index].id}',
+                          ),
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ],

@@ -20,6 +20,25 @@ class NutrientEvidenceMask {
   static bool contains(int mask, TrackedNutrient nutrient) =>
       mask & bit(nutrient) != 0;
 
+  /// Reads the persisted evidence contract without reclassifying legacy cores.
+  static bool isKnown({
+    required int mask,
+    required String source,
+    required TrackedNutrient nutrient,
+    required double value,
+  }) => switch (nutrient) {
+    TrackedNutrient.calories ||
+    TrackedNutrient.protein ||
+    TrackedNutrient.carbohydrates ||
+    TrackedNutrient.fat => coreIsKnown(
+      mask: mask,
+      source: source,
+      nutrient: nutrient,
+      value: value,
+    ),
+    _ => contains(mask, nutrient),
+  };
+
   /// Modern snapshots explicitly distinguish unknown macros from known zero.
   /// Legacy required core columns predate those bits; keep their historical
   /// meaning, while downloaded/Quick Add/community rows retain strict evidence.

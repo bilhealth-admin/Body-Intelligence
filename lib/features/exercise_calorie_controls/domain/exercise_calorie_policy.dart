@@ -49,7 +49,7 @@ final class ExerciseCalorieResult {
   final ExerciseCalorieAvailability availability;
   final double baseCalorieGoal;
   final double effectiveCalorieGoal;
-  final double remainingCalories;
+  final double? remainingCalories;
   final double proteinGoal;
   final double carbohydrateGoal;
   final double fatGoal;
@@ -61,7 +61,7 @@ abstract final class ExerciseCaloriePolicy {
     required ExerciseCaloriePreferences preferences,
     required DateTime day,
     required double baseCalorieGoal,
-    required double consumedCalories,
+    required double? consumedCalories,
     required double baseProteinGoal,
     required double baseCarbohydrateGoal,
     required double baseFatGoal,
@@ -83,7 +83,9 @@ abstract final class ExerciseCaloriePolicy {
           : ExerciseCalorieAvailability.unavailable,
       baseCalorieGoal: baseCalorieGoal,
       effectiveCalorieGoal: effectiveCalories,
-      remainingCalories: effectiveCalories - consumedCalories,
+      remainingCalories: consumedCalories == null
+          ? null
+          : effectiveCalories - consumedCalories,
       proteinGoal: baseProteinGoal * scale,
       carbohydrateGoal: baseCarbohydrateGoal * scale,
       fatGoal: baseFatGoal * scale,

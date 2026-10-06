@@ -61,8 +61,10 @@ extension _CoachMealActionFlow on _IntelligenceCenterPageState {
     toolId: result.toolId,
     committed: true,
     completedAt: result.committedAt,
-    entityType: 'meal_item',
-    entityId: result.after.single.item.id.toString(),
+    entityType: result.after.length == 1 ? 'meal_item' : 'meal',
+    entityId: result.after.length == 1
+        ? result.after.single.item.id.toString()
+        : result.after.first.meal.id.toString(),
     refreshTargets: const {
       'dailyMeals',
       'dailyLedger',
@@ -102,9 +104,13 @@ extension _CoachMealActionFlow on _IntelligenceCenterPageState {
         'تغيّرت هذه الوجبة منذ تجهيز الإجراء. راجعها مجددًا.',
       );
     }
-    final saved = result.after.single;
+    final saved = result.after.first;
     final item = saved.item;
     switch (result.kind) {
+      case CoachMealCommandKind.foods:
+        return tr('Meal saved locally.', 'تم حفظ الوجبة محليًا.');
+      case CoachMealCommandKind.replacement:
+        return tr('Meal updated.', 'تم تحديث الوجبة.');
       case CoachMealCommandKind.quickMacros:
         final payload = saved.toReceiptPayload();
         if (payload['calories'] == null) {

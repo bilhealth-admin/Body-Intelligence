@@ -75,6 +75,9 @@ void main() {
     final drafts = File(
       'lib/features/community/presentation/community_member_profile_drafts.dart',
     ).readAsStringSync();
+    final profile = File(
+      'lib/features/community/presentation/community_member_profile_page.dart',
+    ).readAsStringSync();
 
     expect(routes, contains("path: '/community/drafts'"));
     expect(
@@ -92,7 +95,14 @@ void main() {
       drafts,
       contains('class CommunityDraftsPage extends StatefulWidget'),
     );
-    expect(drafts, contains('listMyCommunityDrafts(limit: 50)'));
+    // The bounded50-item Profile badge projection remains here; the direct
+    // Drafts destination now pages20 at a time beyond the first50 entries.
+    expect(profile, contains('listMyCommunityDrafts(limit: 50)'));
+    expect(drafts, contains('static const _pageSize = 20;'));
+    expect(drafts, contains('listMyCommunityDrafts(limit: _pageSize)'));
+    expect(drafts, contains('before: before,'));
+    expect(drafts, contains('beforeId: beforeId,'));
+    expect(drafts, contains('limit: _pageSize,'));
     expect(drafts, contains('loadMyCommunityDraft(draftId)'));
     expect(drafts, contains('_CommunityComposerDraft.fromPersistent('));
     expect(

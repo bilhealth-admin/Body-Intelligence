@@ -24,8 +24,11 @@ Future<ValueNotifier<_ProfileSelection>> _mountCardProfile(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.byTooltip('List view'));
-  await tester.pumpAndSettle();
+  if (find.byTooltip('List view').evaluate().isNotEmpty) {
+    await tester.tap(find.byTooltip('List view'));
+    await tester.pumpAndSettle();
+  }
+  expect(find.byTooltip('Grid view'), findsOneWidget);
   return selection;
 }
 

@@ -82,6 +82,10 @@ class DashboardIntelligenceLocalizer {
 
   String bestActionTitle(BestAction action) {
     if (!arabic) return _localized(action.title);
+    if (action.abstentionReason ==
+        BestActionAbstentionReason.incompleteOrInvalidEvidence) {
+      return 'لا تتوفر توصية موثوقة بعد';
+    }
     return switch (action.type) {
       BestActionType.weighIn => 'سجّل وزن اليوم',
       BestActionType.completeLogging => 'أكمل تسجيل وجبة واحدة',
@@ -94,6 +98,10 @@ class DashboardIntelligenceLocalizer {
 
   String bestActionReason(BestAction action) {
     if (!arabic) return _localized(action.reason);
+    if (action.abstentionReason ==
+        BestActionAbstentionReason.incompleteOrInvalidEvidence) {
+      return 'لم يقدم BIL توصية لأن البيانات المتاحة غير مكتملة أو غير صالحة.';
+    }
     return switch (action.type) {
       BestActionType.weighIn => 'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
       BestActionType.completeLogging =>
@@ -128,6 +136,7 @@ class DashboardIntelligenceLocalizer {
       'Possible plateau' => 'ثبات محتمل في الاتجاه',
       'Possible short-term water retention' => 'احتباس ماء قصير المدى محتمل',
       'Build your baseline' => 'ابنِ خطك الأساسي',
+      'Nutrition evidence is incomplete' => 'الأدلة الغذائية غير مكتملة',
       _ => 'الأهداف اليومية متقاربة بصورة عامة',
     };
   }

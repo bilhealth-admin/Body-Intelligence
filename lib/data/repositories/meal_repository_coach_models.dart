@@ -1,6 +1,13 @@
 part of 'meal_repository.dart';
 
-enum CoachMealCommandKind { quickMacros, quantity, remove, move }
+enum CoachMealCommandKind {
+  quickMacros,
+  quantity,
+  remove,
+  move,
+  foods,
+  replacement,
+}
 
 enum CoachMealResultState { committed, modified, undone }
 
@@ -13,6 +20,7 @@ enum CoachMealConflictReason {
   closedDay,
   invalidJournal,
   readbackUnavailable,
+  invalidEvidence,
 }
 
 /// A rejected precondition is not a successful mutation or compensation.
@@ -152,6 +160,40 @@ final class CoachMealCommand {
     );
   }
 
+  factory CoachMealCommand.foods({
+    required String operationId,
+    required DateTime date,
+    required String mealType,
+    required CoachFoodReview review,
+    DateTime? occurredAt,
+  }) {
+    _validateMealType(mealType);
+    return CoachMealCommand._(
+      operationId: operationId,
+      kind: CoachMealCommandKind.foods,
+      arguments: {
+        'day': dayKeyFor(date),
+        'mealType': mealType,
+        'portions': review.items.map((item) => item.toJson()).toList(),
+        if (occurredAt != null) 'occurredAt': occurredAt.toIso8601String(),
+      },
+    );
+  }
+
+  factory CoachMealCommand.replaceFood({
+    required String operationId,
+    required CoachMealItemVersion expected,
+    required CoachFoodPortion replacement,
+  }) => CoachMealCommand._(
+    operationId: operationId,
+    kind: CoachMealCommandKind.replacement,
+    expectedItem: expected,
+    arguments: {
+      'expected': expected.toJson(),
+      'replacement': replacement.toJson(),
+    },
+  );
+
   factory CoachMealCommand.deleteItem({
     required String operationId,
     required CoachMealItemVersion expected,
@@ -186,6 +228,8 @@ final class CoachMealCommand {
     CoachMealCommandKind.quantity => 'update_meal_item',
     CoachMealCommandKind.remove => 'delete_meal_item',
     CoachMealCommandKind.move => 'move_meal_item',
+    CoachMealCommandKind.foods => 'log_foods',
+    CoachMealCommandKind.replacement => 'replace_meal_item',
   };
 
   String get argumentsDigest => sha256
@@ -246,21 +290,7 @@ final class CoachMealSnapshot {
   final String? arabicFoodName;
 
   double? known(TrackedNutrient nutrient, double value) {
-    final core = const {
-      TrackedNutrient.calories,
-      TrackedNutrient.protein,
-      TrackedNutrient.carbohydrates,
-      TrackedNutrient.fat,
-    }.contains(nutrient);
-    final isKnown = core
-        ? NutrientEvidenceMask.coreIsKnown(
-            mask: item.nutrientEvidenceMask,
-            source: item.foodSourceSnapshot,
-            nutrient: nutrient,
-            value: value,
-          )
-        : NutrientEvidenceMask.contains(item.nutrientEvidenceMask, nutrient);
-    return isKnown ? value : null;
+    return MealFoodEvidence.read(item).value(nutrient);
   }
 
   Map<String, Object?> toJson() => {
@@ -293,6 +323,11 @@ final class CoachMealSnapshot {
     'magnesium_mg': known(TrackedNutrient.magnesium, item.magnesium),
     'phosphorus_mg': known(TrackedNutrient.phosphorus, item.phosphorus),
     'sugar_g': known(TrackedNutrient.sugar, item.sugar),
+    'iron_mg': MealFoodEvidence.read(item).fullValue(FoodNutrient.iron),
+    'vitamin_c_mg': MealFoodEvidence.read(
+      item,
+    ).fullValue(FoodNutrient.vitaminC),
+    'food_evidence': MealFoodEvidence.read(item).portion?.toJson(),
     'nutrient_evidence_mask': item.nutrientEvidenceMask,
     'source': item.foodSourceSnapshot,
     'source_verified': item.foodVerifiedSnapshot,

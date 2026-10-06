@@ -34,9 +34,27 @@ class NutrientDashboardSample {
   const NutrientDashboardSample({
     required this.evidenceMask,
     required this.values,
+    this.source,
   });
   final int evidenceMask;
   final Map<TrackedNutrient, double> values;
+  final String? source;
+
+  bool isKnown(TrackedNutrient nutrient) {
+    final value = values[nutrient];
+    if (value == null || !value.isFinite || value < 0) {
+      return false;
+    }
+    final capturedSource = source;
+    return capturedSource == null
+        ? NutrientEvidenceMask.contains(evidenceMask, nutrient)
+        : NutrientEvidenceMask.isKnown(
+            mask: evidenceMask,
+            source: capturedSource,
+            nutrient: nutrient,
+            value: value,
+          );
+  }
 }
 
 class EvidencedNutrientValue {
@@ -51,12 +69,7 @@ abstract final class NutrientDashboardEvidence {
     TrackedNutrient nutrient,
   ) {
     final rows = samples.toList(growable: false);
-    if (rows.isEmpty ||
-        rows.any(
-          (row) =>
-              !NutrientEvidenceMask.contains(row.evidenceMask, nutrient) ||
-              !row.values.containsKey(nutrient),
-        )) {
+    if (rows.isEmpty || rows.any((row) => !row.isKnown(nutrient))) {
       return const EvidencedNutrientValue(value: null, complete: false);
     }
     return EvidencedNutrientValue(

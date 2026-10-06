@@ -18,6 +18,11 @@ extension MealRepositoryCopying on MealRepository {
       );
       for (var index = 0; index < meal.items.length; index++) {
         final item = meal.items[index];
+        if (!MealFoodEvidence.read(item, ownerKey: _coachOwnerKey).isValid) {
+          throw const CoachMealConflict(
+            CoachMealConflictReason.invalidEvidence,
+          );
+        }
         await _database
             .into(_database.mealItems)
             .insert(
@@ -38,6 +43,11 @@ extension MealRepositoryCopying on MealRepository {
                 phosphorus: Value(item.phosphorus),
                 sugar: Value(item.sugar),
                 nutrientEvidenceMask: Value(item.nutrientEvidenceMask),
+                foodSourceSnapshot: Value(item.foodSourceSnapshot),
+                foodEvidenceJson: Value(item.foodEvidenceJson),
+                foodVerifiedSnapshot: Value(item.foodVerifiedSnapshot),
+                servingSizeSnapshot: Value(item.servingSizeSnapshot),
+                servingUnitSnapshot: Value(item.servingUnitSnapshot),
               ),
             );
       }
@@ -101,6 +111,11 @@ extension MealRepositoryCopying on MealRepository {
                   ]))
                 .get();
         for (final item in sourceItems) {
+          if (!MealFoodEvidence.read(item, ownerKey: _coachOwnerKey).isValid) {
+            throw const CoachMealConflict(
+              CoachMealConflictReason.invalidEvidence,
+            );
+          }
           await _activeFood(item.foodId);
           await _database
               .into(_database.mealItems)
@@ -122,6 +137,11 @@ extension MealRepositoryCopying on MealRepository {
                   phosphorus: Value(item.phosphorus),
                   sugar: Value(item.sugar),
                   nutrientEvidenceMask: Value(item.nutrientEvidenceMask),
+                  foodSourceSnapshot: Value(item.foodSourceSnapshot),
+                  foodEvidenceJson: Value(item.foodEvidenceJson),
+                  foodVerifiedSnapshot: Value(item.foodVerifiedSnapshot),
+                  servingSizeSnapshot: Value(item.servingSizeSnapshot),
+                  servingUnitSnapshot: Value(item.servingUnitSnapshot),
                 ),
               );
         }
@@ -194,6 +214,9 @@ extension MealRepositoryCopying on MealRepository {
               ))
               .get();
       for (final item in items) {
+        final evidence = MealFoodEvidence.read(item, ownerKey: _coachOwnerKey);
+        bool known(TrackedNutrient nutrient, double value) =>
+            evidence.value(nutrient) != null;
         snapshots.add(
           DailyNutritionItemSnapshot(
             calories: item.calories,
@@ -203,18 +226,16 @@ extension MealRepositoryCopying on MealRepository {
             fiber: item.fiber,
             sodium: item.sodium,
             potassium: item.potassium,
-            fiberKnown: NutrientEvidenceMask.contains(
-              item.nutrientEvidenceMask,
-              TrackedNutrient.fiber,
+            caloriesKnown: known(TrackedNutrient.calories, item.calories),
+            proteinKnown: known(TrackedNutrient.protein, item.protein),
+            carbohydratesKnown: known(
+              TrackedNutrient.carbohydrates,
+              item.carbs,
             ),
-            sodiumKnown: NutrientEvidenceMask.contains(
-              item.nutrientEvidenceMask,
-              TrackedNutrient.sodium,
-            ),
-            potassiumKnown: NutrientEvidenceMask.contains(
-              item.nutrientEvidenceMask,
-              TrackedNutrient.potassium,
-            ),
+            fatKnown: known(TrackedNutrient.fat, item.fats),
+            fiberKnown: known(TrackedNutrient.fiber, item.fiber),
+            sodiumKnown: known(TrackedNutrient.sodium, item.sodium),
+            potassiumKnown: known(TrackedNutrient.potassium, item.potassium),
           ),
         );
       }

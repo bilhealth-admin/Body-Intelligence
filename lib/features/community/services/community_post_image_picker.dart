@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../app/services/recoverable_image_picker.dart';
 
+part 'community_post_image_preview.dart';
+
 const communityPostImageMaxBytes = 5 * 1024 * 1024;
 // Keep a safety margin below the Storage/RPC 5 MiB contract. Users should be
 // able to choose the camera's original image; the app owns this conversion.
@@ -191,6 +193,17 @@ typedef _CommunityPostImageMetadata = ({
 });
 
 _CommunityPostImageMetadata _inspectCommunityPostImage(Uint8List bytes) {
+  final decoded = _decodeCommunityPostImage(bytes);
+  return (
+    mimeType: decoded.mimeType,
+    extension: decoded.extension,
+    width: decoded.image.width,
+    height: decoded.image.height,
+  );
+}
+
+({String mimeType, String extension, img.Image image})
+_decodeCommunityPostImage(Uint8List bytes) {
   final (mimeType, extension, decoder) = _allowedDecoder(bytes);
   img.DecodeInfo? info;
   try {
@@ -226,12 +239,7 @@ _CommunityPostImageMetadata _inspectCommunityPostImage(Uint8List bytes) {
       CommunityPostImageFailure.invalidDimensions,
     );
   }
-  return (
-    mimeType: mimeType,
-    extension: extension,
-    width: oriented.width,
-    height: oriented.height,
-  );
+  return (mimeType: mimeType, extension: extension, image: oriented);
 }
 
 (String, String, img.Decoder) _allowedDecoder(Uint8List bytes) {

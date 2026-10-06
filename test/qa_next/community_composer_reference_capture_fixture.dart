@@ -66,8 +66,9 @@ class _FixturePicker implements CommunityPostImagePickerContract {
 }
 
 class _ComposerReferenceRepository extends CommunityRepository {
-  _ComposerReferenceRepository(super.client, this.photos);
+  _ComposerReferenceRepository(super.client, this.photos, this.previews);
   final List<CommunityPostImageDraft> photos;
+  final List<CommunityPostImagePreview> previews;
   final drafts =
       <
         String,
@@ -262,9 +263,19 @@ class _ComposerReferenceRepository extends CommunityRepository {
   }
 
   @override
-  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  loadMyCommunityDraftPreview(String draftId) async =>
-      (draft: _readDraft(draftId), image: drafts[draftId]!.images.firstOrNull);
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(
+    String draftId, {
+    int maxImages = 4,
+  }) async => (
+    draft: _readDraft(draftId),
+    images: [
+      for (final image in drafts[draftId]!.images.take(maxImages))
+        previews[photos.indexOf(image)],
+    ],
+  );
   @override
   Future<
     ({CommunityPersistentDraft draft, List<CommunityPostImageDraft> images})

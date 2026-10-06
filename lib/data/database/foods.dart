@@ -56,6 +56,10 @@ class Foods extends Table {
 
   TextColumn get source => text().withDefault(const Constant('local'))();
 
+  /// Immutable modern basis, including all thirteen nullable nutrient values.
+  /// Legacy rows retain null and their original evidence interpretation.
+  TextColumn get foodEvidenceJson => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

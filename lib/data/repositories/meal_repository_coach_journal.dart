@@ -199,11 +199,18 @@ extension _CoachMealJournalStorage on MealRepository {
       committed: committed,
     );
     if (meal == null || food == null) return null;
+    final evidence = MealFoodEvidence.read(item, ownerKey: _coachOwnerKey);
+    if (!evidence.isValid) {
+      throw CoachMealConflict(
+        CoachMealConflictReason.invalidEvidence,
+        committed: committed,
+      );
+    }
     return CoachMealSnapshot(
       item: item,
       meal: meal,
-      foodName: food.name,
-      arabicFoodName: food.arabicName,
+      foodName: evidence.portion?.food.name ?? food.name,
+      arabicFoodName: evidence.isModern ? null : food.arabicName,
     );
   }
 

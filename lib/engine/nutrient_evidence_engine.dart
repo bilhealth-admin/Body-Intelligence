@@ -10,6 +10,11 @@ class NutrientEvidenceReport {
   const NutrientEvidenceReport({required this.state, required this.total});
   final NutrientEvidenceState state;
   final double? total;
+
+  /// A partial known subtotal cannot stand in for the day's full intake.
+  /// [total] remains available to views explicitly labelled as partial.
+  double? get completeTotal =>
+      state == NutrientEvidenceState.complete ? total : null;
 }
 
 class NutrientEvidenceEngine {

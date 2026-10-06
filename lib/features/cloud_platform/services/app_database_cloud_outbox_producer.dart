@@ -309,6 +309,8 @@ final class AppDatabaseCloudOutboxProducer {
             'sugar': row.sugar,
             'nutrientEvidenceMask': row.nutrientEvidenceMask,
             'foodSourceSnapshot': row.foodSourceSnapshot,
+            if (row.foodEvidenceJson != null)
+              'foodEvidenceJson': row.foodEvidenceJson,
             'foodVerifiedSnapshot': row.foodVerifiedSnapshot,
             'servingSizeSnapshot': row.servingSizeSnapshot,
             'servingUnitSnapshot': row.servingUnitSnapshot,

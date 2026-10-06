@@ -41,8 +41,10 @@ class _DraftRepository extends CommunityRepository {
   ];
 
   @override
-  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  loadMyCommunityDraftPreview(String draftId) async {
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(String draftId, {int maxImages = 4}) async {
     previewReads++;
     return (
       draft: CommunityPersistentDraft(
@@ -58,9 +60,19 @@ class _DraftRepository extends CommunityRepository {
         pollAllowMultiple: false,
         createdAt: DateTime.utc(2026, 10, 5, 9),
         updatedAt: DateTime.utc(2026, 10, 5, 9, 20),
-        media: const [],
+        media: [
+          for (var index = 0; index < 4; index++)
+            CommunityDraftMediaMetadata(
+              position: index,
+              objectPath: '$_owner/$draftId/photo-$index.png',
+              mimeType: 'image/png',
+              bytes: 1,
+              width: 1,
+              height: 1,
+            ),
+        ],
       ),
-      image: null,
+      images: const <CommunityPostImagePreview?>[],
     );
   }
 }

@@ -9,7 +9,7 @@ class BILResult {
   final double bmr;
   final double tdee;
   final DailyTargets targets;
-  final DailyScore score;
+  final DailyScore? score;
   final List<String> recommendations;
   final BodyModelResult bodyModel;
 
@@ -26,26 +26,33 @@ class BILResult {
 class BILEngine {
   static BILResult calculate({
     required BodyProfile profile,
-    required int eatenCalories,
-    required int eatenProtein,
+    required int? eatenCalories,
+    required int? eatenProtein,
     required int drankWater,
+    int? eatenPotassium,
   }) {
     final model = BodyModelEngine.calculate(profile);
     final targets = model.targets;
     final waterTarget = targets.water;
 
-    final score = ScoreEngine.calculate(
-      targetCalories: targets.calories,
-      eatenCalories: eatenCalories,
-      targetProtein: targets.protein,
-      eatenProtein: eatenProtein,
-      targetWater: waterTarget,
-      drankWater: drankWater,
-    );
+    final score = eatenCalories == null || eatenProtein == null
+        ? null
+        : ScoreEngine.calculate(
+            targetCalories: targets.calories,
+            eatenCalories: eatenCalories,
+            targetProtein: targets.protein,
+            eatenProtein: eatenProtein,
+            targetWater: waterTarget,
+            drankWater: drankWater,
+          );
 
     final recommendations = RecommendationEngine.recommendations(
-      remainingProtein: targets.protein - eatenProtein,
-      remainingPotassium: targets.potassium,
+      remainingProtein: eatenProtein == null
+          ? null
+          : targets.protein - eatenProtein,
+      remainingPotassium: eatenPotassium == null
+          ? null
+          : targets.potassium - eatenPotassium,
       remainingWater: waterTarget - drankWater,
     );
 

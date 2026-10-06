@@ -60,7 +60,8 @@ void main() {
   }.entries) {
     test('valid calorie quantity retains precision: ${entry.key}', () {
       expect(
-        parser.parse(entry.key, locale: 'en', referenceLocal: now)!
+        parser
+            .parse(entry.key, locale: 'en', referenceLocal: now)!
             .payload['calories'],
         entry.value,
       );
@@ -79,11 +80,7 @@ void main() {
     'سجل 1905 سعرة يوم 1 اكتوبر 2026': '2026-10-01',
   }.entries) {
     test('calendar date is not a calorie quantity: ${entry.key}', () {
-      final action = parser.parse(
-        entry.key,
-        locale: 'en',
-        referenceLocal: now,
-      );
+      final action = parser.parse(entry.key, locale: 'en', referenceLocal: now);
       expect(action, isNotNull);
       expect(action!.payload['date'], entry.value);
       expect(action.payload['calories'], 1905);
@@ -101,8 +98,13 @@ void main() {
           '${expected.year}-${expected.month.toString().padLeft(2, '0')}-'
           '${expected.day.toString().padLeft(2, '0')}';
       expect(
-        parser.parse('1905 calories yesterday', locale: 'en',
-            referenceLocal: date)!.payload['date'],
+        parser
+            .parse(
+              '1905 calories yesterday',
+              locale: 'en',
+              referenceLocal: date,
+            )!
+            .payload['date'],
         text,
       );
     }
@@ -120,7 +122,8 @@ void main() {
   }.entries) {
     test('explicit meal overrides the suggested bucket: ${entry.key}', () {
       expect(
-        parser.parse(entry.key, locale: 'en', referenceLocal: now)!
+        parser
+            .parse(entry.key, locale: 'en', referenceLocal: now)!
             .payload['mealType'],
         entry.value,
       );
@@ -194,14 +197,21 @@ void main() {
     'هل 1905 سعرة مناسبة؟',
     'سكر 1905 سعرة',
   ]) {
-    test('ambiguous or non-intake number cannot become calorie entry: $input', () {
-      expect(parser.parse(input, locale: 'ar', referenceLocal: now), isNull);
-      expect(
-        const LocalCoachCommandParser().parse(input, locale: 'ar')
-            .where((action) => action.type == IntelligenceActionType.quickAddMacros),
-        isEmpty,
-      );
-    });
+    test(
+      'ambiguous or non-intake number cannot become calorie entry: $input',
+      () {
+        expect(parser.parse(input, locale: 'ar', referenceLocal: now), isNull);
+        expect(
+          const LocalCoachCommandParser()
+              .parse(input, locale: 'ar')
+              .where(
+                (action) =>
+                    action.type == IntelligenceActionType.quickAddMacros,
+              ),
+          isEmpty,
+        );
+      },
+    );
   }
 
   for (final channel in CoachInputChannel.values) {
@@ -209,27 +219,28 @@ void main() {
       'Log 1905 calories for lunch on 2026-10-01',
       'سجل ١٩٠٥ سعرة للغداء بتاريخ ٢٠٢٦-١٠-٠١',
     ]) {
-      test('typed and voice pipelines use the same native entry: $channel $prompt', () async {
-        final gateway = _NoCalorieModel();
-        final api = ModelBackedLocalCoachApi(
-          gateway: gateway,
-          context: CoachContextSnapshot.empty(),
-        );
-        final result = await api.understand(LocalCoachRequest(
-          text: prompt,
-          locale: 'ar',
-          channel: channel,
-        ));
-        expect(result.actions, hasLength(1));
-        expect(result.processedOnDevice, isTrue);
-        expect(result.actions.single.toolId, 'quick_add_macros');
-        expect(result.actions.single.payload, {
-          'mealType': 'lunch',
-          'date': '2026-10-01',
-          'calories': 1905.0,
-        });
-        expect(gateway.calls, 0);
-      });
+      test(
+        'typed and voice pipelines use the same native entry: $channel $prompt',
+        () async {
+          final gateway = _NoCalorieModel();
+          final api = ModelBackedLocalCoachApi(
+            gateway: gateway,
+            context: CoachContextSnapshot.empty(),
+          );
+          final result = await api.understand(
+            LocalCoachRequest(text: prompt, locale: 'ar', channel: channel),
+          );
+          expect(result.actions, hasLength(1));
+          expect(result.processedOnDevice, isTrue);
+          expect(result.actions.single.toolId, 'quick_add_macros');
+          expect(result.actions.single.payload, {
+            'mealType': 'lunch',
+            'date': '2026-10-01',
+            'calories': 1905.0,
+          });
+          expect(gateway.calls, 0);
+        },
+      );
     }
   }
 }

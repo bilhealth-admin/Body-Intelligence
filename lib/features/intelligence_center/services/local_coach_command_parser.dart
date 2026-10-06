@@ -15,10 +15,20 @@ class LocalCoachCommandParser {
 
   final CoachDateResolver dateResolver;
 
-  List<IntelligenceAction> parse(String input, {bool? arabic, String? locale}) {
+  List<IntelligenceAction> parse(
+    String input, {
+    bool? arabic,
+    String? locale,
+    DateTime? referenceLocal,
+  }) {
     const admission = CoachActionAdmission();
     return [
-      for (final action in _parse(input, arabic: arabic, locale: locale))
+      for (final action in _parse(
+        input,
+        arabic: arabic,
+        locale: locale,
+        referenceLocal: referenceLocal ?? DateTime.now(),
+      ))
         if (admission.bind(action) case final binding?) binding.action,
     ];
   }
@@ -27,6 +37,7 @@ class LocalCoachCommandParser {
     String input, {
     bool? arabic,
     String? locale,
+    required DateTime referenceLocal,
   }) {
     final code = locale ?? (arabic == true ? 'ar' : 'en');
     String tr(String en, String ar) => intelligenceTextFor(code, en, ar);
@@ -34,7 +45,7 @@ class LocalCoachCommandParser {
     if (value.isEmpty) return const [];
     final calorieOnly = LocalCoachCalorieCommand(
       dateResolver: dateResolver,
-    ).parse(input, locale: code);
+    ).parse(input, locale: code, referenceLocal: referenceLocal);
     if (calorieOnly != null) return [calorieOnly];
 
     final themeMode = _requestedThemeMode(value);
@@ -115,7 +126,6 @@ class LocalCoachCommandParser {
       ];
     }
 
-    final number = _firstNumber(value);
     final hasWaterConcept = _hasQuantityUnit(
       value,
       'water|eau|agua|su|ماء|الماء|مياه|المياه|مويه|المويه|موية|الموية|ميه|الميه',
@@ -134,6 +144,13 @@ class LocalCoachCommandParser {
       'راجع سجل الماء',
     ]);
     if (hasWaterConcept) {
+      final waterDate = dateResolver.resolve(
+        input,
+        referenceLocal: referenceLocal,
+      );
+      if (_hasAmbiguousQuantityDate(value, referenceLocal)) {
+        return const [];
+      }
       final amount = _waterMilliliters(value);
       if (amount != null && amount >= 1 && amount <= 5000) {
         return [
@@ -143,7 +160,10 @@ class LocalCoachCommandParser {
             type: IntelligenceActionType.addWater,
             label: _waterLabel(code, amount),
             requiresConfirmation: true,
-            payload: {'amountMl': amount},
+            payload: {
+              'amountMl': amount,
+              if (waterDate != null) 'date': _dateOnly(waterDate),
+            },
           ),
         ];
       }
@@ -176,10 +196,13 @@ class LocalCoachCommandParser {
       'cambiar mi objetivo',
       'hedefimi değiştir',
     ]);
-    if (hasGoalUpdateIntent &&
-        number != null &&
-        number >= 20 &&
-        number <= 500) {
+    if (hasGoalUpdateIntent) {
+      if (_hasAmbiguousQuantityDate(value, referenceLocal)) return const [];
+      final number = _bodyWeightKilograms(value);
+      if (number == null || number < 20 || number > 500) {
+        // An unresolved goal must not fall through into a body-weight write.
+        return const [];
+      }
       return [
         IntelligenceAction(
           id: 'update-goal-$number',
@@ -211,11 +234,12 @@ class LocalCoachCommandParser {
       'ağırlık',
     ]);
     if (hasWeightConcept && _isBodyWeightStatement(value)) {
+      if (_hasAmbiguousQuantityDate(value, referenceLocal)) return const [];
       final weight = _bodyWeightKilograms(value);
       if (weight != null && weight >= 20 && weight <= 500) {
         final date = dateResolver.resolve(
           input,
-          referenceLocal: DateTime.now(),
+          referenceLocal: referenceLocal,
         );
         if (date == null && dateResolver.hasExplicitDate(input)) {
           return const [];
@@ -382,13 +406,6 @@ class LocalCoachCommandParser {
         .replaceAll('أ', 'ا')
         .replaceAll('إ', 'ا')
         .replaceAll('آ', 'ا');
-  }
-
-  double? _firstNumber(String value) {
-    final matches = _quantityNumbers(value);
-    return matches.length == 1
-        ? double.tryParse(matches.single.group(0)!)
-        : null;
   }
 
   String _waterLabel(String locale, int amount) => switch (_code(locale)) {

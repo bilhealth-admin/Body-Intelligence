@@ -65,7 +65,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -221,6 +221,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 21) {
         await _createCommunityFoodOutbox();
+      }
+      if (from < 22) {
+        await _addColumns('meal_items', <String>['food_evidence_json TEXT']);
+        await _addColumns('foods', <String>['food_evidence_json TEXT']);
       }
     },
   );

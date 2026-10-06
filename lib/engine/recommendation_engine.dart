@@ -1,16 +1,16 @@
 class RecommendationEngine {
   static List<String> recommendations({
-    required int remainingProtein,
-    required int remainingPotassium,
+    required int? remainingProtein,
+    required int? remainingPotassium,
     required int remainingWater,
   }) {
     final list = <String>[];
 
-    if (remainingProtein > 30) {
+    if (remainingProtein != null && remainingProtein > 30) {
       list.add("Eat 180 g chicken breast.");
     }
 
-    if (remainingPotassium > 600) {
+    if (remainingPotassium != null && remainingPotassium > 600) {
       list.add("Add one banana or potato.");
     }
 

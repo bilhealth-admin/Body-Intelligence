@@ -30,7 +30,11 @@ class _MacroProgress extends StatelessWidget {
         : (goal! - value!).clamp(0, goal!);
     final centerValue = showRemaining ? remaining : value;
     final semanticValue = value == null
-        ? 'unavailable'
+        ? _referenceText(
+            context,
+            'Value unavailable in the logged food evidence.',
+            'القيمة غير متاحة في أدلة الطعام المسجلة.',
+          )
         : validGoal
         ? '$value of $goal $unit'
         : '$value $unit';

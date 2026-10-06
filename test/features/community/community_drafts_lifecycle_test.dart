@@ -146,9 +146,16 @@ class _DraftRepository extends CommunityRepository {
   }
 
   @override
-  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  loadMyCommunityDraftPreview(String draftId) async =>
-      (draft: _loaded(currentUserId).draft, image: null);
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(
+    String draftId, {
+    int maxImages = 4,
+  }) async => (
+    draft: _loaded(currentUserId).draft,
+    images: const <CommunityPostImagePreview?>[],
+  );
 
   @override
   Future<void> deleteMyCommunityDraft(String draftId) async {

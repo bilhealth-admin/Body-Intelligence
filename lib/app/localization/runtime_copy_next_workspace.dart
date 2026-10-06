@@ -79,6 +79,12 @@ abstract final class NextWorkspaceRuntimeCopy {
     "This record changed since the action was prepared. Review it again.",
     "Your account changed. Prepare this action again for the current account.",
     "The action was saved, but its current state could not be verified. Review your data before retrying.",
+    "Nutrition evidence is incomplete",
+    "One or more recorded foods have missing nutrient values.",
+    "Review missing food values before interpreting nutrition gaps.",
+    "No trusted action is available yet",
+    "BIL withheld the recommendation because its deterministic inputs were incomplete or invalid.",
+    "Add calories only",
   ];
   static const sources = <String>[..._primarySources, ...supplementalSources];
   static const _supplemental = <String, List<String>>{

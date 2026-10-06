@@ -6,6 +6,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../data/database/app_database.dart';
+import '../../../data/database/meal_food_evidence.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
@@ -14,6 +15,7 @@ import '../../settings/premium_meal_features_page.dart';
 import '../../nutrition/services/food_presentation_localizer.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
 import '../providers/daily_log_provider.dart';
+import 'daily_log_nutrition_evidence.dart';
 import 'macro_value_formatter.dart';
 
 part 'daily_log_meal_detail_items.dart';
@@ -238,21 +240,24 @@ class _DiaryMealCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final items = meal?.items ?? const <MealItem>[];
-    final totals = (
-      carbs: items.fold<double>(0, (sum, item) => sum + item.carbs),
-      protein: items.fold<double>(0, (sum, item) => sum + item.protein),
-      fat: items.fold<double>(0, (sum, item) => sum + item.fats),
+    final evidence = DailyLogNutritionEvidence.forItems(
+      items,
+      ownerKey: meal?.ownerKey,
     );
-    final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
-    final netCarbs = useNetCarbs ? knownNetCarbohydrateTotal(items) : null;
-    final carbValue = useNetCarbs ? netCarbs : totals.carbs;
+    final calories = evidence.total(
+      TrackedNutrient.calories,
+      emptyAsZero: true,
+    );
+    final carbValue = useNetCarbs
+        ? evidence.netCarbs
+        : evidence.total(TrackedNutrient.carbohydrates, emptyAsZero: true);
     final showMacroSummary = items.isNotEmpty && macroDisplay?.enabled == true;
     final effectiveGoal = mealGoal ?? dailyGoal;
     final macroLine = _mealMacroLine(
       display: macroDisplay,
       carbs: carbValue,
-      protein: totals.protein,
-      fat: totals.fat,
+      protein: evidence.total(TrackedNutrient.protein, emptyAsZero: true),
+      fat: evidence.total(TrackedNutrient.fat, emptyAsZero: true),
       goal: effectiveGoal,
     );
     final macroGoalText = mealGoal == null
@@ -425,7 +430,7 @@ class _DiaryMealCard extends StatelessWidget {
                       const SizedBox(width: 2),
                       Text(
                         key: Key('daily-meal-totals-$type'),
-                        '${calories.round()} ${_mealListText(context, 'kcal')}',
+                        '${calories?.round() ?? '—'} ${_mealListText(context, 'kcal')}',
                         maxLines: 1,
                         textDirection: TextDirection.ltr,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -465,8 +470,8 @@ BilSemanticIconKind _mealSemanticIcon(String type) => switch (type) {
 String _mealMacroLine({
   required MealMacroDisplay? display,
   required double? carbs,
-  required double protein,
-  required double fat,
+  required double? protein,
+  required double? fat,
   required NutritionGoalTarget? goal,
 }) {
   String grams(String label, double? consumed, double? target) {

@@ -28,6 +28,7 @@ extension MealRepositoryQueries on MealRepository {
         rows.add(
           MealWithItems(
             meal: meal,
+            ownerKey: _coachOwnerKey,
             items: items,
             foodsById: await _foodsForItems(items),
           ),
@@ -76,6 +77,7 @@ extension MealRepositoryQueries on MealRepository {
         for (final meal in meals)
           MealWithItems(
             meal: meal,
+            ownerKey: _coachOwnerKey,
             items: itemsByMeal[meal.id] ?? const <MealItem>[],
             foodsById: {
               for (final item in itemsByMeal[meal.id] ?? const <MealItem>[])
@@ -123,6 +125,7 @@ extension MealRepositoryQueries on MealRepository {
           .add(
             MealWithItems(
               meal: meal,
+              ownerKey: _coachOwnerKey,
               items: items,
               foodsById: await _foodsForItems(items),
             ),
@@ -171,29 +174,21 @@ extension MealRepositoryQueries on MealRepository {
 
       for (final item in canonical.items) {
         final food = await _activeFood(item.foodId);
-        final portion = _calculatePortion(food, item.quantityGrams);
-        await _database
+        final values = _mealFoodPortionValues(
+          food,
+          item.quantityGrams,
+          quantityInGrams: true,
+        );
+        final itemId = await _database
             .into(_database.mealItems)
             .insert(
-              MealItemsCompanion.insert(
-                mealId: mealId,
-                foodId: item.foodId,
-                quantity: Value(item.quantityGrams),
+              values.copyWith(
+                mealId: Value(mealId),
+                foodId: Value(item.foodId),
                 position: Value(item.position),
-                calories: Value(portion.valueOrZero(FoodNutrient.calories)),
-                protein: Value(portion.valueOrZero(FoodNutrient.protein)),
-                carbs: Value(portion.valueOrZero(FoodNutrient.carbohydrates)),
-                fats: Value(portion.valueOrZero(FoodNutrient.fat)),
-                fiber: Value(portion.valueOrZero(FoodNutrient.fiber)),
-                sodium: Value(portion.valueOrZero(FoodNutrient.sodium)),
-                potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
-                calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
-                magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
-                phosphorus: Value(portion.valueOrZero(FoodNutrient.phosphorus)),
-                sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
-                nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
               ),
             );
+        await _verifyAddedFoodEvidence(itemId);
       }
       return mealId;
     });
@@ -205,6 +200,11 @@ extension MealRepositoryQueries on MealRepository {
     required String templateName,
     DateTime? createdAt,
   }) {
+    for (final item in meal.items) {
+      if (!MealFoodEvidence.read(item, ownerKey: _coachOwnerKey).isValid) {
+        throw const CoachMealConflict(CoachMealConflictReason.invalidEvidence);
+      }
+    }
     return _mealTemplateEngine.fromHistoricalMeal(
       meal: meal.meal,
       items: meal.items,
@@ -240,7 +240,7 @@ extension MealRepositoryQueries on MealRepository {
         ..sort((left, right) => left.position.compareTo(right.position));
       for (final item in ordered) {
         await _activeFood(item.foodId);
-        await _database
+        final itemId = await _database
             .into(_database.mealItems)
             .insert(
               MealItemsCompanion.insert(
@@ -260,8 +260,21 @@ extension MealRepositoryQueries on MealRepository {
                 phosphorus: Value(item.phosphorus),
                 sugar: Value(item.sugar),
                 nutrientEvidenceMask: Value(item.nutrientEvidenceMask),
+                foodEvidenceJson: Value(item.foodEvidenceJson),
+                foodSourceSnapshot: Value(item.foodSourceSnapshot),
+                foodVerifiedSnapshot: Value(item.foodVerifiedSnapshot),
+                servingSizeSnapshot: Value(item.servingSizeSnapshot),
+                servingUnitSnapshot: Value(item.servingUnitSnapshot),
               ),
             );
+        if (!MealFoodEvidence.read(
+          await _mealItem(itemId),
+          ownerKey: _coachOwnerKey,
+        ).isValid) {
+          throw const CoachMealConflict(
+            CoachMealConflictReason.invalidEvidence,
+          );
+        }
       }
       return mealId;
     });

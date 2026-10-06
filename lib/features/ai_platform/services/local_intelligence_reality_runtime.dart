@@ -103,7 +103,12 @@ final class BilLocalIntelligenceRealityRuntime {
     final coverage =
         timeline.days
             .where(
-              (d) => d.weightKg != null || d.caloriesKcal > 0 || d.waterMl > 0,
+              (d) =>
+                  d.weightKg != null ||
+                  (d.hasNutritionItems &&
+                      d.caloriesKcal != null &&
+                      d.caloriesKcal! > 0) ||
+                  d.waterMl > 0,
             )
             .length /
         timeline.days.length;
@@ -152,11 +157,13 @@ final class BilLocalIntelligenceRealityRuntime {
         AiContextEngine.bodyTrendsKey,
       ],
     );
-    final energyDays = timeline.days.where((d) => d.caloriesKcal > 0).toList();
-    final averageIntake = energyDays.isEmpty
-        ? null
-        : energyDays.fold<double>(0, (s, d) => s + d.caloriesKcal) /
-              energyDays.length;
+    final completeIntake = LocalNutritionEvidence.average(
+      timeline.days,
+      (day) => day.caloriesKcal,
+    );
+    final averageIntake = completeIntake != null && completeIntake > 0
+        ? completeIntake
+        : null;
     final balance = averageIntake == null ? null : averageIntake - tdee;
     final tissue = balance == null ? null : balance / 7700;
     final noise = const TissueWaterNoiseEngine().analyze<String>(
@@ -166,7 +173,7 @@ final class BilLocalIntelligenceRealityRuntime {
       tissueEvidenceIds: balance == null
           ? const []
           : const ['local-energy-balance'],
-      waterSignalEvidenceIds: _waterEvidence(timeline),
+      waterSignalEvidenceIds: _waterEvidence(timeline, estimate),
       evidenceConfidence: estimate.confidence,
     );
     final forecast = const AdaptiveMetabolicForecastEngine().forecast<String>(
@@ -335,10 +342,13 @@ final class BilLocalIntelligenceRealityRuntime {
     );
   }
 
-  static List<String> _waterEvidence(LocalIntelligenceTimeline t) => [
-    if (t.days.any((d) => d.sodiumMg > 0)) 'local-sodium',
-    if (t.days.any((d) => d.potassiumMg > 0)) 'local-potassium',
-    if (t.days.any((d) => d.carbsG > 0)) 'local-carbohydrates',
+  static List<String> _waterEvidence(
+    LocalIntelligenceTimeline t,
+    PhysiologicalNoiseEstimate estimate,
+  ) => [
+    if (estimate.sodiumDriverKg != null) 'local-sodium',
+    if (estimate.potassiumDriverKg != null) 'local-potassium',
+    if (estimate.carbohydrateDriverKg != null) 'local-carbohydrates',
     if (t.days.any((d) => d.waterMl > 0)) 'local-water',
   ];
   static List<HealthInsightEvidence> _insights(

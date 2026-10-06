@@ -28,6 +28,8 @@ extension CoachMealCommands on MealRepository {
       final itemIds = <int>[];
       if (command.kind == CoachMealCommandKind.quickMacros) {
         itemIds.add(await _insertCoachMacros(command, scope, createdMeals));
+      } else if (command.kind == CoachMealCommandKind.foods) {
+        itemIds.addAll(await _insertCoachFoods(command, scope, createdMeals));
       } else {
         final expected = command.expectedItem!;
         final snapshot = await _requireCoachSnapshot(expected.id, scope);
@@ -48,6 +50,7 @@ extension CoachMealCommands on MealRepository {
       for (final id in itemIds) {
         after.add(await _requireCoachSnapshot(id, scope));
       }
+      _verifyCoachFoodReadback(command, after);
       final journal = _CoachMealJournal(
         operationId: command.operationId,
         toolId: command.toolId,
@@ -170,7 +173,23 @@ extension _CoachMealCommandWrites on MealRepository {
     final now = DateTime.now();
     switch (command.kind) {
       case CoachMealCommandKind.quickMacros:
+      case CoachMealCommandKind.foods:
         throw StateError('A Quick Add creates a new item');
+      case CoachMealCommandKind.replacement:
+        final portion = CoachFoodPortion.fromJson(
+          command.arguments['replacement'],
+        );
+        _checkCoachFoodOwner(portion, scope);
+        final foodId = await _insertCoachFoodBasis(portion, scope);
+        await _writeCoachItemVersion(
+          item,
+          _coachFoodValues(portion).copyWith(
+            foodId: Value(foodId),
+            updatedAt: Value(now),
+            revision: Value(item.revision + 1),
+          ),
+          scope,
+        );
       case CoachMealCommandKind.quantity:
         await _coachAwait(
           () => updateMealItem(

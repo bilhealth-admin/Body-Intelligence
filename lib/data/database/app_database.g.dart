@@ -3235,6 +3235,17 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     requiredDuringInsert: false,
     defaultValue: const Constant('local'),
   );
+  static const VerificationMeta _foodEvidenceJsonMeta = const VerificationMeta(
+    'foodEvidenceJson',
+  );
+  @override
+  late final GeneratedColumn<String> foodEvidenceJson = GeneratedColumn<String>(
+    'food_evidence_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3322,6 +3333,7 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     verified,
     isCustom,
     source,
+    foodEvidenceJson,
     createdAt,
     updatedAt,
     deletedAt,
@@ -3512,6 +3524,15 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
       );
     }
+    if (data.containsKey('food_evidence_json')) {
+      context.handle(
+        _foodEvidenceJsonMeta,
+        foodEvidenceJson.isAcceptableOrUnknown(
+          data['food_evidence_json']!,
+          _foodEvidenceJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3655,6 +3676,10 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         DriftSqlType.string,
         data['${effectivePrefix}source'],
       )!,
+      foodEvidenceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}food_evidence_json'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3711,6 +3736,10 @@ class Food extends DataClass implements Insertable<Food> {
   final bool verified;
   final bool isCustom;
   final String source;
+
+  /// Immutable modern basis, including all thirteen nullable nutrient values.
+  /// Legacy rows retain null and their original evidence interpretation.
+  final String? foodEvidenceJson;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -3743,6 +3772,7 @@ class Food extends DataClass implements Insertable<Food> {
     required this.verified,
     required this.isCustom,
     required this.source,
+    this.foodEvidenceJson,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -3784,6 +3814,9 @@ class Food extends DataClass implements Insertable<Food> {
     map['verified'] = Variable<bool>(verified);
     map['is_custom'] = Variable<bool>(isCustom);
     map['source'] = Variable<String>(source);
+    if (!nullToAbsent || foodEvidenceJson != null) {
+      map['food_evidence_json'] = Variable<String>(foodEvidenceJson);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -3828,6 +3861,9 @@ class Food extends DataClass implements Insertable<Food> {
       verified: Value(verified),
       isCustom: Value(isCustom),
       source: Value(source),
+      foodEvidenceJson: foodEvidenceJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(foodEvidenceJson),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -3872,6 +3908,7 @@ class Food extends DataClass implements Insertable<Food> {
       verified: serializer.fromJson<bool>(json['verified']),
       isCustom: serializer.fromJson<bool>(json['isCustom']),
       source: serializer.fromJson<String>(json['source']),
+      foodEvidenceJson: serializer.fromJson<String?>(json['foodEvidenceJson']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -3909,6 +3946,7 @@ class Food extends DataClass implements Insertable<Food> {
       'verified': serializer.toJson<bool>(verified),
       'isCustom': serializer.toJson<bool>(isCustom),
       'source': serializer.toJson<String>(source),
+      'foodEvidenceJson': serializer.toJson<String?>(foodEvidenceJson),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -3944,6 +3982,7 @@ class Food extends DataClass implements Insertable<Food> {
     bool? verified,
     bool? isCustom,
     String? source,
+    Value<String?> foodEvidenceJson = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -3976,6 +4015,9 @@ class Food extends DataClass implements Insertable<Food> {
     verified: verified ?? this.verified,
     isCustom: isCustom ?? this.isCustom,
     source: source ?? this.source,
+    foodEvidenceJson: foodEvidenceJson.present
+        ? foodEvidenceJson.value
+        : this.foodEvidenceJson,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -4020,6 +4062,9 @@ class Food extends DataClass implements Insertable<Food> {
       verified: data.verified.present ? data.verified.value : this.verified,
       isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
       source: data.source.present ? data.source.value : this.source,
+      foodEvidenceJson: data.foodEvidenceJson.present
+          ? data.foodEvidenceJson.value
+          : this.foodEvidenceJson,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -4059,6 +4104,7 @@ class Food extends DataClass implements Insertable<Food> {
           ..write('verified: $verified, ')
           ..write('isCustom: $isCustom, ')
           ..write('source: $source, ')
+          ..write('foodEvidenceJson: $foodEvidenceJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4096,6 +4142,7 @@ class Food extends DataClass implements Insertable<Food> {
     verified,
     isCustom,
     source,
+    foodEvidenceJson,
     createdAt,
     updatedAt,
     deletedAt,
@@ -4132,6 +4179,7 @@ class Food extends DataClass implements Insertable<Food> {
           other.verified == this.verified &&
           other.isCustom == this.isCustom &&
           other.source == this.source &&
+          other.foodEvidenceJson == this.foodEvidenceJson &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -4166,6 +4214,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
   final Value<bool> verified;
   final Value<bool> isCustom;
   final Value<String> source;
+  final Value<String?> foodEvidenceJson;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -4198,6 +4247,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.verified = const Value.absent(),
     this.isCustom = const Value.absent(),
     this.source = const Value.absent(),
+    this.foodEvidenceJson = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -4231,6 +4281,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.verified = const Value.absent(),
     this.isCustom = const Value.absent(),
     this.source = const Value.absent(),
+    this.foodEvidenceJson = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -4268,6 +4319,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Expression<bool>? verified,
     Expression<bool>? isCustom,
     Expression<String>? source,
+    Expression<String>? foodEvidenceJson,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -4302,6 +4354,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       if (verified != null) 'verified': verified,
       if (isCustom != null) 'is_custom': isCustom,
       if (source != null) 'source': source,
+      if (foodEvidenceJson != null) 'food_evidence_json': foodEvidenceJson,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -4337,6 +4390,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Value<bool>? verified,
     Value<bool>? isCustom,
     Value<String>? source,
+    Value<String?>? foodEvidenceJson,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -4370,6 +4424,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       verified: verified ?? this.verified,
       isCustom: isCustom ?? this.isCustom,
       source: source ?? this.source,
+      foodEvidenceJson: foodEvidenceJson ?? this.foodEvidenceJson,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -4459,6 +4514,9 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     if (source.present) {
       map['source'] = Variable<String>(source.value);
     }
+    if (foodEvidenceJson.present) {
+      map['food_evidence_json'] = Variable<String>(foodEvidenceJson.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4506,6 +4564,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
           ..write('verified: $verified, ')
           ..write('isCustom: $isCustom, ')
           ..write('source: $source, ')
+          ..write('foodEvidenceJson: $foodEvidenceJson, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -5364,6 +5423,17 @@ class $MealItemsTable extends MealItems
         requiredDuringInsert: false,
         defaultValue: const Constant('local'),
       );
+  static const VerificationMeta _foodEvidenceJsonMeta = const VerificationMeta(
+    'foodEvidenceJson',
+  );
+  @override
+  late final GeneratedColumn<String> foodEvidenceJson = GeneratedColumn<String>(
+    'food_evidence_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _foodVerifiedSnapshotMeta =
       const VerificationMeta('foodVerifiedSnapshot');
   @override
@@ -5482,6 +5552,7 @@ class $MealItemsTable extends MealItems
     sugar,
     nutrientEvidenceMask,
     foodSourceSnapshot,
+    foodEvidenceJson,
     foodVerifiedSnapshot,
     servingSizeSnapshot,
     servingUnitSnapshot,
@@ -5621,6 +5692,15 @@ class $MealItemsTable extends MealItems
         foodSourceSnapshot.isAcceptableOrUnknown(
           data['food_source_snapshot']!,
           _foodSourceSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('food_evidence_json')) {
+      context.handle(
+        _foodEvidenceJsonMeta,
+        foodEvidenceJson.isAcceptableOrUnknown(
+          data['food_evidence_json']!,
+          _foodEvidenceJsonMeta,
         ),
       );
     }
@@ -5766,6 +5846,10 @@ class $MealItemsTable extends MealItems
         DriftSqlType.string,
         data['${effectivePrefix}food_source_snapshot'],
       )!,
+      foodEvidenceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}food_evidence_json'],
+      ),
       foodVerifiedSnapshot: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}food_verified_snapshot'],
@@ -5829,6 +5913,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
 
   /// Immutable evidence captured when the food is added to the meal.
   final String foodSourceSnapshot;
+
+  /// Versioned, immutable Food V2 basis, quantity and provenance. Null means
+  /// a legacy item; it must never be backfilled from today's mutable catalog.
+  final String? foodEvidenceJson;
   final bool foodVerifiedSnapshot;
   final double servingSizeSnapshot;
   final String servingUnitSnapshot;
@@ -5857,6 +5945,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.sugar,
     required this.nutrientEvidenceMask,
     required this.foodSourceSnapshot,
+    this.foodEvidenceJson,
     required this.foodVerifiedSnapshot,
     required this.servingSizeSnapshot,
     required this.servingUnitSnapshot,
@@ -5888,6 +5977,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     map['sugar'] = Variable<double>(sugar);
     map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask);
     map['food_source_snapshot'] = Variable<String>(foodSourceSnapshot);
+    if (!nullToAbsent || foodEvidenceJson != null) {
+      map['food_evidence_json'] = Variable<String>(foodEvidenceJson);
+    }
     map['food_verified_snapshot'] = Variable<bool>(foodVerifiedSnapshot);
     map['serving_size_snapshot'] = Variable<double>(servingSizeSnapshot);
     map['serving_unit_snapshot'] = Variable<String>(servingUnitSnapshot);
@@ -5922,6 +6014,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       sugar: Value(sugar),
       nutrientEvidenceMask: Value(nutrientEvidenceMask),
       foodSourceSnapshot: Value(foodSourceSnapshot),
+      foodEvidenceJson: foodEvidenceJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(foodEvidenceJson),
       foodVerifiedSnapshot: Value(foodVerifiedSnapshot),
       servingSizeSnapshot: Value(servingSizeSnapshot),
       servingUnitSnapshot: Value(servingUnitSnapshot),
@@ -5964,6 +6059,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       foodSourceSnapshot: serializer.fromJson<String>(
         json['foodSourceSnapshot'],
       ),
+      foodEvidenceJson: serializer.fromJson<String?>(json['foodEvidenceJson']),
       foodVerifiedSnapshot: serializer.fromJson<bool>(
         json['foodVerifiedSnapshot'],
       ),
@@ -6003,6 +6099,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'sugar': serializer.toJson<double>(sugar),
       'nutrientEvidenceMask': serializer.toJson<int>(nutrientEvidenceMask),
       'foodSourceSnapshot': serializer.toJson<String>(foodSourceSnapshot),
+      'foodEvidenceJson': serializer.toJson<String?>(foodEvidenceJson),
       'foodVerifiedSnapshot': serializer.toJson<bool>(foodVerifiedSnapshot),
       'servingSizeSnapshot': serializer.toJson<double>(servingSizeSnapshot),
       'servingUnitSnapshot': serializer.toJson<String>(servingUnitSnapshot),
@@ -6034,6 +6131,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     double? sugar,
     int? nutrientEvidenceMask,
     String? foodSourceSnapshot,
+    Value<String?> foodEvidenceJson = const Value.absent(),
     bool? foodVerifiedSnapshot,
     double? servingSizeSnapshot,
     String? servingUnitSnapshot,
@@ -6062,6 +6160,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     sugar: sugar ?? this.sugar,
     nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
     foodSourceSnapshot: foodSourceSnapshot ?? this.foodSourceSnapshot,
+    foodEvidenceJson: foodEvidenceJson.present
+        ? foodEvidenceJson.value
+        : this.foodEvidenceJson,
     foodVerifiedSnapshot: foodVerifiedSnapshot ?? this.foodVerifiedSnapshot,
     servingSizeSnapshot: servingSizeSnapshot ?? this.servingSizeSnapshot,
     servingUnitSnapshot: servingUnitSnapshot ?? this.servingUnitSnapshot,
@@ -6098,6 +6199,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       foodSourceSnapshot: data.foodSourceSnapshot.present
           ? data.foodSourceSnapshot.value
           : this.foodSourceSnapshot,
+      foodEvidenceJson: data.foodEvidenceJson.present
+          ? data.foodEvidenceJson.value
+          : this.foodEvidenceJson,
       foodVerifiedSnapshot: data.foodVerifiedSnapshot.present
           ? data.foodVerifiedSnapshot.value
           : this.foodVerifiedSnapshot,
@@ -6139,6 +6243,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('sugar: $sugar, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('foodSourceSnapshot: $foodSourceSnapshot, ')
+          ..write('foodEvidenceJson: $foodEvidenceJson, ')
           ..write('foodVerifiedSnapshot: $foodVerifiedSnapshot, ')
           ..write('servingSizeSnapshot: $servingSizeSnapshot, ')
           ..write('servingUnitSnapshot: $servingUnitSnapshot, ')
@@ -6172,6 +6277,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     sugar,
     nutrientEvidenceMask,
     foodSourceSnapshot,
+    foodEvidenceJson,
     foodVerifiedSnapshot,
     servingSizeSnapshot,
     servingUnitSnapshot,
@@ -6204,6 +6310,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.sugar == this.sugar &&
           other.nutrientEvidenceMask == this.nutrientEvidenceMask &&
           other.foodSourceSnapshot == this.foodSourceSnapshot &&
+          other.foodEvidenceJson == this.foodEvidenceJson &&
           other.foodVerifiedSnapshot == this.foodVerifiedSnapshot &&
           other.servingSizeSnapshot == this.servingSizeSnapshot &&
           other.servingUnitSnapshot == this.servingUnitSnapshot &&
@@ -6234,6 +6341,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<double> sugar;
   final Value<int> nutrientEvidenceMask;
   final Value<String> foodSourceSnapshot;
+  final Value<String?> foodEvidenceJson;
   final Value<bool> foodVerifiedSnapshot;
   final Value<double> servingSizeSnapshot;
   final Value<String> servingUnitSnapshot;
@@ -6262,6 +6370,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.sugar = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
     this.foodSourceSnapshot = const Value.absent(),
+    this.foodEvidenceJson = const Value.absent(),
     this.foodVerifiedSnapshot = const Value.absent(),
     this.servingSizeSnapshot = const Value.absent(),
     this.servingUnitSnapshot = const Value.absent(),
@@ -6291,6 +6400,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.sugar = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
     this.foodSourceSnapshot = const Value.absent(),
+    this.foodEvidenceJson = const Value.absent(),
     this.foodVerifiedSnapshot = const Value.absent(),
     this.servingSizeSnapshot = const Value.absent(),
     this.servingUnitSnapshot = const Value.absent(),
@@ -6321,6 +6431,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<double>? sugar,
     Expression<int>? nutrientEvidenceMask,
     Expression<String>? foodSourceSnapshot,
+    Expression<String>? foodEvidenceJson,
     Expression<bool>? foodVerifiedSnapshot,
     Expression<double>? servingSizeSnapshot,
     Expression<String>? servingUnitSnapshot,
@@ -6352,6 +6463,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
         'nutrient_evidence_mask': nutrientEvidenceMask,
       if (foodSourceSnapshot != null)
         'food_source_snapshot': foodSourceSnapshot,
+      if (foodEvidenceJson != null) 'food_evidence_json': foodEvidenceJson,
       if (foodVerifiedSnapshot != null)
         'food_verified_snapshot': foodVerifiedSnapshot,
       if (servingSizeSnapshot != null)
@@ -6386,6 +6498,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<double>? sugar,
     Value<int>? nutrientEvidenceMask,
     Value<String>? foodSourceSnapshot,
+    Value<String?>? foodEvidenceJson,
     Value<bool>? foodVerifiedSnapshot,
     Value<double>? servingSizeSnapshot,
     Value<String>? servingUnitSnapshot,
@@ -6415,6 +6528,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       sugar: sugar ?? this.sugar,
       nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
       foodSourceSnapshot: foodSourceSnapshot ?? this.foodSourceSnapshot,
+      foodEvidenceJson: foodEvidenceJson ?? this.foodEvidenceJson,
       foodVerifiedSnapshot: foodVerifiedSnapshot ?? this.foodVerifiedSnapshot,
       servingSizeSnapshot: servingSizeSnapshot ?? this.servingSizeSnapshot,
       servingUnitSnapshot: servingUnitSnapshot ?? this.servingUnitSnapshot,
@@ -6486,6 +6600,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     if (foodSourceSnapshot.present) {
       map['food_source_snapshot'] = Variable<String>(foodSourceSnapshot.value);
     }
+    if (foodEvidenceJson.present) {
+      map['food_evidence_json'] = Variable<String>(foodEvidenceJson.value);
+    }
     if (foodVerifiedSnapshot.present) {
       map['food_verified_snapshot'] = Variable<bool>(
         foodVerifiedSnapshot.value,
@@ -6541,6 +6658,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('sugar: $sugar, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('foodSourceSnapshot: $foodSourceSnapshot, ')
+          ..write('foodEvidenceJson: $foodEvidenceJson, ')
           ..write('foodVerifiedSnapshot: $foodVerifiedSnapshot, ')
           ..write('servingSizeSnapshot: $servingSizeSnapshot, ')
           ..write('servingUnitSnapshot: $servingUnitSnapshot, ')
@@ -16206,6 +16324,7 @@ typedef $$FoodsTableCreateCompanionBuilder =
       Value<bool> verified,
       Value<bool> isCustom,
       Value<String> source,
+      Value<String?> foodEvidenceJson,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -16240,6 +16359,7 @@ typedef $$FoodsTableUpdateCompanionBuilder =
       Value<bool> verified,
       Value<bool> isCustom,
       Value<String> source,
+      Value<String?> foodEvidenceJson,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -16441,6 +16561,11 @@ class $$FoodsTableFilterComposer extends Composer<_$AppDatabase, $FoodsTable> {
 
   ColumnFilters<String> get source => $composableBuilder(
     column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get foodEvidenceJson => $composableBuilder(
+    column: $table.foodEvidenceJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16684,6 +16809,11 @@ class $$FoodsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get foodEvidenceJson => $composableBuilder(
+    column: $table.foodEvidenceJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -16806,6 +16936,11 @@ class $$FoodsTableAnnotationComposer
 
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get foodEvidenceJson => $composableBuilder(
+    column: $table.foodEvidenceJson,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -16958,6 +17093,7 @@ class $$FoodsTableTableManager
                 Value<bool> verified = const Value.absent(),
                 Value<bool> isCustom = const Value.absent(),
                 Value<String> source = const Value.absent(),
+                Value<String?> foodEvidenceJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -16990,6 +17126,7 @@ class $$FoodsTableTableManager
                 verified: verified,
                 isCustom: isCustom,
                 source: source,
+                foodEvidenceJson: foodEvidenceJson,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -17024,6 +17161,7 @@ class $$FoodsTableTableManager
                 Value<bool> verified = const Value.absent(),
                 Value<bool> isCustom = const Value.absent(),
                 Value<String> source = const Value.absent(),
+                Value<String?> foodEvidenceJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -17056,6 +17194,7 @@ class $$FoodsTableTableManager
                 verified: verified,
                 isCustom: isCustom,
                 source: source,
+                foodEvidenceJson: foodEvidenceJson,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -17586,6 +17725,7 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       Value<double> sugar,
       Value<int> nutrientEvidenceMask,
       Value<String> foodSourceSnapshot,
+      Value<String?> foodEvidenceJson,
       Value<bool> foodVerifiedSnapshot,
       Value<double> servingSizeSnapshot,
       Value<String> servingUnitSnapshot,
@@ -17616,6 +17756,7 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<double> sugar,
       Value<int> nutrientEvidenceMask,
       Value<String> foodSourceSnapshot,
+      Value<String?> foodEvidenceJson,
       Value<bool> foodVerifiedSnapshot,
       Value<double> servingSizeSnapshot,
       Value<String> servingUnitSnapshot,
@@ -17756,6 +17897,11 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<String> get foodSourceSnapshot => $composableBuilder(
     column: $table.foodSourceSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get foodEvidenceJson => $composableBuilder(
+    column: $table.foodEvidenceJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17940,6 +18086,11 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get foodEvidenceJson => $composableBuilder(
+    column: $table.foodEvidenceJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get foodVerifiedSnapshot => $composableBuilder(
     column: $table.foodVerifiedSnapshot,
     builder: (column) => ColumnOrderings(column),
@@ -18093,6 +18244,11 @@ class $$MealItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get foodEvidenceJson => $composableBuilder(
+    column: $table.foodEvidenceJson,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get foodVerifiedSnapshot => $composableBuilder(
     column: $table.foodVerifiedSnapshot,
     builder: (column) => column,
@@ -18219,6 +18375,7 @@ class $$MealItemsTableTableManager
                 Value<double> sugar = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<String> foodSourceSnapshot = const Value.absent(),
+                Value<String?> foodEvidenceJson = const Value.absent(),
                 Value<bool> foodVerifiedSnapshot = const Value.absent(),
                 Value<double> servingSizeSnapshot = const Value.absent(),
                 Value<String> servingUnitSnapshot = const Value.absent(),
@@ -18247,6 +18404,7 @@ class $$MealItemsTableTableManager
                 sugar: sugar,
                 nutrientEvidenceMask: nutrientEvidenceMask,
                 foodSourceSnapshot: foodSourceSnapshot,
+                foodEvidenceJson: foodEvidenceJson,
                 foodVerifiedSnapshot: foodVerifiedSnapshot,
                 servingSizeSnapshot: servingSizeSnapshot,
                 servingUnitSnapshot: servingUnitSnapshot,
@@ -18277,6 +18435,7 @@ class $$MealItemsTableTableManager
                 Value<double> sugar = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<String> foodSourceSnapshot = const Value.absent(),
+                Value<String?> foodEvidenceJson = const Value.absent(),
                 Value<bool> foodVerifiedSnapshot = const Value.absent(),
                 Value<double> servingSizeSnapshot = const Value.absent(),
                 Value<String> servingUnitSnapshot = const Value.absent(),
@@ -18305,6 +18464,7 @@ class $$MealItemsTableTableManager
                 sugar: sugar,
                 nutrientEvidenceMask: nutrientEvidenceMask,
                 foodSourceSnapshot: foodSourceSnapshot,
+                foodEvidenceJson: foodEvidenceJson,
                 foodVerifiedSnapshot: foodVerifiedSnapshot,
                 servingSizeSnapshot: servingSizeSnapshot,
                 servingUnitSnapshot: servingUnitSnapshot,

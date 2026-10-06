@@ -88,10 +88,12 @@ final class CoachNativeCommandRepository {
         ...validated,
         'occurredAt':
             (kind == CoachNativeCommandKind.water
-                    ? DateTime.fromMillisecondsSinceEpoch(
-                        now.millisecondsSinceEpoch ~/ 1000 * 1000,
-                        isUtc: now.isUtc,
-                      )
+                    ? validated['date'] != null
+                          ? DateTime.parse(validated['date']! as String)
+                          : DateTime.fromMillisecondsSinceEpoch(
+                              now.millisecondsSinceEpoch ~/ 1000 * 1000,
+                              isUtc: now.isUtc,
+                            )
                     : now)
                 .toIso8601String(),
       };

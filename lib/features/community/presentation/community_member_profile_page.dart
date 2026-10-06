@@ -66,7 +66,7 @@ class _CommunityMemberProfilePageState
   bool _loadingMoreReviews = false;
   int _loadGeneration = 0;
   bool _refreshing = false;
-  bool _gridMode = true;
+  bool _gridMode = false;
   bool _relationshipBusy = false;
   bool _followBusy = false;
   bool _managingPost = false;
@@ -143,7 +143,7 @@ class _CommunityMemberProfilePageState
               limit: _pageSize,
             ),
             profile.isSelf
-                ? repository.listMyCommunityDrafts(limit: 5)
+                ? repository.listMyCommunityDrafts(limit: 50)
                 : Future<List<CommunityDraftSummary>>.value(
                     const <CommunityDraftSummary>[],
                   ),
@@ -366,8 +366,21 @@ class _CommunityMemberProfilePageState
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    key: const Key('community-member-profile-page'),
+    bottomNavigationBar: BilReferenceBottomBar(
+      selected: 3,
+      dark: Theme.of(context).brightness == Brightness.dark,
+      onSelected: (index) {
+        if (index == 2) {
+          unawaited(showBilQuickAdd(context, originPath: '/community'));
+        } else {
+          context.go(BilReferenceBottomBar.routes[index]);
+        }
+      },
+    ),
     appBar: AppBar(
-      title: Text(communityText(context, 'Community profile', 'ملف المجتمع')),
+      leading: const CommunityReturnButton(),
+      toolbarHeight: 48,
       actions: [
         IconButton(
           tooltip: _gridMode
@@ -424,7 +437,7 @@ class _CommunityMemberProfilePageState
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        padding: const EdgeInsets.only(bottom: 8),
                         child: _CommunityMemberProfileHeader(
                           visit: visit,
                           profile: profile,
@@ -444,6 +457,8 @@ class _CommunityMemberProfilePageState
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                           child: _CommunitySelfQuickActions(
                             draftCount: _draftSummaries.length,
+                            draftCountIsLowerBound:
+                                _draftSummaries.length == 50,
                             statsAvailable: _creator != null,
                             onPosts: () {
                               if (!visit.isCurrent()) return;

@@ -21,35 +21,23 @@ class DailyMealDetailSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = meal?.items ?? const <MealItem>[];
-    final calories = items.fold<double>(
-      0,
-      (total, item) => total + item.calories,
+    final evidence = DailyLogNutritionEvidence.forItems(
+      items,
+      ownerKey: meal?.ownerKey,
     );
-    final protein = items.fold<double>(
-      0,
-      (total, item) => total + item.protein,
-    );
-    final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
-    final fat = items.fold<double>(0, (total, item) => total + item.fats);
-    double targetProgress(double consumed, double? goal) =>
-        goal == null || !goal.isFinite || goal <= 0
+    double? total(TrackedNutrient nutrient) =>
+        evidence.total(nutrient, emptyAsZero: true);
+    final calories = total(TrackedNutrient.calories);
+    final protein = total(TrackedNutrient.protein);
+    final carbs = total(TrackedNutrient.carbohydrates);
+    final fat = total(TrackedNutrient.fat);
+    double targetProgress(double? consumed, double? goal) =>
+        consumed == null || goal == null || !goal.isFinite || goal <= 0
         ? 0
         : (consumed / goal).clamp(0.0, 1.0).toDouble();
-    final sodium = knownNutrientTotal(
-      items,
-      TrackedNutrient.sodium,
-      (item) => item.sodium,
-    );
-    final potassium = knownNutrientTotal(
-      items,
-      TrackedNutrient.potassium,
-      (item) => item.potassium,
-    );
-    final magnesium = knownNutrientTotal(
-      items,
-      TrackedNutrient.magnesium,
-      (item) => item.magnesium,
-    );
+    final sodium = evidence.total(TrackedNutrient.sodium);
+    final potassium = evidence.total(TrackedNutrient.potassium);
+    final magnesium = evidence.total(TrackedNutrient.magnesium);
     final scheme = Theme.of(context).colorScheme;
     return Container(
       key: const Key('daily-meal-detail-summary'),
@@ -171,7 +159,7 @@ class _MealMacroDial extends StatelessWidget {
   });
 
   final String label;
-  final double grams;
+  final double? grams;
   final double? goalGrams;
   final double progress;
   final Color color;
@@ -180,17 +168,21 @@ class _MealMacroDial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
-    final displayValue = displayPercent
+    final displayValue = grams == null
+        ? '—'
+        : displayPercent
         ? hasGoal
-              ? '${(grams / goalGrams! * 100).round()}%'
+              ? '${(grams! / goalGrams! * 100).round()}%'
               : '—'
-        : '${formatDiaryMacroGrams(grams)} g';
+        : '${formatDiaryMacroGrams(grams!)} g';
     return Semantics(
-      value: displayPercent
+      value: grams == null
+          ? context.strings.text('Unavailable')
+          : displayPercent
           ? displayValue
           : hasGoal
-          ? '${formatDiaryMacroGrams(grams)} / ${formatDiaryMacroGrams(goalGrams!)} g'
-          : '${formatDiaryMacroGrams(grams)} g',
+          ? '${formatDiaryMacroGrams(grams!)} / ${formatDiaryMacroGrams(goalGrams!)} g'
+          : '${formatDiaryMacroGrams(grams!)} g',
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
         child: Column(
@@ -201,12 +193,15 @@ class _MealMacroDial extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 6,
-                    color: color,
-                    backgroundColor: color.withValues(alpha: .13),
-                    strokeCap: StrokeCap.round,
+                  ExcludeSemantics(
+                    excluding: grams == null || !hasGoal,
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 6,
+                      color: color,
+                      backgroundColor: color.withValues(alpha: .13),
+                      strokeCap: StrokeCap.round,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(9),

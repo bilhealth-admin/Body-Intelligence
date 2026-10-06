@@ -56,6 +56,7 @@ extension _FoodLogActions on _FoodLogPageState {
               date: ref.read(selectedLogDateProvider),
               mealType: mealType,
               items: [(foodId: food.id, quantity: quantity)],
+              quantitiesInGrams: false,
             );
         try {
           await ref.read(foodRepositoryProvider).recordRecent(food.id);

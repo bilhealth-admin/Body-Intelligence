@@ -1,4 +1,5 @@
 import '../../../data/database/app_database.dart';
+import '../../../data/database/food_basis_evidence.dart';
 import '../domain/unified_food.dart';
 
 abstract interface class DatabaseFoodAdapter {
@@ -13,7 +14,8 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
 
   @override
   UnifiedFood adapt(Food food) {
-    final source = sourceFor(food);
+    final evidence = FoodBasisEvidence.read(food);
+    final snapshot = evidence.snapshot;
     return UnifiedFood(
       id: food.uuid,
       localId: food.id,
@@ -29,82 +31,44 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
       serving: FoodServing(
         amount: food.servingSize,
         unit: food.servingUnit,
-        grams: _servingGrams(food.servingSize, food.servingUnit),
+        grams: evidence.isModern
+            ? evidence.basisGrams ?? 0
+            : _servingGrams(food.servingSize, food.servingUnit),
       ),
       nutrients: <FoodNutrient, NutrientAmount>{
-        FoodNutrient.calories: _core(
-          food,
-          FoodNutrient.calories,
-          food.calories,
-        ),
-        FoodNutrient.protein: _core(food, FoodNutrient.protein, food.protein),
-        FoodNutrient.carbohydrates: _core(
-          food,
-          FoodNutrient.carbohydrates,
-          food.carbs,
-        ),
-        FoodNutrient.fat: _core(food, FoodNutrient.fat, food.fats),
-        FoodNutrient.fiber: _optional(food, FoodNutrient.fiber, food.fiber),
-        FoodNutrient.sugar: _optional(food, FoodNutrient.sugar, food.sugar),
-        FoodNutrient.sodium: _optional(food, FoodNutrient.sodium, food.sodium),
-        FoodNutrient.potassium: _optional(
-          food,
-          FoodNutrient.potassium,
-          food.potassium,
-        ),
-        FoodNutrient.calcium: _optional(
-          food,
-          FoodNutrient.calcium,
-          food.calcium,
-        ),
-        FoodNutrient.magnesium: _optional(
-          food,
-          FoodNutrient.magnesium,
-          food.magnesium,
-        ),
-        FoodNutrient.phosphorus: _optional(
-          food,
-          FoodNutrient.phosphorus,
-          food.phosphorus,
-        ),
-        FoodNutrient.iron: NutrientAmount.known(food.iron),
-        FoodNutrient.vitaminC: NutrientAmount.known(food.vitaminC),
+        for (final nutrient in FoodNutrient.values)
+          nutrient: switch (evidence.value(nutrient)) {
+            final double value => NutrientAmount.known(value),
+            null => const NutrientAmount.missing(),
+          },
       },
-      source: source,
-      sourceLabel: food.source,
-      verified: food.verified,
+      // The legacy source enum cannot grant a modern snapshot foundation or
+      // verified status. Its exact provenance stays in the validated envelope.
+      source: evidence.isModern ? FoodDataSource.unknown : sourceFor(food),
+      sourceLabel: evidence.isModern
+          ? snapshot == null
+                ? 'unknown'
+                : FoodBasisEvidence.sourceLabel(snapshot)
+          : food.source,
+      verified: !evidence.isModern && food.verified,
       isCustom: food.isCustom,
       updatedAt: food.updatedAt,
     );
   }
 
-  NutrientAmount _optional(Food food, FoodNutrient nutrient, double value) {
-    return UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient)
-        ? NutrientAmount.known(value)
-        : const NutrientAmount.missing();
-  }
-
-  NutrientAmount _core(Food food, FoodNutrient nutrient, double value) {
-    // Quick Add records carry an explicit per-field evidence mask so an empty
-    // field remains unknown while a user-entered zero remains known.
-    if (food.source == 'quick_add' || food.source.startsWith('BIL community')) {
-      return UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient)
-          ? NutrientAmount.known(value)
-          : const NutrientAmount.missing();
-    }
-    // Older bundled and user-created rows predate core evidence bits. Their
-    // required macro columns are authoritative. Downloaded catalog rows must
-    // prove each value instead of turning missing data into a numeric zero.
-    if (food.source != 'bil-mobile-catalog' ||
-        UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient) ||
-        value != 0) {
-      return NutrientAmount.known(value);
-    }
-    return const NutrientAmount.missing();
-  }
-
   double _servingGrams(double amount, String unit) {
+    if (!amount.isFinite || amount <= 0) return 0;
     switch (unit.trim().toLowerCase()) {
+      case 'g':
+      case 'gm':
+      case 'gms':
+      case 'gram':
+      case 'grams':
+      case 'غ':
+      case 'غرام':
+      case 'جرام':
+      case 'جم':
+        return amount;
       case 'kg':
       case 'kgs':
       case 'kilogram':
@@ -126,7 +90,10 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
       case 'milligrams':
         return amount / 1000;
       default:
-        return amount;
+        // FoodServing has no nullable gram field. Its established zero basis
+        // is unavailable and rejected by calculation/serving engines. Volume
+        // or count needs a supported density/portion, never an implicit 1 g.
+        return 0;
     }
   }
 }

@@ -45,18 +45,18 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   });
 
   final bool arabic;
-  final int caloriesConsumed;
+  final int? caloriesConsumed;
   final int caloriesGoal;
   final int baseCaloriesGoal;
   final int caloriesBurned;
-  final int netCalories;
+  final int? netCalories;
   final int? remainingCalories;
   final bool burnedCaloriesApplied;
-  final int proteinConsumed;
+  final int? proteinConsumed;
   final int proteinGoal;
-  final int carbohydratesConsumed;
+  final int? carbohydratesConsumed;
   final int carbohydratesGoal;
-  final int fatConsumed;
+  final int? fatConsumed;
   final int fatGoal;
   final int? fiberGoal;
   final int? sodiumGoal;

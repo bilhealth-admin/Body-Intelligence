@@ -20,7 +20,7 @@ class _RecordingDecisionAuthority implements DashboardDecisionAuthority {
   BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,

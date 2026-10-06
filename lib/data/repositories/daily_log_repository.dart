@@ -4,7 +4,9 @@ import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
+import '../database/database_scope.dart';
 import '../database/nutrient_evidence.dart';
+import '../database/meal_food_evidence.dart';
 
 enum DayLifecycleState { notStarted, open, closed }
 
@@ -291,50 +293,44 @@ class DailyLogRepository {
         : await (_database.select(_database.mealItems)
                 ..where((row) => row.mealId.isIn(ids) & row.deletedAt.isNull()))
               .get();
-    final allFiberKnown =
-        items.isNotEmpty &&
-        items.every(
-          (item) => NutrientEvidenceMask.contains(
-            item.nutrientEvidenceMask,
-            TrackedNutrient.fiber,
-          ),
-        );
-    double sum(double Function(MealItem) select) =>
-        items.fold(0, (total, item) => total + select(item));
-    double? sumCore(
-      TrackedNutrient nutrient,
-      double Function(MealItem) select,
-    ) =>
-        items.isNotEmpty &&
-            items.every(
-              (item) => NutrientEvidenceMask.coreIsKnown(
-                mask: item.nutrientEvidenceMask,
-                source: item.foodSourceSnapshot,
-                nutrient: nutrient,
-                value: select(item),
-              ),
-            )
-        ? sum(select)
-        : null;
-    final carbs = sumCore(TrackedNutrient.carbohydrates, (item) => item.carbs);
-    final fiber = allFiberKnown ? sum((item) => item.fiber) : null;
+    final ownerKey = LocalDatabaseScope.keyForOwner(_database.localOwnerId);
+    final evidence = items
+        .map((item) => MealFoodEvidence.read(item, ownerKey: ownerKey))
+        .toList(growable: false);
+    double? total(TrackedNutrient nutrient) {
+      if (evidence.isEmpty) return null;
+      var result = 0.0;
+      for (final row in evidence) {
+        final value = row.value(nutrient);
+        if (value == null) return null;
+        result += value;
+      }
+      return result;
+    }
+
+    final carbs = total(TrackedNutrient.carbohydrates);
+    final fiber = total(TrackedNutrient.fiber);
     return AuthoritativeDailyLedger(
       date: date,
       state: log == null
           ? DayLifecycleState.notStarted
           : DayLifecycleState.open,
       weightKg: weight?.weight,
-      calories: sumCore(TrackedNutrient.calories, (item) => item.calories),
-      protein: sumCore(TrackedNutrient.protein, (item) => item.protein),
+      calories: total(TrackedNutrient.calories),
+      protein: total(TrackedNutrient.protein),
       carbohydrates: carbs,
-      fat: sumCore(TrackedNutrient.fat, (item) => item.fats),
+      fat: total(TrackedNutrient.fat),
       fiber: fiber,
       netCarbohydrates: carbs != null && fiber != null
           ? (carbs - fiber).clamp(0, double.infinity)
           : null,
       evidenceCompleteness: items.isEmpty
           ? 0
-          : items.where((item) => item.nutrientEvidenceMask != 0).length /
+          : evidence
+                    .where(
+                      (row) => row.values.values.any((value) => value != null),
+                    )
+                    .length /
                 items.length,
     );
   }

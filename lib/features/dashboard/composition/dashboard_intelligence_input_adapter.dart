@@ -1,5 +1,6 @@
 import '../../../data/database/app_database.dart';
 import '../../../data/database/date_keys.dart';
+import '../../../data/database/meal_food_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../../engine/plan_engine.dart';
@@ -138,10 +139,17 @@ final class DashboardIntelligenceInputAdapter {
             DashboardMealItemInput(
               calories: item.calories,
               protein: item.protein,
+              carbohydrates: item.carbs,
               fats: item.fats,
               sodium: item.sodium,
               fiber: item.fiber,
+              potassium: item.potassium,
+              source: item.foodSourceSnapshot,
               nutrientEvidenceMask: item.nutrientEvidenceMask,
+              evidenceValues: MealFoodEvidence.read(
+                item,
+                ownerKey: row.ownerKey,
+              ).values,
             ),
         ],
       );

@@ -48,6 +48,10 @@ class MealItems extends Table {
   TextColumn get foodSourceSnapshot =>
       text().withDefault(const Constant('local'))();
 
+  /// Versioned, immutable Food V2 basis, quantity and provenance. Null means
+  /// a legacy item; it must never be backfilled from today's mutable catalog.
+  TextColumn get foodEvidenceJson => text().nullable()();
+
   BoolColumn get foodVerifiedSnapshot =>
       boolean().withDefault(const Constant(false))();
 

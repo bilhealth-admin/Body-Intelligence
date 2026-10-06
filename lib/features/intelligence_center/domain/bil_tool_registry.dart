@@ -63,6 +63,8 @@ class BilToolDescriptor {
       case 'log_water':
         final amount = raw['amountMl'];
         if (amount is! int || amount < 1 || amount > 5000) return null;
+        final date = raw['date'];
+        if (date != null && !_isCanonicalDate(date)) return null;
       case 'log_weight':
         final weight = raw['weightKg'];
         if (weight is! num || !weight.isFinite || weight < 20 || weight > 500) {
@@ -368,7 +370,7 @@ class BilToolRegistry {
       risk: BilToolRisk.reversibleWrite,
       trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
       requiredArguments: {'amountMl'},
-      allowedArguments: {'amountMl'},
+      allowedArguments: {'amountMl', 'date'},
     ),
     'log_weight': BilToolDescriptor(
       name: 'log_weight',

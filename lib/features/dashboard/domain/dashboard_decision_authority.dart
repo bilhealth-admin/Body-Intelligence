@@ -8,7 +8,7 @@ abstract interface class DashboardDecisionAuthority {
   BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,
@@ -24,7 +24,7 @@ class LegacyDashboardDecisionAuthority implements DashboardDecisionAuthority {
   BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,
@@ -60,7 +60,7 @@ final class TrustedDashboardDecisionAuthority
   BestAction choose({
     required bool weighedToday,
     required bool loggingComplete,
-    required double protein,
+    required double? protein,
     required int proteinTarget,
     required int waterMl,
     required int waterTarget,

@@ -1,5 +1,6 @@
 import '../domain/daily_nutrition_intelligence.dart';
 import '../domain/dietary_preferences.dart';
+import '../../../engine/nutrient_evidence_engine.dart';
 
 class DailyNutritionIntelligenceEngine {
   const DailyNutritionIntelligenceEngine();
@@ -20,37 +21,67 @@ class DailyNutritionIntelligenceEngine {
     _validateTargets(targets);
 
     final materialized = List<DailyNutritionItemSnapshot>.unmodifiable(items);
-    double calories = 0;
-    double protein = 0;
-    double carbohydrates = 0;
-    double fat = 0;
     double fiber = 0;
     double sodium = 0;
     double potassium = 0;
-    var fiberEvidenceComplete = materialized.isNotEmpty;
-    var sodiumEvidenceComplete = materialized.isNotEmpty;
-    var potassiumEvidenceComplete = materialized.isNotEmpty;
 
     for (final item in materialized) {
       _validateItem(item);
-      calories += item.calories;
-      protein += item.protein;
-      carbohydrates += item.carbohydrates;
-      fat += item.fat;
       fiber += item.fiber;
       sodium += item.sodium;
       potassium += item.potassium;
-      fiberEvidenceComplete &= item.fiberKnown;
-      sodiumEvidenceComplete &= item.sodiumKnown;
-      potassiumEvidenceComplete &= item.potassiumKnown;
     }
-
-    final macroEnergy = protein * 4 + carbohydrates * 4 + fat * 9;
-    final proteinShare = macroEnergy > 0 ? protein * 4 / macroEnergy : null;
-    final carbohydrateShare = macroEnergy > 0
-        ? carbohydrates * 4 / macroEnergy
+    NutrientEvidenceReport evidence(
+      double Function(DailyNutritionItemSnapshot) value,
+      bool Function(DailyNutritionItemSnapshot) known,
+    ) => NutrientEvidenceEngine.total([
+      for (final item in materialized)
+        NutrientObservation(value: value(item), available: known(item)),
+    ]);
+    final calorieEvidence = evidence(
+      (item) => item.calories,
+      (item) => item.caloriesKnown,
+    );
+    final proteinEvidence = evidence(
+      (item) => item.protein,
+      (item) => item.proteinKnown,
+    );
+    final carbohydrateEvidence = evidence(
+      (item) => item.carbohydrates,
+      (item) => item.carbohydratesKnown,
+    );
+    final fatEvidence = evidence((item) => item.fat, (item) => item.fatKnown);
+    final fiberEvidence = evidence(
+      (item) => item.fiber,
+      (item) => item.fiberKnown,
+    );
+    final sodiumEvidence = evidence(
+      (item) => item.sodium,
+      (item) => item.sodiumKnown,
+    );
+    final potassiumEvidence = evidence(
+      (item) => item.potassium,
+      (item) => item.potassiumKnown,
+    );
+    final calories = calorieEvidence.completeTotal;
+    final protein = proteinEvidence.completeTotal;
+    final carbohydrates = carbohydrateEvidence.completeTotal;
+    final fat = fatEvidence.completeTotal;
+    final knownFiber = fiberEvidence.completeTotal;
+    final knownSodium = sodiumEvidence.completeTotal;
+    final knownPotassium = potassiumEvidence.completeTotal;
+    final macroEnergy = protein == null || carbohydrates == null || fat == null
+        ? null
+        : protein * 4 + carbohydrates * 4 + fat * 9;
+    final proteinShare = macroEnergy != null && macroEnergy > 0
+        ? protein! * 4 / macroEnergy
         : null;
-    final fatShare = macroEnergy > 0 ? fat * 9 / macroEnergy : null;
+    final carbohydrateShare = macroEnergy != null && macroEnergy > 0
+        ? carbohydrates! * 4 / macroEnergy
+        : null;
+    final fatShare = macroEnergy != null && macroEnergy > 0
+        ? fat! * 9 / macroEnergy
+        : null;
     final insights = <DailyNutritionInsight>[];
 
     if (materialized.isEmpty) {
@@ -62,7 +93,9 @@ class DailyNutritionIntelligenceEngine {
         ),
       );
     } else {
-      if (targets.calories > 0 && calories < targets.calories * 0.8) {
+      if (calories != null &&
+          targets.calories > 0 &&
+          calories < targets.calories * 0.8) {
         insights.add(
           DailyNutritionInsight(
             kind: DailyNutritionInsightKind.caloriesBelowTarget,
@@ -72,7 +105,9 @@ class DailyNutritionIntelligenceEngine {
             sourceIds: targets.sourceIds,
           ),
         );
-      } else if (targets.calories > 0 && calories > targets.calories * 1.1) {
+      } else if (calories != null &&
+          targets.calories > 0 &&
+          calories > targets.calories * 1.1) {
         insights.add(
           DailyNutritionInsight(
             kind: DailyNutritionInsightKind.caloriesAboveTarget,
@@ -84,7 +119,9 @@ class DailyNutritionIntelligenceEngine {
           ),
         );
       }
-      if (targets.protein > 0 && protein < targets.protein * 0.8) {
+      if (protein != null &&
+          targets.protein > 0 &&
+          protein < targets.protein * 0.8) {
         insights.add(
           DailyNutritionInsight(
             kind: DailyNutritionInsightKind.proteinBelowTarget,
@@ -96,9 +133,9 @@ class DailyNutritionIntelligenceEngine {
           ),
         );
       }
-      if (fiberEvidenceComplete &&
+      if (knownFiber != null &&
           targets.fiber > 0 &&
-          fiber < targets.fiber * 0.8) {
+          knownFiber < targets.fiber * 0.8) {
         insights.add(
           DailyNutritionInsight(
             kind: DailyNutritionInsightKind.fiberBelowTarget,
@@ -110,9 +147,9 @@ class DailyNutritionIntelligenceEngine {
           ),
         );
       }
-      if (sodiumEvidenceComplete &&
+      if (knownSodium != null &&
           targets.sodium > 0 &&
-          sodium > targets.sodium * 1.1) {
+          knownSodium > targets.sodium * 1.1) {
         insights.add(
           DailyNutritionInsight(
             kind: DailyNutritionInsightKind.sodiumAboveTarget,
@@ -123,9 +160,9 @@ class DailyNutritionIntelligenceEngine {
           ),
         );
       }
-      if (potassiumEvidenceComplete &&
+      if (knownPotassium != null &&
           targets.potassium > 0 &&
-          potassium < targets.potassium * 0.8) {
+          knownPotassium < targets.potassium * 0.8) {
         insights.add(
           DailyNutritionInsight(
             kind: DailyNutritionInsightKind.potassiumBelowTarget,
@@ -137,7 +174,7 @@ class DailyNutritionIntelligenceEngine {
           ),
         );
       }
-      if (!sodiumEvidenceComplete || !potassiumEvidenceComplete) {
+      if (knownSodium == null || knownPotassium == null) {
         insights.add(
           const DailyNutritionInsight(
             kind: DailyNutritionInsightKind.incompleteElectrolyteEvidence,
@@ -164,10 +201,13 @@ class DailyNutritionIntelligenceEngine {
     return DailyNutritionReport(
       mealCount: mealCount,
       itemCount: materialized.length,
-      calories: calories,
-      protein: protein,
-      carbohydrates: carbohydrates,
-      fat: fat,
+      calorieEvidence: calorieEvidence,
+      proteinEvidence: proteinEvidence,
+      carbohydrateEvidence: carbohydrateEvidence,
+      fatEvidence: fatEvidence,
+      fiberEvidence: fiberEvidence,
+      sodiumEvidence: sodiumEvidence,
+      potassiumEvidence: potassiumEvidence,
       fiber: fiber,
       sodium: sodium,
       potassium: potassium,
@@ -175,9 +215,6 @@ class DailyNutritionIntelligenceEngine {
       proteinEnergyShare: proteinShare,
       carbohydrateEnergyShare: carbohydrateShare,
       fatEnergyShare: fatShare,
-      fiberEvidenceComplete: fiberEvidenceComplete,
-      sodiumEvidenceComplete: sodiumEvidenceComplete,
-      potassiumEvidenceComplete: potassiumEvidenceComplete,
       insights: List<DailyNutritionInsight>.unmodifiable(insights),
     );
   }

@@ -156,9 +156,16 @@ class _ComposerRepository extends CommunityRepository {
   }
 
   @override
-  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
-  loadMyCommunityDraftPreview(String draftId) async =>
-      (draft: _draft(currentUserId), image: null);
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(
+    String draftId, {
+    int maxImages = 4,
+  }) async => (
+    draft: _draft(currentUserId),
+    images: const <CommunityPostImagePreview?>[],
+  );
 
   @override
   Future<

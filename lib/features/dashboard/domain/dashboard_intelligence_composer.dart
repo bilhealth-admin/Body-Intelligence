@@ -68,6 +68,10 @@ class DashboardMealItemInput {
     required this.sodium,
     required this.fiber,
     required this.nutrientEvidenceMask,
+    this.carbohydrates,
+    this.potassium,
+    this.source = 'local',
+    this.evidenceValues,
   });
 
   final double calories;
@@ -75,7 +79,76 @@ class DashboardMealItemInput {
   final double fats;
   final double sodium;
   final double fiber;
+  final double? carbohydrates;
+  final double? potassium;
+  final String source;
   final int nutrientEvidenceMask;
+  final Map<TrackedNutrient, double?>? evidenceValues;
+
+  NutrientObservation observe(TrackedNutrient nutrient) {
+    final explicit = evidenceValues;
+    if (explicit != null) {
+      final value = explicit[nutrient];
+      return NutrientObservation(
+        value: value ?? 0,
+        available: value != null && value.isFinite && value >= 0,
+      );
+    }
+    final value = switch (nutrient) {
+      TrackedNutrient.calories => calories,
+      TrackedNutrient.protein => protein,
+      TrackedNutrient.carbohydrates => carbohydrates,
+      TrackedNutrient.fat => fats,
+      TrackedNutrient.sodium => sodium,
+      TrackedNutrient.fiber => fiber,
+      TrackedNutrient.potassium => potassium,
+      _ => null,
+    };
+    if (value == null) {
+      return const NutrientObservation(value: 0, available: false);
+    }
+    return NutrientObservation(
+      value: value,
+      available:
+          value.isFinite &&
+          value >= 0 &&
+          NutrientEvidenceMask.isKnown(
+            mask: nutrientEvidenceMask,
+            source: source,
+            nutrient: nutrient,
+            value: value,
+          ),
+    );
+  }
+}
+
+/// Full intake and known subtotals remain separate through every consumer.
+class DashboardNutritionEvidence {
+  DashboardNutritionEvidence(Iterable<DashboardMealItemInput> items) {
+    final rows = items.toList(growable: false);
+    hasItems = rows.isNotEmpty;
+    _reports = Map.unmodifiable({
+      for (final nutrient in const [
+        TrackedNutrient.calories,
+        TrackedNutrient.protein,
+        TrackedNutrient.carbohydrates,
+        TrackedNutrient.fat,
+        TrackedNutrient.sodium,
+        TrackedNutrient.fiber,
+        TrackedNutrient.potassium,
+      ])
+        nutrient: NutrientEvidenceEngine.total([
+          for (final item in rows) item.observe(nutrient),
+        ]),
+    });
+  }
+
+  late final bool hasItems;
+  late final Map<TrackedNutrient, NutrientEvidenceReport> _reports;
+
+  NutrientEvidenceReport report(TrackedNutrient nutrient) =>
+      _reports[nutrient]!;
+  double? total(TrackedNutrient nutrient) => report(nutrient).completeTotal;
 }
 
 class DashboardMealInput {
@@ -149,13 +222,9 @@ class DashboardIntelligenceInput {
 
 class DashboardIntelligenceSnapshot {
   const DashboardIntelligenceSnapshot({
-    required this.calories,
-    required this.protein,
-    required this.fats,
-    required this.sodium,
+    required this.nutrition,
     required this.waterMl,
     required this.currentWeightKg,
-    required this.fiberEvidence,
     required this.bil,
     required this.bodyComposition,
     required this.effectiveTargets,
@@ -175,13 +244,16 @@ class DashboardIntelligenceSnapshot {
     required this.personalHealthAi,
   });
 
-  final double calories;
-  final double protein;
-  final double fats;
-  final double sodium;
+  final DashboardNutritionEvidence nutrition;
+  double? get calories => nutrition.total(TrackedNutrient.calories);
+  double? get protein => nutrition.total(TrackedNutrient.protein);
+  double? get carbohydrates => nutrition.total(TrackedNutrient.carbohydrates);
+  double? get fats => nutrition.total(TrackedNutrient.fat);
+  double? get sodium => nutrition.total(TrackedNutrient.sodium);
   final int waterMl;
   final double currentWeightKg;
-  final NutrientEvidenceReport fiberEvidence;
+  NutrientEvidenceReport get fiberEvidence =>
+      nutrition.report(TrackedNutrient.fiber);
   final BILResult bil;
   final BodyCompositionResult bodyComposition;
   final DailyTargets effectiveTargets;
@@ -212,26 +284,10 @@ class DashboardIntelligenceComposer {
 
   DashboardIntelligenceSnapshot compose(DashboardIntelligenceInput input) {
     final todayItems = input.todayMeals.expand((meal) => meal.items).toList();
-    final calories = todayItems.fold<double>(
-      0,
-      (sum, item) => sum + item.calories,
-    );
-    final protein = todayItems.fold<double>(
-      0,
-      (sum, item) => sum + item.protein,
-    );
-    final fats = todayItems.fold<double>(0, (sum, item) => sum + item.fats);
-    final sodium = todayItems.fold<double>(0, (sum, item) => sum + item.sodium);
-    final fiberEvidence = NutrientEvidenceEngine.total([
-      for (final item in todayItems)
-        NutrientObservation(
-          value: item.fiber,
-          available: NutrientEvidenceMask.contains(
-            item.nutrientEvidenceMask,
-            TrackedNutrient.fiber,
-          ),
-        ),
-    ]);
+    final nutrition = DashboardNutritionEvidence(todayItems);
+    final calories = nutrition.total(TrackedNutrient.calories);
+    final protein = nutrition.total(TrackedNutrient.protein);
+    final sodium = nutrition.total(TrackedNutrient.sodium);
     final waterMl = input.todayWater.fold<int>(
       0,
       (sum, row) => sum + row.amountMl,
@@ -258,8 +314,9 @@ class DashboardIntelligenceComposer {
     );
     final bil = BILEngine.calculate(
       profile: body,
-      eatenCalories: calories.round(),
-      eatenProtein: protein.round(),
+      eatenCalories: calories?.round(),
+      eatenProtein: protein?.round(),
+      eatenPotassium: nutrition.total(TrackedNutrient.potassium)?.round(),
       drankWater: waterMl,
     );
     final bodyComposition = bil.bodyModel.composition;
@@ -410,19 +467,17 @@ class DashboardIntelligenceComposer {
           .length,
       weeklyWeightChangeKg: progress.weeklyDirectionKg,
     );
-    final calorieByDay = <DateTime, double?>{};
+    final itemsByDay = <DateTime, List<DashboardMealItemInput>>{};
     for (final meal in input.allMeals) {
       final day = DateTime(meal.at.year, meal.at.month, meal.at.day);
-      final total = meal.items.fold<double>(
-        0,
-        (sum, item) => sum + item.calories,
-      );
-      calorieByDay.update(
-        day,
-        (value) => (value ?? 0) + total,
-        ifAbsent: () => total,
-      );
+      (itemsByDay[day] ??= []).addAll(meal.items);
     }
+    final calorieByDay = <DateTime, double?>{
+      for (final entry in itemsByDay.entries)
+        entry.key: DashboardNutritionEvidence(
+          entry.value,
+        ).total(TrackedNutrient.calories),
+    };
     final personalHealthAi = const PersonalHealthAiEngine().evaluate(
       asOf: input.now,
       weights: [
@@ -442,13 +497,9 @@ class DashboardIntelligenceComposer {
       dailyCalories: calorieByDay,
     );
     return DashboardIntelligenceSnapshot(
-      calories: calories,
-      protein: protein,
-      fats: fats,
-      sodium: sodium,
+      nutrition: nutrition,
       waterMl: waterMl,
       currentWeightKg: currentWeightKg,
-      fiberEvidence: fiberEvidence,
       bil: bil,
       bodyComposition: bodyComposition,
       effectiveTargets: effectiveTargets,

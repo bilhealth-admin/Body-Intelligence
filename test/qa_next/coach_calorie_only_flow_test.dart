@@ -24,81 +24,98 @@ import 'package:flutter_test/flutter_test.dart';
 const _calorieAction = Key(
   'ai-coach-action-sheet-quickAddMacros-calorie-only-2026-10-01-lunch-1905',
 );
-const _receiptText =
-    'Calorie-only entry saved. Other nutrients are unknown.';
+const _receiptText = 'Calorie-only entry saved. Other nutrients are unknown.';
 
 void main() {
   for (final prompt in [
     'Log 1905 calories for lunch on 2026-10-01 yesterday',
     'سجل ١٩٠٥ سعرة للغداء بتاريخ ٢٠٢٦-١٠-٠١ امس',
   ]) {
-    testWidgets('calorie text commits, restores and undoes native rows: $prompt', (tester) async {
-      await _withCoach(tester, CoachActionPermissionMode.writeAllowed, (h) async {
-        await _openEntry(tester, prompt);
-        expect(find.byType(AlertDialog), findsOneWidget);
-        expect(await h.database.select(h.database.mealItems).get(), isEmpty);
-        expect(await h.receipts(), isEmpty);
-        await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
-        await tester.pumpAndSettle();
-        await _waitForReceipts(tester, h, 1);
-        expect(find.text(_receiptText), findsOneWidget);
+    testWidgets(
+      'calorie text commits, restores and undoes native rows: $prompt',
+      (tester) async {
+        await _withCoach(tester, CoachActionPermissionMode.writeAllowed, (
+          h,
+        ) async {
+          await _openEntry(tester, prompt);
+          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(await h.database.select(h.database.mealItems).get(), isEmpty);
+          expect(await h.receipts(), isEmpty);
+          await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
+          await tester.pumpAndSettle();
+          await _waitForReceipts(tester, h, 1);
+          expect(find.text(_receiptText), findsOneWidget);
 
-        final saved = await h.database.select(h.database.mealItems).getSingle();
-        final meal = await h.database.select(h.database.meals).getSingle();
-        expect(meal.date, DateTime(2026, 10, 1));
-        expect(meal.type, 'lunch');
-        final receipts = await h.receipts();
-        expect(receipts, hasLength(1));
-        final receipt = receipts.single;
-        expect(receipt['tool_id'], 'quick_add_macros');
-        expect(receipt['operation_id'], isA<String>());
-        expect(receipt['entity_id'], saved.id.toString());
-        final item = ((receipt['after'] as Map)['items'] as List).single as Map;
-        expect(item['item_uuid'], saved.uuid);
-        expect(item['revision'], saved.revision);
-        expect(item['calories'], 1905);
-        for (final nutrient in ['protein', 'carbohydrates', 'fat']) {
-          expect(item[nutrient], isNull);
-        }
-        final ledger = await DailyLogRepository(h.database)
-            .readLedger(DateTime(2026, 10, 1));
-        expect(ledger.calories, 1905);
-        expect(ledger.protein, isNull);
-        expect(ledger.carbohydrates, isNull);
-        expect(ledger.fat, isNull);
-        expect(h.gateway.calls, 0);
+          final saved = await h.database
+              .select(h.database.mealItems)
+              .getSingle();
+          final meal = await h.database.select(h.database.meals).getSingle();
+          expect(meal.date, DateTime(2026, 10, 1));
+          expect(meal.type, 'lunch');
+          final receipts = await h.receipts();
+          expect(receipts, hasLength(1));
+          final receipt = receipts.single;
+          expect(receipt['tool_id'], 'quick_add_macros');
+          expect(receipt['operation_id'], isA<String>());
+          expect(receipt['entity_id'], saved.id.toString());
+          final item =
+              ((receipt['after'] as Map)['items'] as List).single as Map;
+          expect(item['item_uuid'], saved.uuid);
+          expect(item['revision'], saved.revision);
+          expect(item['calories'], 1905);
+          for (final nutrient in ['protein', 'carbohydrates', 'fat']) {
+            expect(item[nutrient], isNull);
+          }
+          final ledger = await DailyLogRepository(
+            h.database,
+          ).readLedger(DateTime(2026, 10, 1));
+          expect(ledger.calories, 1905);
+          expect(ledger.protein, isNull);
+          expect(ledger.carbohydrates, isNull);
+          expect(ledger.fat, isNull);
+          expect(h.gateway.calls, 0);
 
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
-        await tester.pump(Duration.zero);
-        await tester.pumpWidget(h.app());
-        await tester.pumpAndSettle();
-        expect(await h.database.select(h.database.mealItems).get(), [saved]);
-        expect((await h.receipts()).single['operation_id'], receipt['operation_id']);
-        expect(find.text(_receiptText), findsOneWidget);
-        final undo = find.widgetWithText(OutlinedButton, 'Undo');
-        expect(undo, findsOneWidget);
-        await tester.ensureVisible(undo);
-        final button = tester.widget<OutlinedButton>(undo);
-        button.onPressed!();
-        button.onPressed!();
-        await tester.pumpAndSettle();
-        await _waitForReceipts(tester, h, 2);
-        final compensated = await MealRepository(h.database).getMealItem(saved.id);
-        expect(compensated.deletedAt, isNotNull);
-        expect(compensated.revision, saved.revision + 1);
-        final afterUndo = await h.receipts();
-        expect(afterUndo, hasLength(2));
-        expect(afterUndo.last['operation_id'], receipt['operation_id']);
-        expect(afterUndo.last['undone_at'], isNotNull);
-        expect(h.gateway.calls, 0);
-        expect(tester.takeException(), isNull);
-      });
-    });
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+          await tester.pump(Duration.zero);
+          await tester.pumpWidget(h.app());
+          await tester.pumpAndSettle();
+          expect(await h.database.select(h.database.mealItems).get(), [saved]);
+          expect(
+            (await h.receipts()).single['operation_id'],
+            receipt['operation_id'],
+          );
+          expect(find.text(_receiptText), findsOneWidget);
+          final undo = find.widgetWithText(OutlinedButton, 'Undo');
+          expect(undo, findsOneWidget);
+          await tester.ensureVisible(undo);
+          final button = tester.widget<OutlinedButton>(undo);
+          button.onPressed!();
+          button.onPressed!();
+          await tester.pumpAndSettle();
+          await _waitForReceipts(tester, h, 2);
+          final compensated = await MealRepository(
+            h.database,
+          ).getMealItem(saved.id);
+          expect(compensated.deletedAt, isNotNull);
+          expect(compensated.revision, saved.revision + 1);
+          final afterUndo = await h.receipts();
+          expect(afterUndo, hasLength(2));
+          expect(afterUndo.last['operation_id'], receipt['operation_id']);
+          expect(afterUndo.last['undone_at'], isNotNull);
+          expect(h.gateway.calls, 0);
+          expect(tester.takeException(), isNull);
+        });
+      },
+    );
   }
 
-  testWidgets('cancelled calorie-only review creates no row or receipt', (tester) async {
-    await _withCoach(tester, CoachActionPermissionMode.askBeforeWrite, (h) async {
+  testWidgets('cancelled calorie-only review creates no row or receipt', (
+    tester,
+  ) async {
+    await _withCoach(tester, CoachActionPermissionMode.askBeforeWrite, (
+      h,
+    ) async {
       await _openEntry(tester, 'Log 1905 calories for lunch on 2026-10-01');
       expect(find.byType(AlertDialog), findsOneWidget);
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
@@ -112,7 +129,9 @@ void main() {
     });
   });
 
-  testWidgets('read-only mode blocks a natural-language calorie entry', (tester) async {
+  testWidgets('read-only mode blocks a natural-language calorie entry', (
+    tester,
+  ) async {
     await _withCoach(tester, CoachActionPermissionMode.readOnly, (h) async {
       await _openEntry(tester, 'Log 1905 calories for lunch on 2026-10-01');
       await tester.pumpAndSettle();
@@ -125,8 +144,12 @@ void main() {
     });
   });
 
-  testWidgets('permission revoked during calorie review blocks persistence', (tester) async {
-    await _withCoach(tester, CoachActionPermissionMode.askBeforeWrite, (h) async {
+  testWidgets('permission revoked during calorie review blocks persistence', (
+    tester,
+  ) async {
+    await _withCoach(tester, CoachActionPermissionMode.askBeforeWrite, (
+      h,
+    ) async {
       await _openEntry(tester, 'Log 1905 calories for lunch on 2026-10-01');
       expect(find.byType(AlertDialog), findsOneWidget);
       h.container.read(coachActionPermissionModeProvider.notifier).state =
@@ -145,24 +168,29 @@ void main() {
 
 class _CalorieHarness {
   _CalorieHarness(CoachActionPermissionMode mode) {
-    container = ProviderContainer(overrides: [
-      databaseProvider.overrideWithValue(database),
-      appSettingsServiceProvider.overrideWithValue(
-        AppSettingsService(store: _CalorieSettings()),
-      ),
-      intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
-      coachActionPermissionModeProvider.overrideWith((ref) => mode),
-      coachNativeOwnerWitnessProvider.overrideWithValue(null),
-      coachContextSnapshotProvider.overrideWith((ref) async => CoachContextSnapshot.empty()),
-      intelligenceHealthContextProvider.overrideWith((ref) async =>
-        const IntelligenceHealthContext(
-          primaryMessage: '',
-          explanation: [],
-          confidence: 1,
-          evidence: [],
-          missingData: [],
-        )),
-    ]);
+    container = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(database),
+        appSettingsServiceProvider.overrideWithValue(
+          AppSettingsService(store: _CalorieSettings()),
+        ),
+        intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
+        coachActionPermissionModeProvider.overrideWith((ref) => mode),
+        coachNativeOwnerWitnessProvider.overrideWithValue(null),
+        coachContextSnapshotProvider.overrideWith(
+          (ref) async => CoachContextSnapshot.empty(),
+        ),
+        intelligenceHealthContextProvider.overrideWith(
+          (ref) async => const IntelligenceHealthContext(
+            primaryMessage: '',
+            explanation: [],
+            confidence: 1,
+            evidence: [],
+            missingData: [],
+          ),
+        ),
+      ],
+    );
   }
 
   final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -184,14 +212,18 @@ class _CalorieHarness {
   );
 
   Future<List<Map<String, dynamic>>> receipts() async {
-    final raw = await PreferencesRepository(database).get('intelligenceConversationV1');
+    final raw = await PreferencesRepository(
+      database,
+    ).get('intelligenceConversationV1');
     if (raw == null) return [];
     final result = <Map<String, dynamic>>[];
     for (final message in (jsonDecode(raw) as List).whereType<Map>()) {
-      for (final evidence in (message['evidence'] as List? ?? []).whereType<String>()) {
+      for (final evidence
+          in (message['evidence'] as List? ?? []).whereType<String>()) {
         if (!evidence.startsWith('{')) continue;
         final data = jsonDecode(evidence);
-        if (data is Map<String, dynamic> && data['entity_type'] == 'meal_item') {
+        if (data is Map<String, dynamic> &&
+            data['entity_type'] == 'meal_item') {
           result.add(data);
         }
       }
@@ -223,7 +255,10 @@ Future<void> _withCoach(
 }
 
 Future<void> _openEntry(WidgetTester tester, String prompt) async {
-  await tester.enterText(find.byKey(const Key('ai-coach-question-field')), prompt);
+  await tester.enterText(
+    find.byKey(const Key('ai-coach-question-field')),
+    prompt,
+  );
   FocusManager.instance.primaryFocus?.unfocus();
   tester.testTextInput.hide();
   await tester.pump();

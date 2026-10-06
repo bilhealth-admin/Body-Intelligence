@@ -484,14 +484,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('community-creator-panel')), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('community-profile-follow-action')).hitTestable(),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('community-profile-follow-action')),
         findsOneWidget,
       );
       expect(find.text('Follow'), findsOneWidget);
       expect(find.text('Follows you'), findsOneWidget);
-      expect(find.text('2/7 Badges'), findsOneWidget);
       await tester.tap(
         find.byKey(const Key('community-profile-follow-action')),
       );
@@ -504,6 +508,17 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      // The measured cover/header puts the creator panel below the initial
+      // viewport. Visit it after using Follow in the visible profile header.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('community-creator-panel')),
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('community-creator-panel')), findsOneWidget);
+      expect(find.text('2/7 Badges'), findsOneWidget);
 
       final momentsTab = find.byKey(const Key('community-profile-tab-moments'));
       await tester.scrollUntilVisible(
@@ -523,6 +538,16 @@ void main() {
       expect(find.text('BIL Reference Food'), findsOneWidget);
       expect(find.text('Approved public review text.'), findsOneWidget);
 
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('community-creator-badges')),
+        -160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('community-creator-badges')).hitTestable(),
+        findsOneWidget,
+      );
       await tester.tap(find.byKey(const Key('community-creator-badges')));
       await tester.pumpAndSettle();
       expect(find.text('Community badges'), findsOneWidget);
@@ -537,6 +562,12 @@ void main() {
       tester.state<NavigatorState>(find.byType(Navigator).first).pop();
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('community-profile-tab-moments')),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('community-profile-tab-moments')));
       await tester.pumpAndSettle();
       final viewCount = find.byKey(

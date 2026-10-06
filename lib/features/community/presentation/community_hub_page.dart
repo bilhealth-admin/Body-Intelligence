@@ -90,6 +90,7 @@ part 'community_member_profile_header.dart';
 part 'community_member_profile_content.dart';
 part 'community_member_profile_drafts.dart';
 part 'community_drafts_rendering.dart';
+part 'community_drafts_preview.dart';
 part 'community_account_widgets.dart';
 part 'community_navigation_sheet.dart';
 part 'community_friends_tab.dart';

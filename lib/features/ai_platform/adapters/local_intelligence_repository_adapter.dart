@@ -1,6 +1,10 @@
 import 'package:drift/drift.dart';
 
 import '../../../data/database/app_database.dart';
+import '../../../data/database/database_scope.dart';
+import '../../../data/database/meal_food_evidence.dart';
+import '../../../data/database/nutrient_evidence.dart';
+import '../../../engine/nutrient_evidence_engine.dart';
 import '../../daily_log/domain/daily_body_context_codec.dart';
 import '../domain/local_intelligence_runtime.dart';
 import '../domain/decision_memory_history.dart';
@@ -94,7 +98,14 @@ final class LocalIntelligenceRepositoryAdapter {
     for (final item in items) {
       final key = mealDayById[item.mealId];
       if (key == null) continue;
-      nutrients.putIfAbsent(key, _Nutrients.new).add(item);
+      nutrients
+          .putIfAbsent(key, _Nutrients.new)
+          .add(
+            MealFoodEvidence.read(
+              item,
+              ownerKey: LocalDatabaseScope.keyForOwner(database.localOwnerId),
+            ),
+          );
     }
     final logsByDay = {for (final row in logs) _key(row.date): row};
     final contextsByDay = <String, List<String>>{};
@@ -157,12 +168,13 @@ final class LocalIntelligenceRepositoryAdapter {
         LocalDailyPhysiology(
           day: day,
           weightKg: weightByDay[key],
-          caloriesKcal: nutrient.calories,
-          proteinG: nutrient.protein,
-          carbsG: nutrient.carbs,
-          fatG: nutrient.fat,
-          sodiumMg: nutrient.sodium,
-          potassiumMg: nutrient.potassium,
+          caloriesKcal: nutrient.total(TrackedNutrient.calories),
+          proteinG: nutrient.total(TrackedNutrient.protein),
+          carbsG: nutrient.total(TrackedNutrient.carbohydrates),
+          fatG: nutrient.total(TrackedNutrient.fat),
+          sodiumMg: nutrient.total(TrackedNutrient.sodium),
+          potassiumMg: nutrient.total(TrackedNutrient.potassium),
+          hasNutritionItems: nutrient.hasItems,
           waterMl: waterByDay[key] ?? 0,
           sleepHours: log?.sleepHours,
           steps: log?.steps,
@@ -191,19 +203,17 @@ final class LocalIntelligenceRepositoryAdapter {
 }
 
 final class _Nutrients {
-  double calories = 0;
-  double protein = 0;
-  double carbs = 0;
-  double fat = 0;
-  double sodium = 0;
-  double potassium = 0;
+  final _items = <MealFoodEvidence>[];
 
-  void add(MealItem item) {
-    calories += item.calories;
-    protein += item.protein;
-    carbs += item.carbs;
-    fat += item.fats;
-    sodium += item.sodium;
-    potassium += item.potassium;
+  bool get hasItems => _items.isNotEmpty;
+
+  void add(MealFoodEvidence item) => _items.add(item);
+
+  double? total(TrackedNutrient nutrient) {
+    final values = _items.map((item) => item.value(nutrient));
+    return NutrientEvidenceEngine.total([
+      for (final value in values)
+        NutrientObservation(value: value ?? 0, available: value != null),
+    ]).completeTotal;
   }
 }

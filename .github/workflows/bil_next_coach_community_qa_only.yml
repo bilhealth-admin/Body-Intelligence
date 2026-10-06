@@ -20,8 +20,16 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-          fetch-depth: 0
-          filter: blob:none
+          # Materialize only the exact current snapshot with all its assets.
+          fetch-depth: 1
+      - name: Fetch bounded ancestry metadata for the unchanged base guard
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --filter=blob:none --depth=128 origin "$GITHUB_SHA"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - name: Verify frozen base and record scope
         shell: bash
         run: |

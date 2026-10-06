@@ -34,17 +34,20 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
     CommunityPersistentDraft? draft,
   ) {
     final values = <String>[];
-    if (summary.mediaCount > 0) {
+    final mediaCount = draft?.media.length ?? summary.mediaCount;
+    if (mediaCount > 0) {
       values.add(
         communityText(
           context,
           '{count} photos',
           '{count} صور',
-        ).replaceAll('{count}', '${summary.mediaCount}'),
+        ).replaceAll('{count}', '$mediaCount'),
       );
     }
     if (draft?.pollQuestion?.trim().isNotEmpty == true) {
       values.add(communityText(context, 'Poll', 'استطلاع'));
+    } else if (draft != null) {
+      values.add(communityText(context, 'No poll', 'بلا استطلاع'));
     }
     if (draft?.topicSlugs.isNotEmpty == true) {
       values.add(
@@ -56,90 +59,28 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
     return values;
   }
 
-  Widget _previewTile(
-    CommunityDraftSummary summary,
-    AsyncSnapshot<
-      ({CommunityPersistentDraft draft, CommunityPostImageDraft? image})
-    >
-    snapshot,
-  ) {
-    final image = snapshot.data?.image;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: SizedBox(
-        width: 112,
-        height: 94,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (image != null)
-              Image.memory(
-                image.bytes,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-              )
-            else
-              DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFE9F3FF), Color(0xFFF3F8FD)],
-                  ),
-                ),
-                child: Icon(
-                  summary.mediaCount > 0
-                      ? Icons.photo_library_outlined
-                      : Icons.edit_note_rounded,
-                  size: 34,
-                  color: const Color(0xFF3977C9),
-                ),
-              ),
-            if (summary.mediaCount > 1)
-              PositionedDirectional(
-                end: 7,
-                bottom: 7,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: .64),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '+${summary.mediaCount - 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _draftCard(CommunityDraftSummary summary) {
     final deleting = _deleting.contains(summary.draftId);
     final selected = _selected.contains(summary.draftId);
-    final title = summary.title?.trim();
-    final body = summary.body.trim();
-
-    return FutureBuilder<
-      ({CommunityPersistentDraft draft, CommunityPostImageDraft? image})
-    >(
+    final scheme = Theme.of(context).colorScheme;
+    return FutureBuilder<_CommunityDraftMosaicPreview>(
       future: _preview(summary.draftId),
       builder: (context, preview) {
-        final metadata = _metadata(summary, preview.data?.draft);
+        final draft = preview.data?.draft;
+        // A cross-device edit may be newer than the list summary. Display one
+        // authoritative revision for its text, timestamp, and media together.
+        final title = (draft == null ? summary.title : draft.title)?.trim();
+        final body = (draft?.body ?? summary.body).trim();
+        final metadata = _metadata(summary, draft);
         return Card(
           key: Key('community-draft-${summary.draftId}'),
-          margin: const EdgeInsets.symmetric(vertical: 7),
+          margin: const EdgeInsets.symmetric(vertical: 6),
           clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: scheme.outlineVariant),
+          ),
           child: InkWell(
             onTap: deleting
                 ? null
@@ -147,17 +88,20 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                 ? () => _toggleSelected(summary.draftId)
                 : () => widget.onOpenDraft(summary.draftId),
             child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
+              padding: const EdgeInsets.all(10),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final previewWidth = (constraints.maxWidth * .325)
+                      .clamp(84.0, 118.0)
+                      .toDouble();
+                  return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _previewTile(summary, preview),
-                      const SizedBox(width: 13),
+                      _previewTile(summary, preview, previewWidth),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Row(
                               children: [
@@ -220,22 +164,13 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                                   ),
                               ],
                             ),
-                            if (metadata.isNotEmpty) ...[
-                              const SizedBox(height: 3),
+                            if (metadata.isNotEmpty)
                               Text(
                                 metadata.join(' • '),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                    ?.copyWith(color: scheme.onSurfaceVariant),
                               ),
-                            ],
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 6),
                             Text(
                               body.isNotEmpty
                                   ? body
@@ -247,54 +182,59 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Text(
-                              _savedLabel(summary.updatedAt),
+                              _savedLabel(
+                                draft?.updatedAt ?? summary.updatedAt,
+                              ),
                               style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
                             ),
+                            if (!_selecting) ...[
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                alignment: WrapAlignment.spaceBetween,
+                                children: [
+                                  OutlinedButton(
+                                    onPressed: deleting
+                                        ? null
+                                        : () => widget.onOpenDraft(
+                                            summary.draftId,
+                                          ),
+                                    child: Text(
+                                      communityText(context, 'Edit', 'تعديل'),
+                                    ),
+                                  ),
+                                  FilledButton(
+                                    key: Key(
+                                      'community-draft-continue-${summary.draftId}',
+                                    ),
+                                    onPressed: deleting
+                                        ? null
+                                        : () => widget.onOpenDraft(
+                                            summary.draftId,
+                                          ),
+                                    child: Text(
+                                      communityText(
+                                        context,
+                                        'Continue',
+                                        'متابعة',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),
                     ],
-                  ),
-                  if (!_selecting) ...[
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        TextButton.icon(
-                          onPressed: deleting
-                              ? null
-                              : () => widget.onOpenDraft(summary.draftId),
-                          icon: const Icon(Icons.edit_outlined, size: 17),
-                          label: Text(communityText(context, 'Edit', 'تعديل')),
-                        ),
-                        const Spacer(),
-                        FilledButton(
-                          key: Key(
-                            'community-draft-continue-${summary.draftId}',
-                          ),
-                          onPressed: deleting
-                              ? null
-                              : () => widget.onOpenDraft(summary.draftId),
-                          child: Text(
-                            communityText(context, 'Continue', 'متابعة'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
+                  );
+                },
               ),
             ),
           ),
@@ -306,6 +246,23 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
   Widget _buildDraftsContent(BuildContext context) {
     final content = Column(
       children: [
+        if (widget.fullPage)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                communityText(
+                  context,
+                  'Your drafts are always accessible.',
+                  'مسوداتك متاحة دائمًا.',
+                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
         if (!widget.fullPage)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
@@ -345,7 +302,7 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                   ),
                 );
               }
-              final drafts = snapshot.data ?? const <CommunityDraftSummary>[];
+              final drafts = _loadedRows;
               if (drafts.isEmpty) {
                 return Center(
                   child: Padding(
@@ -383,9 +340,44 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                 child: ListView.builder(
                   key: const Key('community-drafts-list'),
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsetsDirectional.fromSTEB(12, 5, 12, 18),
-                  itemCount: drafts.length,
-                  itemBuilder: (context, index) => _draftCard(drafts[index]),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 18),
+                  itemCount: drafts.length + (_hasMore ? 1 : 0),
+                  itemBuilder: (context, index) => index < drafts.length
+                      ? _draftCard(drafts[index])
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: OutlinedButton.icon(
+                              key: const Key('community-drafts-load-more'),
+                              onPressed: _loadingMore ? null : _loadMore,
+                              icon: _loadingMore
+                                  ? const SizedBox.square(
+                                      dimension: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Icon(
+                                      _loadMoreFailed
+                                          ? Icons.refresh_rounded
+                                          : Icons.expand_more_rounded,
+                                    ),
+                              label: Text(
+                                _loadMoreFailed
+                                    ? communityText(
+                                        context,
+                                        'Retry',
+                                        'إعادة المحاولة',
+                                      )
+                                    : communityText(
+                                        context,
+                                        'Load more',
+                                        'تحميل المزيد',
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ),
                 ),
               );
             },
