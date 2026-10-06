@@ -3,7 +3,6 @@ on:
   push:
     branches: [qa/coach-community-next-20261005]
     paths:
-      - tool/qa_next/community_entry_r5/**
       - .github/workflows/bil_community_entry_r5.yml
       - lib/features/community/**
       - lib/app/router/app_community_routes.dart
@@ -16,40 +15,14 @@ concurrency:
   group: bil-entry-r5-${{ github.sha }}
   cancel-in-progress: false
 jobs:
-  source:
+  entry-checks:
     if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
-    permissions:
-      contents: write
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    outputs:
-      source_sha: ${{ steps.materialize.outputs.source_sha }}
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: ${{ github.sha }}
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Commit exact bounded entry source on QA branch only
-        id: materialize
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 tool/qa_next/community_entry_r5/apply.py
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
-        with:
-          name: bil-entry-r5-source-${{ github.sha }}
-          path: /tmp/bil-entry-r5
-          retention-days: 1
-          if-no-files-found: error
-  entry-checks:
-    needs: source
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          ref: ${{ needs.source.outputs.source_sha }}
           persist-credentials: false
           fetch-depth: 0
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -77,7 +50,7 @@ jobs:
         if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
         run: |
           set -o pipefail
-          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m test/features/community/community_entry_flow_test.dart test/features/community/community_entry_repository_test.dart test/features/community/community_entry_route_contract_test.dart test/features/community/community_visible_activity_scope_test.dart test/features/community/community_inbox_resume_regression_test.dart test/features/community/community_session_switch_test.dart test/features/community/community_reference_composer_v1_test.dart test/features/community/community_profile_identity_contract_test.dart test/architecture_source_file_size_guard_test.dart test/localization/bil_25_locale_fallback_closure_test.dart 2>&1 | tee /tmp/bil-entry-r5/tests.log
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m             test/features/community/community_entry_flow_test.dart             test/features/community/community_entry_repository_test.dart             test/features/community/community_entry_route_contract_test.dart             test/features/community/community_visible_activity_scope_test.dart             test/features/community/community_inbox_resume_regression_test.dart             test/features/community/community_session_switch_test.dart             test/features/community/community_reference_composer_v1_test.dart             test/features/community/community_profile_identity_contract_test.dart             test/architecture_source_file_size_guard_test.dart             test/localization/bil_25_locale_fallback_closure_test.dart             2>&1 | tee /tmp/bil-entry-r5/tests.log
       - name: Capture real Flutter entry screens and failure recovery
         if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
         env:
@@ -90,12 +63,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-entry-r5-checks-${{ needs.source.outputs.source_sha }}
+          name: bil-entry-r5-checks-${{ github.sha }}
           path: /tmp/bil-entry-r5
           retention-days: 1
           if-no-files-found: error
   regression:
-    needs: [source, entry-checks]
+    needs: entry-checks
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     strategy:
@@ -105,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: ${{ needs.source.outputs.source_sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
@@ -122,7 +95,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: bil-entry-r5-regression-${{ matrix.shard }}-${{ needs.source.outputs.source_sha }}
+          name: bil-entry-r5-regression-${{ matrix.shard }}-${{ github.sha }}
           path: /tmp/bil-next-regression
           retention-days: 1
           if-no-files-found: error
