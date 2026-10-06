@@ -441,3 +441,123 @@ class _ProfileRelationshipAction extends StatelessWidget {
     _ => const SizedBox.shrink(),
   };
 }
+
+
+class _CommunitySelfQuickActions extends StatelessWidget {
+  const _CommunitySelfQuickActions({
+    required this.draftCount,
+    required this.statsAvailable,
+    required this.onPosts,
+    required this.onDrafts,
+    required this.onSaved,
+    required this.onStats,
+  });
+
+  final int draftCount;
+  final bool statsAvailable;
+  final VoidCallback onPosts;
+  final VoidCallback onDrafts;
+  final VoidCallback onSaved;
+  final VoidCallback onStats;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(12);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 340 && scale <= 18 ? 4 : 2;
+        final gap = 8.0;
+        final width =
+            (constraints.maxWidth - (columns - 1) * gap) / columns;
+        final items = <Widget>[
+          _CommunitySelfQuickAction(
+            key: const Key('community-self-posts'),
+            icon: Icons.article_outlined,
+            label: communityText(context, 'My posts', 'منشوراتي'),
+            onTap: onPosts,
+          ),
+          _CommunitySelfQuickAction(
+            key: const Key('community-self-drafts'),
+            icon: Icons.drafts_outlined,
+            label: communityText(context, 'Drafts', 'المسودات'),
+            badge: draftCount > 0 ? draftCount.toString() : null,
+            onTap: onDrafts,
+          ),
+          _CommunitySelfQuickAction(
+            key: const Key('community-self-saved'),
+            icon: Icons.bookmark_border_rounded,
+            label: communityText(context, 'Saved', 'المحفوظات'),
+            onTap: onSaved,
+          ),
+          _CommunitySelfQuickAction(
+            key: const Key('community-self-stats'),
+            icon: Icons.bar_chart_rounded,
+            label: communityText(context, 'Stats', 'الإحصاءات'),
+            onTap: statsAvailable ? onStats : null,
+          ),
+        ];
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final item in items) SizedBox(width: width, child: item),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CommunitySelfQuickAction extends StatelessWidget {
+  const _CommunitySelfQuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.badge,
+    super.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  final String? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 74),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Badge(
+                  isLabelVisible: badge != null,
+                  label: badge == null ? null : Text(badge!),
+                  child: Icon(icon, color: scheme.primary, size: 22),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  label,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
