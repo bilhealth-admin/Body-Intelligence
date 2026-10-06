@@ -1,5 +1,6 @@
 name: BIL next isolated source checkpoint
 on:
+  workflow_dispatch:
   push:
     branches: [qa/coach-community-next-20261005]
     paths: [.github/workflows/bil_next_source_snapshot_20261006.yml]
