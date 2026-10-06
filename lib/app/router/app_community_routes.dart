@@ -73,6 +73,15 @@ abstract final class _CommunityRoutes {
         ),
       ),
       GoRoute(
+        path: '/community/drafts',
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityDraftsPage()),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/community/rewards',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
