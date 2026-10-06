@@ -53,12 +53,24 @@ jobs:
           changed=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
           untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines()
           files=sorted(set(changed+[p for p in untracked if p.endswith('.dart')]))
-          expected_files={row['path'] for row in json.loads(pathlib.Path('tool/qa_next/revision_r3_manifest.json').read_text())['files']}
-          if set(files)!=expected_files: raise RuntimeError('Unexpected revision scope')
+          allowed={
+            'lib/features/community/presentation/community_notifications_page.dart',
+            'lib/features/community/presentation/community_notifications_rendering.dart',
+            'lib/features/community/presentation/community_visible_activity_scope.dart',
+            'lib/features/community/presentation/community_notification_read_receipts.dart',
+            'test/features/community/community_visible_activity_scope_test.dart',
+            'test/features/community/community_activity_auto_read_test.dart',
+          }
+          required={
+            'lib/features/community/presentation/community_notifications_page.dart',
+            'lib/features/community/presentation/community_notifications_rendering.dart',
+            'lib/features/community/presentation/community_notification_read_receipts.dart',
+          }
+          if not required.issubset(files) or not set(files).issubset(allowed): raise RuntimeError('Unexpected R4 scope')
           subprocess.run(['git','add','--',*files],check=True)
           subprocess.run(['git','config','user.name','BIL isolated QA'],check=True)
           subprocess.run(['git','config','user.email','qa@users.noreply.github.com'],check=True)
-          subprocess.run(['git','commit','-m','fix(qa-only): restore ordered Community gallery and reconcile reference regression journeys'],check=True)
+          subprocess.run(['git','commit','-m','feat(qa-only): persist visible Community activity with cursor-safe readback'],check=True)
           actual=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
           auth=base64.b64encode(('x-access-token:'+os.environ['GH_TOKEN']).encode()).decode()
           print('::add-mask::'+auth)
@@ -72,7 +84,21 @@ jobs:
       - name: Analyze committed source
         if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
         run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-installed/analyze.log
-      - name: Recheck every previously failing file and new gallery cases
+      - name: Test automatic read scope and actual inbox integration
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 1 \
+            test/features/community/community_visible_activity_scope_test.dart \
+            test/features/community/community_activity_auto_read_test.dart \
+            test/features/community/community_inbox_resume_regression_test.dart \
+            test/features/community/community_activity_pagination_test.dart \
+            test/features/community/community_notification_resilience_test.dart \
+            test/features/community/community_visible_read_receipts_test.dart \
+            test/features/community/community_deep_link_test.dart \
+            test/architecture_source_file_size_guard_test.dart \
+            --timeout 2m 2>&1 | tee /tmp/bil-installed/r4-notifications.log
+      - name: Recheck earlier Community regression and account ownership cases
         if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
         run: |
           set -o pipefail
@@ -83,36 +109,23 @@ jobs:
             test/features/community/community_multi_image_v1_contract_test.dart \
             test/features/community/community_social_v2_ui_test.dart \
             test/features/community/community_post_gallery_behavior_test.dart \
-            test/intelligence_center_five_locale_contract_test.dart \
-            test/intelligence_center_composer_contract_test.dart \
-            test/intelligence_center_composer_test.dart \
             --timeout 2m 2>&1 | tee /tmp/bil-installed/r3-regression.log
-      - name: Execute behavior accessibility and locale regression tests
-        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
-        run: |
-          set -o pipefail
-          flutter test --no-pub --reporter expanded test/features/community/community_reference_composer_v1_test.dart test/features/community/community_inbox_resume_regression_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart test/qa_next/next_workspace_locale_test.dart test/localization/bil_25_locale_fallback_closure_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/behavior.log
-      - name: Capture actual Coach widgets
-        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
-        env:
-          BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-installed/coach
-        run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/coach_reference_workspace_capture_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/coach.log
       - name: Capture actual Community widgets
         if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
         env:
           BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-installed/community
         run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-installed/community.log
       - name: Export exact changed text source and unchanged-source proof
-        if: ${{ always() && steps.apply.outcome == 'success' }}
+        if: ${{ always() && steps.commit.outcome == 'success' }}
         run: |
           git diff --exit-code
           python3 - <<'PY'
           import pathlib,subprocess,zipfile
-          changed=subprocess.check_output(['git','diff','--name-only','b833cea14e1f5347d9dcff036899d5afd0202e05','HEAD'],text=True).splitlines()
+          changed=subprocess.check_output(['git','diff','--name-only','8f42b54027580dcaab8a0e702c5a174e8145d15a','HEAD'],text=True).splitlines()
           with zipfile.ZipFile('/tmp/bil-installed/source-delta.zip','w',zipfile.ZIP_DEFLATED) as z:
               for name in changed:
                   p=pathlib.Path(name)
-                  if p.is_file() and p.suffix in ('.dart','.py','.yml','.json') and p.parts[0] in ('lib','test','tool','.github') and not p.is_symlink(): z.write(p,p.as_posix())
+                  if p.is_file() and p.suffix in ('.dart','.py','.yml','.json','.md') and p.parts[0] in ('lib','test','tool','.github','docs') and not p.is_symlink(): z.write(p,p.as_posix())
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
