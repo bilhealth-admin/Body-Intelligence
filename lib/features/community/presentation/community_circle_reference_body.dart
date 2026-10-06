@@ -1,0 +1,242 @@
+part of 'community_hub_page.dart';
+
+class _CommunityCircleReferenceBody extends StatelessWidget {
+  const _CommunityCircleReferenceBody({
+    required this.circles,
+    required this.search,
+    required this.myCircles,
+    required this.busy,
+    required this.onSearch,
+    required this.onSelect,
+    required this.onRefresh,
+    required this.onMembership,
+    required this.onOpen,
+    required this.onCompose,
+  });
+
+  final Future<List<CommunityCircle>> circles;
+  final TextEditingController search;
+  final bool myCircles;
+  final Set<String> busy;
+  final ValueChanged<String> onSearch;
+  final ValueChanged<bool> onSelect;
+  final Future<void> Function() onRefresh;
+  final ValueChanged<CommunityCircle> onMembership;
+  final ValueChanged<CommunityCircle> onOpen;
+  final ValueChanged<CommunityCircle>? onCompose;
+
+  @override
+  Widget build(BuildContext context) => RefreshIndicator(
+    onRefresh: onRefresh,
+    child: CustomScrollView(
+      key: const Key('community-circles-list'),
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: _CommunityCircleDiscoveryHeader(
+            controller: search,
+            myCircles: myCircles,
+            onSearch: onSearch,
+            onSelect: onSelect,
+          ),
+        ),
+        FutureBuilder<List<CommunityCircle>>(
+          future: circles,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done &&
+                !snapshot.hasData) {
+              return const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: FilledButton.icon(
+                    key: const Key('community-circles-retry'),
+                    onPressed: onRefresh,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(
+                      communityText(context, 'Retry', 'إعادة المحاولة'),
+                    ),
+                  ),
+                ),
+              );
+            }
+            final query = search.text.trim().toLowerCase();
+            final rows = (snapshot.data ?? const <CommunityCircle>[])
+                .where((c) {
+                  if (myCircles && !c.activeMember && !c.pending) return false;
+                  if (query.isEmpty) return true;
+                  return [
+                    c.slug,
+                    _circleRecordTitle(context, c),
+                    _circleKnownDescription(context, c) ?? '',
+                  ].any((value) => value.toLowerCase().contains(query));
+                })
+                .toList(growable: false);
+            if (rows.isEmpty) {
+              return SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Text(
+                      _emptyText(context, query.isNotEmpty),
+                      key: const Key('community-circles-empty'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              );
+            }
+            return SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+              sliver: SliverList.builder(
+                itemCount: rows.length,
+                itemBuilder: (context, index) => _row(context, rows[index]),
+              ),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+
+  String _emptyText(BuildContext context, bool searching) => searching
+      ? communityText(
+          context,
+          'No circles match your search.',
+          'لا توجد دوائر تطابق بحثك.',
+        )
+      : myCircles
+      ? communityText(
+          context,
+          'You have not joined a circle yet.',
+          'لم تنضم إلى أي دائرة بعد.',
+        )
+      : communityText(
+          context,
+          'No circles are available yet.',
+          'لا توجد دوائر متاحة بعد.',
+        );
+
+  Widget _row(BuildContext context, CommunityCircle circle) => LayoutBuilder(
+    builder: (context, bounds) {
+      final headerAction =
+          MediaQuery.textScalerOf(context).scale(1) < 1.5 &&
+          bounds.maxWidth >= 360;
+      final actions = Wrap(
+        spacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: headerAction ? 108 : 240),
+            child: OutlinedButton(
+              key: Key('community-circle-membership-${circle.slug}'),
+              onPressed:
+                  busy.contains(circle.slug) ||
+                      !_circleCanChangeMembership(circle)
+                  ? null
+                  : () => onMembership(circle),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(70, 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 9,
+                ),
+                foregroundColor: circle.activeMember
+                    ? CommunitySapphire.ink(context)
+                    : CommunitySapphire.blue,
+                backgroundColor: Theme.of(context).colorScheme.primary
+                    .withValues(
+                      alpha: Theme.of(context).brightness == Brightness.dark
+                          ? .14
+                          : .045,
+                    ),
+                side: BorderSide.none,
+                textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                shape: const StadiumBorder(),
+              ),
+              child: Text(
+                _circleMembershipLabel(context, circle),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          if (circle.activeMember && onCompose != null)
+            IconButton(
+              tooltip: communityText(
+                context,
+                'Post in circle',
+                'انشر في الدائرة',
+              ),
+              onPressed: () => onCompose!(circle),
+              color: CommunitySapphire.blue,
+              icon: const Icon(Icons.edit_outlined, size: 20),
+            ),
+        ],
+      );
+      return InkWell(
+        key: Key('community-circle-row-${circle.slug}'),
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => onOpen(circle),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _CommunityCircleCover(slug: circle.slug),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _circleRecordTitle(context, circle),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontSize: 14,
+                                height: 1.3,
+                                fontWeight: FontWeight.w700,
+                                color: CommunitySapphire.ink(context),
+                              ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${MaterialLocalizations.of(context).formatDecimal(circle.memberCount)} ${communityText(context, 'members', 'أعضاء')}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 12,
+                                color: CommunitySapphire.muted(context),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (headerAction) ...[const SizedBox(width: 8), actions],
+                ],
+              ),
+              if (!headerAction)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 68, top: 4),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: actions,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}

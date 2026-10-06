@@ -443,9 +443,10 @@ void main() {
     final detailHeader = File(
       'lib/features/community/presentation/community_post_detail_header.dart',
     ).readAsStringSync();
-    final circles = File(
+    final circles = [
       'lib/features/community/presentation/community_circles_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_circle_reference_body.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(detailActions, contains('setPostSaved('));
     expect(detailActions, contains('SharePlus.instance.share('));

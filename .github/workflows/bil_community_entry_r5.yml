@@ -35,6 +35,9 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        env:
+          GIT_HTTP_LOW_SPEED_LIMIT: '1024'
+          GIT_HTTP_LOW_SPEED_TIME: '60'
         timeout-minutes: 10
         with:
           ref: ${{ github.sha }}
@@ -168,6 +171,9 @@ jobs:
         shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        env:
+          GIT_HTTP_LOW_SPEED_LIMIT: '1024'
+          GIT_HTTP_LOW_SPEED_TIME: '60'
         with:
           ref: ${{ github.sha }}
           persist-credentials: false

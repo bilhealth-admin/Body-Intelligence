@@ -18,12 +18,18 @@ import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/contact_picker_service.dart';
+import '../services/community_owner_operation.dart';
+import 'community_visible_activity_scope.dart';
+import 'community_return_button.dart';
+import 'community_messages_page.dart' show showCommunityMessagingPolicy;
 import 'community_chat_runtime_copy.dart';
 import 'community_copy.dart';
 import 'community_sapphire.dart';
 import 'community_invite_copy.dart';
 
 part 'community_chat_page.dart';
+part 'community_chat_owner_scope.dart';
+part 'community_chat_rendering.dart';
 part 'community_people_widgets.dart';
 
 class CommunityPeoplePage extends StatefulWidget {

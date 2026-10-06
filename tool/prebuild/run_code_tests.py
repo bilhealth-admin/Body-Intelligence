@@ -81,6 +81,8 @@ ENV_CAPTURE_DIRECTORIES = {
     "test/qa_next/community_profile_drafts_reference_capture_test.dart": "BIL_PROFILE_DRAFTS_CAPTURE_DIR",
     "test/features/daily_log/daily_log_nutrition_evidence_capture_test.dart": "BIL_DIARY_EVIDENCE_CAPTURE_DIR",
     "test/qa_next/coach_food_cards_capture_test.dart": "BIL_REFERENCE_CAPTURE_DIR",
+    "test/qa_next/community_circles_reference_capture_test.dart": "BIL_CIRCLES_CAPTURE_DIR",
+    "test/qa_next/community_chat_entry_capture_test.dart": "BIL_CHAT_CAPTURE_DIR",
 }
 NON_VISUAL_BYTE_TESTS = {
     "test/launch_readiness/release_source_hygiene_classifier_contract_test.dart":

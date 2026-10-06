@@ -112,9 +112,9 @@ void main() {
     final source = _librarySource(
       'lib/features/community/data/community_repository.dart',
     );
-    final chat = File(
-      'lib/features/community/presentation/community_chat_page.dart',
-    ).readAsStringSync();
+    final chat = _librarySource(
+      'lib/features/community/presentation/community_people_page.dart',
+    );
     final methodStart = source.indexOf('watchConversationChanges(');
     final methodEnd = source.indexOf('loadInboxMessages()', methodStart);
     final method = source.substring(methodStart, methodEnd);
@@ -141,8 +141,8 @@ void main() {
         conversationStart,
       );
       final conversation = source.substring(conversationStart, conversationEnd);
-      expect(conversation, contains(".order('created_at')"));
-      expect(conversation, contains(".order('id')"));
+      expect(conversation, contains(".order('created_at', ascending: false)"));
+      expect(conversation, contains(".order('id', ascending: false)"));
     },
   );
 

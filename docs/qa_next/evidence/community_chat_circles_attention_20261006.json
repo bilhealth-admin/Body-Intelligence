@@ -1,0 +1,538 @@
+{
+  "schema": "bil.qa.community-chat-circles-attention.v1",
+  "tested_merge": {
+    "parent_head": "e8f5ea559036fe5b3ee3f7395e7154ad79db8462",
+    "remote_head_after_verification": "e8f5ea559036fe5b3ee3f7395e7154ad79db8462",
+    "branch": "qa/coach-community-next-20261005",
+    "source_files": [
+      {
+        "path": ".github/workflows/bil_reference_native_candidate.yml",
+        "sha256": "d187a84daf0733f7f78579021b84fe96b655807d09a359a5bfd0a54c080a8713"
+      },
+      {
+        "path": "lib/app/localization/runtime_copy_community_circles.dart",
+        "sha256": "e039cfb150146be69193c0fef4d7a09e71ccaea0a915a78f303fb0fcffddaf81"
+      },
+      {
+        "path": "lib/features/community/data/community_repository_connections_messaging_mixin.dart",
+        "sha256": "e2e5ab3daeacdaba35d1c65c0bd94f260a36c0eed1c3a914190e44e9ae80b7ff"
+      },
+      {
+        "path": "lib/features/community/presentation/community_attention_scope.dart",
+        "sha256": "ca77a7c539a1f094a233852093a6f95d1266f4a17363576957eb826e9cbe728a"
+      },
+      {
+        "path": "lib/features/community/presentation/community_chat_guard_copy.dart",
+        "sha256": "c9d27208453485eb783f21ceb9bcb9d7fe6af0426954b5cbd0ff2f5ed4862765"
+      },
+      {
+        "path": "lib/features/community/presentation/community_chat_owner_scope.dart",
+        "sha256": "277fae541064c951d8b075add4748239bf69eece712635ffea93756d45d09044"
+      },
+      {
+        "path": "lib/features/community/presentation/community_chat_page.dart",
+        "sha256": "7719bfdc23f62d27108c8dec3d72d1a27aa30eeb3b0c5e0187cbf34a22408bc3"
+      },
+      {
+        "path": "lib/features/community/presentation/community_chat_rendering.dart",
+        "sha256": "a5e54693065e323cf00dccded093d0b5240ee01f3f047aee598911037beb99cd"
+      },
+      {
+        "path": "lib/features/community/presentation/community_circle_copy.dart",
+        "sha256": "8e3dd7c1397debf000ef0a12530bd4db2c220ff38fe6f4725610249294aba697"
+      },
+      {
+        "path": "lib/features/community/presentation/community_circle_detail_page.dart",
+        "sha256": "fbb48f44c5d34a35ebfcf42f03da50f41e7304988e96153fec548e91ac282c11"
+      },
+      {
+        "path": "lib/features/community/presentation/community_circle_discovery_header.dart",
+        "sha256": "eecb8113428bc24de19fea8c819dd0c239c93be63046afa32297ab8e64b030c5"
+      },
+      {
+        "path": "lib/features/community/presentation/community_circle_owner_scope.dart",
+        "sha256": "8a0127e6c4b247152963adaa0a5339083924c698566a27eab236bc2e1db72c7e"
+      },
+      {
+        "path": "lib/features/community/presentation/community_circle_reference_body.dart",
+        "sha256": "fe2c39069370cf99c4fc703efd8a4a8e6ba9793ff9d9dd53c6854a76c5e4e9b1"
+      },
+      {
+        "path": "lib/features/community/presentation/community_circles_page.dart",
+        "sha256": "d29f51e9047807b1c989f62f9f5a1839b106fb3965b2d2168a4e0abc35ede935"
+      },
+      {
+        "path": "lib/features/community/presentation/community_copy.dart",
+        "sha256": "f0a47a23922e86bc71bc8dc8c6dcef1e4d5ef05fdecead9c4a0247f39cc4b5ce"
+      },
+      {
+        "path": "lib/features/community/presentation/community_hub_page.dart",
+        "sha256": "c133e1e817e5f4c0db14d03b62b859f2259a1e44a59a6ccfdef8e834dd60e4fa"
+      },
+      {
+        "path": "lib/features/community/presentation/community_message_owner_scope.dart",
+        "sha256": "dd54193c78db1c28544e813955ce2ebb1fa7af29c1caa43d616a9b5426d9e33a"
+      },
+      {
+        "path": "lib/features/community/presentation/community_messages_page.dart",
+        "sha256": "a5bfae9161cbd7ea950b9f6e230a56bd72fb3d16a180f989a41a55279e939008"
+      },
+      {
+        "path": "lib/features/community/presentation/community_people_page.dart",
+        "sha256": "f4dd3716c6abd63c06e9867beaab7102b8831f8ebdb4fc2e10daabc76ef04a4f"
+      },
+      {
+        "path": "lib/features/community/presentation/new_community_message_page.dart",
+        "sha256": "8d2c9481c9743c069da6ffb46f59caa137690b236a151cd72e8ef258a88e4745"
+      },
+      {
+        "path": "test/community_messages_reference_contract_test.dart",
+        "sha256": "03ea034ada784f221b5a3298dd9edae17068baf3b5e91faae0da45fe20b3e752"
+      },
+      {
+        "path": "test/features/community/community_attention_auth_session_test.dart",
+        "sha256": "a9968ff68127f5496bce047fa1b22d205df852009f31450c2e3d24689287e7e9"
+      },
+      {
+        "path": "test/features/community/community_authenticated_interaction_test.dart",
+        "sha256": "beff51d2b9eeeeb5ce926a9eefc36bd4b83b29714f293e42aef165630079bd17"
+      },
+      {
+        "path": "test/features/community/community_chat_auth_session_test.dart",
+        "sha256": "79a4f90a370b55cb6f659ab05d0cd014e0a139ee795bea58fdd6236f5cb8bcd2"
+      },
+      {
+        "path": "test/features/community/community_chat_refresh_regression_test.dart",
+        "sha256": "e6ae08a44ec4e5eb53b65cce232fd9d8554b33c1e5326b02a934eccdb04a9897"
+      },
+      {
+        "path": "test/features/community/community_chat_repository_cases.dart",
+        "sha256": "19ae4a3b76e913ace9a8df962a8875a118e05f8b4e3a7d162151adac1e21e7f6"
+      },
+      {
+        "path": "test/features/community/community_chat_visibility_paging_cases.dart",
+        "sha256": "949ba6cee2448c3b4a00d8459d4930457418aea37b42e39d8d49589149f0dcb9"
+      },
+      {
+        "path": "test/features/community/community_circles_auth_session_fixture.dart",
+        "sha256": "b0174ad653143e433b81085c26775c9773b5bdbe52541368aa99020f9f683392"
+      },
+      {
+        "path": "test/features/community/community_circles_auth_session_test.dart",
+        "sha256": "9d316fff1ae9c6f50553100f3b9685d1f687455bedcc0145470697c6db218cd8"
+      },
+      {
+        "path": "test/features/community/community_circles_v1_contract_test.dart",
+        "sha256": "926888cb949f19d49e7c81b367ee26152adc04d87f2dbc6791df87514f4697d6"
+      },
+      {
+        "path": "test/features/community/community_message_entry_owner_cases.dart",
+        "sha256": "28f0adc66c5854c66bb1b0c1be6a4973c40417ec3c4a3f055a9334e742d2177f"
+      },
+      {
+        "path": "test/features/community/community_message_retry_cases.dart",
+        "sha256": "13332ac81de44d48a0ca2a5f459cb3befd2f7f255419f1390776db88e11bda1b"
+      },
+      {
+        "path": "test/features/community/community_reference_parity_v1_test.dart",
+        "sha256": "06c75d6093a04936f2b8927c57415a1be4724218634b73d9b6a691d68d000d36"
+      },
+      {
+        "path": "test/features/community/community_topic_circle_resilience_test.dart",
+        "sha256": "18a48d2049d591904e5a14a65ae47b933f4171e3e8d1ecc6d7dfc2af48a07355"
+      },
+      {
+        "path": "test/localization/community_chat_guard_copy_test.dart",
+        "sha256": "67318243fccbb41ba96015909b9aea00d4d4e33d5cfda4f92431fe93382fb381"
+      },
+      {
+        "path": "test/qa_next/community_chat_entry_capture_test.dart",
+        "sha256": "27bd7e2113d9bb4439aa5ba3a3864e346218af56dcdd5205768e269d63c9563b"
+      },
+      {
+        "path": "test/qa_next/community_circles_reference_behavior_cases.dart",
+        "sha256": "2493278e519611b1df673dd0f801c9b8b41940cd21205d1143ce1c29a63df628"
+      },
+      {
+        "path": "test/qa_next/community_circles_reference_capture_test.dart",
+        "sha256": "0154603bc2371cabd3ba35dc3fb738798e7a76f17732f078e9323610c5f11200"
+      },
+      {
+        "path": "test/qa_next/community_circles_reference_fixture.dart",
+        "sha256": "444f4f4bfe8dda6dae87e19a4518ad05e3b02813d0629165afc065f7e9394c2a"
+      },
+      {
+        "path": "tool/localization/locale_fallback_closure.dart",
+        "sha256": "0b650ac43e106b9de60ee45d1d64db27bc1daa51c348ba64020b30a042c11ae6"
+      },
+      {
+        "path": "tool/prebuild/run_code_tests.py",
+        "sha256": "360adaa4e8c2c6d7091eab00c0dace45184fc64432fda49589a8ba10cef77ef5"
+      }
+    ],
+    "source_unchanged_during_gates": true,
+    "patch_sha256": "6b6305390084755084cfdf866392a0c6b2016a9e1130f57f1248b360b56f7ff7",
+    "source_digest_sha256": "1b9bf007c94f2efc6a770909f99d98594e60afe9ee82c478bd3e7d042a8571a0",
+    "verification": {
+      "focused_pass": 360,
+      "focused_fail": 0,
+      "test_files": 27,
+      "analyze_issues": 0,
+      "dart_format_files": 39,
+      "dart_format_changes": 0,
+      "capture_png_count": 43
+    },
+    "images": [
+      {
+        "path": "screens-chat/private-chat-ar-1x.png",
+        "sha256": "cf8c95aadb7854e6f5303d7712658e2491dfe6fe62456f57abc0273b658808cc",
+        "bytes": 63826
+      },
+      {
+        "path": "screens-chat/private-chat-ar-2x.png",
+        "sha256": "8f8e6996bbdaee294aa5fd8450c899ebef6d18eb631d2088c372448f86ce8f63",
+        "bytes": 78114
+      },
+      {
+        "path": "screens-chat/private-chat-en-1x.png",
+        "sha256": "7e1d3c47b7aafe00d01effb484da740094483ce17d1a695c38a47fd62704722e",
+        "bytes": 69925
+      },
+      {
+        "path": "screens-chat/private-chat-en-2x.png",
+        "sha256": "ae9e0c3af7ffe31dfc5da04680056fc40463e0bba29969101dd1cf00d033b52a",
+        "bytes": 75285
+      },
+      {
+        "path": "screens-chat/private-inbox-ar-1x.png",
+        "sha256": "1fcae3baa558a232e5830f5a389a36a0a80b1ce252a3d5974e9adbe80312f7b7",
+        "bytes": 45041
+      },
+      {
+        "path": "screens-chat/private-inbox-ar-2x.png",
+        "sha256": "d8c8887945ec561704467a4b2031b3f14c8075175a0f0fe1824d861150d6c765",
+        "bytes": 63613
+      },
+      {
+        "path": "screens-chat/private-inbox-en-1x.png",
+        "sha256": "acf5ed55cc66ad4a5c6355df83bb5484bd4444667146ea844cb8e24872005afb",
+        "bytes": 46414
+      },
+      {
+        "path": "screens-chat/private-inbox-en-2x.png",
+        "sha256": "70eb670c226b2ad8b055001583257ac0c306f5c06f7bc1a1d7a95782bfb0bc25",
+        "bytes": 59656
+      },
+      {
+        "path": "screens-chat/private-new-ar-1x.png",
+        "sha256": "f3c75f5bec8149a5a82c402092ba96833b8f8ec3a97f9ba6ac36cf96b7ad65c5",
+        "bytes": 56295
+      },
+      {
+        "path": "screens-chat/private-new-ar-2x.png",
+        "sha256": "332c7a3655c0488548557bd725aec7205d959b5c4009688715db42b3d93038b0",
+        "bytes": 46626
+      },
+      {
+        "path": "screens-chat/private-new-en-1x.png",
+        "sha256": "fb59942dfd030ff84cdcd787d9e1d7d166921b56dcf7404263cc0e2d7be92518",
+        "bytes": 59012
+      },
+      {
+        "path": "screens-chat/private-new-en-2x.png",
+        "sha256": "fa1061207ee34321b77c42e078789a0473e185484c5b3670af3ad33f8a4167d7",
+        "bytes": 51442
+      },
+      {
+        "path": "screens-circles/ar-dark-1-detail.png",
+        "sha256": "13c3866aa844ab5085a0808540db94a3086af79ee39e64fab47720d63684dace",
+        "bytes": 63546
+      },
+      {
+        "path": "screens-circles/ar-dark-1-discover.png",
+        "sha256": "f1b12259309421c69e22299c1548a91c7630d6bebdade5da9e2758ea65fa4f50",
+        "bytes": 120093
+      },
+      {
+        "path": "screens-circles/ar-dark-1-mine.png",
+        "sha256": "600f98a061e50bd8dc1cd0de3faa9e5b91e7bf2aa9ca008908e9b5b37bc7c29f",
+        "bytes": 57602
+      },
+      {
+        "path": "screens-circles/ar-dark-2-detail.png",
+        "sha256": "452754bc811781175b4161f46731f9f8f0811e21dbde062448112d0c5469f258",
+        "bytes": 117813
+      },
+      {
+        "path": "screens-circles/ar-dark-2-discover.png",
+        "sha256": "21f9253f5076b839c1cc1202f8432089732db71c94d3dcaeff1d5fa456005462",
+        "bytes": 130390
+      },
+      {
+        "path": "screens-circles/ar-dark-2-mine.png",
+        "sha256": "51eb9b6f6fa8437b1e4e37ce9e58ac3c3ac3caefc618944812d9152abb2a5204",
+        "bytes": 92599
+      },
+      {
+        "path": "screens-circles/ar-keyboard-search.png",
+        "sha256": "105dd313a804e85a168333eb02d988e7dae3bb3c6383a3bb4bf4e57159661992",
+        "bytes": 35811
+      },
+      {
+        "path": "screens-circles/ar-light-1-detail.png",
+        "sha256": "7a5b79f778406e6299b2993e5f4462d86a8fa0ca612ff5249918324fb327c348",
+        "bytes": 63304
+      },
+      {
+        "path": "screens-circles/ar-light-1-discover.png",
+        "sha256": "94cabb06ad960b9c992785977c3971de7149f42a7247964e685c2b37a8a18925",
+        "bytes": 112545
+      },
+      {
+        "path": "screens-circles/ar-light-1-mine.png",
+        "sha256": "ab3060d7ff6f2680a5d1615fbd6bc270cf1b7d5187468befb185c6421a2c7be6",
+        "bytes": 55688
+      },
+      {
+        "path": "screens-circles/ar-light-2-detail.png",
+        "sha256": "960bf8b091288fb20b13f07e10953e07025953a044c7b6182a321acf5763f77a",
+        "bytes": 117950
+      },
+      {
+        "path": "screens-circles/ar-light-2-discover.png",
+        "sha256": "af0538c4b3b1e0c144ad66b71a453f14ae99cbbd01fb80011cf2611e743fc583",
+        "bytes": 127410
+      },
+      {
+        "path": "screens-circles/ar-light-2-mine.png",
+        "sha256": "01e220743b23cb32d73166e59037b371e431dfcc4463ad9c4ae0dded4ee2294e",
+        "bytes": 91159
+      },
+      {
+        "path": "screens-circles/ar-narrow-200-last.png",
+        "sha256": "be293306b62760c60dcb51b7bd6a4ea1525a049d3b314ee837a42fab8015f55a",
+        "bytes": 115629
+      },
+      {
+        "path": "screens-circles/ar-narrow-200-top.png",
+        "sha256": "9183626743b997e35250a06366cf75692932a87843b32f57fc5ec5fd5930471d",
+        "bytes": 123397
+      },
+      {
+        "path": "screens-circles/en-dark-1-detail.png",
+        "sha256": "93d79af340e6e58a6f6f92bc095bc467c86de9f338be8ddcfed081d3244afc9d",
+        "bytes": 64911
+      },
+      {
+        "path": "screens-circles/en-dark-1-discover.png",
+        "sha256": "f86979d6a626693a10f3d6c79f483458281a0720587f2553ed412e446af47771",
+        "bytes": 125306
+      },
+      {
+        "path": "screens-circles/en-dark-1-mine.png",
+        "sha256": "47bf59d12fae5128243de2d33ba8588fe0bc43b36ae52c411ff975929d7cc9a0",
+        "bytes": 63235
+      },
+      {
+        "path": "screens-circles/en-dark-2-detail.png",
+        "sha256": "7d38a3d4bae553da2aa5848e5f134bee748762645ce0eb0b2bd9cebbb8689947",
+        "bytes": 114059
+      },
+      {
+        "path": "screens-circles/en-dark-2-discover.png",
+        "sha256": "267900c448a8d66b4697c1741769bcebfcfa0b0e8c7fddcb9b3e0e34bdc31d8a",
+        "bytes": 129018
+      },
+      {
+        "path": "screens-circles/en-dark-2-mine.png",
+        "sha256": "e6c5326d11f8f73bbdf937d3cf0054d7540a59cf39d507a583992ba1163de952",
+        "bytes": 94356
+      },
+      {
+        "path": "screens-circles/en-keyboard-search.png",
+        "sha256": "f07730872c278b39825a741d95c9d7bf0fd58eca696cedfe8e3c7fff75764211",
+        "bytes": 37518
+      },
+      {
+        "path": "screens-circles/en-light-1-detail.png",
+        "sha256": "b0d54b95ec689a65ca513aa05a84e9bf54356fce3f77a5b961b37cfec5a6705e",
+        "bytes": 65554
+      },
+      {
+        "path": "screens-circles/en-light-1-discover.png",
+        "sha256": "5a5f91a81f796a192ff96770abbb16c94ac6f94adf1c5cd33ece2cee37af97f1",
+        "bytes": 119231
+      },
+      {
+        "path": "screens-circles/en-light-1-mine.png",
+        "sha256": "c34107c2fe0d27f4d225f38e4f8f8070e1ae82173ad0984e4b131c8750909c55",
+        "bytes": 60719
+      },
+      {
+        "path": "screens-circles/en-light-2-detail.png",
+        "sha256": "a1531a62cf89384ffa75685344514d7b44a2a16baed639f7e963bb974ba015a6",
+        "bytes": 114591
+      },
+      {
+        "path": "screens-circles/en-light-2-discover.png",
+        "sha256": "1ff7bd8916a35a5cbaef488b84a999d5a00120f3eec119649e58f9d42032992a",
+        "bytes": 126505
+      },
+      {
+        "path": "screens-circles/en-light-2-mine.png",
+        "sha256": "fb7b227fd42f622e548fdfdaec0000f6a4d285598a83ae253b1bbedbf3bab890",
+        "bytes": 93522
+      },
+      {
+        "path": "screens-circles/en-narrow-200-last.png",
+        "sha256": "69ed09709b54c62a1c7db2904c32bd4839ceb36b0fd1439920c2de1bf747fc73",
+        "bytes": 102714
+      },
+      {
+        "path": "screens-circles/en-narrow-200-top.png",
+        "sha256": "0ef4a574b5985edd9f67362ce9b31fa27b5b7a71958dafcbfe8d70bf240ace46",
+        "bytes": 124128
+      },
+      {
+        "path": "screens-circles/fr-local-search.png",
+        "sha256": "efe54f4a1c93dbd7ab875c6a9288b03c869effc6ce3eb0ce11f663aea6890033",
+        "bytes": 38010
+      }
+    ],
+    "reference_parity_verified": false,
+    "production_calls": false,
+    "committed": false
+  },
+  "focused": {
+    "command": [
+      "flutter",
+      "test",
+      "--no-pub",
+      "--concurrency=1",
+      "--reporter=expanded",
+      "--timeout=2m",
+      "test/features/community/community_chat_auth_session_test.dart",
+      "test/features/community/community_chat_refresh_regression_test.dart",
+      "test/features/community/community_written_language_and_chat_copy_test.dart",
+      "test/community_messages_reference_contract_test.dart",
+      "test/localization/community_chat_guard_copy_test.dart",
+      "test/qa_next/community_chat_entry_capture_test.dart",
+      "test/features/community/community_write_entrypoint_policy_test.dart",
+      "test/features/community/community_authenticated_interaction_test.dart",
+      "test/features/community/community_attention_auth_session_test.dart",
+      "test/features/community/community_attention_test.dart",
+      "test/features/community/community_visible_activity_scope_test.dart",
+      "test/features/community/community_activity_auto_read_test.dart",
+      "test/features/community/community_notification_auth_session_test.dart",
+      "test/features/community/community_owner_refresh_transport_test.dart",
+      "test/features/community/community_sapphire_contract_test.dart",
+      "test/qa_next/community_circles_reference_capture_test.dart",
+      "test/features/community/community_circles_auth_session_test.dart",
+      "test/features/community/community_topic_circle_resilience_test.dart",
+      "test/features/community/community_circles_v1_contract_test.dart",
+      "test/features/community/community_reference_parity_v1_test.dart",
+      "test/localization/bil_25_locale_fallback_closure_test.dart",
+      "test/architecture_source_file_size_guard_test.dart",
+      "test/features/community/community_entry_auth_session_test.dart",
+      "test/features/community/community_entry_flow_test.dart",
+      "test/features/community/community_entry_repository_test.dart",
+      "test/features/community/community_entry_route_contract_test.dart",
+      "test/qa_next/community_entry_capture_test.dart"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 88.445,
+    "head": "e8f5ea559036fe5b3ee3f7395e7154ad79db8462"
+  },
+  "analyze": {
+    "command": [
+      "flutter",
+      "analyze",
+      "--no-pub"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 7.398,
+    "head": "e8f5ea559036fe5b3ee3f7395e7154ad79db8462"
+  },
+  "portable_policy": {
+    "existing_classifications_unchanged": true,
+    "capture_directories_added": {
+      "test/qa_next/community_circles_reference_capture_test.dart": "BIL_CIRCLES_CAPTURE_DIR",
+      "test/qa_next/community_chat_entry_capture_test.dart": "BIL_CHAT_CAPTURE_DIR"
+    }
+  },
+  "format_log_sha256": "3d54b170b168aa31ebfe337bcbc8589e622d6867baa534c8d5847f69918e7a56",
+  "focused_log_sha256": "64a85c8a04348bca0dabddb65fdc01a00840691a0b5f8ee2082fed5ea6a154b2",
+  "analyze_log_sha256": "561a9f725e3392b9d8f39e81a3fb3440847cf9525434697036db1924ab22090a",
+  "later_checkout_transport_only_edit": {
+    "reason": "Two e8f5ea checkout fetches timed out before any Flutter command; native workflow at the identical SHA succeeded. Bound stalled HTTP transfer so the pinned checkout action can retry normally.",
+    "git_documentation": "https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables",
+    "config": {
+      "GIT_HTTP_LOW_SPEED_LIMIT": 1024,
+      "GIT_HTTP_LOW_SPEED_TIME": 60
+    },
+    "workflow_checks": [
+      {
+        "path": ".github/workflows/bil_community_entry_r5.yml",
+        "checkout_steps": 2,
+        "before_sha256": "f93383a496158b4726a5c986f9dcfefd0f8cb214f32d3202631d00a478dabe06",
+        "after_sha256": "db1adc09b2d46ee721bbf98377db6c47b079a8689a138acffde1bb50eb044b2d",
+        "only_two_checkout_environment_values_changed": true
+      },
+      {
+        "path": ".github/workflows/bil_next_coach_community_qa_only.yml",
+        "checkout_steps": 4,
+        "before_sha256": "e0794bb9803a07163235af0630d65129efa37d7cc41a78bc56a9e88885faa416",
+        "after_sha256": "00f4deaf3815d761c11c97827834eb19119342f82ef349d940394ad17e2e85f9",
+        "only_two_checkout_environment_values_changed": true
+      },
+      {
+        "path": ".github/workflows/bil_reference_native_candidate.yml",
+        "checkout_steps": 1,
+        "before_sha256": "d187a84daf0733f7f78579021b84fe96b655807d09a359a5bfd0a54c080a8713",
+        "after_sha256": "f7dfcee1e47177713a6f449ac28ae24725a46787e8daa2a7ff7635b9e0d696d4",
+        "only_two_checkout_environment_values_changed": true
+      }
+    ]
+  },
+  "parent_ci": [
+    {
+      "run": 37540492109,
+      "name": "native reference",
+      "conclusion": "success"
+    },
+    {
+      "run": 37540492009,
+      "name": "R5",
+      "conclusion": "failure",
+      "phase": "checkout fetch timeout before Flutter",
+      "regression": "not started"
+    },
+    {
+      "run": 37540492068,
+      "name": "general QA",
+      "conclusion": "failure",
+      "phase": "checkout fetch timeout before Flutter",
+      "regression": "not started",
+      "SQL": "not started"
+    }
+  ],
+  "new_ci": "pending publication",
+  "guards": {
+    "branch": "qa/coach-community-next-20261005",
+    "ios_build": 35,
+    "android_build": 32,
+    "store_build_created": false,
+    "production_written": false,
+    "paid_resources_used": false,
+    "billing_trial_changed": false,
+    "reference_parity_verified": false
+  },
+  "open_gaps": [
+    "public community channels and directory",
+    "online presence contract",
+    "Circle create/invites/images contracts",
+    "remaining Home/Activity owner and snapshot tests",
+    "Moderation/Earn integration",
+    "exact reference visual parity"
+  ]
+}

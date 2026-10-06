@@ -22,39 +22,89 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
   int _searchGeneration = 0;
   Map<String, dynamic>? _recipient;
   bool _sending = false;
+  _MessageOwnerVisit? _visit;
 
   @override
   void initState() {
     super.initState();
-    if (widget.repository != null) {
-      _repository = widget.repository;
-      _people = _repository!.searchProfiles('');
-      return;
-    }
+    _bind();
+    _subject.addListener(_draftChanged);
+    _body.addListener(_draftChanged);
+  }
+
+  void _draftChanged() {
+    if (mounted && _visit?.isCurrent == true) setState(() {});
+  }
+
+  void _bind() {
+    _visit = null;
+    _repository = widget.repository;
     final client = _initializedCommunityClient();
-    if (client?.auth.currentUser != null) {
+    if (_repository == null && client?.auth.currentUser != null) {
       _repository = CommunityRepository(client!);
-      _people = _repository!.searchProfiles('');
+    }
+    final repository = _repository;
+    if (repository == null) return;
+    _visit = _MessageOwnerVisit(repository, () => mounted, () {
+      _debounce?.cancel();
+      _searchGeneration++;
+      _recipient = null;
+      _subject.clear();
+      _body.clear();
+      _recipientSearch.clear();
+      _sending = false;
+      if (mounted) setState(() {});
+    });
+    if (_visit!.isCurrent) {
+      _people = _visit!.run(() => repository.searchProfiles(''));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant NewCommunityMessagePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _visit?.dispose();
+      _debounce?.cancel();
+      _searchGeneration++;
+      _subject.clear();
+      _body.clear();
+      _recipientSearch.clear();
+      _recipient = null;
+      _policyState = null;
+      _policyLocale = null;
+      _sending = false;
+      _bind();
+      _loadPolicy();
+    }
+  }
+
+  void _loadPolicy() {
+    final visit = _visit;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    if (visit?.isCurrent == true &&
+        (_policyState == null || _policyLocale != locale)) {
+      _policyLocale = locale;
+      _policyState = visit!.run(
+        () => visit.repository.loadCommunityPolicyState(localeCode: locale),
+      );
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final repository = _repository;
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    if (repository != null &&
-        (_policyState == null || _policyLocale != locale)) {
-      _policyLocale = locale;
-      _policyState = repository.loadCommunityPolicyState(localeCode: locale);
-    }
+    _loadPolicy();
   }
 
   Future<CommunityPolicyState?> _refreshPolicyState() async {
-    final repository = _repository;
-    if (repository == null) return null;
+    final visit = _visit;
+    if (visit?.isCurrent != true) return null;
+    final repository = visit!.repository;
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final future = repository.loadCommunityPolicyState(localeCode: locale);
+    final future = visit.run(
+      () => repository.loadCommunityPolicyState(localeCode: locale),
+    );
     setState(() {
       _policyLocale = locale;
       _policyState = future;
@@ -67,19 +117,24 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
   }
 
   Future<void> _reviewPolicy() async {
-    final repository = _repository;
-    if (repository == null) return;
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
+    final repository = _MessagePolicyRepository(visit!);
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => CommunitySafetyPage(repository: repository),
+        builder: (_) =>
+            visit.guard(CommunitySafetyPage(repository: repository)),
       ),
     );
-    if (mounted) await _refreshPolicyState();
+    if (mounted && visit.isCurrent) await _refreshPolicyState();
   }
 
   @override
   void dispose() {
+    _visit?.dispose();
     _debounce?.cancel();
+    _subject.removeListener(_draftChanged);
+    _body.removeListener(_draftChanged);
     _recipientSearch.dispose();
     _subject.dispose();
     _body.dispose();
@@ -89,11 +144,12 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
   void _search(String value) {
     _debounce?.cancel();
     final generation = ++_searchGeneration;
+    final visit = _visit;
     _debounce = Timer(const Duration(milliseconds: 250), () {
-      if (mounted && _repository != null) {
+      if (mounted && visit?.isCurrent == true) {
         setState(() {
-          _people = _repository!
-              .searchProfiles(value)
+          _people = visit!
+              .run(() => visit.repository.searchProfiles(value))
               .then(
                 (rows) => generation == _searchGeneration ? rows : const [],
               );
@@ -103,7 +159,8 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
   }
 
   Future<void> _send() async {
-    if (_sending) return;
+    final visit = _visit;
+    if (_sending || visit == null || !visit.isCurrent) return;
     final copy = _MessagesCopy.of(context);
     if (_repository == null ||
         _recipient == null ||
@@ -113,17 +170,39 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
       ).showSnackBar(SnackBar(content: Text(copy.completeFields)));
       return;
     }
+    final envelope = MessageBodyContract.compose(
+      subject: _subject.text,
+      body: _body.text,
+    );
+    final subjectTooLong = _subject.text.trim().runes.length > 120;
+    if (subjectTooLong || envelope.runes.length > 2000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            subjectTooLong
+                ? _privateSubjectLimitText(context)
+                : _privateMessageLimitText(context),
+          ),
+        ),
+      );
+      return;
+    }
+    final recipient = _recipient!['user_id'] as String;
     setState(() => _sending = true);
     try {
-      await _repository!.sendMessage(
-        _recipient!['user_id'] as String,
-        MessageBodyContract.compose(subject: _subject.text, body: _body.text),
-      );
-      if (mounted) context.pop();
+      await visit.run(() => visit.repository.sendMessage(recipient, envelope));
+      if (mounted && visit.isCurrent) {
+        final router = GoRouter.of(context);
+        if (router.canPop()) {
+          router.pop();
+        } else {
+          router.go('/community/messages');
+        }
+      }
     } on CommunityPolicyAccessException catch (error) {
-      if (mounted) {
+      if (mounted && visit.isCurrent) {
         await _refreshPolicyState();
-        if (!mounted) return;
+        if (!mounted || !visit.isCurrent) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -135,13 +214,15 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
             ),
             action: SnackBarAction(
               label: communityText(context, 'Review policy', 'مراجعة السياسة'),
-              onPressed: () => _reviewPolicy(),
+              onPressed: () {
+                if (visit.isCurrent) unawaited(_reviewPolicy());
+              },
             ),
           ),
         );
       }
     } on CommunityMembershipAccessException catch (error) {
-      if (mounted) {
+      if (mounted && visit.isCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -155,7 +236,7 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
         );
       }
     } on CommunityTextPolicyException catch (error) {
-      if (mounted) {
+      if (mounted && visit.isCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -167,22 +248,35 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
         );
       }
     } on Object {
-      if (mounted) {
+      if (mounted && visit.isCurrent) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(copy.sendFailed)));
       }
     } finally {
-      if (mounted) setState(() => _sending = false);
+      if (mounted && visit.isCurrent) setState(() => _sending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final copy = _MessagesCopy.of(context);
+    final visit = _visit;
+    if (visit != null && !visit.isCurrent) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: const CommunityReturnButton(),
+          title: Text(copy.newMessage),
+        ),
+        body: const _MessageOwnerChanged(),
+      );
+    }
     if (_repository == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(copy.newMessage)),
+        appBar: AppBar(
+          leading: const CommunityReturnButton(),
+          title: Text(copy.newMessage),
+        ),
         body: _MessagesSignIn(copy: copy),
       );
     }
@@ -190,9 +284,9 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
       canPop: !_sending,
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: _sending ? null : () => context.pop(),
+          leading: AbsorbPointer(
+            absorbing: _sending,
+            child: const CommunityReturnButton(),
           ),
           title: Text(copy.newMessage),
           actions: [
@@ -265,6 +359,7 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                       SizedBox(
                         height: 180,
                         child: FutureBuilder<List<Map<String, dynamic>>>(
+                          key: ObjectKey(visit),
                           future: _people,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState !=
@@ -296,9 +391,13 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                                     ),
                                     onTap: _sending
                                         ? null
-                                        : () => setState(
-                                            () => _recipient = person,
-                                          ),
+                                        : () {
+                                            if (visit?.isCurrent == true) {
+                                              setState(
+                                                () => _recipient = person,
+                                              );
+                                            }
+                                          },
                                   ),
                               ],
                             );
@@ -311,11 +410,13 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                         key: const Key('community-message-subject'),
                         controller: _subject,
                         enabled: !_sending,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(120),
-                        ],
+                        onChanged: (_) => _draftChanged(),
                         decoration: InputDecoration(
                           labelText: copy.subject,
+                          counterText: '${_subject.text.runes.length}/120',
+                          errorText: _subject.text.trim().runes.length > 120
+                              ? _privateSubjectLimitText(context)
+                              : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -332,14 +433,22 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                         key: const Key('community-message-body'),
                         controller: _body,
                         enabled: !_sending,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(4000),
-                        ],
+                        onChanged: (_) => _draftChanged(),
                         minLines: 8,
                         maxLines: null,
                         textAlignVertical: TextAlignVertical.top,
                         decoration: InputDecoration(
                           hintText: copy.message,
+                          counterText:
+                              '${MessageBodyContract.compose(subject: _subject.text, body: _body.text).runes.length}/2000',
+                          errorText:
+                              MessageBodyContract.compose(
+                                    subject: _subject.text,
+                                    body: _body.text,
+                                  ).runes.length >
+                                  2000
+                              ? _privateMessageLimitText(context)
+                              : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),

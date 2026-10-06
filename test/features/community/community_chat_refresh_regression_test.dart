@@ -8,15 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _ChatRepository extends CommunityRepository {
-  _ChatRepository({List<CommunityMessage>? messages})
-    : messages = messages ?? <CommunityMessage>[],
-      super(
-        SupabaseClient(
-          'https://chat-unit.invalid',
-          'unit-test-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _ChatRepository(super.client, {List<CommunityMessage>? messages})
+    : messages = messages ?? <CommunityMessage>[];
   final changes = StreamController<void>.broadcast();
   final List<CommunityMessage> messages;
   Completer<List<CommunityMessage>>? pendingLoad;
@@ -44,6 +37,9 @@ class _ChatRepository extends CommunityRepository {
   @override
   Future<int> markVisibleMessagesRead(List<String> ids) async => ids.length;
   @override
+  Future<Set<String>> loadReadMessageIds(String peer, List<String> ids) async =>
+      ids.toSet();
+  @override
   Future<void> sendMessage(String id, String body) =>
       pendingSend?.future ?? Future.value();
 }
@@ -56,11 +52,23 @@ Widget _chat(_ChatRepository repository) => MaterialApp(
   ),
 );
 void main() {
+  late SupabaseClient client;
+  setUp(() {
+    client = SupabaseClient(
+      'https://chat-unit.invalid',
+      'unit-test-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() async {
+    await client.dispose();
+  });
   testWidgets(
     'friend chat opens at latest and leaves an older-reading user in place',
     (tester) async {
       final recipient = '22222222-2222-4222-8222-222222222222';
       final repository = _ChatRepository(
+        client,
         messages: [
           for (var index = 0; index < 30; index++)
             CommunityMessage(
@@ -113,7 +121,7 @@ void main() {
   testWidgets(
     'realtime refresh keeps selectable history visible while loading',
     (tester) async {
-      final repository = _ChatRepository();
+      final repository = _ChatRepository(client);
       addTearDown(repository.changes.close);
       await tester.pumpWidget(_chat(repository));
       await tester.pumpAndSettle();
@@ -134,7 +142,8 @@ void main() {
   testWidgets(
     'a new draft typed during send is not erased by the old completion',
     (tester) async {
-      final repository = _ChatRepository()..pendingSend = Completer<void>();
+      final repository = _ChatRepository(client)
+        ..pendingSend = Completer<void>();
       addTearDown(repository.changes.close);
       await tester.pumpWidget(_chat(repository));
       await tester.pumpAndSettle();
@@ -156,7 +165,7 @@ void main() {
   testWidgets('leaving during send does not write to a disposed controller', (
     tester,
   ) async {
-    final repository = _ChatRepository()..pendingSend = Completer<void>();
+    final repository = _ChatRepository(client)..pendingSend = Completer<void>();
     addTearDown(repository.changes.close);
     await tester.pumpWidget(_chat(repository));
     await tester.pumpAndSettle();

@@ -67,6 +67,7 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   int conversationVersion = 0;
   int conversationLoadCalls = 0;
   int conversationReadCalls = 0;
+  final confirmedMessageReads = <String>{};
   bool conversationSubscriptionCancelled = false;
   late final StreamController<void> conversationChanges;
   bool failPublish = false;
@@ -391,8 +392,13 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   @override
   Future<int> markVisibleMessagesRead(List<String> ids) async {
     conversationReadCalls++;
+    confirmedMessageReads.addAll(ids);
     return ids.length;
   }
+
+  @override
+  Future<Set<String>> loadReadMessageIds(String peer, List<String> ids) async =>
+      confirmedMessageReads.intersection(ids.toSet());
 
   @override
   Future<void> sendMessage(String recipientId, String body) async {
@@ -606,6 +612,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Outgoing realtime message'), findsOneWidget);
     expect(repository.conversationLoadCalls, 3);
+    expect(
+      find.text('Incoming realtime message').hitTestable(),
+      findsOneWidget,
+    );
+    // Fetch is not read: complete the real foreground dwell before checking
+    // the unchanged single incoming-message acknowledgement assertion.
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.pump();
     expect(
       repository.conversationReadCalls,
       1,

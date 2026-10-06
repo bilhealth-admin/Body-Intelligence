@@ -79,9 +79,10 @@ void main() {
     final mixin = File(
       'lib/features/community/data/community_feed_repository_mixin.dart',
     ).readAsStringSync();
-    final page = File(
+    final page = [
       'lib/features/community/presentation/community_circles_page.dart',
-    ).readAsStringSync();
+      'lib/features/community/presentation/community_circle_reference_body.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final composer = [
       'lib/features/community/presentation/community_post_composer_page.dart',
       'lib/features/community/presentation/community_post_composer_rendering.dart',

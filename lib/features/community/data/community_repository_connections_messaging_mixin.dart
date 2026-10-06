@@ -11,6 +11,10 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
 
   Future<void> _requireAcceptedContentPolicy();
 
+  Future<T> _runCommunityOwnerOperation<T>(
+    Future<T> Function(CommunityOwnerOperation operation) action,
+  );
+
   Future<List<Map<String, dynamic>>> loadFriendships() async {
     return await _client
         .from('bil_friendships')
@@ -165,28 +169,114 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
     );
   }
 
-  Future<List<CommunityMessage>> loadMessages(String otherUserId) async {
-    final userId = _user.id;
+  Future<List<CommunityMessage>> loadMessages(String otherUserId) =>
+      _loadMessagePage(otherUserId);
+
+  Future<List<CommunityMessage>> loadOlderMessages(
+    String otherUserId, {
+    required DateTime before,
+    required String beforeId,
+  }) => _loadMessagePage(otherUserId, before: before, beforeId: beforeId);
+
+  Future<List<CommunityMessage>> _loadMessagePage(
+    String otherUserId, {
+    DateTime? before,
+    String? beforeId,
+  }) => _runCommunityOwnerOperation((operation) async {
+    final owner = operation.ownerId;
+    if (owner == null) throw const AuthException('Sign-in required');
+    if (!CommunityRepository._uuid.hasMatch(otherUserId) ||
+        owner == otherUserId ||
+        (before == null) != (beforeId == null) ||
+        (beforeId != null && !CommunityRepository._uuid.hasMatch(beforeId))) {
+      throw ArgumentError('Invalid private conversation or cursor');
+    }
+    final cursor = before == null
+        ? ''
+        : ',or(created_at.lt.${before.toUtc().toIso8601String()},'
+              'and(created_at.eq.${before.toUtc().toIso8601String()},id.lt.$beforeId))';
     final rows = await _client
         .from('bil_messages')
         .select('id,sender_id,recipient_id,body,created_at,read_at')
         .or(
-          'and(sender_id.eq.$userId,recipient_id.eq.$otherUserId),and(sender_id.eq.$otherUserId,recipient_id.eq.$userId)',
+          'and(sender_id.eq.$owner,recipient_id.eq.$otherUserId$cursor),'
+          'and(sender_id.eq.$otherUserId,recipient_id.eq.$owner$cursor)',
         )
-        .order('created_at')
-        .order('id');
-    final messages = rows
-        .map((row) => CommunityMessage.fromJson(row))
-        .toList(growable: true);
-    // Keep the conversation transcript chronological even if an edge/cache
-    // returns rows outside the requested order. The chat viewport is reversed
-    // so this places the newest message at the latest (bottom) end.
+        .order('created_at', ascending: false)
+        .order('id', ascending: false)
+        .limit(50);
+    operation.check();
+    final messages = <CommunityMessage>[];
+    final ids = <String>{};
+    for (final row in rows) {
+      final message = CommunityMessage.fromJson(row);
+      final pair =
+          (message.senderId == owner && message.recipientId == otherUserId) ||
+          (message.senderId == otherUserId && message.recipientId == owner);
+      final older =
+          before == null ||
+          message.createdAt.isBefore(before) ||
+          (message.createdAt.isAtSameMomentAs(before) &&
+              message.id.compareTo(beforeId!) < 0);
+      if (!pair ||
+          !older ||
+          !CommunityRepository._uuid.hasMatch(message.id) ||
+          !_validMessageEnvelope(message.body) ||
+          !ids.add(message.id)) {
+        throw const FormatException('Invalid private conversation readback');
+      }
+      messages.add(message);
+    }
+    // Server pages are newest-first; the reversed viewport consumes an
+    // ascending transcript with the same deterministic UUID tie-breaker.
     messages.sort((left, right) {
       final byTime = left.createdAt.compareTo(right.createdAt);
       return byTime == 0 ? left.id.compareTo(right.id) : byTime;
     });
     return List<CommunityMessage>.unmodifiable(messages);
-  }
+  });
+
+  /// The write RPC returns a count, not the identities that it acknowledged.
+  /// Read only the requested incoming rows back through existing message RLS.
+  Future<Set<String>> loadReadMessageIds(
+    String otherUserId,
+    List<String> messageIds,
+  ) => _runCommunityOwnerOperation((operation) async {
+    final owner = operation.ownerId;
+    if (owner == null) throw const AuthException('Sign-in required');
+    final ids = messageIds.toSet();
+    if (!CommunityRepository._uuid.hasMatch(otherUserId) ||
+        otherUserId == owner ||
+        ids.length > 200 ||
+        ids.any((id) => !CommunityRepository._uuid.hasMatch(id))) {
+      throw ArgumentError('Invalid private message readback');
+    }
+    if (ids.isEmpty) return <String>{};
+    final rows = await _client
+        .from('bil_messages')
+        .select('id,sender_id,recipient_id,read_at')
+        .eq('sender_id', otherUserId)
+        .eq('recipient_id', owner)
+        .inFilter('id', ids.toList());
+    operation.check();
+    final confirmed = <String>{};
+    for (final row in rows) {
+      if (!ids.contains(row['id']) ||
+          row['sender_id'] != otherUserId ||
+          row['recipient_id'] != owner) {
+        throw const FormatException(
+          'Message readback does not belong to this conversation',
+        );
+      }
+      final readAt = row['read_at'];
+      if (readAt == null) continue;
+      if (readAt is! String || DateTime.tryParse(readAt) == null) {
+        throw const FormatException('Invalid message read timestamp');
+      }
+      confirmed.add(row['id'] as String);
+    }
+    return Set<String>.unmodifiable(confirmed);
+  });
 
   Stream<void> watchConversationChanges(String otherUserId) {
     final currentUserId = _user.id;
@@ -232,16 +322,20 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
     return controller.stream;
   }
 
-  Future<List<Map<String, dynamic>>> loadInboxMessages() async {
-    final rows = await _client
-        .from('bil_messages')
-        .select('id,sender_id,recipient_id,body,created_at,read_at')
-        .eq('recipient_id', _user.id)
-        .order('created_at', ascending: false)
-        .order('id', ascending: false)
-        .limit(100);
-    return _enrichMessageRows(rows, profileKey: 'sender_id');
-  }
+  Future<List<Map<String, dynamic>>> loadInboxMessages() =>
+      _runCommunityOwnerOperation((operation) async {
+        final owner = operation.ownerId;
+        if (owner == null) throw const AuthException('Sign-in required');
+        final rows = await _client
+            .from('bil_messages')
+            .select('id,sender_id,recipient_id,body,created_at,read_at')
+            .eq('recipient_id', owner)
+            .order('created_at', ascending: false)
+            .order('id', ascending: false)
+            .limit(100);
+        operation.check();
+        return _enrichMessageRows(rows, owner: owner, profileKey: 'sender_id');
+      });
 
   Stream<void> watchInboxChanges() => _client
       .from('bil_messages')
@@ -251,22 +345,32 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
       .limit(1)
       .map<void>((_) {});
 
-  Future<List<Map<String, dynamic>>> loadSentMessages() async {
-    final rows = await _client
-        .from('bil_messages')
-        .select('id,sender_id,recipient_id,body,created_at,read_at')
-        .eq('sender_id', _user.id)
-        .order('created_at', ascending: false)
-        .order('id', ascending: false)
-        .limit(100);
-    return _enrichMessageRows(rows, profileKey: 'recipient_id');
-  }
+  Future<List<Map<String, dynamic>>> loadSentMessages() =>
+      _runCommunityOwnerOperation((operation) async {
+        final owner = operation.ownerId;
+        if (owner == null) throw const AuthException('Sign-in required');
+        final rows = await _client
+            .from('bil_messages')
+            .select('id,sender_id,recipient_id,body,created_at,read_at')
+            .eq('sender_id', owner)
+            .order('created_at', ascending: false)
+            .order('id', ascending: false)
+            .limit(100);
+        operation.check();
+        return _enrichMessageRows(
+          rows,
+          owner: owner,
+          profileKey: 'recipient_id',
+        );
+      });
 
   Future<List<Map<String, dynamic>>> _enrichMessageRows(
     List<Map<String, dynamic>> rows, {
     required String profileKey,
+    required String owner,
   }) async {
-    final currentUserId = _user.id;
+    CommunityOwnerOperation.checkCurrent();
+    final currentUserId = owner;
     final validRows = rows
         .where((row) {
           final id = row['id'];
@@ -301,6 +405,7 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
         .from('bil_public_profiles')
         .select('user_id,display_name,avatar_url')
         .inFilter('user_id', ids);
+    CommunityOwnerOperation.checkCurrent();
     final byId = <String, Map<String, dynamic>>{};
     for (final row in profiles) {
       final id = row['user_id'];
@@ -322,7 +427,7 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
 
   static bool _validMessageEnvelope(String body) {
     if (body.trim().isEmpty ||
-        body.length > 4200 ||
+        body.runes.length > 2000 ||
         CommunityRepository._unsafeText.hasMatch(body)) {
       return false;
     }
@@ -332,32 +437,39 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
     if (newline < 0) return false;
     final subject = body.substring(marker.length, newline);
     final message = body.substring(newline + 1);
-    return subject.length <= 120 &&
+    return subject.runes.length <= 120 &&
         message.trim().isNotEmpty &&
-        message.length <= 4000;
+        message.runes.length <= 2000;
   }
 
-  Future<void> sendMessage(String recipientId, String body) async {
-    if (!CommunityRepository._uuid.hasMatch(recipientId) ||
-        recipientId == _user.id) {
-      throw ArgumentError.value(recipientId, 'recipientId');
-    }
-    final text = body.trim();
-    if (text.isEmpty ||
-        text.length > 4200 ||
-        CommunityRepository._unsafeText.hasMatch(text)) {
-      throw ArgumentError.value(body, 'body');
-    }
-    CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.message);
-    await _requireAcceptedContentPolicy();
-    await _runCommunityMutation(
-      () => _client.from('bil_messages').insert({
-        'sender_id': _user.id,
-        'recipient_id': recipientId,
-        'body': text,
-      }),
-    );
-  }
+  Future<void> sendMessage(String recipientId, String body) =>
+      _runCommunityOwnerOperation((operation) async {
+        final owner = operation.ownerId;
+        if (owner == null) throw const AuthException('Sign-in required');
+        if (!CommunityRepository._uuid.hasMatch(recipientId) ||
+            recipientId == owner) {
+          throw ArgumentError.value(recipientId, 'recipientId');
+        }
+        final text = body.trim();
+        // PostgreSQL length(text) counts Unicode code points, not UTF-16 units.
+        if (!_validMessageEnvelope(text)) {
+          throw ArgumentError.value(body, 'body');
+        }
+        CommunityTextPolicy.enforce(
+          text,
+          surface: CommunityTextSurface.message,
+        );
+        await _requireAcceptedContentPolicy();
+        operation.check();
+        await _runCommunityMutation(
+          () => _client.from('bil_messages').insert({
+            'sender_id': owner,
+            'recipient_id': recipientId,
+            'body': text,
+          }),
+        );
+        operation.check();
+      });
 
   Future<void> deleteMessage(String messageId) =>
       _client.rpc('bil_delete_message', params: {'p_message_id': messageId});

@@ -21,6 +21,9 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        env:
+          GIT_HTTP_LOW_SPEED_LIMIT: '1024'
+          GIT_HTTP_LOW_SPEED_TIME: '60'
         timeout-minutes: 10
         with:
           persist-credentials: false
@@ -100,6 +103,13 @@ jobs:
           BIL_COMMUNITY_CAPTURE_DIR: /tmp/bil-reference/community
         shell: bash
         run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/community-tests.log
+      - name: Render and exercise actual private messages and Circles
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        env:
+          BIL_CHAT_CAPTURE_DIR: /tmp/bil-reference/private-messages
+          BIL_CIRCLES_CAPTURE_DIR: /tmp/bil-reference/circles
+        shell: bash
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/community_chat_entry_capture_test.dart test/qa_next/community_circles_reference_capture_test.dart --concurrency=1 --timeout 2m 2>&1 | tee /tmp/bil-reference/chat-circles-tests.log
       - name: Preserve behavior accessibility and translation contracts
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         shell: bash

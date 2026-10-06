@@ -14,14 +14,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const _postId = '33333333-3333-4333-8333-333333333333';
 
 class _BrowseRepository extends CommunityRepository {
-  _BrowseRepository()
-    : super(
-        SupabaseClient(
-          'https://browse.invalid',
-          'synthetic-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _BrowseRepository(super.client);
+
+  @override
+  String get currentUserId => '11111111-1111-4111-8111-111111111111';
   final requests = <({DateTime? before, String? id})>[];
   Completer<void>? more;
   bool failMore = true;
@@ -150,7 +146,11 @@ Future<void> _open(
     ),
   );
   await tester.pumpAndSettle();
-  await tester.tap(find.byType(InkWell).first);
+  await tester.tap(
+    circle
+        ? find.byKey(const Key('community-circle-row-healthy-eating'))
+        : find.byType(InkWell).first,
+  );
   await tester.pumpAndSettle();
   expect(repository.firstLoads, 1);
 }
@@ -170,12 +170,22 @@ Future<void> _more(WidgetTester tester, String language) async {
 }
 
 void main() {
+  late SupabaseClient client;
+  setUp(() {
+    client = SupabaseClient(
+      'https://browse.invalid',
+      'synthetic-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() async => client.dispose());
+
   for (final language in ['en', 'ar']) {
     for (final circle in [false, true]) {
       testWidgets(
         'older ${circle ? 'circle' : 'topic'} posts retry safely in $language',
         (tester) async {
-          final repository = _BrowseRepository();
+          final repository = _BrowseRepository(client);
           await _open(tester, repository, language, circle);
           await _more(tester, language);
           await tester.pumpAndSettle();
@@ -207,7 +217,7 @@ void main() {
       testWidgets(
         'unknown ${circle ? 'circle' : 'topic'} views are not fabricated in $language',
         (tester) async {
-          final repository = _BrowseRepository()..failCounts = true;
+          final repository = _BrowseRepository(client)..failCounts = true;
           await _open(tester, repository, language, circle);
           expect(
             find.byKey(const Key('community-profile-post-views-$_postId')),
@@ -223,7 +233,13 @@ void main() {
         (tester) async {
           await tester.binding.setSurfaceSize(const Size(320, 568));
           addTearDown(() => tester.binding.setSurfaceSize(null));
-          await _open(tester, _BrowseRepository(), language, circle, scale: 2);
+          await _open(
+            tester,
+            _BrowseRepository(client),
+            language,
+            circle,
+            scale: 2,
+          );
           expect(tester.takeException(), isNull);
           final more = find.widgetWithText(
             TextButton,
@@ -242,7 +258,7 @@ void main() {
       testWidgets(
         'late ${circle ? 'circle' : 'topic'} failure after route exit is contained in $language',
         (tester) async {
-          final repository = _BrowseRepository();
+          final repository = _BrowseRepository(client);
           await _open(tester, repository, language, circle);
           final pending = Completer<void>();
           repository.more = pending;

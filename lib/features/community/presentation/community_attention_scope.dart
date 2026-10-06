@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../domain/community_attention.dart';
+import '../services/community_owner_operation.dart';
 import 'community_copy.dart';
 
 /// One authenticated subscription owner for More, Community and Messages.
@@ -40,11 +41,13 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
   SupabaseClient? _client;
   late final CommunityAttentionController _controller =
       widget.controller ?? CommunityAttentionController(_load);
+  late final bool _ownsController = widget.controller == null;
   StreamSubscription<AuthState>? _auth;
   RealtimeChannel? _channel;
   Timer? _retry;
   Timer? _debounce;
   String? _subscribedOwner;
+  int _bindingGeneration = 0;
   int? _lastBadge;
   bool _resumed = true;
 
@@ -56,7 +59,24 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
         WidgetsBinding.instance.lifecycleState == null ||
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _controller.addListener(_updateNativeBadge);
-    if (widget.controller != null) return;
+    if (!_ownsController) {
+      return;
+    }
+    _bindClient();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityAttentionScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // An injected controller is owned and bound by its caller. Replacing a
+    // client only rebinds this scope's own authenticated controller.
+    if (_ownsController && !identical(oldWidget.client, widget.client)) {
+      _retireClient();
+      _bindClient();
+    }
+  }
+
+  void _bindClient() {
     _client = widget.client;
     if (_client == null &&
         AppEnvironment.communityConfigured &&
@@ -65,31 +85,72 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
     }
     final client = _client;
     if (client != null) {
-      _auth = client.auth.onAuthStateChange.listen(
-        (_) => _bindOwner(),
-        onError: (Object _) {},
-      );
-      _bindOwner();
+      _auth = client.auth.onAuthStateChange.listen((state) {
+        if (mounted && identical(client, _client)) {
+          _bindOwner(client, state.session?.user.id);
+        }
+      }, onError: (Object _) {});
+      _bindOwner(client, client.auth.currentUser?.id);
       _retry = Timer.periodic(const Duration(seconds: 45), (_) {
-        if (_resumed) unawaited(_controller.refresh());
+        if (_resumed) {
+          _refreshCurrent();
+        }
       });
     }
   }
 
-  Future<CommunityAttention> _load() async {
-    final response = await _client!.rpc('bil_community_attention_v2');
-    if (response is! Map) {
-      throw const FormatException('Invalid Community attention response');
+  void _retireClient() {
+    _bindingGeneration++;
+    _retry?.cancel();
+    _retry = null;
+    _debounce?.cancel();
+    _debounce = null;
+    unawaited(_auth?.cancel());
+    _auth = null;
+    final client = _client;
+    final channel = _channel;
+    _channel = null;
+    _client = null;
+    _subscribedOwner = null;
+    if (client != null && channel != null) {
+      unawaited(client.removeChannel(channel));
     }
-    return CommunityAttention.fromJson(Map<String, dynamic>.from(response));
+    _controller.setOwner(null);
   }
 
-  void _bindOwner() {
-    final client = _client!;
-    final owner = client.auth.currentUser?.id;
-    if (owner == _subscribedOwner) {
+  bool _isCurrentBinding(SupabaseClient client, String owner, int generation) =>
+      mounted &&
+      identical(client, _client) &&
+      generation == _bindingGeneration &&
+      owner == _subscribedOwner &&
+      owner == client.auth.currentUser?.id;
+
+  Future<CommunityAttention> _load() {
+    final client = _client;
+    final owner = _subscribedOwner;
+    final generation = _bindingGeneration;
+    if (client == null || owner == null) {
+      throw const CommunityOwnerOperationCancelled();
+    }
+    return CommunityOwnerOperation.run(
+      client: client,
+      ownerId: owner,
+      isCurrentOwner: () => _isCurrentBinding(client, owner, generation),
+      action: (operation) async {
+        final response = await client.rpc('bil_community_attention_v2');
+        operation.check();
+        if (response is! Map) {
+          throw const FormatException('Invalid Community attention response');
+        }
+        return CommunityAttention.fromJson(Map<String, dynamic>.from(response));
+      },
+    );
+  }
+
+  void _bindOwner(SupabaseClient client, String? owner) {
+    if (owner == _subscribedOwner && owner == _controller.owner) {
       if (owner != null) {
-        unawaited(_controller.refresh());
+        _refreshCurrent();
       } else {
         _updateNativeBadge();
       }
@@ -97,14 +158,25 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
     }
     final previous = _channel;
     _channel = null;
-    if (previous != null) unawaited(client.removeChannel(previous));
+    if (previous != null) {
+      unawaited(client.removeChannel(previous));
+    }
+    final generation = ++_bindingGeneration;
     _debounce?.cancel();
     _subscribedOwner = owner;
+    // A queued B event must retire A even if the SDK has already restored A.
+    // Do not issue B's load using that newer A session; wait for its own event.
+    _controller.setOwner(null);
+    if (owner == null || owner != client.auth.currentUser?.id) {
+      return;
+    }
     _controller.setOwner(owner);
-    if (owner == null) return;
-    void changed(PostgresChangePayload _) => _scheduleRefresh();
+    void changed(PostgresChangePayload _) =>
+        _scheduleRefresh(client, owner, generation);
     _channel = client
-        .channel('community-attention-$owner')
+        .channel(
+          'community-attention-$owner-${identityHashCode(this)}-$generation',
+        )
         .onPostgresChanges(
           event: PostgresChangeEvent.all,
           schema: 'public',
@@ -139,15 +211,31 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
           callback: changed,
         )
         .subscribe((status, error) {
-          if (status == RealtimeSubscribeStatus.subscribed) _scheduleRefresh();
+          if (status == RealtimeSubscribeStatus.subscribed) {
+            _scheduleRefresh(client, owner, generation);
+          }
         });
   }
 
-  void _scheduleRefresh() {
-    if (!_resumed || !mounted) return;
+  void _refreshCurrent() {
+    final client = _client;
+    final owner = _subscribedOwner;
+    if (client != null &&
+        owner != null &&
+        _isCurrentBinding(client, owner, _bindingGeneration)) {
+      unawaited(_controller.refresh());
+    }
+  }
+
+  void _scheduleRefresh(SupabaseClient client, String owner, int generation) {
+    if (!_resumed || !_isCurrentBinding(client, owner, generation)) {
+      return;
+    }
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 180), () {
-      unawaited(_controller.refresh());
+      if (_resumed && _isCurrentBinding(client, owner, generation)) {
+        unawaited(_controller.refresh());
+      }
     });
   }
 
@@ -158,17 +246,22 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
       return;
     }
     final count = _controller.value.total;
-    if (count == _lastBadge) return;
+    if (count == _lastBadge) {
+      return;
+    }
     _lastBadge = count;
     unawaited(_writeBadge(count));
   }
 
   Future<void> _writeBadge(int count) async {
+    final generation = _bindingGeneration;
     try {
       await _push.invokeMethod<void>('setBadgeCount', count);
     } on Object {
       // An old native host or denied permission must not break in-app badges.
-      _lastBadge = null;
+      if (mounted && generation == _bindingGeneration && _lastBadge == count) {
+        _lastBadge = null;
+      }
     }
   }
 
@@ -177,20 +270,31 @@ class _CommunityAttentionScopeState extends State<CommunityAttentionScope>
     _resumed = state == AppLifecycleState.resumed;
     if (_resumed) {
       _lastBadge = null;
-      unawaited(_controller.refresh());
+      if (_ownsController) {
+        _refreshCurrent();
+      } else {
+        unawaited(_controller.refresh());
+      }
+    } else {
+      _debounce?.cancel();
     }
   }
 
   @override
   void dispose() {
+    _bindingGeneration++;
     WidgetsBinding.instance.removeObserver(this);
     _retry?.cancel();
     _debounce?.cancel();
     unawaited(_auth?.cancel());
     final channel = _channel;
-    if (channel != null) unawaited(_client!.removeChannel(channel));
+    if (channel != null) {
+      unawaited(_client!.removeChannel(channel));
+    }
     _controller.removeListener(_updateNativeBadge);
-    if (widget.controller == null) _controller.dispose();
+    if (_ownsController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -226,7 +330,9 @@ class CommunityUnreadBadge extends StatelessWidget {
       CommunityAttentionKind.requests => value.incomingRequests,
       CommunityAttentionKind.all => value.total,
     };
-    if (count == 0) return child ?? const SizedBox.shrink();
+    if (count == 0) {
+      return child ?? const SizedBox.shrink();
+    }
     final label = switch (kind) {
       CommunityAttentionKind.messages => communityText(
         context,

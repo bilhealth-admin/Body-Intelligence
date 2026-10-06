@@ -3,7 +3,6 @@ import 'community_attention_scope.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -13,12 +12,15 @@ import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_text_policy.dart';
+import '../services/community_owner_operation.dart';
+import 'community_return_button.dart';
 import 'community_copy.dart';
 import 'community_sapphire.dart';
 import 'community_policy_notice.dart';
 import 'community_safety_page.dart';
 
 part 'community_messages_copy.dart';
+part 'community_message_owner_scope.dart';
 part 'community_conversation_tile.dart';
 part 'new_community_message_page.dart';
 
@@ -48,87 +50,134 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
   late Future<List<Map<String, dynamic>>> _inbox;
   late Future<List<Map<String, dynamic>>> _sent;
   StreamSubscription<void>? _inboxChanges;
+  _MessageOwnerVisit? _visit;
 
   @override
   void initState() {
     super.initState();
-    if (widget.repository != null) {
-      _repository = widget.repository;
-      _reload();
-      _watchInbox();
-      return;
-    }
+    _bind();
+  }
+
+  void _bind() {
+    _visit = null;
+    _repository = widget.repository;
     final client = _initializedCommunityClient();
-    if (client?.auth.currentUser != null) {
+    if (_repository == null && client?.auth.currentUser != null) {
       _repository = CommunityRepository(client!);
+    }
+    final repository = _repository;
+    if (repository != null) {
+      _visit = _MessageOwnerVisit(repository, () => mounted, () {
+        unawaited(_inboxChanges?.cancel());
+        _inboxChanges = null;
+        if (mounted) setState(() {});
+      });
     }
     _reload();
     _watchInbox();
   }
 
+  @override
+  void didUpdateWidget(covariant CommunityMessagesPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _visit?.dispose();
+      unawaited(_inboxChanges?.cancel());
+      _inboxChanges = null;
+      _bind();
+    }
+  }
+
   void _watchInbox() {
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
     try {
-      _inboxChanges = _repository?.watchInboxChanges().listen((_) {
-        if (mounted) unawaited(_refreshInbox());
-      }, onError: (_) {});
+      _inboxChanges = visit!.repository.watchInboxChanges().listen((_) {
+        if (visit.isCurrent) unawaited(_refreshInbox());
+      }, onError: (Object _, StackTrace _) {});
     } on AuthException {
-      // The injected repository may outlive its signed-in test/session user.
-      // The already-loaded inbox remains usable without a realtime channel.
       _inboxChanges = null;
     }
   }
 
   @override
   void dispose() {
+    _visit?.dispose();
     unawaited(_inboxChanges?.cancel());
     super.dispose();
   }
 
-  Future<void> _reload() async {
-    _inbox = _repository?.loadInboxMessages() ?? Future.value(const []);
-    _sent = _repository?.loadSentMessages() ?? Future.value(const []);
-    await Future.wait([_inbox, _sent]);
+  void _reload() {
+    final visit = _visit;
+    _inbox = visit?.isCurrent == true
+        ? visit!.run(visit.repository.loadInboxMessages)
+        : Future.value(const []);
+    _sent = visit?.isCurrent == true
+        ? visit!.run(visit.repository.loadSentMessages)
+        : Future.value(const []);
+    // A not-yet-opened tab may not have a FutureBuilder attached. Observe its
+    // error without changing the original future or hiding its retry state.
+    _inbox.ignore();
+    _sent.ignore();
   }
 
   Future<void> _refresh() async {
-    setState(() {
-      _inbox = _repository!.loadInboxMessages();
-      _sent = _repository!.loadSentMessages();
-    });
-    await Future.wait([_inbox, _sent]);
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
+    setState(_reload);
+    try {
+      await Future.wait([_inbox, _sent]);
+    } on Object {
+      /* Visible retry owns the failure. */
+    }
   }
 
   Future<void> _refreshInbox() async {
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
     setState(() {
-      _inbox = _repository!.loadInboxMessages();
+      _inbox = visit!.run(visit.repository.loadInboxMessages);
     });
-    await _inbox;
+    try {
+      await _inbox;
+    } on Object {
+      /* Visible retry owns the failure. */
+    }
   }
 
   Future<void> _refreshSent() async {
+    final visit = _visit;
+    if (visit?.isCurrent != true) return;
     setState(() {
-      _sent = _repository!.loadSentMessages();
+      _sent = visit!.run(visit.repository.loadSentMessages);
     });
-    await _sent;
+    try {
+      await _sent;
+    } on Object {
+      /* Visible retry owns the failure. */
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final copy = _MessagesCopy.of(context);
+    final visit = _visit;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
+          leading: const CommunityReturnButton(),
           title: Text(copy.messages),
           actions: [
             IconButton(
               tooltip: copy.newMessage,
               icon: const Icon(Icons.add_rounded),
-              onPressed: _repository == null
+              onPressed: visit?.isCurrent != true
                   ? null
                   : () async {
+                      if (!visit!.isCurrent) return;
                       await context.push('/community/messages/new');
-                      if (mounted) await _refresh();
+                      if (mounted && visit.isCurrent) await _refresh();
                     },
             ),
           ],
@@ -156,11 +205,15 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
             ],
           ),
         ),
-        body: _repository == null
+        body: visit != null && !visit.isCurrent
+            ? const _MessageOwnerChanged()
+            : _repository == null
             ? _MessagesSignIn(copy: copy)
             : TabBarView(
+                key: ObjectKey(visit),
                 children: [
                   _MessageList(
+                    visit: visit!,
                     future: _inbox,
                     emptyText: copy.noMessages,
                     copy: copy,
@@ -168,6 +221,7 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
                     onRetry: _refreshInbox,
                   ),
                   _MessageList(
+                    visit: visit,
                     future: _sent,
                     emptyText: copy.noSentMessages,
                     copy: copy,
@@ -184,12 +238,14 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
 class _MessageList extends StatelessWidget {
   const _MessageList({
     required this.future,
+    required this.visit,
     required this.emptyText,
     required this.copy,
     required this.incoming,
     required this.onRetry,
   });
   final Future<List<Map<String, dynamic>>> future;
+  final _MessageOwnerVisit visit;
   final String emptyText;
   final _MessagesCopy copy;
   final bool incoming;
@@ -270,12 +326,13 @@ class _MessageList extends StatelessWidget {
                         createdAt: createdAt,
                         unreadCount: unreadCount,
                         onTap: () async {
+                          if (!visit.isCurrent) return;
                           await context.push(
                             '/community/chat/$otherId?name=${Uri.encodeQueryComponent(name)}',
                           );
-                          if (context.mounted) {
+                          if (context.mounted && visit.isCurrent) {
                             await onRetry();
-                            if (context.mounted) {
+                            if (context.mounted && visit.isCurrent) {
                               await CommunityAttentionScope.refresh(context);
                             }
                           }
@@ -408,7 +465,7 @@ class MessageBodyContract {
 
   static ({String subject, String body}) parse(String value) {
     if (value.trim().isEmpty ||
-        value.length > 4200 ||
+        value.runes.length > 2000 ||
         RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]').hasMatch(value)) {
       throw const FormatException('Invalid stored message body');
     }
@@ -417,7 +474,9 @@ class MessageBodyContract {
     if (newline < 0) throw const FormatException('Invalid subject envelope');
     final subject = value.substring(marker.length, newline);
     final body = value.substring(newline + 1);
-    if (subject.length > 120 || body.trim().isEmpty || body.length > 4000) {
+    if (subject.runes.length > 120 ||
+        body.trim().isEmpty ||
+        body.runes.length > 2000) {
       throw const FormatException('Invalid subject envelope');
     }
     return (subject: subject, body: body);

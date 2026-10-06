@@ -1,5 +1,7 @@
 import '../../../app/localization/runtime_copy_next_workspace.dart';
 import '../../../app/localization/runtime_copy_community_creation.dart';
+import '../../../app/localization/runtime_copy_community_circles.dart';
+import 'community_chat_guard_copy.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
@@ -37,7 +39,9 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
     'Check again' => 'Retry',
     _ => en,
   };
-  return CommunityCreationRuntimeCopy.resolve(catalogEnglish, canonical) ??
+  return CommunityChatGuardCopy.resolve(catalogEnglish, canonical) ??
+      CommunityCirclesRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      CommunityCreationRuntimeCopy.resolve(catalogEnglish, canonical) ??
       NextWorkspaceRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityReviewCopy.resolve(catalogEnglish, canonical) ??
       CommunitySocialRuntimeCopy.resolve(catalogEnglish, canonical) ??
