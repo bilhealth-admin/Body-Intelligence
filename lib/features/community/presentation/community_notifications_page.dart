@@ -17,6 +17,7 @@ import 'community_copy.dart';
 
 part 'community_notifications_filters.dart';
 part 'community_notifications_rendering.dart';
+part 'community_notifications_reference_widgets.dart';
 part 'community_notification_read_receipts.dart';
 
 class CommunityNotificationsPage extends StatefulWidget {
