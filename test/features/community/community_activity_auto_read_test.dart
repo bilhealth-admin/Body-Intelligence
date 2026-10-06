@@ -12,16 +12,28 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _ownerA = '11111111-1111-4111-8111-111111111111';
 const _ownerB = '22222222-2222-4222-8222-222222222222';
+final _clients = <String, SupabaseClient>{};
+final _uiDisposers = <VoidCallback>[];
+
+// Supabase creates a JSON worker isolate. Its initialization and disposal must
+// share the real test-runner zone, not an already-finished widget fake clock.
+void _activityTest(String name, WidgetTesterCallback body) {
+  testWidgets(name, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      for (final dispose in _uiDisposers.reversed) {
+        dispose();
+      }
+      _uiDisposers.clear();
+    }
+  });
+}
 
 class _ActivityRepo extends CommunityRepository {
   _ActivityRepo({this.owner = _ownerA, this.count = 70})
-    : super(
-        SupabaseClient(
-          'https://activity-fixture.invalid',
-          'synthetic-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+    : super(_clients[owner]!);
 
   final String owner;
   final int count;
@@ -126,8 +138,6 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
   addTearDown(tester.view.resetDevicePixelRatio);
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
   final selected = ValueNotifier(repository);
-  final clients = <SupabaseClient>{repository.communitySocialClient};
-  selected.addListener(() => clients.add(selected.value.communitySocialClient));
   final router = GoRouter(
     initialLocation: '/community/notifications',
     routes: [
@@ -149,17 +159,9 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
       ),
     ],
   );
-  addTearDown(() async {
-    // Dispose the real page's auth subscription before closing its client.
-    // Client shutdown uses real async work, not widget-test virtual time.
-    await tester.pumpWidget(const SizedBox.shrink());
+  _uiDisposers.add(() {
     router.dispose();
     selected.dispose();
-    await tester.runAsync(() async {
-      for (final client in clients) {
-        await client.dispose();
-      }
-    });
   });
   await tester.pumpWidget(
     MaterialApp.router(
@@ -192,8 +194,25 @@ Finder get _vertical => find
     .first;
 
 void main() {
+  setUp(() {
+    _uiDisposers.clear();
+    for (final owner in [_ownerA, _ownerB]) {
+      _clients[owner] = SupabaseClient(
+        'https://activity-fixture.invalid',
+        'synthetic-key',
+        authOptions: const AuthClientOptions(autoRefreshToken: false),
+      );
+    }
+  });
+  tearDown(() async {
+    for (final client in _clients.values) {
+      await client.dispose();
+    }
+    _clients.clear();
+  });
+
   for (final language in ['en', 'ar']) {
-    testWidgets(
+    _activityTest(
       'real inbox automatically persists only visible activity in $language',
       (tester) async {
         final repository = _ActivityRepo();
@@ -223,7 +242,7 @@ void main() {
     );
   }
 
-  testWidgets(
+  _activityTest(
     'a successful write without seen readback never paints false Seen',
     (tester) async {
       final repository = _ActivityRepo(count: 4)..suppressReadback = true;
@@ -239,7 +258,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  _activityTest(
     'offline automatic read is retryable and never clears unread rows',
     (tester) async {
       final repository = _ActivityRepo(count: 4)..fail = true;
@@ -260,7 +279,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  _activityTest(
     'original page cursor and scroll position survive automatic readback',
     (tester) async {
       final repository = _ActivityRepo();
@@ -287,7 +306,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  _activityTest(
     'late first-account write does not refresh or acknowledge second account',
     (tester) async {
       final wait = Completer<void>();
@@ -309,7 +328,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  _activityTest(
     'new account can read while the old account write remains stalled',
     (tester) async {
       final wait = Completer<void>();
@@ -330,7 +349,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  _activityTest(
     'tap still opens its destination while automatic receipt is in flight',
     (tester) async {
       final wait = Completer<void>();
@@ -348,7 +367,7 @@ void main() {
     },
   );
 
-  testWidgets('background inbox does not acknowledge rows merely fetched', (
+  _activityTest('background inbox does not acknowledge rows merely fetched', (
     tester,
   ) async {
     final repository = _ActivityRepo(count: 4);
