@@ -123,7 +123,11 @@ extension _CommunityNotificationReadReceipts
               row,
         ],
       );
-      _updateReceiptState(() => _updates = Future.value(readback));
+      // An assignment expression would return this Future from setState and
+      // abort rebuilding in debug mode. Persisted readback stays authoritative.
+      _updateReceiptState(() {
+        _updates = Future.value(readback);
+      });
       if (!mounted) return {};
       await CommunityAttentionScope.refresh(context);
       if (!_receiptIsCurrent(repository, owner, generation)) return {};
