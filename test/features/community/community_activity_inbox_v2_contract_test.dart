@@ -25,10 +25,10 @@ void main() {
     expect(filters, contains('_ActivityFilter.reactions'));
     expect(filters, contains('_ActivityFilter.comments'));
     expect(filters, contains('_ActivityFilter.followers'));
-    expect(filters, contains("'Updates'"));
-    expect(filters, contains("'Likes & saves'"));
+    expect(filters, contains("'Approvals'"));
+    expect(filters, contains("'Mentions'"));
     expect(filters, contains("'Comments'"));
-    expect(filters, contains("'New followers'"));
+    expect(filters, contains("'Followers'"));
     expect(filters, contains('CommunityNotificationKind.collaborationInvite'));
     expect(
       filters,
@@ -36,7 +36,7 @@ void main() {
     );
     expect(filters, contains('CommunityNotificationKind.follow'));
     expect(page, contains("'/community/profile/\${notification.actorId}'"));
-    expect(page, contains('CommunityNotificationKind.collaborationInvite'));
+    expect(page, contains("part 'community_notifications_reference_widgets.dart';"));
     expect(page, contains('CommunityNotificationKind.collaborationAccepted'));
     expect(page, isNot(contains('context.push(notification.deepLinkPath)')));
   });
