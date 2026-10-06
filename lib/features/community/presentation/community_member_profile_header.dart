@@ -110,6 +110,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
             height: 168,
             child: Stack(
               fit: StackFit.expand,
+              clipBehavior: Clip.none,
               children: [
                 if (cover != null)
                   Image.network(
@@ -136,42 +137,49 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                 PositionedDirectional(
                   top: 10,
                   end: 10,
-                  child: Wrap(
-                    spacing: 8,
-                    children: [
-                      _heroAction(
-                        context: context,
-                        icon: Icons.share_outlined,
-                        tooltip: communityText(
-                          context,
-                          'Share profile',
-                          'مشاركة الملف',
-                        ),
-                        onPressed: () => _shareProfile(context),
-                      ),
-                      _heroAction(
-                        context: context,
-                        icon: Icons.mail_outline_rounded,
-                        tooltip: communityText(context, 'Messages', 'الرسائل'),
-                        onPressed: () => context.push('/community/messages'),
-                      ),
-                      if (profile.isSelf)
-                        _heroAction(
-                          context: context,
-                          icon: Icons.settings_outlined,
-                          tooltip: communityText(
-                            context,
-                            'Edit profile',
-                            'تعديل الملف',
-                          ),
+                  child: profile.isSelf
+                      ? FilledButton.tonalIcon(
+                          key: const Key('community-profile-edit-action'),
                           onPressed: () => context.push('/community/profile'),
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          label: Text(
+                            communityText(
+                              context,
+                              'Edit profile',
+                              'تعديل الملف',
+                            ),
+                          ),
+                        )
+                      : Wrap(
+                          spacing: 8,
+                          children: [
+                            _heroAction(
+                              context: context,
+                              icon: Icons.share_outlined,
+                              tooltip: communityText(
+                                context,
+                                'Share profile',
+                                'مشاركة الملف',
+                              ),
+                              onPressed: () => _shareProfile(context),
+                            ),
+                            _heroAction(
+                              context: context,
+                              icon: Icons.mail_outline_rounded,
+                              tooltip: communityText(
+                                context,
+                                'Messages',
+                                'الرسائل',
+                              ),
+                              onPressed: () =>
+                                  context.push('/community/messages'),
+                            ),
+                          ],
                         ),
-                    ],
-                  ),
                 ),
                 PositionedDirectional(
                   start: 18,
-                  bottom: -1,
+                  bottom: -36,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -188,67 +196,30 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+            padding: const EdgeInsets.fromLTRB(18, 48, 18, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 94),
-                    Expanded(
-                      child: Wrap(
-                        alignment: WrapAlignment.end,
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: [
-                          if (profile.followerCount != null)
-                            _metric(
-                              context: context,
-                              value: profile.followerCount.toString(),
-                              label: communityText(
-                                context,
-                                'Followers',
-                                'المتابعون',
-                              ),
-                              onTap: () => onOpenConnections(
-                                CommunityProfileConnectionKind.followers,
-                              ),
-                            ),
-                          if (profile.followingCount != null)
-                            _metric(
-                              context: context,
-                              value: profile.followingCount.toString(),
-                              label: communityText(
-                                context,
-                                'Following',
-                                'يتابع',
-                              ),
-                              onTap: () => onOpenConnections(
-                                CommunityProfileConnectionKind.following,
-                              ),
-                            ),
-                          if (profile.postCount != null)
-                            _metric(
-                              context: context,
-                              value: profile.postCount.toString(),
-                              label: communityText(
-                                context,
-                                'Posts',
-                                'المنشورات',
-                              ),
-                            ),
-                        ],
+                    Flexible(
+                      child: Text(
+                        profile.displayName,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
+                    if (creator?.certificationStatus ==
+                        CommunityCreatorCertificationStatus.approved) ...[
+                      const SizedBox(width: 5),
+                      Icon(
+                        Icons.verified_rounded,
+                        size: 20,
+                        color: scheme.primary,
+                      ),
+                    ],
                   ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  profile.displayName,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
                 ),
                 if (profile.handle != null)
                   Text(
@@ -259,6 +230,49 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (profile.postCount != null)
+                      _metric(
+                        context: context,
+                        value: profile.postCount.toString(),
+                        label: communityText(
+                          context,
+                          'Posts',
+                          'المنشورات',
+                        ),
+                      ),
+                    if (profile.followerCount != null)
+                      _metric(
+                        context: context,
+                        value: profile.followerCount.toString(),
+                        label: communityText(
+                          context,
+                          'Followers',
+                          'المتابعون',
+                        ),
+                        onTap: () => onOpenConnections(
+                          CommunityProfileConnectionKind.followers,
+                        ),
+                      ),
+                    if (profile.followingCount != null)
+                      _metric(
+                        context: context,
+                        value: profile.followingCount.toString(),
+                        label: communityText(
+                          context,
+                          'Following',
+                          'يتابع',
+                        ),
+                        onTap: () => onOpenConnections(
+                          CommunityProfileConnectionKind.following,
+                        ),
+                      ),
+                  ],
+                ),
                 if (profile.countryCode case final country?) ...[
                   const SizedBox(height: 2),
                   Text(country, style: theme.textTheme.labelMedium),
@@ -285,34 +299,8 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 14),
-                if (profile.isSelf)
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 8,
-                    children: [
-                      FilledButton.tonalIcon(
-                        key: const Key('community-profile-edit-action'),
-                        onPressed: () => context.push('/community/profile'),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: Text(
-                          communityText(context, 'Edit profile', 'تعديل الملف'),
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () => context.push('/community/code'),
-                        icon: const Icon(Icons.qr_code_2_rounded),
-                        label: Text(
-                          communityText(
-                            context,
-                            'My BIL Code',
-                            'رمز BIL الخاص بي',
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                else
+                if (!profile.isSelf) ...[
+                  const SizedBox(height: 14),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -357,6 +345,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                         ),
                     ],
                   ),
+                ],
               ],
             ),
           ),
