@@ -8,21 +8,23 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
     ),
     appBar: AppBar(
       leading: const CommunityReturnButton(),
+      centerTitle: true,
       title: Text(
-        communityText(context, 'Community updates', 'تحديثات المجتمع'),
+        communityText(context, 'Notifications', 'الإشعارات'),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w900,
+        ),
       ),
       actions: [
         IconButton(
-          tooltip: communityText(context, 'Notifications', 'الإشعارات'),
-          onPressed: () => context.push('/notification-settings'),
-          icon: const Icon(Icons.tune_rounded),
-        ),
-        if (_repository != null)
-          IconButton(
-            onPressed: _retry,
-            tooltip: communityText(context, 'Refresh', 'تحديث'),
-            icon: const Icon(Icons.refresh_rounded),
+          tooltip: communityText(
+            context,
+            'Notification settings',
+            'إعدادات الإشعارات',
           ),
+          onPressed: () => context.push('/notification-settings'),
+          icon: const Icon(Icons.settings_outlined),
+        ),
       ],
     ),
     body: FutureBuilder<_CommunityUpdates>(
@@ -37,8 +39,8 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             icon: Icons.cloud_off_outlined,
             title: communityText(
               context,
-              'Community updates are unavailable',
-              'تحديثات المجتمع غير متاحة',
+              'Notifications are unavailable',
+              'الإشعارات غير متاحة',
             ),
             body: communityText(
               context,
@@ -82,9 +84,19 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             ),
           );
         }
+
+        final filters = _CommunityNotificationsFilters(this);
+        final reference = _CommunityNotificationsReferenceWidgets(this);
         final filteredNotifications = updates.notifications
-            .where(_CommunityNotificationsFilters(this).matchesFilter)
+            .where(filters.matchesFilter)
             .toList(growable: false);
+        final newNotifications = filteredNotifications
+            .where((row) => !row.seen)
+            .toList(growable: false);
+        final earlierNotifications = filteredNotifications
+            .where((row) => row.seen)
+            .toList(growable: false);
+
         return CommunityVisibleActivityScope(
           key: ValueKey(
             'community-visible-read-$_loadedOwnerId-${_filter.name}',
@@ -97,24 +109,46 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
           enabled: !_loadingFirst && !_loadingMore && !_markingPageSeen,
           retryKey: _loadGeneration,
           onSeen: (ids) => _markVisibleActivityRead(persisted, ids),
-          builder: (context, marker) => ListView(
-            key: const PageStorageKey('community-activity-list'),
-            padding: const EdgeInsets.all(16),
-            children: [
-              ...[
+          builder: (context, marker) => RefreshIndicator(
+            onRefresh: () async {
+              _retry();
+              try {
+                await _updates;
+              } on Object {
+                // The FutureBuilder presents the retry state.
+              }
+            },
+            child: ListView(
+              key: const PageStorageKey('community-activity-list'),
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 24),
+              children: [
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      for (final filter in _ActivityFilter.values) ...[
+                      for (final filter in _referenceActivityFilters) ...[
                         ChoiceChip(
-                          key: Key('community-activity-filter-${filter.name}'),
-                          selected: _filter == filter,
-                          label: Text(
-                            _CommunityNotificationsFilters(
-                              this,
-                            ).filterLabel(filter),
+                          key: Key(
+                            'community-activity-filter-${filter.name}',
                           ),
+                          selected: _filter == filter,
+                          showCheckmark: filter == _ActivityFilter.all,
+                          side: BorderSide(
+                            color: _filter == filter
+                                ? Colors.transparent
+                                : Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                          selectedColor:
+                              Theme.of(context).colorScheme.primaryContainer,
+                          labelStyle:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: _filter == filter
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                          label: Text(filters.filterLabel(filter)),
                           onSelected: (_) => _selectFilter(filter),
                         ),
                         const SizedBox(width: 8),
@@ -122,154 +156,89 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
-              ],
-              if (!_loadingFirst &&
-                  filteredNotifications.any((item) => !item.seen))
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: TextButton.icon(
-                    key: const Key('community-activity-mark-page-read'),
-                    onPressed: _markingPageSeen
-                        ? null
-                        : () => _markLoadedPageSeen(persisted),
-                    icon: _markingPageSeen
-                        ? const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.done_all_rounded),
-                    label: Text(
-                      communityText(
-                        context,
-                        'Mark this page read',
-                        'تحديد هذه الصفحة كمقروءة',
+                if (_loadingFirst) ...[
+                  const SizedBox(height: 28),
+                  const Center(child: CircularProgressIndicator()),
+                ] else if (filteredNotifications.isEmpty) ...[
+                  const SizedBox(height: 72),
+                  _CenteredUpdatesState(
+                    icon: Icons.notifications_none_rounded,
+                    title: communityText(
+                      context,
+                      'You are all caught up',
+                      'أنت مطّلع على كل جديد',
+                    ),
+                    body: communityText(
+                      context,
+                      'New approvals, mentions and comments will appear here.',
+                      'ستظهر الموافقات والإشارات والتعليقات الجديدة هنا.',
+                    ),
+                  ),
+                ] else ...[
+                  if (newNotifications.isNotEmpty)
+                    reference._activitySectionLabel(
+                      context,
+                      'New',
+                      'جديد',
+                      trailing: IconButton(
+                        key: const Key('community-activity-mark-page-read'),
+                        onPressed: _markingPageSeen
+                            ? null
+                            : () => _markLoadedPageSeen(persisted),
+                        tooltip: communityText(
+                          context,
+                          'Mark this page read',
+                          'تحديد هذه الصفحة كمقروءة',
+                        ),
+                        icon: _markingPageSeen
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.more_horiz_rounded, size: 20),
                       ),
                     ),
-                  ),
-                ),
-              if (_loadingFirst)
-                const Center(child: CircularProgressIndicator()),
-              if (!_loadingFirst && filteredNotifications.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Text(
-                    communityText(
+                  for (final notification in newNotifications)
+                    reference._referenceActivityRow(
                       context,
-                      (_filter == _ActivityFilter.all ||
-                                  _filter == _ActivityFilter.updates) &&
-                              updates.isEmpty
-                          ? 'No community updates'
-                          : 'No updates in this category yet.',
-                      (_filter == _ActivityFilter.all ||
-                                  _filter == _ActivityFilter.updates) &&
-                              updates.isEmpty
-                          ? 'لا توجد تحديثات للمجتمع'
-                          : 'لا توجد تحديثات في هذه الفئة بعد.',
+                      notification,
+                      marker(notification.id),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              if (!_loadingFirst &&
-                  (_filter == _ActivityFilter.all ||
-                      _filter == _ActivityFilter.updates) &&
-                  updates.isEmpty)
-                Center(
-                  child: FilledButton.icon(
-                    onPressed: () => _openAndRefresh('/community/people'),
-                    icon: const Icon(Icons.person_add_alt_1_rounded),
-                    label: Text(
-                      communityText(context, 'Find people', 'البحث عن أشخاص'),
-                    ),
-                  ),
-                ),
-              for (final notification
-                  in _loadingFirst
-                      ? const <CommunityNotification>[]
-                      : filteredNotifications)
-                Card(
-                  key: marker(notification.id),
-                  color: notification.seen
-                      ? null
-                      : Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.35),
-                  child: ListTile(
-                    leading: BilAccountAvatar(
-                      radius: 20,
-                      networkUrl: notification.actorAvatarUrl,
-                    ),
-                    title: Text(_notificationTitle(notification)),
-                    subtitle: Text(
-                      notification.seen
-                          ? communityText(context, 'Seen', 'تمت المشاهدة')
-                          : communityText(context, 'New', 'جديد'),
-                    ),
-                    trailing: _notificationTrailing(notification),
-                    onTap:
-                        notification.kind ==
-                            CommunityNotificationKind.collaborationInvite
-                        ? null
-                        : () => _openNotification(notification),
-                  ),
-                ),
-              if (!_loadingFirst && _hasMore)
-                TextButton.icon(
-                  key: const Key('community-activity-load-more'),
-                  onPressed: _loadingMore ? null : () => _loadMore(persisted),
-                  icon: _loadingMore
-                      ? const SizedBox.square(
-                          dimension: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.expand_more_rounded),
-                  label: Text(
-                    communityText(context, 'Load more', 'تحميل المزيد'),
-                  ),
-                ),
-              if (!_loadingFirst &&
-                  (_filter == _ActivityFilter.all ||
-                      _filter == _ActivityFilter.updates) &&
-                  updates.incomingRequests > 0)
-                ListTile(
-                  leading: const BilSemanticIconBadge(
-                    kind: BilSemanticIconKind.friends,
-                  ),
-                  title: Text(
-                    communityText(context, 'Friend requests', 'طلبات الصداقة'),
-                  ),
-                  subtitle: Text('${updates.incomingRequests}'),
-                  trailing: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_left_rounded
-                        : Icons.chevron_right_rounded,
-                  ),
-                  onTap: () => _openAndRefresh('/community/connections'),
-                ),
-              if (!_loadingFirst &&
-                  (_filter == _ActivityFilter.all ||
-                      _filter == _ActivityFilter.updates) &&
-                  updates.unreadMessages > 0)
-                ListTile(
-                  leading: const BilSemanticIconBadge(
-                    kind: BilSemanticIconKind.messages,
-                  ),
-                  title: Text(
-                    communityText(
+                  if (earlierNotifications.isNotEmpty)
+                    reference._activitySectionLabel(
                       context,
-                      'Unread messages',
-                      'الرسائل غير المقروءة',
+                      'Earlier',
+                      'سابقًا',
                     ),
-                  ),
-                  subtitle: Text('${updates.unreadMessages}'),
-                  trailing: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? Icons.chevron_left_rounded
-                        : Icons.chevron_right_rounded,
-                  ),
-                  onTap: () => _openAndRefresh('/community/messages'),
-                ),
-            ],
+                  for (final notification in earlierNotifications)
+                    reference._referenceActivityRow(
+                      context,
+                      notification,
+                      marker(notification.id),
+                    ),
+                  if (_hasMore)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: TextButton.icon(
+                        key: const Key('community-activity-load-more'),
+                        onPressed: _loadingMore
+                            ? null
+                            : () => _loadMore(persisted),
+                        icon: _loadingMore
+                            ? const SizedBox.square(
+                                dimension: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.expand_more_rounded),
+                        label: Text(
+                          communityText(context, 'Load more', 'تحميل المزيد'),
+                        ),
+                      ),
+                    ),
+                ],
+              ],
+            ),
           ),
         );
       },
@@ -292,17 +261,32 @@ class _CenteredUpdatesState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-    child: SingleChildScrollView(
+    child: Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 56, color: Theme.of(context).colorScheme.secondary),
-          const SizedBox(height: 16),
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(body, textAlign: TextAlign.center),
-          if (action != null) ...[const SizedBox(height: 24), action!],
+          Icon(icon, size: 52, color: Theme.of(context).colorScheme.secondary),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          if (action != null) ...[
+            const SizedBox(height: 20),
+            action!,
+          ],
         ],
       ),
     ),
