@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/app/localization/runtime_copy_next_workspace.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -138,6 +139,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...CommunitySocialRuntimeCopy.sources,
     ...CommunityReferenceRuntimeCopy.sources,
     ...ReferenceDeltaRuntimeCopy.sources,
+    ...NextWorkspaceRuntimeCopy.sources,
     ...CommunityExpansionRuntimeCopy.sources,
     ...AppleAiPrivacyRuntimeCopy.values.keys,
     ...AdminNotificationRuntimeCopy.values.keys,

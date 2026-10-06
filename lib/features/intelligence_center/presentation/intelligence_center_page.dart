@@ -68,11 +68,15 @@ import '../../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../intelligence_locale_copy.dart';
 import '../ai_coach_chat_copy.dart';
 import 'coach_message_text.dart';
+import '../../../shared/widgets/bil_reference_bottom_bar.dart';
+import 'workspace/coach_reference_workspace.dart';
 import 'coach_anchored_history.dart';
 
 part 'intelligence_center_page_message.dart';
 part 'intelligence_center_widgets.dart';
 part 'intelligence_coach_menu.dart';
+part 'intelligence_reference_workspace_flow.dart';
+part 'intelligence_coach_reference_header.dart';
 part 'intelligence_center_message_widgets.dart';
 part 'intelligence_center_voice_widgets.dart';
 part 'intelligence_conversation_persistence.dart';
@@ -371,27 +375,6 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     }
   }
 
-  Future<void> _showCoachMenuSheet() async {
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (context) => const _CoachMenuSheet(),
-    );
-    if (!mounted || action == null) return;
-    if (action == 'history') {
-      await _openConversationHistory();
-    } else if (action == 'memory') {
-      await context.push('/decision-memory');
-    } else if (action == 'settings') {
-      await _openAiCoachSettings();
-    } else if (action == 'clear') {
-      await _openConversationHistory(deleteMode: true);
-    }
-  }
-
   @override
   void dispose() {
     voiceCaptureGeneration++;
@@ -407,8 +390,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     super.dispose();
   }
 
+  bool _referenceOverview = false;
+  bool _referenceNavigating = false;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => _buildReferencePresentation(context);
+
+  Widget _buildReferenceChat(BuildContext context) {
     if (entryWelcomeVisible) {
       return const _AiCoachEntryWelcome();
     }
@@ -445,14 +433,21 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
         retryableErrorMessageIds.isEmpty;
     final showReplyThinking = sending;
     final showIntroBrief = introVisible && dailyBrief != null;
-    const coachNavy = Color(0xFF071923);
+    const coachNavy = Color(0xFF07111B);
     return Scaffold(
+      bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
+          ? null
+          : BilReferenceBottomBar(
+              selected: 1,
+              dark: true,
+              onSelected: (index) => unawaited(_navigateReference(index)),
+            ),
       backgroundColor: coachNavy,
       body: ColoredBox(
         color: coachNavy,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(6, 3, 6, 6),
+            padding: EdgeInsets.zero,
             child: Align(
               alignment: Alignment.topCenter,
               child: Container(
@@ -461,11 +456,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: scheme.surface,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: const Color(0xFF1D4A60),
-                    width: 1.2,
-                  ),
+                  borderRadius: BorderRadius.zero,
+                  border: Border.all(color: Colors.transparent, width: 0),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: .3),

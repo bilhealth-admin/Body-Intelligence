@@ -50,12 +50,12 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
     final text = base.textTheme;
     final reading = text.copyWith(
       titleLarge: text.titleLarge?.copyWith(
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: FontWeight.w700,
         color: ink,
       ),
       titleMedium: text.titleMedium?.copyWith(
-        fontSize: 17,
+        fontSize: 15,
         fontWeight: FontWeight.w600,
         color: ink,
       ),
@@ -65,18 +65,18 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
         color: ink,
       ),
       bodyLarge: text.bodyLarge?.copyWith(
-        fontSize: 16,
-        height: 1.55,
+        fontSize: 14,
+        height: 1.45,
         color: ink,
       ),
       bodyMedium: text.bodyMedium?.copyWith(
-        fontSize: 15,
-        height: 1.5,
+        fontSize: 12,
+        height: 1.4,
         color: ink,
       ),
       bodySmall: text.bodySmall?.copyWith(
-        fontSize: 13,
-        height: 1.45,
+        fontSize: 12,
+        height: 1.4,
         color: muted,
       ),
       labelLarge: text.labelLarge?.copyWith(
@@ -103,8 +103,9 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          centerTitle: false,
-          titleSpacing: 8,
+          centerTitle: true,
+          titleSpacing: 6,
+          toolbarHeight: 56,
           titleTextStyle: reading.titleLarge,
         ),
         iconTheme: base.iconTheme.copyWith(size: 22, color: muted),

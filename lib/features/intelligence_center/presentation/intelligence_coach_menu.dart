@@ -36,6 +36,17 @@ class _CoachMenuSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _CoachMenuTile(
+              icon: Icons.dashboard_outlined,
+              title: intelligenceText(context, 'Overview', 'نظرة عامة'),
+              subtitle: intelligenceText(
+                context,
+                'Your Health Timeline',
+                'تسلسل يومك الصحي',
+              ),
+              onTap: () => Navigator.of(context).pop('overview'),
+            ),
+            const SizedBox(height: 9),
+            _CoachMenuTile(
               icon: Icons.forum_outlined,
               title: intelligenceText(
                 context,

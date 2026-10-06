@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/localization/app_localizations.dart';
 
 /// One five-destination component shared by the approved Coach and Community
 /// presentation. Routing and Quick Add actions remain owned by the caller.
@@ -23,13 +24,21 @@ class BilReferenceBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ar = Directionality.of(context) == TextDirection.rtl;
-    final labels = ar
-        ? const ['الرئيسية', 'المدرب الذكي', 'إضافة سريعة', 'المجتمع', 'المزيد']
-        : const ['Home', 'AI Coach', 'Quick Add', 'Community', 'More'];
+    final labels = [
+      for (final source in const [
+        'Home',
+        'AI Coach',
+        'Quick Add',
+        'Community',
+        'More',
+      ])
+        AppLocalizations.of(context).text(source),
+    ];
     final icons = <IconData>[
       selected == 0 ? Icons.home_rounded : Icons.home_outlined,
-      selected == 1 ? Icons.chat_bubble_rounded : Icons.chat_bubble_outline_rounded,
+      selected == 1
+          ? Icons.chat_bubble_rounded
+          : Icons.chat_bubble_outline_rounded,
       Icons.add_rounded,
       selected == 3 ? Icons.groups_rounded : Icons.groups_outlined,
       Icons.more_horiz_rounded,
@@ -80,7 +89,10 @@ class BilReferenceBottomBar extends StatelessWidget {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(minHeight: 64),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 1,
+                            vertical: 5,
+                          ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -94,32 +106,68 @@ class BilReferenceBottomBar extends StatelessWidget {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: dark
-                                          ? const [Color(0xFF4A657B), Color(0xFF17283B)]
-                                          : const [Color(0xFF31B7FF), Color(0xFF1652FF)],
+                                          ? const [
+                                              Color(0xFF4A657B),
+                                              Color(0xFF17283B),
+                                            ]
+                                          : const [
+                                              Color(0xFF31B7FF),
+                                              Color(0xFF1652FF),
+                                            ],
                                     ),
                                     border: Border.all(
                                       width: 1.2,
-                                      color: dark ? const Color(0xFF859EBD) : Colors.white,
+                                      color: dark
+                                          ? const Color(0xFF859EBD)
+                                          : Colors.white,
                                     ),
-                                    boxShadow: [BoxShadow(color: blue.withValues(alpha: dark ? .1 : .26), blurRadius: 12)],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: blue.withValues(
+                                          alpha: dark ? .1 : .26,
+                                        ),
+                                        blurRadius: 12,
+                                      ),
+                                    ],
                                   ),
-                                  child: Icon(icons[i], color: dark ? muted : Colors.white, size: 29),
+                                  child: Icon(
+                                    icons[i],
+                                    color: dark ? muted : Colors.white,
+                                    size: 29,
+                                  ),
                                 )
                               else
                                 Container(
                                   height: 31,
                                   alignment: Alignment.center,
                                   decoration: selected == i
-                                      ? BoxDecoration(boxShadow: [BoxShadow(color: blue.withValues(alpha: .12), blurRadius: 18)])
+                                      ? BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: blue.withValues(
+                                                alpha: .12,
+                                              ),
+                                              blurRadius: 18,
+                                            ),
+                                          ],
+                                        )
                                       : null,
-                                  child: Icon(icons[i], color: selected == i ? blue : muted, size: 25),
+                                  child: Icon(
+                                    icons[i],
+                                    color: selected == i ? blue : muted,
+                                    size: 25,
+                                  ),
                                 ),
                               const SizedBox(height: 4),
                               Text(
                                 labels[i],
                                 maxLines: 3,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 10, height: 1.2, color: selected == i ? blue : muted),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  height: 1.2,
+                                  color: selected == i ? blue : muted,
+                                ),
                               ),
                             ],
                           ),

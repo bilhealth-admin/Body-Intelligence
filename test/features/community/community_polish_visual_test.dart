@@ -762,7 +762,7 @@ void main() {
                   scrollable: find
                       .descendant(
                         of: find.byKey(
-                          const PageStorageKey('community-feed-scroll-for_you'),
+                          const PageStorageKey('community-feed-scroll-explore'),
                         ),
                         matching: find.byType(Scrollable),
                       )
@@ -796,9 +796,22 @@ void main() {
                     .state<NavigatorState>(find.byType(Navigator).first)
                     .pop();
                 await tester.pumpAndSettle();
-                await tester.tap(
-                  find.byKey(const Key('community-create-post')),
+                final composer = find.byKey(const Key('community-create-post'));
+                await tester.scrollUntilVisible(
+                  composer,
+                  -220,
+                  scrollable: find
+                      .descendant(
+                        of: find.byKey(
+                          const PageStorageKey('community-feed-scroll-explore'),
+                        ),
+                        matching: find.byType(Scrollable),
+                      )
+                      .first,
                 );
+                await tester.pumpAndSettle();
+                expect(composer.hitTestable(), findsOneWidget);
+                await tester.tap(composer);
                 await tester.pumpAndSettle();
                 expect(
                   find.byKey(const Key('community-post-editor-page')),

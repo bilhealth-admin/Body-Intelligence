@@ -1,3 +1,4 @@
+import '../../../app/localization/runtime_copy_next_workspace.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
@@ -29,7 +30,8 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
     'Check again' => 'Retry',
     _ => en,
   };
-  return CommunityReviewCopy.resolve(catalogEnglish, canonical) ??
+  return NextWorkspaceRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      CommunityReviewCopy.resolve(catalogEnglish, canonical) ??
       CommunitySocialRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityReferenceRuntimeCopy.resolve(catalogEnglish, canonical) ??
       (code == 'ar' ? ar : null) ??

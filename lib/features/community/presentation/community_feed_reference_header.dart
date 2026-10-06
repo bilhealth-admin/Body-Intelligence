@@ -55,7 +55,9 @@ class _CommunityFeedReferenceHeaderState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(
-          height: 83,
+          height:
+              94 +
+              (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(0, 36),
           child: ListView(
             key: const Key('community-reference-stories'),
             scrollDirection: Axis.horizontal,
@@ -200,7 +202,12 @@ class _CommunityFeedReferenceHeaderState
               }
             }
             return SizedBox(
-              height: 45,
+              height:
+                  48 +
+                  (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(
+                    0,
+                    36,
+                  ),
               child: ListView(
                 key: const Key('community-reference-topic-chips'),
                 scrollDirection: Axis.horizontal,
@@ -349,7 +356,6 @@ class _CommunityComposeAction extends StatelessWidget {
       ),
     ),
   );
-
 }
 
 class _CommunityReferenceChip extends StatelessWidget {

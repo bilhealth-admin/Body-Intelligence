@@ -19,6 +19,7 @@ from run_gate import EVIDENCE, ROOT, run_gate
 
 
 NOT_RUN = {
+    "test/qa_next/coach_reference_workspace_capture_test.dart": "dedicated native Coach capture job executes these cases; excluded only from code-only partition",
     "test/features/community/community_polish_visual_test.dart": "dedicated Community QA runs its 8 layout/capture cases separately; no image capture in code-only release suite",
     "test/epic11_locale_golden_test.dart": "pixel comparisons",
     "test/epic15_store_screenshot_golden_test.dart": "screenshots and pixel comparisons",

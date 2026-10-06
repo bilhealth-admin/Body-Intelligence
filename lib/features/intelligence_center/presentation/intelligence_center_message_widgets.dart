@@ -38,7 +38,12 @@ class _MessageBubble extends StatelessWidget {
           margin: const EdgeInsets.only(left: 48, bottom: 18),
           padding: const EdgeInsetsDirectional.fromSTEB(16, 11, 16, 12),
           decoration: BoxDecoration(
-            color: scheme.primaryContainer.withValues(alpha: .62),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF3F85DD), Color(0xFF285897)],
+            ),
+            border: Border.all(color: const Color(0xFF568CCB), width: .7),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(22),
               topRight: Radius.circular(22),
@@ -64,13 +69,21 @@ class _MessageBubble extends StatelessWidget {
     final trustedActions = message.actionLinks
         .where((action) => action.isTrusted)
         .toList(growable: false);
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 28, 22),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF21334A), Color(0xFF132236)],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF344D68), width: .65),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _BilResponseMark(),
-          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

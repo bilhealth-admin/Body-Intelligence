@@ -199,11 +199,11 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
     margin: const EdgeInsets.symmetric(vertical: 7),
     decoration: BoxDecoration(
       color: CommunitySapphire.paper(context),
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(20),
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -211,7 +211,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               BilAccountAvatar(
-                radius: 24,
+                radius: 19,
                 networkUrl: widget.post.authorAvatarUrl,
               ),
               const SizedBox(width: 10),
@@ -346,15 +346,15 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               compact: true,
             ),
           ],
-          if (widget.post.hasImage) ...[
-            const SizedBox(height: 10),
-            _CommunityFeedImage(post: widget.post),
-          ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _ExpandableCommunityPostBody(
             postId: widget.post.id,
             body: widget.post.body,
           ),
+          if (widget.post.hasImage) ...[
+            const SizedBox(height: 10),
+            _CommunityFeedImage(post: widget.post),
+          ],
           if (widget.post.poll case final poll?) ...[
             const SizedBox(height: 12),
             _CommunityPollPanel(

@@ -363,10 +363,8 @@ class _CommunityPostMediaTile extends StatelessWidget {
             errorBuilder: (_, _, _) => const _CommunityImageFallback(),
           );
     return InkWell(
-      onTap: () => pushCommunityPage<void>(
-        context,
-        _CommunityPhotoPage(url: url),
-      ),
+      onTap: () =>
+          pushCommunityPage<void>(context, _CommunityPhotoPage(url: url)),
       child: image,
     );
   }

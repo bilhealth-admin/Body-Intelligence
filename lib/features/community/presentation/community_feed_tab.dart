@@ -466,6 +466,42 @@ class _FeedTabState extends State<_FeedTab>
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     SliverToBoxAdapter(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: PopupMenuButton<CommunityFeedMode>(
+                          key: const Key('community-feed-mode-menu'),
+                          tooltip: _feedModeLabel(_selectedFeedMode),
+                          onSelected: _selectFeedMode,
+                          itemBuilder: (_) => [
+                            for (final mode in CommunityFeedMode.values)
+                              PopupMenuItem<CommunityFeedMode>(
+                                key: Key(
+                                  'community-feed-mode-${mode.wireValue}',
+                                ),
+                                value: mode,
+                                child: Text(_feedModeLabel(mode)),
+                              ),
+                          ],
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _feedModeLabel(_selectedFeedMode),
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                                const Icon(Icons.expand_more_rounded, size: 18),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
                       child: CommunityPolicyNotice(
                         state: _policyState!,
                         onReview: () => _reviewPolicy(),
@@ -482,6 +518,15 @@ class _FeedTabState extends State<_FeedTab>
                           onCompose: _openComposer,
                           onOpenTopic: _openTopic,
                           onOpenCircles: widget.onOpenCircles,
+                        ),
+                      ),
+                    if (!loading &&
+                        posts.isEmpty &&
+                        _selectedFeedMode == CommunityFeedMode.explore)
+                      SliverToBoxAdapter(
+                        child: _CommunityFeedTopicSuggestions(
+                          topics: _suggestedTopics,
+                          onOpen: _openTopic,
                         ),
                       ),
                     if (loading && snapshot.hasData)
@@ -577,7 +622,6 @@ class _FeedTabState extends State<_FeedTab>
             );
           },
         ),
-
       ],
     );
   }

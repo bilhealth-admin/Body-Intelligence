@@ -196,9 +196,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               },
             ),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        leading: const CommunityReturnButton(),
+        leadingWidth: 48,
         title: Text(
           communityText(context, 'BIL Community', 'مجتمع BIL'),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -302,9 +306,8 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: CommunityFeedMode.explore,
-                onOpenCircles: () => setState(
-                  () => _section = _CommunityHubSection.circles,
-                ),
+                onOpenCircles: () =>
+                    setState(() => _section = _CommunityHubSection.circles),
               ),
               _CommunityHubSection.following => _FeedTab(
                 key: _feedKey,
@@ -312,9 +315,8 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: CommunityFeedMode.following,
-                onOpenCircles: () => setState(
-                  () => _section = _CommunityHubSection.circles,
-                ),
+                onOpenCircles: () =>
+                    setState(() => _section = _CommunityHubSection.circles),
               ),
               _CommunityHubSection.circles => CommunityCirclesPage(
                 repository: repository,

@@ -1,3 +1,4 @@
+import 'runtime_copy_next_workspace.dart';
 import 'runtime_copy_primary.dart';
 import 'runtime_copy_secondary.dart';
 import 'runtime_copy_workouts.dart';
@@ -67,6 +68,8 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final next = NextWorkspaceRuntimeCopy.resolve(english, localeTag);
+    if (next != null) return next;
     final referenceDelta = ReferenceDeltaRuntimeCopy.resolve(
       english,
       localeTag,

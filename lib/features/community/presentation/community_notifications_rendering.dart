@@ -2,6 +2,10 @@ part of 'community_notifications_page.dart';
 
 extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
   Widget buildCommunityNotifications(BuildContext context) => Scaffold(
+    bottomNavigationBar: BilReferenceBottomBar(
+      selected: 3,
+      onSelected: (index) => context.go(BilReferenceBottomBar.routes[index]),
+    ),
     appBar: AppBar(
       leading: const CommunityReturnButton(),
       title: Text(
