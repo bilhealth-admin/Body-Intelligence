@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'community_attention_scope.dart';
+import 'community_visible_activity_scope.dart';
 import 'community_return_button.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +17,7 @@ import 'community_copy.dart';
 
 part 'community_notifications_filters.dart';
 part 'community_notifications_rendering.dart';
+part 'community_notification_read_receipts.dart';
 
 class CommunityNotificationsPage extends StatefulWidget {
   const CommunityNotificationsPage({this.repository, super.key});
@@ -44,6 +48,27 @@ class _CommunityNotificationsPageState
   bool _hasMore = false;
   DateTime? _before;
   String? _beforeId;
+  final _activityReadWindows = <_ActivityReadWindow>[];
+  StreamSubscription<AuthState>? _receiptAuth;
+  String? _loadedOwnerId;
+  String? _receiptSessionOwner;
+  bool _receiptSignedOut = false;
+  bool _visibleReadBusy = false;
+  Object? _visibleReadOperation;
+
+  void _updateReceiptState(VoidCallback update) => setState(update);
+
+  @override
+  void didUpdateWidget(covariant CommunityNotificationsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _repository = widget.repository ?? _productionRepository();
+      _loadedOwnerId = null;
+      _receiptSignedOut = false;
+      _bindReceiptSession();
+      _updates = _load();
+    }
+  }
 
   void _selectFilter(_ActivityFilter filter) {
     if (_filter == filter) return;
@@ -57,6 +82,7 @@ class _CommunityNotificationsPageState
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
+    _bindReceiptSession();
     _updates = _load();
   }
 
@@ -75,11 +101,13 @@ class _CommunityNotificationsPageState
     final next = _attentionController?.value.communityUpdates;
     if (next == null || next == _lastCommunityUpdates) return;
     _lastCommunityUpdates = next;
-    if (mounted) _retry();
+    if (mounted && !_visibleReadBusy) _retry();
   }
 
   @override
   void dispose() {
+    unawaited(_receiptAuth?.cancel());
+    _loadGeneration++;
     _attentionController?.removeListener(_onAttentionChanged);
     super.dispose();
   }
@@ -107,8 +135,13 @@ class _CommunityNotificationsPageState
     _before = null;
     _beforeId = null;
     final repository = _repository;
+    final owner = _receiptOwner(repository);
+    _loadedOwnerId = null;
+    _activityReadWindows.clear();
     try {
-      if (repository == null) return const _CommunityUpdates.signedOut();
+      if (repository == null || _receiptSignedOut) {
+        return const _CommunityUpdates.signedOut();
+      }
       final values = await Future.wait<Object>([
         repository.loadAttention(),
         repository.loadCommunityNotifications(
@@ -119,6 +152,14 @@ class _CommunityNotificationsPageState
       final attention = values[0] as CommunityAttention;
       final notifications = values[1] as List<CommunityNotification>;
       if (mounted && generation == _loadGeneration) {
+        if (!identical(repository, _repository) ||
+            (owner != null && _receiptOwner(repository) != owner)) {
+          return const _CommunityUpdates.signedOut();
+        }
+        _loadedOwnerId = owner;
+        _activityReadWindows.add(
+          _ActivityReadWindow(ids: notifications.map((row) => row.id).toSet()),
+        );
         _setCursor(notifications);
       }
       return _CommunityUpdates(
@@ -149,16 +190,27 @@ class _CommunityNotificationsPageState
       return;
     }
     final generation = _loadGeneration;
+    final owner = _loadedOwnerId;
+    final requestedBefore = _before;
+    final requestedBeforeId = _beforeId;
     setState(() => _loadingMore = true);
     try {
       final page = await repository.loadCommunityNotifications(
-        before: _before,
-        beforeId: _beforeId,
+        before: requestedBefore,
+        beforeId: requestedBeforeId,
         kinds: _CommunityNotificationsFilters(this).filterKinds,
         limit: _pageSize,
       );
       if (!mounted || generation != _loadGeneration) return;
+      if (owner != null && _receiptOwner(repository) != owner) return;
       final known = visible.notifications.map((item) => item.id).toSet();
+      _activityReadWindows.add(
+        _ActivityReadWindow(
+          ids: page.map((row) => row.id).toSet(),
+          before: requestedBefore,
+          beforeId: requestedBeforeId,
+        ),
+      );
       setState(() {
         _setCursor(page);
         _updates = Future.value(

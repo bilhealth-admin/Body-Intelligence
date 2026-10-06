@@ -96,8 +96,10 @@ class _CommunityVisibleActivityScopeState
       0,
       media.padding.top,
       media.size.width,
-      (media.size.height - media.padding.top - media.viewInsets.bottom)
-          .clamp(0.0, media.size.height),
+      (media.size.height - media.padding.top - media.viewInsets.bottom).clamp(
+        0.0,
+        media.size.height,
+      ),
     );
     final clip = (viewport.localToGlobal(Offset.zero) & viewport.size)
         .intersect(screen);

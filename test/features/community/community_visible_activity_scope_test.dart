@@ -72,7 +72,9 @@ Future<void> _dwell(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('only foreground viewport rows pass the continuous dwell', (tester) async {
+  testWidgets('only foreground viewport rows pass the continuous dwell', (
+    tester,
+  ) async {
     final f = await _mount(tester);
     await tester.pump(const Duration(milliseconds: 599));
     expect(f.writes, isEmpty);
@@ -85,7 +87,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('scrolling away before dwell does not acknowledge skipped rows', (tester) async {
+  testWidgets('scrolling away before dwell does not acknowledge skipped rows', (
+    tester,
+  ) async {
     final f = await _mount(tester);
     await tester.pump(const Duration(milliseconds: 200));
     f.scroll.jumpTo(1000);
@@ -95,7 +99,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('another row arriving does not restart an existing row dwell', (tester) async {
+  testWidgets('another row arriving does not restart an existing row dwell', (
+    tester,
+  ) async {
     final f = await _mount(tester);
     await tester.pump(const Duration(milliseconds: 400));
     f.scroll.jumpTo(100);
@@ -109,7 +115,9 @@ void main() {
     expect(f.writes.expand((x) => x.ids), contains('row-3'));
   });
 
-  testWidgets('background never qualifies and resume starts fresh dwell', (tester) async {
+  testWidgets('background never qualifies and resume starts fresh dwell', (
+    tester,
+  ) async {
     final f = await _mount(tester);
     await tester.pump(const Duration(milliseconds: 300));
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
@@ -123,12 +131,18 @@ void main() {
     expect(f.writes, hasLength(1));
   });
 
-  testWidgets('a covered route is not read even through a transparent route', (tester) async {
+  testWidgets('a covered route is not read even through a transparent route', (
+    tester,
+  ) async {
     final f = await _mount(tester);
-    unawaited(f.nav.currentState!.push<void>(PageRouteBuilder<void>(
-      opaque: false,
-      pageBuilder: (_, _, _) => const Scaffold(body: Text('Cover')),
-    )));
+    unawaited(
+      f.nav.currentState!.push<void>(
+        PageRouteBuilder<void>(
+          opaque: false,
+          pageBuilder: (_, _, _) => const Scaffold(body: Text('Cover')),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
     await _dwell(tester);
     expect(f.writes, isEmpty);
@@ -138,42 +152,57 @@ void main() {
     expect(f.writes, hasLength(1));
   });
 
-  testWidgets('disabled scope does not mark and becomes eligible when enabled', (tester) async {
-    final f = await _mount(tester, fixture: _Fixture()..enabled = false);
-    await _dwell(tester);
-    expect(f.writes, isEmpty);
-    f.rebuild(() => f.enabled = true);
-    await tester.pump();
-    await _dwell(tester);
-    expect(f.writes, hasLength(1));
-  });
+  testWidgets(
+    'disabled scope does not mark and becomes eligible when enabled',
+    (tester) async {
+      final f = await _mount(tester, fixture: _Fixture()..enabled = false);
+      await _dwell(tester);
+      expect(f.writes, isEmpty);
+      f.rebuild(() => f.enabled = true);
+      await tester.pump();
+      await _dwell(tester);
+      expect(f.writes, hasLength(1));
+    },
+  );
 
-  testWidgets('failed RPC stays unread and does not spin a retry loop', (tester) async {
+  testWidgets('failed RPC stays unread and does not spin a retry loop', (
+    tester,
+  ) async {
     final f = await _mount(tester, fixture: _Fixture()..fail = true);
     await _dwell(tester);
     expect(f.writes, hasLength(1));
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
     expect(f.writes, hasLength(1));
-    f.rebuild(() { f.fail = false; f.retry++; });
+    f.rebuild(() {
+      f.fail = false;
+      f.retry++;
+    });
     await tester.pump();
     await _dwell(tester);
     expect(f.writes, hasLength(2));
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('partial readback is not guessed into a full acknowledgement', (tester) async {
+  testWidgets('partial readback is not guessed into a full acknowledgement', (
+    tester,
+  ) async {
     final f = await _mount(tester, fixture: _Fixture()..partial = {'row-0'});
     await _dwell(tester);
     await tester.pump(const Duration(seconds: 3));
     expect(f.writes, hasLength(1));
-    f.rebuild(() { f.partial = null; f.retry++; });
+    f.rebuild(() {
+      f.partial = null;
+      f.retry++;
+    });
     await tester.pump();
     await _dwell(tester);
     expect(f.writes.last.ids, containsAll(['row-1', 'row-2']));
   });
 
-  testWidgets('rows entering during an in-flight write are not dropped', (tester) async {
+  testWidgets('rows entering during an in-flight write are not dropped', (
+    tester,
+  ) async {
     final wait = Completer<Set<String>>();
     final f = await _mount(tester, fixture: _Fixture()..pending = wait);
     await _dwell(tester);
@@ -191,11 +220,16 @@ void main() {
     expect(f.writes.last.ids.toSet(), {'row-5', 'row-6', 'row-7'});
   });
 
-  testWidgets('owner change invalidates the prior pending acknowledgement', (tester) async {
+  testWidgets('owner change invalidates the prior pending acknowledgement', (
+    tester,
+  ) async {
     final wait = Completer<Set<String>>();
     final f = await _mount(tester, fixture: _Fixture()..pending = wait);
     await _dwell(tester);
-    f.rebuild(() { f.owner = 'owner-b'; f.pending = null; });
+    f.rebuild(() {
+      f.owner = 'owner-b';
+      f.pending = null;
+    });
     await tester.pump();
     wait.complete({'row-0', 'row-1', 'row-2'});
     await tester.pump();
@@ -205,7 +239,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('disposing before dwell cancels all pending callbacks', (tester) async {
+  testWidgets('disposing before dwell cancels all pending callbacks', (
+    tester,
+  ) async {
     final f = await _mount(tester);
     await tester.pumpWidget(const SizedBox.shrink());
     await _dwell(tester);
@@ -213,7 +249,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('late completion after disposal cannot schedule more writes', (tester) async {
+  testWidgets('late completion after disposal cannot schedule more writes', (
+    tester,
+  ) async {
     final wait = Completer<Set<String>>();
     final f = await _mount(tester, fixture: _Fixture()..pending = wait);
     await _dwell(tester);

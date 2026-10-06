@@ -85,176 +85,192 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
         final filteredNotifications = updates.notifications
             .where(_CommunityNotificationsFilters(this).matchesFilter)
             .toList(growable: false);
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ...[
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final filter in _ActivityFilter.values) ...[
-                      ChoiceChip(
-                        key: Key('community-activity-filter-${filter.name}'),
-                        selected: _filter == filter,
-                        label: Text(
-                          _CommunityNotificationsFilters(
-                            this,
-                          ).filterLabel(filter),
+        return CommunityVisibleActivityScope(
+          key: ValueKey(
+            'community-visible-read-$_loadedOwnerId-${_filter.name}',
+          ),
+          ownerId: _loadedOwnerId ?? '',
+          unreadIds: {
+            for (final row in filteredNotifications)
+              if (!row.seen) row.id,
+          },
+          enabled: !_loadingFirst && !_loadingMore && !_markingPageSeen,
+          retryKey: _loadGeneration,
+          onSeen: (ids) => _markVisibleActivityRead(persisted, ids),
+          builder: (context, marker) => ListView(
+            key: const PageStorageKey('community-activity-list'),
+            padding: const EdgeInsets.all(16),
+            children: [
+              ...[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final filter in _ActivityFilter.values) ...[
+                        ChoiceChip(
+                          key: Key('community-activity-filter-${filter.name}'),
+                          selected: _filter == filter,
+                          label: Text(
+                            _CommunityNotificationsFilters(
+                              this,
+                            ).filterLabel(filter),
+                          ),
+                          onSelected: (_) => _selectFilter(filter),
                         ),
-                        onSelected: (_) => _selectFilter(filter),
-                      ),
-                      const SizedBox(width: 8),
+                        const SizedBox(width: 8),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (!_loadingFirst &&
-                filteredNotifications.any((item) => !item.seen))
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: TextButton.icon(
-                  key: const Key('community-activity-mark-page-read'),
-                  onPressed: _markingPageSeen
+                const SizedBox(height: 12),
+              ],
+              if (!_loadingFirst &&
+                  filteredNotifications.any((item) => !item.seen))
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: TextButton.icon(
+                    key: const Key('community-activity-mark-page-read'),
+                    onPressed: _markingPageSeen
+                        ? null
+                        : () => _markLoadedPageSeen(persisted),
+                    icon: _markingPageSeen
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.done_all_rounded),
+                    label: Text(
+                      communityText(
+                        context,
+                        'Mark this page read',
+                        'تحديد هذه الصفحة كمقروءة',
+                      ),
+                    ),
+                  ),
+                ),
+              if (_loadingFirst)
+                const Center(child: CircularProgressIndicator()),
+              if (!_loadingFirst && filteredNotifications.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    communityText(
+                      context,
+                      (_filter == _ActivityFilter.all ||
+                                  _filter == _ActivityFilter.updates) &&
+                              updates.isEmpty
+                          ? 'No community updates'
+                          : 'No updates in this category yet.',
+                      (_filter == _ActivityFilter.all ||
+                                  _filter == _ActivityFilter.updates) &&
+                              updates.isEmpty
+                          ? 'لا توجد تحديثات للمجتمع'
+                          : 'لا توجد تحديثات في هذه الفئة بعد.',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              if (!_loadingFirst &&
+                  (_filter == _ActivityFilter.all ||
+                      _filter == _ActivityFilter.updates) &&
+                  updates.isEmpty)
+                Center(
+                  child: FilledButton.icon(
+                    onPressed: () => _openAndRefresh('/community/people'),
+                    icon: const Icon(Icons.person_add_alt_1_rounded),
+                    label: Text(
+                      communityText(context, 'Find people', 'البحث عن أشخاص'),
+                    ),
+                  ),
+                ),
+              for (final notification
+                  in _loadingFirst
+                      ? const <CommunityNotification>[]
+                      : filteredNotifications)
+                Card(
+                  key: marker(notification.id),
+                  color: notification.seen
                       ? null
-                      : () => _markLoadedPageSeen(persisted),
-                  icon: _markingPageSeen
+                      : Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withValues(alpha: 0.35),
+                  child: ListTile(
+                    leading: BilAccountAvatar(
+                      radius: 20,
+                      networkUrl: notification.actorAvatarUrl,
+                    ),
+                    title: Text(_notificationTitle(notification)),
+                    subtitle: Text(
+                      notification.seen
+                          ? communityText(context, 'Seen', 'تمت المشاهدة')
+                          : communityText(context, 'New', 'جديد'),
+                    ),
+                    trailing: _notificationTrailing(notification),
+                    onTap:
+                        notification.kind ==
+                            CommunityNotificationKind.collaborationInvite
+                        ? null
+                        : () => _openNotification(notification),
+                  ),
+                ),
+              if (!_loadingFirst && _hasMore)
+                TextButton.icon(
+                  key: const Key('community-activity-load-more'),
+                  onPressed: _loadingMore ? null : () => _loadMore(persisted),
+                  icon: _loadingMore
                       ? const SizedBox.square(
                           dimension: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.done_all_rounded),
+                      : const Icon(Icons.expand_more_rounded),
                   label: Text(
+                    communityText(context, 'Load more', 'تحميل المزيد'),
+                  ),
+                ),
+              if (!_loadingFirst &&
+                  (_filter == _ActivityFilter.all ||
+                      _filter == _ActivityFilter.updates) &&
+                  updates.incomingRequests > 0)
+                ListTile(
+                  leading: const BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.friends,
+                  ),
+                  title: Text(
+                    communityText(context, 'Friend requests', 'طلبات الصداقة'),
+                  ),
+                  subtitle: Text('${updates.incomingRequests}'),
+                  trailing: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
+                  ),
+                  onTap: () => _openAndRefresh('/community/connections'),
+                ),
+              if (!_loadingFirst &&
+                  (_filter == _ActivityFilter.all ||
+                      _filter == _ActivityFilter.updates) &&
+                  updates.unreadMessages > 0)
+                ListTile(
+                  leading: const BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.messages,
+                  ),
+                  title: Text(
                     communityText(
                       context,
-                      'Mark this page read',
-                      'تحديد هذه الصفحة كمقروءة',
+                      'Unread messages',
+                      'الرسائل غير المقروءة',
                     ),
                   ),
-                ),
-              ),
-            if (_loadingFirst) const Center(child: CircularProgressIndicator()),
-            if (!_loadingFirst && filteredNotifications.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  communityText(
-                    context,
-                    (_filter == _ActivityFilter.all ||
-                                _filter == _ActivityFilter.updates) &&
-                            updates.isEmpty
-                        ? 'No community updates'
-                        : 'No updates in this category yet.',
-                    (_filter == _ActivityFilter.all ||
-                                _filter == _ActivityFilter.updates) &&
-                            updates.isEmpty
-                        ? 'لا توجد تحديثات للمجتمع'
-                        : 'لا توجد تحديثات في هذه الفئة بعد.',
+                  subtitle: Text('${updates.unreadMessages}'),
+                  trailing: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left_rounded
+                        : Icons.chevron_right_rounded,
                   ),
-                  textAlign: TextAlign.center,
+                  onTap: () => _openAndRefresh('/community/messages'),
                 ),
-              ),
-            if (!_loadingFirst &&
-                (_filter == _ActivityFilter.all ||
-                    _filter == _ActivityFilter.updates) &&
-                updates.isEmpty)
-              Center(
-                child: FilledButton.icon(
-                  onPressed: () => _openAndRefresh('/community/people'),
-                  icon: const Icon(Icons.person_add_alt_1_rounded),
-                  label: Text(
-                    communityText(context, 'Find people', 'البحث عن أشخاص'),
-                  ),
-                ),
-              ),
-            for (final notification
-                in _loadingFirst
-                    ? const <CommunityNotification>[]
-                    : filteredNotifications)
-              Card(
-                color: notification.seen
-                    ? null
-                    : Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: 0.35),
-                child: ListTile(
-                  leading: BilAccountAvatar(
-                    radius: 20,
-                    networkUrl: notification.actorAvatarUrl,
-                  ),
-                  title: Text(_notificationTitle(notification)),
-                  subtitle: Text(
-                    notification.seen
-                        ? communityText(context, 'Seen', 'تمت المشاهدة')
-                        : communityText(context, 'New', 'جديد'),
-                  ),
-                  trailing: _notificationTrailing(notification),
-                  onTap:
-                      notification.kind ==
-                          CommunityNotificationKind.collaborationInvite
-                      ? null
-                      : () => _openNotification(notification),
-                ),
-              ),
-            if (!_loadingFirst && _hasMore)
-              TextButton.icon(
-                key: const Key('community-activity-load-more'),
-                onPressed: _loadingMore ? null : () => _loadMore(persisted),
-                icon: _loadingMore
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.expand_more_rounded),
-                label: Text(
-                  communityText(context, 'Load more', 'تحميل المزيد'),
-                ),
-              ),
-            if (!_loadingFirst &&
-                (_filter == _ActivityFilter.all ||
-                    _filter == _ActivityFilter.updates) &&
-                updates.incomingRequests > 0)
-              ListTile(
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.friends,
-                ),
-                title: Text(
-                  communityText(context, 'Friend requests', 'طلبات الصداقة'),
-                ),
-                subtitle: Text('${updates.incomingRequests}'),
-                trailing: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
-                ),
-                onTap: () => _openAndRefresh('/community/connections'),
-              ),
-            if (!_loadingFirst &&
-                (_filter == _ActivityFilter.all ||
-                    _filter == _ActivityFilter.updates) &&
-                updates.unreadMessages > 0)
-              ListTile(
-                leading: const BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.messages,
-                ),
-                title: Text(
-                  communityText(
-                    context,
-                    'Unread messages',
-                    'الرسائل غير المقروءة',
-                  ),
-                ),
-                subtitle: Text('${updates.unreadMessages}'),
-                trailing: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.chevron_left_rounded
-                      : Icons.chevron_right_rounded,
-                ),
-                onTap: () => _openAndRefresh('/community/messages'),
-              ),
-          ],
+            ],
+          ),
         );
       },
     ),

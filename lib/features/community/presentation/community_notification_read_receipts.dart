@@ -1,11 +1,7 @@
 part of 'community_notifications_page.dart';
 
 class _ActivityReadWindow {
-  const _ActivityReadWindow({
-    required this.ids,
-    this.before,
-    this.beforeId,
-  });
+  const _ActivityReadWindow({required this.ids, this.before, this.beforeId});
 
   final Set<String> ids;
   final DateTime? before;
@@ -28,20 +24,22 @@ extension _CommunityNotificationReadReceipts
     _receiptSessionOwner = _receiptOwner(_repository);
     final repository = _repository;
     if (repository == null) return;
-    _receiptAuth = repository.communitySocialClient.auth.onAuthStateChange.listen(
-      (_) {
-        if (!mounted || !identical(repository, _repository)) return;
-        final owner = _receiptOwner(repository);
-        if (owner == _receiptSessionOwner) return;
-        _receiptSessionOwner = owner;
-        _loadedOwnerId = null;
-        _activityReadWindows.clear();
-        _retry();
-      },
-      onError: (Object _, StackTrace _) {
-        // Auth owns session recovery; a notification must never invent one.
-      },
-    );
+    _receiptAuth = repository.communitySocialClient.auth.onAuthStateChange
+        .listen(
+          (_) {
+            if (!mounted || !identical(repository, _repository)) return;
+            final owner = _receiptOwner(repository);
+            if (owner == _receiptSessionOwner) return;
+            _receiptSessionOwner = owner;
+            _receiptSignedOut = owner == null;
+            _loadedOwnerId = null;
+            _activityReadWindows.clear();
+            _retry();
+          },
+          onError: (Object _, StackTrace _) {
+            // Auth owns session recovery; a notification must never invent one.
+          },
+        );
   }
 
   bool _receiptIsCurrent(
