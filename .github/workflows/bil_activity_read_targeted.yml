@@ -1,0 +1,82 @@
+name: BIL automatic activity read targeted
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths:
+      - lib/features/community/presentation/community_visible_activity_scope.dart
+      - lib/features/community/presentation/community_notification_read_receipts.dart
+      - lib/features/community/presentation/community_notifications_page.dart
+      - lib/features/community/presentation/community_notifications_rendering.dart
+      - test/features/community/community_visible_activity_scope_test.dart
+      - test/features/community/community_activity_auto_read_test.dart
+      - .github/workflows/bil_activity_read_targeted.yml
+permissions:
+  contents: read
+concurrency:
+  group: bil-activity-targeted-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  flutter:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [scope, inbox, compatibility]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve exact locked packages and record source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-activity-qa
+          git rev-parse HEAD > /tmp/bil-activity-qa/commit.txt
+          flutter --version --machine > /tmp/bil-activity-qa/toolchain.json
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          printf 'Flutter host fixtures; no Production, store artifacts or mobile Push-delivery claim.\n' > /tmp/bil-activity-qa/scope.txt
+      - name: Analyze the actual application
+        if: matrix.suite == 'scope'
+        id: analyze
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-activity-qa/analyze.log
+      - name: Run bounded real Flutter cases, keeping failures visible
+        if: ${{ !cancelled() }}
+        env:
+          BIL_READ_SUITE: ${{ matrix.suite }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib,subprocess
+          groups={
+            'scope':['community_visible_activity_scope_test.dart'],
+            'inbox':['community_activity_auto_read_test.dart'],
+            'compatibility':['community_inbox_resume_regression_test.dart','community_activity_pagination_test.dart','community_notification_resilience_test.dart','community_visible_read_receipts_test.dart'],
+          }
+          rows=[];out=pathlib.Path('/tmp/bil-activity-qa')
+          for name in groups[os.environ['BIL_READ_SUITE']]:
+              path='test/features/community/'+name
+              command=['timeout','--kill-after=10s','130s','flutter','test','--no-pub','--reporter','expanded','--concurrency','1',path,'--timeout','20s']
+              with (out/(name+'.log')).open('w') as log:
+                  result=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=False)
+              rows.append({'test_file':path,'command':command,'exit_code':result.returncode})
+              (out/'results.json').write_text(json.dumps(rows,indent=2)+'\n')
+              print(path,'exit',result.returncode,flush=True)
+              print((out/(name+'.log')).read_text()[-24000:],flush=True)
+          subprocess.run(['git','diff','--exit-code'],check=True)
+          raise SystemExit(int(any(r['exit_code']!=0 for r in rows)))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-activity-${{ matrix.suite }}-${{ github.sha }}
+          path: /tmp/bil-activity-qa
+          retention-days: 1
+          if-no-files-found: error
