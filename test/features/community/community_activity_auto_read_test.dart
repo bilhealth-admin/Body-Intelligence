@@ -126,12 +126,8 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
   addTearDown(tester.view.resetDevicePixelRatio);
   tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
   final selected = ValueNotifier(repository);
-  addTearDown(selected.dispose);
-  addTearDown(() async {
-    debugPrint('R4 trace: client dispose begins');
-    await repository.communitySocialClient.dispose();
-    debugPrint('R4 trace: client dispose ends');
-  });
+  final clients = <SupabaseClient>{repository.communitySocialClient};
+  selected.addListener(() => clients.add(selected.value.communitySocialClient));
   final router = GoRouter(
     initialLocation: '/community/notifications',
     routes: [
@@ -153,8 +149,18 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
       ),
     ],
   );
-  addTearDown(router.dispose);
-  debugPrint('R4 trace: mount begins');
+  addTearDown(() async {
+    // Dispose the real page's auth subscription before closing its client.
+    // Client shutdown uses real async work, not widget-test virtual time.
+    await tester.pumpWidget(const SizedBox.shrink());
+    router.dispose();
+    selected.dispose();
+    await tester.runAsync(() async {
+      for (final client in clients) {
+        await client.dispose();
+      }
+    });
+  });
   await tester.pumpWidget(
     MaterialApp.router(
       routerConfig: router,
@@ -168,19 +174,14 @@ Future<ValueNotifier<_ActivityRepo>> _mount(
       ],
     ),
   );
-  debugPrint('R4 trace: first frame complete');
   await tester.pumpAndSettle();
-  debugPrint('R4 trace: mount settled');
   return selected;
 }
 
 Future<void> _dwell(WidgetTester tester) async {
-  debugPrint('R4 trace: dwell begins');
   await tester.pump(const Duration(milliseconds: 700));
   await tester.pump(const Duration(milliseconds: 20));
-  debugPrint('R4 trace: dwell elapsed');
   await tester.pumpAndSettle();
-  debugPrint('R4 trace: dwell settled');
 }
 
 Finder get _vertical => find
@@ -218,7 +219,6 @@ void main() {
           repository.count - repository.seen.length,
         );
         expect(tester.takeException(), isNull);
-        debugPrint('R4 trace: initial assertions complete');
       },
     );
   }
@@ -296,7 +296,6 @@ void main() {
       await _dwell(tester);
       expect(first.calls, hasLength(1));
       final second = _ActivityRepo(owner: _ownerB, count: 3);
-      addTearDown(second.communitySocialClient.dispose);
       selected.value = second;
       await tester.pumpAndSettle();
       wait.complete();
@@ -306,6 +305,27 @@ void main() {
       expect(second.seen, hasLength(3));
       expect(first.reads, hasLength(1));
       expect(second.privateReads, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'new account can read while the old account write remains stalled',
+    (tester) async {
+      final wait = Completer<void>();
+      final first = _ActivityRepo(count: 4)..pending = wait;
+      final selected = await _mount(tester, first);
+      await _dwell(tester);
+      final second = _ActivityRepo(owner: _ownerB, count: 3);
+      selected.value = second;
+      await tester.pumpAndSettle();
+      await _dwell(tester);
+      expect(wait.isCompleted, isFalse);
+      expect(second.seen, hasLength(3));
+      expect(first.seen, isEmpty);
+      wait.complete();
+      await tester.pumpAndSettle();
+      expect(first.reads, hasLength(1));
       expect(tester.takeException(), isNull);
     },
   );
