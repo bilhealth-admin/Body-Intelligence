@@ -159,19 +159,23 @@ void main() {
 }
 
 Future<void> _settleFeed(WidgetTester tester, String body) async {
-  // Community intentionally keeps its branded entry surface for 2.2 seconds.
-  // Advance that product-owned minimum before waiting on the feed itself.
-  await tester.pump(const Duration(milliseconds: 2200));
-  for (var i = 0; i < 40 && find.text(body).evaluate().isEmpty; i++) {
-    await tester.pump();
+  // Supabase dispatches authentication events and decodes JSON on a real
+  // isolate. A single fake-clock jump can precede the new route's splash timer.
+  // Wait for the actual loaded feed header, not an off-screen lazy post, while
+  // allowing both the real isolate and the product-owned 2.2s timer to advance.
+  final ready = find.byKey(const Key('community-create-post'));
+  await tester.pump();
+  for (var i = 0; i < 80 && ready.evaluate().isEmpty; i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
+    await tester.pump(const Duration(milliseconds: 100));
   }
-  await tester.pumpAndSettle(
-    const Duration(milliseconds: 100),
-    EnginePhase.sendSemanticsUpdate,
-    const Duration(seconds: 3),
+  expect(
+    ready,
+    findsOneWidget,
+    reason: 'The authenticated feed must finish loading.',
   );
   await revealCommunityControl(tester, find.text(body));
+  expect(find.text(body), findsOneWidget);
 }
