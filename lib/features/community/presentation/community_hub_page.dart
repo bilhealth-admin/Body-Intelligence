@@ -14,6 +14,7 @@ import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
+import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_composer_persistence.dart';
@@ -93,7 +94,7 @@ class CommunityHubPage extends StatefulWidget {
   State<CommunityHubPage> createState() => _CommunityHubPageState();
 }
 
-enum _CommunityHubSection { explore, circles }
+enum _CommunityHubSection { explore, following, circles }
 
 class _CommunityHubPageState extends State<CommunityHubPage> {
   CommunityRepository? _repository;
@@ -182,8 +183,20 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   Widget _buildHub(BuildContext context) {
     final repository = _repository;
     return Scaffold(
+      bottomNavigationBar: repository == null
+          ? null
+          : BilReferenceBottomBar(
+              selected: 3,
+              onSelected: (index) {
+                if (index == 2) {
+                  _feedKey.currentState?._openComposer();
+                } else if (index != 3) {
+                  context.go(BilReferenceBottomBar.routes[index]);
+                }
+              },
+            ),
       appBar: AppBar(
-        leading: const CommunityReturnButton(),
+        automaticallyImplyLeading: false,
         title: Text(
           communityText(context, 'BIL Community', 'مجتمع BIL'),
           maxLines: 1,
@@ -197,17 +210,6 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 ? null
                 : () => context.push('/community/people'),
             icon: const Icon(Icons.search_rounded),
-          ),
-          IconButton(
-            key: const Key('community-messages'),
-            tooltip: communityText(context, 'Messages', 'الرسائل'),
-            onPressed: repository == null
-                ? null
-                : () => context.push('/community/messages'),
-            icon: const CommunityUnreadBadge(
-              kind: CommunityAttentionKind.messages,
-              child: Icon(Icons.chat_bubble_outline_rounded),
-            ),
           ),
           IconButton(
             key: const Key('community-updates'),
@@ -264,6 +266,20 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                       ),
                       Expanded(
                         child: _CommunityHubTopTab(
+                          key: const Key('community-hub-following-tab'),
+                          label: communityText(
+                            context,
+                            'Following',
+                            'المتابَعون',
+                          ),
+                          selected: _section == _CommunityHubSection.following,
+                          onTap: () => setState(
+                            () => _section = _CommunityHubSection.following,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: _CommunityHubTopTab(
                           key: const Key('community-hub-circles-tab'),
                           label: communityText(context, 'Circles', 'الدوائر'),
                           selected: _section == _CommunityHubSection.circles,
@@ -285,6 +301,20 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 repository: repository,
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
+                initialMode: CommunityFeedMode.explore,
+                onOpenCircles: () => setState(
+                  () => _section = _CommunityHubSection.circles,
+                ),
+              ),
+              _CommunityHubSection.following => _FeedTab(
+                key: _feedKey,
+                repository: repository,
+                imagePicker:
+                    widget.postImagePicker ?? CommunityPostImagePicker(),
+                initialMode: CommunityFeedMode.following,
+                onOpenCircles: () => setState(
+                  () => _section = _CommunityHubSection.circles,
+                ),
               ),
               _CommunityHubSection.circles => CommunityCirclesPage(
                 repository: repository,
