@@ -1,0 +1,134 @@
+name: BIL calorie-only native QA
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths:
+      - lib/features/intelligence_center/services/local_coach_calorie_command.dart
+      - lib/features/intelligence_center/services/local_coach_command_parser.dart
+      - test/qa_next/coach_calorie_only_command_test.dart
+      - test/qa_next/coach_calorie_only_flow_test.dart
+      - .github/workflows/bil_calorie_only_qa.yml
+permissions:
+  contents: read
+concurrency:
+  group: bil-calorie-only-qa-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  calorie-native-checks:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        timeout-minutes: 10
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Resolve the unchanged lockfile and verify QA ancestry
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 3f0085e6e6686f2e87e9cf14789e9e578ea64159 HEAD
+          test -z "$(git status --porcelain)"
+          mkdir -p /tmp/bil-calorie-only
+          flutter --version --machine > /tmp/bil-calorie-only/toolchain.json
+          flutter pub get --enforce-lockfile 2>&1 | tee /tmp/bil-calorie-only/pub.log
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Format only the four calorie files and commit exact candidate before tests
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(lib/features/intelligence_center/services/local_coach_calorie_command.dart lib/features/intelligence_center/services/local_coach_command_parser.dart test/qa_next/coach_calorie_only_command_test.dart test/qa_next/coach_calorie_only_flow_test.dart)
+          test -z "$(git status --porcelain)"
+          dart format "${paths[@]}" 2>&1 | tee /tmp/bil-calorie-only/format.log
+          git diff --check
+          python3 - <<'PY'
+          import subprocess
+          allowed = {'lib/features/intelligence_center/services/local_coach_calorie_command.dart', 'lib/features/intelligence_center/services/local_coach_command_parser.dart', 'test/qa_next/coach_calorie_only_command_test.dart', 'test/qa_next/coach_calorie_only_flow_test.dart'}
+          changed = set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
+          assert changed <= allowed, sorted(changed - allowed)
+          PY
+          git diff > /tmp/bil-calorie-only/formatter.patch
+          git add -- "${paths[@]}"
+          if ! git diff --cached --quiet; then
+            git -c user.name='BIL QA' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'style(qa-only): format native calorie slice with pinned Dart'
+          fi
+          git rev-parse HEAD > /tmp/bil-calorie-only/tested-source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > /tmp/bil-calorie-only/event-parent-sha.txt
+          git diff --exit-code
+          dart format --output=none --set-exit-if-changed "${paths[@]}"
+      - name: Analyze exact committed candidate
+        shell: bash
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-calorie-only/analyze.log
+      - name: Exercise natural language through native committed readback and Undo
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m test/qa_next/coach_calorie_only_command_test.dart test/qa_next/coach_calorie_only_flow_test.dart 2>&1 | tee /tmp/bil-calorie-only/calorie-tests.log
+      - name: Preserve command admission repository lifecycle and localization contracts
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        timeout-minutes: 6
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m test/features/intelligence_center/coach_native_admission_behavior_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/features/intelligence_center/coach_local_command_quantity_safety_test.dart test/features/intelligence_center/coach_date_resolver_test.dart test/architecture_source_file_size_guard_test.dart test/localization/bil_25_locale_fallback_closure_test.dart 2>&1 | tee /tmp/bil-calorie-only/regression-focused.log
+      - name: Capture actual Flutter Coach and preserve R5 entry
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        timeout-minutes: 5
+        env:
+          BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-calorie-only/coach
+          BIL_ENTRY_CAPTURE_DIR: /tmp/bil-calorie-only/entry
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded --concurrency 1 --timeout 2m test/qa_next/coach_reference_workspace_capture_test.dart test/qa_next/community_entry_capture_test.dart 2>&1 | tee /tmp/bil-calorie-only/capture.log
+          python3 - <<'PY'
+          from pathlib import Path
+          assert len(list(Path('/tmp/bil-calorie-only/entry').glob('*.png'))) == 8
+          assert len(list(Path('/tmp/bil-calorie-only/coach').glob('*.png'))) >= 10
+          PY
+      - name: Verify exact source and publish formatter-only successor on unchanged QA HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = bilhealth-admin/Body-Intelligence
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+          candidate="$(cat /tmp/bil-calorie-only/tested-source-sha.txt)"
+          test "$(git rev-parse HEAD)" = "$candidate"
+          remote='https://github.com/bilhealth-admin/Body-Intelligence.git'
+          current="$(git ls-remote "$remote" refs/heads/qa/coach-community-next-20261005 | cut -f1)"
+          test "$current" = "$GITHUB_SHA"
+          if test "$candidate" != "$GITHUB_SHA"; then
+            test "$(git rev-parse HEAD^)" = "$GITHUB_SHA"
+            auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push "$remote" HEAD:refs/heads/qa/coach-community-next-20261005
+          fi
+          git ls-remote "$remote" refs/heads/qa/coach-community-next-20261005 > /tmp/bil-calorie-only/published-head.txt
+          test "$(cut -f1 /tmp/bil-calorie-only/published-head.txt)" = "$candidate"
+          printf 'Verified native candidate: %s\nNo Production or store operations. No reference-parity claim.\n' "$candidate"
+      - name: Upload bounded evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-calorie-only-${{ github.sha }}
+          path: /tmp/bil-calorie-only
+          retention-days: 1
+          if-no-files-found: error

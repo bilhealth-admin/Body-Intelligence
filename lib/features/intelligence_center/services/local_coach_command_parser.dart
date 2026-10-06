@@ -2,6 +2,7 @@ import '../domain/intelligence_action.dart';
 import '../domain/coach_action_admission.dart';
 import '../intelligence_locale_copy.dart';
 import 'coach_date_resolver.dart';
+import 'local_coach_calorie_command.dart';
 
 part 'local_coach_command_quantity.dart';
 
@@ -31,6 +32,10 @@ class LocalCoachCommandParser {
     String tr(String en, String ar) => intelligenceTextFor(code, en, ar);
     final value = _normalizeForMatching(input);
     if (value.isEmpty) return const [];
+    final calorieOnly = LocalCoachCalorieCommand(
+      dateResolver: dateResolver,
+    ).parse(input, locale: code);
+    if (calorieOnly != null) return [calorieOnly];
 
     final themeMode = _requestedThemeMode(value);
     if (themeMode != null) {
