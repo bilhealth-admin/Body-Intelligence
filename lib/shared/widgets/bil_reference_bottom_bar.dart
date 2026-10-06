@@ -103,9 +103,11 @@ class BilReferenceBottomBar extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (i == 2)
-                                Container(
-                                  width: 44,
-                                  height: 44,
+                                Transform.translate(
+                                  offset: const Offset(0, -6),
+                                  child: Container(
+                                  width: 50,
+                                  height: 50,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: LinearGradient(
@@ -139,8 +141,9 @@ class BilReferenceBottomBar extends StatelessWidget {
                                   child: Icon(
                                     icons[i],
                                     color: dark ? muted : Colors.white,
-                                    size: 29,
+                                    size: 31,
                                   ),
+                                ),
                                 )
                               else
                                 Container(
