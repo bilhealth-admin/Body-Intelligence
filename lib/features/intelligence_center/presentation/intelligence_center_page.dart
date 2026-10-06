@@ -551,10 +551,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                           children: [
                             PopupMenuButton<CoachActionPermissionMode>(
                               key: const Key('ai-coach-permission-mode'),
-                              tooltip: tr(
-                                'Coach action permissions',
-                                'صلاحيات إجراءات المدرب',
-                              ),
+                              tooltip: tr('Coach tools', 'أدوات المدرب'),
                               initialValue: ref.watch(
                                 coachActionPermissionModeProvider,
                               ),
@@ -585,28 +582,23 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                   ),
                                 ),
                               ],
-                              icon: const Icon(Icons.shield_outlined),
-                            ),
-                            IconButton(
-                              key: const Key('ai-coach-food-image-button'),
-                              tooltip: tr('Open camera', 'افتح الكاميرا'),
-                              onPressed:
-                                  !conversationReady ||
-                                      foodImageFlowOpening ||
-                                      sending
-                                  ? null
-                                  : _analyzeFoodImageInChat,
-                              icon: analyzingFoodImage
-                                  ? const SizedBox.square(
-                                      dimension: 19,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.camera_alt_outlined,
-                                      size: 21,
-                                    ),
+                              icon: Container(
+                                width: 42,
+                                height: 42,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF15283D),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFF3D536D),
+                                    width: .8,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.add_rounded,
+                                  color: Color(0xFFBFD0E5),
+                                  size: 25,
+                                ),
+                              ),
                             ),
                             Expanded(
                               child: listening
@@ -714,6 +706,32 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                 ),
                                 icon: const Icon(Icons.arrow_upward_rounded),
                               ),
+                            const SizedBox(width: 2),
+                            IconButton(
+                              key: const Key('ai-coach-food-image-button'),
+                              tooltip: tr('Open camera', 'افتح الكاميرا'),
+                              onPressed:
+                                  !conversationReady ||
+                                      foodImageFlowOpening ||
+                                      sending
+                                  ? null
+                                  : _analyzeFoodImageInChat,
+                              style: IconButton.styleFrom(
+                                foregroundColor: const Color(0xFFBFD0E5),
+                                minimumSize: const Size.square(44),
+                              ),
+                              icon: analyzingFoodImage
+                                  ? const SizedBox.square(
+                                      dimension: 19,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 22,
+                                    ),
+                            ),
                           ],
                         ),
                       ),
