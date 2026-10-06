@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
+import 'package:body_intelligence_log/features/community/domain/community_composer_persistence.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -32,20 +33,27 @@ void _activityTest(String name, WidgetTesterCallback body) {
 }
 
 class _ActivityRepo extends CommunityRepository {
-  _ActivityRepo({this.owner = _ownerA, this.count = 70})
-    : super(_clients[owner]!);
+  _ActivityRepo({
+    this.owner = _ownerA,
+    this.count = 70,
+    this.collaborationInvites = false,
+  }) : super(_clients[owner]!);
 
   final String owner;
   final int count;
+  final bool collaborationInvites;
   final seen = <String>{};
   final calls = <List<String>>[];
   final reads = <({DateTime? before, String? beforeId})>[];
   final trace = <String>[];
   bool fail = false;
   bool suppressReadback = false;
+  Set<String>? readbackSeenIds;
   int privateReads = 0;
   int friendChanges = 0;
   Completer<void>? pending;
+  Completer<void>? pendingCollaboration;
+  final collaborationResponses = <bool>[];
 
   @override
   String get currentUserId => owner;
@@ -55,7 +63,9 @@ class _ActivityRepo extends CommunityRepository {
 
   CommunityNotification row(int index) => CommunityNotification(
     id: id(index),
-    kind: index.isEven
+    kind: collaborationInvites
+        ? CommunityNotificationKind.collaborationInvite
+        : index.isEven
         ? CommunityNotificationKind.postLike
         : CommunityNotificationKind.comment,
     actorId: _ownerB,
@@ -65,7 +75,10 @@ class _ActivityRepo extends CommunityRepository {
     entityId: '33333333-3333-4333-8333-333333333333',
     copyKey: 'synthetic_activity_v1',
     deepLinkPath: '/community',
-    seenAt: seen.contains(id(index)) && !suppressReadback
+    seenAt:
+        seen.contains(id(index)) &&
+            !suppressReadback &&
+            (readbackSeenIds == null || readbackSeenIds!.contains(id(index)))
         ? DateTime.utc(2026, 10, 6)
         : null,
   );
@@ -112,6 +125,18 @@ class _ActivityRepo extends CommunityRepository {
       if (seen.add(value)) changed++;
     }
     return changed;
+  }
+
+  @override
+  Future<CommunityCollaborationStatus> respondCommunityCollaboration({
+    required String postId,
+    required bool accept,
+  }) async {
+    collaborationResponses.add(accept);
+    await pendingCollaboration?.future;
+    return accept
+        ? CommunityCollaborationStatus.accepted
+        : CommunityCollaborationStatus.declined;
   }
 
   @override
@@ -193,6 +218,12 @@ Finder get _vertical => find
     )
     .first;
 
+void _expectReadState(WidgetTester tester, String id, String state) {
+  final row = find.byKey(ValueKey('community-activity-read-state-$id'));
+  expect(row, findsOneWidget);
+  expect(tester.widget<Semantics>(row).properties.value, state);
+}
+
 void main() {
   setUp(() {
     _uiDisposers.clear();
@@ -249,7 +280,9 @@ void main() {
       await _mount(tester, repository);
       await _dwell(tester);
       expect(repository.seen, isNotEmpty);
-      expect(find.text('Seen'), findsNothing);
+      for (var index = 0; index < repository.count; index++) {
+        _expectReadState(tester, repository.id(index), 'New');
+      }
       expect(find.text('New'), findsWidgets);
       final calls = repository.calls.length;
       await tester.pump(const Duration(seconds: 3));
@@ -266,18 +299,43 @@ void main() {
       await _dwell(tester);
       expect(repository.calls, hasLength(1));
       expect(repository.seen, isEmpty);
+      for (var index = 0; index < repository.count; index++) {
+        _expectReadState(tester, repository.id(index), 'New');
+      }
       expect(find.text('New'), findsWidgets);
       await tester.pump(const Duration(seconds: 3));
       expect(repository.calls, hasLength(1));
       repository.fail = false;
-      await tester.tap(find.byTooltip('Refresh'));
+      await tester.drag(find.byType(RefreshIndicator), const Offset(0, 350));
       await tester.pumpAndSettle();
       await _dwell(tester);
       expect(repository.seen, isNotEmpty);
-      expect(find.text('Seen'), findsWidgets);
+      for (var index = 0; index < repository.count; index++) {
+        _expectReadState(tester, repository.id(index), 'Seen');
+      }
       expect(tester.takeException(), isNull);
     },
   );
+
+  _activityTest('partial readback changes only confirmed row semantics', (
+    tester,
+  ) async {
+    final repository = _ActivityRepo(count: 4);
+    repository.readbackSeenIds = {repository.id(0)};
+    await _mount(tester, repository);
+    await _dwell(tester);
+    expect(repository.seen, hasLength(4));
+    _expectReadState(tester, repository.id(0), 'Seen');
+    for (var index = 1; index < repository.count; index++) {
+      _expectReadState(tester, repository.id(index), 'New');
+    }
+    final calls = repository.calls.length;
+    await tester.pump(const Duration(seconds: 3));
+    expect(repository.calls.length, calls);
+    expect(repository.privateReads, 0);
+    expect(repository.friendChanges, 0);
+    expect(tester.takeException(), isNull);
+  });
 
   _activityTest(
     'original page cursor and scroll position survive automatic readback',
@@ -292,6 +350,7 @@ void main() {
       await tester.scrollUntilVisible(later, 250, scrollable: _vertical);
       await tester.pumpAndSettle();
       final position = tester.state<ScrollableState>(_vertical).position.pixels;
+      final rowTop = tester.getTopLeft(later).dy;
       final loads = repository.reads.length;
       await _dwell(tester);
       expect(repository.reads.length, greaterThan(loads));
@@ -301,6 +360,8 @@ void main() {
         closeTo(position, 1),
       );
       expect(later, findsOneWidget);
+      expect(later.hitTestable(), findsOneWidget);
+      expect(tester.getTopLeft(later).dy, closeTo(rowTop, 1));
       expect(repository.seen.contains(repository.id(69)), isFalse);
       expect(tester.takeException(), isNull);
     },
@@ -379,6 +440,58 @@ void main() {
     await tester.pump();
     await _dwell(tester);
     expect(repository.seen, hasLength(4));
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final returnToFirst in [false, true]) {
+    _activityTest(
+      'late explicit receipt cannot navigate after account switch, return=$returnToFirst',
+      (tester) async {
+        final wait = Completer<void>();
+        final first = _ActivityRepo(count: 4)..pending = wait;
+        final selected = await _mount(tester, first);
+        await tester.tap(find.textContaining('Peer 0 '));
+        await tester.pump();
+        expect(first.calls, hasLength(1));
+        final second = _ActivityRepo(owner: _ownerB, count: 3);
+        selected.value = second;
+        await tester.pumpAndSettle();
+        if (returnToFirst) {
+          selected.value = first;
+          await tester.pumpAndSettle();
+        }
+        wait.complete();
+        await tester.pumpAndSettle();
+        expect(find.byType(CommunityNotificationsPage), findsOneWidget);
+        expect(find.text('Community destination'), findsNothing);
+        expect(second.calls, isEmpty);
+        expect(first.privateReads, 0);
+        expect(first.friendChanges, 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  _activityTest('late collaboration response cannot mark the next account', (
+    tester,
+  ) async {
+    final wait = Completer<void>();
+    final first = _ActivityRepo(count: 1, collaborationInvites: true)
+      ..pendingCollaboration = wait;
+    final selected = await _mount(tester, first);
+    expect(first.collaborationResponses, isEmpty);
+    await tester.tap(find.byKey(Key('community-collab-accept-${first.id(0)}')));
+    await tester.pump();
+    expect(first.collaborationResponses, [true]);
+    final second = _ActivityRepo(owner: _ownerB, count: 3);
+    selected.value = second;
+    await tester.pumpAndSettle();
+    wait.complete();
+    await tester.pumpAndSettle();
+    expect(first.calls, isEmpty);
+    expect(second.calls, isEmpty);
+    expect(find.text('Collaboration accepted.'), findsNothing);
+    expect(find.byType(CommunityNotificationsPage), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

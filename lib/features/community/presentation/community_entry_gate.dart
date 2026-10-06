@@ -55,6 +55,8 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
   bool _welcomePending = false;
   String? _saveError;
   int _generation = 0;
+  int _bindingGeneration = 0;
+  int _ownerEpoch = 0;
 
   @override
   void initState() {
@@ -79,6 +81,8 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
   void _bind() {
     unawaited(_auth?.cancel());
     _auth = null;
+    final binding = ++_bindingGeneration;
+    _ownerEpoch++;
     SupabaseClient? client;
     _repository = widget.repository;
     if (_repository != null) {
@@ -94,27 +98,27 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
       }
     }
     _owner = _currentOwner(_repository);
-    _coordinator = _repository == null
-        ? null
-        : CommunityEntryCoordinator(_repository!);
+    _coordinator = _coordinatorFor(_repository);
     if (client != null) {
       final observedClient = client;
+      var sessionOwner = client.auth.currentUser?.id;
       _auth = client.auth.onAuthStateChange.listen(
-        (_) {
-          if (!mounted) return;
+        (state) {
+          if (!mounted || binding != _bindingGeneration) return;
+          final changedSession = state.session?.user.id != sessionOwner;
+          sessionOwner = state.session?.user.id;
           final next = widget.repository == null
               ? observedClient.auth.currentUser?.id
               : _currentOwner(widget.repository);
-          if (next == _owner) return;
+          if (!changedSession && next == _owner) return;
           _generation++;
+          _ownerEpoch++;
           setState(() {
             _owner = next;
             _repository =
                 widget.repository ??
                 (next == null ? null : CommunityRepository(observedClient));
-            _coordinator = _repository == null
-                ? null
-                : CommunityEntryCoordinator(_repository!);
+            _coordinator = _coordinatorFor(_repository);
             _receipt = null;
             _saveError = null;
             _name.clear();
@@ -128,6 +132,16 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
       );
     }
     unawaited(_check());
+  }
+
+  CommunityEntryCoordinator? _coordinatorFor(CommunityRepository? repository) {
+    if (repository == null) return null;
+    final epoch = _ownerEpoch;
+    return CommunityEntryCoordinator(
+      repository,
+      isCurrentOwner: () =>
+          mounted && epoch == _ownerEpoch && identical(repository, _repository),
+    );
   }
 
   @override

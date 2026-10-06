@@ -11,14 +11,7 @@ const _owner = '11111111-1111-4111-8111-111111111111';
 const _draft = '33333333-3333-4333-8333-333333333333';
 
 class _DraftRepository extends CommunityRepository {
-  _DraftRepository()
-    : super(
-        SupabaseClient(
-          'https://draft-route.invalid',
-          'synthetic',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _DraftRepository(super.client);
 
   int profileReads = 0;
   int previewReads = 0;
@@ -48,9 +41,7 @@ class _DraftRepository extends CommunityRepository {
   ];
 
   @override
-  Future<
-    ({CommunityPersistentDraft draft, CommunityPostImageDraft? image})
-  >
+  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
   loadMyCommunityDraftPreview(String draftId) async {
     previewReads++;
     return (
@@ -74,11 +65,35 @@ class _DraftRepository extends CommunityRepository {
   }
 }
 
+void _draftTest(String description, WidgetTesterCallback body) {
+  testWidgets(description, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
+}
+
 void main() {
-  testWidgets('drafts are directly reachable without a Community profile', (
+  late SupabaseClient client;
+  late _DraftRepository repository;
+  setUp(() {
+    client = SupabaseClient(
+      'https://draft-route.invalid',
+      'synthetic',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+    repository = _DraftRepository(client);
+  });
+  tearDown(() async {
+    await client.dispose();
+  });
+
+  _draftTest('drafts are directly reachable without a Community profile', (
     tester,
   ) async {
-    final repository = _DraftRepository();
     await tester.pumpWidget(
       MaterialApp(home: CommunityDraftsPage(repository: repository)),
     );
@@ -98,10 +113,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('select mode is explicit and never opens a draft implicitly', (
+  _draftTest('select mode is explicit and never opens a draft implicitly', (
     tester,
   ) async {
-    final repository = _DraftRepository();
     await tester.pumpWidget(
       MaterialApp(home: CommunityDraftsPage(repository: repository)),
     );

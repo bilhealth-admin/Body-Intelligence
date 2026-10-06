@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'ordinary social deep links cannot bypass profile and code confirmation',
+    'social routes require identity while private Drafts stays independent',
     () {
       final source = File(
         'lib/app/router/app_community_routes.dart',
@@ -27,7 +27,15 @@ void main() {
         '/community/messages/new',
       ]) {
         final route = blocks.singleWhere((b) => b.contains("path: '$path',"));
-        expect(route, contains('CommunityEntryGate('), reason: path);
+        expect(
+          route,
+          path == '/community/drafts'
+              ? isNot(contains('CommunityEntryGate('))
+              : contains('CommunityEntryGate('),
+          reason: path == '/community/drafts'
+              ? 'Private saved work cannot require a public identity'
+              : path,
+        );
         expect(
           route,
           contains('PremiumRouteGlassGate('),
@@ -69,7 +77,10 @@ void main() {
     ).readAsStringSync();
 
     expect(routes, contains("path: '/community/drafts'"));
-    expect(routes, contains('child: CommunitySurface(child: CommunityDraftsPage())'));
+    expect(
+      routes,
+      contains('child: CommunitySurface(child: CommunityDraftsPage())'),
+    );
     expect(navigation, contains("'/community/drafts'"));
     expect(navigation, contains("'Saved posts'"));
     expect(navigation, contains("'Drafts'"));
@@ -77,16 +88,17 @@ void main() {
       navigation.indexOf("'/community/drafts'"),
       isNot(navigation.indexOf("'saved'")),
     );
-    expect(drafts, contains('class CommunityDraftsPage extends StatefulWidget'));
+    expect(
+      drafts,
+      contains('class CommunityDraftsPage extends StatefulWidget'),
+    );
     expect(drafts, contains('listMyCommunityDrafts(limit: 50)'));
     expect(drafts, contains('loadMyCommunityDraft(draftId)'));
     expect(drafts, contains('_CommunityComposerDraft.fromPersistent('));
     expect(
       drafts.substring(
         drafts.indexOf('class CommunityDraftsPage extends StatefulWidget'),
-        drafts.indexOf(
-          'extension _CommunityProfileDraftActions',
-        ),
+        drafts.indexOf('class _CommunityDraftsSheet extends StatefulWidget'),
       ),
       isNot(contains('loadProfileOverview')),
     );

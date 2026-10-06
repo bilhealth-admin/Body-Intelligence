@@ -4,6 +4,8 @@ part 'runtime_copy_next_workspace_0.dart';
 part 'runtime_copy_next_workspace_1.dart';
 part 'runtime_copy_next_workspace_2.dart';
 part 'runtime_copy_next_workspace_3.dart';
+part 'runtime_copy_next_workspace_supplemental_0.dart';
+part 'runtime_copy_next_workspace_supplemental_1.dart';
 
 /// Authored next-version workspace and inbox copy; all locale rows are tested.
 abstract final class NextWorkspaceRuntimeCopy {
@@ -32,33 +34,42 @@ abstract final class NextWorkspaceRuntimeCopy {
     "Your health partner, always with you",
     "Search conversations",
   ];
-  static const supplementalSources = ['Overview', 'Post photos', 'Home'];
+  static const supplementalSources = [
+    'Overview',
+    'Post photos',
+    'Home',
+    'Private unfinished posts',
+    'Save profile and create BIL Code',
+    'Sign in to open your private drafts.',
+    'Coach action permissions',
+    'Stats',
+    "{count} photos",
+    "Approvals",
+    "Delete {count} drafts?",
+    "Delete selected ({count})",
+    "Draft actions",
+    "Drafts ({count})",
+    "Last saved {count}d ago",
+    "Last saved {count}h ago",
+    "Last saved {count}m ago",
+    "Mentions",
+    "New approvals, mentions and comments will appear here.",
+    "No saved drafts yet",
+    "Notification settings",
+    "Notifications are unavailable",
+    "Now",
+    "Reward added to your AI balance",
+    "Save unfinished posts and continue them here later.",
+    "Saved just now",
+    "Select",
+    "This removes only the selected private drafts.",
+    "You are all caught up",
+    "Earlier",
+  ];
   static const sources = <String>[..._primarySources, ...supplementalSources];
   static const _supplemental = <String, List<String>>{
-    'ar': ['نظرة عامة', 'صور المنشور', 'الرئيسية'],
-    'fr': ['Vue d’ensemble', 'Photos de la publication', 'Accueil'],
-    'es': ['Resumen', 'Fotos de la publicación', 'Inicio'],
-    'tr': ['Genel bakış', 'Gönderi fotoğrafları', 'Ana sayfa'],
-    'de': ['Übersicht', 'Beitragsfotos', 'Startseite'],
-    'it': ['Panoramica', 'Foto del post', 'Pagina iniziale'],
-    'pt-BR': ['Visão geral', 'Fotos da publicação', 'Início'],
-    'pt-PT': ['Visão geral', 'Fotografias da publicação', 'Início'],
-    'ur': ['جائزہ', 'پوسٹ کی تصاویر', 'مرکزی صفحہ'],
-    'fa': ['نمای کلی', 'عکس‌های پست', 'خانه'],
-    'hi': ['अवलोकन', 'पोस्ट की तस्वीरें', 'मुख्य पृष्ठ'],
-    'id': ['Ringkasan', 'Foto postingan', 'Beranda'],
-    'ms': ['Gambaran keseluruhan', 'Foto siaran', 'Laman utama'],
-    'ja': ['概要', '投稿の写真', 'ホーム'],
-    'ko': ['개요', '게시물 사진', '홈'],
-    'zh-Hans': ['概览', '帖子照片', '首页'],
-    'zh-Hant': ['總覽', '貼文照片', '首頁'],
-    'ru': ['Обзор', 'Фотографии публикации', 'Главная'],
-    'bn': ['সারসংক্ষেপ', 'পোস্টের ছবি', 'প্রধান পাতা'],
-    'vi': ['Tổng quan', 'Ảnh bài viết', 'Trang chủ'],
-    'th': ['ภาพรวม', 'รูปภาพของโพสต์', 'หน้าหลัก'],
-    'pl': ['Przegląd', 'Zdjęcia wpisu', 'Strona główna'],
-    'nl': ['Overzicht', 'Berichtfoto’s', 'Startpagina'],
-    'uk': ['Огляд', 'Фотографії допису', 'Головна'],
+    ..._nextWorkspaceSupplementalRows0,
+    ..._nextWorkspaceSupplementalRows1,
   };
   static const rows = <String, List<String>>{
     ..._nextWorkspaceRows0,

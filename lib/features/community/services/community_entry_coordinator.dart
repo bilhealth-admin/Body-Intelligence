@@ -16,13 +16,16 @@ class CommunityEntryOwnerChanged implements Exception {
 /// Entry never edits an existing profile or rotates an existing public code.
 /// Every asynchronous boundary is tied to the original authenticated owner.
 class CommunityEntryCoordinator {
-  CommunityEntryCoordinator(this.repository);
+  CommunityEntryCoordinator(this.repository, {this.isCurrentOwner});
   final CommunityRepository repository;
+  // A UI session epoch also invalidates A -> B -> A and disposal. The current
+  // user ID alone cannot distinguish work from a previous visit by the owner.
+  final bool Function()? isCurrentOwner;
   Future<CommunityEntryReceipt>? _saving;
   String? _savingOwner;
 
   void _requireOwner(String owner) {
-    if (repository.currentUserId != owner) {
+    if (repository.currentUserId != owner || isCurrentOwner?.call() == false) {
       throw const CommunityEntryOwnerChanged();
     }
   }
@@ -48,6 +51,7 @@ class CommunityEntryCoordinator {
 
   Future<CommunityEntryReceipt?> check() async {
     final owner = repository.currentUserId;
+    _requireOwner(owner);
     final profile = await repository.loadMyProfile();
     _requireOwner(owner);
     return profile == null ? null : _complete(owner, profile);
@@ -58,6 +62,7 @@ class CommunityEntryCoordinator {
     required String localeCode,
   }) {
     final owner = repository.currentUserId;
+    _requireOwner(owner);
     if (_saving != null && _savingOwner == owner) return _saving!;
     _savingOwner = owner;
     late final Future<CommunityEntryReceipt> operation;

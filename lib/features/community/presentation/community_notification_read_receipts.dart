@@ -24,22 +24,28 @@ extension _CommunityNotificationReadReceipts
     _receiptSessionOwner = _receiptOwner(_repository);
     final repository = _repository;
     if (repository == null) return;
-    _receiptAuth = repository.communitySocialClient.auth.onAuthStateChange
-        .listen(
-          (_) {
-            if (!mounted || !identical(repository, _repository)) return;
-            final owner = _receiptOwner(repository);
-            if (owner == _receiptSessionOwner) return;
-            _receiptSessionOwner = owner;
-            _receiptSignedOut = owner == null;
-            _loadedOwnerId = null;
-            _activityReadWindows.clear();
-            _retry();
-          },
-          onError: (Object _, StackTrace _) {
-            // Auth owns session recovery; a notification must never invent one.
-          },
-        );
+    final auth = repository.communitySocialClient.auth;
+    var deliveredSessionOwner = auth.currentUser?.id;
+    _receiptAuth = auth.onAuthStateChange.listen(
+      (state) {
+        if (!mounted || !identical(repository, _repository)) return;
+        // Queued B/A events may both arrive after currentUser is A. Keep
+        // each delivered owner boundary so an old A receipt stays cancelled.
+        final sessionOwner = state.session?.user.id;
+        final changedSession = sessionOwner != deliveredSessionOwner;
+        deliveredSessionOwner = sessionOwner;
+        final owner = _receiptOwner(repository);
+        if (!changedSession && owner == _receiptSessionOwner) return;
+        _receiptSessionOwner = owner;
+        _receiptSignedOut = owner == null;
+        _loadedOwnerId = null;
+        _activityReadWindows.clear();
+        _retry();
+      },
+      onError: (Object _, StackTrace _) {
+        // Auth owns session recovery; a notification must never invent one.
+      },
+    );
   }
 
   bool _receiptIsCurrent(

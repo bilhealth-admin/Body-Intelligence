@@ -1,0 +1,150 @@
+{
+  "created_at_utc": "2026-10-06T16:30:13.752191+00:00",
+  "branch": "qa/coach-community-next-20261005",
+  "parent_commit": "f1e7e09e88e639fc3417d1e7ce822e0906e32e4a",
+  "phase": "pre-commit local verification; full regression pending",
+  "flutter_version": "3.44.6",
+  "dart_version": "3.12.2",
+  "logs": {
+    "format": {
+      "file": "format-final.log",
+      "bytes": 123,
+      "sha256": "f5c59d4d48ef5f73796d68b60403859886aa423d7eafc9344aa0fe4b861f1715"
+    },
+    "analyze": {
+      "file": "analyze-final.log",
+      "bytes": 96,
+      "sha256": "aa5e6ca8f3b2f88b1759c44f11f9fee10ea929b21ec1849c68fdb7a7bd92b8e2"
+    },
+    "r5_focused": {
+      "file": "r5-final-focused.log",
+      "bytes": 24126,
+      "sha256": "1de91ef0b4239970283f83af0832cb0360c3c54e693f6fc52ec8bdaaab69adcc"
+    },
+    "r5_capture": {
+      "file": "r5-capture-final.log",
+      "bytes": 471,
+      "sha256": "ae7bcf6d7dce5746c37492e2330dcfa3db0a3b691809870ce65c6107c53041e0"
+    },
+    "entry_auth_and_core": {
+      "file": "community-entry-auth-validation.log",
+      "bytes": 11211,
+      "sha256": "a44ef37564e368ae0def94da29226870fd9205007af960026b7e3ab086ce4168"
+    },
+    "drafts": {
+      "file": "drafts-validation-20261006.log",
+      "bytes": 2924,
+      "sha256": "1d0a49f3fd914b67e2530d2cf3b3cbd266a098a43a5883d4a87339fc5c9e3362"
+    },
+    "notification_auth_and_activity": {
+      "file": "notification-auth-after-fix.log",
+      "bytes": 6480,
+      "sha256": "b41ea39673765a075e4b8bf952e77b719028c421b2e9a08a5a3172115188bc7d"
+    },
+    "locale_closure": {
+      "file": "locale-closure-f1e7e09-after.log",
+      "bytes": 829,
+      "sha256": "f354a315bfacb64502297c5d16927988f8afbdddcc307ccfbef4497356306914"
+    },
+    "locale_workspace": {
+      "file": "locale-workspace-f1e7e09-after.log",
+      "bytes": 417,
+      "sha256": "63fd2d6fcc85d82900a974e8f0e2e095b9bac2eddd30773964ac81d6531d87ec"
+    },
+    "coach_architecture_contracts": {
+      "file": "coach-menu-extraction-contracts.log",
+      "bytes": 2778,
+      "sha256": "667f15f043202e7ffcefab4d276690f45564432308e0ef75f53bf7997ab9fd7d"
+    },
+    "coach_accessibility": {
+      "file": "coach-menu-extraction-accessibility.log",
+      "bytes": 633,
+      "sha256": "41017b7d881810745ec08b06c364e78cacbcd6ad06148a41e9475c77a20bd245"
+    },
+    "performance": {
+      "file": "performance.log",
+      "bytes": 341,
+      "sha256": "a21c496fec82a78ddeadf05a2cab0a9cf6d2dbd35a177c6fba21049c9b7fcb47"
+    }
+  },
+  "captures": [
+    {
+      "file": "entry-ar-dark.png",
+      "bytes": 678617,
+      "sha256": "6efcf5a51767ed43e5756ba8f91eab7175c9c2750d8d17b644a3cba4cad4b462",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-ar-light.png",
+      "bytes": 675250,
+      "sha256": "cb8d4557021660e68751d92349571840842039b36df468842a2a562025b92a90",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-en-dark.png",
+      "bytes": 687136,
+      "sha256": "1af6c46ebeba54de778648f46ff02e6e51ed25be913473524bb2095a17c7eef4",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-en-light.png",
+      "bytes": 685796,
+      "sha256": "8b54518d569b62b5337e0645ce47036ccd7bb524ed1bee97b1045550256e039d",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-retry-ar-dark.png",
+      "bytes": 700716,
+      "sha256": "6e6fc7c1dda2765a300a0864706a04a5024ff1a38186cd468b6a2c22473519a5",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-retry-ar-light.png",
+      "bytes": 698307,
+      "sha256": "5390607e15379467b332b0fcf531050f230c5bb8215fbf524d3d71c7cd05e080",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-retry-en-dark.png",
+      "bytes": 707711,
+      "sha256": "49fd6840e8e2aae7eae96f78f3d07928db7d191182971086de300eded0df6d85",
+      "width": 1170,
+      "height": 2532
+    },
+    {
+      "file": "entry-retry-en-light.png",
+      "bytes": 707953,
+      "sha256": "e15480bc62bb786ce5faae1212bcc760909bf0c89db4cdcca85dbd8b03fb6291",
+      "width": 1170,
+      "height": 2532
+    }
+  ],
+  "full_regression": "pending",
+  "device_e2e": false,
+  "reference_parity": false,
+  "production_writes": false,
+  "store_packages": false,
+  "paid_resources": false,
+  "protected_files": {
+    "pubspec.yaml": {
+      "file": "pubspec.yaml",
+      "bytes": 12012,
+      "sha256": "95e3187c5766bc8e4d1905d4196e51d576f53f26088f514f26050789b0247613"
+    },
+    "pubspec.lock": {
+      "file": "pubspec.lock",
+      "bytes": 59741,
+      "sha256": "03400436fa39d01ce4a4cf1d8b86a9829f7e07905cd304dd4972050263b62c25"
+    }
+  },
+  "reference_sha256": {
+    "AI_COACH_APPROVED.png": "07f25ba0fffc661e5232a4fba6365ee3ff96cbea69636c2672b97f4fafce63d0",
+    "COMMUNITY_APPROVED.png": "db67d1c6bb1f4ecd3c539ada3de72a980c610b7c1d2331c4796b7fa27e3bbea4"
+  }
+}

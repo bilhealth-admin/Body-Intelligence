@@ -49,6 +49,10 @@ class _CommunityNotificationsPageState
   DateTime? _before;
   String? _beforeId;
   final _activityReadWindows = <_ActivityReadWindow>[];
+  // Keep this visit's New/Earlier sections stable while authoritative receipts
+  // update row styling. Moving a row after dwell would move the viewport and
+  // expose unrelated unread rows without the user's scroll.
+  final _newActivityIds = <String>{};
   StreamSubscription<AuthState>? _receiptAuth;
   String? _loadedOwnerId;
   String? _receiptSessionOwner;
@@ -104,7 +108,12 @@ class _CommunityNotificationsPageState
     final next = _attentionController?.value.communityUpdates;
     if (next == null || next == _lastCommunityUpdates) return;
     _lastCommunityUpdates = next;
-    if (mounted && !_visibleReadBusy) _retry();
+    if (mounted &&
+        !_visibleReadBusy &&
+        _markingSeen.isEmpty &&
+        _respondingCollaboration.isEmpty) {
+      _retry();
+    }
   }
 
   @override
@@ -135,6 +144,9 @@ class _CommunityNotificationsPageState
     _visibleReadOperation = null;
     _visibleReadBusy = false;
     _manualReceiptIds.clear();
+    _markingSeen.clear();
+    _respondingCollaboration.clear();
+    _markingPageSeen = false;
     _loadingFirst = true;
     _loadingMore = false;
     _hasMore = false;
@@ -144,6 +156,7 @@ class _CommunityNotificationsPageState
     final owner = _receiptOwner(repository);
     _loadedOwnerId = null;
     _activityReadWindows.clear();
+    _newActivityIds.clear();
     try {
       if (repository == null || _receiptSignedOut) {
         return const _CommunityUpdates.signedOut();
@@ -163,6 +176,9 @@ class _CommunityNotificationsPageState
           return const _CommunityUpdates.signedOut();
         }
         _loadedOwnerId = owner;
+        _newActivityIds.addAll(
+          notifications.where((row) => !row.seen).map((row) => row.id),
+        );
         _activityReadWindows.add(
           _ActivityReadWindow(ids: notifications.map((row) => row.id).toSet()),
         );
@@ -210,6 +226,9 @@ class _CommunityNotificationsPageState
       if (!mounted || generation != _loadGeneration) return;
       if (owner != null && _receiptOwner(repository) != owner) return;
       final known = visible.notifications.map((item) => item.id).toSet();
+      _newActivityIds.addAll(
+        page.where((row) => !row.seen).map((row) => row.id),
+      );
       _activityReadWindows.add(
         _ActivityReadWindow(
           ids: page.map((row) => row.id).toSet(),
@@ -258,12 +277,17 @@ class _CommunityNotificationsPageState
     });
   }
 
-  Future<void> _openAndRefresh(String route) async {
+  Future<void> _openAndRefresh(
+    String route,
+    CommunityRepository repository,
+    String owner,
+    int generation,
+  ) async {
+    if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
     await context.push(route);
-    if (mounted) {
-      await CommunityAttentionScope.refresh(context);
-      if (mounted) _retry();
-    }
+    if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
+    await CommunityAttentionScope.refresh(context);
+    if (_receiptIsCurrent(repository, owner, generation)) _retry();
   }
 
   Future<void> _markLoadedPageSeen(_CommunityUpdates visible) async {
@@ -320,23 +344,41 @@ class _CommunityNotificationsPageState
         ),
       );
     } finally {
-      _markingSeen.removeAll(ids);
-      if (mounted) setState(() => _markingPageSeen = false);
+      if (mounted && generation == _loadGeneration) {
+        _markingSeen.removeAll(ids);
+        setState(() => _markingPageSeen = false);
+      }
     }
   }
 
   Future<void> _openNotification(CommunityNotification notification) async {
     final repository = _repository;
-    if (repository == null || !_markingSeen.add(notification.id)) return;
+    final owner = _loadedOwnerId;
+    final generation = _loadGeneration;
+    if (repository == null ||
+        owner == null ||
+        !_receiptIsCurrent(repository, owner, generation) ||
+        !_markingSeen.add(notification.id)) {
+      return;
+    }
     setState(() => _manualReceiptIds.add(notification.id));
     try {
       if (!notification.seen) {
         await repository.markCommunityNotificationsSeen([notification.id]);
-        if (mounted) await CommunityAttentionScope.refresh(context);
+        if (!mounted || !_receiptIsCurrent(repository, owner, generation)) {
+          return;
+        }
+        await CommunityAttentionScope.refresh(context);
       }
-      if (mounted) await _openAndRefresh(_routeFor(notification));
+      if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
+      await _openAndRefresh(
+        _routeFor(notification),
+        repository,
+        owner,
+        generation,
+      );
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -349,7 +391,7 @@ class _CommunityNotificationsPageState
         ),
       );
     } finally {
-      _markingSeen.remove(notification.id);
+      if (generation == _loadGeneration) _markingSeen.remove(notification.id);
     }
   }
 
@@ -358,7 +400,11 @@ class _CommunityNotificationsPageState
     required bool accept,
   }) async {
     final repository = _repository;
+    final owner = _loadedOwnerId;
+    final generation = _loadGeneration;
     if (repository == null ||
+        owner == null ||
+        !_receiptIsCurrent(repository, owner, generation) ||
         notification.entityKind != 'post' ||
         !_respondingCollaboration.add(notification.id)) {
       return;
@@ -369,12 +415,13 @@ class _CommunityNotificationsPageState
         postId: notification.entityId,
         accept: accept,
       );
+      if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
       if (!notification.seen) {
         await repository.markCommunityNotificationsSeen([notification.id]);
       }
-      if (!mounted) return;
+      if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
       await CommunityAttentionScope.refresh(context);
-      if (!mounted) return;
+      if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -394,7 +441,7 @@ class _CommunityNotificationsPageState
       );
       _retry();
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || !_receiptIsCurrent(repository, owner, generation)) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -407,8 +454,10 @@ class _CommunityNotificationsPageState
         ),
       );
     } finally {
-      _respondingCollaboration.remove(notification.id);
-      if (mounted) setState(() {});
+      if (mounted && generation == _loadGeneration) {
+        _respondingCollaboration.remove(notification.id);
+        setState(() {});
+      }
     }
   }
 

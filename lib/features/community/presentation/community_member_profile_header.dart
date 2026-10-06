@@ -239,21 +239,13 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                       _metric(
                         context: context,
                         value: profile.postCount.toString(),
-                        label: communityText(
-                          context,
-                          'Posts',
-                          'المنشورات',
-                        ),
+                        label: communityText(context, 'Posts', 'المنشورات'),
                       ),
                     if (profile.followerCount != null)
                       _metric(
                         context: context,
                         value: profile.followerCount.toString(),
-                        label: communityText(
-                          context,
-                          'Followers',
-                          'المتابعون',
-                        ),
+                        label: communityText(context, 'Followers', 'المتابعون'),
                         onTap: () => onOpenConnections(
                           CommunityProfileConnectionKind.followers,
                         ),
@@ -262,11 +254,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                       _metric(
                         context: context,
                         value: profile.followingCount.toString(),
-                        label: communityText(
-                          context,
-                          'Following',
-                          'يتابع',
-                        ),
+                        label: communityText(context, 'Following', 'يتابع'),
                         onTap: () => onOpenConnections(
                           CommunityProfileConnectionKind.following,
                         ),
@@ -431,7 +419,6 @@ class _ProfileRelationshipAction extends StatelessWidget {
   };
 }
 
-
 class _CommunitySelfQuickActions extends StatelessWidget {
   const _CommunitySelfQuickActions({
     required this.draftCount,
@@ -456,8 +443,7 @@ class _CommunitySelfQuickActions extends StatelessWidget {
       builder: (context, constraints) {
         final columns = constraints.maxWidth >= 340 && scale <= 18 ? 4 : 2;
         final gap = 8.0;
-        final width =
-            (constraints.maxWidth - (columns - 1) * gap) / columns;
+        final width = (constraints.maxWidth - (columns - 1) * gap) / columns;
         final items = <Widget>[
           _CommunitySelfQuickAction(
             key: const Key('community-self-posts'),
@@ -538,9 +524,9 @@ class _CommunitySelfQuickAction extends StatelessWidget {
                   maxLines: 2,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ],
             ),

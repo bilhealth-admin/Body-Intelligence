@@ -76,9 +76,9 @@ abstract final class _CommunityRoutes {
         path: '/community/drafts',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityEntryGate(
-            child: CommunitySurface(child: CommunityDraftsPage()),
-          ),
+          // Private saved work remains reachable before public identity setup.
+          // The Drafts page requires the authenticated owner itself.
+          child: CommunitySurface(child: CommunityDraftsPage()),
         ),
       ),
       GoRoute(

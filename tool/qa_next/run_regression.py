@@ -1,6 +1,6 @@
 """Run the existing portable selection, preserving all published exclusions.
 
-Runs only on an isolated GitHub runner. Native device/provider testing is not
+Runs only in an isolated QA checkout. Native device/provider testing is not
 represented by this script. No secrets, server mutation, or packaging steps.
 """
 import importlib.util
@@ -11,7 +11,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path.cwd()
-OUT = pathlib.Path('/tmp/bil-next-regression')
+# CI keeps its existing path; isolated local QA worktrees can retain all four
+# shards independently without sharing or overwriting plan/results evidence.
+OUT = pathlib.Path(os.environ.get('BIL_QA_REGRESSION_DIR', '/tmp/bil-next-regression'))
 OUT.mkdir(parents=True, exist_ok=True)
 shard = int(os.environ['BIL_QA_SHARD'])
 if shard not in range(4):

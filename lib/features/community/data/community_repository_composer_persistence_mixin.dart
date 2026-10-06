@@ -130,9 +130,7 @@ mixin _CommunityComposerPersistenceRepositoryMixin {
     );
   }
 
-  Future<
-    ({CommunityPersistentDraft draft, CommunityPostImageDraft? image})
-  >
+  Future<({CommunityPersistentDraft draft, CommunityPostImageDraft? image})>
   loadMyCommunityDraftPreview(String draftId) async {
     if (!CommunityRepository._uuid.hasMatch(draftId)) {
       throw ArgumentError.value(draftId, 'draftId');

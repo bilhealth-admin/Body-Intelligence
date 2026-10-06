@@ -604,9 +604,7 @@ class _CommunityMemberProfilePageState
                             onDrafts: () => context.push('/community/drafts'),
                             onSaved: () => pushCommunityPage<void>(
                               context,
-                              CommunitySavedPostsPage(
-                                repository: _repository!,
-                              ),
+                              CommunitySavedPostsPage(repository: _repository!),
                             ),
                             onStats: _openSelfCreatorStats,
                           ),

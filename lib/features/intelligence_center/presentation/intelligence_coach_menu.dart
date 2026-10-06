@@ -180,3 +180,43 @@ class _CoachMenuTile extends StatelessWidget {
     );
   }
 }
+
+extension _CoachPermissionMenu on _IntelligenceCenterPageState {
+  Widget _buildCoachPermissionMenu() {
+    return PopupMenuButton<CoachActionPermissionMode>(
+      key: const Key('ai-coach-permission-mode'),
+      tooltip: tr('Coach action permissions', 'صلاحيات إجراءات المدرب'),
+      initialValue: ref.watch(coachActionPermissionModeProvider),
+      onSelected: (mode) =>
+          ref.read(coachActionPermissionModeProvider.notifier).state = mode,
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: CoachActionPermissionMode.readOnly,
+          child: Text(tr('Read only', 'قراءة فقط')),
+        ),
+        PopupMenuItem(
+          value: CoachActionPermissionMode.askBeforeWrite,
+          child: Text(tr('Ask before write', 'اسأل قبل الكتابة')),
+        ),
+        PopupMenuItem(
+          value: CoachActionPermissionMode.writeAllowed,
+          child: Text(tr('Write allowed', 'الكتابة مسموحة')),
+        ),
+      ],
+      icon: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: const Color(0xFF15283D),
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFF3D536D), width: .8),
+        ),
+        child: const Icon(
+          Icons.add_rounded,
+          color: Color(0xFFBFD0E5),
+          size: 25,
+        ),
+      ),
+    );
+  }
+}

@@ -11,9 +11,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
       centerTitle: true,
       title: Text(
         communityText(context, 'Notifications', 'الإشعارات'),
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
       ),
       actions: [
         IconButton(
@@ -89,10 +89,10 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             .where(_CommunityNotificationsFilters(this).matchesFilter)
             .toList(growable: false);
         final newNotifications = filteredNotifications
-            .where((row) => !row.seen)
+            .where((row) => _newActivityIds.contains(row.id))
             .toList(growable: false);
         final earlierNotifications = filteredNotifications
-            .where((row) => row.seen)
+            .where((row) => !_newActivityIds.contains(row.id))
             .toList(growable: false);
 
         return CommunityVisibleActivityScope(
@@ -127,9 +127,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                     children: [
                       for (final filter in _referenceActivityFilters) ...[
                         ChoiceChip(
-                          key: Key(
-                            'community-activity-filter-${filter.name}',
-                          ),
+                          key: Key('community-activity-filter-${filter.name}'),
                           selected: _filter == filter,
                           showCheckmark: filter == _ActivityFilter.all,
                           side: BorderSide(
@@ -138,15 +136,17 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                                 : Theme.of(context).colorScheme.outlineVariant,
                           ),
                           selectedColor: Theme.of(context).colorScheme.primary,
-                          labelStyle:
-                              Theme.of(context).textTheme.labelMedium?.copyWith(
-                                    color: _filter == filter
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSurface,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                          labelStyle: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: _filter == filter
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onSurface,
+                                fontWeight: FontWeight.w800,
+                              ),
                           label: Text(
-                            _CommunityNotificationsFilters(this).filterLabel(filter),
+                            _CommunityNotificationsFilters(
+                              this,
+                            ).filterLabel(filter),
                           ),
                           onSelected: (_) => _selectFilter(filter),
                         ),
@@ -175,13 +175,17 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                   ),
                 ] else ...[
                   if (newNotifications.isNotEmpty)
-                    _CommunityNotificationsReferenceWidgets(this)._activitySectionLabel(
+                    _CommunityNotificationsReferenceWidgets(
+                      this,
+                    )._activitySectionLabel(
                       context,
                       'New',
                       'جديد',
                       trailing: IconButton(
                         key: const Key('community-activity-mark-page-read'),
-                        onPressed: _markingPageSeen
+                        onPressed:
+                            _markingPageSeen ||
+                                !filteredNotifications.any((row) => !row.seen)
                             ? null
                             : () => _markLoadedPageSeen(persisted),
                         tooltip: communityText(
@@ -192,25 +196,29 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                         icon: _markingPageSeen
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.more_horiz_rounded, size: 20),
                       ),
                     ),
                   for (final notification in newNotifications)
-                    _CommunityNotificationsReferenceWidgets(this)._referenceActivityRow(
+                    _CommunityNotificationsReferenceWidgets(
+                      this,
+                    )._referenceActivityRow(
                       context,
                       notification,
                       marker(notification.id),
                     ),
                   if (earlierNotifications.isNotEmpty)
-                    _CommunityNotificationsReferenceWidgets(this)._activitySectionLabel(
-                      context,
-                      'Earlier',
-                      'سابقًا',
-                    ),
+                    _CommunityNotificationsReferenceWidgets(
+                      this,
+                    )._activitySectionLabel(context, 'Earlier', 'سابقًا'),
                   for (final notification in earlierNotifications)
-                    _CommunityNotificationsReferenceWidgets(this)._referenceActivityRow(
+                    _CommunityNotificationsReferenceWidgets(
+                      this,
+                    )._referenceActivityRow(
                       context,
                       notification,
                       marker(notification.id),
@@ -226,8 +234,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                         icon: _loadingMore
                             ? const SizedBox.square(
                                 dimension: 16,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.expand_more_rounded),
                         label: Text(
@@ -270,9 +279,9 @@ class _CenteredUpdatesState extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 7),
           Text(
@@ -282,10 +291,7 @@ class _CenteredUpdatesState extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          if (action != null) ...[
-            const SizedBox(height: 20),
-            action!,
-          ],
+          if (action != null) ...[const SizedBox(height: 20), action!],
         ],
       ),
     ),

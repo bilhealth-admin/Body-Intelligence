@@ -19,6 +19,35 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 const ownerA = '11111111-1111-4111-8111-111111111111';
 const ownerB = '22222222-2222-4222-8222-222222222222';
 const codeValue = 'aabbccddaabbccddaabbccddaabbccdd';
+final _entryClients = <String, SupabaseClient>{};
+final _entryUiDisposers = <VoidCallback>[];
+
+// Initialize and dispose Supabase's JSON worker in the real runner zone.
+// A worker created under a widget fake clock can outlive that clock and hang
+// disposal even when the individual widget assertions have already passed.
+SupabaseClient createEntryTestClient() => SupabaseClient(
+  'https://entry.invalid',
+  'fixture-key',
+  authOptions: const AuthClientOptions(autoRefreshToken: false),
+);
+
+EntryRepositoryFixture _entryRepository({String? owner = ownerA}) =>
+    EntryRepositoryFixture(_entryClients[owner ?? ownerA]!, owner: owner);
+
+void _entryTest(String name, WidgetTesterCallback body) {
+  testWidgets(name, (tester) async {
+    try {
+      await body(tester);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      for (final dispose in _entryUiDisposers.reversed) {
+        dispose();
+      }
+      _entryUiDisposers.clear();
+    }
+  });
+}
+
 CommunityPublicCode validCode() => CommunityPublicCode(
   code: codeValue,
   uri: Uri.parse('bil://community/member/$codeValue'),
@@ -39,14 +68,7 @@ CommunityProfile profile(String owner, {String name = 'Existing member'}) =>
     );
 
 class EntryRepositoryFixture extends CommunityRepository {
-  EntryRepositoryFixture({this.owner = ownerA})
-    : super(
-        SupabaseClient(
-          'https://entry.invalid',
-          'fixture-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  EntryRepositoryFixture(super.client, {this.owner = ownerA});
   String? owner;
   final profiles = <String, CommunityProfile>{};
   final writes = <({String owner, String name, String locale})>[];
@@ -175,12 +197,10 @@ Future<EntryWidgetFixture> mountEntry(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  final value =
-      fixture ?? EntryWidgetFixture(repository ?? EntryRepositoryFixture());
-  addTearDown(() {
+  final value = fixture ?? EntryWidgetFixture(repository ?? _entryRepository());
+  _entryUiDisposers.add(() {
     value.router?.dispose();
   });
-  addTearDown(value.repository.communitySocialClient.dispose);
   await tester.pumpWidget(value.app(locale: locale, scale: scale));
   await tester.pump();
   return value;
@@ -200,9 +220,21 @@ Future<void> submitEntry(WidgetTester tester, String name) async {
 }
 
 void main() {
+  setUp(() {
+    _entryUiDisposers.clear();
+    for (final owner in [ownerA, ownerB]) {
+      _entryClients[owner] = createEntryTestClient();
+    }
+  });
+  tearDown(() async {
+    for (final client in _entryClients.values) {
+      await client.dispose();
+    }
+    _entryClients.clear();
+  });
+
   test('checking missing profile never writes or provisions a code', () async {
-    final r = EntryRepositoryFixture();
-    addTearDown(r.communitySocialClient.dispose);
+    final r = _entryRepository();
     expect(await CommunityEntryCoordinator(r).check(), isNull);
     expect(r.writes, isEmpty);
     expect(r.codeReads, 0);
@@ -210,8 +242,7 @@ void main() {
   test(
     'existing private profile and public code are preserved without writes',
     () async {
-      final r = EntryRepositoryFixture()..profiles[ownerA] = profile(ownerA);
-      addTearDown(r.communitySocialClient.dispose);
+      final r = _entryRepository()..profiles[ownerA] = profile(ownerA);
       final c = CommunityEntryCoordinator(r);
       final receipt = await c.save(
         displayName: 'New unwanted name',
@@ -225,8 +256,7 @@ void main() {
     },
   );
   test('name-only save reads persisted profile and validated code', () async {
-    final r = EntryRepositoryFixture();
-    addTearDown(r.communitySocialClient.dispose);
+    final r = _entryRepository();
     final receipt = await CommunityEntryCoordinator(
       r,
     ).save(displayName: '  Alex  ', localeCode: 'en');
@@ -237,8 +267,7 @@ void main() {
   });
   test('double save shares the same in-flight future and one insert', () async {
     final wait = Completer<void>();
-    final r = EntryRepositoryFixture()..pendingCreate = wait.future;
-    addTearDown(r.communitySocialClient.dispose);
+    final r = _entryRepository()..pendingCreate = wait.future;
     final c = CommunityEntryCoordinator(r);
     final one = c.save(displayName: 'Alex', localeCode: 'en');
     final two = c.save(displayName: 'Alex', localeCode: 'en');
@@ -250,8 +279,7 @@ void main() {
   test(
     'code failure after saved profile retries without an overwrite',
     () async {
-      final r = EntryRepositoryFixture()..failCode = true;
-      addTearDown(r.communitySocialClient.dispose);
+      final r = _entryRepository()..failCode = true;
       final c = CommunityEntryCoordinator(r);
       await expectLater(
         c.save(displayName: 'Alex', localeCode: 'en'),
@@ -264,8 +292,7 @@ void main() {
     },
   );
   test('unconfirmed save cannot create a successful entry receipt', () async {
-    final r = EntryRepositoryFixture()..skipPersistence = true;
-    addTearDown(r.communitySocialClient.dispose);
+    final r = _entryRepository()..skipPersistence = true;
     await expectLater(
       CommunityEntryCoordinator(r).save(displayName: 'Alex', localeCode: 'en'),
       throwsStateError,
@@ -275,8 +302,7 @@ void main() {
   test(
     'profile created concurrently retains authoritative privacy and name',
     () async {
-      final r = EntryRepositoryFixture();
-      addTearDown(r.communitySocialClient.dispose);
+      final r = _entryRepository();
       r.onCreate = () =>
           r.profiles[ownerA] = profile(ownerA, name: 'Saved elsewhere');
       final result = await CommunityEntryCoordinator(
@@ -290,8 +316,7 @@ void main() {
     'switching accounts during check does not request another owner code',
     () async {
       final wait = Completer<CommunityProfile?>();
-      final r = EntryRepositoryFixture()..pendingRead = wait.future;
-      addTearDown(r.communitySocialClient.dispose);
+      final r = _entryRepository()..pendingRead = wait.future;
       final result = CommunityEntryCoordinator(r).check();
       final failure = expectLater(
         result,
@@ -307,10 +332,9 @@ void main() {
     'switching accounts during code retrieval invalidates receipt',
     () async {
       final wait = Completer<CommunityPublicCode>();
-      final r = EntryRepositoryFixture()
+      final r = _entryRepository()
         ..profiles[ownerA] = profile(ownerA)
         ..pendingCode = wait.future;
-      addTearDown(r.communitySocialClient.dispose);
       final result = CommunityEntryCoordinator(r).check();
       final failure = expectLater(
         result,
@@ -323,14 +347,13 @@ void main() {
     },
   );
   test('malformed code cannot pass entry even with a valid profile', () async {
-    final r = EntryRepositoryFixture()
+    final r = _entryRepository()
       ..profiles[ownerA] = profile(ownerA)
       ..suppliedCode = CommunityPublicCode(
         code: codeValue,
         uri: Uri.parse('https://attacker.invalid'),
         handle: 'member_qa',
       );
-    addTearDown(r.communitySocialClient.dispose);
     await expectLater(
       CommunityEntryCoordinator(r).check(),
       throwsFormatException,
@@ -340,8 +363,7 @@ void main() {
     test(
       'invalid name is not sent to repository (${invalid.length})',
       () async {
-        final r = EntryRepositoryFixture();
-        addTearDown(r.communitySocialClient.dispose);
+        final r = _entryRepository();
         await expectLater(
           CommunityEntryCoordinator(
             r,
@@ -352,7 +374,7 @@ void main() {
       },
     );
   }
-  testWidgets(
+  _entryTest(
     'entry shows one name field, no fabricated code or extra requirements',
     (tester) async {
       final f = await mountEntry(tester);
@@ -365,10 +387,10 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-  testWidgets(
+  _entryTest(
     'branded welcome precedes form and no member content loads behind it',
     (tester) async {
-      final f = EntryWidgetFixture(EntryRepositoryFixture())..welcome = true;
+      final f = EntryWidgetFixture(_entryRepository())..welcome = true;
       await mountEntry(tester, fixture: f);
       expect(find.byType(CommunityWelcome), findsOneWidget);
       expect(find.byType(TextField), findsNothing);
@@ -379,7 +401,7 @@ void main() {
       expect(f.repository.writes, isEmpty);
     },
   );
-  testWidgets('saved profile and code release original deep-link destination', (
+  _entryTest('saved profile and code release original deep-link destination', (
     tester,
   ) async {
     final f = await mountEntry(tester);
@@ -391,19 +413,19 @@ void main() {
     expect(find.byType(CommunityEntryWelcome), findsNothing);
     expect(tester.takeException(), isNull);
   });
-  testWidgets('existing member enters without rewriting identity', (
+  _entryTest('existing member enters without rewriting identity', (
     tester,
   ) async {
-    final r = EntryRepositoryFixture()..profiles[ownerA] = profile(ownerA);
+    final r = _entryRepository()..profiles[ownerA] = profile(ownerA);
     await mountEntry(tester, repository: r);
     await tester.pumpAndSettle();
     expect(find.textContaining('Member destination'), findsOneWidget);
     expect(r.writes, isEmpty);
   });
-  testWidgets('failed check offers retry and never a creation shortcut', (
+  _entryTest('failed check offers retry and never a creation shortcut', (
     tester,
   ) async {
-    final r = EntryRepositoryFixture()..failRead = true;
+    final r = _entryRepository()..failRead = true;
     await mountEntry(tester, repository: r);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('community-entry-retry')), findsOneWidget);
@@ -414,10 +436,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
   });
-  testWidgets('save failure preserves name and repeated submission is safe', (
+  _entryTest('save failure preserves name and repeated submission is safe', (
     tester,
   ) async {
-    final r = EntryRepositoryFixture()..failCode = true;
+    final r = _entryRepository()..failCode = true;
     await mountEntry(tester, repository: r);
     await tester.pumpAndSettle();
     await submitEntry(tester, 'Alex');
@@ -433,11 +455,11 @@ void main() {
     expect(find.textContaining('Member destination'), findsOneWidget);
     expect(r.writes.length, 1);
   });
-  testWidgets(
+  _entryTest(
     'optional photo failure does not hold entry or delete the saved profile',
     (tester) async {
       final wait = Completer<bool>();
-      final f = EntryWidgetFixture(EntryRepositoryFixture())
+      final f = EntryWidgetFixture(_entryRepository())
         ..syncPhoto = () => wait.future;
       await mountEntry(tester, fixture: f);
       await tester.pumpAndSettle();
@@ -450,11 +472,9 @@ void main() {
       expect(f.repository.profiles[ownerA], isNotNull);
     },
   );
-  testWidgets('cold entry can always go back even while saving', (
-    tester,
-  ) async {
+  _entryTest('cold entry can always go back even while saving', (tester) async {
     final wait = Completer<void>();
-    final r = EntryRepositoryFixture()..pendingCreate = wait.future;
+    final r = _entryRepository()..pendingCreate = wait.future;
     await mountEntry(tester, repository: r);
     await tester.pumpAndSettle();
     await submitEntry(tester, 'Alex');
@@ -466,13 +486,12 @@ void main() {
     expect(find.text('Dashboard'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-  testWidgets(
+  _entryTest(
     'old late profile cannot release content for new repository owner',
     (tester) async {
       final wait = Completer<CommunityProfile?>();
-      final a = EntryRepositoryFixture()..pendingRead = wait.future;
-      final b = EntryRepositoryFixture(owner: ownerB);
-      addTearDown(b.communitySocialClient.dispose);
+      final a = _entryRepository()..pendingRead = wait.future;
+      final b = _entryRepository(owner: ownerB);
       final f = await mountEntry(tester, repository: a);
       f.update(() => f.repository = b);
       await tester.pumpAndSettle();
@@ -482,7 +501,7 @@ void main() {
       expect(find.textContaining('Member destination'), findsNothing);
     },
   );
-  testWidgets(
+  _entryTest(
     'invalid name is retained without silently clipping 61 characters',
     (tester) async {
       final f = await mountEntry(tester);
@@ -518,25 +537,24 @@ void main() {
     }
   });
   for (final tag in BilLocalePolicy.productionTags) {
-    testWidgets(
-      'name-only entry remains usable at 200% and narrow width $tag',
-      (tester) async {
-        await mountEntry(
-          tester,
-          locale: BilLocalePolicy.localeFromTag(tag),
-          scale: 2,
-          size: const Size(320, 720),
-        );
-        await tester.pumpAndSettle();
-        final button = find.byKey(const Key('community-entry-save'));
-        await tester.ensureVisible(button);
-        await tester.pumpAndSettle();
-        expect(button.hitTestable(), findsOneWidget);
-        expect(find.byType(TextField), findsOneWidget);
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pumpAndSettle();
-      },
-    );
+    _entryTest('name-only entry remains usable at 200% and narrow width $tag', (
+      tester,
+    ) async {
+      await mountEntry(
+        tester,
+        locale: BilLocalePolicy.localeFromTag(tag),
+        scale: 2,
+        size: const Size(320, 720),
+      );
+      await tester.pumpAndSettle();
+      final button = find.byKey(const Key('community-entry-save'));
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      expect(button.hitTestable(), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
   }
 }

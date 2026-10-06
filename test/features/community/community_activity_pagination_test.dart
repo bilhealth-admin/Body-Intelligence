@@ -217,7 +217,7 @@ void main() {
           repository.requests.first.kinds,
           isNot(contains(CommunityNotificationKind.mention)),
         );
-        await _choose(tester, 'comments');
+        await _choose(tester, 'reactions');
         expect(repository.requests.last.kinds, [
           CommunityNotificationKind.mention,
         ]);
@@ -279,7 +279,7 @@ void main() {
     ];
     final repository = _ActivityRepository(rows);
     await _pump(tester, repository, 'en');
-    await _choose(tester, 'reactions');
+    await _choose(tester, 'comments');
     final late = Completer<List<CommunityNotification>>();
     repository.delayedMore = late;
     await _more(tester);

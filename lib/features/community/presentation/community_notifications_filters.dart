@@ -15,9 +15,7 @@ extension _CommunityNotificationsFilters on _CommunityNotificationsPageState {
     ],
     // The stored enum name is retained for migration safety; the user-visible
     // reference tab is Mentions.
-    _ActivityFilter.reactions => const [
-      CommunityNotificationKind.mention,
-    ],
+    _ActivityFilter.reactions => const [CommunityNotificationKind.mention],
     _ActivityFilter.comments => const [
       CommunityNotificationKind.comment,
       CommunityNotificationKind.reply,
@@ -45,13 +43,13 @@ extension _CommunityNotificationsFilters on _CommunityNotificationsPageState {
 
   String filterLabel(_ActivityFilter filter) => switch (filter) {
     _ActivityFilter.all => communityText(context, 'All', 'الكل'),
-    _ActivityFilter.updates =>
-      communityText(context, 'Approvals', 'الموافقات'),
-    _ActivityFilter.reactions =>
-      communityText(context, 'Mentions', 'الإشارات'),
-    _ActivityFilter.comments =>
-      communityText(context, 'Comments', 'التعليقات'),
-    _ActivityFilter.followers =>
-      communityText(context, 'Followers', 'المتابعون'),
+    _ActivityFilter.updates => communityText(context, 'Approvals', 'الموافقات'),
+    _ActivityFilter.reactions => communityText(context, 'Mentions', 'الإشارات'),
+    _ActivityFilter.comments => communityText(context, 'Comments', 'التعليقات'),
+    _ActivityFilter.followers => communityText(
+      context,
+      'Followers',
+      'المتابعون',
+    ),
   };
 }
