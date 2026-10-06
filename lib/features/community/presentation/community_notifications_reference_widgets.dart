@@ -15,7 +15,7 @@ extension _CommunityNotificationsReferenceWidgets
     Key marker,
   ) {
     final scheme = Theme.of(context).colorScheme;
-    final palette = _activityPalette(notification.kind, scheme);
+    final palette = _activityPalette(notification.kind);
     final actorAvatar = notification.actorAvatarUrl;
     final actorDriven = switch (notification.kind) {
       CommunityNotificationKind.postLike ||
@@ -98,7 +98,6 @@ extension _CommunityNotificationsReferenceWidgets
 
   (Color, IconData, Color) _activityPalette(
     CommunityNotificationKind kind,
-    ColorScheme scheme,
   ) => switch (kind) {
     CommunityNotificationKind.friendRequest ||
     CommunityNotificationKind.follow => (
