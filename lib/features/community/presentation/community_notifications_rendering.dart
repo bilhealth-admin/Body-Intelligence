@@ -139,12 +139,11 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                                 ? Colors.transparent
                                 : Theme.of(context).colorScheme.outlineVariant,
                           ),
-                          selectedColor:
-                              Theme.of(context).colorScheme.primaryContainer,
+                          selectedColor: Theme.of(context).colorScheme.primary,
                           labelStyle:
                               Theme.of(context).textTheme.labelMedium?.copyWith(
                                     color: _filter == filter
-                                        ? Theme.of(context).colorScheme.primary
+                                        ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w800,
                                   ),
