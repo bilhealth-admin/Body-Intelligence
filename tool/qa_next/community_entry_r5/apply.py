@@ -1,83 +1,87 @@
-"""Apply the exact, locally authored R5 diff once to the isolated QA branch.
+"""Materialize the reviewed two-file R5 analyzer repair on the QA branch only.
 
-No SDK, dependencies, user data, network request, or application code is run by
-this privileged materialization step. The following testing jobs are read-only.
-The tracked diff is compressed solely for bounded transport through the editor;
-its expanded, reviewable Dart source is committed before any test is executed.
+The readable replacements and before/after digests are exact. No dependencies,
+app code, network data, build, or production operation run in this write step.
+Tests execute the resulting committed revision in separate read-only jobs.
 """
 from pathlib import Path
 import base64
 import hashlib
 import json
 import os
-import re
 import subprocess
-import zlib
 
-BASE = 'ad3bc5905f336724584705c40cd9dd4eb22fa4e9'
+BASE = '0c26336545709575addd7544402e164aed37a553'
 BRANCH = 'refs/heads/qa/coach-community-next-20261005'
-ALLOWED = {
-    'lib/app/router/app_community_routes.dart',
-    'lib/app/router/app_router.dart',
-    'lib/features/community/data/community_repository_profile_moderation_mixin.dart',
-    'lib/features/community/presentation/community_entry_copy.dart',
-    'lib/features/community/presentation/community_entry_gate.dart',
-    'lib/features/community/presentation/community_entry_welcome.dart',
-    'lib/features/community/presentation/community_feed_tab.dart',
-    'lib/features/community/presentation/community_hub_page.dart',
-    'lib/features/community/services/community_entry_coordinator.dart',
-    'test/features/community/community_entry_flow_test.dart',
-    'test/features/community/community_entry_repository_test.dart',
-    'test/features/community/community_entry_route_contract_test.dart',
-    'test/qa_next/community_entry_capture_test.dart',
+REPAIRS = {
+    'lib/features/community/presentation/community_entry_gate.dart': (
+        'b0b858e2cee3b83b2bf44c58c0a39231779953fec34ddad8cb9589565fcf1612',
+        '9e7a9be940c5acbaa2933597455c0a486f236956c130f2041c7f29cda6eb4508',
+        [
+            ('      if (_sameOperation(generation, owner))\n        setState(() => _failedCheck = true);', '      if (_sameOperation(generation, owner)) {\n        setState(() => _failedCheck = true);\n      }', 1),
+            ('    if (!synced && _sameOperation(generation, owner)) {', '    if (!synced && mounted && _sameOperation(generation, owner)) {', 1),
+        ],
+    ),
+    'test/features/community/community_entry_flow_test.dart': (
+        '0180a5ce6e4ac1f92087fded00e95934ac1e180ea17ec537739569c67e20d596',
+        '65490d6a6b3f369378ff1ee5c54254d5f19896d51022cfc5a65f6f43f30b5558',
+        [
+            ('  EntryRepositoryFixture({String? owner = ownerA})\n    : owner = owner,\n      super(', '  EntryRepositoryFixture({this.owner = ownerA})\n    : super(', 1),
+            ('    if (currentUserId != expectedOwnerId)\n      throw const CommunityEntryOwnerChanged();', '    if (currentUserId != expectedOwnerId) {\n      throw const CommunityEntryOwnerChanged();\n    }', 2),
+            ("        if (tag != 'en')\n          expect(value, isNot(CommunityEntryCopy.resolve('en', key)));", "        if (tag != 'en') {\n          expect(value, isNot(CommunityEntryCopy.resolve('en', key)));\n        }", 1),
+        ],
+    ),
 }
 
 def git(*args, **kwargs):
     return subprocess.check_output(['git', *args], **kwargs)
 
 if os.environ.get('GITHUB_REF') != BRANCH or os.environ.get('GITHUB_REPOSITORY') != 'bilhealth-admin/Body-Intelligence':
-    raise RuntimeError('Only the authorized QA branch is permitted')
+    raise RuntimeError('Authorized isolated QA branch only')
 expected = os.environ['GITHUB_SHA']
 if git('rev-parse', 'HEAD', text=True).strip() != expected:
-    raise RuntimeError('Checkout does not match requested commit')
+    raise RuntimeError('Checkout identity mismatch')
 git('merge-base', '--is-ancestor', BASE, 'HEAD')
 git('diff', '--exit-code')
 out = Path('/tmp/bil-entry-r5'); out.mkdir(exist_ok=True)
-entry = Path('lib/features/community/presentation/community_entry_gate.dart')
-if not entry.exists():
-    if git('diff', '--name-only', BASE, 'HEAD', '--', *sorted(ALLOWED), text=True).strip():
-        raise RuntimeError('Application source drift: reconcile before materialization')
-    root = Path(__file__).parent
-    packed = b''.join((root / f'patch.{i}').read_bytes() for i in range(1, 8))
-    if len(packed) != 21631 or hashlib.sha256(packed).hexdigest() != '7956805f43bd3a8c065da2729ff7f5523e89baa3e98136505e0cb673cca466ed':
-        raise RuntimeError('Patch transport digest mismatch')
-    decoder = zlib.decompressobj()
-    patch = decoder.decompress(packed, 1000000)
-    if not decoder.eof or decoder.unused_data or len(patch) != 89579:
-        raise RuntimeError('Patch exceeds exact expected envelope')
-    if hashlib.sha256(patch).hexdigest() != '2bd1016d00bc25b5e495cb6d88cf14c3dbcd2ce0ddb309fb722447eae7ff9da3':
-        raise RuntimeError('Expanded patch digest mismatch')
-    paths = re.findall(r'^diff --git a/(\S+) b/(\S+)$', patch.decode('utf-8'), re.M)
-    if len(paths) != 13 or any(a != b for a, b in paths) or {a for a, b in paths} != ALLOWED:
-        raise RuntimeError('Patch scope mismatch')
-    git('apply', '--check', '-', input=patch)
-    git('apply', '-', input=patch)
-    git('diff', '--exit-code', '--', 'supabase', 'cloudflare', 'ios', 'android', 'pubspec.yaml', 'pubspec.lock')
-    git('add', '--', *sorted(ALLOWED))
+changed = []
+for name, (before, after, replacements) in REPAIRS.items():
+    p = Path(name)
+    data = p.read_bytes()
+    digest = hashlib.sha256(data).hexdigest()
+    if digest == after:
+        continue
+    if digest != before:
+        raise RuntimeError('Source drift; reconcile instead of overwriting: ' + name)
+    text = data.decode('utf-8')
+    for old, new, count in replacements:
+        if text.count(old) != count:
+            raise RuntimeError('Replacement occurrence mismatch: ' + name)
+        text = text.replace(old, new)
+    encoded = text.encode('utf-8')
+    if hashlib.sha256(encoded).hexdigest() != after:
+        raise RuntimeError('Reviewed result digest mismatch: ' + name)
+    p.write_bytes(encoded)
+    changed.append(name)
+if changed:
+    actual_changes = set(git('diff', '--name-only', text=True).splitlines())
+    if actual_changes != set(changed):
+        raise RuntimeError('Unexpected edit outside reviewed files')
+    git('add', '--', *changed)
     git('config', 'user.name', 'BIL isolated QA')
     git('config', 'user.email', 'qa@users.noreply.github.com')
-    git('commit', '-m', 'feat(community): require confirmed name-only profile and BIL Code at entry\n\nQA branch only. Preserve legacy member privacy, optional photo sync, original destinations and existing notifications. Add transport, lifecycle, 25-locale and actual Flutter capture tests. No production or store operation.')
-    authorization = base64.b64encode(('x-access-token:' + os.environ['GH_TOKEN']).encode()).decode()
-    print('::add-mask::' + authorization)
-    remote_git = ['git', '-c', 'http.https://github.com/.extraheader=AUTHORIZATION: basic ' + authorization]
+    git('commit', '-m', 'fix(community): guard optional-photo context and close entry analyzer findings\n\nExact reviewed two-file repair. Every persistence, privacy, failure and accessibility assertion retained. QA only, no backend or release operations.')
+    auth = base64.b64encode(('x-access-token:' + os.environ['GH_TOKEN']).encode()).decode()
+    print('::add-mask::' + auth)
+    remote_git = ['git', '-c', 'http.https://github.com/.extraheader=AUTHORIZATION: basic ' + auth]
     remote = subprocess.check_output(remote_git + ['ls-remote', 'origin', BRANCH], text=True).split()[0]
     if remote != expected:
         raise RuntimeError('QA branch advanced; refusing overwrite')
     subprocess.run(remote_git + ['push', 'origin', 'HEAD:' + BRANCH], check=True)
 actual = git('rev-parse', 'HEAD', text=True).strip()
-manifest = [{'path': name, 'sha256': hashlib.sha256(Path(name).read_bytes()).hexdigest()} for name in sorted(ALLOWED)]
-(out / 'source.json').write_text(json.dumps({'source_commit': actual, 'workflow_trigger_commit': expected, 'base_commit': BASE, 'source_files': manifest, 'production_modified': False, 'store_build_created': False, 'reference_parity_verified': False}, indent=2) + '\n')
-(out / 'scope.txt').write_text('Exact tracked Community entry source. Host Flutter and synthetic HTTP fixtures; not device or production E2E. No build, signing, deployment, user data or fonts exported.\n')
+manifest = [{'path': name, 'sha256': hashlib.sha256(Path(name).read_bytes()).hexdigest()} for name in sorted(REPAIRS)]
+(out / 'source.json').write_text(json.dumps({'source_commit': actual, 'workflow_trigger_commit': expected, 'base_commit': BASE, 'repaired_files': manifest, 'production_modified': False, 'store_build_created': False, 'reference_parity_verified': False}, indent=2) + '\n')
+(out / 'scope.txt').write_text('Exact reviewed R5 repair, committed before tests. Native Flutter host fixtures only, no claim of live-device or complete reference parity.\n')
 with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
     output.write('source_sha=' + actual + '\n')
 print('Exact source revision:', actual)
