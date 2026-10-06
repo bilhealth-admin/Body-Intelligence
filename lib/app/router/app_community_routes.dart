@@ -7,36 +7,49 @@ abstract final class _CommunityRoutes {
         path: '/community',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityHubPage(),
+          child: CommunityEntryGate(
+            showWelcome: true,
+            child: CommunityHubPage(entryWelcomeHandled: true),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/people',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityPeoplePage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityPeoplePage()),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/code',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityBilCodePage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityBilCodePage()),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/code/scan',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityCodeScannerPage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityCodeScannerPage()),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/member/:code',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(
-            child: CommunityMemberCodePage(code: state.pathParameters['code']!),
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityMemberCodePage(
+                code: state.pathParameters['code']!,
+              ),
+            ),
           ),
         ),
       ),
@@ -44,7 +57,9 @@ abstract final class _CommunityRoutes {
         path: '/community/notifications',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityNotificationsPage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityNotificationsPage()),
+          ),
         ),
       ),
       // Referral attribution must be reachable before Premium or even sign-in.
@@ -61,7 +76,9 @@ abstract final class _CommunityRoutes {
         path: '/community/rewards',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityRewardsPage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityRewardsPage()),
+          ),
         ),
       ),
       // Moderation uses a server-verified role, not a customer purchase.
@@ -75,14 +92,18 @@ abstract final class _CommunityRoutes {
         path: '/community/connections',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityConnectionsPage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityConnectionsPage()),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/food-review',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityFoodReviewPage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityFoodReviewPage()),
+          ),
         ),
       ),
       GoRoute(
@@ -96,9 +117,11 @@ abstract final class _CommunityRoutes {
         path: '/community/profile/:userId',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(
-            child: CommunityMemberProfilePage(
-              userId: state.pathParameters['userId']!,
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityMemberProfilePage(
+                userId: state.pathParameters['userId']!,
+              ),
             ),
           ),
         ),
@@ -114,12 +137,14 @@ abstract final class _CommunityRoutes {
         path: '/community/chat/:userId',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(
-            child: CommunityChatPage(
-              userId: state.pathParameters['userId']!,
-              displayName: state.extra is String
-                  ? state.extra! as String
-                  : state.uri.queryParameters['name'] ?? 'BIL',
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityChatPage(
+                userId: state.pathParameters['userId']!,
+                displayName: state.extra is String
+                    ? state.extra! as String
+                    : state.uri.queryParameters['name'] ?? 'BIL',
+              ),
             ),
           ),
         ),
@@ -128,14 +153,18 @@ abstract final class _CommunityRoutes {
         path: '/community/messages',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: CommunityMessagesPage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityMessagesPage()),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/messages/new',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySurface(child: NewCommunityMessagePage()),
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: NewCommunityMessagePage()),
+          ),
         ),
       ),
     ];

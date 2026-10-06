@@ -174,6 +174,49 @@ mixin _CommunityProfileModerationRepositoryMixin {
     }, onConflict: 'user_id');
   }
 
+  /// Create-only entry. A concurrent save must not reset a member's identity,
+  /// avatar or privacy. The existing editor remains the explicit editing path.
+  Future<void> createMyCommunityEntryProfile({
+    required String displayName,
+    required String localeCode,
+    required String expectedOwnerId,
+  }) async {
+    if (_user.id != expectedOwnerId) {
+      throw const AuthException('Community entry owner changed');
+    }
+    final name = displayName.trim();
+    if (name.length < 2 || name.length > 60) {
+      throw const FormatException('Invalid community display name');
+    }
+    final locale = BilLocalePolicy.canonicalSupportedTag(localeCode);
+    if (locale == null) {
+      throw const FormatException('Unsupported community locale');
+    }
+    CommunityTextPolicy.enforce(
+      name,
+      surface: CommunityTextSurface.profileDisplayName,
+    );
+    await _client
+        .from('bil_public_profiles')
+        .upsert(
+          {
+            'user_id': expectedOwnerId,
+            'display_name': name,
+            'locale_code': locale,
+            'discoverable': false,
+            'profile_visibility': CommunityProfileVisibility.friends.name,
+            'allow_friend_requests': true,
+            'allow_follows': false,
+            'allow_messages_from': CommunityMessagePermission.friends.name,
+          },
+          onConflict: 'user_id',
+          ignoreDuplicates: true,
+        );
+    if (_user.id != expectedOwnerId) {
+      throw const AuthException('Community entry owner changed');
+    }
+  }
+
   void invalidateCommunityModeratorStatus() {
     _moderatorGeneration++;
     _moderatorSession = null;

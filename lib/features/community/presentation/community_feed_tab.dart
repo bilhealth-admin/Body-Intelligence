@@ -6,12 +6,14 @@ class _FeedTab extends StatefulWidget {
     required this.imagePicker,
     this.initialMode = CommunityFeedMode.explore,
     this.onOpenCircles,
+    this.entryWelcomeHandled = false,
     super.key,
   });
   final CommunityRepository repository;
   final CommunityPostImagePickerContract imagePicker;
   final CommunityFeedMode initialMode;
   final VoidCallback? onOpenCircles;
+  final bool entryWelcomeHandled;
   @override
   State<_FeedTab> createState() => _FeedTabState();
 }
@@ -51,9 +53,12 @@ class _FeedTabState extends State<_FeedTab>
     _selectedFeedMode = widget.initialMode;
     // Match AI Coach's entry welcome: keep Community's branded first paint
     // visible for at least 2.2 seconds without delaying the feed request itself.
-    _entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
-      if (mounted) setState(() => _entryWelcomeVisible = false);
-    });
+    _entryWelcomeVisible = !widget.entryWelcomeHandled;
+    if (_entryWelcomeVisible) {
+      _entryWelcomeTimer = Timer(const Duration(milliseconds: 2200), () {
+        if (mounted) setState(() => _entryWelcomeVisible = false);
+      });
+    }
   }
 
   @override

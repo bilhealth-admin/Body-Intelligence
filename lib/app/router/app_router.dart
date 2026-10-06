@@ -44,6 +44,7 @@ import '../../features/commerce/presentation/bil_store_plans_page.dart';
 import '../../features/commerce/presentation/premium_route_glass_gate.dart';
 import '../../features/commerce/presentation/premium_logging_intro_page.dart';
 import '../../features/community/presentation/community_hub_page.dart';
+import '../../features/community/presentation/community_entry_gate.dart';
 import '../../features/community/presentation/community_surface.dart';
 import '../../features/community/presentation/community_bil_code_page.dart';
 import '../../features/community/presentation/community_people_page.dart';

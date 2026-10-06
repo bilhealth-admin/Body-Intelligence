@@ -84,12 +84,14 @@ class CommunityHubPage extends StatefulWidget {
     this.repository,
     this.client,
     this.postImagePicker,
+    this.entryWelcomeHandled = false,
     super.key,
   });
 
   final CommunityRepository? repository;
   final SupabaseClient? client;
   final CommunityPostImagePickerContract? postImagePicker;
+  final bool entryWelcomeHandled;
 
   @override
   State<CommunityHubPage> createState() => _CommunityHubPageState();
@@ -307,6 +309,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: CommunityFeedMode.explore,
+                entryWelcomeHandled: widget.entryWelcomeHandled,
                 onOpenCircles: () =>
                     setState(() => _section = _CommunityHubSection.circles),
               ),
@@ -316,6 +319,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 imagePicker:
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: CommunityFeedMode.following,
+                entryWelcomeHandled: widget.entryWelcomeHandled,
                 onOpenCircles: () =>
                     setState(() => _section = _CommunityHubSection.circles),
               ),
