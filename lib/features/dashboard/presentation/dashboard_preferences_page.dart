@@ -10,7 +10,9 @@ import '../../../app/theme/bil_semantic_icons.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
 import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
+import '../../profile/providers/profile_auth_identity_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../settings/reference_settings_home_page.dart';
 import '../providers/dashboard_preferences_provider.dart';
 part 'dashboard_preferences_actions.dart';
 part 'dashboard_preferences_catalog.dart';
@@ -31,6 +33,7 @@ class DashboardPreferencesPage extends ConsumerStatefulWidget {
 class _DashboardPreferencesPageState
     extends ConsumerState<DashboardPreferencesPage> {
   bool _saving = false;
+  bool _signingOut = false;
   String? _savingSection;
   // A single switch save must not dim every control or flash a page-wide
   // progress bar. Batch changes still use the existing blocking presentation.
@@ -53,6 +56,9 @@ class _DashboardPreferencesPageState
 
   @override
   Widget build(BuildContext context) {
+    final identity = ref.watch(profileAuthIdentityProvider);
+    final ownerId = identity.asData?.value.ownerId;
+    final sessionReady = identity.hasValue && !identity.hasError;
     final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
     final entitlementResolved = verifiedSubscription.asData != null;
     final paid =
@@ -672,6 +678,42 @@ class _DashboardPreferencesPageState
                 ),
               ),
             ),
+            if (ownerId != null) ...[
+              const SizedBox(height: 20),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  key: const Key('dashboard-preferences-sign-out'),
+                  minTileHeight: 58,
+                  leading: _signingOut || !sessionReady
+                      ? const SizedBox.square(
+                          dimension: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(
+                          Icons.logout_rounded,
+                          color: Color(0xFFD92D3A),
+                        ),
+                  title: Text(
+                    _copy(
+                      context,
+                      en: 'Log out',
+                      ar: 'تسجيل الخروج',
+                      fr: 'Se déconnecter',
+                      es: 'Cerrar sesión',
+                      tr: 'Çıkış yap',
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFFD92D3A),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  onTap: _savingLayout || _signingOut || !sessionReady
+                      ? null
+                      : () => _logout(ownerId),
+                ),
+              ),
+            ],
           ],
         ),
         bottomNavigationBar: SafeArea(
@@ -684,5 +726,34 @@ class _DashboardPreferencesPageState
         ),
       ),
     );
+  Future<void> _logout(String ownerId) async {
+    if (_signingOut) return;
+    setState(() => _signingOut = true);
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      await ref.read(settingsSignOutProvider)(ownerId);
+      if (mounted) context.go('/login');
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _copy(
+                context,
+                en: 'Could not sign out. Check your connection and retry.',
+                ar: 'تعذر تسجيل الخروج. تحقق من الاتصال وحاول مرة أخرى.',
+                fr: 'Impossible de se déconnecter. Vérifiez la connexion et réessayez.',
+                es: 'No se pudo cerrar sesión. Comprueba la conexión e inténtalo de nuevo.',
+                tr: 'Çıkış yapılamadı. Bağlantınızı kontrol edip yeniden deneyin.',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
+    }
+  }
+
   }
 }
