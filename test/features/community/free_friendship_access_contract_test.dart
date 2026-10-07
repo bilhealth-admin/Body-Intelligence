@@ -80,6 +80,7 @@ void main() {
       '/community/member/:code',
       '/community/notifications',
       '/community/drafts',
+      '/community/compose',
       '/community/rewards',
       '/community/connections',
       '/community/food-review',
