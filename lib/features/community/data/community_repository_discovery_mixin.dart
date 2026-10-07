@@ -3,6 +3,10 @@ part of 'community_repository.dart';
 mixin _CommunityDiscoveryRepositoryMixin {
   SupabaseClient get _client;
 
+  Future<T> _runCommunityOwnerOperation<T>(
+    Future<T> Function(CommunityOwnerOperation operation) action,
+  );
+
   Future<T> _runCommunityMutation<T>(Future<T> Function() mutation);
 
   void _validateTopicSlugs(List<String> slugs);
@@ -464,19 +468,22 @@ mixin _CommunityDiscoveryRepositoryMixin {
     );
   }
 
-  Future<CommunityGoldBalance> loadGoldBalance() async {
-    final response = await _client.rpc('bil_gold_balance_v1');
-    if (response is! Map) {
-      throw const FormatException('Invalid BIL Gold balance');
-    }
-    return CommunityGoldBalance.fromJson(Map<String, dynamic>.from(response));
-  }
+  Future<CommunityGoldBalance> loadGoldBalance() => _runCommunityOwnerOperation(
+    (operation) async {
+      final response = await _client.rpc('bil_gold_balance_v1');
+      operation.check();
+      if (response is! Map) {
+        throw const FormatException('Invalid BIL Gold balance');
+      }
+      return CommunityGoldBalance.fromJson(Map<String, dynamic>.from(response));
+    },
+  );
 
   Future<List<CommunityGoldLedgerEntry>> loadGoldHistory({
     DateTime? beforeCreatedAt,
     int? beforeId,
     int limit = 30,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
     if ((beforeCreatedAt == null) != (beforeId == null) ||
         (beforeId != null && beforeId < 1) ||
         limit < 1 ||
@@ -491,6 +498,7 @@ mixin _CommunityDiscoveryRepositoryMixin {
         'p_limit': limit,
       },
     );
+    operation.check();
     if (response is! List) {
       throw const FormatException('Invalid BIL Gold history');
     }
@@ -504,27 +512,29 @@ mixin _CommunityDiscoveryRepositoryMixin {
         );
       }),
     );
-  }
+  });
 
-  Future<List<CommunityQuest>> loadCommunityQuests() async {
-    final response = await _client.rpc('bil_list_community_quests_v1');
-    if (response is! List) {
-      throw const FormatException('Invalid Community quest list');
-    }
-    return List<CommunityQuest>.unmodifiable(
-      response.map((row) {
-        if (row is! Map) {
-          throw const FormatException('Invalid Community quest row');
+  Future<List<CommunityQuest>> loadCommunityQuests() =>
+      _runCommunityOwnerOperation((operation) async {
+        final response = await _client.rpc('bil_list_community_quests_v1');
+        operation.check();
+        if (response is! List) {
+          throw const FormatException('Invalid Community quest list');
         }
-        return CommunityQuest.fromJson(Map<String, dynamic>.from(row));
-      }),
-    );
-  }
+        return List<CommunityQuest>.unmodifiable(
+          response.map((row) {
+            if (row is! Map) {
+              throw const FormatException('Invalid Community quest row');
+            }
+            return CommunityQuest.fromJson(Map<String, dynamic>.from(row));
+          }),
+        );
+      });
 
   Future<CommunityQuestClaimResult> claimCommunityQuest({
     required String questKey,
     required String periodKey,
-  }) async {
+  }) => _runCommunityOwnerOperation((operation) async {
     if (!CommunityQuest.questKeyPattern.hasMatch(questKey) ||
         periodKey.length < 4 ||
         periodKey.length > 16) {
@@ -534,11 +544,12 @@ mixin _CommunityDiscoveryRepositoryMixin {
       'bil_claim_community_quest_v1',
       params: {'p_quest_key': questKey, 'p_period_key': periodKey},
     );
+    operation.check();
     if (response is! Map) {
       throw const FormatException('Invalid Community quest claim result');
     }
     return CommunityQuestClaimResult.fromJson(
       Map<String, dynamic>.from(response),
     );
-  }
+  });
 }

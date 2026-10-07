@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,8 +11,11 @@ import '../domain/community_rewards.dart';
 import 'bil_gold_coin.dart';
 import 'community_copy.dart';
 import 'community_ai_reward_notice.dart';
+import 'community_return_button.dart';
+import '../services/community_owner_operation.dart';
 
 part 'community_rewards_cards.dart';
+part 'community_rewards_owner_scope.dart';
 
 class CommunityRewardsPage extends StatefulWidget {
   const CommunityRewardsPage({this.repository, super.key});
@@ -25,6 +31,8 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   static const _historyPageSize = 30;
 
   CommunityRepository? _repository;
+  _RewardsOwnerVisit? _visit;
+  bool _ownerChanged = false;
   late Future<_RewardsSnapshot> _snapshot;
   final List<CommunityGoldLedgerEntry> _history = [];
   DateTime? _historyBefore;
@@ -42,7 +50,59 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
+    final repository = _repository;
+    if (repository != null) {
+      _visit = _RewardsOwnerVisit(
+        repository: repository,
+        isAttached: () => mounted && identical(_repository, repository),
+        onRetired: _retireVisit,
+      );
+    }
     _snapshot = _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityRewardsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      // This state belongs to one visit, even A -> null -> A on the same key.
+      _visit?.dispose();
+      _retireVisit();
+    }
+  }
+
+  @override
+  void dispose() {
+    _visit?.dispose();
+    _loadGeneration++;
+    super.dispose();
+  }
+
+  bool get _current => mounted && !_ownerChanged && _visit?.isCurrent == true;
+
+  void _retireVisit() {
+    if (_ownerChanged) return;
+    _ownerChanged = true;
+    _loadGeneration++;
+    _history.clear();
+    _historyBefore = null;
+    _historyBeforeId = null;
+    _historyHasMore = false;
+    _historyLoadingMore = false;
+    _refreshing = false;
+    _claimingQuest = null;
+    _openingEarnComposer = false;
+    // Repository replacement may arrive during build. Cancel immediately;
+    // schedule only the visual invalidation, never the authorization check.
+    if (!mounted) return;
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    } else {
+      setState(() {});
+    }
   }
 
   CommunityRepository? _productionRepository() {
@@ -60,21 +120,26 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
 
   Future<_RewardsSnapshot> _load() async {
     final repository = _repository;
-    if (repository == null) return const _RewardsSnapshot.signedOut();
+    final visit = _visit;
+    if (repository == null || visit == null || !_current) {
+      return const _RewardsSnapshot.signedOut();
+    }
     final generation = ++_loadGeneration;
     _refreshing = true;
     _historyLoadingMore = false;
     try {
-      final values = await Future.wait<Object>([
-        repository.loadGoldBalance(),
-        repository.loadCommunityQuests(),
-        repository.loadGoldHistory(limit: _historyPageSize),
-      ]);
+      final values = await visit.run(
+        () => Future.wait<Object>([
+          repository.loadGoldBalance(),
+          repository.loadCommunityQuests(),
+          repository.loadGoldHistory(limit: _historyPageSize),
+        ]),
+      );
       final balance = values[0] as CommunityGoldBalance;
       final quests = values[1] as List<CommunityQuest>;
       final history = values[2] as List<CommunityGoldLedgerEntry>;
-      if (!mounted || generation != _loadGeneration) {
-        return _RewardsSnapshot(balance: balance, quests: quests);
+      if (!_current || generation != _loadGeneration) {
+        return const _RewardsSnapshot.signedOut();
       }
       _history
         ..clear()
@@ -95,6 +160,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   }
 
   void _retry() {
+    if (!_current) return;
     final next = _load();
     setState(() {
       _snapshot = next;
@@ -102,6 +168,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   }
 
   Future<void> _reloadAfterMutation() async {
+    if (!_current) return;
     final next = _load();
     setState(() {
       _snapshot = next;
@@ -115,14 +182,22 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
 
   Future<void> _claim(CommunityQuest quest) async {
     final repository = _repository;
-    if (repository == null || _claimingQuest != null) return;
+    final visit = _visit;
+    if (repository == null ||
+        visit == null ||
+        !_current ||
+        _claimingQuest != null) {
+      return;
+    }
     setState(() => _claimingQuest = quest.questKey);
     try {
-      final result = await repository.claimCommunityQuest(
-        questKey: quest.questKey,
-        periodKey: quest.periodKey,
+      final result = await visit.run(
+        () => repository.claimCommunityQuest(
+          questKey: quest.questKey,
+          periodKey: quest.periodKey,
+        ),
       );
-      if (!mounted) return;
+      if (!mounted || !_current) return;
       final messenger = ScaffoldMessenger.of(context);
       if (result.status == CommunityQuestClaimStatus.claimed) {
         messenger.showSnackBar(
@@ -156,8 +231,10 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         );
       }
       await _reloadAfterMutation();
+    } on CommunityOwnerOperationCancelled {
+      // A committed server claim is not reversed or repeated for another visit.
     } catch (_) {
-      if (mounted) {
+      if (mounted && _current) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -171,11 +248,12 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         );
       }
     } finally {
-      if (mounted) setState(() => _claimingQuest = null);
+      if (_current) setState(() => _claimingQuest = null);
     }
   }
 
   Future<void> _openQuestAction(CommunityQuest quest) async {
+    if (!_current) return;
     final route = _routeForAction(quest.actionKind);
     if (route == null) return;
     if (route == '/community/compose?origin=earn') {
@@ -183,18 +261,18 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
       return;
     }
     await context.push(route);
-    if (mounted) await _reloadAfterMutation();
+    if (_current) await _reloadAfterMutation();
   }
 
   Future<void> _openEarnComposer() async {
-    if (!mounted || _openingEarnComposer) return;
+    if (!_current || _openingEarnComposer) return;
     setState(() => _openingEarnComposer = true);
     try {
       await context.push('/community/compose?origin=earn');
       // No automatic quest claim or balance refresh: a draft/publication is
       // not moderator approval. The server remains the reward authority.
     } finally {
-      if (mounted) setState(() => _openingEarnComposer = false);
+      if (_current) setState(() => _openingEarnComposer = false);
     }
   }
 
@@ -210,7 +288,10 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
 
   Future<void> _loadMoreHistory() async {
     final repository = _repository;
+    final visit = _visit;
     if (repository == null ||
+        visit == null ||
+        !_current ||
         _historyLoadingMore ||
         _refreshing ||
         !_historyHasMore ||
@@ -221,12 +302,14 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
     final generation = _loadGeneration;
     setState(() => _historyLoadingMore = true);
     try {
-      final next = await repository.loadGoldHistory(
-        beforeCreatedAt: _historyBefore,
-        beforeId: _historyBeforeId,
-        limit: _historyPageSize,
+      final next = await visit.run(
+        () => repository.loadGoldHistory(
+          beforeCreatedAt: _historyBefore,
+          beforeId: _historyBeforeId,
+          limit: _historyPageSize,
+        ),
       );
-      if (!mounted || generation != _loadGeneration) return;
+      if (!_current || generation != _loadGeneration) return;
       final known = _history.map((entry) => entry.id).toSet();
       setState(() {
         _history.addAll(next.where((entry) => known.add(entry.id)));
@@ -239,7 +322,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         }
       });
     } catch (_) {
-      if (mounted && generation == _loadGeneration) {
+      if (mounted && _current && generation == _loadGeneration) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -253,7 +336,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         );
       }
     } finally {
-      if (mounted && generation == _loadGeneration) {
+      if (_current && generation == _loadGeneration) {
         setState(() => _historyLoadingMore = false);
       }
     }
@@ -264,6 +347,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
     length: 2,
     child: Scaffold(
       appBar: AppBar(
+        leading: const CommunityReturnButton(),
         title: Text(communityText(context, 'BIL Rewards', 'مكافآت BIL')),
         bottom: TabBar(
           tabs: [
@@ -275,6 +359,22 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
       body: FutureBuilder<_RewardsSnapshot>(
         future: _snapshot,
         builder: (context, snapshot) {
+          if (_ownerChanged || (_visit?.ownerId != null && !_current)) {
+            return Center(
+              key: const Key('community-rewards-owner-changed'),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  communityText(
+                    context,
+                    'Your account changed. Return to Community to continue.',
+                    'تغير حسابك. ارجع إلى المجتمع للمتابعة.',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
           if (snapshot.connectionState != ConnectionState.done &&
               !snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

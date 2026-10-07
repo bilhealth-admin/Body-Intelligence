@@ -181,6 +181,9 @@ CommunityProfileReview _review(int id) => CommunityProfileReview(
 class _HistoryRepository extends CommunityRepository {
   _HistoryRepository() : super(_client());
 
+  @override
+  String get currentUserId => _viewer;
+
   int firstPages = 0;
   final cursors = <int?>[];
   final returnedFirstRanges = <({int newest, int oldest})>[];

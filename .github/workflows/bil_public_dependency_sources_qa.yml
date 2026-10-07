@@ -29,7 +29,7 @@ jobs:
           python3 - <<'PY'
           import hashlib, json, os, pathlib, zipfile
           cache = pathlib.Path(os.environ['PUB_CACHE']) / 'hosted' / 'pub.dev'
-          packages = ['image-4.9.1', 'passkeys_platform_interface-2.8.0']
+          packages = ['image-4.9.1', 'passkeys_platform_interface-2.8.0', 'sign_in_with_apple_platform_interface-2.0.0', 'pdf-3.13.0']
           out = pathlib.Path('/tmp/bil-public-sources')
           out.mkdir(parents=True, exist_ok=True)
           manifest = []

@@ -8,8 +8,14 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-final class _AuditRewardsRepository implements CommunityRepository {
+final class _AuditRewardsRepository extends CommunityRepository {
+  _AuditRewardsRepository(super.client);
+
+  @override
+  String get currentUserId => '11111111-1111-4111-8111-111111111111';
+
   @override
   Future<CommunityGoldBalance> loadGoldBalance() async =>
       const CommunityGoldBalance(balance: 50);
@@ -39,6 +45,16 @@ double _contrast(Color foreground, Color background) {
 }
 
 void main() {
+  late SupabaseClient client;
+  setUp(() {
+    client = SupabaseClient(
+      'https://rewards-layout.invalid',
+      'synthetic-layout-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => client.dispose());
+
   test('Rewards source respects the unchanged 700-line ceiling', () {
     final source = File(
       'lib/features/community/presentation/community_rewards_page.dart',
@@ -77,7 +93,7 @@ void main() {
                   child: child!,
                 ),
                 home: CommunityRewardsPage(
-                  repository: _AuditRewardsRepository(),
+                  repository: _AuditRewardsRepository(client),
                 ),
               ),
             );

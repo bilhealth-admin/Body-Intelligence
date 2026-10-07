@@ -6,14 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final class _RewardsRepository extends CommunityRepository {
-  _RewardsRepository()
-    : super(
-        SupabaseClient(
-          'https://rewards.invalid',
-          'rewards-anon-key',
-          authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ),
-      );
+  _RewardsRepository(super.client);
+
+  @override
+  String get currentUserId => '11111111-1111-4111-8111-111111111111';
 
   int claimCalls = 0;
   int balance = 50;
@@ -67,6 +63,16 @@ final class _RewardsRepository extends CommunityRepository {
 }
 
 void main() {
+  late SupabaseClient client;
+  setUp(() {
+    client = SupabaseClient(
+      'https://rewards.invalid',
+      'rewards-anon-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  });
+  tearDown(() => client.dispose());
+
   test('reward domain parses Gold and quest states strictly', () {
     final balance = CommunityGoldBalance.fromJson({
       'balance': 1450,
@@ -97,7 +103,7 @@ void main() {
   testWidgets(
     'Rewards Center claims once and refreshes authoritative balance',
     (tester) async {
-      final repository = _RewardsRepository();
+      final repository = _RewardsRepository(client);
       await tester.pumpWidget(
         MaterialApp(home: CommunityRewardsPage(repository: repository)),
       );
