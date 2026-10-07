@@ -1,6 +1,59 @@
 const AASA_PATH = '/.well-known/apple-app-site-association';
 const ASSETLINKS_PATH = '/.well-known/assetlinks.json';
 const BUNDLE_ID = 'com.bilhealth.bodyintelligencelog';
+const CANONICAL_ORIGIN = 'https://www.bilhealth.com';
+const INDEXABLE_PATHS = new Set([
+  '/',
+  '/privacy',
+  '/terms',
+  '/account-deletion',
+  '/data-deletion',
+  '/subscription-terms',
+  '/health-disclaimer',
+  '/support',
+  '/community-guidelines',
+  '/contact',
+]);
+
+function normalizedPath(pathname) {
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  return clean === '/delete-account' ? '/account-deletion' : clean;
+}
+
+function canonicalUrlFor(url) {
+  const path = normalizedPath(url.pathname);
+  return `${CANONICAL_ORIGIN}${path === '/' ? '/' : path}`;
+}
+
+function escapeHtmlAttribute(value) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
+function rewriteHtmlMetadata(html, canonicalUrl) {
+  const escaped = escapeHtmlAttribute(canonicalUrl);
+  const canonicalTag = `<link rel="canonical" href="${escaped}">`;
+  const ogUrlTag = `<meta property="og:url" content="${escaped}">`;
+
+  if (/<links+[^>]*rel=["']canonical["'][^>]*>/i.test(html)) {
+    html = html.replace(/<links+[^>]*rel=["']canonical["'][^>]*>/i, canonicalTag);
+  } else {
+    html = html.replace(/</head>/i, `  ${canonicalTag}
+</head>`);
+  }
+
+  if (/<metas+[^>]*property=["']og:url["'][^>]*>/i.test(html)) {
+    html = html.replace(/<metas+[^>]*property=["']og:url["'][^>]*>/i, ogUrlTag);
+  } else {
+    html = html.replace(/</head>/i, `  ${ogUrlTag}
+</head>`);
+  }
+  return html;
+}
+
 const REQUIRED_RETURN_PATHS = new Set([
   '/auth/callback',
   '/auth/reset-password',
@@ -60,7 +113,39 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith('/.well-known/')) {
-      return env.ASSETS.fetch(request);
+      if (url.protocol !== 'https:' || url.hostname !== 'www.bilhealth.com') {
+        const target = new URL(canonicalUrlFor(url));
+        target.search = url.search;
+        return Response.redirect(target.toString(), 308);
+      }
+
+      const path = normalizedPath(url.pathname);
+      if (url.pathname !== '/' && url.pathname.endsWith('/') && INDEXABLE_PATHS.has(path)) {
+        const target = new URL(canonicalUrlFor(url));
+        target.search = url.search;
+        return Response.redirect(target.toString(), 308);
+      }
+
+      if (!env?.ASSETS?.fetch) {
+        return failClosed(503, 'Site asset binding is unavailable.');
+      }
+      const assetResponse = await env.ASSETS.fetch(request);
+      if (request.method !== 'GET') return assetResponse;
+
+      const contentType = assetResponse.headers.get('Content-Type')?.toLowerCase() ?? '';
+      if (!contentType.includes('text/html')) return assetResponse;
+
+      const body = await assetResponse.text();
+      const headers = new Headers(assetResponse.headers);
+      headers.delete('Content-Length');
+      if (!INDEXABLE_PATHS.has(path)) {
+        headers.set('X-Robots-Tag', 'noindex,follow');
+      }
+      return new Response(rewriteHtmlMetadata(body, canonicalUrlFor(url)), {
+        status: assetResponse.status,
+        statusText: assetResponse.statusText,
+        headers,
+      });
     }
     if (url.pathname !== AASA_PATH && url.pathname !== ASSETLINKS_PATH) {
       return failClosed(404, 'Association document not found.');
@@ -107,4 +192,10 @@ export default {
   },
 };
 
-export { hasAasaContract, hasAssetLinksContract };
+export {
+  canonicalUrlFor,
+  hasAasaContract,
+  hasAssetLinksContract,
+  normalizedPath,
+  rewriteHtmlMetadata,
+};
