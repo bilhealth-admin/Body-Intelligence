@@ -88,6 +88,7 @@ jobs:
             test/features/community/community_profile_identity_contract_test.dart \
             test/features/community/community_rewards_ai_coach_contract_test.dart \
             test/features/intelligence_center/coach_context_food_evidence_test.dart \
+            test/features/intelligence_center/coach_nutrition_remaining_evidence_test.dart \
             test/features/intelligence_center/coach_context_food_storage_test.dart \
             test/features/intelligence_center/coach_context_food_provider_test.dart \
             test/features/intelligence_center/coach_context_minimal_views_test.dart \

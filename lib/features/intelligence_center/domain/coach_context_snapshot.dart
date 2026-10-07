@@ -134,24 +134,32 @@ class CoachContextSnapshot {
       }
     }
     final raw = computedHealth['dailyTargets'];
-    if (raw is! Map) return null;
-    if (consumed != null &&
-        !consumed.knownTotals.containsAll(const <String>{
-          'caloriesKcal',
-          'proteinG',
-          'carbsG',
-          'fatG',
-        })) {
-      return null;
-    }
-    num remaining(String targetKey, num eaten) =>
-        (((raw[targetKey] as num?) ?? 0) - eaten).clamp(0, double.infinity);
-    return <String, num>{
-      'caloriesKcal': remaining('caloriesKcal', consumed?.calories ?? 0),
-      'proteinG': remaining('proteinG', consumed?.protein ?? 0),
-      'carbsG': remaining('carbsG', consumed?.carbs ?? 0),
-      'fatG': remaining('fatG', consumed?.fat ?? 0),
+    // No row means no evidence for this civil day, not zero intake. A
+    // complete view also requires every target: an absent target is not zero.
+    if (consumed == null || raw is! Map) return null;
+    final totals = <String, double>{
+      'caloriesKcal': consumed.calories,
+      'proteinG': consumed.protein,
+      'carbsG': consumed.carbs,
+      'fatG': consumed.fat,
     };
+    if (!consumed.knownTotals.containsAll(totals.keys)) return null;
+    final remaining = <String, num>{};
+    for (final entry in totals.entries) {
+      final target = raw[entry.key];
+      final eaten = entry.value;
+      // Persisted/legacy maps are not assumed to be typed or finite. Keep
+      // unavailable values out of receipts and .round() in the daily brief.
+      if (target is! num ||
+          !target.isFinite ||
+          target < 0 ||
+          !eaten.isFinite ||
+          eaten < 0) {
+        return null;
+      }
+      remaining[entry.key] = (target - eaten).clamp(0, double.infinity);
+    }
+    return remaining;
   }
 
   Map<String, Object?> toJson() => {
