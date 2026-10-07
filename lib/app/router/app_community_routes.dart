@@ -82,6 +82,19 @@ abstract final class _CommunityRoutes {
         ),
       ),
       GoRoute(
+        path: '/community/compose',
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityComposePage(
+                fromEarn: state.uri.queryParameters['origin'] == 'earn',
+              ),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/community/rewards',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,

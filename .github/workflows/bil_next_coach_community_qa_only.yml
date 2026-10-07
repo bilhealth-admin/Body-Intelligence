@@ -81,6 +81,10 @@ jobs:
             test/features/community/community_notification_resilience_test.dart \
             test/features/community/community_visible_read_receipts_test.dart \
             test/features/community/community_post_moderation_test.dart \
+            test/features/community/community_earn_composer_test.dart \
+            test/features/community/community_earn_copy_test.dart \
+            test/features/community/community_rewards_center_test.dart \
+            test/features/community/community_rewards_accessibility_test.dart \
             test/features/community/community_deep_link_test.dart \
             test/features/community/community_publish_operation_test.dart \
             test/features/community/community_publish_preflight_test.dart \

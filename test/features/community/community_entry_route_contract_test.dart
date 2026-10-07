@@ -19,6 +19,7 @@ void main() {
         '/community/notifications',
         '/community/drafts',
         '/community/rewards',
+        '/community/compose',
         '/community/connections',
         '/community/food-review',
         '/community/profile/:userId',

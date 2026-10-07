@@ -59,11 +59,13 @@ class _CommunityPostComposerPage extends StatefulWidget {
     required this.imagePicker,
     required this.draft,
     this.ownerIsCurrent,
+    this.fromEarn = false,
   });
   final CommunityRepository repository;
   final CommunityPostImagePickerContract imagePicker;
   final _CommunityComposerDraft draft;
   final ValueGetter<bool>? ownerIsCurrent;
+  final bool fromEarn;
 
   @override
   State<_CommunityPostComposerPage> createState() =>

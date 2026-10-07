@@ -97,6 +97,12 @@ jobs:
           BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-reference/coach
         shell: bash
         run: set -o pipefail; flutter test --no-pub --reporter expanded test/qa_next/coach_reference_workspace_capture_test.dart test/qa_next/coach_food_cards_capture_test.dart --concurrency=1 --timeout 2m 2>&1 | tee /tmp/bil-reference/coach-tests.log
+      - name: Exercise Earn handoff and capture the real existing editor
+        if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
+        env:
+          BIL_EARN_CAPTURE_DIR: /tmp/bil-reference/earn
+        shell: bash
+        run: set -o pipefail; flutter test --no-pub --reporter expanded test/features/community/community_earn_composer_test.dart test/features/community/community_earn_copy_test.dart --concurrency=1 --timeout 2m 2>&1 | tee /tmp/bil-reference/earn-tests.log
       - name: Render actual Community surfaces and large-text states
         if: ${{ !cancelled() && steps.candidate.outcome == 'success' }}
         env:

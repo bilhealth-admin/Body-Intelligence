@@ -7,6 +7,7 @@ import '../data/community_repository.dart';
 import '../domain/community_rewards.dart';
 import 'bil_gold_coin.dart';
 import 'community_copy.dart';
+import 'community_ai_reward_notice.dart';
 
 part 'community_rewards_cards.dart';
 
@@ -32,6 +33,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   bool _historyLoadingMore = false;
   int _loadGeneration = 0;
   bool _refreshing = false;
+  bool _openingEarnComposer = false;
   String? _claimingQuest;
   CommunityQuestCadence? _cadenceFilter;
   _HistoryFilter _historyFilter = _HistoryFilter.all;
@@ -176,14 +178,32 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
   Future<void> _openQuestAction(CommunityQuest quest) async {
     final route = _routeForAction(quest.actionKind);
     if (route == null) return;
+    if (route == '/community/compose?origin=earn') {
+      await _openEarnComposer();
+      return;
+    }
     await context.push(route);
     if (mounted) await _reloadAfterMutation();
+  }
+
+  Future<void> _openEarnComposer() async {
+    if (!mounted || _openingEarnComposer) return;
+    setState(() => _openingEarnComposer = true);
+    try {
+      await context.push('/community/compose?origin=earn');
+      // No automatic quest claim or balance refresh: a draft/publication is
+      // not moderator approval. The server remains the reward authority.
+    } finally {
+      if (mounted) setState(() => _openingEarnComposer = false);
+    }
   }
 
   String? _routeForAction(String actionKind) => switch (actionKind) {
     'invite_friend' || 'friend_request' => '/community/people',
     'complete_profile' || 'community_profile' => '/community/profile',
-    'valuable_post' || 'create_post' || 'community_post' => '/community',
+    'valuable_post' ||
+    'create_post' ||
+    'community_post' => '/community/compose?origin=earn',
     'community_interaction' => '/community',
     _ => null,
   };
@@ -382,6 +402,11 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
               ),
               const SizedBox(height: 12),
             ],
+          const SizedBox(height: 12),
+          CommunityAiRewardNotice(
+            showCreateAction: true,
+            onCreate: _openingEarnComposer ? null : _openEarnComposer,
+          ),
         ],
       ),
     );

@@ -106,6 +106,10 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          if (widget.fromEarn) ...[
+                            const CommunityAiRewardNotice(),
+                            const SizedBox(height: 12),
+                          ],
                           _buildCommunityTitleField(context, busy),
                           const SizedBox(height: 8),
                           _buildCommunityBodyField(context, busy),
