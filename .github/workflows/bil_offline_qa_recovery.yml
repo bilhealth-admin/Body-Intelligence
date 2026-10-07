@@ -1,0 +1,142 @@
+name: BIL offline QA recovery
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_offline_qa_recovery.yml]
+permissions:
+  contents: read
+jobs:
+  recovery:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Preserve exact current source, not an older overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p /tmp/bil-recovery/source
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess,zipfile
+          out=pathlib.Path('/tmp/bil-recovery/source')
+          rows=[];excluded=[]
+          blocked={'.ttf','.otf','.woff','.woff2','.eot','.ttc','.p12','.p8','.pem','.key','.jks','.keystore','.mobileprovision'}
+          with zipfile.ZipFile(out/'source.zip','w',zipfile.ZIP_DEFLATED) as archive:
+              for row in subprocess.check_output(['git','ls-tree','-rz','--full-tree','HEAD']).split(b'\0'):
+                  if not row: continue
+                  meta,name=row.split(b'\t',1);mode,kind,oid=meta.decode().split();name=name.decode();p=pathlib.Path(name)
+                  if kind!='blob' or mode=='120000' or p.suffix.lower() in blocked or p.name.startswith('.env'):
+                      excluded.append(name);continue
+                  data=p.read_bytes()
+                  try: data.decode('utf-8')
+                  except UnicodeError: excluded.append(name);continue
+                  if b'\0' in data or b'-----BEGIN PRIVATE KEY-----' in data or b'-----BEGIN RSA PRIVATE KEY-----' in data:
+                      excluded.append(name);continue
+                  actual=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+                  if actual!=oid: raise RuntimeError('Source drift: '+name)
+                  archive.writestr('source/'+name,data)
+                  rows.append({'path':name,'git_blob':oid,'sha256':hashlib.sha256(data).hexdigest(),'mode':mode})
+              manifest={'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'source_tree':subprocess.check_output(['git','rev-parse','HEAD^{tree}'],text=True).strip(),'files':rows,'excluded':excluded,'scope':'Exact tracked UTF-8 source, not a complete checkout or test clearance. Fonts and binary assets excluded.'}
+              archive.writestr('SOURCE_SNAPSHOT.json',json.dumps(manifest,indent=2)+'\n')
+          print(json.dumps({'source_commit':manifest['source_commit'],'files':len(rows),'excluded':len(excluded)}))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-recovery-source-${{ github.sha }}
+          path: /tmp/bil-recovery/source
+          retention-days: 1
+          if-no-files-found: error
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve locked dependencies and prime disposable SQLite host runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          flutter test --no-pub --no-test-assets --reporter expanded test/performance_budget_test.dart --timeout 2m
+      - name: Export font-free pinned tooling in bounded archives
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,subprocess,zipfile,zlib
+          root=pathlib.Path('/tmp/bil-recovery');sdk=pathlib.Path(os.environ['FLUTTER_ROOT']);pub=pathlib.Path(os.environ['PUB_CACHE'])
+          deny={'.ttf','.otf','.woff','.woff2','.eot','.ttc','.dfont','.pfb','.pfa','.zip','.gz','.xz','.7z','.tar','.sym','.p12','.p8','.pem','.key','.jks','.keystore'}
+          magic={b'\x00\x01\x00\x00',b'OTTO',b'ttcf',b'wOFF',b'wOF2',b'true',b'typ1'}
+          def put(z,p,name):
+              if not p.is_file() or p.is_symlink() or p.suffix.lower() in deny: return
+              if any(x in p.parts for x in ('fonts','font','test_fonts','test_data','.git','.cache')): return
+              if any(x in p.name.lower() for x in ('credential','private_key','service-account','.env','asan','msan','tsan','chrome-dart','dart-sdk-linux')): return
+              with p.open('rb') as f: head=f.read(4096)
+              if head[:4] in magic or b'-----BEGIN PRIVATE KEY-----' in head or b'-----BEGIN RSA PRIVATE KEY-----' in head: return
+              z.write(p,name)
+          for name in ('sdk','pub','runtime'): (root/name).mkdir(exist_ok=True)
+          with zipfile.ZipFile(root/'sdk/flutter.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in sdk.rglob('*'):
+                  rel=p.relative_to(sdk).as_posix()
+                  if not (rel.startswith(('bin/','packages/')) or rel in ('version','LICENSE','AUTHORS','README.md')): continue
+                  if rel.startswith('bin/cache/artifacts/engine/') and not any(x in rel for x in ('/linux-x64/','/common/')): continue
+                  if any(x in rel for x in ('/flutter_web_sdk/','/linux-x64-profile/','/linux-x64-release/','/examples/','/integration_test/example/','/test/','/test_fixes/','/test_general.shard/')): continue
+                  put(z,p,'flutter/'+rel)
+              sha=subprocess.check_output(['git','-C',str(sdk),'rev-parse','HEAD'],text=True).strip()
+              commit=subprocess.check_output(['git','-C',str(sdk),'cat-file','commit',sha]);tree=commit.splitlines()[0].decode().split()[1]
+              objects=[(sha,'commit',commit)];stack=[tree];seen=set()
+              while stack:
+                  oid=stack.pop()
+                  if oid in seen: continue
+                  seen.add(oid);data=subprocess.check_output(['git','-C',str(sdk),'cat-file','tree',oid]);objects.append((oid,'tree',data))
+                  for row in subprocess.check_output(['git','-C',str(sdk),'ls-tree','-z',oid]).split(b'\0'):
+                      if row:
+                          bits=row.split(b'\t',1)[0].split()
+                          if bits[1]==b'tree': stack.append(bits[2].decode())
+              z.writestr('flutter/.git/HEAD','ref: refs/heads/stable\n');z.writestr('flutter/.git/refs/heads/stable',sha+'\n');z.writestr('flutter/.git/refs/tags/3.44.6',sha+'\n');z.writestr('flutter/.git/shallow',sha+'\n')
+              z.writestr('flutter/.git/config','[core]\nrepositoryformatversion = 0\nbare = false\n[remote "origin"]\nurl = https://github.com/flutter/flutter.git\n')
+              for oid,kind,data in objects:
+                  raw=(kind+' '+str(len(data))+'\0').encode()+data
+                  if hashlib.sha1(raw).hexdigest()!=oid: raise RuntimeError('Object mismatch')
+                  z.writestr('flutter/.git/objects/'+oid[:2]+'/'+oid[2:],zlib.compress(raw))
+          with zipfile.ZipFile(root/'pub/pub.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in pub.rglob('*'):
+                  rel=p.relative_to(pub).as_posix()
+                  if rel.startswith(('hosted/','hosted-hashes/','git/')): put(z,p,'pub-cache/'+rel)
+          total=0
+          with zipfile.ZipFile(root/'runtime/runtime.zip','w',zipfile.ZIP_DEFLATED,compresslevel=3) as z:
+              for p in pathlib.Path('.dart_tool').rglob('*'):
+                  if p.name in ('package_config.json','package_graph.json') or p.suffix in ('.so','.json'): put(z,p,p.as_posix())
+              for p in sorted(pathlib.Path('assets').rglob('*')):
+                  if p.is_file() and p.suffix.lower() in {'.png','.jpg','.jpeg','.webp','.svg','.json','.yaml','.txt'} and p.stat().st_size<4*1024*1024 and total+p.stat().st_size<96*1024*1024:
+                      put(z,p,p.as_posix());total+=p.stat().st_size
+          for folder in ('sdk','pub','runtime'):
+              p=next((root/folder).glob('*.zip'))
+              if p.stat().st_size>490*1024*1024: raise RuntimeError('Archive exceeds bound: '+folder)
+              (root/folder/'manifest.json').write_text(json.dumps({'source_commit':os.environ['GITHUB_SHA'],'flutter_revision':sha,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size,'font_files_excluded':True,'assets_partial':folder=='runtime','no_production_connection':True},indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-recovery-sdk-${{ github.sha }}
+          path: /tmp/bil-recovery/sdk
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-recovery-pub-${{ github.sha }}
+          path: /tmp/bil-recovery/pub
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-recovery-runtime-${{ github.sha }}
+          path: /tmp/bil-recovery/runtime
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
