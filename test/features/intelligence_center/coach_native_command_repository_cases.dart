@@ -435,4 +435,5 @@ void _nativeRepositoryCases() {
       );
     },
   );
+  _nativeOperationReadbackCases(() => store);
 }

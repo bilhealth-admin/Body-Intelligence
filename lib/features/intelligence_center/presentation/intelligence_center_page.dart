@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -95,6 +96,8 @@ part 'intelligence_meal_action_flow.dart';
 part 'intelligence_meal_owner.dart';
 part 'intelligence_native_owner.dart';
 part 'intelligence_native_action_flow.dart';
+part 'intelligence_native_recovery.dart';
+part 'intelligence_native_recovery_owner.dart';
 part 'intelligence_meal_recovery.dart';
 part 'intelligence_action_runtime.dart';
 part 'intelligence_action_confirmation.dart';
@@ -201,6 +204,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final preparedMealActions = <String, _PreparedCoachMealAction>{};
   final preparedNativeActions = <String, _PreparedCoachNativeAction>{};
   final recoveredMealOwners = <_CoachMealOwnerHandle>[];
+  final recoveredNativeOwners = <_RecoveredCoachNativeOwner>[];
   // Only the latest failed turn owns a retry affordance. The failure remains
   // part of the transcript, while the transient progress row is not rendered
   // as a second error surface.

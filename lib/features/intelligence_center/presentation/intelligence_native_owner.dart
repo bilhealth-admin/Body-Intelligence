@@ -159,5 +159,9 @@ extension _CoachNativePreparation on _IntelligenceCenterPageState {
       prepared.closeRoute(cancelConfirmedCommit: cancelConfirmedCommit);
     }
     preparedNativeActions.clear();
+    for (final owner in recoveredNativeOwners) {
+      owner.dispose();
+    }
+    recoveredNativeOwners.clear();
   }
 }

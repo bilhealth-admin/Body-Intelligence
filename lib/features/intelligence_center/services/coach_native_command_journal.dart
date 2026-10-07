@@ -125,11 +125,29 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
     String operationId,
     CoachNativeOwnerScope scope, {
     required bool replayed,
+  }) async => (await _operationReadback(
+    operationId,
+    scope,
+    replayed: replayed,
+    committed: true,
+  ))!;
+
+  Future<CoachNativeCommit?> _operationReadback(
+    String operationId,
+    CoachNativeOwnerScope scope, {
+    required bool replayed,
+    required bool committed,
   }) async {
     try {
+      scope.check(database.localOwnerId, committed: committed);
       final result = await database.transaction(() async {
-        final journal = await _readJournal(operationId, scope, committed: true);
+        final journal = await _readJournal(
+          operationId,
+          scope,
+          committed: committed,
+        );
         if (journal == null) {
+          if (!committed) return null;
           throw const CoachNativeConflict(
             CoachNativeConflictReason.invalidJournal,
           );
@@ -139,7 +157,7 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
           journal.command.resolved,
           scope,
           waterId: journal.after.water?.id,
-          committed: true,
+          committed: committed,
         );
         return CoachNativeCommit._(
           command: journal.command,
@@ -155,14 +173,14 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
           undoneAt: journal.undoneAt,
         );
       });
-      scope.check(database.localOwnerId, committed: true);
+      scope.check(database.localOwnerId, committed: committed);
       return result;
     } on CoachNativeConflict catch (error) {
-      throw CoachNativeConflict(error.reason, committed: true);
+      throw CoachNativeConflict(error.reason, committed: committed);
     } on Object {
-      throw const CoachNativeConflict(
+      throw CoachNativeConflict(
         CoachNativeConflictReason.readbackUnavailable,
-        committed: true,
+        committed: committed,
       );
     }
   }

@@ -1,0 +1,114 @@
+{
+  "scope": "Local native Undo recovery verification, not full CI, release or visual-fidelity clearance",
+  "base_commit": "32b225431b69bac5ce85e5e5de894e11d48fd031",
+  "repository": "bilhealth-admin/Body-Intelligence",
+  "branch": "qa/coach-community-next-20261005",
+  "new_cases": 39,
+  "focused_passes": 67,
+  "broader_passes": 229,
+  "test_counts_overlap": true,
+  "checks": {
+    "native-baseline": {
+      "exit_code": 0,
+      "log_sha256": "331609f083fca4fde056f3ca3d5297612dd899895a29a410531ae672ec5fba3f",
+      "metadata_note": "Original run saved log and exit code only; start time/source digest not recorded."
+    },
+    "native-recovery-red": {
+      "exit_code": 1,
+      "log_sha256": "b56bef5347bc7a908b85809b4d9fbe101988b69619c9d4ebf488d3da0d92809f",
+      "metadata_note": "Original run saved log and exit code only; start time/source digest not recorded."
+    },
+    "native-recovery-final": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--reporter",
+        "expanded",
+        "--concurrency",
+        "2",
+        "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+        "test/features/intelligence_center/coach_native_command_repository_test.dart",
+        "--timeout",
+        "40s"
+      ],
+      "started_at_utc": "2026-10-07T04:14:59.403625+00:00",
+      "finished_at_utc": "2026-10-07T04:18:17.662235+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "c35d3a0c9d74d7d58e1832d6fbd981b84541510e3b6d9b8760a4f554d6cfc7de",
+      "log_sha256": "96933f05f1e456179dec7c4c16dab6bf0848129ea2e7412101238f2406fa89aa",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence."
+    },
+    "native-recovery-broader": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--reporter",
+        "expanded",
+        "--concurrency",
+        "2",
+        "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+        "test/features/intelligence_center/coach_native_command_repository_test.dart",
+        "test/features/intelligence_center/coach_native_admission_behavior_test.dart",
+        "test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart",
+        "test/features/intelligence_center/coach_memory_owner_sync_test.dart",
+        "test/features/intelligence_center/coach_action_admission_contract_test.dart",
+        "test/features/intelligence_center/coach_action_permission_test.dart",
+        "test/features/intelligence_center/bil_action_receipt_test.dart",
+        "test/features/intelligence_center/intelligence_message_action_persistence_test.dart",
+        "test/features/intelligence_center/conversation_history_retention_test.dart",
+        "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+        "test/features/intelligence_center/coach_context_food_provider_test.dart",
+        "test/features/intelligence_center/coach_context_minimal_views_test.dart",
+        "test/architecture_source_file_size_guard_test.dart",
+        "test/localization/bil_25_locale_fallback_closure_test.dart",
+        "--timeout",
+        "45s"
+      ],
+      "started_at_utc": "2026-10-07T04:20:05.938330+00:00",
+      "finished_at_utc": "2026-10-07T04:21:02.588351+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "d8b1b576c56eacbee4df8fe46d2fb8295f3499fa507d5e435cd53b27ddca0b86",
+      "log_sha256": "ad06b547b3af220cf888b4794851cef9f5cbf14935a766c43742ae4525411569",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence."
+    },
+    "native-analyze-lib": {
+      "command": [
+        "dart",
+        "analyze",
+        "--fatal-infos",
+        "lib"
+      ],
+      "started_at_utc": "2026-10-07T04:20:05.941093+00:00",
+      "finished_at_utc": "2026-10-07T04:20:09.378896+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "d8b1b576c56eacbee4df8fe46d2fb8295f3499fa507d5e435cd53b27ddca0b86",
+      "log_sha256": "6b7a8871da280b2b7725a31509a42d0e66de8a6281e319414cfeb7d46b48d2ed",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence."
+    },
+    "native-analyze-tests": {
+      "command": [
+        "dart",
+        "analyze",
+        "--fatal-infos",
+        "test/features/intelligence_center"
+      ],
+      "started_at_utc": "2026-10-07T04:21:59.769859+00:00",
+      "finished_at_utc": "2026-10-07T04:22:01.602308+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "d8b1b576c56eacbee4df8fe46d2fb8295f3499fa507d5e435cd53b27ddca0b86",
+      "log_sha256": "a3b4fa058b9611b1f3520ff0b5b4dadfda01a885345b82ad89b9837cdbe8c2c0",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence."
+    }
+  },
+  "prohibited_actions_performed": false,
+  "local_assets_partial": true,
+  "full_ci_pending_at_document_creation": true
+}

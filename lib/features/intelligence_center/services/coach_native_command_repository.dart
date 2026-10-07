@@ -163,6 +163,15 @@ final class CoachNativeCommandRepository {
     return _commitReadback(command.operationId, scope, replayed: replayed);
   }
 
+  /// Read a persisted operation and its current rows atomically. This never
+  /// prepares, replays, commits, compensates, or repairs a serialized command.
+  /// An absent journal is not an error and grants no mutation authority.
+  Future<CoachNativeCommit?> readOperation({
+    required String operationId,
+    required CoachNativeOwnerScope scope,
+  }) =>
+      _operationReadback(operationId, scope, replayed: false, committed: false);
+
   Future<CoachNativeCommit> undo({
     required String operationId,
     required String toolId,

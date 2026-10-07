@@ -12,11 +12,14 @@ import 'package:body_intelligence_log/data/repositories/goal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
+import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_action_permission.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_memory_repository.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:drift/drift.dart' hide Column, isNull, isNotNull;
@@ -27,8 +30,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 part 'coach_native_command_behavior_cases.dart';
+part 'coach_native_command_recovery_cases.dart';
+part 'coach_native_recovery_lifecycle_cases.dart';
 
-void main() => _nativeCommandCases();
+void main() {
+  _nativeCommandCases();
+  _nativeRecoveryCases();
+  _nativeRecoveryLifecycleCases();
+}
 
 final _day = DateTime(2026, 10, 6);
 
@@ -46,53 +55,7 @@ Future<void> _withCoach(
   addTearDown(() => tester.binding.setSurfaceSize(null));
   if (seed != null) await seed(fixture);
   try {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          databaseProvider.overrideWithValue(fixture.database),
-          appSettingsServiceProvider.overrideWithValue(
-            AppSettingsService(store: _NativeSettings()),
-          ),
-          intelligenceCenterModelGatewayProvider.overrideWithValue(
-            fixture.gateway,
-          ),
-          coachActionPermissionModeProvider.overrideWith(
-            (ref) => CoachActionPermissionMode.askBeforeWrite,
-          ),
-          coachNativeOwnerWitnessProvider.overrideWithValue(
-            ownerId == null
-                ? null
-                : CoachNativeOwnerWitness(
-                    readOwner: () => fixture.owner,
-                    changes: fixture.owners.stream,
-                  ),
-          ),
-          coachContextSnapshotProvider.overrideWith(
-            (ref) async => CoachContextSnapshot.empty(),
-          ),
-          intelligenceHealthContextProvider.overrideWith(
-            (ref) async => const IntelligenceHealthContext(
-              primaryMessage: '',
-              explanation: [],
-              confidence: 1,
-              evidence: [],
-              missingData: [],
-            ),
-          ),
-        ],
-        child: const MaterialApp(
-          locale: Locale('en'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: IntelligenceCenterPage(),
-        ),
-      ),
-    );
+    await tester.pumpWidget(_nativeCoachApp(fixture));
     await tester.pumpAndSettle();
     await body(fixture);
   } finally {
@@ -101,6 +64,50 @@ Future<void> _withCoach(
     await tester.pump(Duration.zero);
   }
 }
+
+Widget _nativeCoachApp(_NativeFixture fixture) => ProviderScope(
+  overrides: [
+    databaseProvider.overrideWithValue(fixture.database),
+    if (fixture.recoveryPreferences case final preferences?)
+      preferencesRepositoryProvider.overrideWithValue(preferences),
+    appSettingsServiceProvider.overrideWithValue(fixture.settings),
+    intelligenceCenterModelGatewayProvider.overrideWithValue(fixture.gateway),
+    coachActionPermissionModeProvider.overrideWith(
+      (ref) => CoachActionPermissionMode.askBeforeWrite,
+    ),
+    coachNativeOwnerWitnessProvider.overrideWithValue(
+      fixture.database.localOwnerId == null
+          ? null
+          : CoachNativeOwnerWitness(
+              readOwner: () => fixture.owner,
+              changes: fixture.owners.stream,
+            ),
+    ),
+    coachContextSnapshotProvider.overrideWith(
+      (ref) async => CoachContextSnapshot.empty(),
+    ),
+    intelligenceHealthContextProvider.overrideWith(
+      (ref) async => const IntelligenceHealthContext(
+        primaryMessage: '',
+        explanation: [],
+        confidence: 1,
+        evidence: [],
+        missingData: [],
+      ),
+    ),
+  ],
+  child: const MaterialApp(
+    locale: Locale('en'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: IntelligenceCenterPage(),
+  ),
+);
 
 Map<String, Object?> _tool(String name, Map<String, Object?> arguments) => {
   'name': name,
@@ -172,8 +179,10 @@ class _NativeFixture {
 
   final AppDatabase database;
   final _NativeGateway gateway;
+  final settings = AppSettingsService(store: _NativeSettings());
   final owners = StreamController<String?>.broadcast(sync: true);
   String? owner;
+  PreferencesRepository? recoveryPreferences;
 
   Future<void> seedProfile({double target = 82, double? waist}) =>
       UserProfileRepository(database).save(

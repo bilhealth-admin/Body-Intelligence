@@ -176,6 +176,8 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
       _scrollToLatest(jump: true);
       await _restoreCoachMealUndoOperations(restored);
       if (!loadIsCurrent()) return;
+      await _restoreCoachNativeUndoOperations(restored);
+      if (!loadIsCurrent()) return;
       // Keep the fingerprint for diagnostics/migrations, but never rewrite the
       // transcript merely because the current health context changed.
       if (contextFingerprintChanged ||

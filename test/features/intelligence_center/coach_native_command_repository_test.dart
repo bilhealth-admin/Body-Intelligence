@@ -14,6 +14,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 part 'coach_native_command_repository_cases.dart';
+part 'coach_native_operation_readback_cases.dart';
 
 final _nativeNow = DateTime(2026, 10, 6, 14, 35, 20, 987, 456);
 const _memory = <String, Object?>{
