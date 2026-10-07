@@ -67,5 +67,72 @@
     "reference_images_changed": false,
     "assertions_removed": false
   },
-  "visual_fidelity_verified": false
+  "visual_fidelity_verified": false,
+  "later_observed_checkpoint": {
+    "sha": "4669368702751054f502fd9be321b29c59732b92",
+    "general_run": 37550211630,
+    "general_job": 112563616095,
+    "focused_passes": 144,
+    "focused_failures": 7,
+    "focused_duration_seconds": 25,
+    "stream_warmup_assertions_passed": true,
+    "provider_nutrition_assertions_reached": false,
+    "remaining_provider_failure": "Undeclared scoped dependency connectedHealthProvider at coach_context_provider.dart:48",
+    "moderation_cases_passed": 8,
+    "analyze_issues": 0,
+    "formatter_files": 1,
+    "formatter_hunks": 2,
+    "architecture_passes": 1,
+    "performance_passes": 2,
+    "r5": {
+      "run_id": 37550211417,
+      "job_id": 112563615099,
+      "focused_passes": 276,
+      "capture_passes": 4,
+      "analyze_issues": 0,
+      "conclusion": "failure: moderation test formatting only",
+      "regression": "skipped"
+    },
+    "native": {
+      "run_id": 37550211316,
+      "job_id": 112563615181,
+      "passes": 199,
+      "analyze_issues": 0,
+      "conclusion": "success"
+    },
+    "artifacts": [
+      {
+        "artifact_id": 11452017996,
+        "name": "general",
+        "sha256": "1456b290b40e41dde2743a646521f7755a302eb8bf2a794d0610b85c13f1e997",
+        "bytes": 12904
+      },
+      {
+        "artifact_id": 11452766249,
+        "name": "r5",
+        "sha256": "4fd2d3dc8e889f339789d833739a25a90f22a4e511da0c4cda78973635c5b8d7",
+        "bytes": 20401153
+      },
+      {
+        "artifact_id": 11452367813,
+        "name": "native",
+        "sha256": "e056f28149d8958d387fae8da42600727dd4fe9b4ab53c954d6a33a5b726dc1b",
+        "bytes": 29332921
+      }
+    ]
+  },
+  "scope_metadata_repair": {
+    "provider": "coachContextSnapshotProvider",
+    "dependencies_added": [
+      "connectedHealthProvider"
+    ],
+    "direct_providers_audited": 17,
+    "downstream_core_ref_consumer_found": false,
+    "downstream_audit_scope": "99 intelligence_center Dart files and 31 dependency sources; WidgetRef consumers",
+    "application_algorithms_changed": false,
+    "provider_tests_unchanged": true,
+    "r5_trigger_added": "test/features/community/community_post_moderation_test.dart",
+    "r5_focused_file_added": "test/features/community/community_post_moderation_test.dart",
+    "execution": "pending"
+  }
 }

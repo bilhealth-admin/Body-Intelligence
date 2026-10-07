@@ -14,6 +14,7 @@ on:
       - lib/app/router/app_router.dart
       - test/features/community/community_entry*
       - test/features/community/community_composer_auth_session_test.dart
+      - test/features/community/community_post_moderation_test.dart
       - test/features/community/community_publish_operation*
       - test/features/community/community_owner_refresh_transport_test.dart
       - test/features/community/community_unicode_body_boundary_test.dart
@@ -125,6 +126,7 @@ jobs:
             test/features/community/community_entry_auth_session_test.dart \
             test/features/community/community_entry_route_contract_test.dart \
             test/features/community/community_composer_auth_session_test.dart \
+            test/features/community/community_post_moderation_test.dart \
             test/features/community/community_publish_operation_test.dart \
             test/features/community/community_owner_refresh_transport_test.dart \
             test/features/profile/profile_photo_entry_owner_test.dart \

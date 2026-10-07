@@ -1,5 +1,36 @@
 # إصلاح انتظار Coach وتحديث الإشراف — QA، 2026-10-07
 
+## نتيجة 4669368 وتصحيح نطاق provider
+
+[run37550211630](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37550211630)
+على `4669368702751054f502fd9be321b29c59732b92` انتهى خلال25ثانية اختبار:
+**144PASS /7FAIL**. انتهى انتظار أول نتائج Drift؛ assertions `null` و`empty`
+اجتازت، ووصلت الحالات السبعة إلى provider الحقيقي. السبب المتبقي هو عدم تصريح
+`coachContextSnapshotProvider` باعتماده ذي النطاق `connectedHealthProvider`؛
+أبلغ Riverpod عن ذلك عند `ref.watch` في السطر48 قبل assertions التغذية.
+
+يضيف تصحيح المصدر `dependencies: [connectedHealthProvider]` إلى تعريف
+Coach provider نفسه. راجعت مصادر الاعتمادات المباشرة السبعة عشر؛ هذا هو الاعتماد
+الوحيد الذي يعلن scope metadata. وراجعت قراءات Coach المنشورة: المستهلكون
+WidgetRef داخل ConsumerState، ولا core provider downstream يحتاج تصريحًا إضافيًا
+ضمن الملفات المقروءة. لا تتغير overrides أو assertions أو خوارزمية التغذية.
+[عقد Riverpod3.3.2](https://github.com/rrousselGit/riverpod/blob/riverpod-v3.3.2/packages/riverpod/lib/src/core/ref.dart#L134)
+هو مرجع التصريح، ونتيجة التصحيح التنفيذي التالية ما زالت pending.
+
+**Moderation8/8PASS** على466: الخمس الأصلية والثلاث الجديدة. الخطأ الذي تصححه
+callbacks هو مخالفة عقد Flutter setState، والتي يكتشفها فحص Flutter في debug؛
+اختبارات remove/hide تؤكد غياب رسالة الفشل الكاذبة في هذا المسار.
+بقي اقتراح Dart من hunkين في ملف الاختبار فقط، ويُطبّق حرفيًا دون تغيير assertions.
+
+[R5 run37550211417](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37550211417):
+276focusedPASS و4capturePASS وanalyze0، مع failure بسبب تنسيق ملف moderation
+وحده؛ regression التابعة skipped. أضيف ملف الاختبار إلى trigger وfocused R5
+حتى يُفحص تغيير الاختبار نفسه في هذا المسار، مع بقاء كل الملفات والمهل الأصلية.
+
+[Native run37550211316](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37550211316)
+انتهىSUCCESS:199PASS وanalyze0 والمصدر دون تغيير. هذه Flutter host captures،
+ولم تُفحص PNG بصريًا أثناء الانقطاع؛ لا يُستنتج منها تطابق المرجع أو صلاحية إصدار متجر.
+
 ## الحالة التي أدت إلى هذه الدفعة
 
 المصدر السابق هو `dde861ba2a266b79f9c04a5ebcc86ca3c7958820`.

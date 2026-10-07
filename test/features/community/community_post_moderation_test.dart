@@ -167,9 +167,7 @@ final class _ModerationRefreshRepository extends _ModerationRepository {
   }
 
   @override
-  Future<List<CommunityPost>> loadPendingPostsForModeration({
-    int limit = 100,
-  }) {
+  Future<List<CommunityPost>> loadPendingPostsForModeration({int limit = 100}) {
     queueLoads++;
     return queueReadback?.future ??
         super.loadPendingPostsForModeration(limit: limit);
@@ -241,10 +239,9 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 300));
 
-          expect(
-            repository.mutations,
-            [(action, _ModerationRepository.postId, 'spam')],
-          );
+          expect(repository.mutations, [
+            (action, _ModerationRepository.postId, 'spam'),
+          ]);
           expect(repository.feedLoads, 2);
 
           readback.complete([repository.nextFeedPost]);

@@ -694,4 +694,4 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
               )
               .toList(growable: false),
   );
-});
+}, dependencies: [connectedHealthProvider]);
