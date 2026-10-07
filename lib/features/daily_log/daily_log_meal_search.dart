@@ -133,7 +133,6 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     required SearchController controller,
     required String languageCode,
   }) {
-    final accent = Theme.of(context).colorScheme.primary;
     final displayName = _displayFoodName(food, languageCode);
     final servingSize = intl.NumberFormat.decimalPattern(
       languageCode,
@@ -151,195 +150,122 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       food.nutrientEvidenceMask,
       TrackedNutrient.calories,
     );
+    final nameDirection = intl.Bidi.detectRtlDirectionality(displayName)
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+    final scheme = Theme.of(context).colorScheme;
     final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
-    if (largeText) {
-      return Card(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceContainerLowest,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => _selectFood(food, controller, displayName),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      key: food.verified
-                          ? const Key('daily-search-verified-food-badge')
-                          : null,
-                      radius: 18,
-                      backgroundColor: food.verified
-                          ? const Color(0xFFE2F8EC)
-                          : accent.withValues(alpha: 0.10),
-                      child: Icon(
-                        food.verified
-                            ? Icons.verified_rounded
-                            : food.isCustom
-                            ? Icons.person_rounded
-                            : Icons.shield_outlined,
-                        color: food.verified ? const Color(0xFF087A43) : accent,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            displayName,
-                            textDirection:
-                                intl.Bidi.detectRtlDirectionality(displayName)
-                                ? TextDirection.rtl
-                                : TextDirection.ltr,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (caloriesKnown || servingText != null)
-                            Text(
-                              '${caloriesKnown ? '${food.calories.round()} $caloriesUnit' : ''}'
-                              '${caloriesKnown && servingText != null ? ' · ' : ''}'
-                              '${servingText ?? ''}',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                FilledButton.tonal(
-                  key: const Key('daily-search-add-food-action'),
-                  onPressed: () => _selectFood(food, controller, displayName),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.add_rounded, size: 19),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _mealCopy('add'),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerLowest,
-      child: ListTile(
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(14, 8, 8, 8),
-        leading: CircleAvatar(
-          key: food.verified
-              ? const Key('daily-search-verified-food-badge')
-              : null,
-          radius: 18,
-          backgroundColor: food.verified
-              ? const Color(0xFFE2F8EC)
-              : accent.withValues(alpha: 0.10),
-          child: Icon(
-            food.verified
-                ? Icons.verified_rounded
-                : food.isCustom
-                ? Icons.person_rounded
-                : Icons.shield_outlined,
-            color: food.verified ? const Color(0xFF087A43) : accent,
-          ),
-        ),
-        title: Text(
-          displayName,
-          textDirection: intl.Bidi.detectRtlDirectionality(displayName)
-              ? TextDirection.rtl
-              : TextDirection.ltr,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+
+    Widget foodIdentity() => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          textDirection: nameDirection,
           children: [
-            if (caloriesKnown || servingText != null)
-              Row(
-                children: [
-                  if (caloriesKnown) ...[
-                    Text(
-                      food.calories.round().toString(),
-                      textDirection: TextDirection.ltr,
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    const SizedBox(width: 3),
-                    Text(caloriesUnit, style: const TextStyle(fontSize: 13)),
-                  ],
-                  if (caloriesKnown && servingText != null)
-                    const Text(' · ', style: TextStyle(fontSize: 13)),
-                  if (servingText != null)
-                    Flexible(
-                      child: Text(
-                        servingText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textDirection: TextDirection.ltr,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ),
-                ],
+            Flexible(
+              child: Text(
+                displayName,
+                textDirection: nameDirection,
+                maxLines: largeText ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            if (largeText) ...[
-              const SizedBox(height: 8),
-              FilledButton.tonal(
-                style: FilledButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                ),
-                onPressed: () => _selectFood(food, controller, displayName),
-                child: Row(
-                  children: [
-                    const Icon(Icons.add_rounded, size: 19),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Text(
-                        _mealCopy('add'),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            if (food.verified) ...[
+              const SizedBox(width: 7),
+              const Icon(
+                Icons.verified_rounded,
+                key: Key('daily-search-verified-food-badge'),
+                size: 19,
+                color: Color(0xFF56C878),
               ),
             ],
           ],
         ),
-        trailing: largeText
-            ? null
-            : FilledButton.tonalIcon(
-                key: const Key('daily-search-add-food-action'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsetsDirectional.fromSTEB(8, 6, 9, 6),
-                  visualDensity: VisualDensity.compact,
-                ),
-                onPressed: () => _selectFood(food, controller, displayName),
-                icon: const Icon(Icons.add_rounded, size: 19),
-                label: Text(_mealCopy('add')),
-              ),
+        if (caloriesKnown || servingText != null) ...[
+          const SizedBox(height: 3),
+          Text(
+            '${caloriesKnown ? '${food.calories.round()} $caloriesUnit' : ''}'
+            '${caloriesKnown && servingText != null ? ' · ' : ''}'
+            '${servingText ?? ''}',
+            maxLines: largeText ? 2 : 1,
+            overflow: TextOverflow.ellipsis,
+            textDirection: nameDirection,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 14,
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ],
+    );
+
+    final addControl = Semantics(
+      key: const Key('daily-search-add-food-action'),
+      button: true,
+      label: _mealCopy('add'),
+      child: Material(
+        color: scheme.surfaceContainerLow,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () => _selectFood(food, controller, displayName),
+          child: SizedBox.square(
+            dimension: largeText ? 58 : 54,
+            child: Icon(
+              Icons.add_rounded,
+              size: largeText ? 32 : 30,
+              color: scheme.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      elevation: 0,
+      color: scheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: () => _selectFood(food, controller, displayName),
+        child: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+            18,
+            largeText ? 14 : 11,
+            12,
+            largeText ? 14 : 11,
+          ),
+          child: largeText
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    foodIdentity(),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: addControl,
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: foodIdentity()),
+                    const SizedBox(width: 12),
+                    addControl,
+                  ],
+                ),
+        ),
       ),
     );
   }

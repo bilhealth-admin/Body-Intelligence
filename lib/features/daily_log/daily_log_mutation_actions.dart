@@ -14,10 +14,16 @@ extension _DailyLogMutationActions on _DailyLogPageState {
     final exerciseNotesView = DailyExerciseNotesCodec.decode(
       existing?.exerciseNotes,
     );
+    final composedExerciseNotes = exerciseNotesView.compose(
+      manualText: exerciseNotes.text,
+    );
     await repository.save(
       date: date,
       notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-      exerciseNotes: exerciseNotesView.compose(manualText: exerciseNotes.text),
+      exerciseNotes: exerciseNotes.text.trim().isEmpty &&
+              exerciseNotesView.preservedStructuredLines.isEmpty
+          ? null
+          : composedExerciseNotes,
     );
     ref.invalidate(selectedDailyLedgerProvider);
     if (!mounted) return;
