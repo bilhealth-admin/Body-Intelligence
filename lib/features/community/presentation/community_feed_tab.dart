@@ -341,14 +341,22 @@ class _FeedTabState extends State<_FeedTab>
           reason: moderationReason!,
         );
         final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
-        if (mounted) setState(() => _feed = refreshedFeed);
+        if (mounted) {
+          setState(() {
+            _feed = refreshedFeed;
+          });
+        }
       } else if (action == 'moderate_hide') {
         await widget.repository.hidePublishedPostAsModerator(
           postId: post.id,
           reason: moderationReason!,
         );
         final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
-        if (mounted) setState(() => _feed = refreshedFeed);
+        if (mounted) {
+          setState(() {
+            _feed = refreshedFeed;
+          });
+        }
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

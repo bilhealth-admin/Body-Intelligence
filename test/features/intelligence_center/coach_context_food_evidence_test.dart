@@ -129,10 +129,12 @@ void main() {
     ]).single;
     expect(_totals(day), {for (final key in _contextKeys) key: 0.0});
     expect(day.knownCalories, 0);
-    expect(
-      _context([day]).nutritionRemainingFor(DateTime(2026, 10, 6)),
-      {'caloriesKcal': 2000, 'proteinG': 150, 'carbsG': 200, 'fatG': 70},
-    );
+    expect(_context([day]).nutritionRemainingFor(DateTime(2026, 10, 6)), {
+      'caloriesKcal': 2000,
+      'proteinG': 150,
+      'carbsG': 200,
+      'fatG': 70,
+    });
     expect(_energy(day).remainingCalories, 2000);
   });
 
@@ -147,10 +149,7 @@ void main() {
         ]).single;
         expect(day.knownTotals, isEmpty);
         expect(_totals(day), isEmpty);
-        expect(_item(day), {
-          'itemId': row.id,
-          'food': 'historical-food',
-        });
+        expect(_item(day), {'itemId': row.id, 'food': 'historical-food'});
         expect(day.knownCalories, isNull);
         expect(_energy(day).remainingCalories, isNull);
         expect(
@@ -193,11 +192,7 @@ void main() {
     expect(_item(right)['food'], 'Cooked food');
     for (final owner in <String?>['owner-b', null]) {
       final wrong = assembleCoachNutritionDays([
-        _meal(
-          [row],
-          ownerKey: owner,
-          foods: {row.foodId: basisFood()},
-        ),
+        _meal([row], ownerKey: owner, foods: {row.foodId: basisFood()}),
       ]).single;
       expect(_totals(wrong), isEmpty);
       expect(_item(wrong)['food'], 'historical-food');
@@ -288,9 +283,9 @@ void main() {
     ]).single;
     expect(day.day, '2026-10-06');
     expect(
-      _context([day]).nutritionRemainingFor(DateTime(2026, 10, 6))![
-        'caloriesKcal'
-      ],
+      _context([
+        day,
+      ]).nutritionRemainingFor(DateTime(2026, 10, 6))!['caloriesKcal'],
       1877,
     );
   });

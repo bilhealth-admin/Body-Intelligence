@@ -130,7 +130,9 @@ List<CoachNutritionDay> assembleCoachNutritionDays(List<MealWithItems> meals) {
         final ownerAvailable = meal.ownerKey != null || !evidence.isModern;
         final values = <String, double?>{
           for (final nutrient in nutrients.entries)
-            nutrient.key: ownerAvailable ? evidence.value(nutrient.value) : null,
+            nutrient.key: ownerAvailable
+                ? evidence.value(nutrient.value)
+                : null,
         };
         for (final nutrient in values.entries) {
           final previous = totals[nutrient.key];
@@ -141,7 +143,8 @@ List<CoachNutritionDay> assembleCoachNutritionDays(List<MealWithItems> meals) {
           totals[nutrient.key] = sum != null && sum.isFinite ? sum : null;
         }
         final quickAdd = item.foodSourceSnapshot == 'quick_add';
-        final foodName = (ownerAvailable ? portion?.food.name : null) ??
+        final foodName =
+            (ownerAvailable ? portion?.food.name : null) ??
             (evidence.isModern ? null : meal.foodsById[item.foodId]?.name);
         items.add({
           'itemId': item.id,

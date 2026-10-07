@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
@@ -108,7 +111,231 @@ final class _OwnerFeedRepository extends CommunityRepository {
   Future<List<Map<String, dynamic>>> loadMyFoodSubmissions() async => const [];
 }
 
+final class _ModerationRefreshRepository extends _ModerationRepository {
+  static const nextPostId = '55555555-5555-4555-8555-555555555555';
+
+  int feedLoads = 0;
+  int queueLoads = 0;
+  final mutations = <(String, String, String)>[];
+  Completer<List<CommunityPost>>? feedReadback;
+  Completer<List<CommunityPost>>? queueReadback;
+
+  CommunityPost get initialFeedPost => CommunityPost(
+    id: _ModerationRepository.postId,
+    authorId: _ModerationRepository.authorId,
+    authorName: 'Another member',
+    body: 'Original published post',
+    createdAt: DateTime.utc(2026, 9, 4),
+    moderationStatus: CommunityPostModerationStatus.approved,
+  );
+
+  CommunityPost get nextFeedPost => CommunityPost(
+    id: nextPostId,
+    authorId: _ModerationRepository.authorId,
+    authorName: 'Another member',
+    body: 'Next server post',
+    createdAt: DateTime.utc(2026, 9, 3),
+    moderationStatus: CommunityPostModerationStatus.approved,
+  );
+
+  @override
+  Future<bool> isCommunityModerator() async => true;
+
+  @override
+  Future<CommunityProfileOverview?> loadMyProfileOverview() async => null;
+
+  @override
+  Future<List<CommunityTopic>> loadCommunityTopics() async => const [];
+
+  @override
+  Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async =>
+      const [];
+
+  @override
+  Future<List<Map<String, dynamic>>> loadMyFoodSubmissions() async => const [];
+
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async => const CommunityPolicyState.unavailable();
+
+  @override
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) {
+    feedLoads++;
+    return feedReadback?.future ??
+        Future<List<CommunityPost>>.value([initialFeedPost]);
+  }
+
+  @override
+  Future<List<CommunityPost>> loadPendingPostsForModeration({
+    int limit = 100,
+  }) {
+    queueLoads++;
+    return queueReadback?.future ??
+        super.loadPendingPostsForModeration(limit: limit);
+  }
+
+  @override
+  Future<void> removePublishedPostAsModerator({
+    required String postId,
+    required String reason,
+  }) async {
+    mutations.add(('remove', postId, reason));
+  }
+
+  @override
+  Future<void> hidePublishedPostAsModerator({
+    required String postId,
+    required String reason,
+  }) async {
+    mutations.add(('hide', postId, reason));
+  }
+}
+
 void main() {
+  group('moderation refresh rebuilds from the new readback', () {
+    late _ModerationRefreshRepository repository;
+
+    // Supabase JSON/process lifecycle belongs to the real runner zone.
+    setUp(() {
+      repository = _ModerationRefreshRepository();
+    });
+
+    tearDown(() async {
+      await repository.communitySocialClient.dispose();
+    });
+
+    for (final action in ['remove', 'hide']) {
+      testWidgets('feed $action succeeds and renders its refreshed result', (
+        tester,
+      ) async {
+        final readback = Completer<List<CommunityPost>>();
+        try {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: CommunityHubPage(
+                repository: repository,
+                entryWelcomeHandled: true,
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(repository.feedLoads, 1);
+
+          repository.feedReadback = readback;
+          final actions = find.byKey(
+            const Key(
+              'community-post-actions-33333333-3333-4333-8333-333333333333',
+            ),
+          );
+          await tapCommunityControl(tester, actions);
+          await tester.pumpAndSettle();
+
+          await tester.tap(
+            find.text(action == 'remove' ? 'Remove post' : 'Hide post'),
+          );
+          await tester.pumpAndSettle();
+          expect(repository.mutations, isEmpty);
+
+          await tester.tap(find.widgetWithText(SimpleDialogOption, 'spam'));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+
+          expect(
+            repository.mutations,
+            [(action, _ModerationRepository.postId, 'spam')],
+          );
+          expect(repository.feedLoads, 2);
+
+          readback.complete([repository.nextFeedPost]);
+          await tester.pumpAndSettle();
+
+          await revealCommunityControl(
+            tester,
+            find.byKey(
+              const Key(
+                'community-post-actions-55555555-5555-4555-8555-555555555555',
+              ),
+            ),
+          );
+          expect(find.text('Next server post'), findsOneWidget);
+          expect(actions, findsNothing);
+          expect(repository.feedLoads, 2);
+          expect(repository.mutations, hasLength(1));
+          // Feed catches the framework error. No uncaught exception alone
+          // would miss the false failure message after a successful mutation.
+          expect(
+            find.text(
+              action == 'remove'
+                  ? 'Post removed by moderation.'
+                  : 'Post hidden by moderation.',
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.text('Could not complete that action safely. Try again.'),
+            findsNothing,
+          );
+          expect(tester.takeException(), isNull);
+        } finally {
+          if (!readback.isCompleted) {
+            readback.complete(const []);
+          }
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+        }
+      });
+    }
+
+    testWidgets('queue refresh renders the completed replacement future', (
+      tester,
+    ) async {
+      final readback = Completer<List<CommunityPost>>();
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: CommunityPostModerationPage(repository: repository),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(repository.queueLoads, 1);
+        expect(
+          find.text('A post that requires a human decision'),
+          findsOneWidget,
+        );
+
+        repository.queueReadback = readback;
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byIcon(Icons.refresh_rounded),
+          ),
+        );
+        await tester.pump();
+        expect(repository.queueLoads, 2);
+
+        readback.complete(const []);
+        await tester.pumpAndSettle();
+
+        expect(repository.queueLoads, 2);
+        expect(repository.moderationCalls, 0);
+        expect(
+          find.text('A post that requires a human decision'),
+          findsNothing,
+        );
+        expect(find.text('The moderation queue is clear.'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        if (!readback.isCompleted) {
+          readback.complete(const []);
+        }
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    });
+  });
+
   test('migration makes post review private, atomic, and idempotent', () {
     final sql = File(
       'supabase/migrations/20260904030000_community_post_human_moderation.sql',

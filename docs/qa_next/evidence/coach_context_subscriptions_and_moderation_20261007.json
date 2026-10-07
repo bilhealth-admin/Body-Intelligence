@@ -1,0 +1,71 @@
+{
+  "schema": "bil.qa.coach-context-subscription-and-moderation.v1",
+  "recorded_at": "2026-10-07",
+  "authorized_branch": "qa/coach-community-next-20261005",
+  "parent_sha": "dde861ba2a266b79f9c04a5ebcc86ca3c7958820",
+  "last_full_green": {
+    "sha": "7046710f8625aa1b2b9915cc6beff4011c37fefa",
+    "run_id": 37545878945,
+    "regression_passes": 6985,
+    "regression_failures": 0,
+    "files": 1136
+  },
+  "failing_run": {
+    "run_id": 37547980744,
+    "job_id": 112556495245,
+    "focused_passes": 136,
+    "focused_failures": 7,
+    "analyze_issues": 0,
+    "architecture_passes": 1,
+    "performance_passes": 2,
+    "passed_food_evidence": 23,
+    "passed_food_storage": 4,
+    "provider_nutrition_assertions_reached": false,
+    "artifact": {
+      "id": 11452282492,
+      "bytes": 14628,
+      "sha256": "b63bd679597d86cd77b258fb43891ffc43fc12f1a75b7489c779aefc0349bc85"
+    }
+  },
+  "cause": {
+    "package": "riverpod",
+    "locked_version": "3.3.2",
+    "upstream_tag": "riverpod-v3.3.2",
+    "symptom": "latestDailyLogProvider remained loading until teardown",
+    "mechanism": "ProviderContainer.read closes temporary listener; onCancel pauses underlying StreamSubscription before first emission"
+  },
+  "repair": {
+    "strong_test_listeners": [
+      "latestDailyLogProvider",
+      "insightLifeContextProvider"
+    ],
+    "original_provider_assertions": 32,
+    "current_provider_assertions": 34,
+    "provider_test_cases": 7,
+    "formatter_proposal_files": 4,
+    "community_void_callbacks": 3,
+    "new_community_widget_cases": 3,
+    "original_community_assertions_preserved": true,
+    "source_test_overrides_added": 0
+  },
+  "execution": {
+    "format": "pending",
+    "analyze": "pending",
+    "focused": "pending",
+    "regression": "pending",
+    "isolated_sql": "pending",
+    "flutter_capture": "pending",
+    "local_execution": "environment_offline"
+  },
+  "protected": {
+    "main": false,
+    "store_build": false,
+    "build_numbers_changed": false,
+    "production_writes": false,
+    "billing_or_trial_changes": false,
+    "paid_resources": false,
+    "reference_images_changed": false,
+    "assertions_removed": false
+  },
+  "visual_fidelity_verified": false
+}

@@ -80,6 +80,7 @@ jobs:
             test/features/community/community_activity_pagination_test.dart \
             test/features/community/community_notification_resilience_test.dart \
             test/features/community/community_visible_read_receipts_test.dart \
+            test/features/community/community_post_moderation_test.dart \
             test/features/community/community_deep_link_test.dart \
             test/features/community/community_publish_operation_test.dart \
             test/features/community/community_publish_preflight_test.dart \

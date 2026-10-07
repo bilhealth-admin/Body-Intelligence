@@ -124,7 +124,9 @@ class _CommunityPostModerationPageState
 
   Future<void> _refresh() async {
     final refreshed = _load();
-    setState(() => _queue = refreshed);
+    setState(() {
+      _queue = refreshed;
+    });
     await refreshed;
   }
 

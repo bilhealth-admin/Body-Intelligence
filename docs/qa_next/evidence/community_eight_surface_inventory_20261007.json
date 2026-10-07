@@ -1,0 +1,109 @@
+{
+  "source_sha": "7046710f8625aa1b2b9915cc6beff4011c37fefa",
+  "application_sha": "6f4ccc1374d643678bee02db39951cab14c573a4",
+  "evidence": "source audit; published lib/ identical at these two commits",
+  "surfaces": [
+    {
+      "surface": "Home / Explore",
+      "paths": [
+        "community_hub_page.dart",
+        "community_feed_tab.dart",
+        "community_feed_mode_control.dart",
+        "community_feed_reference_header.dart"
+      ],
+      "connected": "Feed modes, pagination, Composer, photos/poll, profile/Saved/friends/topics/circles, shared bottom bar",
+      "gaps": "Permanent owner visit for Home/menu is incomplete; two moderator feed setState callbacks return Futures."
+    },
+    {
+      "surface": "Notifications / Activity",
+      "paths": [
+        "community_notifications_page.dart",
+        "community_notifications_rendering.dart",
+        "community_notification_read_receipts.dart",
+        "community_visible_activity_scope.dart"
+      ],
+      "connected": "Pagination and filters, foreground uncovered visibility dwell600ms/batch16ms, authoritative readback and badges, owner cancellation and partial acknowledgement",
+      "gaps": "Approvals filter does not read author post-event receipts; rewardEarned currently routes to Gold rewards."
+    },
+    {
+      "surface": "Composer",
+      "paths": [
+        "community_post_composer_page.dart",
+        "community_post_composer_reference_sections.dart",
+        "community_post_composer_reference_actions.dart",
+        "community_post_composer_owner_scope.dart"
+      ],
+      "connected": "1200 code points without clipping, four images, poll, optional title/location/circle/mentions/tags, save/retry/draft restore, profile/code/policy preflight and owner cancellation",
+      "gaps": "Earn-to-Composer reward explanation bridge is not published; visual fidelity remains to verify."
+    },
+    {
+      "surface": "Profile",
+      "paths": [
+        "community_member_profile_page.dart",
+        "community_member_profile_header.dart",
+        "community_member_profile_content.dart",
+        "community_member_profile_owner_scope.dart"
+      ],
+      "connected": "Cover/photo and saved privacy, follow/relationships/counts, creator badges, publish-state filters, list/grid, distinct Posts/Drafts/Saved/Stats, owner/target/repository guards",
+      "gaps": "Only Moments/Reviews content tabs are wired; distinct Replies/Media/Likes reference surfaces missing."
+    },
+    {
+      "surface": "Drafts",
+      "paths": [
+        "community_member_profile_drafts.dart",
+        "community_drafts_rendering.dart",
+        "../data/community_repository_composer_persistence_mixin.dart"
+      ],
+      "connected": "Independent auth-only route, paged20 updatedAt/id, full editor restore, select/delete, four image previews with bounded cache and revision/owner checks",
+      "gaps": "No new proven functional gap in this audit; displayed paginated count is explicitly a lower bound."
+    },
+    {
+      "surface": "Circles",
+      "paths": [
+        "community_circles_page.dart",
+        "community_circle_discovery_header.dart",
+        "community_circle_reference_body.dart",
+        "community_circle_detail_page.dart",
+        "community_circle_owner_scope.dart"
+      ],
+      "connected": "Discover/My circles, explicitly loaded-result search, join/request/cancel/leave/readback, details/posts/paging/views/Composer, permanent owner/repository/circle visit cancellation",
+      "gaps": "Create/Invites/reference circle image surface missing; no server search in this client."
+    },
+    {
+      "surface": "Community Chat",
+      "paths": [
+        "community_messages_page.dart",
+        "new_community_message_page.dart",
+        "community_chat_page.dart",
+        "community_chat_owner_scope.dart"
+      ],
+      "connected": "Direct Inbox/Sent/new message/chat, explicit send/policy, 2000 code points without clipping, draft/retry/older pagination, peer/repository/ABA and authoritative read-ID intersection",
+      "gaps": "Public community channels/directory/presence/online count from reference are not wired."
+    },
+    {
+      "surface": "Moderation / Earn",
+      "paths": [
+        "community_post_moderation_page.dart",
+        "community_rewards_page.dart",
+        "../data/community_repository_profile_moderation_mixin.dart"
+      ],
+      "connected": "Pending/hidden/reports, approve/reject/restore/resolve RPC and duplicate/tokensGranted; published rewards are Gold quests/history",
+      "gaps": "Typed AI earn/post-event receipt bridge absent; queue setState returns Future; permanent moderation owner visit missing; approval copy promises5 unconditionally; pending card shows first image only and no poll."
+    }
+  ],
+  "wip": {
+    "home_activity": "19-pass checkpoint precedes later mixin refactor; current bytes unverified",
+    "moderation_earn": "52 PASS and analyze0 before later localization/composer bridge additions; final capture/execution unverified"
+  },
+  "reference_parity": false,
+  "audited_at": "2026-10-06",
+  "later_coach_only_sha": "dde861ba2a266b79f9c04a5ebcc86ca3c7958820",
+  "baseline": {
+    "sha": "7046710f8625aa1b2b9915cc6beff4011c37fefa",
+    "run_id": 37545878945,
+    "regression_passes": 6985,
+    "regression_failures": 0,
+    "files": 1136,
+    "visual_fidelity_verified": false
+  }
+}

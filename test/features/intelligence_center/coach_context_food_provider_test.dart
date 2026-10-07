@@ -116,11 +116,13 @@ Future<void> _seed(
           mealId: mealId,
           foodId: itemId,
         );
-        await database.into(database.foods).insert(
-          basisFood()
-              .copyWith(id: itemId, uuid: 'provider-food-$itemId')
-              .toCompanion(true),
-        );
+        await database
+            .into(database.foods)
+            .insert(
+              basisFood()
+                  .copyWith(id: itemId, uuid: 'provider-food-$itemId')
+                  .toCompanion(true),
+            );
         await database.into(database.mealItems).insert(item.toCompanion(true));
       }
     }
@@ -156,15 +158,14 @@ void main() {
         exerciseCaloriesIncludedPreferenceKey: 'true',
         exerciseMacrosAdjustedPreferenceKey: 'false',
         CoachContextPreferences.storageKey: const CoachContextPreferences(
-          focuses: {
-            CoachContextFocus.nutrition,
-            CoachContextFocus.training,
-          },
+          focuses: {CoachContextFocus.nutrition, CoachContextFocus.training},
         ).encode(),
       });
       final rows = await MealRepository(database).watchAll().first;
       expect(rows, hasLength(scenario == _Case.noDay ? 0 : 3));
-      final expectedOwner = LocalDatabaseScope.keyForOwner(database.localOwnerId);
+      final expectedOwner = LocalDatabaseScope.keyForOwner(
+        database.localOwnerId,
+      );
       for (final meal in rows) {
         expect(meal.ownerKey, expectedOwner);
         for (final item in meal.items) {
@@ -210,15 +211,29 @@ void main() {
           // test. Its documented unavailable state has no worker or retry.
           productIntelligenceOutputProvider.overrideWithValue(
             AsyncError(
-              StateError('Canonical engine intentionally unavailable in fixture'),
+              StateError(
+                'Canonical engine intentionally unavailable in fixture',
+              ),
               StackTrace.empty,
             ),
           ),
         ],
       );
       container = current;
-      await current.read(latestDailyLogProvider.future);
-      await current.read(insightLifeContextProvider.future);
+      // Riverpod 3 pauses a StreamProvider when its last listener closes.
+      // Keep the real database watches active until their first data arrives.
+      final latestLogSubscription = current.listen(
+        latestDailyLogProvider,
+        (_, _) {},
+      );
+      final lifeContextSubscription = current.listen(
+        insightLifeContextProvider,
+        (_, _) {},
+      );
+      addTearDown(latestLogSubscription.close);
+      addTearDown(lifeContextSubscription.close);
+      expect(await current.read(latestDailyLogProvider.future), isNull);
+      expect(await current.read(insightLifeContextProvider.future), isEmpty);
       await current.read(connectedHealthProvider.notifier).refresh();
 
       final snapshot = await current.read(coachContextSnapshotProvider.future);
