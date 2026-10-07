@@ -146,6 +146,7 @@ extension _CoachMealPreparation on _IntelligenceCenterPageState {
               operationId: operationId,
               expected: expected,
               quantity: (action.payload['quantityGrams']! as num).toDouble(),
+              quantityInGrams: true,
             ),
           IntelligenceActionType.deleteMealItem => CoachMealCommand.deleteItem(
             operationId: operationId,

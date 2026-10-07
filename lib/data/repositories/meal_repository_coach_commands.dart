@@ -191,6 +191,15 @@ extension _CoachMealCommandWrites on MealRepository {
           scope,
         );
       case CoachMealCommandKind.quantity:
+        if (command.arguments['quantityUnit'] == 'g' &&
+            item.servingUnitSnapshot.trim().toLowerCase() != 'g') {
+          // A historical ml/count/serving row has no trustworthy gram
+          // conversion. Its catalog may have changed since logging. Reject
+          // inside the transaction, before either the item or journal changes.
+          throw const CoachMealConflict(
+            CoachMealConflictReason.invalidEvidence,
+          );
+        }
         await _coachAwait(
           () => updateMealItem(
             id: item.id,

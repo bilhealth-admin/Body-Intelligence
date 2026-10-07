@@ -148,6 +148,7 @@ final class CoachMealCommand {
     required String operationId,
     required CoachMealItemVersion expected,
     required double quantity,
+    bool quantityInGrams = false,
   }) {
     if (!quantity.isFinite || quantity <= 0 || quantity > 100000) {
       throw ArgumentError.value(quantity, 'quantity');
@@ -156,7 +157,14 @@ final class CoachMealCommand {
       operationId: operationId,
       kind: CoachMealCommandKind.quantity,
       expectedItem: expected,
-      arguments: {'expected': expected.toJson(), 'quantity': quantity},
+      arguments: {
+        'expected': expected.toJson(),
+        'quantity': quantity,
+        // Legacy native callers intentionally edit the stored serving unit.
+        // A model tool's quantityGrams must never inherit that interpretation.
+        // Include the unit in the digest so retry cannot change its meaning.
+        if (quantityInGrams) 'quantityUnit': 'g',
+      },
     );
   }
 
