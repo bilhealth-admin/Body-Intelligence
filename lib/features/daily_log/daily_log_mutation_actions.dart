@@ -10,12 +10,14 @@ extension _DailyLogMutationActions on _DailyLogPageState {
     if (!await _ensureDiaryOpen()) return;
     final date = ref.read(selectedLogDateProvider);
     final repository = ref.read(dailyLogRepositoryProvider);
+    final existing = await repository.getForDay(date);
+    final exerciseNotesView = DailyExerciseNotesCodec.decode(
+      existing?.exerciseNotes,
+    );
     await repository.save(
       date: date,
       notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-      exerciseNotes: exerciseNotes.text.trim().isEmpty
-          ? null
-          : exerciseNotes.text.trim(),
+      exerciseNotes: exerciseNotesView.compose(manualText: exerciseNotes.text),
     );
     ref.invalidate(selectedDailyLedgerProvider);
     if (!mounted) return;

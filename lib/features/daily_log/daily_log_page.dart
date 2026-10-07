@@ -49,6 +49,7 @@ import '../connected_health/food_name_health_sync_policy.dart';
 import '../global_platform/core/global_platform_core.dart';
 import '../global_platform/runtime/global_product_composition_root.dart';
 import 'daily_log_capture_providers.dart';
+import 'domain/daily_exercise_notes_codec.dart';
 import 'providers/daily_log_provider.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'presentation/daily_log_input_sections.dart';
@@ -210,11 +211,17 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final alwaysShowWater =
         ref.watch(dailyLogPreferenceProvider('diary.alwaysShowWater')).value ??
         true;
+    final selectedDailyLog = ref.watch(selectedDailyLogProvider);
+    final exerciseNotesView = DailyExerciseNotesCodec.decode(
+      selectedDailyLog.value?.exerciseNotes,
+    );
     ref.listen(selectedDailyLogProvider, (_, next) {
       next.whenData((log) {
         final value = log?.notes ?? '';
         if (notes.text != value) notes.text = value;
-        final exerciseValue = log?.exerciseNotes ?? '';
+        final exerciseValue = DailyExerciseNotesCodec.decode(
+          log?.exerciseNotes,
+        ).manualText;
         if (exerciseNotes.text != exerciseValue) {
           exerciseNotes.text = exerciseValue;
         }
@@ -601,6 +608,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                       key: exerciseSectionKey,
                                       arabic: _arabic,
                                       controller: exerciseNotes,
+                                      structuredExerciseNames:
+                                          exerciseNotesView.displayNames,
                                       compact: true,
                                       onBrowseWorkouts: () =>
                                           context.push('/wellness/workouts'),

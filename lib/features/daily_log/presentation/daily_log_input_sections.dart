@@ -18,12 +18,14 @@ class DailyExerciseSection extends StatelessWidget {
     required this.arabic,
     required this.controller,
     required this.onBrowseWorkouts,
+    this.structuredExerciseNames = const <String>[],
     this.compact = false,
   });
 
   final bool arabic;
   final TextEditingController controller;
   final VoidCallback onBrowseWorkouts;
+  final List<String> structuredExerciseNames;
   final bool compact;
 
   String tr(String en, String ar) => _inputText(en, ar);
@@ -65,27 +67,50 @@ class DailyExerciseSection extends StatelessWidget {
         ),
         subtitle: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
-          builder: (_, value, _) => Text(
-            value.text.isEmpty
-                ? tr('Browse workouts', 'استكشف التمارين')
-                : value.text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          builder: (_, value, _) {
+            final manual = value.text.trim();
+            final summary = <String>[
+              ...structuredExerciseNames,
+              if (manual.isNotEmpty) manual.replaceAll('\n', ' · '),
+            ];
+            return Text(
+              summary.isEmpty
+                  ? tr('Browse workouts', 'استكشف التمارين')
+                  : summary.join(' · '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            );
+          },
         ),
         shape: const Border(),
         collapsedShape: const Border(),
         childrenPadding: const EdgeInsets.all(16),
         children: [
           browseButton,
+          if (structuredExerciseNames.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            for (final name in structuredExerciseNames)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.fitness_center_rounded),
+                title: Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
           TextField(
             key: const Key('daily-log-exercise-notes'),
             controller: controller,
             minLines: 1,
-            maxLines: 4,
+            maxLines: 3,
             textInputAction: TextInputAction.newline,
             decoration: InputDecoration(
-              labelText: tr('What did you do?', 'ما التمرين الذي أنجزته؟'),
+              labelText: structuredExerciseNames.isEmpty
+                  ? tr('What did you do?', 'ما التمرين الذي أنجزته؟')
+                  : tr('Optional note', 'ملاحظة اختيارية'),
             ),
           ),
         ],
