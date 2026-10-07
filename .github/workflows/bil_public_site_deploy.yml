@@ -5,10 +5,12 @@ on:
   push:
     branches:
       - fix/community-sapphire-health-3033
+      - fix/public-site-canonical-20261007
     paths:
       - 'public_site/**'
       - 'wrangler.site.jsonc'
       - 'tool/release/bilhealth_site_worker.mjs'
+      - 'tool/release/bilhealth_site_worker.test.mjs'
       - '.github/workflows/bil_public_site_deploy.yml'
 
 permissions:
@@ -178,6 +180,95 @@ jobs:
         run: |
           set -euo pipefail
           npx --yes wrangler@4.125.0 deploy --config wrangler.site.jsonc --no-bundle --keep-vars
+
+
+      - name: Verify production canonical SEO routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          import time
+          import urllib.request
+
+          canonical_origin = 'https://www.bilhealth.com'
+          paths = (
+              '/',
+              '/privacy',
+              '/terms',
+              '/account-deletion',
+              '/data-deletion',
+              '/subscription-terms',
+              '/health-disclaimer',
+              '/support',
+              '/community-guidelines',
+              '/contact',
+          )
+
+          def get(url):
+              request = urllib.request.Request(
+                  url,
+                  headers={'User-Agent': 'BIL-release-verifier/1.0'},
+              )
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  return response.status, response.geturl(), response.headers, response.read().decode('utf-8')
+
+          last_error = None
+          for attempt in range(12):
+              try:
+                  for path in paths:
+                      expected = canonical_origin + ('/' if path == '/' else path)
+                      status, final_url, headers, html = get(expected)
+                      if status != 200 or final_url != expected:
+                          raise RuntimeError(
+                              f'canonical route mismatch: {expected} -> '
+                              f'{status} {final_url}'
+                          )
+                      canonical = re.search(
+                          r'<link\s+rel=["\']canonical["\']\s+href=["\']([^"\']+)["\']',
+                          html,
+                          re.I,
+                      )
+                      if not canonical or canonical.group(1) != expected:
+                          raise RuntimeError(
+                              f'canonical tag mismatch for {expected}: '
+                              f'{canonical.group(1) if canonical else "missing"}'
+                          )
+                      og_url = re.search(
+                          r'<meta\s+property=["\']og:url["\']\s+content=["\']([^"\']+)["\']',
+                          html,
+                          re.I,
+                      )
+                      if not og_url or og_url.group(1) != expected:
+                          raise RuntimeError(
+                              f'og:url mismatch for {expected}: '
+                              f'{og_url.group(1) if og_url else "missing"}'
+                          )
+
+                  for variant in (
+                      'http://www.bilhealth.com/',
+                      'http://bilhealth.com/',
+                      'https://bilhealth.com/',
+                  ):
+                      status, final_url, _, _ = get(variant)
+                      if status != 200 or final_url != canonical_origin + '/':
+                          raise RuntimeError(
+                              f'host/scheme canonicalization failed: {variant} -> '
+                              f'{status} {final_url}'
+                          )
+
+                  print('PUBLIC_SITE_CANONICAL_SEO_VERIFICATION=PASS')
+                  raise SystemExit(0)
+              except Exception as error:
+                  last_error = error
+                  if attempt == 11:
+                      break
+                  time.sleep(10)
+
+          raise SystemExit(
+              f'PUBLIC_SITE_CANONICAL_SEO_VERIFICATION=FAIL: {last_error}'
+          )
+          PY
 
       - name: Verify production app-ads and preserved associations
         shell: bash
