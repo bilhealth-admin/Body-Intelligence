@@ -14,10 +14,12 @@ void main() {
   });
 
   test('trusted and library workouts use title or name without leaking JSON', () {
-    final view = DailyExerciseNotesCodec.decode([
-      '{"kind":"trusted_workout_routine","id":"x","title":"Core strength"}',
-      '{"id":"walk","name":"Brisk walk","minutes":20,"recordedAt":"2026-10-07T08:00:00Z"}',
-    ].join('\n'));
+    final view = DailyExerciseNotesCodec.decode(
+      [
+        '{"kind":"trusted_workout_routine","id":"x","title":"Core strength"}',
+        '{"id":"walk","name":"Brisk walk","minutes":20,"recordedAt":"2026-10-07T08:00:00Z"}',
+      ].join('\n'),
+    );
 
     expect(view.displayNames, const ['Core strength', 'Brisk walk']);
     expect(view.manualText, isEmpty);
@@ -37,13 +39,16 @@ void main() {
     );
   });
 
-  test('malformed JSON-shaped internal data is preserved but never displayed', () {
-    const raw = '{"kind":"custom_workout_routine"';
+  test(
+    'malformed JSON-shaped internal data is preserved but never displayed',
+    () {
+      const raw = '{"kind":"custom_workout_routine"';
 
-    final view = DailyExerciseNotesCodec.decode(raw);
+      final view = DailyExerciseNotesCodec.decode(raw);
 
-    expect(view.displayNames, isEmpty);
-    expect(view.manualText, isEmpty);
-    expect(view.compose(manualText: ''), raw);
-  });
+      expect(view.displayNames, isEmpty);
+      expect(view.manualText, isEmpty);
+      expect(view.compose(manualText: ''), raw);
+    },
+  );
 }

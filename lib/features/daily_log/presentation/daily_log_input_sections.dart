@@ -94,11 +94,7 @@ class DailyExerciseSection extends StatelessWidget {
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.fitness_center_rounded),
-                title: Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
           ],
           TextField(
