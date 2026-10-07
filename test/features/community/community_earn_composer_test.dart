@@ -317,14 +317,16 @@ void main() {
       tester,
     ) async {
       repo.action = action;
-      final value = await mount(tester);
+      await mount(tester);
       expect(find.text('50'), findsOneWidget);
       await _tap(tester, find.text('Go'));
+      expect(_editor, findsOneWidget);
+      // Imperative push keeps the browser URL unchanged by default. Inspect
+      // the mounted route instead, including the reward-intent query.
       expect(
-        value.router.routeInformationProvider.value.uri.toString(),
+        GoRouterState.of(tester.element(_editor)).uri.toString(),
         '/community/compose?origin=earn',
       );
-      expect(_editor, findsOneWidget);
       expect(
         find.byKey(const Key('community-ai-reward-notice')),
         findsOneWidget,
@@ -505,7 +507,17 @@ void main() {
             dark: dark,
             scale: scale,
           );
-          await tester.ensureVisible(_earnCreate);
+          // At large text sizes the lazy list has not built the final CTA.
+          // Scroll the actual vertical list until that child exists.
+          await tester.scrollUntilVisible(
+            _earnCreate,
+            180,
+            scrollable: find.byWidgetPredicate(
+              (widget) =>
+                  widget is Scrollable &&
+                  widget.axisDirection == AxisDirection.down,
+            ),
+          );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
           final suffix =

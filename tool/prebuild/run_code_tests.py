@@ -75,6 +75,7 @@ ENV_CAPTURE_GUARDED = {
 # portable partition. Only PNG output is opt-in via a directory-valued variable.
 # Unset those variables: the string "0" would itself be a valid output directory.
 ENV_CAPTURE_DIRECTORIES = {
+    "test/features/community/community_earn_composer_test.dart": "BIL_EARN_CAPTURE_DIR",
     "test/features/community/community_reference_navigation_test.dart": "BIL_NAVIGATION_CAPTURE_DIR",
     "test/shared/bil_reference_navigation_test.dart": "BIL_NAVIGATION_CAPTURE_DIR",
     "test/qa_next/community_composer_reference_capture_test.dart": "BIL_COMPOSER_CAPTURE_DIR",

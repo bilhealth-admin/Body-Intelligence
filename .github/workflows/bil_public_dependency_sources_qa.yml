@@ -1,0 +1,59 @@
+name: BIL locked public dependency sources QA
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_public_dependency_sources_qa.yml]
+permissions:
+  contents: read
+jobs:
+  sources:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve the unchanged lock and retain only public Dart source
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get --enforce-lockfile
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, zipfile
+          cache = pathlib.Path(os.environ['PUB_CACHE']) / 'hosted' / 'pub.dev'
+          packages = ['image-4.9.1', 'passkeys_platform_interface-2.8.0']
+          out = pathlib.Path('/tmp/bil-public-sources')
+          out.mkdir(parents=True, exist_ok=True)
+          manifest = []
+          with zipfile.ZipFile(out / 'public-dart-sources.zip', 'w', zipfile.ZIP_DEFLATED) as archive:
+              for name in packages:
+                  package = cache / name
+                  if not package.is_dir():
+                      raise SystemExit('The pinned public package is absent: ' + name)
+                  for path in sorted((package / 'lib').rglob('*.dart')):
+                      if path.is_symlink():
+                          continue
+                      data = path.read_bytes()
+                      data.decode('utf-8')
+                      if b'\0' in data:
+                          raise SystemExit('Not Dart text: ' + str(path))
+                      relative = 'hosted/pub.dev/' + path.relative_to(cache).as_posix()
+                      archive.writestr(relative, data)
+                      manifest.append({'path': relative, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
+              archive.writestr('SOURCE_MANIFEST.json', json.dumps({'source_commit': os.environ['GITHUB_SHA'], 'pubspec_lock_sha256': hashlib.sha256(pathlib.Path('pubspec.lock').read_bytes()).hexdigest(), 'scope': 'Public locked Dart library sources only. No application data, credentials, compiled artifacts or font files.', 'files': manifest}, indent=2) + '\n')
+          print('Public source files:', len(manifest))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-public-dependency-sources-${{ github.sha }}
+          path: /tmp/bil-public-sources
+          retention-days: 1
+          if-no-files-found: error
