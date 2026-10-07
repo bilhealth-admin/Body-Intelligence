@@ -38,18 +38,19 @@ function rewriteHtmlMetadata(html, canonicalUrl) {
   const canonicalTag = `<link rel="canonical" href="${escaped}">`;
   const ogUrlTag = `<meta property="og:url" content="${escaped}">`;
 
-  if (/<links+[^>]*rel=["']canonical["'][^>]*>/i.test(html)) {
-    html = html.replace(/<links+[^>]*rel=["']canonical["'][^>]*>/i, canonicalTag);
-  } else {
-    html = html.replace(/</head>/i, `  ${canonicalTag}
-</head>`);
+  const defaultCanonical = '<link rel="canonical" href="https://www.bilhealth.com/">';
+  const defaultOgUrl = '<meta property="og:url" content="https://www.bilhealth.com/">';
+
+  if (html.includes(defaultCanonical)) {
+    html = html.replace(defaultCanonical, canonicalTag);
+  } else if (!html.includes('rel="canonical"')) {
+    html = html.replace('</head>', `  ${canonicalTag}\n</head>`);
   }
 
-  if (/<metas+[^>]*property=["']og:url["'][^>]*>/i.test(html)) {
-    html = html.replace(/<metas+[^>]*property=["']og:url["'][^>]*>/i, ogUrlTag);
-  } else {
-    html = html.replace(/</head>/i, `  ${ogUrlTag}
-</head>`);
+  if (html.includes(defaultOgUrl)) {
+    html = html.replace(defaultOgUrl, ogUrlTag);
+  } else if (!html.includes('property="og:url"')) {
+    html = html.replace('</head>', `  ${ogUrlTag}\n</head>`);
   }
   return html;
 }
