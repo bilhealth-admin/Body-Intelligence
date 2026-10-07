@@ -34,12 +34,13 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
         _coachNativeResultText(result),
         receipt: _coachNativeReceipt(action.id, result),
         undoReadback: result.canUndo
-            ? () async {
+            ? (checkWritePermission) async {
                 final undone = await prepared.repository.undo(
                   operationId: result.operationId,
                   toolId: result.toolId,
                   argumentsDigest: result.argumentsDigest,
                   scope: prepared.scope,
+                  checkWritePermission: checkWritePermission,
                 );
                 prepared.scope.check(
                   prepared.database.localOwnerId,

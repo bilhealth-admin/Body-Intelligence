@@ -8,9 +8,12 @@ extension CoachMealCompensation on MealRepository {
     required String toolId,
     required String argumentsDigest,
     required CoachMealOwnerScope scope,
+    void Function()? checkWritePermission,
   }) async {
+    checkWritePermission?.call();
     scope.check(_database.localOwnerId);
     final replayed = await _database.transaction(() async {
+      checkWritePermission?.call();
       final journal = await _readCoachJournal(operationId, scope);
       if (journal == null) {
         throw const CoachMealConflict(CoachMealConflictReason.invalidJournal);
@@ -51,6 +54,7 @@ extension CoachMealCompensation on MealRepository {
         await _requireCoachOpenDay(parent.dayKey, scope);
       }
 
+      checkWritePermission?.call();
       // Drift stores DateTime values at second precision. Compare the intended
       // persisted snapshot at that same precision after the database writes.
       final now = DateTime.fromMillisecondsSinceEpoch(
@@ -134,6 +138,7 @@ extension CoachMealCompensation on MealRepository {
       }
       await _writeCoachJournal(journal.compensated(now, readback), scope);
       scope.check(_database.localOwnerId);
+      checkWritePermission?.call();
       return false;
     });
     return _coachCommitReadback(operationId, scope, replayed: replayed);

@@ -177,9 +177,12 @@ final class CoachNativeCommandRepository {
     required String toolId,
     required String argumentsDigest,
     required CoachNativeOwnerScope scope,
+    void Function()? checkWritePermission,
   }) async {
+    checkWritePermission?.call();
     var replayed = false;
     await database.transaction(() async {
+      checkWritePermission?.call();
       final journal = await _readJournal(operationId, scope);
       if (journal == null ||
           journal.command.toolId != toolId ||
@@ -201,9 +204,13 @@ final class CoachNativeCommandRepository {
       if (!_sameNativeSnapshot(journal.after, current)) {
         throw const CoachNativeConflict(CoachNativeConflictReason.staleRecord);
       }
+      checkWritePermission?.call();
       final undoAfter = await _compensate(journal, scope);
       await _writeJournal(journal.compensated(undoAfter), scope);
       scope.check(database.localOwnerId);
+      // A revoked attempt rolls back rows and journal together, even if the
+      // permission is later granted again. Readback after commit stays truthful.
+      checkWritePermission?.call();
     });
     return _commitReadback(operationId, scope, replayed: replayed);
   }

@@ -436,4 +436,5 @@ void _nativeRepositoryCases() {
     },
   );
   _nativeOperationReadbackCases(() => store);
+  _nativeUndoPermissionRepositoryCases(() => store);
 }

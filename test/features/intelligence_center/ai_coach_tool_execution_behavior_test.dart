@@ -17,6 +17,7 @@ import 'package:body_intelligence_log/data/repositories/user_profile_repository.
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_action_permission.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_action.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
@@ -32,10 +33,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 part 'ai_coach_meal_commit_behavior_cases.dart';
 part 'ai_coach_meal_recovery_cases.dart';
+part 'ai_coach_undo_permission_cases.dart';
 
 void main() {
   _coachMealCommitBehaviorCases();
   _coachMealRecoveryCases();
+  _coachUndoPermissionCases();
   test(
     'measurement merge is opt-in and ordinary saves retain replacement semantics',
     () async {

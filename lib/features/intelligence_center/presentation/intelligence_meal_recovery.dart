@@ -123,10 +123,11 @@ extension _CoachMealRecovery on _IntelligenceCenterPageState {
         _updateState(() {
           undoOperations[candidate.messageId] = _CoachUndoOperation(
             receipt: receipt,
-            undoReadback: () => _undoCommittedCoachMeal(
+            undoReadback: (checkWritePermission) => _undoCommittedCoachMeal(
               actionId: reference.actionId,
               result: verifiedResult,
               owner: owner,
+              checkWritePermission: checkWritePermission,
             ),
           );
         });

@@ -147,10 +147,11 @@ extension _CoachNativeRecovery on _IntelligenceCenterPageState {
           _updateState(() {
             undoOperations[candidate.message.id] = _CoachUndoOperation(
               receipt: receipt,
-              undoReadback: () => _undoRecoveredCoachNative(
+              undoReadback: (checkWritePermission) => _undoRecoveredCoachNative(
                 actionId: reference.actionId,
                 result: result,
                 owner: visit,
+                checkWritePermission: checkWritePermission,
               ),
             );
           });
@@ -175,6 +176,7 @@ extension _CoachNativeRecovery on _IntelligenceCenterPageState {
     required String actionId,
     required CoachNativeCommit result,
     required _RecoveredCoachNativeOwner owner,
+    required void Function() checkWritePermission,
   }) async {
     owner.scope.check(owner.database.localOwnerId);
     final undone = await owner.repository.undo(
@@ -182,6 +184,7 @@ extension _CoachNativeRecovery on _IntelligenceCenterPageState {
       toolId: result.toolId,
       argumentsDigest: result.argumentsDigest,
       scope: owner.scope,
+      checkWritePermission: checkWritePermission,
     );
     owner.scope.check(owner.database.localOwnerId, committed: true);
     _refreshCommittedCoachNative(undone.kind);

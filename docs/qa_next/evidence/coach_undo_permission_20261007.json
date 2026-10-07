@@ -1,0 +1,331 @@
+{
+  "record_type": "native and meal Undo write-permission regression evidence, not full release clearance",
+  "base_application_sha": "2e272fa420add03a2ff248a7a55395006f4a3792",
+  "branch": "qa/coach-community-next-20261005",
+  "toolchain": {
+    "flutter": "3.44.6",
+    "dart": "3.12.2",
+    "timezone": "Africa/Cairo"
+  },
+  "new_cases": 42,
+  "cases": {
+    "native_live_and_restored_read_only": 10,
+    "native_delayed_revocation_read_write_and_ABA": 4,
+    "native_repository_denial_before_and_after_write": 10,
+    "meal_live_and_restored_typed_undo": 2,
+    "meal_repository_four_actions_four_boundaries": 16
+  },
+  "checks": {
+    "undo-permission-red": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--reporter",
+        "expanded",
+        "--concurrency",
+        "1",
+        "--timeout",
+        "2m",
+        "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+        "--plain-name",
+        "read only preserves"
+      ],
+      "started_at_utc": "2026-10-07T04:41:35.191588+00:00",
+      "finished_at_utc": "2026-10-07T04:41:44.793767+00:00",
+      "exit_code": 1,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "c7d724dcd8450efd1b900f471c751234cbb5ddfe08b5529bdcb884b49d4acd42",
+      "log_sha256": "bb2f8986b4da3837ea768f92ee9b2028179a394de58e3e3440f5849fe5fbb063",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence.",
+      "last_case_counters": [
+        [
+          "0",
+          "10"
+        ]
+      ],
+      "evidence_name": "undo-permission-red"
+    },
+    "undo-permission-expanded-v2": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--reporter",
+        "expanded",
+        "--concurrency",
+        "2",
+        "--timeout",
+        "2m",
+        "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+        "test/features/intelligence_center/coach_native_command_repository_test.dart",
+        "test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart",
+        "test/features/nutrition/coach_meal_undo_permission_test.dart",
+        "test/features/nutrition/coach_meal_compensation_readback_test.dart",
+        "test/features/nutrition/coach_meal_commit_boundary_test.dart"
+      ],
+      "started_at_utc": "2026-10-07T04:47:15.506793+00:00",
+      "finished_at_utc": "2026-10-07T04:47:41.312070+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "8ef46d6a2bb5614118ac599014cf03901a02408a2fcdc6110630e9445e28f7d2",
+      "log_sha256": "7331047ac91eab3c1ffd0093fb44a2cf8990c3d205a13356b98783e5df3acd80",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence.",
+      "last_case_counters": [
+        [
+          "155",
+          ""
+        ]
+      ],
+      "evidence_name": "undo-permission-expanded-v2"
+    },
+    "undo-permission-broader": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--reporter",
+        "expanded",
+        "--concurrency",
+        "2",
+        "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+        "test/features/intelligence_center/coach_native_command_repository_test.dart",
+        "test/features/intelligence_center/coach_native_admission_behavior_test.dart",
+        "test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart",
+        "test/features/intelligence_center/coach_memory_owner_sync_test.dart",
+        "test/features/intelligence_center/coach_action_admission_contract_test.dart",
+        "test/features/intelligence_center/coach_action_permission_test.dart",
+        "test/features/intelligence_center/bil_action_receipt_test.dart",
+        "test/features/intelligence_center/intelligence_message_action_persistence_test.dart",
+        "test/features/intelligence_center/conversation_history_retention_test.dart",
+        "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+        "test/features/intelligence_center/coach_context_food_provider_test.dart",
+        "test/features/intelligence_center/coach_context_minimal_views_test.dart",
+        "test/architecture_source_file_size_guard_test.dart",
+        "test/localization/bil_25_locale_fallback_closure_test.dart",
+        "--timeout",
+        "45s",
+        "test/features/nutrition/coach_meal_undo_permission_test.dart",
+        "test/features/nutrition/coach_meal_compensation_readback_test.dart",
+        "test/features/nutrition/coach_meal_commit_boundary_test.dart"
+      ],
+      "started_at_utc": "2026-10-07T04:48:27.083043+00:00",
+      "finished_at_utc": "2026-10-07T04:49:27.143951+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "8ef46d6a2bb5614118ac599014cf03901a02408a2fcdc6110630e9445e28f7d2",
+      "log_sha256": "a204d9908396e3d841554eef65e30f0a271940f56ce12534e59b7c16103eb8e3",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence.",
+      "last_case_counters": [
+        [
+          "293",
+          ""
+        ]
+      ],
+      "evidence_name": "undo-permission-broader"
+    },
+    "undo-permission-final": {
+      "command": [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--no-test-assets",
+        "--reporter",
+        "expanded",
+        "--concurrency",
+        "2",
+        "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+        "test/features/intelligence_center/coach_native_command_repository_test.dart",
+        "test/features/intelligence_center/coach_native_admission_behavior_test.dart",
+        "test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart",
+        "test/features/intelligence_center/coach_memory_owner_sync_test.dart",
+        "test/features/intelligence_center/coach_action_admission_contract_test.dart",
+        "test/features/intelligence_center/coach_action_permission_test.dart",
+        "test/features/intelligence_center/bil_action_receipt_test.dart",
+        "test/features/intelligence_center/intelligence_message_action_persistence_test.dart",
+        "test/features/intelligence_center/conversation_history_retention_test.dart",
+        "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+        "test/features/intelligence_center/coach_context_food_provider_test.dart",
+        "test/features/intelligence_center/coach_context_minimal_views_test.dart",
+        "test/architecture_source_file_size_guard_test.dart",
+        "test/localization/bil_25_locale_fallback_closure_test.dart",
+        "--timeout",
+        "45s",
+        "test/features/nutrition/coach_meal_undo_permission_test.dart",
+        "test/features/nutrition/coach_meal_compensation_readback_test.dart",
+        "test/features/nutrition/coach_meal_commit_boundary_test.dart"
+      ],
+      "started_at_utc": "2026-10-07T04:49:54.209427+00:00",
+      "finished_at_utc": "2026-10-07T04:50:54.231259+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "a9db40eee99658c4ffd6319279ed74349dc435b5a2d1c9b950be79865ff581f7",
+      "log_sha256": "54a7dc41f365f4b0fe51868b29761f4f2fa07e21190dabea498f65c2473aed07",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence.",
+      "last_case_counters": [
+        [
+          "293",
+          ""
+        ]
+      ],
+      "evidence_name": "undo-permission-final"
+    },
+    "undo-permission-analyze-lib": {
+      "command": [
+        "dart",
+        "analyze",
+        "--fatal-infos",
+        "lib"
+      ],
+      "started_at_utc": "2026-10-07T04:48:26.981621+00:00",
+      "finished_at_utc": "2026-10-07T04:48:30.882535+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "8ef46d6a2bb5614118ac599014cf03901a02408a2fcdc6110630e9445e28f7d2",
+      "log_sha256": "6b7a8871da280b2b7725a31509a42d0e66de8a6281e319414cfeb7d46b48d2ed",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence.",
+      "last_case_counters": [],
+      "evidence_name": "undo-permission-analyze-lib"
+    },
+    "undo-permission-analyze-tests-final": {
+      "command": [
+        "dart",
+        "analyze",
+        "--fatal-infos",
+        "test/features/intelligence_center",
+        "test/features/nutrition/coach_meal_undo_permission_test.dart"
+      ],
+      "started_at_utc": "2026-10-07T04:49:54.216385+00:00",
+      "finished_at_utc": "2026-10-07T04:49:56.593504+00:00",
+      "exit_code": 0,
+      "lib_test_source_unchanged": true,
+      "source_sha256": "a9db40eee99658c4ffd6319279ed74349dc435b5a2d1c9b950be79865ff581f7",
+      "log_sha256": "b5dde439725e773b95222650764ce8df8b6dacc707d915a704f7862579a34bbd",
+      "scope": "Local host tests on exact text source plus current patch; font-free partial original assets. Not visual/device evidence.",
+      "last_case_counters": [],
+      "evidence_name": "undo-permission-analyze-tests-final"
+    }
+  },
+  "files": [
+    {
+      "path": "lib/data/repositories/meal_repository_coach_undo.dart",
+      "before": "6bd496693511f2fad9c23fd667d7d541dd488d4e",
+      "after": "56b5e2cbed1a53534111195f250a81236e688dc2",
+      "sha256": "5f5a8adcefa72d7993831b92318042f5e05aa270ac2af9ae862506726938483d"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "before": "c458b02a2dd68ee9b7825049bdb041d2bf3882a3",
+      "after": "efb5f8352cecf269c00ba9b7e6d6e149685d1fec",
+      "sha256": "9c0aa87046c201c0a1dbda91e5154e2bdd8cb755513240d5484199dde782b0e4"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_widgets.dart",
+      "before": "80e10371f2bc8d6f8742207f6ac2af72957fbcbb",
+      "after": "e4f76071101ccffe8c0a19a77e50c3ed2c403719",
+      "sha256": "68a42c9ababd98fd2394dab58a301127989b998b03f363f4d38295c2fb4fb97d"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+      "before": "925244a4d49331377668fef6d63b783947b513fc",
+      "after": "ce4767df299753181acd2be7c63207b4aec6bf69",
+      "sha256": "d2149d2d5f05b073547bddd80bded6b2003ab2c24d88a1c49fa204a65b9de958"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_recovery.dart",
+      "before": "d54ae4d6dc3de4f9640f3fc45b20dc794c055607",
+      "after": "49b35a88d28c037a27d24a5f3aa32cdcc0640074",
+      "sha256": "63f8bd05d069278e8927a06b3689801cc37b78f0d459920ba229ce1fe2886f4d"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "before": "d7ba2ee0f2fb933b46580829a2dfc860af941f18",
+      "after": "fee970b0a8f03d47f73595974ce27a48f548d8bd",
+      "sha256": "ddae7c798851c8b673f1c1d537c121aae7ba321877dabbea332d607c5fc21483"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+      "before": "5fbb5a4ad47d53e06a62b4665e756e6f82ae84ef",
+      "after": "dceff3d2d658d0b4412b66de90b87fd453c27ae9",
+      "sha256": "fb91ea7f57f4c03982f92ad09d04b2502b0a3af3dd1fa1846fb4eafd8a2701e6"
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "before": "c4ffa2548b90c19b5bd204dd18264d3362e821d4",
+      "after": "38da42bb632130599b66785127fc55f5176e0d07",
+      "sha256": "2ef8821981692d9a9ef50ad38884ffe1180f53e4d4c533c919888bd0725e7b8e"
+    },
+    {
+      "path": "test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart",
+      "before": "95af893b1e6ca5c2a36b55a177978135917bc624",
+      "after": "965846dde36c8f10216f1d81afbf3a06e8e726cd",
+      "sha256": "f646bee9bd098516cfa6328dff1d5122f01f3c045e77e0e5d03946008e7501b3"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+      "before": "6586e81a7aa98f5ea8c62d9a480cb7c7d352f71b",
+      "after": "d7cbcaf520e5f65b85dc5519236d981aefcd883d",
+      "sha256": "d8a3cd03319010cfc4a18d47c3d568e272238c184cf6e94c4238c3ad01a39d19"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_repository_cases.dart",
+      "before": "27511b27488c179a49244317af46654e212bb0cd",
+      "after": "468e66cd6b597d8d08c7dde3a1e99f402db7024f",
+      "sha256": "abf960a5da2ad0cb6b435b902a7940947a59b25e0b0e45311686642c180c0eb3"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_repository_test.dart",
+      "before": "0fc43a834c5160ab1f5ebcf26ade28941456d748",
+      "after": "71123d36dc363b0b8e1d37a60a9cf7cd1abd71aa",
+      "sha256": "f3dd688340b4e163f165f907bf4cc3e29849ae810d0f1e85d3c33070100bb07a"
+    },
+    {
+      "path": "test/features/intelligence_center/ai_coach_undo_permission_cases.dart",
+      "before": null,
+      "after": "8368cbc672385f9d754cbad29064fcca65b82c55",
+      "sha256": "752f4d2230906d617ffd227d8b8129af278563f6cdd3baef706c7423bc5456cf"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_undo_permission_cases.dart",
+      "before": null,
+      "after": "e7ee4f339b57ebd12375a2a99cb8f8b10ca6c861",
+      "sha256": "e27cb8fd9e14059d6cac6ee25ffa497616891de8491fbdc417cdb856943ff82c"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_undo_permission_repository_cases.dart",
+      "before": null,
+      "after": "55725276c72f93b73f6ea827b601fec8f0f5f245",
+      "sha256": "d450a7f50356f6b89e65fe438f8d878c4f01eca4d5c5f0c57e321c2090388173"
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_undo_permission_test.dart",
+      "before": null,
+      "after": "1a0e50a6b3f2484e72c2024b67b2296dd3bbca36",
+      "sha256": "cd5d7d9b9431a426721746a16e5d4d87f17a0ef626b05016860823cc01cbca22"
+    }
+  ],
+  "full_ci_for_this_slice": "not run yet at evidence creation",
+  "limits": [
+    "No full local flutter analyze: SDK recovery omits dev packages. Targeted Dart analysis of lib and Coach/nutrition tests passed; full analysis is required in original CI checkout.",
+    "Local host test assets are partial and font-free. Local tests are not visual-fidelity evidence.",
+    "Legacy settings Undo is gated at entry, but has no atomic journal, durable CAS or restored Undo; this slice does not close settings.",
+    "This slice guards compensating Undo, not permission revalidation during every initial native commit.",
+    "Owner and version protection is preserved independently of the write permit.",
+    "No reference-parity/device/production/store completion claim."
+  ],
+  "untouched": [
+    "main",
+    "ios",
+    "android",
+    "pubspec.yaml",
+    "pubspec.lock",
+    "supabase",
+    "pricing",
+    "billing",
+    "Trial",
+    "portable runner policies and exclusions"
+  ]
+}

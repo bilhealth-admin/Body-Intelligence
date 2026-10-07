@@ -32,11 +32,13 @@ import 'package:flutter_test/flutter_test.dart';
 part 'coach_native_command_behavior_cases.dart';
 part 'coach_native_command_recovery_cases.dart';
 part 'coach_native_recovery_lifecycle_cases.dart';
+part 'coach_native_undo_permission_cases.dart';
 
 void main() {
   _nativeCommandCases();
   _nativeRecoveryCases();
   _nativeRecoveryLifecycleCases();
+  _nativeUndoPermissionCases();
 }
 
 final _day = DateTime(2026, 10, 6);

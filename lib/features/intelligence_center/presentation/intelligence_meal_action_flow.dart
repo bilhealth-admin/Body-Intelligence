@@ -16,10 +16,11 @@ extension _CoachMealActionFlow on _IntelligenceCenterPageState {
       _coachMealResultText(result),
       receipt: receipt,
       undoReadback: result.canUndo
-          ? () => _undoCommittedCoachMeal(
+          ? (checkWritePermission) => _undoCommittedCoachMeal(
               actionId: action.id,
               result: result,
               owner: prepared.owner,
+              checkWritePermission: checkWritePermission,
             )
           : null,
     );
@@ -33,12 +34,14 @@ extension _CoachMealActionFlow on _IntelligenceCenterPageState {
     required String actionId,
     required CoachMealCommit result,
     required _CoachMealOwnerHandle owner,
+    required void Function() checkWritePermission,
   }) async {
     final undone = await owner.repository.undoCoachMeal(
       operationId: result.operationId,
       toolId: result.toolId,
       argumentsDigest: result.argumentsDigest,
       scope: owner.scope,
+      checkWritePermission: checkWritePermission,
     );
     owner.scope.check(owner.database.localOwnerId, committed: true);
     _refreshCommittedCoachMeals();

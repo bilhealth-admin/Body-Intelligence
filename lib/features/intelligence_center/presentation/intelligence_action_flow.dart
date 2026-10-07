@@ -310,7 +310,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     String text, {
     BilActionReceipt? receipt,
     Future<void> Function()? undo,
-    Future<BilActionReceipt> Function()? undoReadback,
+    Future<BilActionReceipt> Function(void Function() checkWritePermission)?
+    undoReadback,
     bool verifiedResult = true,
   }) {
     if (!mounted) return;
@@ -386,12 +387,38 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
         epoch == conversationPersistenceEpoch &&
         identical(undoOperations[messageId], operation) &&
         messages.any((message) => message.id == messageId);
+    bool mayWrite() =>
+        mounted &&
+        ref.read(coachActionPermissionModeProvider) !=
+            CoachActionPermissionMode.readOnly;
+    void showPermissionRequired() => _showActionCompleted(
+      tr(
+        'This action needs write permission. Change the shield setting to continue.',
+        'يحتاج هذا الإجراء إلى إذن كتابة. غيّر إعداد الدرع للمتابعة.',
+      ),
+    );
+    if (!mayWrite()) {
+      showPermissionRequired();
+      return;
+    }
+    var revoked = false;
+    void checkWritePermission() {
+      if (revoked || !mayWrite()) throw const _CoachUndoPermissionDenied();
+    }
+
+    final permissionSubscription = ref.listenManual(
+      coachActionPermissionModeProvider,
+      (previous, next) {
+        if (next == CoachActionPermissionMode.readOnly) revoked = true;
+      },
+    );
     _updateState(() => operation.running = true);
     try {
+      checkWritePermission();
       final readback = operation.undoReadback;
       final BilActionReceipt receipt;
       if (readback != null) {
-        receipt = await readback();
+        receipt = await readback(checkWritePermission);
       } else {
         await operation.undo!();
         receipt = BilActionReceipt(
@@ -417,6 +444,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
         tr('The previous action was undone.', 'تم التراجع عن الإجراء السابق.'),
         receipt: receipt,
       );
+    } on _CoachUndoPermissionDenied {
+      if (stillShowing()) showPermissionRequired();
     } on CoachMealConflict catch (error) {
       if (stillShowing()) _showCoachMealConflict(error);
     } on CoachNativeConflict catch (error) {
@@ -431,6 +460,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
         );
       }
     } finally {
+      permissionSubscription.close();
       if (stillShowing()) _updateState(() => operation.running = false);
     }
   }
