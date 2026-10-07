@@ -1,0 +1,148 @@
+name: BIL Undo permission candidate verification
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_undo_permission_candidate.yml]
+permissions:
+  contents: read
+jobs:
+  verify-candidate:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Validate exact parent and bounded tested delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD^)" = 2e272fa420add03a2ff248a7a55395006f4a3792
+          test -z "$(git status --porcelain)"
+          mkdir -p /tmp/bil-undo-permission
+          python3 - <<'PY'
+          import base64,hashlib,json,pathlib,subprocess,zlib
+          root=pathlib.Path('tool/qa_next/undo_permission_candidate')
+          manifest=json.loads((root/'manifest.json').read_text())
+          assert manifest['base']=='2e272fa420add03a2ff248a7a55395006f4a3792'
+          patch=zlib.decompress(base64.b64decode(''.join((root/f'{i}.b64').read_text() for i in range(3)),validate=True))
+          assert hashlib.sha256(patch).hexdigest()==manifest['sha256']
+          assert len(manifest['files'])==18
+          paths=set()
+          for row in manifest['files']:
+              name=row['path'];p=pathlib.Path(name)
+              assert not p.is_absolute() and '..' not in p.parts and name not in paths
+              assert name.startswith(('lib/features/intelligence_center/','test/features/intelligence_center/','docs/qa_next/')) or name in ('lib/data/repositories/meal_repository_coach_undo.dart','test/features/nutrition/coach_meal_undo_permission_test.dart')
+              paths.add(name)
+              if row['before'] is None: assert not p.exists(),name
+              else:
+                  actual=subprocess.check_output(['git','rev-parse','HEAD:'+name],text=True).strip()
+                  assert actual==row['before'],name
+          saved=pathlib.Path('/tmp/bil-undo-permission/tested.patch');saved.write_bytes(patch)
+          subprocess.run(['git','apply','--check',str(saved)],check=True)
+          subprocess.run(['git','apply',str(saved)],check=True)
+          for row in manifest['files']:
+              p=pathlib.Path(row['path']);data=p.read_bytes()
+              assert hashlib.sha256(data).hexdigest()==row['sha256'],row['path']
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==row['after'],row['path']
+          changed=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
+          changed.update(subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True).splitlines())
+          assert changed==paths,sorted(changed^paths)
+          pathlib.Path('/tmp/bil-undo-permission/source-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+          print('Exact 18-file candidate matches the locally tested bytes; no branch ref changed.')
+          PY
+          git diff --check
+          git diff --exit-code -- pubspec.yaml pubspec.lock ios android supabase
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve unchanged packages and check candidate formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter --version --machine > /tmp/bil-undo-permission/toolchain.json
+          flutter pub get --enforce-lockfile 2>&1 | tee /tmp/bil-undo-permission/pub.log
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          python3 - <<'PY'
+          import json,pathlib,subprocess
+          m=json.loads(pathlib.Path('/tmp/bil-undo-permission/source-manifest.json').read_text())
+          subprocess.run(['dart','format','--output=none','--set-exit-if-changed',*[x['path'] for x in m['files'] if x['path'].endswith('.dart')]],check=True)
+          PY
+      - name: Analyze complete original checkout with candidate delta
+        shell: bash
+        run: set -o pipefail; flutter analyze --no-pub 2>&1 | tee /tmp/bil-undo-permission/analyze.log
+      - name: Exercise native recovery and existing command lifecycle contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --reporter expanded --concurrency 2 --timeout 2m \
+            test/features/intelligence_center/coach_native_command_behavior_test.dart \
+            test/features/intelligence_center/coach_native_command_repository_test.dart \
+            test/features/intelligence_center/coach_native_admission_behavior_test.dart \
+            test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart \
+            test/features/intelligence_center/coach_memory_owner_sync_test.dart \
+            test/features/intelligence_center/coach_action_admission_contract_test.dart \
+            test/features/intelligence_center/coach_action_permission_test.dart \
+            test/features/intelligence_center/bil_action_receipt_test.dart \
+            test/features/intelligence_center/intelligence_message_action_persistence_test.dart \
+            test/features/intelligence_center/conversation_history_retention_test.dart \
+            test/features/intelligence_center/coach_page_lifecycle_regression_test.dart \
+            test/features/intelligence_center/coach_context_food_provider_test.dart \
+            test/features/intelligence_center/coach_context_minimal_views_test.dart \
+            test/architecture_source_file_size_guard_test.dart \
+            test/localization/bil_25_locale_fallback_closure_test.dart \
+            test/features/nutrition/coach_meal_undo_permission_test.dart \
+            test/features/nutrition/coach_meal_compensation_readback_test.dart \
+            test/features/nutrition/coach_meal_commit_boundary_test.dart \
+            2>&1 | tee /tmp/bil-undo-permission/tests.log
+      - name: Capture actual Flutter Coach and retain R5 entry checks
+        shell: bash
+        env:
+          BIL_REFERENCE_CAPTURE_DIR: /tmp/bil-undo-permission/coach
+          BIL_ENTRY_CAPTURE_DIR: /tmp/bil-undo-permission/entry
+        run: |
+          set -o pipefail
+          flutter test --no-pub --reporter expanded --concurrency 1 --timeout 2m test/qa_next/coach_reference_workspace_capture_test.dart test/qa_next/community_entry_capture_test.dart 2>&1 | tee /tmp/bil-undo-permission/capture.log
+      - name: Store verified Git objects only, never move any branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,subprocess,urllib.request
+          repo='bilhealth-admin/Body-Intelligence';branch='refs/heads/qa/coach-community-next-20261005'
+          assert os.environ['GITHUB_REPOSITORY']==repo and os.environ['GITHUB_REF']==branch
+          head=os.environ['GITHUB_SHA']
+          manifest=json.loads(pathlib.Path('/tmp/bil-undo-permission/source-manifest.json').read_text())
+          def api(path,payload=None):
+              assert path.startswith(('git/blobs','git/ref/heads/qa/coach-community-next-20261005'))
+              request=urllib.request.Request('https://api.github.com/repos/'+repo+'/'+path,data=None if payload is None else json.dumps(payload).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'})
+              with urllib.request.urlopen(request,timeout=60) as response: return json.load(response)
+          assert api('git/ref/heads/qa/coach-community-next-20261005')['object']['sha']==head,'QA advanced; do not overwrite'
+          elements=[]
+          for row in manifest['files']:
+              data=pathlib.Path(row['path']).read_bytes()
+              assert hashlib.sha256(data).hexdigest()==row['sha256'],'Tested source drift'
+              blob=api('git/blobs',{'content':data.decode('utf-8'),'encoding':'utf-8'})['sha']
+              assert blob==row['after'],'Git blob mismatch'
+              elements.append({'path':row['path'],'mode':'100644','type':'blob','sha':blob})
+          result={'repository':repo,'branch':branch,'candidate_commit':head,'files':manifest['files'],'blob_elements':elements,'branch_updated':False,'full_portable_regression_pending':True,'visual_fidelity_verified':False}
+          pathlib.Path('/tmp/bil-undo-permission/verified-blobs.json').write_text(json.dumps(result,indent=2)+'\n')
+          print(json.dumps({'candidate_commit':head,'verified_blobs':len(elements),'branch_updated':False}))
+          PY
+      - name: Preserve evidence and PNGs only, never font files
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-undo-permission-candidate-${{ github.sha }}
+          path: /tmp/bil-undo-permission
+          retention-days: 1
+          if-no-files-found: error
