@@ -29,6 +29,7 @@ import '../../shared/widgets/bil_camera_capture_page.dart';
 import 'domain/food_log_meal_selector.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
 import 'providers/daily_log_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'food_log_actions.dart';
 
@@ -189,7 +190,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final popularFoods = ref.watch(foodLogPopularFoodsProvider);
     final date = ref.watch(selectedLogDateProvider);
     final scheme = Theme.of(context).colorScheme;
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       backgroundColor: scheme.surfaceContainerLowest,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -263,7 +264,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               )
             : _buildBody(context, items, rankedFoods: popularFoods.value),
       ),
-    );
+    ));
   }
 
   Widget _buildBody(

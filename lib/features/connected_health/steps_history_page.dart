@@ -6,6 +6,7 @@ import '../../app/localization/app_localizations.dart';
 import 'connected_health_copy.dart';
 import 'connected_health_model.dart';
 import 'providers/connected_health_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 /// Daily step totals imported from the authorized connected-health source.
 ///
@@ -40,7 +41,7 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
     String t(String english, String arabic) =>
         connectedHealthText(context, english, arabic);
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(title: Text(t('Steps', 'الخطوات'))),
       body: RefreshIndicator(
         onRefresh: () => ref.read(connectedHealthProvider.notifier).refresh(),
@@ -182,6 +183,6 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

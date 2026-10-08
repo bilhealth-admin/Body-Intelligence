@@ -16,6 +16,7 @@ import '../../recipe_import/providers/trusted_recipe_providers.dart';
 import '../../recipe_import/domain/trusted_recipe.dart';
 import '../../recipe_import/services/trusted_recipe_diary_service.dart';
 import '../food_page.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'meals_tab.dart';
 part 'recipes_tab.dart';
@@ -51,7 +52,7 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
           );
         }
         if (snapshot.hasError) {
-          return Scaffold(
+          return BilCalmVisualScope(builder: (context) => Scaffold(
             body: Center(
               child: FilledButton.icon(
                 onPressed: () => setState(
@@ -63,7 +64,7 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
                 label: Text(_c(context, 'Retry')),
               ),
             ),
-          );
+          ));
         }
         final initialIndex = switch (snapshot.data) {
           'meals' => 0,

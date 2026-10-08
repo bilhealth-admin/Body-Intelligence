@@ -15,6 +15,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'data/diary_sharing_support_repository.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'reference_preferences_controls.dart';
 part 'reference_preferences_numeric.dart';
@@ -132,7 +133,7 @@ class ReferenceAppearancePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(appSettingsProvider).themeMode;
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(_diaryText(context, 'App appearance')),
@@ -173,7 +174,7 @@ class ReferenceAppearancePage extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 

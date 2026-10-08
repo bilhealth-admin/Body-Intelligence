@@ -23,6 +23,7 @@ import 'providers/fitness_device_provider.dart';
 import 'widgets/food_name_health_sync_card.dart';
 import 'widgets/live_health_watch.dart';
 import 'widgets/apple_health_permission_review.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'connected_health_components.dart';
 part 'connected_health_source_card.dart';
@@ -136,7 +137,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
         verified?.authority == EntitlementAuthority.verifiedServer &&
         verified?.plan != CommercePlan.free;
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () =>
@@ -428,6 +429,6 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                 ),
               ),
             ),
-    );
+    ));
   }
 }

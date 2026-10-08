@@ -31,6 +31,7 @@ import '../services/wellness_video_resume.dart';
 import 'workout_access_policy.dart';
 import 'wellness_copy.dart';
 import 'workout_video_group_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'bil_workout_routines_list.dart';
 part 'bil_workout_routine_details.dart';
@@ -367,7 +368,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     ref.watch(verifiedSubscriptionAccessProvider);
     final future = _items;
     final compactHeader = MediaQuery.sizeOf(context).width < 520;
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         toolbarHeight: compactHeader ? 72 : null,
         titleSpacing: compactHeader ? 0 : null,
@@ -453,7 +454,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                 );
               },
             ),
-    );
+    ));
   }
 
   Future<void> _showCustomRoutineBuilder(
