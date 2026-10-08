@@ -397,6 +397,36 @@ class _FeedReferenceVisualRepository extends _VisualRepository {
       postCount: 67,
       following: true,
     ),
+    const CommunityTopic(
+      slug: 'fitness',
+      titleCopyKey: 'community_topic_fitness',
+      descriptionCopyKey: 'community_topic_fitness_body',
+      iconKey: 'fitness',
+      featured: true,
+      followerCount: 182,
+      postCount: 44,
+      following: false,
+    ),
+    const CommunityTopic(
+      slug: 'motivation-support',
+      titleCopyKey: 'community_topic_motivation_support',
+      descriptionCopyKey: 'community_topic_motivation_support_body',
+      iconKey: 'heart',
+      featured: true,
+      followerCount: 92,
+      postCount: 18,
+      following: false,
+    ),
+    const CommunityTopic(
+      slug: 'wellness',
+      titleCopyKey: 'community_topic_wellness',
+      descriptionCopyKey: 'community_topic_wellness_body',
+      iconKey: 'wellness',
+      featured: true,
+      followerCount: 156,
+      postCount: 33,
+      following: false,
+    ),
   ];
 
   @override

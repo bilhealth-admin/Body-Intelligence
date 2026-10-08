@@ -238,7 +238,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         title: Text(
           communityText(context, 'BIL Community', 'مجتمع BIL'),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontSize: 27 * (width / 414).clamp(.78, 1.0),
+            fontSize: 21 * (width / 414).clamp(.85, 1.0),
             fontWeight: FontWeight.w900,
           ),
           maxLines: 1,

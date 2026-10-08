@@ -200,11 +200,14 @@ class _CommunityFeedReferenceHeaderState
           future: widget.topics,
           builder: (context, snapshot) {
             final topics = snapshot.data ?? const <CommunityTopic>[];
+            // The selected chips are projections of actual server topics.
+            // The source taxonomy uses motivation-support / wellness rather
+            // than invented mindset / sleep identifiers.
             final preferred = <String>[
               'nutrition',
               'fitness',
-              'mindset',
-              'sleep',
+              'motivation-support',
+              'wellness',
             ];
             final visible = <CommunityTopic>[];
             for (final slug in preferred) {
@@ -240,10 +243,32 @@ class _CommunityFeedReferenceHeaderState
                   for (final topic in visible.take(4)) ...[
                     const SizedBox(width: 7),
                     _CommunityReferenceChip(
-                      label: CommunityTaxonomySheet.titleForSlug(
-                        context,
-                        topic.slug,
-                      ),
+                      label: switch (topic.slug) {
+                        'nutrition' => communityText(
+                          context,
+                          'Nutrition',
+                          'التغذية',
+                        ),
+                        'fitness' => communityText(
+                          context,
+                          'Workouts',
+                          'التمارين',
+                        ),
+                        'motivation-support' => communityText(
+                          context,
+                          'Motivation',
+                          'التحفيز',
+                        ),
+                        'wellness' => communityText(
+                          context,
+                          'Wellness',
+                          'العافية',
+                        ),
+                        _ => CommunityTaxonomySheet.titleForSlug(
+                          context,
+                          topic.slug,
+                        ),
+                      },
                       onTap: widget.enabled
                           ? () => widget.onOpenTopic(topic)
                           : null,
