@@ -1488,8 +1488,22 @@ void main() {
                   findsOneWidget,
                 );
                 expect(tester.takeException(), isNull, reason: 'create post');
-                // Populate the *real* editor's 4-slot media strip through its
-                // injected picker, preserving native validation and undo.
+                // MemoryImage is decoded asynchronously even with a local,
+                // validated BIL picker. Precache the exact bytes before
+                // capturing so synthetic white tiles cannot look like a
+                // successful reference screenshot.
+                final editorContext = tester.element(
+                  find.byKey(const Key('community-post-editor-page')),
+                );
+                await tester.runAsync(() async {
+                  for (final photo
+                      in _ExtendedVisualRepository.composerImages.take(3)) {
+                    await precacheImage(MemoryImage(photo.bytes), editorContext);
+                  }
+                });
+                await tester.pumpAndSettle();
+                // Populate the real editor's four slots through the injected
+                // picker, preserving native validation and undo.
                 for (var index = 0; index < 3; index++) {
                   final addPhoto = find.byKey(
                     const Key('community-post-add-photo'),
