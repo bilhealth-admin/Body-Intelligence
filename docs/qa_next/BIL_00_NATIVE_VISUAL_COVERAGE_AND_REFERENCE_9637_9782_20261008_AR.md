@@ -63,6 +63,7 @@
 - Drafts: fixture يستخدم أربع صور BIL محلية حقيقية؛ أُضيف precacheImage قبل الالتقاط لأن اللقطة السابقة أظهرت مساحة بيضاء رغم وجود Image.memory في شجرة العناصر. لا يعني هذا نسخ صور المستخدم أو إثبات pixel-match.
 - Feed: جرى ضبط `_CommunityPostMediaTile` ليملأ كامل خلية الـgallery بدل ترك فراغات ذات عرض كبير بين الصور الأربع.
 - Composer: جرى إصلاح Overflow فعلي بمقدار 2dp عند 200% text scale في بطاقة `Add photos` عبر احتساب ارتفاع الأيقونة والفراغات والـpadding، دون تعطيل اختبارات الوصول.
+- Circles: جرى استكمال الـfixture المرئي إلى 6 صفوف (10K Steps, Meal Prep & Nutrition, Intermittent Fasting, Muscle Building, Sleep Better, Mental Health & Mindset) مع member counts **اصطناعية للالتقاط فقط**. لا تنشئ دوائر على الخادم ولا تثبت وظائف join/leave أو RLS.
 - Circles/Moderation/Channels: زيادة تغطية screenshots لا تعني RLS/receipt/real-user validation.
 - Reviewer: Android 32 المرفوض لم يتغير؛ إعادة تقديم build ليست ضمن صلاحية هذا الفرع.
 

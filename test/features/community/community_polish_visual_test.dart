@@ -850,10 +850,64 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         memberCount: 468,
         postCount: 69,
       ),
-      displayName: arabic ? 'الأكل الصحي' : 'Healthy Eating',
+      displayName: arabic ? 'إعداد وجبات صحية' : 'Meal Prep & Nutrition',
       description: arabic
           ? 'شارك أفكار الوجبات والعادات المفيدة.'
           : 'Share practical meals and sustainable habits.',
+    ),
+    // Visual-only rows are never inserted into the Community database.
+    // The native page must support the complete approved six-row density.
+    ManagedCommunityCircle(
+      circle: const CommunityCircle(
+        slug: 'intermittent-fasting',
+        titleCopyKey: 'community_circle_native_title',
+        descriptionCopyKey: 'community_circle_native_description',
+        rulesCopyKey: 'community_circle_standard_rules',
+        access: CommunityCircleAccess.public,
+        joinPolicy: CommunityCircleJoinPolicy.open,
+        memberCount: 1800,
+        postCount: 67,
+      ),
+      displayName: arabic ? 'الصيام المتقطع' : 'Intermittent Fasting',
+    ),
+    ManagedCommunityCircle(
+      circle: const CommunityCircle(
+        slug: 'muscle-building',
+        titleCopyKey: 'community_circle_native_title',
+        descriptionCopyKey: 'community_circle_native_description',
+        rulesCopyKey: 'community_circle_standard_rules',
+        access: CommunityCircleAccess.public,
+        joinPolicy: CommunityCircleJoinPolicy.open,
+        memberCount: 2600,
+        postCount: 108,
+      ),
+      displayName: arabic ? 'بناء العضلات' : 'Muscle Building',
+    ),
+    ManagedCommunityCircle(
+      circle: const CommunityCircle(
+        slug: 'sleep-better',
+        titleCopyKey: 'community_circle_native_title',
+        descriptionCopyKey: 'community_circle_native_description',
+        rulesCopyKey: 'community_circle_standard_rules',
+        access: CommunityCircleAccess.public,
+        joinPolicy: CommunityCircleJoinPolicy.open,
+        memberCount: 1100,
+        postCount: 40,
+      ),
+      displayName: arabic ? 'نوم أفضل' : 'Sleep Better',
+    ),
+    ManagedCommunityCircle(
+      circle: const CommunityCircle(
+        slug: 'mental-health-mindset',
+        titleCopyKey: 'community_circle_native_title',
+        descriptionCopyKey: 'community_circle_native_description',
+        rulesCopyKey: 'community_circle_standard_rules',
+        access: CommunityCircleAccess.public,
+        joinPolicy: CommunityCircleJoinPolicy.open,
+        memberCount: 1900,
+        postCount: 55,
+      ),
+      displayName: arabic ? 'الصحة النفسية والتحفيز' : 'Mental Health & Mindset',
     ),
   ];
 
