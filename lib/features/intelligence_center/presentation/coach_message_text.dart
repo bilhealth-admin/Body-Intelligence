@@ -76,7 +76,10 @@ class _CoachMessageTextState extends State<CoachMessageText>
     _visibleText = String.fromCharCodes(_runes.take(visible));
     final controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: remaining * 40),
+      // Short answers keep their conversational reveal. Very long answers
+      // are already fully available, so cap the cosmetic reveal to avoid
+      // keeping a multi-paragraph message in motion for minutes.
+      duration: Duration(milliseconds: (remaining * 40).clamp(320, 2400)),
     );
     _revealController = controller;
     controller.addListener(() {
@@ -99,6 +102,15 @@ class _CoachMessageTextState extends State<CoachMessageText>
     super.dispose();
   }
 
+  TextStyle _messageStyle(BuildContext context) =>
+      (widget.style ?? DefaultTextStyle.of(context).style).copyWith(
+        // The writing language can differ from the UI language.
+        fontFamilyFallback: <String>[
+          'BILArabic',
+          ...?widget.style?.fontFamilyFallback,
+        ],
+      );
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -107,21 +119,43 @@ class _CoachMessageTextState extends State<CoachMessageText>
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
-        SelectableText(
-          _visibleText,
-          textDirection: widget.textDirection,
-          style: (widget.style ?? DefaultTextStyle.of(context).style).copyWith(
-            // A user's writing language can differ from the interface locale.
-            // Use the bundled Arabic face before an OS/test fallback glyph.
-            fontFamilyFallback: <String>[
-              'BILArabic',
-              ...?widget.style?.fontFamilyFallback,
+        // Text reveals must not grow the bubble on every tick. Reserve the
+        // complete reply's typography from the first frame so its timestamp,
+        // reactions, report button and Sources remain at a fixed offset.
+        if (widget.animateReveal && _runes.length > 8)
+          Stack(
+            fit: StackFit.passthrough,
+            children: [
+              ExcludeSemantics(
+                child: Opacity(
+                  opacity: 0,
+                  child: Text(
+                    widget.text,
+                    textDirection: widget.textDirection,
+                    style: _messageStyle(context),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: SelectableText(
+                    _visibleText,
+                    textDirection: widget.textDirection,
+                    style: _messageStyle(context),
+                    semanticsLabel: widget.text,
+                  ),
+                ),
+              ),
             ],
+          )
+        else
+          SelectableText(
+            _visibleText,
+            textDirection: widget.textDirection,
+            style: _messageStyle(context),
+            semanticsLabel: widget.animateReveal ? widget.text : null,
           ),
-          // Screen readers receive the complete answer while the visual layer
-          // reveals it quickly.
-          semanticsLabel: widget.animateReveal ? widget.text : null,
-        ),
         if (widget.showTime) ...[
           const SizedBox(height: 4),
           CoachMessageTime(createdAt: widget.createdAt),
