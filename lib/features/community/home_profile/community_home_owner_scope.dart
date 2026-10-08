@@ -77,6 +77,9 @@ extension _CommunityHomeOwnerScope on _CommunityHubPageState {
         _deliveredOwnerId = nextOwner;
         if (!changed) return;
         _invalidateHomeVisit();
+        // Production binds a fresh repository; a supplied repository needs
+        // an explicit new visit after any owner transition, even A-B-A.
+        if (widget.repository != null) _suspendReboundFeed = true;
         final currentSdkOwner = client.auth.currentUser?.id;
         _setHomeState(() {
           _ownerId = nextOwner;

@@ -9,6 +9,7 @@ class _FeedTab extends StatefulWidget {
     this.ownerIsCurrent,
     this.ownerChanges,
     this.entryWelcomeHandled = false,
+    this.suspendAfterOwnerChange = false,
     super.key,
   });
   final CommunityRepository repository;
@@ -18,6 +19,7 @@ class _FeedTab extends StatefulWidget {
   final ValueGetter<bool>? ownerIsCurrent;
   final Listenable? ownerChanges;
   final bool entryWelcomeHandled;
+  final bool suspendAfterOwnerChange;
   @override
   State<_FeedTab> createState() => _FeedTabState();
 }
@@ -513,7 +515,9 @@ class _FeedTabState extends State<_FeedTab>
             if (visit == null) {
               return const _CommunityProfileOwnerChangedBody();
             }
-            final posts = snapshot.data ?? const <CommunityPost>[];
+            final posts = widget.suspendAfterOwnerChange
+                ? const <CommunityPost>[]
+                : snapshot.data ?? const <CommunityPost>[];
             final loading = snapshot.connectionState != ConnectionState.done;
             return RefreshIndicator(
               onRefresh: _refresh,
@@ -544,7 +548,10 @@ class _FeedTabState extends State<_FeedTab>
                           repository: visit.repository,
                           posts: posts,
                           topics: _suggestedTopics,
-                          enabled: !_openingComposer && !_managingPost,
+                          enabled:
+                              !_openingComposer &&
+                              !_managingPost &&
+                              !widget.suspendAfterOwnerChange,
                           ownerIsCurrent: visit.isCurrent,
                           onCompose: _openComposer,
                           onOpenTopic: _openTopic,

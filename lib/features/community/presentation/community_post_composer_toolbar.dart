@@ -61,8 +61,8 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
           foregroundColor: Colors.white,
           disabledForegroundColor: Colors.white,
           shadowColor: Colors.transparent,
-          minimumSize: const Size(0, 52),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          minimumSize: const Size(0, 68),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),

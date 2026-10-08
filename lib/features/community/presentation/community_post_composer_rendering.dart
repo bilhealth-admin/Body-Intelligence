@@ -192,7 +192,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
     bool busy,
   ) => _composerTextBox(
     key: const Key('community-composer-body-box'),
-    minHeight: 120,
+    minHeight: 150,
     child: TextField(
       key: const Key('community-post-composer'),
       controller: _composer,
@@ -201,8 +201,8 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
       maxLength: CommunityTextLimits.bodyCodePointLimit,
       maxLengthEnforcement: MaxLengthEnforcement.none,
       buildCounter: communityBodyCounter(_composer),
-      minLines: 4,
-      maxLines: 7,
+      minLines: 5,
+      maxLines: 8,
       style: TextStyle(
         fontSize: 14,
         height: 1.45,

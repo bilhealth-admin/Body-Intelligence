@@ -382,7 +382,7 @@ class _CommunityComposeAction extends StatelessWidget {
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
     child: ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 44),
+      constraints: const BoxConstraints(minHeight: 48),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
         child: Row(

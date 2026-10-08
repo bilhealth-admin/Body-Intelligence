@@ -32,7 +32,7 @@ extension _CommunityPostComposerImages on _CommunityPostComposerPageState {
           (51 +
                   textHeight(label, labelStyle) +
                   textHeight('${_selectedImages.length}/4', countStyle))
-              .clamp(88.0, double.infinity);
+              .clamp(100.0, double.infinity);
       final dark = Theme.of(context).brightness == Brightness.dark;
       return SizedBox(
         height: height,

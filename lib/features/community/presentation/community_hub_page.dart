@@ -143,6 +143,8 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   String? _deliveredOwnerId;
   int _homeVisitEpoch = 0;
   int _homeAuthBinding = 0;
+  // Do not re-expose an injected repository's cached feed after queued ABA.
+  bool _suspendReboundFeed = false;
   final _homeOwnerChanges = ValueNotifier<int>(0);
   bool _homeSignalDisposed = false;
   Future<CommunityProfileOverview?>? _profilePreview;
@@ -163,6 +165,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         !identical(oldWidget.client, widget.client)) {
       _invalidateHomeVisit();
       _homeAuthBinding++;
+      _suspendReboundFeed = false;
       _repository = widget.repository ?? _productionRepository();
       _ownerId = _readHomeRepositoryOwner(_repository);
       _deliveredOwnerId = _ownerId;
@@ -361,6 +364,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: _feedMode,
                 entryWelcomeHandled: widget.entryWelcomeHandled,
+                suspendAfterOwnerChange: _suspendReboundFeed,
                 ownerIsCurrent: visit.isCurrent,
                 ownerChanges: visit.changes,
                 onOpenCircles: () {
@@ -376,6 +380,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: _feedMode,
                 entryWelcomeHandled: widget.entryWelcomeHandled,
+                suspendAfterOwnerChange: _suspendReboundFeed,
                 ownerIsCurrent: visit.isCurrent,
                 ownerChanges: visit.changes,
                 onOpenCircles: () {

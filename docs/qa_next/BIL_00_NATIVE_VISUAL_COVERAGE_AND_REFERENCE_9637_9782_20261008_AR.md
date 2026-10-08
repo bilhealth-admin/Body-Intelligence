@@ -66,7 +66,15 @@
 - Circles/Moderation/Channels: زيادة تغطية screenshots لا تعني RLS/receipt/real-user validation.
 - Reviewer: Android 32 المرفوض لم يتغير؛ إعادة تقديم build ليست ضمن صلاحية هذا الفرع.
 
-## 5) بوابات الإغلاق
+## 5) Contract-compatible visual fixes after full regression
+
+- Restored the approved Composer body at 150dp, photo rail at 100dp and Publish at 68dp, without reintroducing 200% font overflow.
+- Restored Profile cover 80/248 and self quick-action minimum height 88.5dp.
+- Restored 48dp minimum hit target for the Community compose action shortcuts, preserving touch accessibility.
+- Injected repositories never revive previous-owner Feed content after queued A→B→A; the policy notice remains visible; production repository rebinding remains enabled.
+- All original regression assertions remain unchanged.
+
+## 6) بوابات الإغلاق
 
 1. نجاح CI `flutter-checks` و `isolated-sql-contracts` و **كل** `portable-regression (0–3)` و `flutter-visual-capture` على SHA واحد؛ لا يُسمح بتخفيف assertions أو استبعاد الاختبارات.
 2. مقارنة screenshots Native actuals بالمراجع الصحيحة بحالة ولغة وثيم وviewport مطابقين مع توثيق الاختلافات، لا الاكتفاء بنجاح capture.
