@@ -8,6 +8,7 @@ import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'weekly_report_engine.dart';
 import 'weekly_report_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'weekly_report_body.dart';
 part 'weekly_report_food.dart';
@@ -484,7 +485,7 @@ class WeeklyReportPage extends ConsumerWidget {
   const WeeklyReportPage({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         title: FittedBox(
           fit: BoxFit.scaleDown,
@@ -554,7 +555,7 @@ class WeeklyReportPage extends ConsumerWidget {
             ),
             data: (report) => _Body(report: report),
           ),
-    );
+    ));
   }
 }
 
