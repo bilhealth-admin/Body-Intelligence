@@ -15,7 +15,7 @@ void main() {
   };
 
   for (final locale in AppLocalizations.supportedLocales) {
-    testWidgets('Analytics Home return is readable in ${locale.toLanguageTag()}', (
+    testWidgets('Analytics Home ${locale.toLanguageTag()}', (
       tester,
     ) async {
       await tester.pumpWidget(
