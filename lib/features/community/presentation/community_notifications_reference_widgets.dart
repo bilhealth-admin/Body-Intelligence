@@ -13,6 +13,7 @@ extension _CommunityNotificationsReferenceWidgets
     final repository = _repository;
     final owner = _loadedOwnerId;
     final generation = _loadGeneration;
+    final scheme = Theme.of(context).colorScheme;
 
     Widget action({
       required String id,
@@ -20,30 +21,64 @@ extension _CommunityNotificationsReferenceWidgets
       required String label,
       required int count,
       required String route,
-    }) => ListTile(
+    }) => Material(
       key: ValueKey(id),
-      minTileHeight: 48,
-      contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
-      leading: Icon(icon, size: 22),
-      title: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-      trailing: Semantics(
-        value: '$count',
-        child: Text(
-          CommunityAttention.badgeText(count),
-          key: ValueKey('$id-count'),
-          style: Theme.of(
-            context,
-          ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: repository == null || owner == null
+            ? null
+            : () => _openAndRefresh(route, repository, owner, generation),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: 48,
+            maxWidth: MediaQuery.sizeOf(context).width - 48,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: scheme.primary),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Semantics(
+                  value: '$count',
+                  child: Text(
+                    CommunityAttention.badgeText(count),
+                    key: ValueKey('$id-count'),
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      onTap: repository == null || owner == null
-          ? null
-          : () => _openAndRefresh(route, repository, owner, generation),
     );
 
+    // Compact, responsive attention shortcuts follow the approved Activity
+    // density. Preserve accessible 48dp hit targets, count keys and readback
+    // navigation; no requests/messages are silently dropped.
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Column(
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
         children: [
           if (updates.incomingRequests > 0)
             action(
