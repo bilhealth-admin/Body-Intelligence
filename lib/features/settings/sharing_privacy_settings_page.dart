@@ -18,6 +18,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../nutrition/presentation/meal_vision_consent_gate.dart';
 import 'cloud_sync_status_presentation.dart';
 import 'reference_settings_copy.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 String _privacyText(BuildContext context, String key) {
   final locale = Localizations.localeOf(context);
@@ -283,7 +284,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final copy = ReferenceSettingsCopy.of(context);
     final diarySharing = ref.watch(diarySharingSummaryProvider);
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(centerTitle: true, title: Text(copy('Sharing & Privacy'))),
       body: ListView(
         children: [
@@ -389,7 +390,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 

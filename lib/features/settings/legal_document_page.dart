@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 const _aiCoachPrivacyDisclosure =
     'BIL sends your questions and only the categories you select—weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns—to Google Gemini, a third-party AI service operated by Google, to generate requested answers. Raw microphone audio is not sent. You can decline and keep using local features, or withdraw later in AI Coach settings.';
@@ -37,7 +38,7 @@ class LegalDocumentPage extends StatelessWidget {
     // The legal entity is rendered from the immutable metadata line below.
     // Translation services must never localize or rename it.
     final effectiveStatus = copy.effective.split(' • ').take(2).join(' • ');
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(title: Text(title)),
       body: SelectionArea(
         child: ListView(
@@ -74,7 +75,7 @@ class LegalDocumentPage extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

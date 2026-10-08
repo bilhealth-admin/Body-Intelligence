@@ -5,6 +5,7 @@ import '../../app/localization/bil_locale_names.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 class LanguageSettingsPage extends ConsumerWidget {
   const LanguageSettingsPage({super.key});
@@ -14,7 +15,7 @@ class LanguageSettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(appSettingsProvider).localeCode;
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Language'))),
       body: ListView.builder(
         itemCount: orderedTags.length,
@@ -51,6 +52,6 @@ class LanguageSettingsPage extends ConsumerWidget {
           );
         },
       ),
-    );
+    ));
   }
 }

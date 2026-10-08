@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 const _trustPolicyRevision = 'BIL-TRUST-2026-08-R1';
 
@@ -138,7 +139,7 @@ class TrustSupportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     String tr(String en, String arabic) => _trustText(context, en, arabic);
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(title: Text(tr('Trust & support', 'الثقة والمساعدة'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 116),
@@ -275,7 +276,7 @@ class TrustSupportPage extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 

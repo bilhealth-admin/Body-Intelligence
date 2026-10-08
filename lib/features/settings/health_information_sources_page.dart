@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../core/health_evidence/health_evidence_catalog.dart';
 import '../../shared/widgets/bil_clinical_note.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 class HealthInformationSourcesPage extends StatelessWidget {
   const HealthInformationSourcesPage({
@@ -32,7 +33,7 @@ class HealthInformationSourcesPage extends StatelessWidget {
         (source) => !featuredIds.contains(source.id),
       ),
     ];
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         title: Text(
           copy('Health sources & methodology', 'مصادر ومنهجية الصحة'),
@@ -75,7 +76,7 @@ class HealthInformationSourcesPage extends StatelessWidget {
           ],
         ],
       ),
-    );
+    ));
   }
 }
 

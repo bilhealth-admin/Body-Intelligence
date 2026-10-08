@@ -11,6 +11,7 @@ import '../../shared/widgets/secondary_page_app_bar.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'location_catalog.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 class LocationSettingsPage extends ConsumerStatefulWidget {
   const LocationSettingsPage({super.key});
@@ -363,7 +364,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
         timezoneController.text.trim(),
     ].join(' · ');
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: SecondaryPageAppBar(
         title: Text(l('title')),
@@ -471,7 +472,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                 ),
               ],
             ),
-    );
+    ));
   }
 }
 
