@@ -74,6 +74,12 @@
 - Injected repositories never revive previous-owner Feed content after queued A→B→A; the policy notice remains visible; production repository rebinding remains enabled.
 - All original regression assertions remain unchanged.
 
+### Confirmed native QA on earlier SHA (not final acceptance)
+
+- Native render [37807249158](https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/37807249158) exercised widgets successfully but release locale test found two unregistered literal strings. The tab labels now reuse authored 25-locale taxonomy rather than adding English source fallbacks.
+- Exact Dart formatter proposal `86480c8f92a59f75f46c172519c00053f6afd3b7c70a3b9ceec27a168f44d70f` wraps the synthetic image picker type; no assertions altered.
+- Synthetic owner transition now blocks even the retired Feed read request, while leaving real production account rebinding unchanged.
+
 ## 6) بوابات الإغلاق
 
 1. نجاح CI `flutter-checks` و `isolated-sql-contracts` و **كل** `portable-regression (0–3)` و `flutter-visual-capture` على SHA واحد؛ لا يُسمح بتخفيف assertions أو استبعاد الاختبارات.

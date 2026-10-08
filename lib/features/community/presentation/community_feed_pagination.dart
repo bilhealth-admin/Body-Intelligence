@@ -24,6 +24,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   _CommunityFeedVisit? _captureFeedVisit();
 
   Future<List<CommunityPost>> _loadFirst() async {
+    // Do not fetch cached old-session content after an injected repository's
+    // owner scope was retired by a queued A -> B -> A auth transition.
+    if (widget.suspendAfterOwnerChange) return const <CommunityPost>[];
     final visit = _captureFeedVisit();
     if (visit == null) return const <CommunityPost>[];
     final repository = visit.repository;

@@ -957,7 +957,8 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
 
 /// The real native picker contract, injected with bundled synthetic QA
 /// originals. No permissions, photo library, Cloud Storage, or user data.
-final class _NativeVisualImagePicker implements CommunityPostImagePickerContract {
+final class _NativeVisualImagePicker
+    implements CommunityPostImagePickerContract {
   _NativeVisualImagePicker(this.images);
 
   final List<CommunityPostImageDraft> images;
