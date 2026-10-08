@@ -54,6 +54,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   bool changingContextFocus = false;
   Set<CoachContextFocus>? contextFocuses;
   int _lastBoostCreditsRevision = 0;
+  int _usageLoadVersion = 0;
+  String? _verifiedUsageOwnerId;
+  Map<String, Object?>? _lastVerifiedUsage;
 
   @override
   void initState() {
@@ -86,6 +89,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   }
 
   Future<Map<String, Object?>> _loadUsage() async {
+    final loadVersion = ++_usageLoadVersion;
     final client = Supabase.instance.client;
     if (client.auth.currentSession == null) {
       throw StateError('authentication_required');
@@ -127,6 +131,17 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     } on Object {
       // Older backends can still show usage while the additive notice
       // migration is rolling out.
+    }
+    // An older request may complete after sign-out, sign-in or a newer
+    // refresh. Never publish its private credit and consent data to the
+    // current owner's UI.
+    if (client.auth.currentUser?.id != ownerId) {
+      throw StateError('authentication_required');
+    }
+    result['_qualityOwnerId'] = ownerId;
+    if (mounted && loadVersion == _usageLoadVersion) {
+      _verifiedUsageOwnerId = ownerId;
+      _lastVerifiedUsage = Map<String, Object?>.unmodifiable(result);
     }
     return result;
   }
@@ -245,22 +260,86 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
       body: FutureBuilder<Map<String, Object?>>(
         future: usage,
         builder: (context, snapshot) {
-          if (snapshot.hasError) return _errorState(snapshot.error);
-          if (!snapshot.hasData) {
+          final currentOwner = Supabase.instance.client.auth.currentUser?.id;
+          final received = snapshot.data;
+          final currentData =
+              received?['_qualityOwnerId'] == currentOwner
+              ? received
+              : null;
+          // A refresh or transient network error may retain the last
+          // server-verified data, but never data from a different account.
+          final cached =
+              currentOwner != null && _verifiedUsageOwnerId == currentOwner
+              ? _lastVerifiedUsage
+              : null;
+          final data = currentData ?? cached;
+          if (data == null) {
+            if (snapshot.hasError) return _errorState(snapshot.error);
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFF1D8ACB)),
             );
           }
-          return RefreshIndicator(
-            onRefresh: () async {
-              final fresh = _loadUsage();
-              setState(() {
-                contextFocuses = null;
-                usage = fresh;
-              });
-              await fresh;
-            },
-            child: _settingsBody(snapshot.data!),
+          final refreshing =
+              snapshot.connectionState == ConnectionState.waiting;
+          return Column(
+            children: [
+              SizedBox(
+                height: 3,
+                child: refreshing
+                    ? const LinearProgressIndicator()
+                    : const SizedBox.shrink(),
+              ),
+              if (snapshot.hasError)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ListTile(
+                    key: const Key('ai-coach-settings-stale-notice'),
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Icon(Icons.info_outline_rounded, size: 20),
+                    title: Text(
+                      t(
+                        'Refresh failed. Showing last verified settings.',
+                        'تعذّر التحديث. تظهر آخر إعدادات مؤكدة.',
+                        'Actualisation impossible. Derniers réglages vérifiés.',
+                        'No se pudo actualizar. Se muestra la última versión verificada.',
+                        'Yenileme başarısız. Son doğrulanmış ayarlar gösteriliyor.',
+                      ),
+                    ),
+                    trailing: IconButton(
+                      tooltip: t(
+                        'Retry',
+                        'إعادة المحاولة',
+                        'Réessayer',
+                        'Reintentar',
+                        'Yeniden dene',
+                      ),
+                      onPressed: () => setState(() {
+                        usage = _loadUsage();
+                      }),
+                      icon: const Icon(Icons.refresh_rounded),
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    final fresh = _loadUsage();
+                    setState(() {
+                      contextFocuses = null;
+                      usage = fresh;
+                    });
+                    try {
+                      await fresh;
+                    } on Object {
+                      // Keep the verified snapshot; the inline notice and
+                      // explicit Retry expose the failed refresh.
+                    }
+                  },
+                  child: _settingsBody(data),
+                ),
+              ),
+            ],
           );
         },
       ),
