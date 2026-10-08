@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/visual_2026/bil_calm_visual_scope.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -86,6 +87,11 @@ void main() {
                 MaterialApp(
                   locale: locale,
                   supportedLocales: const <Locale>[Locale('ar'), Locale('en')],
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                  ],
                   theme: dark
                       ? ThemeData.dark(useMaterial3: true)
                       : ThemeData.light(useMaterial3: true),
@@ -159,7 +165,7 @@ void main() {
         expect(
           file.readAsStringSync(),
           isNot(contains('bil_calm_visual_scope.dart')),
-          reason: 'Protected page imports scoped visual theme: ' + file.path,
+          reason: 'Protected page imports scoped visual theme: ${file.path}',
         );
       }
     }
