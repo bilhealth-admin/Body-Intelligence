@@ -107,6 +107,7 @@ jobs:
             test/features/intelligence_center/coach_context_lifecycle_contract_test.dart \
             test/features/intelligence_center/coach_today_context_parity_test.dart \
             test/features/intelligence_center/coach_daily_brief_test.dart \
+            test/features/commerce/admin_subscription_access_test.dart \
             2>&1 | tee /tmp/bil-next-qa/focused.log
       - name: Verify architecture ceilings and serial performance prerequisite
         if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}

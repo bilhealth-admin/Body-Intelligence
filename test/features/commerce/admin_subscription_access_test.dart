@@ -45,6 +45,14 @@ void main() {
     await container.read(verifiedSubscriptionStateProvider.future);
     final originalRights = rightsLoads;
     final originalCredits = creditLoads;
+    // Independent witness: prove Flutter delivered the lifecycle event before
+    // diagnosing Riverpod's owner-scoped refresh, not just a fake timer tick.
+    final observedTransitions = <AppLifecycleState>[];
+    final witness = AppLifecycleListener(
+      binding: tester.binding,
+      onStateChange: observedTransitions.add,
+    );
+    addTearDown(witness.dispose);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
@@ -55,7 +63,19 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(rightsLoads, greaterThan(originalRights));
+    expect(
+      observedTransitions,
+      contains(AppLifecycleState.resumed),
+      reason: 'The test binding must deliver foreground resume to observers.',
+    );
+    expect(
+      rightsLoads,
+      greaterThan(originalRights),
+      reason:
+          'resumed observed by binding: $observedTransitions; '
+          'rights=$rightsLoads from $originalRights; '
+          'credits=$creditLoads from $originalCredits',
+    );
     expect(creditLoads, greaterThan(originalCredits));
     rights.close();
     credits.close();
