@@ -37,7 +37,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
   static final _startedRevealKeys = <Object>{};
   AnimationController? _revealController;
   late List<String> _graphemes;
-  late String _visibleText;
+  final _visibleText = ValueNotifier<String>('');
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
         widget.animateReveal &&
         (revealKey == null || _startedRevealKeys.add(revealKey));
     if (!animateReveal || _graphemes.length <= 8) {
-      _visibleText = widget.text;
+      _visibleText.value = widget.text;
       return;
     }
     // Grapheme clusters keep Arabic combining marks and joined emoji intact. The answer already exists locally;
@@ -74,7 +74,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
     const initialVisible = 8;
     final remaining = _graphemes.length - initialVisible;
     var visible = initialVisible;
-    _visibleText = _graphemes.take(visible).join();
+    _visibleText.value = _graphemes.take(visible).join();
     final controller = AnimationController(
       vsync: this,
       // Short answers keep their conversational reveal. Very long answers
@@ -90,9 +90,9 @@ class _CoachMessageTextState extends State<CoachMessageText>
           (controller.value * remaining).floor().clamp(0, remaining);
       if (nextVisible == visible) return;
       visible = nextVisible;
-      setState(() {
-        _visibleText = _graphemes.take(visible).join();
-      });
+      // Only the selectable text subtree rebuilds; no parent bubble,
+      // reaction buttons or hidden full-text layout is dirtied per tick.
+      _visibleText.value = _graphemes.take(visible).join();
     });
     controller.forward();
   }
@@ -100,6 +100,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
   @override
   void dispose() {
     _revealController?.dispose();
+    _visibleText.dispose();
     super.dispose();
   }
 
@@ -140,22 +141,28 @@ class _CoachMessageTextState extends State<CoachMessageText>
               Positioned.fill(
                 child: Align(
                   alignment: AlignmentDirectional.topStart,
-                  child: SelectableText(
-                    _visibleText,
-                    textDirection: widget.textDirection,
-                    style: _messageStyle(context),
-                    semanticsLabel: widget.text,
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: _visibleText,
+                    builder: (context, visible, _) => SelectableText(
+                      visible,
+                      textDirection: widget.textDirection,
+                      style: _messageStyle(context),
+                      semanticsLabel: widget.text,
+                    ),
                   ),
                 ),
               ),
             ],
           )
         else
-          SelectableText(
-            _visibleText,
-            textDirection: widget.textDirection,
-            style: _messageStyle(context),
-            semanticsLabel: widget.animateReveal ? widget.text : null,
+          ValueListenableBuilder<String>(
+            valueListenable: _visibleText,
+            builder: (context, visible, _) => SelectableText(
+              visible,
+              textDirection: widget.textDirection,
+              style: _messageStyle(context),
+              semanticsLabel: widget.animateReveal ? widget.text : null,
+            ),
           ),
         if (widget.showTime) ...[
           const SizedBox(height: 4),
