@@ -121,6 +121,20 @@ final verifiedEntitlementLoaderProvider =
       (_) => const ServerEntitlementRepository().current,
     );
 
+/// Avoids the extra lifecycle transition assumptions of
+/// AppLifecycleListener. Each observed verification owns exactly one listener
+/// that is removed when Riverpod invalidates or disposes that generation.
+final class _VerifiedCommerceResumeObserver with WidgetsBindingObserver {
+  _VerifiedCommerceResumeObserver(this.onResumed);
+
+  final VoidCallback onResumed;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) onResumed();
+  }
+}
+
 /// Starts a non-overlapping refresh after a load finishes and only while its
 /// provider is observed. Credit access must refresh independently of Premium.
 void Function() _observedAuthorityReload(
@@ -138,30 +152,40 @@ void Function() _observedAuthorityReload(
   // Headless Riverpod consumers (including entitlement policy tests) do not
   // install a Flutter WidgetsBinding. Keep their 30-second refresh operational
   // without assuming that an application lifecycle exists.
-  AppLifecycleListener? appLifecycle;
+  WidgetsBinding? binding;
   try {
-    final binding = WidgetsBinding.instance;
-    appLifecycle = AppLifecycleListener(
-      binding: binding,
-      // Reverify on the delivered foreground state, not only on Flutter's
-      // synthesized inactive -> resumed edge. Android may restore through
-      // hidden/paused/inactive; a missed edge must never keep rights stale.
-      onStateChange: (state) {
-        if (state != AppLifecycleState.resumed ||
-            disposed ||
-            !observed ||
-            !loaded) {
-          return;
-        }
-        refresh?.cancel();
-        (resumeReload ?? reload)();
-      },
-    );
+    binding = WidgetsBinding.instance;
   } on FlutterError {
-    // Only the lifecycle observer is unavailable. Server verification and
-    // subscription/credit refresh must still work in headless runtimes.
+    // Headless Riverpod tests have no WidgetsBinding. Keep the periodic and
+    // owner-triggered verified refreshes without a Flutter lifecycle observer.
   }
-  ref.onDispose(() => appLifecycle?.dispose());
+  _VerifiedCommerceResumeObserver? appLifecycle;
+  if (binding != null) {
+    appLifecycle = _VerifiedCommerceResumeObserver(() {
+      // QA-only trace contains no user identifiers, credits, or tokens. A
+      // lifecycle event does not by itself establish account entitlement.
+      assert(() {
+        debugPrint(
+          'BIL_QA_RESUME received observed=$observed '
+          'loaded=$loaded disposed=$disposed',
+        );
+        return true;
+      }());
+      if (disposed || !observed || !loaded) return;
+      refresh?.cancel();
+      (resumeReload ?? reload)();
+    });
+    binding.addObserver(appLifecycle);
+    assert(() {
+      debugPrint('BIL_QA_RESUME registered');
+      return true;
+    }());
+  }
+  ref.onDispose(() {
+    if (binding != null && appLifecycle != null) {
+      binding!.removeObserver(appLifecycle!);
+    }
+  });
   void schedule() {
     refresh?.cancel();
     refresh = Timer(const Duration(seconds: 30), reload);
