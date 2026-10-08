@@ -18,7 +18,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            onPressed: _finishEditing,
+            onPressed: _savingLayout ? null : _finishEditing,
             icon: const Icon(Icons.arrow_back_rounded),
           ),
           title: Text(
@@ -684,7 +684,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
           minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
           child: FilledButton(
             key: const Key('dashboard-preferences-done'),
-            onPressed: _finishEditing,
+            onPressed: _savingLayout ? null : _finishEditing,
             child: Text(_sectionCopy(context, 'Done editing', 'إنهاء التعديل')),
           ),
         ),
