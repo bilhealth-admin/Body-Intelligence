@@ -79,13 +79,7 @@ class SettingsPage extends ConsumerWidget {
       ),
       body: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: dark
-              ? null
-              : const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFF9FBFF), Color(0xFFF3F7FC)],
-                ),
+          color: Theme.of(context).scaffoldBackgroundColor,
         ),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 96),
@@ -360,8 +354,8 @@ class _MoreSection extends StatelessWidget {
             child: Text(
               title,
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -.25,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -.12,
                 color: dark
                     ? theme.colorScheme.onSurface
                     : const Color(0xFF101C33),
@@ -372,16 +366,16 @@ class _MoreSection extends StatelessWidget {
             color: dark
                 ? theme.colorScheme.surfaceContainer
                 : const Color(0xFFFEFFFF),
-            elevation: dark ? 0 : 1.5,
+            elevation: 0,
             shadowColor: dark
                 ? Colors.black.withValues(alpha: .18)
                 : const Color(0xFF315E9B).withValues(alpha: .10),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(16),
               side: BorderSide(
                 color: dark
-                    ? Colors.white.withValues(alpha: .09)
-                    : const Color(0xFFDDE7F3),
+                    ? Colors.white.withValues(alpha: .08)
+                    : const Color(0xFFE8EAEE),
               ),
             ),
             clipBehavior: Clip.antiAlias,
