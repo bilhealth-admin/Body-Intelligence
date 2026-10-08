@@ -25,7 +25,7 @@ void main() {
   );
 
   for (final locale in AppLocalizations.supportedLocales) {
-    testWidgets('Unknown health source is localized ${locale.toLanguageTag()}', (
+    testWidgets('Unknown source ${locale.toLanguageTag()}', (
       tester,
     ) async {
       await tester.pumpWidget(
