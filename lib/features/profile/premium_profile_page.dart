@@ -30,6 +30,7 @@ import 'providers/user_profile_provider.dart';
 import 'providers/profile_auth_identity_provider.dart';
 import 'profile_locale_copy.dart';
 import 'services/profile_photo_service.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'premium_profile_components.dart';
 part 'premium_profile_actions.dart';
@@ -131,7 +132,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
     final photoAsync = ref.watch(profilePhotoProvider);
     final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     final authIdentityAsync = ref.watch(profileAuthIdentityProvider);
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !saving,
       child: Scaffold(
         appBar: SecondaryPageAppBar(
@@ -435,6 +436,6 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
           },
         ),
       ),
-    );
+    ));
   }
 }

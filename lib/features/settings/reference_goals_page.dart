@@ -12,6 +12,7 @@ import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../weight/providers/weight_provider.dart';
 import '../weight/domain/weight_goal_progress.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 part 'reference_goals_components.dart';
 
 @visibleForTesting
@@ -435,7 +436,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
   Widget build(BuildContext context) {
     final profileState = ref.watch(userProfileProvider);
     final effectiveCurrentWeight = ref.watch(effectiveCurrentWeightProvider);
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !saving,
       child: Scaffold(
         appBar: AppBar(centerTitle: true, title: Text(c('Goals'))),
@@ -676,7 +677,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
           },
         ),
       ),
-    );
+    ));
   }
 }
 

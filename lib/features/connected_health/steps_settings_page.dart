@@ -7,6 +7,7 @@ import '../../app/theme/bil_semantic_icons.dart';
 import '../../data/repositories/preferences_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'providers/connected_health_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 const stepGoalMinimum = 1000;
 const stepGoalMaximum = 100000;
@@ -248,7 +249,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
         : watchAvailable
         ? t('A connected watch source is available.')
         : t('No connected watch source is available.');
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !saving,
       child: Scaffold(
         appBar: AppBar(
@@ -394,7 +395,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                 ],
               ),
       ),
-    );
+    ));
   }
 }
 

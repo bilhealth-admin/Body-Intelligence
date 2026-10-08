@@ -8,6 +8,7 @@ import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'providers/daily_log_provider.dart';
 import 'water_mutation_coordinator.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 class DailyWaterPage extends ConsumerStatefulWidget {
   const DailyWaterPage({super.key, this.returnPath});
@@ -107,21 +108,21 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && !saving) leave();
       },
       child: Scaffold(
         key: const Key('daily-water-page'),
-        backgroundColor: const Color(0xFFF5F5F8),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFF5F5F8),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           surfaceTintColor: Colors.transparent,
           leading: BackButton(onPressed: saving ? null : leave),
           title: Text(
             context.strings.text('Water'),
-            style: const TextStyle(fontWeight: FontWeight.w800),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
         body: ListView(
@@ -166,6 +167,6 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

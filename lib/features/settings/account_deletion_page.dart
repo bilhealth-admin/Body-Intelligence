@@ -7,6 +7,7 @@ import '../../app/environment/app_environment.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../auth/apple_credential_lifecycle.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'account_deletion_copy.dart';
 
@@ -237,7 +238,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
   @override
   Widget build(BuildContext context) {
     final copy = _AccountDeletionCopy.of(context);
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !_submitting,
       child: Scaffold(
         appBar: AppBar(title: Text(copy.title)),
@@ -246,7 +247,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
           children: [
             Icon(
               Icons.person_remove_outlined,
-              size: 48,
+              size: 22,
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 20),
@@ -301,6 +302,6 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
