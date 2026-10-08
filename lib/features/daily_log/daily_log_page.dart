@@ -56,6 +56,7 @@ import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_meals_list.dart';
 import 'presentation/daily_log_today_sections.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'daily_log_page_actions.dart';
 part 'daily_log_meal_entry.dart';
@@ -246,7 +247,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       }
     }
 
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || mutationBusy) return;
@@ -651,6 +652,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

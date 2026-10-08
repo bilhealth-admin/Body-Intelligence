@@ -57,7 +57,7 @@ class _MealImageGuidePageState extends ConsumerState<MealImageGuidePage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final usage = ref.watch(mealVisionUsageProvider);
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         title: Text(_mealGuideText(context, 'meal_scan')),
         actions: [
@@ -141,7 +141,7 @@ class _MealImageGuidePageState extends ConsumerState<MealImageGuidePage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
