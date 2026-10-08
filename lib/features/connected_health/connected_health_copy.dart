@@ -22,6 +22,17 @@ String connectedHealthText(
   return connectedHealthTextForLanguage(language, english, arabic);
 }
 
+/// Localize the generic fallback while keeping verified device product names.
+String connectedHealthDisplayName(
+  BuildContext context,
+  ConnectedHealthSignalView signal,
+) {
+  final name = connectedHealthDisplaySource(signal);
+  return name == 'Health source'
+      ? connectedHealthText(context, 'Health source', 'مصدر الصحة')
+      : name;
+}
+
 String connectedHealthSignalValueText(
   BuildContext context,
   ConnectedHealthSignalView signal,
