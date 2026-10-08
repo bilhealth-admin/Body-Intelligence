@@ -113,9 +113,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                           _buildCommunityTitleField(context, busy),
                           const SizedBox(height: 8),
                           _buildCommunityBodyField(context, busy),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 9),
                           _buildCommunityImageStrip(context, busy),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           _buildCommunityReferenceOptions(context, busy),
                         ],
                       ),
@@ -192,7 +192,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
     bool busy,
   ) => _composerTextBox(
     key: const Key('community-composer-body-box'),
-    minHeight: 150,
+    minHeight: 120,
     child: TextField(
       key: const Key('community-post-composer'),
       controller: _composer,
@@ -201,8 +201,8 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
       maxLength: CommunityTextLimits.bodyCodePointLimit,
       maxLengthEnforcement: MaxLengthEnforcement.none,
       buildCounter: communityBodyCounter(_composer),
-      minLines: 5,
-      maxLines: 8,
+      minLines: 4,
+      maxLines: 7,
       style: TextStyle(
         fontSize: 14,
         height: 1.45,

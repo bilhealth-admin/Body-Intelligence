@@ -221,6 +221,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
           ? null
           : BilReferenceBottomBar(
               selected: 3,
+              dark: Theme.of(context).brightness == Brightness.dark,
               onSelected: (index) {
                 if (!visit.isCurrent()) return;
                 if (index == 2) {

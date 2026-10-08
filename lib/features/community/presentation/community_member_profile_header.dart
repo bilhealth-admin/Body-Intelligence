@@ -106,7 +106,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
       builder: (context, constraints) {
         // Measurements are from the immutable 248px-wide Profile panel.
         // Only the photographs follow its aspect ratios; text remains scalable.
-        final coverHeight = constraints.maxWidth * 80 / 248;
+        final coverHeight = constraints.maxWidth * 72 / 248;
         final avatarDiameter = (constraints.maxWidth * 65 / 248)
             .clamp(88.0, 112.0)
             .toDouble();

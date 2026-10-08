@@ -62,6 +62,10 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     await tester.pump();
+    // Riverpod refreshes through a zero-delay scheduler task after the
+    // lifecycle observer returns. Advancing fake time waits for that queued
+    // task; the strict rights and credit read-count assertions remain intact.
+    await tester.pump(const Duration(milliseconds: 1));
 
     expect(
       observedTransitions,

@@ -164,26 +164,15 @@ void Function() _observedAuthorityReload(
     appLifecycle = _VerifiedCommerceResumeObserver(() {
       // QA-only trace contains no user identifiers, credits, or tokens. A
       // lifecycle event does not by itself establish account entitlement.
-      assert(() {
-        debugPrint(
-          'BIL_QA_RESUME received observed=$observed '
-          'loaded=$loaded disposed=$disposed',
-        );
-        return true;
-      }());
       if (disposed || !observed || !loaded) return;
       refresh?.cancel();
       (resumeReload ?? reload)();
     });
     binding.addObserver(appLifecycle);
-    assert(() {
-      debugPrint('BIL_QA_RESUME registered');
-      return true;
-    }());
   }
   ref.onDispose(() {
     if (binding != null && appLifecycle != null) {
-      binding!.removeObserver(appLifecycle!);
+      binding.removeObserver(appLifecycle);
     }
   });
   void schedule() {

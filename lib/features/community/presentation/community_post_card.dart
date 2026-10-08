@@ -230,7 +230,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               BilAccountAvatar(
-                radius: 19,
+                radius: 18,
                 networkUrl: widget.post.authorAvatarUrl,
               ),
               const SizedBox(width: 10),
@@ -363,14 +363,14 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             ),
           ],
           if (widget.referenceMetadata case final metadata?) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             _CommunityPostReferenceBlock(
               metadata: metadata,
               repository: widget.repository,
               compact: true,
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           _ExpandableCommunityPostBody(
             postId: widget.post.id,
             body: widget.post.body,
@@ -466,8 +466,8 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       )
                     : Icon(
                         _stats.liked
-                            ? Icons.thumb_up_rounded
-                            : Icons.thumb_up_outlined,
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                       ),
                 label: Text(
                   '${_stats.likeCount}',
@@ -520,8 +520,8 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                       )
                     : Icon(
                         _saved
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
                       ),
               ),
               Builder(

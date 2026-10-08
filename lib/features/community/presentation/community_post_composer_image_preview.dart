@@ -23,13 +23,13 @@ extension _CommunityPostComposerImages on _CommunityPostComposerPageState {
         return result;
       }
 
-      // Keep the reference's 100 dp strip at ordinary type sizes, while
+      // Keep a compact reference-style strip at ordinary type sizes, while
       // allowing every translated label to wrap at the user's text scale.
       final height =
-          (49 +
+          (45 +
                   textHeight(label, labelStyle) +
                   textHeight('${_selectedImages.length}/4', countStyle))
-              .clamp(100.0, double.infinity);
+              .clamp(88.0, double.infinity);
       final dark = Theme.of(context).brightness == Brightness.dark;
       return SizedBox(
         height: height,
