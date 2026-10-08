@@ -1477,6 +1477,26 @@ void main() {
                 );
               }
               if (scene.key == 'updates') {
+                // The compact inbox shortcuts retain real 48dp minimum touch
+                // targets and exact count semantics in both RTL and LTR,
+                // including text at 200%. Aesthetic compression must not
+                // reduce accessibility or hide unread state.
+                for (final id in const [
+                  'community-attention-requests',
+                  'community-attention-messages',
+                ]) {
+                  final shortcut = find.byKey(ValueKey(id));
+                  expect(shortcut, findsOneWidget);
+                  expect(
+                    tester.getSize(shortcut).height,
+                    greaterThanOrEqualTo(48),
+                    reason: id,
+                  );
+                  expect(
+                    find.byKey(ValueKey('$id-count')),
+                    findsOneWidget,
+                  );
+                }
                 expect(
                   find.byKey(const Key('community-activity-filter-updates')),
                   findsOneWidget,
