@@ -20,6 +20,7 @@ import '../weight/providers/weight_provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'profile_summary_locale_copy.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 final profileFriendsCountProvider = FutureProvider<int?>((ref) async {
   if (!AppEnvironment.cloudConfigured) return null;
@@ -153,7 +154,7 @@ class ProfileSummaryPage extends ConsumerWidget {
         friendsState.hasError ||
         nameState.hasError ||
         photoState.hasError) {
-      return Scaffold(
+      return BilCalmVisualScope(builder: (context) => Scaffold(
         appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
         body: Center(
           child: Padding(
@@ -184,7 +185,7 @@ class ProfileSummaryPage extends ConsumerWidget {
             ),
           ),
         ),
-      );
+      ));
     }
     if (profileState.isLoading ||
         weightsState.isLoading ||
@@ -192,13 +193,13 @@ class ProfileSummaryPage extends ConsumerWidget {
         friendsState.isLoading ||
         nameState.isLoading ||
         photoState.isLoading) {
-      return Scaffold(
+      return BilCalmVisualScope(builder: (context) => Scaffold(
         appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
         body: const Center(child: CircularProgressIndicator()),
-      );
+      ));
     }
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       backgroundColor: colors.surfaceContainerLowest,
       appBar: AppBar(centerTitle: true, title: Text(name)),
       body: ListView(
@@ -347,7 +348,7 @@ class ProfileSummaryPage extends ConsumerWidget {
           const Divider(height: 1),
         ],
       ),
-    );
+    ));
   }
 }
 
