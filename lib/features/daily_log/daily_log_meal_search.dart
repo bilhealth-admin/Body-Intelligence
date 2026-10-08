@@ -170,8 +170,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                 maxLines: largeText ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -181,8 +181,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                 key: Key('daily-search-verified-food-badge'),
                 child: Icon(
                   Icons.verified_rounded,
-                  size: 19,
-                  color: Color(0xFF56C878),
+                  size: 16,
+                  color: scheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -222,8 +222,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             dimension: largeText ? 58 : 54,
             child: Icon(
               Icons.add_rounded,
-              size: largeText ? 32 : 30,
-              color: scheme.primary,
+              size: 20,
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -231,22 +231,24 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     );
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       elevation: 0,
       color: scheme.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: scheme.outlineVariant.withValues(alpha: .55),
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _selectFood(food, controller, displayName),
         child: Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
-            18,
-            largeText ? 14 : 11,
-            12,
-            largeText ? 14 : 11,
+            16,
+            largeText ? 14 : 10,
+            10,
+            largeText ? 14 : 10,
           ),
           child: largeText
               ? Column(
