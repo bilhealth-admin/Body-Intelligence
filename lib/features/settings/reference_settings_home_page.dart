@@ -6,13 +6,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../app/environment/app_environment.dart';
-import '../../app/theme/bil_semantic_icons.dart';
-import '../../shared/widgets/bil_native_settings_icon.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/profile_auth_identity_provider.dart';
 import '../cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import 'reference_settings_copy.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 /// Explicitly local sign-out: never revoke the member's other devices.
 final settingsSignOutProvider = Provider<Future<void> Function(String)>((ref) {
@@ -71,7 +70,7 @@ class _ReferenceSettingsHomePageState
           loading: () => false,
           error: (_, _) => false,
         );
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(
         context,
       ),
@@ -82,7 +81,7 @@ class _ReferenceSettingsHomePageState
         border: null,
         middle: Text(
           copy('Settings'),
-          style: const TextStyle(fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
         ),
       ),
       body: SafeArea(
@@ -92,7 +91,6 @@ class _ReferenceSettingsHomePageState
           children: [
             _SettingsGroup(
               title: copy('Account & profile'),
-              kind: BilSemanticIconKind.profile,
               children: [
                 _SettingsRow(copy('Profile'), '/profile-settings'),
                 _SettingsRow(copy('App Appearance'), '/settings/appearance'),
@@ -101,14 +99,12 @@ class _ReferenceSettingsHomePageState
             ),
             _SettingsGroup(
               title: copy('Diary & goals'),
-              kind: BilSemanticIconKind.goals,
               children: [
                 _SettingsRow(copy('Diary Settings'), '/settings/diary'),
               ],
             ),
             _SettingsGroup(
               title: copy('Privacy & notifications'),
-              kind: BilSemanticIconKind.privacy,
               children: [
                 _SettingsRow(
                   copy('Sharing & Privacy'),
@@ -118,7 +114,6 @@ class _ReferenceSettingsHomePageState
             ),
             _SettingsGroup(
               title: copy('Health preferences'),
-              kind: BilSemanticIconKind.health,
               children: [
                 _SettingsRow(
                   context.strings.text('Health sources & methodology'),
@@ -219,7 +214,7 @@ class _ReferenceSettingsHomePageState
           ],
         ),
       ),
-    );
+    ));
   }
 
   Future<void> _logout(String ownerId) async {
@@ -250,11 +245,9 @@ class _ReferenceSettingsHomePageState
 class _SettingsGroup extends StatelessWidget {
   const _SettingsGroup({
     required this.title,
-    required this.kind,
     required this.children,
   });
   final String title;
-  final BilSemanticIconKind kind;
   final List<Widget> children;
 
   @override
@@ -291,24 +284,14 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kind = BilSemanticIcons.kindForRoute(route);
     return CupertinoListTile(
       padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
-      leadingSize: 29,
-      leadingToTitle: 12,
-      leading: kind == null
-          ? Icon(
-              CupertinoIcons.circle,
-              size: 19,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            )
-          : BilNativeSettingsIcon(kind: kind),
       title: Tooltip(
         message: label,
         child: Text(
           label,
-          maxLines: 1,
-          softWrap: false,
+          maxLines: 2,
+          softWrap: true,
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -316,7 +299,7 @@ class _SettingsRow extends StatelessWidget {
         Directionality.of(context) == TextDirection.rtl
             ? CupertinoIcons.chevron_back
             : CupertinoIcons.chevron_forward,
-        size: 18,
+        size: 15,
         color: CupertinoColors.secondaryLabel.resolveFrom(context),
       ),
       onTap: () => context.push(route),
