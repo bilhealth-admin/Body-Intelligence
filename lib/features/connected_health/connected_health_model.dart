@@ -160,7 +160,6 @@ final class ConnectedHealthSnapshot {
   );
 }
 
-
 String? _readableHealthSourceName(Object? candidate) {
   Object? value = candidate;
   for (var depth = 0; depth < 5; depth++) {
@@ -201,8 +200,7 @@ String? _readableHealthSourceName(Object? candidate) {
         return null;
       }
     }
-    if (text.length == 36 &&
-        RegExp(r'^[0-9a-fA-F-]{36}').hasMatch(text)) {
+    if (text.length == 36 && RegExp(r'^[0-9a-fA-F-]{36}').hasMatch(text)) {
       return null;
     }
     return text;
@@ -219,8 +217,9 @@ String connectedHealthDisplaySource(ConnectedHealthSignalView signal) {
   final sourceName = _readableHealthSourceName(attrs['sourceName']);
   final productName = _readableHealthSourceName(attrs['sourceProductType']);
   final kind = _readableHealthSourceName(attrs['wearableKind'])?.toLowerCase();
-  final manufacturer =
-      _readableHealthSourceName(attrs['deviceManufacturer'])?.toLowerCase();
+  final manufacturer = _readableHealthSourceName(
+    attrs['deviceManufacturer'],
+  )?.toLowerCase();
   final product = productName?.toLowerCase();
   final deviceText = [
     source,

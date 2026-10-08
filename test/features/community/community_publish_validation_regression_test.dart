@@ -213,52 +213,53 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-  testWidgets('Publish keeps its geometry and never duplicates an in-flight request', (
-    tester,
-  ) async {
-    final repository = _Repository()
-      ..pendingTextPublication = Completer<void>();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: CommunityHubPage(
-          repository: repository,
-          postImagePicker: _Picker(),
+  testWidgets(
+    'Publish keeps its geometry and never duplicates an in-flight request',
+    (tester) async {
+      final repository = _Repository()
+        ..pendingTextPublication = Completer<void>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CommunityHubPage(
+            repository: repository,
+            postImagePicker: _Picker(),
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-create-post')));
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
 
-    final composer = find.byKey(const Key('community-post-composer'));
-    await tester.enterText(composer, 'Stable publish regression');
-    await tester.pumpAndSettle();
-    final publish = find.byKey(const Key('community-post-publish'));
-    await tester.ensureVisible(publish);
-    await tester.pumpAndSettle();
-    final before = tester.getSize(publish);
-    final initialLabel = tester.widget<FilledButton>(publish);
-    expect(initialLabel.onPressed, isNotNull);
-    await tester.tap(publish);
-    for (var i = 0; i < 30 && repository.textCalls == 0; i++) {
-      await tester.pump(const Duration(milliseconds: 50));
-    }
-    expect(repository.textCalls, 1);
-    expect(tester.getSize(publish), before);
-    expect(tester.widget<FilledButton>(publish).onPressed, isNull);
-    expect(find.text('Publish'), findsOneWidget);
+      final composer = find.byKey(const Key('community-post-composer'));
+      await tester.enterText(composer, 'Stable publish regression');
+      await tester.pumpAndSettle();
+      final publish = find.byKey(const Key('community-post-publish'));
+      await tester.ensureVisible(publish);
+      await tester.pumpAndSettle();
+      final before = tester.getSize(publish);
+      final initialLabel = tester.widget<FilledButton>(publish);
+      expect(initialLabel.onPressed, isNotNull);
+      await tester.tap(publish);
+      for (var i = 0; i < 30 && repository.textCalls == 0; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      expect(repository.textCalls, 1);
+      expect(tester.getSize(publish), before);
+      expect(tester.widget<FilledButton>(publish).onPressed, isNull);
+      expect(find.text('Publish'), findsOneWidget);
 
-    // A second tap while pending cannot call the repository again.
-    await tester.tap(publish, warnIfMissed: false);
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(repository.textCalls, 1);
-    expect(tester.getSize(publish), before);
+      // A second tap while pending cannot call the repository again.
+      await tester.tap(publish, warnIfMissed: false);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(repository.textCalls, 1);
+      expect(tester.getSize(publish), before);
 
-    repository.pendingTextPublication!.complete();
-    await tester.pumpAndSettle();
-    expect(repository.textCalls, 1);
-    expect(tester.takeException(), isNull);
-  });
+      repository.pendingTextPublication!.complete();
+      await tester.pumpAndSettle();
+      expect(repository.textCalls, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('food list is not reloaded by a parent rebuild', (tester) async {
     final repository = _Repository();

@@ -218,8 +218,9 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
     _updateState(() {
       _pendingPresetId = '__default__';
       for (final section in DashboardSectionIds.all) {
-        _pendingSectionValues[section] =
-            DashboardSectionIds.defaultVisible(section);
+        _pendingSectionValues[section] = DashboardSectionIds.defaultVisible(
+          section,
+        );
       }
     });
     final saved = await _guardedSave(() async {

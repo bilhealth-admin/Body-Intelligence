@@ -83,7 +83,9 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                     ),
                   );
                 }
-                if (snapshot.isLoading && !snapshot.hasValue && _pendingPresetId == null) {
+                if (snapshot.isLoading &&
+                    !snapshot.hasValue &&
+                    _pendingPresetId == null) {
                   return Semantics(
                     liveRegion: true,
                     label: _sectionCopy(
@@ -373,9 +375,12 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                   !state.hasError &&
                                   latestVisible == pendingVisible) {
                                 final expected = pendingVisible;
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
                                   if (!mounted ||
-                                      _pendingSectionValues[item.$1] != expected) {
+                                      _pendingSectionValues[item.$1] !=
+                                          expected) {
                                     return;
                                   }
                                   _updateState(() {

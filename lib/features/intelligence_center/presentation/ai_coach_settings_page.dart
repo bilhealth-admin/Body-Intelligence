@@ -262,8 +262,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
         builder: (context, snapshot) {
           final currentOwner = Supabase.instance.client.auth.currentUser?.id;
           final received = snapshot.data;
-          final currentData =
-              received?['_qualityOwnerId'] == currentOwner
+          final currentData = received?['_qualityOwnerId'] == currentOwner
               ? received
               : null;
           // A refresh or transient network error may retain the last

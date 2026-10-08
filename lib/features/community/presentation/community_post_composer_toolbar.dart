@@ -34,8 +34,9 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
     );
     // Preserve the publishing button's geometry, text, and surface while a
     // request is pending. The progress glyph occupies the same icon slot.
-    final publishColor =
-        dark ? const Color(0xFF285778) : const Color(0xFF17629E);
+    final publishColor = dark
+        ? const Color(0xFF285778)
+        : const Color(0xFF17629E);
     final publish = Semantics(
       liveRegion: _publishing,
       label: _publishing

@@ -140,49 +140,53 @@ void main() {
     },
   );
 
-  testWidgets('full reply never pushes an adjacent feedback row while animating', (
-    tester,
-  ) async {
-    final reply = List<String>.filled(12, 'Detailed evidence based answer.').join(' ');
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 300,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CoachMessageText(
-                  key: const ValueKey('coach-feedback-anchor'),
-                  text: reply,
-                  createdAt: DateTime(2026, 10, 8),
-                  textDirection: TextDirection.ltr,
-                  animateReveal: true,
-                  showTime: false,
-                ),
-                const SizedBox(
-                  key: ValueKey('coach-fake-reactions'),
-                  height: 48,
-                ),
-              ],
+  testWidgets(
+    'full reply never pushes an adjacent feedback row while animating',
+    (tester) async {
+      final reply = List<String>.filled(
+        12,
+        'Detailed evidence based answer.',
+      ).join(' ');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CoachMessageText(
+                    key: const ValueKey('coach-feedback-anchor'),
+                    text: reply,
+                    createdAt: DateTime(2026, 10, 8),
+                    textDirection: TextDirection.ltr,
+                    animateReveal: true,
+                    showTime: false,
+                  ),
+                  const SizedBox(
+                    key: ValueKey('coach-fake-reactions'),
+                    height: 48,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-    final feedback = find.byKey(const ValueKey('coach-fake-reactions'));
-    final top = tester.getTopLeft(feedback).dy;
-    for (final elapsed in [
-      const Duration(milliseconds: 120),
-      const Duration(milliseconds: 400),
-      const Duration(milliseconds: 1500),
-      const Duration(seconds: 2),
-    ]) {
-      await tester.pump(elapsed);
-      expect(tester.getTopLeft(feedback).dy, closeTo(top, .01));
-    }
-    expect(tester.takeException(), isNull);
-  });
+      );
+      final feedback = find.byKey(const ValueKey('coach-fake-reactions'));
+      final top = tester.getTopLeft(feedback).dy;
+      for (final elapsed in [
+        const Duration(milliseconds: 120),
+        const Duration(milliseconds: 400),
+        const Duration(milliseconds: 1500),
+        const Duration(seconds: 2),
+      ]) {
+        await tester.pump(elapsed);
+        expect(tester.getTopLeft(feedback).dy, closeTo(top, .01));
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('joined emoji and combining scripts never reveal split graphemes', (
     tester,
@@ -204,8 +208,9 @@ void main() {
     );
     for (var step = 0; step < 12; step++) {
       await tester.pump(const Duration(milliseconds: 70));
-      final visible =
-          tester.widget<SelectableText>(find.byType(SelectableText)).data!;
+      final visible = tester
+          .widget<SelectableText>(find.byType(SelectableText))
+          .data!;
       expect(
         completeClusters.take(visible.characters.length).join(),
         visible,
