@@ -25,8 +25,11 @@ extension _CommunityPostComposerImages on _CommunityPostComposerPageState {
 
       // Keep a compact reference-style strip at ordinary type sizes, while
       // allowing every translated label to wrap at the user's text scale.
+      // Icon (25) + gaps (4 + 2) + button vertical padding (16) = 47.
+      // Include four points of safety for font metrics at 200% text scale.
+      // The previous base of 45 caused a genuine 2-pixel RenderFlex overflow.
       final height =
-          (45 +
+          (51 +
                   textHeight(label, labelStyle) +
                   textHeight('${_selectedImages.length}/4', countStyle))
               .clamp(88.0, double.infinity);

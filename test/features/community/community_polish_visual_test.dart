@@ -702,13 +702,14 @@ class _ReferenceVisualRepository extends _VisualRepository {
   ];
 }
 
-
 /// Synthetic readback states: no account, production write or network request.
 /// Capture success proves native rendering, not approved-reference pixel parity.
 final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
   _ExtendedVisualRepository(super.arabic);
 
   static const pendingPostId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  static List<CommunityPostImagePreview?> get loadedDraftPreviews =>
+      _draftPreviews;
   static List<CommunityPostImagePreview?> _draftPreviews = const [];
   static List<CommunityDraftMediaMetadata> _draftMedia = const [];
 
@@ -1141,9 +1142,7 @@ void main() {
               'moderation': CommunityPostModerationPage(
                 repository: extendedRepository,
               ),
-              'channels': CommunityChannelsPage(
-                repository: channelsRepository,
-              ),
+              'channels': CommunityChannelsPage(repository: channelsRepository),
               'channel_chat': CommunityChannelMessagesPage(
                 repository: channelsRepository,
                 channelId: _VisualChannelsRepository.firstChannel,
@@ -1200,6 +1199,23 @@ void main() {
               await tester.pumpAndSettle();
               await settleVisualAssetImages(tester);
               await tester.pumpAndSettle();
+              if (scene.key == 'drafts') {
+                // Decode the actual BIL thumbnails before taking a GPU
+                // snapshot. Image.memory's asynchronous codec may otherwise
+                // leave white pixels in an otherwise passing host capture.
+                final surface = find
+                    .byKey(const Key('community-drafts-page'))
+                    .evaluate()
+                    .first;
+                await tester.runAsync(() async {
+                  for (final preview
+                      in _ExtendedVisualRepository.loadedDraftPreviews) {
+                    if (preview == null) continue;
+                    await precacheImage(MemoryImage(preview.bytes), surface);
+                  }
+                });
+                await tester.pumpAndSettle();
+              }
               expect(tester.takeException(), isNull, reason: scene.key);
               if (scene.key == 'drafts') {
                 expect(
@@ -1232,7 +1248,10 @@ void main() {
                 );
               }
               if (scene.key == 'channels') {
-                expect(find.byKey(const Key('bil07-directory')), findsOneWidget);
+                expect(
+                  find.byKey(const Key('bil07-directory')),
+                  findsOneWidget,
+                );
               }
               if (scene.key == 'channel_chat') {
                 expect(

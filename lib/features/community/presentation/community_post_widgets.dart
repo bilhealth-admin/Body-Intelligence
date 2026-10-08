@@ -432,7 +432,9 @@ class _CommunityPostMediaTile extends StatelessWidget {
                 initialIndex: initialIndex,
               ),
       ),
-      child: image,
+      // Fill each bounded gallery cell. Without this constraint the image
+      // keeps its intrinsic square size and leaves a large empty gutter.
+      child: SizedBox.expand(child: image),
     );
   }
 }

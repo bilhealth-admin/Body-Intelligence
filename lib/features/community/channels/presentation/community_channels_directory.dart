@@ -59,11 +59,14 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                     children: [
                       CircleAvatar(
                         radius: 23,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
                         child: Icon(
                           Icons.forum_outlined,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -82,14 +85,11 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                             const SizedBox(height: 6),
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
+                                color: Theme.of(context).colorScheme.primary
                                     .withValues(
-                                      alpha:
-                                          (channel.unreadCount ?? 0) > 0
-                                              ? .13
-                                              : .035,
+                                      alpha: (channel.unreadCount ?? 0) > 0
+                                          ? .13
+                                          : .035,
                                     ),
                                 borderRadius: BorderRadius.circular(12),
                               ),

@@ -60,7 +60,9 @@
 - Notifications: fixture يثبت حدثًا، ولا يغطي كامل مصفوفة AI token rewards والـreceipts.
 - Composer: لقطات empty media، ولا تثبت 4 uploads فعلية؛ **حد 1200** المعتمد من المالك أولى من «2000» في رسم مفاهيمي.
 - Profile: تخطيط الرأس والبطاقات والأزرار مختلف؛ ما زال يحتاج مقارنة viewport/crop موحدة.
-- Drafts: fixture يعرض أربع صور BIL محلية حقيقية؛ لا يعني ذلك أن صور المستخدم أو المرجع الأصلية نُسخت ولا يثبت pixel-match.
+- Drafts: fixture يستخدم أربع صور BIL محلية حقيقية؛ أُضيف precacheImage قبل الالتقاط لأن اللقطة السابقة أظهرت مساحة بيضاء رغم وجود Image.memory في شجرة العناصر. لا يعني هذا نسخ صور المستخدم أو إثبات pixel-match.
+- Feed: جرى ضبط `_CommunityPostMediaTile` ليملأ كامل خلية الـgallery بدل ترك فراغات ذات عرض كبير بين الصور الأربع.
+- Composer: جرى إصلاح Overflow فعلي بمقدار 2dp عند 200% text scale في بطاقة `Add photos` عبر احتساب ارتفاع الأيقونة والفراغات والـpadding، دون تعطيل اختبارات الوصول.
 - Circles/Moderation/Channels: زيادة تغطية screenshots لا تعني RLS/receipt/real-user validation.
 - Reviewer: Android 32 المرفوض لم يتغير؛ إعادة تقديم build ليست ضمن صلاحية هذا الفرع.
 
