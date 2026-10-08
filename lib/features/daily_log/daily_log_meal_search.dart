@@ -177,8 +177,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             ),
             if (food.verified) ...[
               const SizedBox(width: 7),
-              const KeyedSubtree(
-                key: Key('daily-search-verified-food-badge'),
+              KeyedSubtree(
+                key: const Key('daily-search-verified-food-badge'),
                 child: Icon(
                   Icons.verified_rounded,
                   size: 16,
