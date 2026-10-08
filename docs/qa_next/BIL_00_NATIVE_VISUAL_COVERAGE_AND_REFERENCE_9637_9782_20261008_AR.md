@@ -64,6 +64,7 @@
 - Feed: جرى ضبط `_CommunityPostMediaTile` ليملأ كامل خلية الـgallery بدل ترك فراغات ذات عرض كبير بين الصور الأربع.
 - Composer: جرى إصلاح Overflow فعلي بمقدار 2dp عند 200% text scale في بطاقة `Add photos` عبر احتساب ارتفاع الأيقونة والفراغات والـpadding، دون تعطيل اختبارات الوصول.
 - Circles: جرى استكمال الـfixture المرئي إلى 6 صفوف (10K Steps, Meal Prep & Nutrition, Intermittent Fasting, Muscle Building, Sleep Better, Mental Health & Mindset) مع member counts **اصطناعية للالتقاط فقط**. لا تنشئ دوائر على الخادم ولا تثبت وظائف join/leave أو RLS.
+- Moderation: ثلاث بطاقات `pending` اصطناعية من أصول BIL مصوّرة تغطي الشكل والتدفق البصري للقائمة، لكنها لا تمنح أي AI Tokens حقيقية ولا تعدل إنتاج الخادم.
 - Circles/Moderation/Channels: زيادة تغطية screenshots لا تعني RLS/receipt/real-user validation.
 - Reviewer: Android 32 المرفوض لم يتغير؛ إعادة تقديم build ليست ضمن صلاحية هذا الفرع.
 

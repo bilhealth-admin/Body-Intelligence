@@ -992,6 +992,46 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         ),
       ],
     ),
+    CommunityPost(
+      id: 'abababab-abab-4bab-8bab-abababababab',
+      authorId: _VisualRepository.peer,
+      authorName: arabic ? 'عضو المجتمع' : 'Community member',
+      body: arabic ? 'تحدّي لياقة لمدة ثلاثين يومًا.' : 'My 30-day fitness journey.',
+      createdAt: DateTime.utc(2026, 10, 3, 8, 30),
+      moderationStatus: CommunityPostModerationStatus.pending,
+      media: const [
+        CommunityPostMedia(
+          position: 0,
+          objectPath: 'fixture/moderation-3.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url: 'asset://assets/images/professional/workouts/brisk_walk.jpg',
+        ),
+      ],
+    ),
+    CommunityPost(
+      id: 'cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd',
+      authorId: _VisualRepository.peer,
+      authorName: arabic ? 'عضو المجتمع' : 'Community member',
+      body: arabic
+          ? 'أفكار وجبات صحية وسهلة لأيام العمل.'
+          : 'Healthy snack and meal ideas for busy days.',
+      createdAt: DateTime.utc(2026, 10, 3, 8, 10),
+      moderationStatus: CommunityPostModerationStatus.pending,
+      media: const [
+        CommunityPostMedia(
+          position: 0,
+          objectPath: 'fixture/moderation-4.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url: 'asset://assets/images/professional/recipes/chicken_shawarma_bowl.jpg',
+        ),
+      ],
+    ),
   ];
 
   @override
