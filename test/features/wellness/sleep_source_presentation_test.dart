@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -147,6 +149,53 @@ void main() {
       },
     );
   }
+
+  test('JSON source strings, double encoding and unknown objects stay human readable', () {
+    final patterns = <({String raw, String expected})>[
+      (
+        raw: jsonEncode({'deviceName': 'Apple Watch Series 9', 'id': 'private-id'}),
+        expected: 'Apple Watch',
+      ),
+      (
+        raw: jsonEncode(jsonEncode({'sourceName': 'Polar H10'})),
+        expected: 'Polar H10',
+      ),
+      (
+        raw: jsonEncode({'displayName': 'Samsung Health', 'metadata': {'x': 1}}),
+        expected: 'Samsung Health',
+      ),
+      (raw: '{"unrecognized": {"deviceId": "private-id"}}', expected: 'Health source'),
+      (raw: '{"name":', expected: 'Health source'),
+      (raw: '{}', expected: 'Health source'),
+      (raw: 'Instance of \'HealthDevice\'', expected: 'Health source'),
+    ];
+    for (final sample in patterns) {
+      final signal = ConnectedHealthSignalView(
+        key: 'sleep',
+        value: 2.7,
+        unit: 'h',
+        source: sample.raw,
+        observedAt: DateTime(2026, 10, 4),
+        confidence: 1,
+      );
+      expect(connectedHealthDisplaySource(signal), sample.expected);
+      expect(signal.source, sample.raw, reason: 'original provenance unchanged');
+    }
+  });
+
+  test('unknown wearer never becomes an Apple Watch without Apple evidence', () {
+    const raw = '{"wearableKind": "wear_os_watch", "deviceId": "id"}';
+    final signal = ConnectedHealthSignalView(
+      key: 'sleep',
+      value: 1.5,
+      unit: 'h',
+      source: raw,
+      observedAt: DateTime(2026, 10, 4),
+      confidence: 1,
+      attributes: const {'wearableKind': 'wear_os_watch'},
+    );
+    expect(connectedHealthDisplaySource(signal), 'Health source');
+  });
 
   test('sleep stage translations cover the supported locale set', () {
     expect(
