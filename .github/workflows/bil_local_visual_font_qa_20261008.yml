@@ -1,0 +1,44 @@
+name: BIL QA-only font fixture recovery
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_local_visual_font_qa_20261008.yml]
+permissions:
+  contents: read
+jobs:
+  visual-fixture-fonts:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: false
+      - name: Recover exact Flutter UI test fonts and repository Arabic faces
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter precache --linux
+          root="${FLUTTER_ROOT}/bin/cache/artifacts/material_fonts"
+          mkdir -p /tmp/bil-qa-fonts/sdk /tmp/bil-qa-fonts/project
+          for font in Roboto-Regular.ttf Roboto-Medium.ttf Roboto-Bold.ttf MaterialIcons-Regular.otf; do
+            test -s "${root}/${font}"
+            cp "${root}/${font}" "/tmp/bil-qa-fonts/sdk/${font}"
+          done
+          for font in NotoNaskhArabic-Regular.ttf NotoNaskhArabic-Bold.ttf Montserrat-Bold.ttf; do
+            test -s "assets/fonts/${font}"
+            cp "assets/fonts/${font}" "/tmp/bil-qa-fonts/project/${font}"
+          done
+          find /tmp/bil-qa-fonts -type f -printf '%P %s bytes\n'
+          printf 'QA-only glyph fixtures. No app build, no production, no deploy.\n' > /tmp/bil-qa-fonts/SCOPE.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-qa-ui-fixture-glyphs-${{ github.sha }}
+          path: /tmp/bil-qa-fonts/
+          retention-days: 1
+          if-no-files-found: error
