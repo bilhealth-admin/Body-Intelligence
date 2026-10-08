@@ -165,6 +165,7 @@ final class ServerEntitlementRepository {
       final user = client.auth.currentUser;
       if (user == null) return FreePlan.createState();
       final now = DateTime.now().toUtc();
+      var closedTestReadFailed = false;
       List<Map<String, dynamic>> closedTestRows;
       try {
         closedTestRows = await client
@@ -179,6 +180,9 @@ final class ServerEntitlementRepository {
         // verified Google/Apple subscription mirror for this same owner.
         // This catch grants nothing; the next lookup must still verify paid
         // access through its own provider, timestamps and lifecycle.
+        // An independently verified Free subscription is not proof that the
+        // unreadable additive grant is also Free.
+        closedTestReadFailed = true;
         closedTestRows = const [];
       }
       final closedTestExpiresAt = closedTestRows.isEmpty
@@ -223,7 +227,9 @@ final class ServerEntitlementRepository {
       final plan = _planOrNull('${row['plan_id']}');
       if (plan == null) return await _transientFallback(user.id, now);
       if (plan == CommercePlan.free) {
-        return await _remember(user.id, _verifiedFree(), now);
+        return closedTestReadFailed
+            ? FreePlan.createState()
+            : await _remember(user.id, _verifiedFree(), now);
       }
       final lifecycle = _lifecycleOrNull('${row['lifecycle']}');
       if (lifecycle == null) return await _transientFallback(user.id, now);
@@ -247,8 +253,11 @@ final class ServerEntitlementRepository {
         return await _transientFallback(user.id, now);
       }
       if (lifecycle.mayGrantPaidAccess && !accessBoundary!.isAfter(now)) {
-        // Expiration at the boundary is an authoritative loss of access.
-        return await _remember(user.id, _verifiedFree(), now);
+        // An expired store receipt does not prove that an unreadable separate
+        // closed-test grant is revoked. Keep verification unresolved.
+        return closedTestReadFailed
+            ? FreePlan.createState()
+            : await _remember(user.id, _verifiedFree(), now);
       }
       final resolved = _resolver.resolve(
         record: SubscriptionRecord(
@@ -270,6 +279,12 @@ final class ServerEntitlementRepository {
       // that unreadable response into a visible Free flicker.
       if (lifecycle.mayGrantPaidAccess && resolved.plan == CommercePlan.free) {
         return await _transientFallback(user.id, now);
+      }
+      if (closedTestReadFailed && resolved.plan == CommercePlan.free) {
+        // A verified terminal store cannot be overridden by a cached paid
+        // store receipt. An independently unreadable grant keeps the overall
+        // subscription decision unverified, with protected Retry UI.
+        return FreePlan.createState();
       }
       return await _remember(user.id, resolved, now);
     } on Object {

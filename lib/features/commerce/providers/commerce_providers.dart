@@ -194,7 +194,8 @@ final verifiedSubscriptionAccessProvider =
       // show a Free paywall while an on-demand entitlement recheck is pending.
       if (snapshot.isLoading &&
           (!snapshot.isRefreshing ||
-              snapshot.value?.authority != EntitlementAuthority.verifiedServer ||
+              snapshot.value?.authority !=
+                  EntitlementAuthority.verifiedServer ||
               snapshot.value?.plan == CommercePlan.free)) {
         return const AsyncValue.loading();
       }

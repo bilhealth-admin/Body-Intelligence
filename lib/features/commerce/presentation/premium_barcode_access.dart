@@ -18,8 +18,7 @@ Future<bool> requestPremiumBarcodeAccess(
   SubscriptionState? verified;
   try {
     var access = ref.read(verifiedSubscriptionAccessProvider);
-    if (access.asData?.value.authority !=
-        EntitlementAuthority.verifiedServer) {
+    if (access.asData?.value.authority != EntitlementAuthority.verifiedServer) {
       // Local Free and failed reads are unknown, never confirmed Free.
       // A new on-demand verification prevents the reviewer from being sent
       // to Plans by the pre-sign-in fallback state.
