@@ -1,0 +1,31 @@
+{
+  "protocol": "BIL_QA_PATCH_XZ_BASE64_PARTS_V1",
+  "source_local_head": "d5f318bf905577e41bb03de2953b5e41e927d210",
+  "source_local_base": "8163e67b32f77044f4833743bde351a646bf770f",
+  "remote_base_sha": "5afff8599882d1ae7b0984011a71ad33e6257758",
+  "ref": "qa/coach-community-next-20261005",
+  "parts": 11,
+  "encoded_length": 971884,
+  "xz_length": 728912,
+  "raw_diff_length": 44218379,
+  "raw_patch_sha256": "2253dd8f5ddeca041ff516b209c65200e6bb8f1bbba1c03907459760cc7ac965",
+  "xz_sha256": "778403796f31f98756a2a8d05e77fea5928ce42dbf7488ee463f1f6d147dd629",
+  "allowed_scope": "QA_ONLY",
+  "changed_files": 742,
+  "font_files_exported": false,
+  "production": false,
+  "main": false,
+  "parts_files": [
+    "part_01_of_11.txt",
+    "part_02_of_11.txt",
+    "part_03_of_11.txt",
+    "part_04_of_11.txt",
+    "part_05_of_11.txt",
+    "part_06_of_11.txt",
+    "part_07_of_11.txt",
+    "part_08_of_11.txt",
+    "part_09_of_11.txt",
+    "part_10_of_11.txt",
+    "part_11_of_11.txt"
+  ]
+}

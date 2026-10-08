@@ -1,0 +1,95 @@
+name: BIL apply verified local QA handoff only
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths:
+      - '.github/workflows/bil_apply_qa_handoff_20261008.yml'
+      - 'docs/qa_handoffs/20261008/base64/**'
+permissions:
+  contents: write
+concurrency:
+  group: bil-qa-handoff-apply-20261008
+  cancel-in-progress: false
+jobs:
+  apply-qa-handoff:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact QA commit with write permission, never main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: true
+          fetch-depth: 32
+      - name: Validate snapshot and decode SHA-256-guarded QA patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git merge-base --is-ancestor 5afff8599882d1ae7b0984011a71ad33e6257758 HEAD
+          mkdir -p /tmp/bil-qa-handoff
+          python3 - <<'PY'
+          import base64, hashlib, json, lzma, pathlib, re
+          root=pathlib.Path('docs/qa_handoffs/20261008')
+          m=json.loads((root/'manifest.json').read_text())
+          assert m['protocol']=='BIL_QA_PATCH_XZ_BASE64_PARTS_V1'
+          assert m['remote_base_sha']=='5afff8599882d1ae7b0984011a71ad33e6257758'
+          assert m['parts']==11 and m['changed_files']==742
+          parts=sorted((root/'base64').glob('part_*_of_11.txt'))
+          assert len(parts)==11
+          encoded=''.join(''.join(p.read_text().split()) for p in parts)
+          assert len(encoded)==m['encoded_length']
+          assert re.fullmatch('[A-Za-z0-9+/=]+',encoded)
+          payload=base64.b64decode(encoded,validate=True)
+          assert len(payload)==m['xz_length']
+          assert hashlib.sha256(payload).hexdigest()==m['xz_sha256']
+          diff=lzma.decompress(payload)
+          assert len(diff)==m['raw_diff_length']
+          assert hashlib.sha256(diff).hexdigest()==m['raw_patch_sha256']
+          out=pathlib.Path('/tmp/bil-qa-handoff/integration.patch')
+          out.write_bytes(diff)
+          print('Patch SHA256 validated, bytes:',len(diff),'XZ:',len(payload))
+          PY
+      - name: Apply precisely 742 text/code files with explicit scope guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          patch=/tmp/bil-qa-handoff/integration.patch
+          git apply --numstat "$patch" > /tmp/bil-qa-handoff/paths.tsv
+          python3 - <<'PY'
+          import pathlib
+          lines=pathlib.Path('/tmp/bil-qa-handoff/paths.tsv').read_text().splitlines()
+          assert len(lines)==742, ('Expected 742 paths, got',len(lines))
+          banned_prefix=('.github/','ios/','android/','assets/','lib/features/commerce/','lib/features/subscription/')
+          banned_exact=('pubspec.yaml','pubspec.lock')
+          banned_ext=('.ttf','.otf','.woff','.woff2','.pem','.key','.jks','.keystore','.p12','.p8')
+          for line in lines:
+              path=line.rsplit('\t',1)[-1]
+              if path.startswith(banned_prefix) or path in banned_exact or path.endswith(banned_ext):
+                  raise SystemExit('PROTECTED_PATH: '+path)
+          print('QA-only path gate: 742 allowed paths')
+          PY
+          git apply --check --whitespace=nowarn "$patch"
+          git apply --index --whitespace=nowarn "$patch"
+          test "$(git diff --cached --name-only | wc -l)" -eq 742
+          git -c user.name='BIL QA Integration' -c user.email='bil-qa-integration@users.noreply.github.com' commit -m 'feat(qa): integrate BIL-01..08 on protected QA-only source'
+          git rev-parse HEAD | tee /tmp/bil-qa-handoff/new-head.txt
+          git diff --stat HEAD^ HEAD | tail -n 5 | tee /tmp/bil-qa-handoff/summary.txt
+      - name: Push fast-forward strictly to approved QA branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/coach-community-next-20261005
+          git push origin HEAD:refs/heads/qa/coach-community-next-20261005
+          git ls-remote origin refs/heads/qa/coach-community-next-20261005 > /tmp/bil-qa-handoff/pushed-head.txt
+          test "$(cut -f1 /tmp/bil-qa-handoff/pushed-head.txt)" = "$(cat /tmp/bil-qa-handoff/new-head.txt)"
+      - name: Retain QA integration evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-qa-handoff-apply-evidence
+          path: /tmp/bil-qa-handoff/*txt
+          retention-days: 2
+          if-no-files-found: warn
