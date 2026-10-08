@@ -123,10 +123,7 @@ void main() {
               // Protected Community/Coach destinations retain their existing
               // badges. Other secondary routes are deliberately text-first.
               if (row.leading != null) {
-                expect(
-                  row.leading.runtimeType.toString(),
-                  '_MorePremiumIcon',
-                );
+                expect(row.leading.runtimeType.toString(), '_MorePremiumIcon');
               } else {
                 expect(row.minTileHeight, greaterThanOrEqualTo(48));
               }

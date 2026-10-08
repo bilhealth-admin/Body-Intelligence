@@ -75,8 +75,7 @@ void main() {
     }
   });
 
-  testWidgets('help rows stay text-first while all destinations remain actionable',
-      (tester) async {
+  testWidgets('help rows stay text-first and actionable', (tester) async {
     tester.view.physicalSize = const Size(430, 932);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -126,5 +125,4 @@ void main() {
       expect(tester.takeException(), isNull, reason: platform.name);
     }
   });
-
 }

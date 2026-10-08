@@ -38,10 +38,12 @@ void main() {
     expect(source, contains('(active ? _stop : _start)'));
     expect(source, contains('prefs.mutate('));
     expect(source, contains('canPop: !busy'));
+    final historyLabel = RegExp(
+      r"tr\(\s*'Intermittent fasting history',"
+      r"\s*'سجل الصيام المتقطع',?\s*\)",
+    );
     expect(
-      RegExp(
-        r"tr\(\s*'Intermittent fasting history',\s*'سجل الصيام المتقطع',?\s*\)",
-      ).hasMatch(source),
+      historyLabel.hasMatch(source),
       isTrue,
       reason: 'Localized fasting history stays available despite Dart formatting',
     );
