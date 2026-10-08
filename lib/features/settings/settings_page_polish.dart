@@ -106,11 +106,7 @@ class _CloudSyncRow extends ConsumerWidget {
 }
 
 class _MoreActionRow extends StatelessWidget {
-  const _MoreActionRow({
-    required this.label,
-    required this.onTap,
-    super.key,
-  });
+  const _MoreActionRow({required this.label, required this.onTap, super.key});
 
   final String label;
   final VoidCallback onTap;

@@ -133,48 +133,52 @@ class ReferenceAppearancePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(appSettingsProvider).themeMode;
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(_diaryText(context, 'App appearance')),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.only(top: 8, bottom: 24),
-        children: [
-          const _SectionLabel('Select theme'),
-          const Divider(height: 1),
-          RadioGroup<String>(
-            groupValue: mode,
-            onChanged: (value) {
-              if (value != null) {
-                ref.read(appSettingsProvider.notifier).setThemeMode(value);
-              }
-            },
-            child: Column(
-              children: [
-                for (final entry in const [
-                  ('system', 'System default'),
-                  ('light', 'Light theme'),
-                  ('dark', 'Dark theme'),
-                ]) ...[
-                  RadioListTile<String>(
-                    value: entry.$1,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 18),
-                    title: Text(
-                      _diaryText(context, entry.$2),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(_diaryText(context, 'App appearance')),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.only(top: 8, bottom: 24),
+          children: [
+            const _SectionLabel('Select theme'),
+            const Divider(height: 1),
+            RadioGroup<String>(
+              groupValue: mode,
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(appSettingsProvider.notifier).setThemeMode(value);
+                }
+              },
+              child: Column(
+                children: [
+                  for (final entry in const [
+                    ('system', 'System default'),
+                    ('light', 'Light theme'),
+                    ('dark', 'Dark theme'),
+                  ]) ...[
+                    RadioListTile<String>(
+                      value: entry.$1,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                      ),
+                      title: Text(
+                        _diaryText(context, entry.$2),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      activeColor: const Color(0xFF0A6FF5),
+                      controlAffinity: ListTileControlAffinity.trailing,
                     ),
-                    activeColor: const Color(0xFF0A6FF5),
-                    controlAffinity: ListTileControlAffinity.trailing,
-                  ),
-                  const Divider(height: 1, indent: 18),
+                    const Divider(height: 1, indent: 18),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 

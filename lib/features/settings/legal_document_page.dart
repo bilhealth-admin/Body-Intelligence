@@ -38,44 +38,49 @@ class LegalDocumentPage extends StatelessWidget {
     // The legal entity is rendered from the immutable metadata line below.
     // Translation services must never localize or rename it.
     final effectiveStatus = copy.effective.split(' • ').take(2).join(' • ');
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: SelectionArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 18, 24, 48),
-          children: [
-            Text(
-              heading,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            Text(effectiveStatus, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 4),
-            Text(
-              '$bilLegalPolicyId • $bilLegalPolicyRevision • $bilLegalEntity',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 22),
-            for (final section in sections) ...[
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: SelectionArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(24, 18, 24, 48),
+            children: [
               Text(
-                section.$1,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                heading,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              const SizedBox(height: 6),
-              Text(section.$2, style: const TextStyle(height: 1.45)),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
+              Text(
+                effectiveStatus,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$bilLegalPolicyId • $bilLegalPolicyRevision • $bilLegalEntity',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 22),
+              for (final section in sections) ...[
+                Text(
+                  section.$1,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(section.$2, style: const TextStyle(height: 1.45)),
+                const SizedBox(height: 20),
+              ],
+              const Divider(),
+              const SizedBox(height: 12),
+              Text(copy.contact),
             ],
-            const Divider(),
-            const SizedBox(height: 12),
-            Text(copy.contact),
-          ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }
 

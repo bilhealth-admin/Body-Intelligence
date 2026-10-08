@@ -436,248 +436,257 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
   Widget build(BuildContext context) {
     final profileState = ref.watch(userProfileProvider);
     final effectiveCurrentWeight = ref.watch(effectiveCurrentWeightProvider);
-    return BilCalmVisualScope(builder: (context) => PopScope(
-      canPop: !saving,
-      child: Scaffold(
-        appBar: AppBar(centerTitle: true, title: Text(c('Goals'))),
-        body: profileState.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(
-            child: FilledButton(
-              onPressed: () => ref.invalidate(userProfileProvider),
-              child: Text(c('Retry')),
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !saving,
+        child: Scaffold(
+          appBar: AppBar(centerTitle: true, title: Text(c('Goals'))),
+          body: profileState.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, _) => Center(
+              child: FilledButton(
+                onPressed: () => ref.invalidate(userProfileProvider),
+                child: Text(c('Retry')),
+              ),
             ),
-          ),
-          data: (profile) {
-            if (profile == null) {
-              return Center(child: Text(c('Complete your profile first.')));
-            }
-            final currentWeight =
-                effectiveCurrentWeight ?? profile.currentWeight;
-            if (!hydrated && !hydrating && hydrateError == null) {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => hydrate(profile.activityLevel),
-              );
-            }
-            if (hydrating || (!hydrated && hydrateError == null)) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (hydrateError != null) {
-              return Center(
-                child: FilledButton(
-                  onPressed: () => hydrate(profile.activityLevel),
-                  child: Text(c('Retry')),
-                ),
-              );
-            }
-            return AbsorbPointer(
-              absorbing: saving,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                children: [
-                  Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        _GoalRow(
-                          label: c('Starting Weight'),
-                          value: startingWeight == null
-                              ? '—'
-                              : '${startingWeight!.toStringAsFixed(1)} ${c('kg')}${startingDate == null ? '' : ' · $startingDate'}',
-                          onTap: () async {
-                            final value = await startingWeightEditor(
-                              startingWeight ?? profile.currentWeight,
-                            );
-                            if (value == null) return;
-                            final date = value.date
-                                .toIso8601String()
-                                .split('T')
-                                .first;
-                            final repo = ref.read(
-                              preferencesRepositoryProvider,
-                            );
-                            final saved = await _write(
-                              () => repo.setMany({
-                                'goals.startingWeight': '${value.weight}',
-                                'goals.startingDate': date,
-                              }),
-                            );
-                            if (saved && mounted) {
-                              setState(() {
-                                startingWeight = value.weight;
-                                startingDate = date;
-                              });
-                            }
-                          },
-                        ),
-                        _GoalRow(
-                          label: c('Current Weight'),
-                          value:
-                              '${currentWeight.toStringAsFixed(1)} ${c('kg')}',
-                          onTap: () async {
-                            final value = await numberEditor(
-                              c('Current Weight'),
-                              currentWeight,
-                              20,
-                              500,
-                            );
-                            if (value != null) {
-                              await _write(
+            data: (profile) {
+              if (profile == null) {
+                return Center(child: Text(c('Complete your profile first.')));
+              }
+              final currentWeight =
+                  effectiveCurrentWeight ?? profile.currentWeight;
+              if (!hydrated && !hydrating && hydrateError == null) {
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => hydrate(profile.activityLevel),
+                );
+              }
+              if (hydrating || (!hydrated && hydrateError == null)) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (hydrateError != null) {
+                return Center(
+                  child: FilledButton(
+                    onPressed: () => hydrate(profile.activityLevel),
+                    child: Text(c('Retry')),
+                  ),
+                );
+              }
+              return AbsorbPointer(
+                absorbing: saving,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  children: [
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          _GoalRow(
+                            label: c('Starting Weight'),
+                            value: startingWeight == null
+                                ? '—'
+                                : '${startingWeight!.toStringAsFixed(1)} ${c('kg')}${startingDate == null ? '' : ' · $startingDate'}',
+                            onTap: () async {
+                              final value = await startingWeightEditor(
+                                startingWeight ?? profile.currentWeight,
+                              );
+                              if (value == null) return;
+                              final date = value.date
+                                  .toIso8601String()
+                                  .split('T')
+                                  .first;
+                              final repo = ref.read(
+                                preferencesRepositoryProvider,
+                              );
+                              final saved = await _write(
+                                () => repo.setMany({
+                                  'goals.startingWeight': '${value.weight}',
+                                  'goals.startingDate': date,
+                                }),
+                              );
+                              if (saved && mounted) {
+                                setState(() {
+                                  startingWeight = value.weight;
+                                  startingDate = date;
+                                });
+                              }
+                            },
+                          ),
+                          _GoalRow(
+                            label: c('Current Weight'),
+                            value:
+                                '${currentWeight.toStringAsFixed(1)} ${c('kg')}',
+                            onTap: () async {
+                              final value = await numberEditor(
+                                c('Current Weight'),
+                                currentWeight,
+                                20,
+                                500,
+                              );
+                              if (value != null) {
+                                await _write(
+                                  () => updateProfileWeight(
+                                    profile,
+                                    current: value,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          _GoalRow(
+                            label: c('Goal Weight'),
+                            value:
+                                '${profile.targetWeight.toStringAsFixed(1)} ${c('kg')}',
+                            onTap: () async {
+                              final value = await numberEditor(
+                                c('Goal Weight'),
+                                profile.targetWeight,
+                                20,
+                                500,
+                              );
+                              if (value != null) {
+                                await _write(
+                                  () => updateProfileWeight(
+                                    profile,
+                                    target: value,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          _GoalRow(
+                            label: c('Weekly Goal'),
+                            value: weeklyGoal == null ? '—' : c(weeklyGoal!),
+                            onTap: chooseWeeklyGoal,
+                          ),
+                          _GoalRow(
+                            label: c('Activity Level'),
+                            value: c(_activityLabels[activity] ?? '—'),
+                            onTap: () async {
+                              final selected = await Navigator.push<String>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => _ChoicePage(
+                                    title: c('Activity Level'),
+                                    options: _activityLabels.keys.toList(),
+                                    selected: activity ?? '',
+                                    translate: (key) =>
+                                        c(_activityLabels[key] ?? key),
+                                  ),
+                                ),
+                              );
+                              if (selected == null) return;
+                              final saved = await _write(
                                 () => updateProfileWeight(
                                   profile,
-                                  current: value,
+                                  activityValue: selected,
                                 ),
                               );
-                            }
-                          },
-                        ),
-                        _GoalRow(
-                          label: c('Goal Weight'),
-                          value:
-                              '${profile.targetWeight.toStringAsFixed(1)} ${c('kg')}',
-                          onTap: () async {
-                            final value = await numberEditor(
-                              c('Goal Weight'),
-                              profile.targetWeight,
-                              20,
-                              500,
-                            );
-                            if (value != null) {
-                              await _write(
-                                () =>
-                                    updateProfileWeight(profile, target: value),
-                              );
-                            }
-                          },
-                        ),
-                        _GoalRow(
-                          label: c('Weekly Goal'),
-                          value: weeklyGoal == null ? '—' : c(weeklyGoal!),
-                          onTap: chooseWeeklyGoal,
-                        ),
-                        _GoalRow(
-                          label: c('Activity Level'),
-                          value: c(_activityLabels[activity] ?? '—'),
-                          onTap: () async {
-                            final selected = await Navigator.push<String>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => _ChoicePage(
-                                  title: c('Activity Level'),
-                                  options: _activityLabels.keys.toList(),
-                                  selected: activity ?? '',
-                                  translate: (key) =>
-                                      c(_activityLabels[key] ?? key),
-                                ),
-                              ),
-                            );
-                            if (selected == null) return;
-                            final saved = await _write(
-                              () => updateProfileWeight(
-                                profile,
-                                activityValue: selected,
-                              ),
-                            );
-                            if (saved && mounted) {
-                              setState(() => activity = selected);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      key: const Key('goals-methodology-sources'),
-                      onPressed: () => context.push(
-                        '/health-information-sources?topic=weight-planning',
-                      ),
-                      icon: const Icon(Icons.menu_book_outlined),
-                      label: Text(
-                        Localizations.localeOf(context).languageCode == 'ar'
-                            ? 'منهجية التخطيط ومصدرها'
-                            : '${c('Method')} · ${c('Source')}',
+                              if (saved && mounted) {
+                                setState(() => activity = selected);
+                              }
+                            },
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  _Section(c('Nutrition Goals')),
-                  Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        _LinkRow(
-                          c('Calorie, Carbs, Protein and Fat Goals'),
-                          c('Customize your default or daily goals.'),
-                          () => context.push('/settings/nutrition-goals'),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        key: const Key('goals-methodology-sources'),
+                        onPressed: () => context.push(
+                          '/health-information-sources?topic=weight-planning',
                         ),
-                        _LinkRow(
-                          c('Different goals by day'),
-                          c(
-                            'Set calories and macros for each day of the week.',
-                          ),
-                          () =>
-                              context.push('/settings/nutrition-goal-schedule'),
+                        icon: const Icon(Icons.menu_book_outlined),
+                        label: Text(
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'منهجية التخطيط ومصدرها'
+                              : '${c('Method')} · ${c('Source')}',
                         ),
-                        _PremiumRow(
-                          c('Calorie Goals By Meal'),
-                          c('Stay on track with a calorie goal for each meal.'),
-                          route: '/settings/nutrition-meal-calorie-goals',
-                          stateKey: const Key(
-                            'goals-meal-calories-entitlement-state',
-                          ),
-                        ),
-                        _PremiumRow(
-                          c('Show Carbs, Protein and Fat By Meal'),
-                          c('View carbs, protein and fat by gram or percent.'),
-                          route: '/settings/diary/macro-display',
-                          stateKey: const Key(
-                            'goals-meal-macros-entitlement-state',
-                          ),
-                        ),
-                        _LinkRow(
-                          c('Additional Nutrient Goals'),
-                          null,
-                          () => context.push('/settings/nutrition-goals'),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  _Section(c('Fitness Goals')),
-                  Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        const _StoredFitnessNumber(
-                          'goals.workoutsPerWeek',
-                          'Workouts/Week',
-                        ),
-                        const _StoredFitnessNumber(
-                          'goals.minutesPerWorkout',
-                          'Minutes/Workout',
-                        ),
-                        _PremiumRow(
-                          c('Exercise Calories'),
-                          c(
-                            'Decide whether to adjust daily goals when you exercise.',
+                    const SizedBox(height: 16),
+                    _Section(c('Nutrition Goals')),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          _LinkRow(
+                            c('Calorie, Carbs, Protein and Fat Goals'),
+                            c('Customize your default or daily goals.'),
+                            () => context.push('/settings/nutrition-goals'),
                           ),
-                          route: '/settings/exercise-calories',
-                          stateKey: const Key(
-                            'goals-exercise-calories-entitlement-state',
+                          _LinkRow(
+                            c('Different goals by day'),
+                            c(
+                              'Set calories and macros for each day of the week.',
+                            ),
+                            () => context.push(
+                              '/settings/nutrition-goal-schedule',
+                            ),
                           ),
-                        ),
-                      ],
+                          _PremiumRow(
+                            c('Calorie Goals By Meal'),
+                            c(
+                              'Stay on track with a calorie goal for each meal.',
+                            ),
+                            route: '/settings/nutrition-meal-calorie-goals',
+                            stateKey: const Key(
+                              'goals-meal-calories-entitlement-state',
+                            ),
+                          ),
+                          _PremiumRow(
+                            c('Show Carbs, Protein and Fat By Meal'),
+                            c(
+                              'View carbs, protein and fat by gram or percent.',
+                            ),
+                            route: '/settings/diary/macro-display',
+                            stateKey: const Key(
+                              'goals-meal-macros-entitlement-state',
+                            ),
+                          ),
+                          _LinkRow(
+                            c('Additional Nutrient Goals'),
+                            null,
+                            () => context.push('/settings/nutrition-goals'),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    const SizedBox(height: 16),
+                    _Section(c('Fitness Goals')),
+                    Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          const _StoredFitnessNumber(
+                            'goals.workoutsPerWeek',
+                            'Workouts/Week',
+                          ),
+                          const _StoredFitnessNumber(
+                            'goals.minutesPerWorkout',
+                            'Minutes/Workout',
+                          ),
+                          _PremiumRow(
+                            c('Exercise Calories'),
+                            c(
+                              'Decide whether to adjust daily goals when you exercise.',
+                            ),
+                            route: '/settings/exercise-calories',
+                            stateKey: const Key(
+                              'goals-exercise-calories-entitlement-state',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
-    ));
+    );
   }
 }
 

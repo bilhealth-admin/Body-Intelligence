@@ -181,250 +181,259 @@ class _NotificationSettingsPageState
     final reminders = _reminders;
     final delivery = _deliveryPreferences;
     final busy = _saving || _pushSaving;
-    return BilCalmVisualScope(builder: (context) => PopScope(
-      canPop: !busy,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            onPressed: busy
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go('/settings'),
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          title: Text(_copy.title),
-          actions: [
-            IconButton(
-              key: const Key('add-reminder'),
-              tooltip: _ui(
-                'Add reminder',
-                'إضافة تذكير',
-                'Ajouter un rappel',
-                'Añadir recordatorio',
-                'Hatırlatıcı ekle',
-              ),
-              onPressed: reminders == null || busy ? null : _addReminder,
-              icon: const Icon(Icons.add_rounded),
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !busy,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: busy
+                  ? null
+                  : () => context.canPop()
+                        ? context.pop()
+                        : context.go('/settings'),
+              icon: const Icon(Icons.arrow_back_rounded),
             ),
-          ],
-        ),
-        body: _loadError != null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.notifications_off_outlined, size: 42),
-                      const SizedBox(height: 12),
-                      Text(
-                        _ui(
-                          'Saved setting could not be loaded. Tap to retry.',
-                          'تعذر تحميل إعدادات التنبيهات المحفوظة.',
-                          'Impossible de charger les réglages enregistrés.',
-                          'No se pudieron cargar los ajustes guardados.',
-                          'Kayıtlı bildirim ayarları yüklenemedi.',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      FilledButton.tonalIcon(
-                        onPressed: _load,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: Text(
-                          _ui(
-                            'Retry',
-                            'إعادة المحاولة',
-                            'Réessayer',
-                            'Reintentar',
-                            'Yeniden dene',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+            title: Text(_copy.title),
+            actions: [
+              IconButton(
+                key: const Key('add-reminder'),
+                tooltip: _ui(
+                  'Add reminder',
+                  'إضافة تذكير',
+                  'Ajouter un rappel',
+                  'Añadir recordatorio',
+                  'Hatırlatıcı ekle',
                 ),
-              )
-            : reminders == null || delivery == null
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  Text(
-                    _copy.intro,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  Card.filled(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer.withValues(alpha: 0.7),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  _phoneNotificationsEnabled == true
-                                      ? Icons.notifications_active_rounded
-                                      : Icons.notifications_none_rounded,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      _copy.title,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      _permissionStatusText,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                onPressed: reminders == null || busy ? null : _addReminder,
+                icon: const Icon(Icons.add_rounded),
+              ),
+            ],
+          ),
+          body: _loadError != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.notifications_off_outlined, size: 42),
+                        const SizedBox(height: 12),
+                        Text(
+                          _ui(
+                            'Saved setting could not be loaded. Tap to retry.',
+                            'تعذر تحميل إعدادات التنبيهات المحفوظة.',
+                            'Impossible de charger les réglages enregistrés.',
+                            'No se pudieron cargar los ajustes guardados.',
+                            'Kayıtlı bildirim ayarları yüklenemedi.',
                           ),
-                          const SizedBox(height: 8),
-                          if (_requiresSystemSettings ||
-                              _phoneNotificationsEnabled != true)
-                            FilledButton.tonal(
-                              key: const Key('notification-phone-check'),
-                              onPressed: _saving
-                                  ? null
-                                  : _requiresSystemSettings
-                                  ? _openSystemNotificationSettings
-                                  : () => _setAllDaily(true),
-                              child: Text(
-                                _requiresSystemSettings
-                                    ? _phoneText(
-                                        'Open settings',
-                                        ar: 'فتح الإعدادات',
-                                        fr: 'Ouvrir les réglages',
-                                        es: 'Abrir ajustes',
-                                        tr: 'Ayarları aç',
-                                      )
-                                    : _phoneText(
-                                        'Turn on',
-                                        ar: 'تشغيل',
-                                        fr: 'Activer',
-                                        es: 'Activar',
-                                        tr: 'Aç',
-                                      ),
-                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton.tonalIcon(
+                          onPressed: _load,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: Text(
+                            _ui(
+                              'Retry',
+                              'إعادة المحاولة',
+                              'Réessayer',
+                              'Reintentar',
+                              'Yeniden dene',
                             ),
-                        ],
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  ..._communityDeliveryControls(delivery),
-                  const SizedBox(height: 18),
-                  ..._dailyDeliveryControls(delivery),
-                  ...reminders.expand(
-                    (reminder) => [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
-                        child: Text(
-                          _copy.label(reminder.kind),
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ),
-                      Card(
-                        child: SwitchListTile(
-                          key: Key('daily-reminder-${reminder.kind.name}'),
-                          value: reminder.enabled,
-                          onChanged: _saving
-                              ? null
-                              : (enabled) => _update(
-                                  DailyReminder(
-                                    kind: reminder.kind,
-                                    hour: reminder.hour,
-                                    minute: reminder.minute,
-                                    enabled: enabled,
+                )
+              : reminders == null || delivery == null
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    Text(
+                      _copy.intro,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    Card.filled(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.7),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    _phoneNotificationsEnabled == true
+                                        ? Icons.notifications_active_rounded
+                                        : Icons.notifications_none_rounded,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                 ),
-                          secondary: BilSemanticIconBadge(
-                            kind: _semanticKind(reminder.kind),
-                          ),
-                          title: Text(_copy.label(reminder.kind)),
-                          subtitle:
-                              reminder.kind ==
-                                  DailyReminderKind.returnAfter24Hours
-                              ? Text(
-                                  _ui(
-                                    'Only after the app has been away for a full day.',
-                                    'فقط بعد الابتعاد عن التطبيق ليوم كامل.',
-                                    'Seulement après une journée complète sans ouvrir l’application.',
-                                    'Solo después de un día completo sin abrir la aplicación.',
-                                    'Yalnızca uygulama tam bir gün açılmadığında.',
-                                  ),
-                                )
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextButton.icon(
-                                      onPressed: _saving
-                                          ? null
-                                          : () => _chooseTime(reminder),
-                                      icon: const Icon(
-                                        Icons.schedule_rounded,
-                                        size: 18,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _copy.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                       ),
-                                      label: Text(
-                                        TimeOfDay(
-                                          hour: reminder.hour,
-                                          minute: reminder.minute,
-                                        ).format(context),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsetsDirectional.only(
-                                        start: 12,
-                                        bottom: 8,
-                                      ),
-                                      child: Text(
-                                        _scheduleStatus(reminder),
-                                        key: Key(
-                                          'daily-reminder-status-${reminder.kind.name}',
-                                        ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        _permissionStatusText,
                                         style: Theme.of(
                                           context,
                                         ).textTheme.bodySmall,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            if (_requiresSystemSettings ||
+                                _phoneNotificationsEnabled != true)
+                              FilledButton.tonal(
+                                key: const Key('notification-phone-check'),
+                                onPressed: _saving
+                                    ? null
+                                    : _requiresSystemSettings
+                                    ? _openSystemNotificationSettings
+                                    : () => _setAllDaily(true),
+                                child: Text(
+                                  _requiresSystemSettings
+                                      ? _phoneText(
+                                          'Open settings',
+                                          ar: 'فتح الإعدادات',
+                                          fr: 'Ouvrir les réglages',
+                                          es: 'Abrir ajustes',
+                                          tr: 'Ayarları aç',
+                                        )
+                                      : _phoneText(
+                                          'Turn on',
+                                          ar: 'تشغيل',
+                                          fr: 'Activer',
+                                          es: 'Activar',
+                                          tr: 'Aç',
+                                        ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(height: 12),
+                    ..._communityDeliveryControls(delivery),
+                    const SizedBox(height: 18),
+                    ..._dailyDeliveryControls(delivery),
+                    ...reminders.expand(
+                      (reminder) => [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 14, 4, 6),
+                          child: Text(
+                            _copy.label(reminder.kind),
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                        Card(
+                          child: SwitchListTile(
+                            key: Key('daily-reminder-${reminder.kind.name}'),
+                            value: reminder.enabled,
+                            onChanged: _saving
+                                ? null
+                                : (enabled) => _update(
+                                    DailyReminder(
+                                      kind: reminder.kind,
+                                      hour: reminder.hour,
+                                      minute: reminder.minute,
+                                      enabled: enabled,
+                                    ),
+                                  ),
+                            secondary: BilSemanticIconBadge(
+                              kind: _semanticKind(reminder.kind),
+                            ),
+                            title: Text(_copy.label(reminder.kind)),
+                            subtitle:
+                                reminder.kind ==
+                                    DailyReminderKind.returnAfter24Hours
+                                ? Text(
+                                    _ui(
+                                      'Only after the app has been away for a full day.',
+                                      'فقط بعد الابتعاد عن التطبيق ليوم كامل.',
+                                      'Seulement après une journée complète sans ouvrir l’application.',
+                                      'Solo después de un día completo sin abrir la aplicación.',
+                                      'Yalnızca uygulama tam bir gün açılmadığında.',
+                                    ),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextButton.icon(
+                                        onPressed: _saving
+                                            ? null
+                                            : () => _chooseTime(reminder),
+                                        icon: const Icon(
+                                          Icons.schedule_rounded,
+                                          size: 18,
+                                        ),
+                                        label: Text(
+                                          TimeOfDay(
+                                            hour: reminder.hour,
+                                            minute: reminder.minute,
+                                          ).format(context),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                              start: 12,
+                                              bottom: 8,
+                                            ),
+                                        child: Text(
+                                          _scheduleStatus(reminder),
+                                          key: Key(
+                                            'daily-reminder-status-${reminder.kind.name}',
+                                          ),
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+        ),
       ),
-    ));
+    );
   }
 }

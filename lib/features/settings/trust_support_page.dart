@@ -139,144 +139,148 @@ class TrustSupportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     String tr(String en, String arabic) => _trustText(context, en, arabic);
 
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(title: Text(tr('Trust & support', 'الثقة والمساعدة'))),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 116),
-        children: [
-          const _TrustHero(),
-          const SizedBox(height: 18),
-          _TrustSection(
-            kind: BilSemanticIconKind.privacy,
-            title: tr('Privacy by design', 'خصوصية من التصميم'),
-            body: tr(
-              'Your profile, meals, water, weight and preferences remain in the local database unless you explicitly enable and authorize a connected service.',
-              'يبقى ملفك ووجباتك وماؤك ووزنك وتفضيلاتك في قاعدة البيانات المحلية ما لم تفعّل خدمة متصلة وتمنحها الإذن صراحةً.',
-            ),
-          ),
-          _TrustSection(
-            kind: BilSemanticIconKind.health,
-            title: tr('Health responsibility', 'المسؤولية الصحية'),
-            body: tr(
-              'BIL supports tracking and cautious personal hypotheses. It does not diagnose, prescribe treatment, or replace a qualified health professional. Seek urgent care for emergency symptoms.',
-              'يدعم BIL التتبع والفرضيات الشخصية الحذرة. لا يشخّص ولا يصف علاجًا ولا يستبدل المختص الصحي المؤهل. اطلب رعاية عاجلة عند ظهور أعراض طارئة.',
-            ),
-          ),
-          _TrustSection(
-            kind: BilSemanticIconKind.aiCoach,
-            title: tr('How BIL intelligence answers', 'كيف يجيب ذكاء BIL'),
-            body: tr(
-              'BIL is designed to distinguish recorded facts from interpretation, show confidence and missing data, and ask for consent before changing a plan.',
-              'صُمم BIL للتمييز بين الحقائق المسجلة والتفسير، وعرض الثقة والبيانات الناقصة، وطلب الموافقة قبل تغيير الخطة.',
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            minLeadingWidth: 32,
-            horizontalTitleGap: 20,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.devices,
-              size: 38,
-              iconSize: 21,
-              shape: BoxShape.rectangle,
-            ),
-            title: Text(tr('Connected health sources', 'مصادر الصحة المتصلة')),
-            subtitle: Text(
-              tr(
-                'Review permissions, connection state and imported readings.',
-                'راجع الأذونات وحالة الاتصال والقراءات المستوردة.',
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/connected-health'),
-          ),
-          ListTile(
-            minLeadingWidth: 32,
-            horizontalTitleGap: 20,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.export,
-              size: 38,
-              iconSize: 21,
-              shape: BoxShape.rectangle,
-            ),
-            title: Text(tr('Export local data', 'تصدير البيانات المحلية')),
-            subtitle: Text(
-              tr(
-                'Create a local export for a date range.',
-                'أنشئ تصديرًا محليًا لنطاق زمني تختاره.',
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/local-export'),
-          ),
-          ListTile(
-            minLeadingWidth: 32,
-            horizontalTitleGap: 20,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.accountDeletion,
-              size: 38,
-              iconSize: 21,
-              shape: BoxShape.rectangle,
-            ),
-            title: Text(
-              tr('Request cloud-account deletion', 'طلب حذف الحساب السحابي'),
-            ),
-            subtitle: Text(
-              tr(
-                'Open the verified deletion-request workflow. Local records remain separate.',
-                'افتح مسار طلب الحذف الموثق. تبقى السجلات المحلية منفصلة.',
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/help/delete-account'),
-          ),
-          ListTile(
-            minLeadingWidth: 32,
-            horizontalTitleGap: 20,
-            leading: const BilSemanticIconBadge(
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: Text(tr('Trust & support', 'الثقة والمساعدة'))),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 116),
+          children: [
+            const _TrustHero(),
+            const SizedBox(height: 18),
+            _TrustSection(
               kind: BilSemanticIconKind.privacy,
-              size: 38,
-              iconSize: 21,
-              shape: BoxShape.rectangle,
+              title: tr('Privacy by design', 'خصوصية من التصميم'),
+              body: tr(
+                'Your profile, meals, water, weight and preferences remain in the local database unless you explicitly enable and authorize a connected service.',
+                'يبقى ملفك ووجباتك وماؤك ووزنك وتفضيلاتك في قاعدة البيانات المحلية ما لم تفعّل خدمة متصلة وتمنحها الإذن صراحةً.',
+              ),
             ),
-            title: Text(tr('Privacy Policy', 'سياسة الخصوصية')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/legal/privacy'),
-          ),
-          ListTile(
-            minLeadingWidth: 32,
-            horizontalTitleGap: 20,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.legal,
-              size: 38,
-              iconSize: 21,
-              shape: BoxShape.rectangle,
+            _TrustSection(
+              kind: BilSemanticIconKind.health,
+              title: tr('Health responsibility', 'المسؤولية الصحية'),
+              body: tr(
+                'BIL supports tracking and cautious personal hypotheses. It does not diagnose, prescribe treatment, or replace a qualified health professional. Seek urgent care for emergency symptoms.',
+                'يدعم BIL التتبع والفرضيات الشخصية الحذرة. لا يشخّص ولا يصف علاجًا ولا يستبدل المختص الصحي المؤهل. اطلب رعاية عاجلة عند ظهور أعراض طارئة.',
+              ),
             ),
-            title: Text(tr('Terms of Service', 'شروط الخدمة')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/legal/terms'),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            tr(
-              'Trust statement revision $_trustPolicyRevision',
-              'مراجعة بيان الثقة $_trustPolicyRevision',
+            _TrustSection(
+              kind: BilSemanticIconKind.aiCoach,
+              title: tr('How BIL intelligence answers', 'كيف يجيب ذكاء BIL'),
+              body: tr(
+                'BIL is designed to distinguish recorded facts from interpretation, show confidence and missing data, and ask for consent before changing a plan.',
+                'صُمم BIL للتمييز بين الحقائق المسجلة والتفسير، وعرض الثقة والبيانات الناقصة، وطلب الموافقة قبل تغيير الخطة.',
+              ),
             ),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            children: [
-              const _TrustEmailButton(address: 'privacy@bilhealth.com'),
-              const _TrustEmailButton(address: 'support@bilhealth.com'),
-            ],
-          ),
-        ],
+            const SizedBox(height: 8),
+            ListTile(
+              minLeadingWidth: 32,
+              horizontalTitleGap: 20,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.devices,
+                size: 38,
+                iconSize: 21,
+                shape: BoxShape.rectangle,
+              ),
+              title: Text(
+                tr('Connected health sources', 'مصادر الصحة المتصلة'),
+              ),
+              subtitle: Text(
+                tr(
+                  'Review permissions, connection state and imported readings.',
+                  'راجع الأذونات وحالة الاتصال والقراءات المستوردة.',
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/connected-health'),
+            ),
+            ListTile(
+              minLeadingWidth: 32,
+              horizontalTitleGap: 20,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.export,
+                size: 38,
+                iconSize: 21,
+                shape: BoxShape.rectangle,
+              ),
+              title: Text(tr('Export local data', 'تصدير البيانات المحلية')),
+              subtitle: Text(
+                tr(
+                  'Create a local export for a date range.',
+                  'أنشئ تصديرًا محليًا لنطاق زمني تختاره.',
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/settings/local-export'),
+            ),
+            ListTile(
+              minLeadingWidth: 32,
+              horizontalTitleGap: 20,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.accountDeletion,
+                size: 38,
+                iconSize: 21,
+                shape: BoxShape.rectangle,
+              ),
+              title: Text(
+                tr('Request cloud-account deletion', 'طلب حذف الحساب السحابي'),
+              ),
+              subtitle: Text(
+                tr(
+                  'Open the verified deletion-request workflow. Local records remain separate.',
+                  'افتح مسار طلب الحذف الموثق. تبقى السجلات المحلية منفصلة.',
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/help/delete-account'),
+            ),
+            ListTile(
+              minLeadingWidth: 32,
+              horizontalTitleGap: 20,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.privacy,
+                size: 38,
+                iconSize: 21,
+                shape: BoxShape.rectangle,
+              ),
+              title: Text(tr('Privacy Policy', 'سياسة الخصوصية')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/legal/privacy'),
+            ),
+            ListTile(
+              minLeadingWidth: 32,
+              horizontalTitleGap: 20,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.legal,
+                size: 38,
+                iconSize: 21,
+                shape: BoxShape.rectangle,
+              ),
+              title: Text(tr('Terms of Service', 'شروط الخدمة')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/legal/terms'),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              tr(
+                'Trust statement revision $_trustPolicyRevision',
+                'مراجعة بيان الثقة $_trustPolicyRevision',
+              ),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              children: [
+                const _TrustEmailButton(address: 'privacy@bilhealth.com'),
+                const _TrustEmailButton(address: 'support@bilhealth.com'),
+              ],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 

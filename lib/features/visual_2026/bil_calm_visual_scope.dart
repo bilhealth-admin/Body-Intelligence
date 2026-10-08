@@ -32,7 +32,11 @@ abstract final class BilCalmTokens {
 }
 
 class BilCalmVisualScope extends StatelessWidget {
-  const BilCalmVisualScope({super.key, required this.builder, this.enabled = true});
+  const BilCalmVisualScope({
+    super.key,
+    required this.builder,
+    this.enabled = true,
+  });
 
   final WidgetBuilder builder;
   final bool enabled;

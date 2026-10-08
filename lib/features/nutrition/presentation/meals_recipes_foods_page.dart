@@ -52,19 +52,21 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
           );
         }
         if (snapshot.hasError) {
-          return BilCalmVisualScope(builder: (context) => Scaffold(
-            body: Center(
-              child: FilledButton.icon(
-                onPressed: () => setState(
-                  () => preference = PreferencesRepository(
-                    ref.read(databaseProvider),
-                  ).get('diary.defaultSearchTab'),
+          return BilCalmVisualScope(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: FilledButton.icon(
+                  onPressed: () => setState(
+                    () => preference = PreferencesRepository(
+                      ref.read(databaseProvider),
+                    ).get('diary.defaultSearchTab'),
+                  ),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(_c(context, 'Retry')),
                 ),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(_c(context, 'Retry')),
               ),
             ),
-          ));
+          );
         }
         final initialIndex = switch (snapshot.data) {
           'meals' => 0,

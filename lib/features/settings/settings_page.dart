@@ -546,7 +546,8 @@ class _MoreRow extends StatelessWidget {
     final semanticKind = BilSemanticIcons.kindForRoute(route) ?? _fallbackKind;
     // Entry points into BIL-00's protected journeys retain their current
     // visual and interaction design; only eligible More rows become text-first.
-    final protectedEntry = route.startsWith('/community') ||
+    final protectedEntry =
+        route.startsWith('/community') ||
         route == '/intelligence-center' ||
         route.startsWith('/settings/ai-coach') ||
         route == '/admin/ai-coach';

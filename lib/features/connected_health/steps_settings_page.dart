@@ -249,153 +249,157 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
         : watchAvailable
         ? t('A connected watch source is available.')
         : t('No connected watch source is available.');
-    return BilCalmVisualScope(builder: (context) => PopScope(
-      canPop: !saving,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: BackButton(
-            onPressed: saving
-                ? null
-                : () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go('/connected-health');
-                    }
-                  },
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !saving,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: BackButton(
+              onPressed: saving
+                  ? null
+                  : () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/connected-health');
+                      }
+                    },
+            ),
+            title: Text(t('Steps')),
           ),
-          title: Text(t('Steps')),
-        ),
-        body: loading
-            ? Center(
-                child: Semantics(
-                  label: t('Loading step settings'),
-                  child: const CircularProgressIndicator(),
-                ),
-              )
-            : loadError != null
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+          body: loading
+              ? Center(
+                  child: Semantics(
+                    label: t('Loading step settings'),
+                    child: const CircularProgressIndicator(),
+                  ),
+                )
+              : loadError != null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(t('Step settings could not be loaded.')),
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
+                        onPressed: _load,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(t('Retry')),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView(
                   children: [
-                    Text(t('Step settings could not be loaded.')),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      onPressed: _load,
-                      icon: const Icon(Icons.refresh),
-                      label: Text(t('Retry')),
+                    _Section(t('Choose a source')),
+                    RadioGroup<String>(
+                      groupValue: source,
+                      onChanged: (value) {
+                        if (!saving && value != null) selectSource(value);
+                      },
+                      child: Column(
+                        children: [
+                          RadioListTile(
+                            value: 'device',
+                            title: Text(t('Phone motion and health source')),
+                            subtitle: Text(
+                              t(
+                                'Uses a source only after you authorize it on this device.',
+                              ),
+                            ),
+                          ),
+                          RadioListTile(
+                            value: 'watch',
+                            enabled: watchAvailable && !saving,
+                            title: Text(t('Connected watch')),
+                            subtitle: Text(watchStatus),
+                          ),
+                          if (health.hasError)
+                            ListTile(
+                              leading: const Icon(Icons.refresh),
+                              title: Text(t('Retry connected sources')),
+                              onTap: saving
+                                  ? null
+                                  : () => ref
+                                        .read(connectedHealthProvider.notifier)
+                                        .refresh(),
+                            ),
+                          ListTile(
+                            enabled: !saving,
+                            titleAlignment: ListTileTitleAlignment.top,
+                            minLeadingWidth: 28,
+                            horizontalTitleGap: 16,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            leading: const BilSemanticIconBadge(
+                              kind: BilSemanticIconKind.devices,
+                            ),
+                            title: Text(t('Add a device')),
+                            subtitle: Text(
+                              t(
+                                'Open connected-health sources and permissions.',
+                              ),
+                            ),
+                            onTap: saving
+                                ? null
+                                : () => context.push('/connected-health'),
+                          ),
+                          RadioListTile(
+                            value: 'none',
+                            title: Text(t('Do not track steps')),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _Section(t('Step goal')),
+                    ListTile(
+                      key: const Key('steps-history-link'),
+                      leading: const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.progress,
+                      ),
+                      title: Text(t('View step history')),
+                      trailing: Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_left_rounded
+                            : Icons.chevron_right_rounded,
+                        key: const Key('steps-history-chevron'),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      onTap: saving
+                          ? null
+                          : () => context.go('/connected-health/steps/history'),
+                    ),
+                    ListTile(
+                      key: const Key('daily-step-goal'),
+                      enabled: !saving,
+                      title: Text(t('Daily step goal')),
+                      subtitle: goal == null ? Text(t('Not set')) : null,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Text(goal?.toString() ?? '—'),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Directionality.of(context) == TextDirection.rtl
+                                ? Icons.chevron_left_rounded
+                                : Icons.chevron_right_rounded,
+                            key: const Key('steps-goal-chevron'),
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                      onTap: saving ? null : editGoal,
                     ),
                   ],
                 ),
-              )
-            : ListView(
-                children: [
-                  _Section(t('Choose a source')),
-                  RadioGroup<String>(
-                    groupValue: source,
-                    onChanged: (value) {
-                      if (!saving && value != null) selectSource(value);
-                    },
-                    child: Column(
-                      children: [
-                        RadioListTile(
-                          value: 'device',
-                          title: Text(t('Phone motion and health source')),
-                          subtitle: Text(
-                            t(
-                              'Uses a source only after you authorize it on this device.',
-                            ),
-                          ),
-                        ),
-                        RadioListTile(
-                          value: 'watch',
-                          enabled: watchAvailable && !saving,
-                          title: Text(t('Connected watch')),
-                          subtitle: Text(watchStatus),
-                        ),
-                        if (health.hasError)
-                          ListTile(
-                            leading: const Icon(Icons.refresh),
-                            title: Text(t('Retry connected sources')),
-                            onTap: saving
-                                ? null
-                                : () => ref
-                                      .read(connectedHealthProvider.notifier)
-                                      .refresh(),
-                          ),
-                        ListTile(
-                          enabled: !saving,
-                          titleAlignment: ListTileTitleAlignment.top,
-                          minLeadingWidth: 28,
-                          horizontalTitleGap: 16,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          leading: const BilSemanticIconBadge(
-                            kind: BilSemanticIconKind.devices,
-                          ),
-                          title: Text(t('Add a device')),
-                          subtitle: Text(
-                            t('Open connected-health sources and permissions.'),
-                          ),
-                          onTap: saving
-                              ? null
-                              : () => context.push('/connected-health'),
-                        ),
-                        RadioListTile(
-                          value: 'none',
-                          title: Text(t('Do not track steps')),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _Section(t('Step goal')),
-                  ListTile(
-                    key: const Key('steps-history-link'),
-                    leading: const BilSemanticIconBadge(
-                      kind: BilSemanticIconKind.progress,
-                    ),
-                    title: Text(t('View step history')),
-                    trailing: Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
-                      key: const Key('steps-history-chevron'),
-                      textDirection: TextDirection.ltr,
-                    ),
-                    onTap: saving
-                        ? null
-                        : () => context.go('/connected-health/steps/history'),
-                  ),
-                  ListTile(
-                    key: const Key('daily-step-goal'),
-                    enabled: !saving,
-                    title: Text(t('Daily step goal')),
-                    subtitle: goal == null ? Text(t('Not set')) : null,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Text(goal?.toString() ?? '—'),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Directionality.of(context) == TextDirection.rtl
-                              ? Icons.chevron_left_rounded
-                              : Icons.chevron_right_rounded,
-                          key: const Key('steps-goal-chevron'),
-                          textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    ),
-                    onTap: saving ? null : editGoal,
-                  ),
-                ],
-              ),
+        ),
       ),
-    ));
+    );
   }
 }
 

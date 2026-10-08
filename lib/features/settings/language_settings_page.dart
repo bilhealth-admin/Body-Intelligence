@@ -15,43 +15,45 @@ class LanguageSettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(appSettingsProvider).localeCode;
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(title: Text(context.strings.text('Language'))),
-      body: ListView.builder(
-        itemCount: orderedTags.length,
-        itemBuilder: (context, index) {
-          final tag = orderedTags[index];
-          final optionDirection = BilLocalePolicy.isRtlTag(tag)
-              ? TextDirection.rtl
-              : TextDirection.ltr;
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: ListTile(
-              key: Key('language-option-$tag'),
-              minTileHeight: 58,
-              title: Text(
-                BilLocaleNames.native[tag]!,
-                key: Key('settings-language-option-label-$tag'),
-                locale: BilLocalePolicy.localeFromTag(tag),
-                textDirection: optionDirection,
-                textAlign: TextAlign.left,
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: Text(context.strings.text('Language'))),
+        body: ListView.builder(
+          itemCount: orderedTags.length,
+          itemBuilder: (context, index) {
+            final tag = orderedTags[index];
+            final optionDirection = BilLocalePolicy.isRtlTag(tag)
+                ? TextDirection.rtl
+                : TextDirection.ltr;
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: ListTile(
+                key: Key('language-option-$tag'),
+                minTileHeight: 58,
+                title: Text(
+                  BilLocaleNames.native[tag]!,
+                  key: Key('settings-language-option-label-$tag'),
+                  locale: BilLocalePolicy.localeFromTag(tag),
+                  textDirection: optionDirection,
+                  textAlign: TextAlign.left,
+                ),
+                trailing: selected == tag
+                    ? const Icon(
+                        Icons.check_rounded,
+                        key: Key('settings-language-option-check'),
+                      )
+                    : null,
+                onTap: () async {
+                  await ref.read(appSettingsProvider.notifier).setLocale(tag);
+                  if (context.mounted && Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  }
+                },
               ),
-              trailing: selected == tag
-                  ? const Icon(
-                      Icons.check_rounded,
-                      key: Key('settings-language-option-check'),
-                    )
-                  : null,
-              onTap: () async {
-                await ref.read(appSettingsProvider.notifier).setLocale(tag);
-                if (context.mounted && Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-    ));
+    );
   }
 }

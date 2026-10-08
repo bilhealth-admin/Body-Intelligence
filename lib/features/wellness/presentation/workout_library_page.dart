@@ -264,279 +264,287 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
     final pageTitle = category == null
         ? tr('Exercise', 'التمارين')
         : _categoryLabel(category!);
-    return BilCalmVisualScope(builder: (context) => PopScope(
-      canPop: !customMutationBusy && !saving,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: customMutationBusy || saving
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go('/dashboard'),
-            icon: const Icon(Icons.arrow_back_rounded),
-          ),
-          centerTitle: true,
-          title: Text(pageTitle),
-          actions: [
-            IconButton(
-              tooltip: tr('Display options', 'خيارات العرض'),
-              onPressed: customMutationBusy || saving ? null : _chooseSortOrder,
-              icon: const Icon(Icons.sort_by_alpha_rounded),
+    return BilCalmVisualScope(
+      builder: (context) => PopScope(
+        canPop: !customMutationBusy && !saving,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: customMutationBusy || saving
+                  ? null
+                  : () => context.canPop()
+                        ? context.pop()
+                        : context.go('/dashboard'),
+              icon: const Icon(Icons.arrow_back_rounded),
             ),
-          ],
-        ),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 156),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(
-                onChanged: (value) => setState(() => query = value),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
-                  prefixIcon: Icon(
-                     Icons.search_rounded,
-                     size: 18,
-                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                   ),
-                  hintText: tr('Search for an exercise', 'ابحث عن تمرين'),
-                  border: InputBorder.none,
+            centerTitle: true,
+            title: Text(pageTitle),
+            actions: [
+              IconButton(
+                tooltip: tr('Display options', 'خيارات العرض'),
+                onPressed: customMutationBusy || saving
+                    ? null
+                    : _chooseSortOrder,
+                icon: const Icon(Icons.sort_by_alpha_rounded),
+              ),
+            ],
+          ),
+          body: ListView(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 156),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  onChanged: (value) => setState(() => query = value),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    hintText: tr('Search for an exercise', 'ابحث عن تمرين'),
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ChoiceChip(
-                    label: Text(tr('All', 'الكل')),
-                    selected: category == null,
-                    onSelected: (_) => setState(() => category = null),
-                  ),
-                  const SizedBox(width: 8),
-                  for (final option in const [
-                    'Cardio',
-                    'Strength',
-                    'Recovery',
-                  ]) ...[
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
                     ChoiceChip(
-                      label: Text(_categoryLabel(option)),
-                      selected: category == option,
-                      onSelected: (_) => setState(() => category = option),
+                      label: Text(tr('All', 'الكل')),
+                      selected: category == null,
+                      onSelected: (_) => setState(() => category = null),
                     ),
                     const SizedBox(width: 8),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            _WorkoutDiscoveryHero(
-              onStrength: () => _openWorkout(
-                workouts.firstWhere((item) => item.id == 'strength'),
-              ),
-              onMobility: () => _openWorkout(
-                workouts.firstWhere((item) => item.id == 'mobility'),
-              ),
-            ),
-            const SizedBox(height: 14),
-            _WorkoutLibraryTabs(
-              selected: libraryTab,
-              onSelected: _selectLibraryTab,
-            ),
-            if (libraryTab == 2)
-              for (final item in visible)
-                Column(
-                  children: [
-                    Semantics(
-                      button: true,
-                      selected: multiSelecting
-                          ? multiSelection.contains(item.id)
-                          : null,
-                      label: wellnessCopy(context, item.en, item.ar),
-                      value: _categoryLabel(item.categoryEn),
-                      excludeSemantics: true,
-                      child: ListTile(
-                        minTileHeight: 58,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        title: Text(wellnessCopy(context, item.en, item.ar)),
-                        trailing: multiSelecting
-                            ? Checkbox(
-                                value: multiSelection.contains(item.id),
-                                onChanged: (_) => _toggleMulti(item.id),
-                              )
-                            : const Icon(Icons.chevron_right_rounded),
-                        onTap: () => multiSelecting
-                            ? _toggleMulti(item.id)
-                            : _openWorkout(item),
+                    for (final option in const [
+                      'Cardio',
+                      'Strength',
+                      'Recovery',
+                    ]) ...[
+                      ChoiceChip(
+                        label: Text(_categoryLabel(option)),
+                        selected: category == option,
+                        onSelected: (_) => setState(() => category = option),
                       ),
-                    ),
-                    const Divider(height: 1),
+                      const SizedBox(width: 8),
+                    ],
                   ],
-                )
-            else if (libraryTab == 1 && customExercises.isNotEmpty)
-              for (final entry in customExercises)
-                Column(
-                  children: [
-                    Semantics(
-                      button: true,
-                      selected: multiSelecting
-                          ? multiSelection.contains(entry['id'])
-                          : null,
-                      label: entry['name'],
-                      value: _categoryLabel(entry['category'] ?? 'Strength'),
-                      excludeSemantics: multiSelecting,
-                      explicitChildNodes: !multiSelecting,
-                      child: ListTile(
-                        key: Key('custom-exercise-${entry['id']}'),
-                        minTileHeight: 62,
-                        title: Text(entry['name']!),
-                        subtitle: Text(
-                          _categoryLabel(entry['category'] ?? 'Strength'),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _WorkoutDiscoveryHero(
+                onStrength: () => _openWorkout(
+                  workouts.firstWhere((item) => item.id == 'strength'),
+                ),
+                onMobility: () => _openWorkout(
+                  workouts.firstWhere((item) => item.id == 'mobility'),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _WorkoutLibraryTabs(
+                selected: libraryTab,
+                onSelected: _selectLibraryTab,
+              ),
+              if (libraryTab == 2)
+                for (final item in visible)
+                  Column(
+                    children: [
+                      Semantics(
+                        button: true,
+                        selected: multiSelecting
+                            ? multiSelection.contains(item.id)
+                            : null,
+                        label: wellnessCopy(context, item.en, item.ar),
+                        value: _categoryLabel(item.categoryEn),
+                        excludeSemantics: true,
+                        child: ListTile(
+                          minTileHeight: 58,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          title: Text(wellnessCopy(context, item.en, item.ar)),
+                          trailing: multiSelecting
+                              ? Checkbox(
+                                  value: multiSelection.contains(item.id),
+                                  onChanged: (_) => _toggleMulti(item.id),
+                                )
+                              : const Icon(Icons.chevron_right_rounded),
+                          onTap: () => multiSelecting
+                              ? _toggleMulti(item.id)
+                              : _openWorkout(item),
                         ),
-                        onTap: () => multiSelecting
-                            ? _toggleMulti(entry['id']!)
-                            : _openCustomExercise(entry),
-                        trailing: multiSelecting
-                            ? Checkbox(
-                                value: multiSelection.contains(entry['id']),
-                                onChanged: (_) => _toggleMulti(entry['id']!),
-                              )
-                            : Semantics(
-                                container: true,
-                                button: true,
-                                label: tr('Delete', 'حذف'),
-                                excludeSemantics: true,
-                                child: IconButton(
-                                  tooltip: tr('Delete', 'حذف'),
-                                  onPressed: customMutationBusy
-                                      ? null
-                                      : () =>
-                                            _deleteCustomExercise(entry['id']!),
-                                  icon: const Icon(
-                                    Icons.delete_outline_rounded,
+                      ),
+                      const Divider(height: 1),
+                    ],
+                  )
+              else if (libraryTab == 1 && customExercises.isNotEmpty)
+                for (final entry in customExercises)
+                  Column(
+                    children: [
+                      Semantics(
+                        button: true,
+                        selected: multiSelecting
+                            ? multiSelection.contains(entry['id'])
+                            : null,
+                        label: entry['name'],
+                        value: _categoryLabel(entry['category'] ?? 'Strength'),
+                        excludeSemantics: multiSelecting,
+                        explicitChildNodes: !multiSelecting,
+                        child: ListTile(
+                          key: Key('custom-exercise-${entry['id']}'),
+                          minTileHeight: 62,
+                          title: Text(entry['name']!),
+                          subtitle: Text(
+                            _categoryLabel(entry['category'] ?? 'Strength'),
+                          ),
+                          onTap: () => multiSelecting
+                              ? _toggleMulti(entry['id']!)
+                              : _openCustomExercise(entry),
+                          trailing: multiSelecting
+                              ? Checkbox(
+                                  value: multiSelection.contains(entry['id']),
+                                  onChanged: (_) => _toggleMulti(entry['id']!),
+                                )
+                              : Semantics(
+                                  container: true,
+                                  button: true,
+                                  label: tr('Delete', 'حذف'),
+                                  excludeSemantics: true,
+                                  child: IconButton(
+                                    tooltip: tr('Delete', 'حذف'),
+                                    onPressed: customMutationBusy
+                                        ? null
+                                        : () => _deleteCustomExercise(
+                                            entry['id']!,
+                                          ),
+                                    icon: const Icon(
+                                      Icons.delete_outline_rounded,
+                                    ),
                                   ),
                                 ),
-                              ),
-                      ),
-                    ),
-                    const Divider(height: 1),
-                  ],
-                )
-            else if (libraryTab == 0 && historyLoading)
-              const Padding(
-                padding: EdgeInsets.all(48),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (libraryTab == 0 && historyError != null)
-              _WorkoutHistoryError(
-                message: historyError!,
-                onRetry: _loadHistory,
-              )
-            else if (libraryTab == 0 && history.isNotEmpty)
-              for (final entry in history)
-                Column(
-                  children: [
-                    ListTile(
-                      key: Key(
-                        'workout-history-${entry.id}-${entry.date.millisecondsSinceEpoch}',
-                      ),
-                      minTileHeight: 62,
-                      title: Text(_historyDisplayName(entry)),
-                      subtitle: Text(
-                        tr(
-                          '${entry.minutes} min · ${MaterialLocalizations.of(context).formatShortDate(entry.date)}',
-                          '${entry.minutes} دقيقة · ${MaterialLocalizations.of(context).formatShortDate(entry.date)}',
                         ),
                       ),
-                      trailing: Icon(
-                        Icons.replay_rounded,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      onTap: () => _reuseHistory(entry),
-                    ),
-                    const Divider(height: 1),
-                  ],
+                      const Divider(height: 1),
+                    ],
+                  )
+              else if (libraryTab == 0 && historyLoading)
+                const Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Center(child: CircularProgressIndicator()),
                 )
-            else
-              _WorkoutEmptyState(
-                title: libraryTab == 0
-                    ? tr('No exercise history yet', 'لا يوجد سجل تمارين بعد')
-                    : tr('No custom exercises yet', 'لا توجد تمارين مخصصة بعد'),
-                body: libraryTab == 0
-                    ? tr(
-                        'Exercises you log will appear here for quick reuse.',
-                        'ستظهر التمارين التي تسجلها هنا لإعادة استخدامها بسرعة.',
-                      )
-                    : tr(
-                        'Create exercises that match your own training plan.',
-                        'أنشئ تمارين تناسب خطتك التدريبية.',
+              else if (libraryTab == 0 && historyError != null)
+                _WorkoutHistoryError(
+                  message: historyError!,
+                  onRetry: _loadHistory,
+                )
+              else if (libraryTab == 0 && history.isNotEmpty)
+                for (final entry in history)
+                  Column(
+                    children: [
+                      ListTile(
+                        key: Key(
+                          'workout-history-${entry.id}-${entry.date.millisecondsSinceEpoch}',
+                        ),
+                        minTileHeight: 62,
+                        title: Text(_historyDisplayName(entry)),
+                        subtitle: Text(
+                          tr(
+                            '${entry.minutes} min · ${MaterialLocalizations.of(context).formatShortDate(entry.date)}',
+                            '${entry.minutes} دقيقة · ${MaterialLocalizations.of(context).formatShortDate(entry.date)}',
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.replay_rounded,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        onTap: () => _reuseHistory(entry),
                       ),
-              ),
-          ],
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-            child: Row(
-              children: [
-                if (!multiSelecting) ...[
+                      const Divider(height: 1),
+                    ],
+                  )
+              else
+                _WorkoutEmptyState(
+                  title: libraryTab == 0
+                      ? tr('No exercise history yet', 'لا يوجد سجل تمارين بعد')
+                      : tr(
+                          'No custom exercises yet',
+                          'لا توجد تمارين مخصصة بعد',
+                        ),
+                  body: libraryTab == 0
+                      ? tr(
+                          'Exercises you log will appear here for quick reuse.',
+                          'ستظهر التمارين التي تسجلها هنا لإعادة استخدامها بسرعة.',
+                        )
+                      : tr(
+                          'Create exercises that match your own training plan.',
+                          'أنشئ تمارين تناسب خطتك التدريبية.',
+                        ),
+                ),
+            ],
+          ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: Row(
+                children: [
+                  if (!multiSelecting) ...[
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: customMutationBusy
+                            ? null
+                            : _createCustomExercise,
+                        icon: const Icon(Icons.add_rounded),
+                        label: Text(tr('New exercise', 'تمرين جديد')),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                  ],
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: customMutationBusy
-                          ? null
-                          : _createCustomExercise,
-                      icon: const Icon(Icons.add_rounded),
-                      label: Text(tr('New exercise', 'تمرين جديد')),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                ],
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: customMutationBusy ? null : _toggleMultiMode,
-                    icon: Icon(
-                      multiSelecting
-                          ? Icons.close_rounded
-                          : Icons.library_add_check_outlined,
-                    ),
-                    label: Text(
-                      multiSelecting
-                          ? tr('Cancel', 'إلغاء')
-                          : tr('Multi-add', 'إضافة متعددة'),
-                    ),
-                  ),
-                ),
-                if (multiSelecting) ...[
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton.icon(
-                      key: const Key('log-selected-workouts'),
-                      onPressed: multiSelection.isEmpty || saving
-                          ? null
-                          : _saveSelectedWorkouts,
-                      icon: const Icon(Icons.check_rounded),
+                      onPressed: customMutationBusy ? null : _toggleMultiMode,
+                      icon: Icon(
+                        multiSelecting
+                            ? Icons.close_rounded
+                            : Icons.library_add_check_outlined,
+                      ),
                       label: Text(
-                        tr(
-                          'Log ${multiSelection.length}',
-                          'سجل ${multiSelection.length}',
-                        ),
+                        multiSelecting
+                            ? tr('Cancel', 'إلغاء')
+                            : tr('Multi-add', 'إضافة متعددة'),
                       ),
                     ),
                   ),
+                  if (multiSelecting) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        key: const Key('log-selected-workouts'),
+                        onPressed: multiSelection.isEmpty || saving
+                            ? null
+                            : _saveSelectedWorkouts,
+                        icon: const Icon(Icons.check_rounded),
+                        label: Text(
+                          tr(
+                            'Log ${multiSelection.length}',
+                            'سجل ${multiSelection.length}',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

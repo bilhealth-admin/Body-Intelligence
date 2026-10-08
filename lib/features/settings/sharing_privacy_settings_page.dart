@@ -284,113 +284,118 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final copy = ReferenceSettingsCopy.of(context);
     final diarySharing = ref.watch(diarySharingSummaryProvider);
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text(copy('Sharing & Privacy'))),
-      body: ListView(
-        children: [
-          ListTile(
-            key: const Key('sharing-privacy-diary-sharing'),
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.notes,
-            ),
-            title: Text(_privacyText(context, 'Diary sharing')),
-            subtitle: diarySharing.when(
-              data: (value) => Text(
-                _privacyText(context, diarySharingSummaryCopyKey(value)),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(copy('Sharing & Privacy')),
+        ),
+        body: ListView(
+          children: [
+            ListTile(
+              key: const Key('sharing-privacy-diary-sharing'),
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.notes,
               ),
-              loading: () => null,
-              error: (_, _) => Text(context.strings.text('Unavailable')),
+              title: Text(_privacyText(context, 'Diary sharing')),
+              subtitle: diarySharing.when(
+                data: (value) => Text(
+                  _privacyText(context, diarySharingSummaryCopyKey(value)),
+                ),
+                loading: () => null,
+                error: (_, _) => Text(context.strings.text('Unavailable')),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/settings/diary/sharing'),
             ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/diary/sharing'),
-          ),
-          const _CloudSyncConsentTile(),
-          const _MealVisionConsentTile(),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.profile,
+            const _CloudSyncConsentTile(),
+            const _MealVisionConsentTile(),
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.profile,
+              ),
+              title: Text(context.strings.text('Community profile')),
+              subtitle: Text(_privacyText(context, 'Profile visibility')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/community/profile'),
             ),
-            title: Text(context.strings.text('Community profile')),
-            subtitle: Text(_privacyText(context, 'Profile visibility')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/community/profile'),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.friends,
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.friends,
+              ),
+              title: Text(context.strings.text('Friends and requests')),
+              subtitle: Text(_privacyText(context, 'Allow people to find me')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/community/connections'),
             ),
-            title: Text(context.strings.text('Friends and requests')),
-            subtitle: Text(_privacyText(context, 'Allow people to find me')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/community/connections'),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.legal,
+            const Divider(height: 1),
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.legal,
+              ),
+              title: Text(_privacyText(context, 'Terms of service')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/legal/terms'),
             ),
-            title: Text(_privacyText(context, 'Terms of service')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/legal/terms'),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.privacy,
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.privacy,
+              ),
+              title: Text(_privacyText(context, 'Privacy policy')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/legal/privacy'),
             ),
-            title: Text(_privacyText(context, 'Privacy policy')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/legal/privacy'),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.support,
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.support,
+              ),
+              title: Text(_privacyText(context, 'Trust & support')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/trust-support'),
             ),
-            title: Text(_privacyText(context, 'Trust & support')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/trust-support'),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.preferences,
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.preferences,
+              ),
+              title: Text(
+                _privacyText(context, 'Manage personalization preferences'),
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/advertising-privacy'),
             ),
-            title: Text(
-              _privacyText(context, 'Manage personalization preferences'),
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.notifications,
+                iconOverride: Icons.mail_outline_rounded,
+                appleIconOverride: Icons.mail_outline_rounded,
+              ),
+              title: Text(_privacyText(context, 'Email settings')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/settings/email'),
             ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/advertising-privacy'),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.notifications,
-              iconOverride: Icons.mail_outline_rounded,
-              appleIconOverride: Icons.mail_outline_rounded,
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.support,
+              ),
+              title: Text(_privacyText(context, 'Contact support')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => launchUrl(
+                Uri(scheme: 'mailto', path: 'privacy@bilhealth.com'),
+                mode: LaunchMode.externalApplication,
+              ),
             ),
-            title: Text(_privacyText(context, 'Email settings')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/email'),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.support,
+            ListTile(
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.export,
+              ),
+              title: Text(_privacyText(context, 'Export my data')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/settings/local-export'),
             ),
-            title: Text(_privacyText(context, 'Contact support')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => launchUrl(
-              Uri(scheme: 'mailto', path: 'privacy@bilhealth.com'),
-              mode: LaunchMode.externalApplication,
-            ),
-          ),
-          ListTile(
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.export,
-            ),
-            title: Text(_privacyText(context, 'Export my data')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/local-export'),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 

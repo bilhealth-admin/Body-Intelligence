@@ -383,116 +383,120 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   Widget build(BuildContext context) {
     final t = context.strings.text;
 
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(
-        title: Text(t('Scan food barcode')),
-        actions: [
-          if (widget.scannerEnabled)
-            IconButton(
-              key: const Key('barcode-manual-entry-action'),
-              tooltip: nutritionText(
-                context,
-                'Enter barcode manually',
-                'إدخال الباركود يدويًا',
-              ),
-              onPressed: handled ? null : _enterBarcodeManually,
-              icon: const Icon(Icons.keyboard_alt_outlined),
-            ),
-          if (widget.scannerEnabled && galleryAnalysisSupported)
-            IconButton(
-              key: const Key('barcode-gallery-image-action'),
-              tooltip: _barcodeImageCopy(context).chooseImage,
-              onPressed: analyzingImage ? null : _analyzeGalleryImage,
-              icon: analyzingImage
-                  ? const SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.image_search_rounded),
-            ),
-          if (widget.scannerEnabled && mobileScannerSupported && !isWindows)
-            ValueListenableBuilder<MobileScannerState>(
-              valueListenable: controller,
-              builder: (context, state, _) => IconButton(
-                tooltip: t('Toggle flashlight'),
-                onPressed: state.torchState == TorchState.unavailable
-                    ? null
-                    : controller.toggleTorch,
-                icon: Icon(
-                  state.torchState == TorchState.on
-                      ? Icons.flash_on
-                      : Icons.flash_off,
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: Text(t('Scan food barcode')),
+          actions: [
+            if (widget.scannerEnabled)
+              IconButton(
+                key: const Key('barcode-manual-entry-action'),
+                tooltip: nutritionText(
+                  context,
+                  'Enter barcode manually',
+                  'إدخال الباركود يدويًا',
                 ),
+                onPressed: handled ? null : _enterBarcodeManually,
+                icon: const Icon(Icons.keyboard_alt_outlined),
               ),
-            ),
-        ],
-      ),
-      body: !widget.scannerEnabled || !scannerSupported
-          ? _UnsupportedScanner(onManualEntry: _enterBarcodeManually)
-          : isWindows
-          ? _WindowsScannerLauncher(
-              starting: starting,
-              error: startError,
-              onScan: _startWindows,
-            )
-          : Stack(
-              fit: StackFit.expand,
-              children: [
-                MobileScanner(
-                  controller: controller,
-                  onDetect: _onDetect,
-                  errorBuilder: (context, error) => _ScannerError(
-                    message: t('Camera permission or scanner startup failed.'),
-                    onRetry: _startMobile,
+            if (widget.scannerEnabled && galleryAnalysisSupported)
+              IconButton(
+                key: const Key('barcode-gallery-image-action'),
+                tooltip: _barcodeImageCopy(context).chooseImage,
+                onPressed: analyzingImage ? null : _analyzeGalleryImage,
+                icon: analyzingImage
+                    ? const SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.image_search_rounded),
+              ),
+            if (widget.scannerEnabled && mobileScannerSupported && !isWindows)
+              ValueListenableBuilder<MobileScannerState>(
+                valueListenable: controller,
+                builder: (context, state, _) => IconButton(
+                  tooltip: t('Toggle flashlight'),
+                  onPressed: state.torchState == TorchState.unavailable
+                      ? null
+                      : controller.toggleTorch,
+                  icon: Icon(
+                    state.torchState == TorchState.on
+                        ? Icons.flash_on
+                        : Icons.flash_off,
                   ),
                 ),
-                IgnorePointer(
-                  child: CustomPaint(
-                    key: const Key('barcode-animated-scan-beam'),
-                    painter: _ScanFramePainter(
-                      color: Theme.of(context).colorScheme.primary,
-                      progress: _scanBeamProgress,
+              ),
+          ],
+        ),
+        body: !widget.scannerEnabled || !scannerSupported
+            ? _UnsupportedScanner(onManualEntry: _enterBarcodeManually)
+            : isWindows
+            ? _WindowsScannerLauncher(
+                starting: starting,
+                error: startError,
+                onScan: _startWindows,
+              )
+            : Stack(
+                fit: StackFit.expand,
+                children: [
+                  MobileScanner(
+                    controller: controller,
+                    onDetect: _onDetect,
+                    errorBuilder: (context, error) => _ScannerError(
+                      message: t(
+                        'Camera permission or scanner startup failed.',
+                      ),
+                      onRetry: _startMobile,
                     ),
                   ),
-                ),
-                SafeArea(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      margin: const EdgeInsets.all(20),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surface.withValues(alpha: .92),
-                        borderRadius: BorderRadius.circular(18),
+                  IgnorePointer(
+                    child: CustomPaint(
+                      key: const Key('barcode-animated-scan-beam'),
+                      painter: _ScanFramePainter(
+                        color: Theme.of(context).colorScheme.primary,
+                        progress: _scanBeamProgress,
                       ),
-                      child: Text(
-                        t(
-                          'Place the product barcode inside the frame. '
-                          'Nothing is uploaded.',
+                    ),
+                  ),
+                  SafeArea(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        margin: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surface.withValues(alpha: .92),
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                        textAlign: TextAlign.center,
+                        child: Text(
+                          t(
+                            'Place the product barcode inside the frame. '
+                            'Nothing is uploaded.',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (starting)
-                  const ColoredBox(
-                    color: Color(0x66000000),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                if (startError != null)
-                  _ScannerError(
-                    message: t(
-                      'Camera permission was denied or the camera is '
-                      'unavailable. You can retry or use manual barcode entry.',
+                  if (starting)
+                    const ColoredBox(
+                      color: Color(0x66000000),
+                      child: Center(child: CircularProgressIndicator()),
                     ),
-                    onRetry: _startMobile,
-                  ),
-              ],
-            ),
-    ));
+                  if (startError != null)
+                    _ScannerError(
+                      message: t(
+                        'Camera permission was denied or the camera is '
+                        'unavailable. You can retry or use manual barcode entry.',
+                      ),
+                      onRetry: _startMobile,
+                    ),
+                ],
+              ),
+      ),
+    );
   }
 }
 
