@@ -865,6 +865,7 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         rulesCopyKey: 'community_circle_standard_rules',
         access: CommunityCircleAccess.public,
         joinPolicy: CommunityCircleJoinPolicy.open,
+        featured: false,
         memberCount: 1800,
         postCount: 67,
       ),
@@ -878,6 +879,7 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         rulesCopyKey: 'community_circle_standard_rules',
         access: CommunityCircleAccess.public,
         joinPolicy: CommunityCircleJoinPolicy.open,
+        featured: false,
         memberCount: 2600,
         postCount: 108,
       ),
@@ -891,6 +893,7 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         rulesCopyKey: 'community_circle_standard_rules',
         access: CommunityCircleAccess.public,
         joinPolicy: CommunityCircleJoinPolicy.open,
+        featured: false,
         memberCount: 1100,
         postCount: 40,
       ),
@@ -904,6 +907,7 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         rulesCopyKey: 'community_circle_standard_rules',
         access: CommunityCircleAccess.public,
         joinPolicy: CommunityCircleJoinPolicy.open,
+        featured: false,
         memberCount: 1900,
         postCount: 55,
       ),
@@ -1492,10 +1496,7 @@ void main() {
                     greaterThanOrEqualTo(48),
                     reason: id,
                   );
-                  expect(
-                    find.byKey(ValueKey('$id-count')),
-                    findsOneWidget,
-                  );
+                  expect(find.byKey(ValueKey('$id-count')), findsOneWidget);
                 }
                 expect(
                   find.byKey(const Key('community-activity-filter-updates')),
