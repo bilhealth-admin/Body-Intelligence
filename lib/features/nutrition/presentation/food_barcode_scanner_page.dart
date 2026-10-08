@@ -15,9 +15,9 @@ import 'barcode_scanner_helpers.dart';
 import 'nutrition_copy.dart';
 import '../../visual_2026/bil_calm_visual_scope.dart';
 
-part 'food_barcode_scanner_painter.dart';
-
 export 'barcode_scanner_helpers.dart';
+
+part 'food_barcode_scanner_painter.dart';
 
 class FoodBarcodeScannerPage extends StatefulWidget {
   const FoodBarcodeScannerPage({super.key, this.scannerEnabled = true});
