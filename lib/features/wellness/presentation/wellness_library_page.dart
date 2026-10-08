@@ -5,6 +5,7 @@ import '../../../app/theme/bil_flagship_tokens.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../ads/presentation/safe_free_ad_anchor.dart';
 import 'wellness_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 class WellnessLibraryPage extends StatefulWidget {
   const WellnessLibraryPage({super.key});
@@ -26,7 +27,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
   @override
   Widget build(BuildContext context) {
     final items = _items(context);
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () =>
@@ -104,7 +105,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   List<_WellnessItem> _items(BuildContext context) => [
