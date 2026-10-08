@@ -112,8 +112,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         ),
         tooltip: analyticsText(
           context,
-          dashboardBack ? 'Back to dashboard' : 'Back to settings',
-          dashboardBack ? 'العودة إلى لوحة القيادة' : 'العودة إلى الإعدادات',
+          dashboardBack ? 'Back to Home' : 'Back to settings',
+          dashboardBack ? 'العودة إلى الرئيسية' : 'العودة إلى الإعدادات',
         ),
         onPressed: () {
           if (dashboardBack) {
