@@ -85,7 +85,7 @@ void main() {
               (widget) =>
                   widget is Text &&
                   widget.data == localizedTitle &&
-                  widget.style?.fontWeight == FontWeight.w900,
+                  widget.style?.fontWeight == FontWeight.w600,
               description: 'More section heading: $title',
             );
             await tester.scrollUntilVisible(heading, 250);
@@ -120,12 +120,24 @@ void main() {
             );
             expect(rows, isNotEmpty, reason: '$title keeps its action rows');
             for (final row in rows) {
-              expect(row.leading, isNotNull);
-              expect(
-                row.leading.runtimeType.toString(),
-                anyOf('_MorePremiumIcon', 'BilSemanticIconBadge'),
-              );
+              // Protected Community/Coach destinations retain their existing
+              // badges. Other secondary routes are deliberately text-first.
+              if (row.leading != null) {
+                expect(
+                  row.leading.runtimeType.toString(),
+                  '_MorePremiumIcon',
+                );
+              } else {
+                expect(row.minTileHeight, greaterThanOrEqualTo(48));
+              }
               expect(row.onTap, isNotNull);
+            }
+            if (title == 'Account & profile' || title == 'Diary & goals') {
+              expect(
+                rows.any((row) => row.leading == null),
+                isTrue,
+                reason: '$title uses text-first action rows',
+              );
             }
             expect(tester.takeException(), isNull);
           }

@@ -135,9 +135,18 @@ void main() {
       final registrationCoordinator = source(
         'lib/features/notifications/presentation/community_push_registration_coordinator.dart',
       );
-      final settings = source(
-        'lib/features/notifications/presentation/notification_settings_page.dart',
+      const notificationDir = 'lib/features/notifications/presentation/';
+      final notificationEntry = source(
+        '${notificationDir}notification_settings_page.dart',
       );
+      final settings = <String>[
+        notificationEntry,
+        for (final part in RegExp(
+          r"^part '([^']+)';",
+          multiLine: true,
+        ).allMatches(notificationEntry))
+          source('$notificationDir${part.group(1)!}'),
+      ].join('\n');
       final dispatch = readPushDispatcherImplementation(
         'supabase/functions/community_push_dispatch.ts',
       );

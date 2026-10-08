@@ -39,8 +39,11 @@ void main() {
     expect(source, contains('prefs.mutate('));
     expect(source, contains('canPop: !busy'));
     expect(
-      source,
-      contains("tr('Intermittent fasting history', 'سجل الصيام المتقطع')"),
+      RegExp(
+        r"tr\(\s*'Intermittent fasting history',\s*'سجل الصيام المتقطع',?\s*\)",
+      ).hasMatch(source),
+      isTrue,
+      reason: 'Localized fasting history stays available despite Dart formatting',
     );
   });
 }
