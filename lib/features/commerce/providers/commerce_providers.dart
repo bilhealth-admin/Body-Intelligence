@@ -143,8 +143,16 @@ void Function() _observedAuthorityReload(
     final binding = WidgetsBinding.instance;
     appLifecycle = AppLifecycleListener(
       binding: binding,
-      onResume: () {
-        if (disposed || !observed || !loaded) return;
+      // Reverify on the delivered foreground state, not only on Flutter's
+      // synthesized inactive -> resumed edge. Android may restore through
+      // hidden/paused/inactive; a missed edge must never keep rights stale.
+      onStateChange: (state) {
+        if (state != AppLifecycleState.resumed ||
+            disposed ||
+            !observed ||
+            !loaded) {
+          return;
+        }
         refresh?.cancel();
         (resumeReload ?? reload)();
       },
