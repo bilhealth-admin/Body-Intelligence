@@ -27,6 +27,7 @@ import 'recipe_cuisine.dart';
 import 'recipe_source_disclosure.dart';
 import '../domain/recipe_source_copy.dart';
 import 'wellness_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'recipe_library_helpers.dart';
 part 'recipe_library_card.dart';
@@ -165,7 +166,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         centerTitle: false,
         scrolledUnderElevation: 0,
@@ -205,7 +206,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           return _buildCatalog(snapshot.requireData);
         },
       ),
-    );
+    ));
   }
 
   Widget _buildCatalog(List<RecipeCatalogSummary> source) {
