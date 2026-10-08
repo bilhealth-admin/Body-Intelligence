@@ -18,8 +18,10 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
       _saving = true;
       _savingSection = section;
     });
+    var saved = false;
     try {
       await operation();
+      saved = true;
       return true;
     } catch (_) {
       if (mounted) _showSaveFailure(context);
@@ -30,6 +32,14 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
           _saving = false;
           _savingSection = null;
         });
+        if (_finishAfterSave) {
+          _finishAfterSave = false;
+          if (saved) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _finishEditing();
+            });
+          }
+        }
       }
     }
   }
@@ -155,7 +165,14 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
     String preset,
     Set<String> visible,
   ) async {
-    await _guardedSave(() async {
+    if (_saving) return;
+    _updateState(() {
+      _pendingPresetId = preset;
+      for (final section in DashboardSectionIds.all) {
+        _pendingSectionValues[section] = visible.contains(section);
+      }
+    });
+    final saved = await _guardedSave(() async {
       final repository = ref.read(preferencesRepositoryProvider);
       await repository.setMany({
         'dashboard.preset': preset,
@@ -163,6 +180,12 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
           'dashboard.section.$section': '${visible.contains(section)}',
       });
     });
+    if (!saved && mounted) {
+      _updateState(() {
+        _pendingPresetId = null;
+        _pendingSectionValues.clear();
+      });
+    }
   }
 
   Future<void> _setSectionVisibility(
@@ -171,16 +194,35 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
     String section,
     bool visible,
   ) async {
-    await _guardedSave(() async {
+    if (_saving) return;
+    _updateState(() {
+      _pendingSectionValues[section] = visible;
+      _pendingPresetId = 'custom';
+    });
+    final saved = await _guardedSave(() async {
       await ref.read(preferencesRepositoryProvider).setMany({
         'dashboard.section.$section': '$visible',
         'dashboard.preset': 'custom',
       });
     }, section: section);
+    if (!saved && mounted) {
+      _updateState(() {
+        _pendingSectionValues.remove(section);
+        _pendingPresetId = null;
+      });
+    }
   }
 
   Future<void> _restoreDefaults(BuildContext context, WidgetRef ref) async {
-    await _guardedSave(() async {
+    if (_saving) return;
+    _updateState(() {
+      _pendingPresetId = '__default__';
+      for (final section in DashboardSectionIds.all) {
+        _pendingSectionValues[section] =
+            DashboardSectionIds.defaultVisible(section);
+      }
+    });
+    final saved = await _guardedSave(() async {
       final repository = ref.read(preferencesRepositoryProvider);
       await repository.removeMany([
         'dashboard.preset',
@@ -191,6 +233,12 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
         'dashboard.nutrientGoalCards',
       ]);
     });
+    if (!saved && mounted) {
+      _updateState(() {
+        _pendingPresetId = null;
+        _pendingSectionValues.clear();
+      });
+    }
   }
 
   void _showSaveFailure(BuildContext context) {
