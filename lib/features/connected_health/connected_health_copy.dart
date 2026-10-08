@@ -28,10 +28,42 @@ String connectedHealthDisplayName(
   ConnectedHealthSignalView signal,
 ) {
   final name = connectedHealthDisplaySource(signal);
-  return name == 'Health source'
-      ? connectedHealthText(context, 'Health source', 'مصدر الصحة')
-      : name;
+  if (name != 'Health source') return name;
+  // An unknown source must not turn into an invented wearable. Render one
+  // reviewed generic label in the selected language; never expose raw JSON,
+  // provider IDs or localization keys.
+  final locale = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
+  return _unknownHealthSourceLabels[locale] ??
+      connectedHealthText(context, 'Health source', 'مصدر الصحة');
 }
+
+const _unknownHealthSourceLabels = <String, String>{
+  'ar': 'مصدر الصحة',
+  'en': 'Health source',
+  'fr': 'Source santé',
+  'es': 'Fuente de salud',
+  'tr': 'Sağlık kaynağı',
+  'de': 'Gesundheitsquelle',
+  'it': 'Fonte di dati sanitari',
+  'pt-BR': 'Fonte de dados de saúde',
+  'pt-PT': 'Fonte de dados de saúde',
+  'ur': 'صحت کے ڈیٹا کا ماخذ',
+  'fa': 'منبع داده‌های سلامت',
+  'hi': 'स्वास्थ्य डेटा स्रोत',
+  'id': 'Sumber data kesehatan',
+  'ms': 'Sumber data kesihatan',
+  'ja': 'ヘルスケアデータの提供元',
+  'ko': '건강 데이터 출처',
+  'zh-Hans': '健康数据来源',
+  'zh-Hant': '健康資料來源',
+  'ru': 'Источник данных о здоровье',
+  'bn': 'স্বাস্থ্য তথ্যের উৎস',
+  'vi': 'Nguồn dữ liệu sức khỏe',
+  'th': 'แหล่งข้อมูลสุขภาพ',
+  'pl': 'Źródło danych zdrowotnych',
+  'nl': 'Bron van gezondheidsgegevens',
+  'uk': 'Джерело даних про здоров’я',
+};
 
 String connectedHealthSignalValueText(
   BuildContext context,
