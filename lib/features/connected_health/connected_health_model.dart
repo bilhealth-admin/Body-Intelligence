@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../global_platform/core/global_platform_core.dart';
 
 enum ConnectedHealthStatus {
@@ -158,37 +160,170 @@ final class ConnectedHealthSnapshot {
   );
 }
 
+/// Converts source *presentation* fields to readable text without altering
+/// provenance or health measurements. Structured objects without a known name
+/// are intentionally not rendered as raw JSON or inferred device brands.
+String? _readableHealthSourceName(Object? candidate) {
+  Object? value = candidate;
+  for (var depth = 0; depth < 3; depth++) {
+    if (value is Map) {
+      Object? named;
+      for (final key in const [
+        'deviceName',
+        'sourceName',
+        'displayName',
+        'productName',
+        'name',
+      ]) {
+        if (value[key] is String) {
+          named = value[key];
+          break;
+        }
+      }
+      if (named == null) return null;
+      value = named;
+      continue;
+    }
+    if (value is! String) return null;
+    final text = value.trim();
+    if (text.isEmpty ||
+        text == 'null' ||
+        text == '{}' ||
+        text.startsWith('Instance of ') ||
+        text.startsWith('[object ')) {
+      return null;
+    }
+    if (text.startsWith('{') ||
+        text.startsWith('[') ||
+        (text.startsWith('"') && text.endsWith('"'))) {
+      try {
+        value = jsonDecode(text);
+        continue;
+      } on FormatException {
+        return null;
+      }
+    }
+    if (RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
+
+/// Returns one value for each of the last 30 local calendar days.
+///
+/// The dashboard chart consumes these totals as bars; it is not a Cartesian
+/// line chart. Missing days are represented by zero so the time axis remains
+/// honest and stable.
+List<double> connectedHealthStepTrendValues(
+  ConnectedHealthSnapshot? snapshot,
+  DateTime now,
+) {
+  final totals = connectedHealthDailyStepTotals(snapshot, now);
+  final local = now.toLocal();
+  return List<double>.generate(
+    30,
+    (index) =>
+        totals[DateTime(local.year, local.month, local.day - 29 + index)] ?? 0,
+    growable: false,
+  );
+}
+
+/// Missing data is absent, not zero. Only chart bars may fill a missing day
+/// with zero; the Today value must come from an actual record for today.
+Map<DateTime, double> connectedHealthDailyStepTotals(
+  ConnectedHealthSnapshot? snapshot,
+  DateTime now,
+) {
+  if (snapshot == null ||
+      const {
+        ConnectedHealthStatus.unavailable,
+        ConnectedHealthStatus.permissionRequired,
+        ConnectedHealthStatus.permissionDenied,
+        ConnectedHealthStatus.authorizationRequested,
+      }.contains(snapshot.status)) {
+    return const {};
+  }
+  final source = snapshot.stepHistory.isNotEmpty
+      ? snapshot.stepHistory
+      : snapshot.signals;
+  final local = now.toLocal();
+  final today = DateTime(local.year, local.month, local.day);
+  final first = DateTime(local.year, local.month, local.day - 29);
+  final totals = <DateTime, double>{};
+  for (final signal in source) {
+    if (signal.key != 'steps' || signal.unit != 'count') continue;
+    if (!signal.value.isFinite || signal.value < 0) continue;
+    final observed = signal.observedAt.toLocal();
+    final day = DateTime(observed.year, observed.month, observed.day);
+    if (day.isBefore(first) || day.isAfter(today)) continue;
+    totals.update(
+      day,
+      (current) => current + signal.value,
+      ifAbsent: () => signal.value,
+    );
+  }
+  // Older snapshots may have history ending yesterday but a current daily
+  // total in signals. Fill only missing days; never count the same native
+  // total twice when it appears in both projections.
+  if (snapshot.stepHistory.isNotEmpty) {
+    for (final signal in snapshot.signals) {
+      if (signal.key != 'steps' ||
+          signal.unit != 'count' ||
+          !signal.value.isFinite ||
+          signal.value < 0) {
+        continue;
+      }
+      final observed = signal.observedAt.toLocal();
+      final day = DateTime(observed.year, observed.month, observed.day);
+      if (day.isBefore(first) || day.isAfter(today)) continue;
+      totals.putIfAbsent(day, () => signal.value);
+    }
+  }
+  return Map.unmodifiable(totals);
+}
+,
+    ).hasMatch(text)) {
+      return null;
+    }
+    return text;
+  }
+  return null;
+}
+
 String connectedHealthDisplaySource(ConnectedHealthSignalView signal) {
-  // A wearable is not necessarily an Apple Watch. Use the Apple-specific
-  // evidence carried by HealthKit, including revisions without an HKDevice.
-  final attributes = signal.attributes;
-  final kind = attributes['wearableKind']?.toString().trim().toLowerCase();
-  final product = attributes['sourceProductType']
-      ?.toString()
-      .trim()
-      .toLowerCase();
-  final device = [
-    signal.source,
-    attributes['deviceName'],
-    attributes['deviceModel'],
-    attributes['sourceName'],
-  ].whereType<Object>().join(' ').toLowerCase();
-  final manufacturer = attributes['deviceManufacturer']
-      ?.toString()
-      .trim()
-      .toLowerCase();
+  // Never stringify Maps/metadata. Only explicit product and device evidence
+  // permits identifying a wearable as Apple Watch.
+  final attrs = signal.attributes;
+  final source = _readableHealthSourceName(signal.source);
+  final deviceName = _readableHealthSourceName(attrs['deviceName']);
+  final deviceModel = _readableHealthSourceName(attrs['deviceModel']);
+  final sourceName = _readableHealthSourceName(attrs['sourceName']);
+  final productName = _readableHealthSourceName(attrs['sourceProductType']);
+  final kind = _readableHealthSourceName(attrs['wearableKind'])?.toLowerCase();
+  final manufacturer =
+      _readableHealthSourceName(attrs['deviceManufacturer'])?.toLowerCase();
+  final product = productName?.toLowerCase();
+  final deviceText = [
+    source,
+    deviceName,
+    deviceModel,
+    sourceName,
+  ].whereType<String>().join(' ').toLowerCase();
   if (kind == 'apple_watch' ||
       product?.startsWith('watch') == true ||
-      device.contains('apple watch') ||
-      (manufacturer == 'apple inc.' && device.contains('watch'))) {
+      deviceText.contains('apple watch') ||
+      (manufacturer == 'apple inc.' && deviceText.contains('watch'))) {
     return 'Apple Watch';
   }
-  final normalized = signal.source.trim().toLowerCase();
-  if (normalized.contains('health connect')) return 'Health Connect';
-  if (normalized.contains('apple') || normalized.contains('healthkit')) {
+  if (deviceText.contains('health connect')) return 'Health Connect';
+  if (deviceText.contains('apple') || deviceText.contains('healthkit')) {
     return 'Apple Health';
   }
-  return signal.source.trim();
+  final preferred = sourceName ?? deviceName ?? source;
+  if (preferred == null ||
+      preferred.toLowerCase().startsWith('com.') ||
+      preferred.toLowerCase().startsWith('org.') ||
+      preferred.toLowerCase().startsWith('android.')) {
+    return 'Health source';
+  }
+  return preferred;
 }
 
 /// Returns one value for each of the last 30 local calendar days.
