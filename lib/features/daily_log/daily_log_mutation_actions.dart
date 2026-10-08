@@ -20,7 +20,8 @@ extension _DailyLogMutationActions on _DailyLogPageState {
     await repository.save(
       date: date,
       notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-      exerciseNotes: exerciseNotes.text.trim().isEmpty &&
+      exerciseNotes:
+          exerciseNotes.text.trim().isEmpty &&
               exerciseNotesView.preservedStructuredLines.isEmpty
           ? null
           : composedExerciseNotes,
