@@ -907,7 +907,9 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         memberCount: 1900,
         postCount: 55,
       ),
-      displayName: arabic ? 'الصحة النفسية والتحفيز' : 'Mental Health & Mindset',
+      displayName: arabic
+          ? 'الصحة النفسية والتحفيز'
+          : 'Mental Health & Mindset',
     ),
   ];
 
@@ -996,7 +998,9 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
       id: 'abababab-abab-4bab-8bab-abababababab',
       authorId: _VisualRepository.peer,
       authorName: arabic ? 'عضو المجتمع' : 'Community member',
-      body: arabic ? 'تحدّي لياقة لمدة ثلاثين يومًا.' : 'My 30-day fitness journey.',
+      body: arabic
+          ? 'تحدّي لياقة لمدة ثلاثين يومًا.'
+          : 'My 30-day fitness journey.',
       createdAt: DateTime.utc(2026, 10, 3, 8, 30),
       moderationStatus: CommunityPostModerationStatus.pending,
       media: const [
@@ -1028,7 +1032,8 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
           bytes: 1,
           width: 400,
           height: 400,
-          url: 'asset://assets/images/professional/recipes/chicken_shawarma_bowl.jpg',
+          url:
+              'asset://assets/images/professional/recipes/chicken_shawarma_bowl.jpg',
         ),
       ],
     ),
