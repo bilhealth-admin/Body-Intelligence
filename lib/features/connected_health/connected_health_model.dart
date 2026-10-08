@@ -165,7 +165,7 @@ final class ConnectedHealthSnapshot {
 /// are intentionally not rendered as raw JSON or inferred device brands.
 String? _readableHealthSourceName(Object? candidate) {
   Object? value = candidate;
-  for (var depth = 0; depth < 3; depth++) {
+  for (var depth = 0; depth < 5; depth++) {
     if (value is Map) {
       Object? named;
       for (final key in const [
