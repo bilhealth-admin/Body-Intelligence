@@ -742,11 +742,15 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
       _draftPreviews;
   static List<CommunityPostImagePreview?> _draftPreviews = const [];
   static List<CommunityDraftMediaMetadata> _draftMedia = const [];
+  static List<CommunityPostImageDraft> _composerImages = const [];
+
+  static List<CommunityPostImageDraft> get composerImages => _composerImages;
 
   static Future<void> preloadPhotoFixtures() async {
     if (_draftPreviews.length == 4) return;
     final previews = <CommunityPostImagePreview?>[];
     final metadata = <CommunityDraftMediaMetadata>[];
+    final originals = <CommunityPostImageDraft>[];
     for (final path in const [
       'assets/images/professional/recipes/bean_corn_salad.jpg',
       'assets/images/professional/recipes/chicken_shawarma_bowl.jpg',
@@ -763,6 +767,8 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         throw StateError('Bundled BIL visual fixture could not be decoded');
       }
       final position = metadata.length;
+      // Exercise the same validated draft type used by the real post editor.
+      originals.add(await validateCommunityPostImageAsync(bytes));
       previews.add(
         await createCommunityPostImagePreviewAsync(
           bytes,
@@ -785,6 +791,7 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
     }
     _draftPreviews = List<CommunityPostImagePreview?>.unmodifiable(previews);
     _draftMedia = List<CommunityDraftMediaMetadata>.unmodifiable(metadata);
+    _composerImages = List<CommunityPostImageDraft>.unmodifiable(originals);
   }
 
   @override
@@ -946,6 +953,21 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
   Future<List<CommunityPost>> hydrateModerationReviewContents(
     List<CommunityPost> posts,
   ) async => posts;
+}
+
+/// The real native picker contract, injected with bundled synthetic QA
+/// originals. No permissions, photo library, Cloud Storage, or user data.
+final class _NativeVisualImagePicker implements CommunityPostImagePickerContract {
+  _NativeVisualImagePicker(this.images);
+
+  final List<CommunityPostImageDraft> images;
+  int _next = 0;
+
+  @override
+  Future<CommunityPostImageDraft?> pick() async {
+    if (_next >= images.length) return null;
+    return images[_next++];
+  }
 }
 
 final class _VisualChannelsRepository implements CommunityChannelsRepository {
@@ -1140,7 +1162,12 @@ void main() {
                 : BilFlagshipTheme.light(isArabic: arabic);
             final scenes = <String, Widget>{
               'welcome': const Scaffold(body: CommunityWelcome()),
-              'feed': CommunityHubPage(repository: feedRepository),
+              'feed': CommunityHubPage(
+                repository: feedRepository,
+                postImagePicker: _NativeVisualImagePicker(
+                  _ExtendedVisualRepository.composerImages,
+                ),
+              ),
               'profile': CommunityProfilePage(repository: repository),
               'member_profile': CommunityMemberProfilePage(
                 userId: _VisualRepository.peer,
@@ -1400,6 +1427,29 @@ void main() {
                   findsOneWidget,
                 );
                 expect(tester.takeException(), isNull, reason: 'create post');
+                // Populate the *real* editor's 4-slot media strip through its
+                // injected picker, preserving native validation and undo.
+                for (var index = 0; index < 3; index++) {
+                  final addPhoto = find.byKey(
+                    const Key('community-post-add-photo'),
+                  );
+                  await tester.ensureVisible(addPhoto);
+                  await tester.pumpAndSettle();
+                  await tester.tap(addPhoto);
+                  await tester.pumpAndSettle();
+                  expect(
+                    find.byKey(Key('community-selected-photo-$index')),
+                    findsOneWidget,
+                    reason: 'approved 3-photo + add composition',
+                  );
+                }
+                await settleVisualAssetImages(tester);
+                await tester.pumpAndSettle();
+                expect(
+                  tester.takeException(),
+                  isNull,
+                  reason: 'three native image-picker actions',
+                );
                 await _capture(
                   tester,
                   key,

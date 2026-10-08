@@ -58,7 +58,7 @@
 - Coach: بُنية الأدوات والجدول والبطاقات تختلف عن اللوحة اليمنى المعتمدة؛ يجب محاذاة حالات conversation/confirm/readback قبل أي pixel score.
 - Community feed: fixture لا يبرهن معرض أربع صور ولا جميع خيارات engagement.
 - Notifications: fixture يثبت حدثًا، ولا يغطي كامل مصفوفة AI token rewards والـreceipts.
-- Composer: لقطات empty media، ولا تثبت 4 uploads فعلية؛ **حد 1200** المعتمد من المالك أولى من «2000» في رسم مفاهيمي.
+- Composer: أضيفت لقطات محرر Flutter الحقيقية بعد اختيار 3 صور BIL محلية عبر واجهة picker القابلة للحقن؛ تظهر 3 صور وخانة الإضافة الرابعة، وتُختبر حالات 200% text scale وRTL. **هذه ليست تجربة Gallery/Upload فعلية على جهاز**، وحد 1200 Unicode يبقى كما اعتمده المالك.
 - Profile: تخطيط الرأس والبطاقات والأزرار مختلف؛ ما زال يحتاج مقارنة viewport/crop موحدة.
 - Drafts: fixture يستخدم أربع صور BIL محلية حقيقية؛ أُضيف precacheImage قبل الالتقاط لأن اللقطة السابقة أظهرت مساحة بيضاء رغم وجود Image.memory في شجرة العناصر. لا يعني هذا نسخ صور المستخدم أو إثبات pixel-match.
 - Feed: جرى ضبط `_CommunityPostMediaTile` ليملأ كامل خلية الـgallery بدل ترك فراغات ذات عرض كبير بين الصور الأربع.
