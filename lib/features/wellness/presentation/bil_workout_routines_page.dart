@@ -515,7 +515,10 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     // that intent until the real authority resolves; build observes this
     // provider and retries without opening Plans for a loading paid member.
     if (!WorkoutFreePreviewPolicy.isPreview(item) &&
-        (access.isLoading || access.hasError)) {
+        (access.isLoading ||
+            access.hasError ||
+            access.asData?.value.authority !=
+                EntitlementAuthority.verifiedServer)) {
       return;
     }
     _initialItemHandled = true;
@@ -523,7 +526,10 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       if (!mounted) return;
       final currentAccess = ref.read(verifiedSubscriptionAccessProvider);
       if (!WorkoutFreePreviewPolicy.isPreview(item) &&
-          (currentAccess.isLoading || currentAccess.hasError)) {
+          (currentAccess.isLoading ||
+              currentAccess.hasError ||
+              currentAccess.asData?.value.authority !=
+                  EntitlementAuthority.verifiedServer)) {
         _initialItemHandled = false;
         return;
       }

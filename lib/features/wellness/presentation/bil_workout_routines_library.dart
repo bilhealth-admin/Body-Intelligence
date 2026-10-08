@@ -5,18 +5,43 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
     List<WellnessContentItem> items,
     GymSixMonthPlan gymPlan,
   ) {
-    final subscription = _usableVerifiedSubscription(
-      ref.watch(verifiedSubscriptionAccessProvider),
-    );
+    final rights = ref.watch(verifiedSubscriptionAccessProvider);
+    final subscription = _usableVerifiedSubscription(rights);
+    final verified =
+        subscription?.authority == EntitlementAuthority.verifiedServer;
     final premiumUnlocked =
-        subscription != null && subscription.plan != CommercePlan.free;
+        verified && subscription?.plan != CommercePlan.free;
     final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
     const premiumTier = 'Premium';
-    void openPremium() => context.push(
-      storefrontPlan == CommercePlan.premiumAiCoach
-          ? '/plans?focus=boost'
-          : '/plans?focus=subscription',
-    );
+    void openPremium() {
+      if (!verified) {
+        // This is a separate protected feature, not proof of a Free member.
+        if (!rights.isLoading) {
+          ref.invalidate(verifiedSubscriptionStateProvider);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _copy(
+                context,
+                rights.isLoading
+                    ? 'Checking subscription'
+                    : 'Subscription check unavailable',
+                rights.isLoading
+                    ? 'جارٍ التحقق من الاشتراك'
+                    : 'تعذر التحقق من الاشتراك',
+              ),
+            ),
+          ),
+        );
+        return;
+      }
+      context.push(
+        storefrontPlan == CommercePlan.premiumAiCoach
+            ? '/plans?focus=boost'
+            : '/plans?focus=subscription',
+      );
+    }
     final selectedItems = switch (_tabs.index) {
       0 => items,
       1 => items.where((item) => item.releaseBundleId != 'home-training'),

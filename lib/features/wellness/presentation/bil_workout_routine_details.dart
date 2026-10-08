@@ -74,6 +74,25 @@ class _BilWorkoutRoutineDetailsPageState
   }
 
   Future<void> _openPlans() async {
+    final rights = ref.read(verifiedSubscriptionAccessProvider);
+    if (rights.asData?.value.authority !=
+        EntitlementAuthority.verifiedServer) {
+      if (!rights.isLoading) {
+        ref.invalidate(verifiedSubscriptionStateProvider);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _copy(
+              context,
+              'Subscription check unavailable',
+              'تعذر التحقق من الاشتراك',
+            ),
+          ),
+        ),
+      );
+      return;
+    }
     await context.push('/plans');
     if (!mounted) return;
     // Purchase and restore complete at the verified server boundary. Discard
@@ -84,9 +103,10 @@ class _BilWorkoutRoutineDetailsPageState
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
-    final subscription = _usableVerifiedSubscription(
-      ref.watch(verifiedSubscriptionAccessProvider),
-    );
+    final rights = ref.watch(verifiedSubscriptionAccessProvider);
+    final subscription = _usableVerifiedSubscription(rights);
+    final verified =
+        subscription?.authority == EntitlementAuthority.verifiedServer;
     final locked = !workoutItemAccessGranted(item, subscription);
     return Scaffold(
       appBar: AppBar(
@@ -186,8 +206,12 @@ class _BilWorkoutRoutineDetailsPageState
                       child: Text(
                         _copy(
                           context,
-                          'View membership plans',
-                          'عرض خطط العضوية',
+                          verified
+                              ? 'View membership plans'
+                              : 'Retry subscription check',
+                          verified
+                              ? 'عرض خطط العضوية'
+                              : 'إعادة التحقق من الاشتراك',
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

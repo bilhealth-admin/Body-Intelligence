@@ -31,7 +31,10 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --filter=blob:none --depth=128 origin "$GITHUB_SHA"
+          # The signed 35/32 source is now 128+ commits behind QA HEAD.
+          # Fetch a deeper, still bounded metadata-only history so the real
+          # frozen-base ancestry assertion cannot fail at a shallow boundary.
+          git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --filter=blob:none --depth=512 origin "$GITHUB_SHA"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - name: Verify frozen base and record scope
         shell: bash

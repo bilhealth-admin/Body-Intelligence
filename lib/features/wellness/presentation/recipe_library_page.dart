@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../commerce/domain/commerce_plan.dart';
+import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/presentation/premium_collection_item_gate.dart';
 import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/presentation/premium_route_glass_gate.dart';
@@ -224,18 +225,42 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final subscription = ref.watch(verifiedSubscriptionAccessProvider).value;
+    final rights = ref.watch(verifiedSubscriptionAccessProvider);
+    final subscription = rights.asData?.value;
+    final verifiedRights =
+        subscription?.authority == EntitlementAuthority.verifiedServer;
     final premiumUnlocked =
-        subscription != null && subscription.plan != CommercePlan.free;
+        verifiedRights && subscription?.plan != CommercePlan.free;
     final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
     final premiumTier = storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
-    void openPremium() => context.push(
-      storefrontPlan == CommercePlan.premiumAiCoach
-          ? '/plans?focus=boost'
-          : '/plans?focus=subscription',
-    );
+    void openPremium() {
+      if (!verifiedRights) {
+        // A locally inferred Free tier or delayed receipt check must never
+        // send an active member to Plans. Keep the recipe protected and retry.
+        if (!rights.isLoading) {
+          ref.invalidate(verifiedSubscriptionStateProvider);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text(
+                rights.isLoading
+                    ? 'Checking subscription'
+                    : 'Subscription check unavailable',
+              ),
+            ),
+          ),
+        );
+        return;
+      }
+      context.push(
+        storefrontPlan == CommercePlan.premiumAiCoach
+            ? '/plans?focus=boost'
+            : '/plans?focus=subscription',
+      );
+    }
     final availableCuisines = recipeCuisineOrder
         .where(
           (key) =>
@@ -350,7 +375,9 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
               visibleCount: visible.length,
               totalCount: compatibleSource.length,
               showPremiumMarker:
-                  !premiumUnlocked && compatibleSource.length > 2,
+                  verifiedRights &&
+                  !premiumUnlocked &&
+                  compatibleSource.length > 2,
               premiumSemanticLabel: premiumTier,
               onSearchChanged: (_) =>
                   setState(() => _visibleLimit = _filteredPageSize),

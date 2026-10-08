@@ -11,6 +11,7 @@ import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/localization/runtime_copy_connected_health.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../commerce/domain/commerce_plan.dart';
+import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../dashboard/widgets/premium_dashboard_card_lock.dart';
 import '../global_platform/fitness_devices/ble_fitness_device_platform.dart';
@@ -126,12 +127,14 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
   Widget build(BuildContext context) {
     String tr(String en, String ar) => connectedHealthText(context, en, ar);
     final state = ref.watch(connectedHealthProvider);
-    final verifiedPlan = ref
-        .watch(verifiedSubscriptionStateProvider)
-        .value
-        ?.plan;
+    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
+    final verified = subscription.asData?.value;
+    final confirmedFree =
+        verified?.authority == EntitlementAuthority.verifiedServer &&
+        verified?.plan == CommercePlan.free;
     final fitnessDevicesUnlocked =
-        verifiedPlan != null && verifiedPlan != CommercePlan.free;
+        verified?.authority == EntitlementAuthority.verifiedServer &&
+        verified?.plan != CommercePlan.free;
 
     return Scaffold(
       appBar: AppBar(
@@ -304,8 +307,34 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                               'Weight, body composition, and heart rate',
                               'الوزن وتركيب الجسم ومعدل ضربات القلب',
                             ),
-                            onTap: () =>
-                                context.push('/plans?focus=subscription'),
+                            onTap: () {
+                              if (confirmedFree) {
+                                context.push('/plans?focus=subscription');
+                                return;
+                              }
+                              // A pending or unverified owner entitlement
+                              // remains locked, but is never an upsell signal.
+                              if (!subscription.isLoading) {
+                                ref.invalidate(
+                                  verifiedSubscriptionStateProvider,
+                                );
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    subscription.isLoading
+                                        ? tr(
+                                            'Checking subscription',
+                                            'جارٍ التحقق من الاشتراك',
+                                          )
+                                        : tr(
+                                            'Subscription check unavailable',
+                                            'تعذر التحقق من الاشتراك',
+                                          ),
+                                  ),
+                                ),
+                              );
+                            },
                             child: const _FitnessDeviceSection(),
                           ),
                           if (!kIsWeb &&
