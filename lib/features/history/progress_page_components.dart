@@ -8,18 +8,12 @@ class _Point {
 
 class _ProgressSelector extends StatelessWidget {
   const _ProgressSelector({
-    required this.kind,
     required this.eyebrow,
     required this.value,
     required this.onTap,
-    this.iconOverride,
-    this.appleIconOverride,
     super.key,
   });
 
-  final BilSemanticIconKind kind;
-  final IconData? iconOverride;
-  final IconData? appleIconOverride;
   final String eyebrow;
   final String value;
   final VoidCallback onTap;
