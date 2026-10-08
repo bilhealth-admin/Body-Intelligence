@@ -15,8 +15,11 @@ import '../weight/domain/weight_goal_progress.dart';
 part 'reference_goals_components.dart';
 
 @visibleForTesting
-String premiumGoalDestination(bool active, String featureRoute) =>
-    active ? featureRoute : '/plans';
+String premiumGoalDestination(bool _active, String featureRoute) {
+  // This helper selects a guarded destination, not entitlement authority.
+  // All three features enforce their own verified access after navigation.
+  return featureRoute;
+}
 
 @visibleForTesting
 ({String? weeklyGoal, double? startingWeight, String? startingDate})

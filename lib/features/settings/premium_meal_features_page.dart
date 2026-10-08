@@ -96,6 +96,22 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
         ),
       ),
       data: (subscription) {
+        // Missing auth/server verification is not an authoritative Free plan.
+        // Keep writes locked and offer retry rather than a false upsell.
+        if (subscription.authority != EntitlementAuthority.verifiedServer) {
+          return Scaffold(
+            appBar: AppBar(title: Text(title)),
+            body: Center(
+              child: FilledButton.icon(
+                key: const Key('premium-feature-entitlement-retry'),
+                onPressed: () =>
+                    ref.invalidate(verifiedSubscriptionStateProvider),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(_copy(context, 'Retry subscription check')),
+              ),
+            ),
+          );
+        }
         if (subscription.grants(CommerceEntitlement.advancedIntelligence)) {
           return child;
         }

@@ -8,6 +8,7 @@ import 'package:body_intelligence_log/data/repositories/user_profile_repository.
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
@@ -77,7 +78,7 @@ void main() {
     expect(valid.startingDate, '2026-08-14');
   });
 
-  testWidgets('free premium goal rows route to plans with a simple chevron', (
+  testWidgets('premium goal rows open guarded destinations, not Plans', (
     tester,
   ) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -110,8 +111,117 @@ void main() {
     expect(freeTile.onTap, isNotNull);
     expect(
       premiumGoalDestination(false, '/settings/nutrition-meal-calorie-goals'),
-      '/plans',
+      '/settings/nutrition-meal-calorie-goals',
     );
+    await tester.tap(find.text('Calorie Goals By Meal'));
+    await tester.pumpAndSettle();
+    expect(find.text('meal-calories-target'), findsOneWidget);
+    expect(find.text('plans-target'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    router.dispose();
+    await database.close();
+  });
+
+  testWidgets('unverified access opens retry without a false paywall', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    await _seedProfile(database);
+    final router = _realMealRouter();
+    await _pump(
+      tester,
+      database,
+      router: router,
+      subscription: FreePlan.createState(),
+    );
+    await _reveal(
+      tester,
+      find.byKey(const Key('goals-meal-calories-entitlement-state')),
+      520,
+    );
+    await tester.tap(find.text('Calorie Goals By Meal'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('premium-feature-entitlement-retry')),
+      findsOneWidget,
+    );
+    expect(find.text('View Premium plans'), findsNothing);
+    expect(find.text('Breakfast'), findsNothing);
+    expect(find.text('plans-target'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    router.dispose();
+    await database.close();
+  });
+
+  testWidgets('verified Free has a gated offer, never an immediate redirect', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    await _seedProfile(database);
+    final router = _realMealRouter();
+    await _pump(
+      tester,
+      database,
+      router: router,
+      subscription: SubscriptionState(
+        plan: CommercePlan.free,
+        entitlements: FreePlan.entitlements,
+        authority: EntitlementAuthority.verifiedServer,
+        isPurchasable: false,
+        canRestorePurchases: false,
+      ),
+    );
+    await _reveal(
+      tester,
+      find.byKey(const Key('goals-meal-calories-entitlement-state')),
+      520,
+    );
+    await tester.tap(find.text('Calorie Goals By Meal'));
+    await tester.pumpAndSettle();
+    expect(find.text('View Premium plans'), findsOneWidget);
+    expect(find.text('Breakfast'), findsNothing);
+    expect(find.text('plans-target'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    router.dispose();
+    await database.close();
+  });
+
+  testWidgets('verified Premium AI Coach reaches actual meal goals', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    await _seedProfile(database);
+    final router = _realMealRouter();
+    final now = DateTime.now().toUtc();
+    await _pump(
+      tester,
+      database,
+      router: router,
+      subscription: SubscriptionState(
+        plan: CommercePlan.premiumAiCoach,
+        entitlements: PaidPlanCatalog.composedEntitlementsFor(
+          CommercePlan.premiumAiCoach,
+        ),
+        authority: EntitlementAuthority.verifiedServer,
+        startedAt: now.subtract(const Duration(days: 1)),
+        currentPeriodEndsAt: now.add(const Duration(minutes: 5)),
+        isPurchasable: false,
+        canRestorePurchases: false,
+      ),
+    );
+    await _reveal(
+      tester,
+      find.byKey(const Key('goals-meal-calories-entitlement-state')),
+      520,
+    );
+    await tester.tap(find.text('Calorie Goals By Meal'));
+    await tester.pumpAndSettle();
+    expect(find.text('Breakfast'), findsOneWidget);
+    expect(find.text('View Premium plans'), findsNothing);
+    expect(find.text('plans-target'), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
     router.dispose();
@@ -294,6 +404,21 @@ GoRouter _router() => GoRouter(
         path: route.key,
         builder: (_, _) => Scaffold(body: Text(route.value)),
       ),
+  ],
+);
+
+GoRouter _realMealRouter() => GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (_, _) => const ReferenceGoalsPage()),
+    GoRoute(
+      path: '/settings/nutrition-meal-calorie-goals',
+      builder: (_, _) => const MealCalorieGoalsPage(),
+    ),
+    GoRoute(
+      path: '/plans',
+      builder: (_, _) => const Scaffold(body: Text('plans-target')),
+    ),
   ],
 );
 

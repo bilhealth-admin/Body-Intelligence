@@ -65,10 +65,15 @@ class _PremiumRow extends ConsumerWidget {
   final Key stateKey;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entitlement = ref.watch(verifiedSubscriptionStateProvider);
+    // Use the exact-expiry access view shared by the destination gate.
+    // Never classify an unverified response as a confirmed Free entitlement.
+    final entitlement = ref.watch(verifiedSubscriptionAccessProvider);
+    final verified = entitlement.asData?.value;
     final active =
-        entitlement.value?.grants(CommerceEntitlement.advancedIntelligence) ??
-        false;
+        verified?.authority == EntitlementAuthority.verifiedServer &&
+        (verified?.grants(CommerceEntitlement.advancedIntelligence) ?? false);
+    final unverified =
+        verified?.authority != EntitlementAuthority.verifiedServer;
     final locale = Localizations.localeOf(context);
     final language = locale.languageCode;
     final status = active
@@ -93,25 +98,27 @@ class _PremiumRow extends ConsumerWidget {
                 locale.toLanguageTag(),
               ) ??
               'Locked Pro feature';
+    final visibleStatus = unverified ? '' : status;
     return Semantics(
       key: stateKey,
-      label: '$title, $status',
-      button: entitlement.hasValue || entitlement.hasError,
+      label: visibleStatus.isEmpty ? title : '$title, $visibleStatus',
+      button: true,
       child: ListTile(
-        enabled: entitlement.hasValue || entitlement.hasError,
+        enabled: true,
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: Icon(
           Icons.chevron_right_rounded,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        onTap: !entitlement.hasValue
-            ? entitlement.hasError
-                  ? () => ref.invalidate(verifiedSubscriptionStateProvider)
-                  : null
-            : () => GoRouter.of(
-                context,
-              ).push(premiumGoalDestination(active, route)),
+        // An unknown snapshot triggers a fresh owner-scoped read; the feature
+        // page waits for that read and remains locked until verification.
+        onTap: () {
+          if (entitlement.hasError || (verified != null && unverified)) {
+            ref.invalidate(verifiedSubscriptionStateProvider);
+          }
+          context.push(premiumGoalDestination(active, route));
+        },
       ),
     );
   }

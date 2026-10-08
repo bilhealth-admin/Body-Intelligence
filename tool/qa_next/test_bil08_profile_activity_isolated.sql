@@ -2,9 +2,25 @@
 
 -- BIL-08 QA only. Runs against a disposable PostgreSQL 17 CI database.
 -- Visibility doubles are synthetic; no Supabase Production connection exists.
-create role anon;
-create role authenticated;
-create role service_role;
+-- Roles are global to a PostgreSQL cluster; earlier isolated databases may
+-- have created them already. Never drop or reset these shared fixture roles.
+do $roles$
+begin
+  if not exists (select 1 from pg_catalog.pg_roles where rolname = 'anon') then
+    create role anon;
+  end if;
+  if not exists (
+    select 1 from pg_catalog.pg_roles where rolname = 'authenticated'
+  ) then
+    create role authenticated;
+  end if;
+  if not exists (
+    select 1 from pg_catalog.pg_roles where rolname = 'service_role'
+  ) then
+    create role service_role;
+  end if;
+end
+$roles$;
 create schema auth;
 grant usage on schema auth to authenticated;
 create or replace function auth.uid() returns uuid
