@@ -160,9 +160,7 @@ final class ConnectedHealthSnapshot {
   );
 }
 
-/// Converts source *presentation* fields to readable text without altering
-/// provenance or health measurements. Structured objects without a known name
-/// are intentionally not rendered as raw JSON or inferred device brands.
+
 String? _readableHealthSourceName(Object? candidate) {
   Object? value = candidate;
   for (var depth = 0; depth < 5; depth++) {
@@ -203,83 +201,8 @@ String? _readableHealthSourceName(Object? candidate) {
         return null;
       }
     }
-    if (RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
-
-/// Returns one value for each of the last 30 local calendar days.
-///
-/// The dashboard chart consumes these totals as bars; it is not a Cartesian
-/// line chart. Missing days are represented by zero so the time axis remains
-/// honest and stable.
-List<double> connectedHealthStepTrendValues(
-  ConnectedHealthSnapshot? snapshot,
-  DateTime now,
-) {
-  final totals = connectedHealthDailyStepTotals(snapshot, now);
-  final local = now.toLocal();
-  return List<double>.generate(
-    30,
-    (index) =>
-        totals[DateTime(local.year, local.month, local.day - 29 + index)] ?? 0,
-    growable: false,
-  );
-}
-
-/// Missing data is absent, not zero. Only chart bars may fill a missing day
-/// with zero; the Today value must come from an actual record for today.
-Map<DateTime, double> connectedHealthDailyStepTotals(
-  ConnectedHealthSnapshot? snapshot,
-  DateTime now,
-) {
-  if (snapshot == null ||
-      const {
-        ConnectedHealthStatus.unavailable,
-        ConnectedHealthStatus.permissionRequired,
-        ConnectedHealthStatus.permissionDenied,
-        ConnectedHealthStatus.authorizationRequested,
-      }.contains(snapshot.status)) {
-    return const {};
-  }
-  final source = snapshot.stepHistory.isNotEmpty
-      ? snapshot.stepHistory
-      : snapshot.signals;
-  final local = now.toLocal();
-  final today = DateTime(local.year, local.month, local.day);
-  final first = DateTime(local.year, local.month, local.day - 29);
-  final totals = <DateTime, double>{};
-  for (final signal in source) {
-    if (signal.key != 'steps' || signal.unit != 'count') continue;
-    if (!signal.value.isFinite || signal.value < 0) continue;
-    final observed = signal.observedAt.toLocal();
-    final day = DateTime(observed.year, observed.month, observed.day);
-    if (day.isBefore(first) || day.isAfter(today)) continue;
-    totals.update(
-      day,
-      (current) => current + signal.value,
-      ifAbsent: () => signal.value,
-    );
-  }
-  // Older snapshots may have history ending yesterday but a current daily
-  // total in signals. Fill only missing days; never count the same native
-  // total twice when it appears in both projections.
-  if (snapshot.stepHistory.isNotEmpty) {
-    for (final signal in snapshot.signals) {
-      if (signal.key != 'steps' ||
-          signal.unit != 'count' ||
-          !signal.value.isFinite ||
-          signal.value < 0) {
-        continue;
-      }
-      final observed = signal.observedAt.toLocal();
-      final day = DateTime(observed.year, observed.month, observed.day);
-      if (day.isBefore(first) || day.isAfter(today)) continue;
-      totals.putIfAbsent(day, () => signal.value);
-    }
-  }
-  return Map.unmodifiable(totals);
-}
-,
-    ).hasMatch(text)) {
+    if (text.length == 36 &&
+        RegExp(r'^[0-9a-fA-F-]{36}').hasMatch(text)) {
       return null;
     }
     return text;
@@ -287,9 +210,8 @@ Map<DateTime, double> connectedHealthDailyStepTotals(
   return null;
 }
 
+/// Human-readable, evidence-based source. Do not mutate canonical provenance.
 String connectedHealthDisplaySource(ConnectedHealthSignalView signal) {
-  // Never stringify Maps/metadata. Only explicit product and device evidence
-  // permits identifying a wearable as Apple Watch.
   final attrs = signal.attributes;
   final source = _readableHealthSourceName(signal.source);
   final deviceName = _readableHealthSourceName(attrs['deviceName']);
