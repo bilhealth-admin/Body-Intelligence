@@ -51,14 +51,14 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                 onTap: () => _open(controller, channel),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
+                    horizontal: 12,
+                    vertical: 9,
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CircleAvatar(
-                        radius: 23,
+                        radius: 20,
                         backgroundColor: Theme.of(
                           context,
                         ).colorScheme.primaryContainer,
@@ -93,37 +93,35 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                               const SizedBox(height: 4),
                               Text(channel.description),
                             ],
-                            const SizedBox(height: 6),
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary
-                                    .withValues(
-                                      alpha: (channel.unreadCount ?? 0) > 0
-                                          ? .13
-                                          : .035,
-                                    ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 9,
-                                  vertical: 4,
-                                ),
-                                child: Text(
-                                  _unreadLabel(channel.unreadCount),
-                                  key: ValueKey(
-                                    'bil07-channel-count-${channel.id}',
-                                  ),
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                ),
-                              ),
-                            ),
                             if (!channel.canSend)
                               Text(_copy(CommunityChannelsCopyKey.readOnly)),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary
+                              .withValues(
+                                alpha: (channel.unreadCount ?? 0) > 0
+                                    ? .13
+                                    : .035,
+                              ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            _unreadLabel(channel.unreadCount),
+                            key: ValueKey('bil07-channel-count-${channel.id}'),
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
                       const ExcludeSemantics(
                         // This Material icon already mirrors in RTL.
                         child: Icon(Icons.chevron_right_rounded),
