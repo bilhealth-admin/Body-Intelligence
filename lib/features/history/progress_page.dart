@@ -17,6 +17,7 @@ import '../connected_health/connected_health_model.dart';
 import '../connected_health/providers/connected_health_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'progress_page_components.dart';
 part 'progress_page_copy.dart';
@@ -58,7 +59,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
       systemState,
     );
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       appBar: AppBar(
         centerTitle: true,
@@ -211,7 +212,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   ({List<_Point> points, String unit})? _shareData(
