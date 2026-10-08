@@ -92,10 +92,16 @@ void main() {
       );
       addTearDown(router.dispose);
 
+      // Model an actually server-verified store entitlement, including its
+      // current period. The runtime access gate must reject boundaryless paid
+      // fixtures, rather than accepting a tier label alone.
+      final now = DateTime.now().toUtc();
       final premium = SubscriptionState(
         plan: CommercePlan.premium,
         entitlements: const {CommerceEntitlement.advancedIntelligence},
         authority: EntitlementAuthority.verifiedServer,
+        startedAt: now.subtract(const Duration(days: 1)),
+        currentPeriodEndsAt: now.add(const Duration(days: 7)),
         isPurchasable: true,
         canRestorePurchases: true,
       );

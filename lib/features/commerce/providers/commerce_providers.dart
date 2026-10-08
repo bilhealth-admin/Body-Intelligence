@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show FlutterError;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -123,7 +124,11 @@ final verifiedEntitlementLoaderProvider =
 
 /// Starts a non-overlapping refresh after a load finishes and only while its
 /// provider is observed. Credit access must refresh independently of Premium.
-void Function() _observedAuthorityReload(Ref ref, void Function() reload) {
+void Function() _observedAuthorityReload(
+  Ref ref,
+  void Function() reload, {
+  void Function()? resumeReload,
+}) {
   Timer? refresh;
   var disposed = false;
   var observed = true;
@@ -131,14 +136,25 @@ void Function() _observedAuthorityReload(Ref ref, void Function() reload) {
   // A resumed Play/TestFlight process must immediately refresh its
   // server-owned rights and credits; background-paused timers can be stale.
   // Auth owner changes continue to invalidate separately via Riverpod.
-  final appLifecycle = AppLifecycleListener(
-    onResume: () {
-      if (disposed || !observed || !loaded) return;
-      refresh?.cancel();
-      reload();
-    },
-  );
-  ref.onDispose(appLifecycle.dispose);
+  // Headless Riverpod consumers (including entitlement policy tests) do not
+  // install a Flutter WidgetsBinding. Keep their 30-second refresh operational
+  // without assuming that an application lifecycle exists.
+  AppLifecycleListener? appLifecycle;
+  try {
+    final binding = WidgetsBinding.instance;
+    appLifecycle = AppLifecycleListener(
+      binding: binding,
+      onResume: () {
+        if (disposed || !observed || !loaded) return;
+        refresh?.cancel();
+        (resumeReload ?? reload)();
+      },
+    );
+  } on FlutterError {
+    // Only the lifecycle observer is unavailable. Server verification and
+    // subscription/credit refresh must still work in headless runtimes.
+  }
+  ref.onDispose(() => appLifecycle?.dispose());
   void schedule() {
     refresh?.cancel();
     refresh = Timer(const Duration(seconds: 30), reload);
@@ -334,9 +350,17 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   final snapshot = ref.watch(aiCoachAccessSnapshotStoreProvider);
   ref.watch(aiCoachUsageRefreshProvider);
   if (ownerId == null) return false;
-  final loaded = _observedAuthorityReload(ref, () {
-    ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
-  });
+  final loaded = _observedAuthorityReload(
+    ref,
+    () {
+      final usageRefresh = ref.read(aiCoachUsageRefreshProvider.notifier);
+      usageRefresh.requestAuthoritativeReload();
+    },
+    // Refresh the observed Coach access itself on app resume, rather than
+    // relying on a broadcast signal whose notification can be coalesced with
+    // an in-flight owner/permission refresh.
+    resumeReload: ref.invalidateSelf,
+  );
   // Only a successful server response creates access. Retain the same owner's
   // last verified result on transient failure; zero/malformed results revoke it.
   try {
