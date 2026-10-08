@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:image/image.dart' as img;
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
@@ -111,6 +113,57 @@ class _VisualRepository extends CommunityRepository {
       friendshipId: '33333333-3333-4333-8333-333333333333',
       copyKey: 'friend_accepted_v1',
       deepLinkPath: '/community/connections',
+    ),
+    CommunityNotification(
+      id: '55555555-5555-4555-8555-555555555555',
+      kind: CommunityNotificationKind.rewardEarned,
+      actorId: owner,
+      createdAt: DateTime.utc(2026, 10, 3, 7, 58),
+      entityKind: 'post',
+      entityId: '66666666-6666-4666-8666-666666666666',
+      copyKey: 'post_approved_ai_tokens_v1',
+      deepLinkPath: '/community/post/66666666-6666-4666-8666-666666666666',
+      metadata: const {
+        'receipt_kind': 'post_moderation',
+        'post_id': '66666666-6666-4666-8666-666666666666',
+        'decision': 'approved',
+        'ai_tokens_granted': 5,
+        'reward_reason': 'granted',
+      },
+    ),
+    CommunityNotification(
+      id: '44444444-4444-4444-8444-444444444441',
+      kind: CommunityNotificationKind.postLike,
+      actorId: peer,
+      actorDisplayName: name,
+      createdAt: DateTime.utc(2026, 10, 3, 7, 45),
+      entityKind: 'post',
+      entityId: '66666666-6666-4666-8666-666666666666',
+      copyKey: 'post_like_v1',
+      deepLinkPath: '/community',
+    ),
+    CommunityNotification(
+      id: '44444444-4444-4444-8444-444444444442',
+      kind: CommunityNotificationKind.comment,
+      actorId: peer,
+      actorDisplayName: name,
+      createdAt: DateTime.utc(2026, 10, 3, 7, 30),
+      entityKind: 'post',
+      entityId: '66666666-6666-4666-8666-666666666666',
+      copyKey: 'comment_v1',
+      deepLinkPath: '/community',
+    ),
+    CommunityNotification(
+      id: '44444444-4444-4444-8444-444444444443',
+      kind: CommunityNotificationKind.mention,
+      actorId: peer,
+      actorDisplayName: name,
+      createdAt: DateTime.utc(2026, 10, 2, 9),
+      entityKind: 'post',
+      entityId: '66666666-6666-4666-8666-666666666666',
+      copyKey: 'mention_v1',
+      deepLinkPath: '/community',
+      seenAt: DateTime.utc(2026, 10, 2, 11),
     ),
   ];
   @override
@@ -267,6 +320,57 @@ class _VisualRepository extends CommunityRepository {
 
 class _FeedReferenceVisualRepository extends _VisualRepository {
   _FeedReferenceVisualRepository(super.arabic);
+
+  @override
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) async {
+    final posts = await super.loadFeed(limit: limit);
+    if (posts.isEmpty) return posts;
+    // Four genuinely bundled BIL image assets, not fabricated network URLs.
+    // This is a view-only QA gallery, never user content or a database write.
+    return [
+      posts.first.withMedia(const [
+        CommunityPostMedia(
+          position: 0,
+          objectPath: 'fixture/meal-1.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url: 'asset://assets/images/professional/recipes/bean_corn_salad.jpg',
+        ),
+        CommunityPostMedia(
+          position: 1,
+          objectPath: 'fixture/meal-2.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url:
+              'asset://assets/images/professional/recipes/chicken_shawarma_bowl.jpg',
+        ),
+        CommunityPostMedia(
+          position: 2,
+          objectPath: 'fixture/workout-1.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url: 'asset://assets/images/professional/workouts/brisk_walk.jpg',
+        ),
+        CommunityPostMedia(
+          position: 3,
+          objectPath: 'fixture/workout-2.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url:
+              'asset://assets/images/professional/workouts/full_body_strength.jpg',
+        ),
+      ]),
+      ...posts.skip(1),
+    ];
+  }
 
   @override
   bool get useServerCommunityReferenceParity => true;
@@ -605,6 +709,75 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
   _ExtendedVisualRepository(super.arabic);
 
   static const pendingPostId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  static List<CommunityPostImagePreview?> _draftPreviews = const [];
+  static List<CommunityDraftMediaMetadata> _draftMedia = const [];
+
+  static Future<void> preloadPhotoFixtures() async {
+    if (_draftPreviews.length == 4) return;
+    final previews = <CommunityPostImagePreview?>[];
+    final metadata = <CommunityDraftMediaMetadata>[];
+    for (final path in const [
+      'assets/images/professional/recipes/bean_corn_salad.jpg',
+      'assets/images/professional/recipes/chicken_shawarma_bowl.jpg',
+      'assets/images/professional/workouts/brisk_walk.jpg',
+      'assets/images/professional/workouts/full_body_strength.jpg',
+    ]) {
+      final data = await rootBundle.load(path);
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) {
+        throw StateError('Bundled BIL visual fixture could not be decoded');
+      }
+      final position = metadata.length;
+      previews.add(
+        await createCommunityPostImagePreviewAsync(
+          bytes,
+          expectedMimeType: 'image/jpeg',
+          expectedByteLength: bytes.length,
+          expectedWidth: decoded.width,
+          expectedHeight: decoded.height,
+        ),
+      );
+      metadata.add(
+        CommunityDraftMediaMetadata(
+          position: position,
+          objectPath: 'fixture/photo-$position.jpg',
+          mimeType: 'image/jpeg',
+          bytes: bytes.length,
+          width: decoded.width,
+          height: decoded.height,
+        ),
+      );
+    }
+    _draftPreviews = List<CommunityPostImagePreview?>.unmodifiable(previews);
+    _draftMedia = List<CommunityDraftMediaMetadata>.unmodifiable(metadata);
+  }
+
+  @override
+  Future<List<CommunityDraftSummary>> listMyCommunityDrafts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 20,
+  }) async {
+    final rows = await super.listMyCommunityDrafts(
+      before: before,
+      beforeId: beforeId,
+      limit: limit,
+    );
+    return [
+      for (final row in rows)
+        CommunityDraftSummary(
+          draftId: row.draftId,
+          title: row.title,
+          body: row.body,
+          updatedAt: row.updatedAt,
+          mediaCount: 4,
+        ),
+    ];
+  }
 
   @override
   Future<List<CommunityCircle>> loadCommunityCircles() async => [
@@ -651,8 +824,11 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
     ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
   >
   loadMyCommunityDraftMosaicPreview(String draftId, {int maxImages = 4}) async {
-    // Missing image bytes are intentionally represented as placeholders with
-    // retry. This evidence does NOT claim four-photo reference fidelity.
+    // Preview bytes are bounded by the same decoder as production; originals
+    // remain local BIL assets. This is synthetic, not user-owned draft data.
+    if (_draftPreviews.length != 4 || _draftMedia.length != 4) {
+      throw StateError('Native draft photo fixtures were not preloaded');
+    }
     return (
       draft: CommunityPersistentDraft(
         draftId: draftId,
@@ -668,19 +844,9 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
         pollAllowMultiple: false,
         createdAt: DateTime.utc(2026, 10, 3, 10),
         updatedAt: DateTime.utc(2026, 10, 3, 11),
-        media: [
-          for (var index = 0; index < 2; index++)
-            CommunityDraftMediaMetadata(
-              position: index,
-              objectPath: 'fixture/$draftId/photo-$index.png',
-              mimeType: 'image/png',
-              bytes: 1,
-              width: 1,
-              height: 1,
-            ),
-        ],
+        media: _draftMedia,
       ),
-      images: const <CommunityPostImagePreview?>[null, null],
+      images: _draftPreviews,
     );
   }
 
@@ -712,6 +878,27 @@ final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
           : 'A new step toward better habits. Share your experience!',
       createdAt: DateTime.utc(2026, 10, 3, 9),
       moderationStatus: CommunityPostModerationStatus.pending,
+      media: const [
+        CommunityPostMedia(
+          position: 0,
+          objectPath: 'fixture/moderation-1.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url: 'asset://assets/images/professional/recipes/bean_corn_salad.jpg',
+        ),
+        CommunityPostMedia(
+          position: 1,
+          objectPath: 'fixture/moderation-2.jpg',
+          mimeType: 'image/jpeg',
+          bytes: 1,
+          width: 400,
+          height: 400,
+          url:
+              'asset://assets/images/professional/workouts/full_body_strength.jpg',
+        ),
+      ],
     ),
   ];
 
@@ -886,6 +1073,7 @@ final class _VisualChannelsRepository implements CommunityChannelsRepository {
 void main() {
   setUpAll(() async {
     await loadVisualEvidenceFont();
+    await _ExtendedVisualRepository.preloadPhotoFixtures();
     final icons = FontLoader('MaterialIcons')
       ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await icons.load();
@@ -1016,6 +1204,14 @@ void main() {
               if (scene.key == 'drafts') {
                 expect(
                   find.byKey(const Key('community-drafts-page')),
+                  findsOneWidget,
+                );
+                expect(
+                  find.byKey(
+                    const Key(
+                      'community-draft-photo-aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa-0',
+                    ),
+                  ),
                   findsOneWidget,
                 );
               }

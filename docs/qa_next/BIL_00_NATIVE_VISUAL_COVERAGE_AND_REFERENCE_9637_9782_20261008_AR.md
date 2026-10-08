@@ -45,7 +45,7 @@
 
 | Scene | واجهة Flutter الفعلية | Fixture | ماذا تثبت |
 |---|---|---|---|
-| `drafts` | `CommunityDraftsPage` | ملخص مسودة + metadata مع missing image bytes صريح | يُظهر صف المسودة والـRetry؛ **لا** يثبت photo fidelity |
+| `drafts` | `CommunityDraftsPage` | أربع صور مصغرة معتمدة من أصول BIL المحلية، مقيّدة الحجم ومتحقَّق من فك ترميزها | يُظهر 2×2 mosaic حقيقي وmetadata؛ لا يثبت التطابق البكسلي مع مرجع المالك |
 | `circles` | `CommunityCirclesPage` | قائمتا 10K Steps وHealthy Eating عبر `ManagedCommunityCircle` | عرض Discovery وMembership وحجم النص |
 | `moderation` | `CommunityPostModerationPage` | Moderator synthetic + منشور pending | عرض البطاقة وأزرار approve/reject دون اعتماد فعلي |
 | `channels` | `CommunityChannelsPage` | Repository read-only synthetic | قناة عامة مستقلة عن المحادثة الشخصية |
@@ -60,7 +60,7 @@
 - Notifications: fixture يثبت حدثًا، ولا يغطي كامل مصفوفة AI token rewards والـreceipts.
 - Composer: لقطات empty media، ولا تثبت 4 uploads فعلية؛ **حد 1200** المعتمد من المالك أولى من «2000» في رسم مفاهيمي.
 - Profile: تخطيط الرأس والبطاقات والأزرار مختلف؛ ما زال يحتاج مقارنة viewport/crop موحدة.
-- Drafts: fixture missing image data intentionally; لا يمكن اعتماده كصورة match للصور.
+- Drafts: fixture يعرض أربع صور BIL محلية حقيقية؛ لا يعني ذلك أن صور المستخدم أو المرجع الأصلية نُسخت ولا يثبت pixel-match.
 - Circles/Moderation/Channels: زيادة تغطية screenshots لا تعني RLS/receipt/real-user validation.
 - Reviewer: Android 32 المرفوض لم يتغير؛ إعادة تقديم build ليست ضمن صلاحية هذا الفرع.
 

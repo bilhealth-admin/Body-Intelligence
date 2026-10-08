@@ -38,16 +38,35 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
           for (final channel in channels)
             Card(
               key: ValueKey('bil07-channel-${channel.id}'),
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: () => _open(controller, channel),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const ExcludeSemantics(child: Icon(Icons.tag_rounded)),
-                      const SizedBox(width: 14),
+                      CircleAvatar(
+                        radius: 23,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        child: Icon(
+                          Icons.forum_outlined,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,11 +79,32 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                               const SizedBox(height: 4),
                               Text(channel.description),
                             ],
-                            const SizedBox(height: 8),
-                            Text(
-                              _unreadLabel(channel.unreadCount),
-                              key: ValueKey(
-                                'bil07-channel-count-${channel.id}',
+                            const SizedBox(height: 6),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(
+                                      alpha:
+                                          (channel.unreadCount ?? 0) > 0
+                                              ? .13
+                                              : .035,
+                                    ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                  vertical: 4,
+                                ),
+                                child: Text(
+                                  _unreadLabel(channel.unreadCount),
+                                  key: ValueKey(
+                                    'bil07-channel-count-${channel.id}',
+                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
                               ),
                             ),
                             if (!channel.canSend)

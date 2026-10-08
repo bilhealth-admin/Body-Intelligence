@@ -245,21 +245,26 @@ class _ModerationMediaGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final item = items[index];
+        final url = item.url;
+        Widget unavailable() => const ColoredBox(
+          color: Color(0xFFE8EBF0),
+          child: Icon(Icons.broken_image_outlined),
+        );
         return ClipRRect(
           key: Key('community-moderation-media-${post.id}-$index'),
           borderRadius: BorderRadius.circular(14),
-          child: item.url == null
-              ? const ColoredBox(
-                  color: Color(0xFFE8EBF0),
-                  child: Icon(Icons.broken_image_outlined),
+          child: url == null
+              ? unavailable()
+              : url.startsWith('asset://')
+              ? Image.asset(
+                  url.substring('asset://'.length),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => unavailable(),
                 )
               : Image.network(
-                  item.url!,
+                  url,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const ColoredBox(
-                    color: Color(0xFFE8EBF0),
-                    child: Icon(Icons.broken_image_outlined),
-                  ),
+                  errorBuilder: (_, _, _) => unavailable(),
                 ),
         );
       },

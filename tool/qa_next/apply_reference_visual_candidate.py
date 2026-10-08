@@ -1,7 +1,7 @@
 """Verify tracked reference presentation; never transform source during tests."""
 from pathlib import Path
 required = {
-    'lib/features/intelligence_center/presentation/intelligence_center_page.dart': '_buildReferenceChat',
+    'lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart': '_buildReferenceChat',
     'lib/features/community/presentation/community_hub_page.dart': 'BilReferenceBottomBar',
     'lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart': 'CoachReferenceWorkspace',
 }
