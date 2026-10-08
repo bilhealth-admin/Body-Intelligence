@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 
 /// Render-only transcript text: selection/copy is user initiated, and time
@@ -35,7 +36,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
   // must not restart the reveal animation when the user browses history.
   static final _startedRevealKeys = <Object>{};
   AnimationController? _revealController;
-  late List<int> _runes;
+  late List<String> _graphemes;
   late String _visibleText;
 
   @override
@@ -56,24 +57,24 @@ class _CoachMessageTextState extends State<CoachMessageText>
   void _resetReveal() {
     _revealController?.dispose();
     _revealController = null;
-    _runes = widget.text.runes.toList(growable: false);
+    _graphemes = widget.text.characters.toList(growable: false);
     final revealKey = widget.key;
     final animateReveal =
         widget.animateReveal &&
         (revealKey == null || _startedRevealKeys.add(revealKey));
-    if (!animateReveal || _runes.length <= 8) {
+    if (!animateReveal || _graphemes.length <= 8) {
       _visibleText = widget.text;
       return;
     }
-    // Runes keep Arabic and emoji intact. The answer already exists locally;
+    // Grapheme clusters keep Arabic combining marks and joined emoji intact. The answer already exists locally;
     // this is a short visual reveal, not a streamed or delayed response.
     // A 40ms single-rune cadence is deliberately conversational rather than
     // the previous near-instant burst, while still keeping a normal reply
     // readable without a long wait.
     const initialVisible = 8;
-    final remaining = _runes.length - initialVisible;
+    final remaining = _graphemes.length - initialVisible;
     var visible = initialVisible;
-    _visibleText = String.fromCharCodes(_runes.take(visible));
+    _visibleText = _graphemes.take(visible).join();
     final controller = AnimationController(
       vsync: this,
       // Short answers keep their conversational reveal. Very long answers
@@ -90,7 +91,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
       if (nextVisible == visible) return;
       visible = nextVisible;
       setState(() {
-        _visibleText = String.fromCharCodes(_runes.take(visible));
+        _visibleText = _graphemes.take(visible).join();
       });
     });
     controller.forward();
@@ -122,7 +123,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
         // Text reveals must not grow the bubble on every tick. Reserve the
         // complete reply's typography from the first frame so its timestamp,
         // reactions, report button and Sources remain at a fixed offset.
-        if (widget.animateReveal && _runes.length > 8)
+        if (widget.animateReveal && _graphemes.length > 8)
           Stack(
             fit: StackFit.passthrough,
             children: [
