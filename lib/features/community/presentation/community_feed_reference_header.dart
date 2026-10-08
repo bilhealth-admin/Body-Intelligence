@@ -254,15 +254,14 @@ class _CommunityFeedReferenceHeaderState
                           'Workouts',
                           'التمارين',
                         ),
-                        'motivation-support' => communityText(
+                        'motivation-support' =>
+                          CommunityTaxonomySheet.titleForSlug(
+                            context,
+                            topic.slug,
+                          ),
+                        'wellness' => CommunityTaxonomySheet.titleForSlug(
                           context,
-                          'Motivation',
-                          'التحفيز',
-                        ),
-                        'wellness' => communityText(
-                          context,
-                          'Wellness',
-                          'العافية',
+                          topic.slug,
                         ),
                         _ => CommunityTaxonomySheet.titleForSlug(
                           context,
