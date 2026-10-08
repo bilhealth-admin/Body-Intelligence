@@ -59,156 +59,162 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
       systemState,
     );
 
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(copy.progress),
-        actions: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 8),
-            child: IconButton(
-              key: const Key('progress-share'),
-              tooltip: copy.shareProgress,
-              onPressed: shareData == null
-                  ? null
-                  : () => _shareProgress(copy, shareData),
-              icon: const Icon(Icons.ios_share_rounded, size: 18),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(copy.progress),
+          actions: [
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 8),
+              child: IconButton(
+                key: const Key('progress-share'),
+                tooltip: copy.shareProgress,
+                onPressed: shareData == null
+                    ? null
+                    : () => _shareProgress(copy, shareData),
+                icon: const Icon(Icons.ios_share_rounded, size: 18),
+              ),
             ),
-          ),
-          if (metric == ProgressMetric.weight)
-            IconButton(
-              key: const Key('progress-manage-weight'),
-              tooltip: copy.addEditWeight,
-              onPressed: () => context.push('/weight-history'),
-              icon: const Icon(Icons.edit_note_rounded),
-            ),
-          if (const {
-            ProgressMetric.neck,
-            ProgressMetric.waist,
-            ProgressMetric.hips,
-            ProgressMetric.chest,
-            ProgressMetric.arm,
-            ProgressMetric.thigh,
-          }.contains(metric))
-            IconButton(
-              key: const Key('progress-edit-measurements'),
-              tooltip: copy.editMeasurements,
-              onPressed: () => _editMeasurement(copy),
-              icon: const Icon(Icons.straighten_rounded),
-            ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _ProgressSelector(
-                  key: const Key('progress-metric-selector'),
-                  eyebrow: copy.metric,
-                  value: copy.metricLabel(metric),
-                  onTap: _pickMetric,
+            if (metric == ProgressMetric.weight)
+              IconButton(
+                key: const Key('progress-manage-weight'),
+                tooltip: copy.addEditWeight,
+                onPressed: () => context.push('/weight-history'),
+                icon: const Icon(Icons.edit_note_rounded),
+              ),
+            if (const {
+              ProgressMetric.neck,
+              ProgressMetric.waist,
+              ProgressMetric.hips,
+              ProgressMetric.chest,
+              ProgressMetric.arm,
+              ProgressMetric.thigh,
+            }.contains(metric))
+              IconButton(
+                key: const Key('progress-edit-measurements'),
+                tooltip: copy.editMeasurements,
+                onPressed: () => _editMeasurement(copy),
+                icon: const Icon(Icons.straighten_rounded),
+              ),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _ProgressSelector(
+                    key: const Key('progress-metric-selector'),
+                    eyebrow: copy.metric,
+                    value: copy.metricLabel(metric),
+                    onTap: _pickMetric,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _ProgressSelector(
-                  key: const Key('progress-range-selector'),
-                  eyebrow: copy.range,
-                  value: copy.rangeLabel(range),
-                  onTap: _pickRange,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _ProgressSelector(
+                    key: const Key('progress-range-selector'),
+                    eyebrow: copy.range,
+                    value: copy.rangeLabel(range),
+                    onTap: _pickRange,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (metric == ProgressMetric.steps)
-            logs.when(
-              loading: _loading,
-              error: (_, _) =>
-                  _error(copy, () => ref.invalidate(progressDailyLogsProvider)),
-              data: (rows) => _series(
-                copy,
-                _filter(_progressStepPoints(rows, connectedHealth)),
-                copy.stepsUnit,
-              ),
-            )
-          else if (systemState.isLoading)
-            _loading()
-          else if (systemState.hasError)
-            _error(copy, () => ref.invalidate(measurementSystemProvider))
-          else
-            switch (metric) {
-              ProgressMetric.steps => const SizedBox.shrink(),
-              ProgressMetric.weight => weights.when(
-                loading: _loading,
-                error: (_, _) =>
-                    _error(copy, () => ref.invalidate(weightHistoryProvider)),
-                data: (rows) {
-                  final points = _filter(
-                    rows
-                        .where((row) => row.weight.isFinite && row.weight >= 0)
-                        .map(
-                          (row) => _Point(
-                            row.date,
-                            UnitConverter.weightFromKg(
-                              row.weight,
-                              systemState.requireValue,
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
-                  );
-                  return _series(
-                    copy,
-                    points,
-                    UnitConverter.weightUnit(systemState.requireValue),
-                  );
-                },
-              ),
-              ProgressMetric.neck ||
-              ProgressMetric.waist ||
-              ProgressMetric.hips ||
-              ProgressMetric.chest ||
-              ProgressMetric.arm ||
-              ProgressMetric.thigh => measurements.when(
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (metric == ProgressMetric.steps)
+              logs.when(
                 loading: _loading,
                 error: (_, _) => _error(
                   copy,
-                  () => ref.invalidate(bodyMeasurementHistoryProvider),
+                  () => ref.invalidate(progressDailyLogsProvider),
                 ),
-                data: (rows) {
-                  final points = _filter(
-                    rows
-                        .map(
-                          (row) => _measurementPoint(
-                            row,
-                            metric,
-                            systemState.requireValue,
-                          ),
-                        )
-                        .whereType<_Point>()
-                        .toList(growable: false),
-                  );
-                  return _series(
+                data: (rows) => _series(
+                  copy,
+                  _filter(_progressStepPoints(rows, connectedHealth)),
+                  copy.stepsUnit,
+                ),
+              )
+            else if (systemState.isLoading)
+              _loading()
+            else if (systemState.hasError)
+              _error(copy, () => ref.invalidate(measurementSystemProvider))
+            else
+              switch (metric) {
+                ProgressMetric.steps => const SizedBox.shrink(),
+                ProgressMetric.weight => weights.when(
+                  loading: _loading,
+                  error: (_, _) =>
+                      _error(copy, () => ref.invalidate(weightHistoryProvider)),
+                  data: (rows) {
+                    final points = _filter(
+                      rows
+                          .where(
+                            (row) => row.weight.isFinite && row.weight >= 0,
+                          )
+                          .map(
+                            (row) => _Point(
+                              row.date,
+                              UnitConverter.weightFromKg(
+                                row.weight,
+                                systemState.requireValue,
+                              ),
+                            ),
+                          )
+                          .toList(growable: false),
+                    );
+                    return _series(
+                      copy,
+                      points,
+                      UnitConverter.weightUnit(systemState.requireValue),
+                    );
+                  },
+                ),
+                ProgressMetric.neck ||
+                ProgressMetric.waist ||
+                ProgressMetric.hips ||
+                ProgressMetric.chest ||
+                ProgressMetric.arm ||
+                ProgressMetric.thigh => measurements.when(
+                  loading: _loading,
+                  error: (_, _) => _error(
                     copy,
-                    points,
-                    systemState.requireValue == MeasurementSystem.imperial
-                        ? 'in'
-                        : 'cm',
-                  );
-                },
-              ),
-            },
-          const SafeFreeAdAnchor(
-            key: Key('progress-free-ad-slot'),
-            surface: SafeFreeAdSurface.progress,
-          ),
-        ],
+                    () => ref.invalidate(bodyMeasurementHistoryProvider),
+                  ),
+                  data: (rows) {
+                    final points = _filter(
+                      rows
+                          .map(
+                            (row) => _measurementPoint(
+                              row,
+                              metric,
+                              systemState.requireValue,
+                            ),
+                          )
+                          .whereType<_Point>()
+                          .toList(growable: false),
+                    );
+                    return _series(
+                      copy,
+                      points,
+                      systemState.requireValue == MeasurementSystem.imperial
+                          ? 'in'
+                          : 'cm',
+                    );
+                  },
+                ),
+              },
+            const SafeFreeAdAnchor(
+              key: Key('progress-free-ad-slot'),
+              surface: SafeFreeAdSurface.progress,
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   ({List<_Point> points, String unit})? _shareData(

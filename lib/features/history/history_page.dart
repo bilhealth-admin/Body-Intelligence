@@ -240,190 +240,198 @@ class HistoryPage extends ConsumerWidget {
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final unit = UnitConverter.weightUnit(system);
     final profile = ref.watch(userProfileProvider).value;
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(title: Text(context.strings.text('Weight history'))),
-      floatingActionButton: history.value?.isNotEmpty == true
-          ? FloatingActionButton(
-              tooltip: context.strings.text('Add weight'),
-              onPressed: () => _edit(context, ref),
-              child: const Icon(Icons.add),
-            )
-          : null,
-      body: history.when(
-        loading: () => Semantics(
-          label: context.strings.text('Loading weight history'),
-          liveRegion: true,
-          child: ExcludeSemantics(
-            child: ListView(
-              padding: PremiumDesignTokens.screenPadding,
-              children: [
-                const _HistorySkeletonBlock(height: 220),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                const _HistorySkeletonBlock(height: 96),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                const _HistorySkeletonBlock(height: 96),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                const _HistorySkeletonBlock(height: 96),
-              ],
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: Text(context.strings.text('Weight history'))),
+        floatingActionButton: history.value?.isNotEmpty == true
+            ? FloatingActionButton(
+                tooltip: context.strings.text('Add weight'),
+                onPressed: () => _edit(context, ref),
+                child: const Icon(Icons.add),
+              )
+            : null,
+        body: history.when(
+          loading: () => Semantics(
+            label: context.strings.text('Loading weight history'),
+            liveRegion: true,
+            child: ExcludeSemantics(
+              child: ListView(
+                padding: PremiumDesignTokens.screenPadding,
+                children: [
+                  const _HistorySkeletonBlock(height: 220),
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  const _HistorySkeletonBlock(height: 96),
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  const _HistorySkeletonBlock(height: 96),
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  const _HistorySkeletonBlock(height: 96),
+                ],
+              ),
             ),
           ),
-        ),
-        error: (_, _) => ListView(
-          padding: PremiumDesignTokens.screenPadding,
-          children: [
-            _HistoryContextBanner(
-              icon: Icons.warning_amber_rounded,
-              title: context.strings.text(
-                'Weight history is temporarily unavailable',
-              ),
-              subtitle: context.strings.text(
-                'Some local records could not be read. Trend interpretation is hidden until local data is available again.',
-              ),
-            ),
-            const SizedBox(height: PremiumDesignTokens.spaceSm),
-            ActionableErrorState(
-              title: context.strings.text('Could not load weight history'),
-              onRetry: () => ref.invalidate(weightHistoryProvider),
-            ),
-          ],
-        ),
-        data: (rows) {
-          if (rows.isEmpty) {
-            return ActionableEmptyState(
-              icon: Icons.monitor_weight_outlined,
-              title: context.strings.text('Build your first comparable trend'),
-              body: context.strings.text(
-                'One measurement establishes a starting point. BIL waits for more comparable days before describing a trend.',
-              ),
-              actionLabel: context.strings.text('Record first weight'),
-              onAction: () => _edit(context, ref),
-            );
-          }
-          final chronological = rows.reversed.toList();
-          final trend = WeightAnalysis.calculateWeeklyTrend(
-            chronological.map((row) => row.weight).toList(),
-          );
-          final analysis = ProgressAnalysis.evaluate(
-            samples: chronological
-                .map(
-                  (row) => ProgressSample(date: row.date, weightKg: row.weight),
-                )
-                .toList(),
-            goalWeightKg: profile?.targetWeight,
-          );
-          final locale = Localizations.localeOf(
-            context,
-          ).languageCode.toLowerCase();
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(
-              PremiumDesignTokens.spaceMd,
-              PremiumDesignTokens.spaceMd,
-              PremiumDesignTokens.spaceMd,
-              96,
-            ),
+          error: (_, _) => ListView(
+            padding: PremiumDesignTokens.screenPadding,
             children: [
-              PremiumSurface(
-                padding: PremiumDesignTokens.cardPaddingLarge,
-                child: Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          context.strings.text('Weight trend'),
-                          style: PremiumDesignTokens.cardHeading(context),
-                        ),
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      WeightTrendChart(
-                        // Weight history is an all-time surface. Keep the
-                        // chart on the same complete series used by the
-                        // evidence engine instead of silently clipping it to
-                        // the latest 30 entries.
-                        weights: chronological
-                            .map((row) => row.weight)
-                            .toList(),
-                        variability: analysis.variabilityKg,
-                        semanticsLabel: context.strings.text(
-                          'Recorded weight trend over time',
-                        ),
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      _HistoryExplainabilityChips(
-                        confidenceLabel: _confidenceLabel(
-                          analysis.confidence,
-                          locale,
-                        ),
-                        sampleCount: analysis.sampleCount,
-                        spanDays: analysis.spanDays,
-                        system: system,
-                        weeklyDirectionKg: analysis.weeklyDirectionKg,
-                      ),
-                      const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      Text(
-                        '${context.strings.text('Seven-day change')}: ${trend == null ? context.strings.text('More data needed') : '${UnitConverter.weightFromKg(trend, system).toStringAsFixed(2)} $unit'}',
-                      ),
-                      Text(
-                        '${context.strings.text('Smoothed weekly direction')}: ${analysis.weeklyDirectionKg == null ? context.strings.text('At least four entries needed') : '${analysis.weeklyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.weeklyDirectionKg!, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}'}',
-                      ),
-                      Text(
-                        '${_historyText(locale, 'monthlyDirection')}: ${analysis.monthlyDirectionKg == null ? _historyText(locale, 'longerWindow') : '${analysis.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.monthlyDirectionKg!, system).toStringAsFixed(1)} $unit'}',
-                      ),
-                      Text(
-                        '${_historyText(locale, 'confidence')}: ${_confidenceLabel(analysis.confidence, locale)} · ${analysis.sampleCount} ${_historyText(locale, 'measurementsAcross')} ${analysis.spanDays} ${_historyText(locale, 'days')}',
-                      ),
-                      if (analysis.variabilityKg != null)
-                        Text(
-                          '${_historyText(locale, 'variation')}: ${_historyText(locale, 'about')} ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit',
-                        ),
-                      _HistoryGoalProjectionCard(
-                        analysis: analysis,
-                        system: system,
-                        locale: locale,
-                      ),
-                      Text(
-                        context.strings.text(
-                          'Scale trends include water, glycogen, digestive content, and measurement variation; they do not prove fat or muscle change.',
-                        ),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+              _HistoryContextBanner(
+                icon: Icons.warning_amber_rounded,
+                title: context.strings.text(
+                  'Weight history is temporarily unavailable',
+                ),
+                subtitle: context.strings.text(
+                  'Some local records could not be read. Trend interpretation is hidden until local data is available again.',
                 ),
               ),
-              ...rows.map(
-                (entry) => PremiumSurface(
-                  child: ListTile(
-                    leading: BilSemanticIconBadge(
-                      kind: BilSemanticIconKind.weight,
-                      size: 38,
-                      iconSize: 20,
-                      shape: BoxShape.rectangle,
-                    ),
-                    title: Text(
-                      '${UnitConverter.weightFromKg(entry.weight, system).toStringAsFixed(1)} $unit',
-                    ),
-                    subtitle: Text(
-                      '${entry.date.year}-${entry.date.month.toString().padLeft(2, '0')}-${entry.date.day.toString().padLeft(2, '0')}',
-                    ),
-                    onTap: () => _edit(context, ref, entry),
-                    trailing: IconButton(
-                      tooltip: context.strings.text('Delete'),
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => _delete(context, ref, entry),
-                    ),
-                  ),
-                ),
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              ActionableErrorState(
+                title: context.strings.text('Could not load weight history'),
+                onRetry: () => ref.invalidate(weightHistoryProvider),
               ),
             ],
-          );
-        },
+          ),
+          data: (rows) {
+            if (rows.isEmpty) {
+              return ActionableEmptyState(
+                icon: Icons.monitor_weight_outlined,
+                title: context.strings.text(
+                  'Build your first comparable trend',
+                ),
+                body: context.strings.text(
+                  'One measurement establishes a starting point. BIL waits for more comparable days before describing a trend.',
+                ),
+                actionLabel: context.strings.text('Record first weight'),
+                onAction: () => _edit(context, ref),
+              );
+            }
+            final chronological = rows.reversed.toList();
+            final trend = WeightAnalysis.calculateWeeklyTrend(
+              chronological.map((row) => row.weight).toList(),
+            );
+            final analysis = ProgressAnalysis.evaluate(
+              samples: chronological
+                  .map(
+                    (row) =>
+                        ProgressSample(date: row.date, weightKg: row.weight),
+                  )
+                  .toList(),
+              goalWeightKg: profile?.targetWeight,
+            );
+            final locale = Localizations.localeOf(
+              context,
+            ).languageCode.toLowerCase();
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(
+                PremiumDesignTokens.spaceMd,
+                PremiumDesignTokens.spaceMd,
+                PremiumDesignTokens.spaceMd,
+                96,
+              ),
+              children: [
+                PremiumSurface(
+                  padding: PremiumDesignTokens.cardPaddingLarge,
+                  child: Padding(
+                    padding: const EdgeInsets.all(0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            context.strings.text('Weight trend'),
+                            style: PremiumDesignTokens.cardHeading(context),
+                          ),
+                        ),
+                        const SizedBox(height: PremiumDesignTokens.spaceSm),
+                        WeightTrendChart(
+                          // Weight history is an all-time surface. Keep the
+                          // chart on the same complete series used by the
+                          // evidence engine instead of silently clipping it to
+                          // the latest 30 entries.
+                          weights: chronological
+                              .map((row) => row.weight)
+                              .toList(),
+                          variability: analysis.variabilityKg,
+                          semanticsLabel: context.strings.text(
+                            'Recorded weight trend over time',
+                          ),
+                        ),
+                        const SizedBox(height: PremiumDesignTokens.spaceSm),
+                        _HistoryExplainabilityChips(
+                          confidenceLabel: _confidenceLabel(
+                            analysis.confidence,
+                            locale,
+                          ),
+                          sampleCount: analysis.sampleCount,
+                          spanDays: analysis.spanDays,
+                          system: system,
+                          weeklyDirectionKg: analysis.weeklyDirectionKg,
+                        ),
+                        const SizedBox(height: PremiumDesignTokens.spaceSm),
+                        Text(
+                          '${context.strings.text('Seven-day change')}: ${trend == null ? context.strings.text('More data needed') : '${UnitConverter.weightFromKg(trend, system).toStringAsFixed(2)} $unit'}',
+                        ),
+                        Text(
+                          '${context.strings.text('Smoothed weekly direction')}: ${analysis.weeklyDirectionKg == null ? context.strings.text('At least four entries needed') : '${analysis.weeklyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.weeklyDirectionKg!, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}'}',
+                        ),
+                        Text(
+                          '${_historyText(locale, 'monthlyDirection')}: ${analysis.monthlyDirectionKg == null ? _historyText(locale, 'longerWindow') : '${analysis.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.monthlyDirectionKg!, system).toStringAsFixed(1)} $unit'}',
+                        ),
+                        Text(
+                          '${_historyText(locale, 'confidence')}: ${_confidenceLabel(analysis.confidence, locale)} · ${analysis.sampleCount} ${_historyText(locale, 'measurementsAcross')} ${analysis.spanDays} ${_historyText(locale, 'days')}',
+                        ),
+                        if (analysis.variabilityKg != null)
+                          Text(
+                            '${_historyText(locale, 'variation')}: ${_historyText(locale, 'about')} ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit',
+                          ),
+                        _HistoryGoalProjectionCard(
+                          analysis: analysis,
+                          system: system,
+                          locale: locale,
+                        ),
+                        Text(
+                          context.strings.text(
+                            'Scale trends include water, glycogen, digestive content, and measurement variation; they do not prove fat or muscle change.',
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                ...rows.map(
+                  (entry) => PremiumSurface(
+                    child: ListTile(
+                      leading: BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.weight,
+                        size: 38,
+                        iconSize: 20,
+                        shape: BoxShape.rectangle,
+                      ),
+                      title: Text(
+                        '${UnitConverter.weightFromKg(entry.weight, system).toStringAsFixed(1)} $unit',
+                      ),
+                      subtitle: Text(
+                        '${entry.date.year}-${entry.date.month.toString().padLeft(2, '0')}-${entry.date.day.toString().padLeft(2, '0')}',
+                      ),
+                      onTap: () => _edit(context, ref, entry),
+                      trailing: IconButton(
+                        tooltip: context.strings.text('Delete'),
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _delete(context, ref, entry),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
-    ));
+    );
   }
 }
 

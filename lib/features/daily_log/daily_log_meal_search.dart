@@ -236,9 +236,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       color: scheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: .55),
-        ),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .55)),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(

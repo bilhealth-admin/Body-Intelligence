@@ -98,9 +98,7 @@ class _ProgressChartCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.surface,
-        ),
+        decoration: BoxDecoration(color: colors.surface),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(18, 17, 18, 18),
           child: Column(

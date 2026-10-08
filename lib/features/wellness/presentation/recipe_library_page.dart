@@ -166,47 +166,53 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BilCalmVisualScope(builder: (context) => Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/dashboard'),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        title: Text(wellnessCopy(context, 'BIL recipes', 'وصفات BIL')),
-        actions: [
-          IconButton(
-            tooltip: wellnessCopy(context, 'Saved recipes', 'الوصفات المحفوظة'),
-            onPressed: () => setState(() {
-              _search.clear();
-              _category = 'saved';
-              _cuisine = 'all';
-              _visibleLimit = _filteredPageSize;
-            }),
-            icon: Icon(
-              _category == 'saved'
-                  ? Icons.bookmark_rounded
-                  : Icons.bookmark_outline_rounded,
-            ),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          centerTitle: false,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/dashboard'),
+            icon: const Icon(Icons.arrow_back_rounded),
           ),
-        ],
+          title: Text(wellnessCopy(context, 'BIL recipes', 'وصفات BIL')),
+          actions: [
+            IconButton(
+              tooltip: wellnessCopy(
+                context,
+                'Saved recipes',
+                'الوصفات المحفوظة',
+              ),
+              onPressed: () => setState(() {
+                _search.clear();
+                _category = 'saved';
+                _cuisine = 'all';
+                _visibleLimit = _filteredPageSize;
+              }),
+              icon: Icon(
+                _category == 'saved'
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_outline_rounded,
+              ),
+            ),
+          ],
+        ),
+        body: FutureBuilder<List<RecipeCatalogSummary>>(
+          future: _catalog,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return _CatalogUnavailable(onRetry: _retry);
+            }
+            _scheduleInitialRecipe(snapshot.requireData);
+            return _buildCatalog(snapshot.requireData);
+          },
+        ),
       ),
-      body: FutureBuilder<List<RecipeCatalogSummary>>(
-        future: _catalog,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError || !snapshot.hasData) {
-            return _CatalogUnavailable(onRetry: _retry);
-          }
-          _scheduleInitialRecipe(snapshot.requireData);
-          return _buildCatalog(snapshot.requireData);
-        },
-      ),
-    ));
+    );
   }
 
   Widget _buildCatalog(List<RecipeCatalogSummary> source) {

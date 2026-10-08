@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 /// BIL's 2026 editorial treatment for secondary, non-protected journeys.
- ///
- /// This scope MUST be applied inside an individual allowed route, never to
- /// MaterialApp, the shell, Dashboard, Community, or AI Coach. The Builder
- /// deliberately supplies a descendant context so Theme.of(context) inside
- /// the page is scoped too. No bundled fonts: system sans follows each OS,
- /// script, accessibility setting, and installed fallback.
+///
+/// This scope MUST be applied inside an individual allowed route, never to
+/// MaterialApp, the shell, Dashboard, Community, or AI Coach. The Builder
+/// deliberately supplies a descendant context so Theme.of(context) inside
+/// the page is scoped too. No bundled fonts: system sans follows each OS,
+/// script, accessibility setting, and installed fallback.
 abstract final class BilCalmTokens {
   static const double pageInset = 16;
   static const double rowMinHeight = 52;
@@ -39,11 +39,14 @@ class BilCalmVisualScope extends StatelessWidget {
   static ThemeData resolve(ThemeData parent, {required bool isArabic}) {
     final dark = parent.brightness == Brightness.dark;
     final canvas = dark ? BilCalmTokens.darkCanvas : BilCalmTokens.lightCanvas;
-    final surface = dark ? BilCalmTokens.darkSurface : BilCalmTokens.lightSurface;
+    final surface = dark
+        ? BilCalmTokens.darkSurface
+        : BilCalmTokens.lightSurface;
     final subtle = dark ? BilCalmTokens.darkSubtle : BilCalmTokens.lightSubtle;
     final ink = dark ? BilCalmTokens.darkInk : BilCalmTokens.lightInk;
-    final secondary =
-        dark ? BilCalmTokens.darkSecondary : BilCalmTokens.lightSecondary;
+    final secondary = dark
+        ? BilCalmTokens.darkSecondary
+        : BilCalmTokens.lightSecondary;
     final border = dark ? BilCalmTokens.darkBorder : BilCalmTokens.lightBorder;
     final scheme = parent.colorScheme.copyWith(
       surface: surface,
@@ -57,18 +60,27 @@ class BilCalmVisualScope extends StatelessWidget {
     // Do not set fontFamily: preserve platform-native Arabic/Latin fallback.
     // Avoid negative letter spacing for Arabic's joined glyphs.
     final tracking = isArabic ? 0.0 : -0.15;
-    TextStyle? style(TextStyle? source, double size, FontWeight weight,
-            {double height = 1.36, double? spacing}) =>
-        source?.copyWith(
-          fontSize: size,
-          fontWeight: weight,
-          height: height,
-          letterSpacing: spacing ?? tracking,
-          color: ink,
-        );
+    TextStyle? style(
+      TextStyle? source,
+      double size,
+      FontWeight weight, {
+      double height = 1.36,
+      double? spacing,
+    }) => source?.copyWith(
+      fontSize: size,
+      fontWeight: weight,
+      height: height,
+      letterSpacing: spacing ?? tracking,
+      color: ink,
+    );
     final base = parent.textTheme;
     final typography = base.copyWith(
-      headlineSmall: style(base.headlineSmall, 22, FontWeight.w600, height: 1.24),
+      headlineSmall: style(
+        base.headlineSmall,
+        22,
+        FontWeight.w600,
+        height: 1.24,
+      ),
       titleLarge: style(base.titleLarge, 19, FontWeight.w600, height: 1.3),
       titleMedium: style(base.titleMedium, 16, FontWeight.w500),
       titleSmall: style(base.titleSmall, 14, FontWeight.w500),
@@ -91,7 +103,10 @@ class BilCalmVisualScope extends StatelessWidget {
         foregroundColor: ink,
         centerTitle: true,
         titleTextStyle: typography.titleLarge,
-        iconTheme: IconThemeData(color: secondary, size: BilCalmTokens.iconSize),
+        iconTheme: IconThemeData(
+          color: secondary,
+          size: BilCalmTokens.iconSize,
+        ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -111,8 +126,7 @@ class BilCalmVisualScope extends StatelessWidget {
         iconColor: secondary,
         contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
         titleTextStyle: typography.bodyLarge,
-        subtitleTextStyle:
-            typography.bodyMedium?.copyWith(color: secondary),
+        subtitleTextStyle: typography.bodyMedium?.copyWith(color: secondary),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: ButtonStyle(
@@ -126,8 +140,7 @@ class BilCalmVisualScope extends StatelessWidget {
       inputDecorationTheme: parent.inputDecorationTheme.copyWith(
         filled: true,
         fillColor: surface,
-        contentPadding:
-            const EdgeInsetsDirectional.fromSTEB(14, 13, 14, 13),
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(14, 13, 14, 13),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(BilCalmTokens.fieldRadius),
           borderSide: BorderSide(color: border),
