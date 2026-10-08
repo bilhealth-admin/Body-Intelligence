@@ -296,7 +296,11 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.surfaceContainer,
-                  prefixIcon: const Icon(Icons.search_rounded),
+                  prefixIcon: Icon(
+                     Icons.search_rounded,
+                     size: 18,
+                     color: Theme.of(context).colorScheme.onSurfaceVariant,
+                   ),
                   hintText: tr('Search for an exercise', 'ابحث عن تمرين'),
                   border: InputBorder.none,
                 ),
@@ -356,9 +360,9 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                       value: _categoryLabel(item.categoryEn),
                       excludeSemantics: true,
                       child: ListTile(
-                        minTileHeight: 76,
+                        minTileHeight: 58,
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 22,
+                          horizontal: 16,
                         ),
                         title: Text(wellnessCopy(context, item.en, item.ar)),
                         trailing: multiSelecting
@@ -390,9 +394,7 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                       explicitChildNodes: !multiSelecting,
                       child: ListTile(
                         key: Key('custom-exercise-${entry['id']}'),
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.fitness_center_rounded),
-                        ),
+                        minTileHeight: 62,
                         title: Text(entry['name']!),
                         subtitle: Text(
                           _categoryLabel(entry['category'] ?? 'Strength'),
@@ -444,9 +446,7 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                       key: Key(
                         'workout-history-${entry.id}-${entry.date.millisecondsSinceEpoch}',
                       ),
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.history_rounded),
-                      ),
+                      minTileHeight: 62,
                       title: Text(_historyDisplayName(entry)),
                       subtitle: Text(
                         tr(
@@ -454,7 +454,11 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                           '${entry.minutes} دقيقة · ${MaterialLocalizations.of(context).formatShortDate(entry.date)}',
                         ),
                       ),
-                      trailing: const Icon(Icons.replay_rounded),
+                      trailing: Icon(
+                        Icons.replay_rounded,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       onTap: () => _reuseHistory(entry),
                     ),
                     const Divider(height: 1),
