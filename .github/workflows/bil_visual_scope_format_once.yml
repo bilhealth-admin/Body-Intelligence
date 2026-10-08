@@ -62,6 +62,7 @@ jobs:
             git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
               commit -m "style(ux): format scoped premium surfaces with Dart formatter"
+            git pull --rebase origin qa/bil-premium-visual-2026
             git push origin HEAD:refs/heads/qa/bil-premium-visual-2026
           fi
           echo "Scoped formatting complete; NO app build or store release.";
