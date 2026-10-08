@@ -32,9 +32,10 @@ abstract final class BilCalmTokens {
 }
 
 class BilCalmVisualScope extends StatelessWidget {
-  const BilCalmVisualScope({super.key, required this.builder});
+  const BilCalmVisualScope({super.key, required this.builder, this.enabled = true});
 
   final WidgetBuilder builder;
+  final bool enabled;
 
   static ThemeData resolve(ThemeData parent, {required bool isArabic}) {
     final dark = parent.brightness == Brightness.dark;
@@ -155,6 +156,7 @@ class BilCalmVisualScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!enabled) return Builder(builder: builder);
     final locale = Localizations.localeOf(context);
     return Theme(
       data: resolve(Theme.of(context), isArabic: locale.languageCode == 'ar'),

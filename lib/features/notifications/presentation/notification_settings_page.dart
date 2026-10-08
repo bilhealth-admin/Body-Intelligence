@@ -14,6 +14,7 @@ import '../services/bil_notification_service.dart';
 import '../services/community_push_service.dart';
 import '../services/daily_reminder_store.dart';
 import 'notification_settings_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'notification_settings_components.dart';
 part 'notification_settings_actions.dart';
@@ -180,7 +181,7 @@ class _NotificationSettingsPageState
     final reminders = _reminders;
     final delivery = _deliveryPreferences;
     final busy = _saving || _pushSaving;
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !busy,
       child: Scaffold(
         appBar: AppBar(
@@ -424,6 +425,6 @@ class _NotificationSettingsPageState
                 ],
               ),
       ),
-    );
+    ));
   }
 }

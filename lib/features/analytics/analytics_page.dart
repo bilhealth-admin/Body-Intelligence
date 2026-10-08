@@ -27,6 +27,7 @@ import 'localized_confidence.dart';
 import 'analytics_locale_copy.dart';
 import 'widgets/analytics_range_selector.dart';
 import 'widgets/analytics_weight_trend_chart.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'widgets/analytics_page_primitives.dart';
 
@@ -154,7 +155,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         (waterAsync.isLoading && !waterAsync.hasValue) ||
         (dailyLogsAsync.isLoading && !dailyLogsAsync.hasValue) ||
         (contextsAsync.isLoading && !contextsAsync.hasValue)) {
-      return Scaffold(
+      return BilCalmVisualScope(builder: (context) => Scaffold(
         appBar: _settingsAppBar(context),
         body: Semantics(
           label: tr('Loading analytics', 'جارٍ تحميل التحليلات'),
@@ -176,14 +177,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ),
           ),
         ),
-      );
+      ));
     }
     if (weightsAsync.hasError ||
         mealsAsync.hasError ||
         waterAsync.hasError ||
         dailyLogsAsync.hasError ||
         contextsAsync.hasError) {
-      return Scaffold(
+      return BilCalmVisualScope(builder: (context) => Scaffold(
         appBar: _settingsAppBar(context),
         body: ActionableErrorState(
           title: tr(
@@ -202,7 +203,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ref.invalidate(insightLifeContextProvider);
           },
         ),
-      );
+      ));
     }
     final allWeights = (weightsAsync.value ?? const []).reversed.toList();
     final allMeals = mealsAsync.value ?? const [];
@@ -354,7 +355,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       currentStartDay: cutoffKey,
     );
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar:
           _settingsAppBar(context) ??
           AppBar(
@@ -716,6 +717,6 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

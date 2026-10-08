@@ -26,6 +26,7 @@ import 'models/onboarding_draft.dart';
 import 'onboarding_runtime_copy.dart';
 import 'services/onboarding_permission_gateways.dart';
 import 'widgets/modern_onboarding_scaffold.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'onboarding_core_steps.dart';
 part 'onboarding_detail_steps.dart';
@@ -582,7 +583,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     // Consent work may disable Continue, but must not replace its stable label
     // with the navigation spinner.
     final navigationBusy = _busy || _transitionBusy;
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && !navigationBusy) unawaited(_goBack());
@@ -617,7 +618,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         nextPending: _permissionBusy,
         busy: navigationBusy,
       ),
-    );
+    ));
   }
 
   Widget _photoForStep(String step) {

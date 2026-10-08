@@ -20,6 +20,7 @@ import '../dashboard/domain/nutrient_dashboard.dart';
 import '../dashboard/providers/dashboard_preferences_provider.dart';
 import '../nutrition/domain/percentage_nutrition_goals.dart';
 import 'domain/food_analysis_engine.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'nutrition_analytics_food.dart';
 part 'nutrition_analytics_totals.dart';
@@ -171,7 +172,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                 fats: percentageGoals.fatGrams,
                 fiber: planTargets.fiber,
               ));
-    return DefaultTabController(
+    return BilCalmVisualScope(builder: (context) => DefaultTabController(
       length: 4,
       initialIndex: initialTab.clamp(0, 3),
       child: Scaffold(
@@ -261,7 +262,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

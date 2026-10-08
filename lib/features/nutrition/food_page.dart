@@ -27,6 +27,7 @@ import 'presentation/nutrition_copy.dart';
 import 'presentation/meal_image_guide_page.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'presentation/food_catalog_overview.dart';
 part 'presentation/food_catalog_tile.dart';
@@ -177,7 +178,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     final allFoods = ref.watch(foodsProvider);
     final favorites = ref.watch(favoriteFoodsProvider);
     final recent = ref.watch(recentFoodsProvider);
-    return Scaffold(
+    return BilCalmVisualScope(enabled: !widget.embedded, builder: (context) => Scaffold(
       appBar: widget.embedded
           ? null
           : AppBar(title: Text(nutritionText(context, 'Food', 'الغذاء'))),
@@ -461,7 +462,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 

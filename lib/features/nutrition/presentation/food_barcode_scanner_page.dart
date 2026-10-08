@@ -13,6 +13,7 @@ import '../../../app/services/recoverable_image_picker.dart';
 import 'barcode_runtime_copy.dart';
 import 'barcode_scanner_helpers.dart';
 import 'nutrition_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 export 'barcode_scanner_helpers.dart';
 
@@ -382,7 +383,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   Widget build(BuildContext context) {
     final t = context.strings.text;
 
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         title: Text(t('Scan food barcode')),
         actions: [
@@ -491,7 +492,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
                   ),
               ],
             ),
-    );
+    ));
   }
 }
 
