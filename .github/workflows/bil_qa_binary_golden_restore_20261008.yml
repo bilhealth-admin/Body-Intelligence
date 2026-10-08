@@ -1,0 +1,61 @@
+name: BIL isolated QA binary golden restore
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_qa_binary_golden_restore_20261008.yml]
+permissions:
+  contents: read
+jobs:
+  test-fixtures:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Export tracked app imagery and exact test golden fixtures without fonts or secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-qa-tracked-binary
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess,zipfile
+          allowed_prefix=('test/','assets/','store_assets/')
+          allowed_suffix={'.png','.jpg','.jpeg','.webp','.gif','.ico','.wav','.mp4','.sqlite','.db','.pdf'}
+          blocked_suffix={'.ttf','.otf','.ttc','.woff','.woff2','.eot','.p12','.p8','.pem','.key','.jks','.keystore','.mobileprovision'}
+          names=subprocess.check_output(['git','ls-files','-z']).split(b'\0')
+          rows=[]; skipped=[]; total=0;limit=420*1024*1024
+          out=pathlib.Path('/tmp/bil-qa-tracked-binary/fixtures.zip')
+          with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED,compresslevel=2) as z:
+              for raw in names:
+                  if not raw:continue
+                  name=raw.decode('utf-8')
+                  path=pathlib.PurePosixPath(name)
+                  if not name.startswith(allowed_prefix) or path.suffix.lower() not in allowed_suffix or path.suffix.lower() in blocked_suffix:
+                      continue
+                  if any('secret' in p.lower() or 'credential' in p.lower() or p.lower().startswith('.env') for p in path.parts):
+                      skipped.append(name);continue
+                  disk=pathlib.Path(name)
+                  size=disk.stat().st_size
+                  if size>24*1024*1024 or total+size>limit:
+                      skipped.append(name);continue
+                  data=disk.read_bytes()
+                  z.writestr(name,data)
+                  rows.append({'path':name,'sha256':hashlib.sha256(data).hexdigest(),'bytes':size})
+                  total+=size
+          pathlib.Path('/tmp/bil-qa-tracked-binary/manifest.json').write_text(json.dumps({
+            'head_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+            'files':rows,'omitted':skipped,'production_connected':False,
+            'deploy':False,'fonts_exported':False,'scope':'Read-only tracked QA imagery/goldens only'
+          },indent=2)+'\n')
+          print('QA_FIXTURES',len(rows),'BYTES',total,'SKIPPED',len(skipped))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-qa-tracked-binary-${{ github.sha }}
+          path: /tmp/bil-qa-tracked-binary/
+          retention-days: 1
+          if-no-files-found: error
