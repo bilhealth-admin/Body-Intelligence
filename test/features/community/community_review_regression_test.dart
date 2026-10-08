@@ -899,7 +899,11 @@ void main() {
           .first,
       maxScrolls: 100,
     );
-    await tester.tap(more);
+    // The shared native dock covers the lower viewport. A hit-testable,
+    // vertically centered Load more button is required: an offscreen tap
+    // could accidentally invoke the dock's Quick Add instead of pagination.
+    // Keep all stale-response/readback assertions unchanged.
+    await tapCommunityControl(tester, more);
     await tester.pump();
     repository.feedRows = [post('fresh')];
     await tester
