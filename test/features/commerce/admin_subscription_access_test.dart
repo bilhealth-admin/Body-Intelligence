@@ -7,10 +7,62 @@ import 'package:body_intelligence_log/features/commerce/domain/subscription_prov
 import 'package:body_intelligence_log/features/commerce/domain/subscription_record.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
+  testWidgets('app resume refreshes observed rights and Coach credit', (
+    tester,
+  ) async {
+    var rightsLoads = 0;
+    var creditLoads = 0;
+    final container = ProviderContainer(
+      overrides: [
+        verifiedEntitlementOwnerProvider.overrideWith(
+          (_) => Stream.value('owner'),
+        ),
+        verifiedEntitlementLoaderProvider.overrideWithValue(() async {
+          rightsLoads++;
+          return FreePlan.createState();
+        }),
+        aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
+          creditLoads++;
+          return {
+            'credits': {'total_remaining': 5000},
+          };
+        }),
+      ],
+    );
+    final rights = container.listen(
+      verifiedSubscriptionStateProvider,
+      (_, _) {},
+    );
+    final credits = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+    await tester.pump();
+    await tester.pump();
+    expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+    await container.read(verifiedSubscriptionStateProvider.future);
+    final originalRights = rightsLoads;
+    final originalCredits = creditLoads;
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump();
+
+    expect(rightsLoads, greaterThan(originalRights));
+    expect(creditLoads, greaterThan(originalCredits));
+    rights.close();
+    credits.close();
+    await tester.pump();
+    container.dispose();
+  });
+
   testWidgets(
     'a mounted Coach gate observes grants and revocation without a Premium lookup',
     (tester) async {

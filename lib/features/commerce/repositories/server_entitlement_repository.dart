@@ -165,12 +165,22 @@ final class ServerEntitlementRepository {
       final user = client.auth.currentUser;
       if (user == null) return FreePlan.createState();
       final now = DateTime.now().toUtc();
-      final closedTestRows = await client
-          .from('bil_ai_closed_test_grants')
-          .select('active, expires_at')
-          .eq('owner_id', user.id)
-          .limit(1)
-          .timeout(const Duration(seconds: 10));
+      List<Map<String, dynamic>> closedTestRows;
+      try {
+        closedTestRows = await client
+            .from('bil_ai_closed_test_grants')
+            .select('active, expires_at')
+            .eq('owner_id', user.id)
+            .limit(1)
+            .timeout(const Duration(seconds: 10));
+      } on Object {
+        // Closed-test is an independent, additive server authority. A
+        // temporary failure to read that overlay must not skip the separate
+        // verified Google/Apple subscription mirror for this same owner.
+        // This catch grants nothing; the next lookup must still verify paid
+        // access through its own provider, timestamps and lifecycle.
+        closedTestRows = const [];
+      }
       final closedTestExpiresAt = closedTestRows.isEmpty
           ? null
           : DateTime.tryParse('${closedTestRows.first['expires_at']}')?.toUtc();

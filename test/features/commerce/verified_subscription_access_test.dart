@@ -69,6 +69,49 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('verified Free recheck stays neutral until new paid response', (
+    tester,
+  ) async {
+    final now = DateTime.utc(2026, 10, 8);
+    var response = Future.value(
+      SubscriptionState(
+        plan: CommercePlan.free,
+        entitlements: FreePlan.entitlements,
+        authority: EntitlementAuthority.verifiedServer,
+        isPurchasable: false,
+        canRestorePurchases: false,
+      ),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        verifiedEntitlementClockProvider.overrideWithValue(() => now),
+        verifiedSubscriptionStateProvider.overrideWith((_) => response),
+      ],
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const _AccessProbe(),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('free'), findsOneWidget);
+
+    final next = Completer<SubscriptionState>();
+    response = next.future;
+    container.invalidate(verifiedSubscriptionStateProvider);
+    await tester.pump();
+    expect(find.text('loading'), findsOneWidget);
+    expect(find.text('free'), findsNothing);
+    next.complete(_paid(now.add(const Duration(hours: 1))));
+    await container.read(verifiedSubscriptionStateProvider.future);
+    await tester.pump();
+    expect(find.text('premium'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await tester.pump();
+  });
+
   testWidgets('same owner auth startup does not reload a verified paid grant', (
     tester,
   ) async {

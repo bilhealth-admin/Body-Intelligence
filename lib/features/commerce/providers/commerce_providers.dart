@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -127,6 +128,17 @@ void Function() _observedAuthorityReload(Ref ref, void Function() reload) {
   var disposed = false;
   var observed = true;
   var loaded = false;
+  // A resumed Play/TestFlight process must immediately refresh its
+  // server-owned rights and credits; background-paused timers can be stale.
+  // Auth owner changes continue to invalidate separately via Riverpod.
+  final appLifecycle = AppLifecycleListener(
+    onResume: () {
+      if (disposed || !observed || !loaded) return;
+      refresh?.cancel();
+      reload();
+    },
+  );
+  ref.onDispose(appLifecycle.dispose);
   void schedule() {
     refresh?.cancel();
     refresh = Timer(const Duration(seconds: 30), reload);
@@ -178,7 +190,12 @@ final verifiedSubscriptionAccessProvider =
       // A dependency reload includes an account change. Never reuse another
       // owner's previous AsyncValue; only an explicit same-owner refresh may
       // retain its previously verified value while the server is answering.
-      if (snapshot.isLoading && !snapshot.isRefreshing) {
+      // Keep a verified paid lease during a same-owner refresh, but never
+      // show a Free paywall while an on-demand entitlement recheck is pending.
+      if (snapshot.isLoading &&
+          (!snapshot.isRefreshing ||
+              snapshot.value?.authority != EntitlementAuthority.verifiedServer ||
+              snapshot.value?.plan == CommercePlan.free)) {
         return const AsyncValue.loading();
       }
       if (snapshot.hasError) return snapshot;

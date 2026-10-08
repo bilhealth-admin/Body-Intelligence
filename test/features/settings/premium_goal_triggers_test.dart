@@ -189,6 +189,74 @@ void main() {
     await database.close();
   });
 
+  testWidgets('stale verified Free rechecks a new grant before feature entry', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    await _seedProfile(database);
+    final router = _realMealRouter();
+    final now = DateTime.now().toUtc();
+    var reads = 0;
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          verifiedSubscriptionStateProvider.overrideWith((_) async {
+            reads++;
+            return reads == 1
+                ? SubscriptionState(
+                    plan: CommercePlan.free,
+                    entitlements: FreePlan.entitlements,
+                    authority: EntitlementAuthority.verifiedServer,
+                    isPurchasable: false,
+                    canRestorePurchases: false,
+                  )
+                : SubscriptionState(
+                    plan: CommercePlan.premiumAiCoach,
+                    entitlements: PaidPlanCatalog.composedEntitlementsFor(
+                      CommercePlan.premiumAiCoach,
+                    ),
+                    authority: EntitlementAuthority.verifiedServer,
+                    startedAt: now.subtract(const Duration(minutes: 1)),
+                    currentPeriodEndsAt: now.add(const Duration(minutes: 5)),
+                    isPurchasable: false,
+                    canRestorePurchases: false,
+                  );
+          }),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await _reveal(
+      tester,
+      find.byKey(const Key('goals-meal-calories-entitlement-state')),
+      520,
+    );
+    expect(reads, 1);
+    await tester.tap(find.text('Calorie Goals By Meal'));
+    await tester.pumpAndSettle();
+    expect(reads, greaterThan(1));
+    expect(find.text('Breakfast'), findsOneWidget);
+    expect(find.text('View Premium plans'), findsNothing);
+    expect(find.text('plans-target'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    router.dispose();
+    await database.close();
+  });
+
   testWidgets('verified Premium AI Coach reaches actual meal goals', (
     tester,
   ) async {

@@ -80,7 +80,9 @@ void main() {
     },
   );
 
-  testWidgets('local Free fallback requires retry, never a paid upsell', (tester) async {
+  testWidgets('local Free fallback requires retry, never a paid upsell', (
+    tester,
+  ) async {
     final localDefault = SubscriptionState(
       plan: CommercePlan.free,
       entitlements: const <CommerceEntitlement>{},

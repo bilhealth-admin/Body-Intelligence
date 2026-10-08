@@ -111,12 +111,11 @@ class _PremiumRow extends ConsumerWidget {
           Icons.chevron_right_rounded,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        // An unknown snapshot triggers a fresh owner-scoped read; the feature
-        // page waits for that read and remains locked until verification.
+        // An unknown or previously verified Free result may precede a fresh
+        // server-side grant. Recheck on entry, then let the protected feature
+        // handle loading, Retry, verified Free and valid paid access.
         onTap: () {
-          if (entitlement.hasError || (verified != null && unverified)) {
-            ref.invalidate(verifiedSubscriptionStateProvider);
-          }
+          if (!active) ref.invalidate(verifiedSubscriptionStateProvider);
           context.push(premiumGoalDestination(route));
         },
       ),
