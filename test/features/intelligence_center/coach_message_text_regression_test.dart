@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -180,6 +181,42 @@ void main() {
       await tester.pump(elapsed);
       expect(tester.getTopLeft(feedback).dy, closeTo(top, .01));
     }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('joined emoji and combining scripts never reveal split graphemes', (
+    tester,
+  ) async {
+    const reply =
+        'العائلة 👨‍👩‍👧‍👦 والرياضة 🏃🏽‍♂️ — let us review the sleep report.';
+    final completeClusters = reply.characters.toList(growable: false);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CoachMessageText(
+            text: reply,
+            createdAt: DateTime(2026, 10, 8),
+            textDirection: TextDirection.rtl,
+            animateReveal: true,
+          ),
+        ),
+      ),
+    );
+    for (var step = 0; step < 12; step++) {
+      await tester.pump(const Duration(milliseconds: 70));
+      final visible =
+          tester.widget<SelectableText>(find.byType(SelectableText)).data!;
+      expect(
+        completeClusters.take(visible.characters.length).join(),
+        visible,
+        reason: 'The display must end on a complete grapheme at frame $step',
+      );
+    }
+    await tester.pump(const Duration(seconds: 3));
+    expect(
+      tester.widget<SelectableText>(find.byType(SelectableText)).data,
+      reply,
+    );
     expect(tester.takeException(), isNull);
   });
 
