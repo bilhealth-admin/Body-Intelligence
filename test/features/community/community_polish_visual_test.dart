@@ -1512,10 +1512,24 @@ void main() {
                   await tester.pumpAndSettle();
                   await tester.tap(addPhoto);
                   await tester.pumpAndSettle();
+                  final photoTile = find.byKey(
+                    Key('community-selected-photo-$index'),
+                  );
                   expect(
-                    find.byKey(Key('community-selected-photo-$index')),
+                    photoTile,
                     findsOneWidget,
                     reason: 'approved 3-photo + add composition',
+                  );
+                  expect(
+                    find.descendant(
+                      of: photoTile,
+                      matching: find.byWidgetPredicate(
+                        (widget) =>
+                            widget is RawImage && widget.image != null,
+                      ),
+                    ),
+                    findsOneWidget,
+                    reason: 'Actual decoded photograph, not a blank tile',
                   );
                 }
                 await settleVisualAssetImages(tester);
