@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 
 /// Render-only transcript text: selection/copy is user initiated, and time
