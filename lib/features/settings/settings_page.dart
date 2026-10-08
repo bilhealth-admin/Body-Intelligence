@@ -65,15 +65,14 @@ class SettingsPage extends ConsumerWidget {
     );
     final unit = copy(UnitConverter.weightUnit(system));
 
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           copy('More'),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -.35,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -.15,
           ),
         ),
       ),
