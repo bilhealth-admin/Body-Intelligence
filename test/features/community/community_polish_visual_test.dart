@@ -1498,7 +1498,10 @@ void main() {
                 await tester.runAsync(() async {
                   for (final photo
                       in _ExtendedVisualRepository.composerImages.take(3)) {
-                    await precacheImage(MemoryImage(photo.bytes), editorContext);
+                    await precacheImage(
+                      MemoryImage(photo.bytes),
+                      editorContext,
+                    );
                   }
                 });
                 await tester.pumpAndSettle();
@@ -1524,8 +1527,7 @@ void main() {
                     find.descendant(
                       of: photoTile,
                       matching: find.byWidgetPredicate(
-                        (widget) =>
-                            widget is RawImage && widget.image != null,
+                        (widget) => widget is RawImage && widget.image != null,
                       ),
                     ),
                     findsOneWidget,
