@@ -102,14 +102,16 @@ void main() {
           supportedLocales: const [Locale('ar'), Locale('en')],
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Scaffold(
-            body: SizedBox(
-              width: 340,
-              child: CoachMessageText(
-                key: const ValueKey('coach-long-geometry'),
-                text: reply,
-                createdAt: DateTime(2026, 10, 8),
-                textDirection: TextDirection.rtl,
-                animateReveal: true,
+            body: SingleChildScrollView(
+              child: SizedBox(
+                width: 340,
+                child: CoachMessageText(
+                  key: const ValueKey('coach-long-geometry'),
+                  text: reply,
+                  createdAt: DateTime(2026, 10, 8),
+                  textDirection: TextDirection.rtl,
+                  animateReveal: true,
+                ),
               ),
             ),
           ),
