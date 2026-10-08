@@ -1,5 +1,6 @@
 name: BIL Community entry R5 QA only
 on:
+  workflow_dispatch:
   push:
     branches: [qa/coach-community-next-20261005]
     paths:
@@ -13,6 +14,8 @@ on:
       - lib/app/router/app_community_routes.dart
       - lib/app/router/app_router.dart
       - test/features/community/community_entry*
+      # Review/pagination tests are part of R5's portable matrix; edits must rerun R5.
+      - test/features/community/community_review_regression_test.dart
       - test/features/community/community_polish_visual_test.dart
       - test/qa_next/community_composer_reference_capture_test.dart
       - test/qa_next/community_profile_drafts_reference_capture_test.dart

@@ -7,6 +7,7 @@ on:
       - lib/features/community/presentation/**
       - lib/features/community/channels/presentation/**
       - test/features/community/community_polish_visual_test.dart
+      - test/features/community/community_review_regression_test.dart
       - lib/features/intelligence_center/presentation/**
       - lib/shared/widgets/bil_reference_bottom_bar.dart
       - test/qa_next/**
@@ -123,7 +124,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          flutter test --no-pub --reporter expanded test/features/community/community_inbox_resume_regression_test.dart test/features/community/community_reference_composer_v1_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart test/qa_next/next_workspace_locale_test.dart test/localization/bil_25_locale_fallback_closure_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/behavior-tests.log
+          flutter test --no-pub --reporter expanded test/features/community/community_review_regression_test.dart test/features/community/community_inbox_resume_regression_test.dart test/features/community/community_reference_composer_v1_test.dart test/features/intelligence_center/ai_coach_tool_execution_behavior_test.dart test/features/intelligence_center/coach_page_lifecycle_regression_test.dart test/architecture_source_file_size_guard_test.dart test/qa_next/next_workspace_locale_test.dart test/localization/bil_25_locale_fallback_closure_test.dart --timeout 2m 2>&1 | tee /tmp/bil-reference/behavior-tests.log
       - name: Verify renderer never changed source
         if: ${{ always() && steps.candidate.outcome == 'success' }}
         run: git diff --exit-code
