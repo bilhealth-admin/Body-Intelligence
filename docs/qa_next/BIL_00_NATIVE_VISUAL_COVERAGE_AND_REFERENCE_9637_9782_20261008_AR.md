@@ -48,7 +48,7 @@
 | `drafts` | `CommunityDraftsPage` | أربع صور مصغرة معتمدة من أصول BIL المحلية، مقيّدة الحجم ومتحقَّق من فك ترميزها | يُظهر 2×2 mosaic حقيقي وmetadata؛ لا يثبت التطابق البكسلي مع مرجع المالك |
 | `circles` | `CommunityCirclesPage` | قائمتا 10K Steps وHealthy Eating عبر `ManagedCommunityCircle` | عرض Discovery وMembership وحجم النص |
 | `moderation` | `CommunityPostModerationPage` | Moderator synthetic + منشور pending | عرض البطاقة وأزرار approve/reject دون اعتماد فعلي |
-| `channels` | `CommunityChannelsPage` | Repository read-only synthetic | قناة عامة مستقلة عن المحادثة الشخصية |
+| `channels` | `CommunityChannelsPage` | 6 قنوات synthetic read-only ذات أسماء وتصنيفات حقيقية قابلة للإسقاط على slugs الخادم | عرض directory وunread badges وread-only؛ هذه ليست قنوات مُنشأة على Production |
 | `channel_chat` | `CommunityChannelMessagesPage` | رسالتان اصطناعيتان + readback | واجهة conversation لقناة عامة لا Private DM |
 
 المصفوفة المتوقعة: لكل مشهد نسختان لغة (ar/en)، وثيمان (light/dark)، وحجما نص (1/2) = **8 صور**؛ 5 مشاهد جديدة ×8=40 لقطة إضافية؛ المتوقّع Community **184** + Coach **11** = **195** لقطة. **هذا تقدير اختبار، ليس نتيجة CI؛ لا يُعتمد العدد حتى نجاح CI وإثبات artifact على SHA النهائي.**

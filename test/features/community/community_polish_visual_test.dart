@@ -1002,11 +1002,11 @@ final class _VisualChannelsRepository implements CommunityChannelsRepository {
       channels: [
         CommunityChannel(
           id: firstChannel,
-          slug: 'daily-progress',
-          title: arabic ? 'التقدم اليومي' : 'Daily progress',
+          slug: 'general',
+          title: arabic ? 'العام' : 'General',
           description: arabic
-              ? 'عادات بسيطة وتشجيع متبادل.'
-              : 'Small habits and mutual encouragement.',
+              ? 'حوار المجتمع ومشاركة عادات يومية مفيدة.'
+              : 'Meet the community and share daily progress.',
           visibility: 'public',
           enabled: true,
           membership: 'member',
@@ -1017,18 +1017,78 @@ final class _VisualChannelsRepository implements CommunityChannelsRepository {
         ),
         CommunityChannel(
           id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
-          slug: 'healthy-recipes',
-          title: arabic ? 'وصفات صحية' : 'Healthy recipes',
+          slug: 'nutrition',
+          title: arabic ? 'التغذية' : 'Nutrition',
           description: arabic
-              ? 'أفكار الوجبات اليومية.'
-              : 'Everyday meal ideas.',
+              ? 'أفكار الوجبات اليومية ووصفات متنوعة.'
+              : 'Meal ideas, recipes and encouragement.',
+          visibility: 'public',
+          enabled: true,
+          membership: 'member',
+          canRead: true,
+          canSend: true,
+          unreadCount: 8,
+          latestSequence: 11,
+        ),
+        CommunityChannel(
+          id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+          slug: 'workouts',
+          title: arabic ? 'التمارين' : 'Workouts',
+          description: arabic
+              ? 'خطط تدريب وتقدّم مشترك.'
+              : 'Training plans and shared progress.',
           visibility: 'public',
           enabled: true,
           membership: 'member',
           canRead: true,
           canSend: true,
           unreadCount: 0,
-          latestSequence: 0,
+          latestSequence: 9,
+        ),
+        CommunityChannel(
+          id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+          slug: 'mindset',
+          title: arabic ? 'التحفيز' : 'Mindset',
+          description: arabic
+              ? 'التشجيع والعادات اليومية.'
+              : 'Motivation, habits and growth.',
+          visibility: 'public',
+          enabled: true,
+          membership: 'member',
+          canRead: true,
+          canSend: true,
+          unreadCount: 2,
+          latestSequence: 7,
+        ),
+        CommunityChannel(
+          id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+          slug: 'sleep-recovery',
+          title: arabic ? 'النوم والتعافي' : 'Sleep & Recovery',
+          description: arabic
+              ? 'نوم أفضل وعادات مريحة.'
+              : 'Better rest and recovery habits.',
+          visibility: 'public',
+          enabled: true,
+          membership: 'member',
+          canRead: true,
+          canSend: false,
+          unreadCount: 0,
+          latestSequence: 6,
+        ),
+        CommunityChannel(
+          id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaab',
+          slug: 'success-stories',
+          title: arabic ? 'قصص النجاح' : 'Success Stories',
+          description: arabic
+              ? 'تجارب التقدم ودعم المجتمع.'
+              : 'Real progress and community support.',
+          visibility: 'public',
+          enabled: true,
+          membership: 'member',
+          canRead: true,
+          canSend: true,
+          unreadCount: 1,
+          latestSequence: 5,
         ),
       ],
       serverTime: DateTime.utc(2026, 10, 3),

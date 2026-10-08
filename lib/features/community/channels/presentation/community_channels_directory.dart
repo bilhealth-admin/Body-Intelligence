@@ -62,8 +62,19 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                         backgroundColor: Theme.of(
                           context,
                         ).colorScheme.primaryContainer,
+                        // Category icons are display-only projections of
+                        // actual server channel slugs, never enrollment hints.
                         child: Icon(
-                          Icons.forum_outlined,
+                          switch (channel.slug) {
+                            'general' => Icons.campaign_outlined,
+                            'nutrition' => Icons.restaurant_menu_rounded,
+                            'workouts' => Icons.fitness_center_rounded,
+                            'mindset' => Icons.psychology_outlined,
+                            'sleep-recovery' => Icons.bedtime_outlined,
+                            'success-stories' => Icons.emoji_events_outlined,
+                            'q-and-a' => Icons.help_outline_rounded,
+                            _ => Icons.forum_outlined,
+                          },
                           color: Theme.of(
                             context,
                           ).colorScheme.onPrimaryContainer,
