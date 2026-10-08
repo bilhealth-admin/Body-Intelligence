@@ -18,7 +18,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            onPressed: _savingLayout ? null : _finishEditing,
+            onPressed: _finishEditing,
             icon: const Icon(Icons.arrow_back_rounded),
           ),
           title: Text(
@@ -64,7 +64,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
             Consumer(
               builder: (context, ref, _) {
                 final snapshot = ref.watch(dashboardSelectedPresetProvider);
-                if (snapshot.hasError) {
+                if (snapshot.hasError && _pendingPresetId == null) {
                   return ListTile(
                     leading: const Icon(Icons.error_outline_rounded),
                     title: Text(
@@ -83,7 +83,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                     ),
                   );
                 }
-                if (snapshot.isLoading && !snapshot.hasValue) {
+                if (snapshot.isLoading && !snapshot.hasValue && _pendingPresetId == null) {
                   return Semantics(
                     liveRegion: true,
                     label: _sectionCopy(
@@ -94,7 +94,23 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                     child: const LinearProgressIndicator(),
                   );
                 }
-                final selected = snapshot.value;
+                final pendingPreset = _pendingPresetId;
+                if (pendingPreset != null &&
+                    !_saving &&
+                    !snapshot.isLoading &&
+                    !snapshot.hasError &&
+                    snapshot.hasValue &&
+                    (pendingPreset == '__default__'
+                        ? snapshot.value == null
+                        : snapshot.value == pendingPreset)) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted || _pendingPresetId != pendingPreset) return;
+                    _updateState(() => _pendingPresetId = null);
+                  });
+                }
+                final selected = pendingPreset == '__default__'
+                    ? null
+                    : pendingPreset ?? snapshot.value;
                 return SizedBox(
                   height: 190 * MediaQuery.textScalerOf(context).scale(1),
                   child: ListView(
@@ -285,9 +301,12 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                               );
                               final cachedVisible =
                                   _stableSectionValues[item.$1];
+                              final pendingVisible =
+                                  _pendingSectionValues[item.$1];
                               if (state.hasError &&
                                   !state.hasValue &&
-                                  cachedVisible == null) {
+                                  cachedVisible == null &&
+                                  pendingVisible == null) {
                                 return ListTile(
                                   key: Key(
                                     'dashboard-section-${item.$1}-error',
@@ -348,10 +367,27 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                 );
                               }
                               final latestVisible = state.value;
+                              if (pendingVisible != null &&
+                                  !_saving &&
+                                  !state.isLoading &&
+                                  !state.hasError &&
+                                  latestVisible == pendingVisible) {
+                                final expected = pendingVisible;
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (!mounted ||
+                                      _pendingSectionValues[item.$1] != expected) {
+                                    return;
+                                  }
+                                  _updateState(() {
+                                    _pendingSectionValues.remove(item.$1);
+                                  });
+                                });
+                              }
                               if (latestVisible != null) {
                                 _stableSectionValues[item.$1] = latestVisible;
                               }
                               final visible =
+                                  pendingVisible ??
                                   latestVisible ??
                                   cachedVisible ??
                                   DashboardSectionIds.defaultVisible(item.$1);
@@ -369,29 +405,11 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                   horizontalTitleGap: 12,
                                   minLeadingWidth: 0,
                                   minTileHeight: 64,
-                                  secondary: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      _DashboardLuxeIconBadge(
-                                        kind: _dashboardSectionIconKind(
-                                          item.$1,
-                                        ),
-                                        active: visible,
-                                        size: 36,
-                                        iconSize: 19,
-                                      ),
-                                      if (_savingSection == item.$1)
-                                        SizedBox.square(
-                                          key: Key(
-                                            'dashboard-section-${item.$1}-saving',
-                                          ),
-                                          dimension: 30,
-                                          child:
-                                              const CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                        ),
-                                    ],
+                                  secondary: _DashboardLuxeIconBadge(
+                                    kind: _dashboardSectionIconKind(item.$1),
+                                    active: visible,
+                                    size: 36,
+                                    iconSize: 19,
                                   ),
                                   title: Text(
                                     _sectionCopy(context, item.$3, item.$4),
@@ -666,7 +684,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
           minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
           child: FilledButton(
             key: const Key('dashboard-preferences-done'),
-            onPressed: _savingLayout ? null : _finishEditing,
+            onPressed: _finishEditing,
             child: Text(_sectionCopy(context, 'Done editing', 'إنهاء التعديل')),
           ),
         ),
