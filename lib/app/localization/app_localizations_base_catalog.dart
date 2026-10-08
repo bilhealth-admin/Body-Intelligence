@@ -3,7 +3,7 @@ part of 'app_localizations.dart';
 const _appLocaleAr = {
   'app_title': 'BIL – Body Intelligence Log',
   'welcome_back': 'مرحبًا بك من جديد',
-  'dashboard': 'لوحة القيادة',
+  'dashboard': 'الرئيسية',
   'daily_log': 'السجل اليومي',
   'nutrition': 'التغذية',
   'history': 'السجل',
@@ -36,7 +36,7 @@ const _appLocaleAr = {
   'primary_navigation': 'التنقل الرئيسي',
   'quick_add': 'إضافة سريعة',
   'invalid_link':
-      'لا يمكن فتح هذا الرابط بأمان. ارجع إلى لوحة القيادة وحاول مرة أخرى.',
+      'لا يمكن فتح هذا الرابط بأمان. ارجع إلى الرئيسية وحاول مرة أخرى.',
   'french': 'الفرنسية',
   'spanish': 'الإسبانية',
   'turkish': 'التركية',
@@ -45,7 +45,7 @@ const _appLocaleAr = {
 const _appLocaleEn = {
   'app_title': 'BIL – Body Intelligence Log',
   'welcome_back': 'Welcome back',
-  'dashboard': 'Dashboard',
+  'dashboard': 'Home',
   'daily_log': 'Daily Log',
   'nutrition': 'Nutrition',
   'history': 'History',
@@ -78,7 +78,7 @@ const _appLocaleEn = {
   'primary_navigation': 'Primary navigation',
   'quick_add': 'Quick Add',
   'invalid_link':
-      'This link cannot be opened safely. Return to the dashboard and try again.',
+      'This link cannot be opened safely. Return to Home and try again.',
   'french': 'French',
   'spanish': 'Spanish',
   'turkish': 'Turkish',
@@ -87,7 +87,7 @@ const _appLocaleEn = {
 const _appLocaleFr = {
   'app_title': 'BIL – Body Intelligence Log',
   'welcome_back': 'Bon retour',
-  'dashboard': 'Tableau de bord',
+  'dashboard': 'Accueil',
   'daily_log': 'Journal quotidien',
   'nutrition': 'Nutrition',
   'history': 'Historique',
@@ -122,7 +122,7 @@ const _appLocaleFr = {
   'primary_navigation': 'Navigation principale',
   'quick_add': 'Ajout rapide',
   'invalid_link':
-      'Ce lien ne peut pas être ouvert en toute sécurité. Revenez au tableau de bord et réessayez.',
+      'Ce lien ne peut pas être ouvert en toute sécurité. Revenez à l’accueil et réessayez.',
   'french': 'Français',
   'spanish': 'Espagnol',
   'turkish': 'Turc',
@@ -131,7 +131,7 @@ const _appLocaleFr = {
 const _appLocaleEs = {
   'app_title': 'BIL – Body Intelligence Log',
   'welcome_back': 'Te damos la bienvenida de nuevo',
-  'dashboard': 'Panel',
+  'dashboard': 'Inicio',
   'daily_log': 'Diario',
   'nutrition': 'Nutrición',
   'history': 'Historial',
@@ -166,7 +166,7 @@ const _appLocaleEs = {
   'primary_navigation': 'Navegación principal',
   'quick_add': 'Añadir rápido',
   'invalid_link':
-      'Este enlace no se puede abrir de forma segura. Vuelve al panel e inténtalo de nuevo.',
+      'Este enlace no se puede abrir de forma segura. Vuelve al inicio e inténtalo de nuevo.',
   'french': 'Francés',
   'spanish': 'Español',
   'turkish': 'Turco',
@@ -175,7 +175,7 @@ const _appLocaleEs = {
 const _appLocaleTr = {
   'app_title': 'BIL – Body Intelligence Log',
   'welcome_back': 'Tekrar hoş geldiniz',
-  'dashboard': 'Gösterge paneli',
+  'dashboard': 'Ana sayfa',
   'daily_log': 'Günlük kayıt',
   'nutrition': 'Beslenme',
   'history': 'Geçmiş',
@@ -210,7 +210,7 @@ const _appLocaleTr = {
   'primary_navigation': 'Ana gezinme',
   'quick_add': 'Hızlı ekle',
   'invalid_link':
-      'Bu bağlantı güvenli bir şekilde açılamıyor. Gösterge paneline dönüp yeniden deneyin.',
+      'Bu bağlantı güvenli bir şekilde açılamıyor. Ana sayfaya dönüp yeniden deneyin.',
   'french': 'Fransızca',
   'spanish': 'İspanyolca',
   'turkish': 'Türkçe',
