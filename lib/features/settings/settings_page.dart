@@ -213,7 +213,6 @@ class SettingsPage extends ConsumerWidget {
                 _MoreActionRow(
                   key: const Key('settings-review-onboarding'),
                   label: copy('Review initial setup'),
-                  kind: BilSemanticIconKind.notes,
                   onTap: () => _reviewSetupAgain(context, ref),
                 ),
                 _MoreRow(
@@ -545,20 +544,28 @@ class _MoreRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semanticKind = BilSemanticIcons.kindForRoute(route) ?? _fallbackKind;
+    // Entry points into BIL-00's protected journeys retain their current
+    // visual and interaction design; only eligible More rows become text-first.
+    final protectedEntry = route.startsWith('/community') ||
+        route == '/intelligence-center' ||
+        route.startsWith('/settings/ai-coach') ||
+        route == '/admin/ai-coach';
     return Column(
       children: [
         ListTile(
-          minTileHeight: 60,
+          minTileHeight: protectedEntry ? 60 : 54,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
           horizontalTitleGap: 12,
-          leading: _MorePremiumIcon(kind: semanticKind, danger: _isDanger),
+          leading: protectedEntry
+              ? _MorePremiumIcon(kind: semanticKind, danger: _isDanger)
+              : null,
           title: Text(
             label,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: _isDanger ? Theme.of(context).colorScheme.error : null,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -.12,
+              fontSize: protectedEntry ? 16 : 15,
+              fontWeight: protectedEntry ? FontWeight.w700 : FontWeight.w500,
+              letterSpacing: protectedEntry ? -.12 : 0,
             ),
           ),
           trailing: Row(
@@ -580,8 +587,10 @@ class _MoreRow extends StatelessWidget {
                 Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_left_rounded
                     : Icons.chevron_right_rounded,
-                size: 22,
-                color: const Color(0xFF61738D),
+                size: protectedEntry ? 22 : 16,
+                color: protectedEntry
+                    ? const Color(0xFF61738D)
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -591,7 +600,7 @@ class _MoreRow extends StatelessWidget {
           Divider(
             height: 1,
             thickness: .7,
-            indent: 72,
+            indent: protectedEntry ? 72 : 16,
             endIndent: 16,
             color: Theme.of(context).dividerColor.withValues(alpha: .42),
           ),
