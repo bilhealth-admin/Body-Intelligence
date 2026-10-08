@@ -5,6 +5,8 @@ on:
     branches: [qa/coach-community-next-20261005]
     paths:
       - lib/features/community/presentation/**
+      - lib/features/community/channels/presentation/**
+      - test/features/community/community_polish_visual_test.dart
       - lib/features/intelligence_center/presentation/**
       - lib/shared/widgets/bil_reference_bottom_bar.dart
       - test/qa_next/**
