@@ -149,8 +149,12 @@ void main() {
         ),
       ),
     );
-    final value = tester.widget<Text>(find.text('Embedded protected region'));
-    expect(value.style?.fontSize, original.textTheme.titleLarge?.fontSize);
+    final finder = find.text('Embedded protected region');
+    final value = tester.widget<Text>(finder);
+    // MaterialApp resolves its platform defaults; ThemeData.light().textTheme
+    // alone does not include every resolved font size.
+    final inherited = Theme.of(tester.element(finder));
+    expect(value.style?.fontSize, inherited.textTheme.titleLarge?.fontSize);
     expect(tester.takeException(), isNull);
   });
 

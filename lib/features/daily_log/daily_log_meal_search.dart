@@ -182,7 +182,8 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                 child: Icon(
                   Icons.verified_rounded,
                   size: 16,
-                  color: scheme.onSurfaceVariant,
+                  // Verified source status is semantic, not decorative.
+                  color: const Color(0xFF56C878),
                 ),
               ),
             ],
