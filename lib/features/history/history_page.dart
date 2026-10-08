@@ -18,6 +18,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../nutrition/services/bil_speech_to_text.dart';
 import '../weight/providers/weight_provider.dart';
 import '../weight/services/weight_voice_input_service.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'widgets/weight_trend_painter.dart';
 part 'widgets/history_page_components.dart';
@@ -239,7 +240,7 @@ class HistoryPage extends ConsumerWidget {
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final unit = UnitConverter.weightUnit(system);
     final profile = ref.watch(userProfileProvider).value;
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Weight history'))),
       floatingActionButton: history.value?.isNotEmpty == true
           ? FloatingActionButton(
@@ -422,7 +423,7 @@ class HistoryPage extends ConsumerWidget {
           );
         },
       ),
-    );
+    ));
   }
 }
 
