@@ -84,3 +84,4 @@ jobs:
           path: /tmp/bil-source-checkpoint
           retention-days: 1
           if-no-files-found: error
+# QA-only checkpoint refresh for BIL-00 integration; no production operation.
