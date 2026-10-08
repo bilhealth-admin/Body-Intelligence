@@ -34,8 +34,6 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  # Unicode grapheme clusters for Coach typing (emoji ZWJ + mixed scripts).
-  characters: ^1.4.1
   flutter_riverpod: ^3.3.2
   go_router: ^17.3.0
   drift: ^2.34.2
