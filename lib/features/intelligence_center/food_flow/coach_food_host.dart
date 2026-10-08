@@ -95,10 +95,11 @@ final class CoachFoodHost {
     int? preferredTargetItemId,
   }) async {
     ownerScope.check();
-    // Both English and Arabic native water/weight entries are explicitly
-    // owned by Coach's reviewed native-write contract, not by food logging.
-    // The native parser is side-effect-free; only a fully parsed, admitted
-    // quantity can reserve this route. Ordinary food logs remain Food V2.
+    // Admitted native water, weight and calorie-only commands own their
+    // reviewed write contracts. Food V2's generic "log"/"سجل" prefix must
+    // not reinterpret a calorie total as a food identity or quantity.
+    // Only a fully parsed, side-effect-free and validated native proposal
+    // can reserve this route; food items and corrections still use Food V2.
     final nativeActions = const LocalCoachCommandParser().parse(
       input,
       locale: localeTag,
@@ -107,7 +108,8 @@ final class CoachFoodHost {
     if (nativeActions.any(
       (action) =>
           action.type == IntelligenceActionType.addWater ||
-          action.type == IntelligenceActionType.addWeight,
+          action.type == IntelligenceActionType.addWeight ||
+          action.type == IntelligenceActionType.quickAddMacros,
     )) {
       return const CoachFoodHostIgnored();
     }

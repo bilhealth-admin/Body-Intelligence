@@ -78,9 +78,19 @@ void main() {
     expect(page, contains('autoDetectLanguage: true'));
     expect(page, contains('localeId: null'));
     expect(page, isNot(contains('previousUserMessage')));
+    // Native capture now requires the owned media request and a guarded
+    // draft writer; old one-argument source text was no longer the contract.
     expect(
       page,
-      contains('if (await _startNativeVoiceCapture(generation)) return;'),
+      matches(
+        RegExp(
+          r'if\s*\(await _startNativeVoiceCapture\('
+          r'\s*request,\s*generation,'
+          r'\s*writeTranscript:\s*writeTranscript,'
+          r'\s*hasUserEdited:\s*hasUserEdited,'
+          r'\s*\)\s*\)\s*\{\s*return;',
+        ),
+      ),
     );
     expect(page, isNot(contains('_startCloudVoiceCapture')));
     expect(page, isNot(contains('CoachVoicePayload')));

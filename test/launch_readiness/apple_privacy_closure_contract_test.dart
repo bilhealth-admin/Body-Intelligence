@@ -243,9 +243,16 @@ void main() {
     final voicePolicy = File(
       'lib/features/intelligence_center/services/coach_voice_turn_policy.dart',
     ).readAsStringSync();
-    final voiceUi = File(
-      'lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart',
-    ).readAsStringSync();
+    final voiceUi = [
+      'intelligence_conversation_voice.dart',
+      'intelligence_conversation_voice_transcript.dart',
+    ]
+        .map(
+          (name) => File(
+            'lib/features/intelligence_center/presentation/$name',
+          ).readAsStringSync(),
+        )
+        .join('\n');
     final speechBridge = File(
       'ios/Runner/BILSpeechBridge.swift',
     ).readAsStringSync();
@@ -289,7 +296,14 @@ void main() {
       ),
     );
     expect(voicePolicy, contains('maySendAudio: false'));
-    expect(voiceUi, contains('textOverride: transcript'));
+    // The owner-claimed transcript, not microphone bytes or a stale text
+    // variable, is passed to the existing consent-checked query boundary.
+    expect(voiceUi, contains('voiceTranscriptBridge.takeForSubmission('));
+    expect(
+      voiceUi,
+      contains('if (!await _voiceRequestAllowed(request, generation)) return;'),
+    );
+    expect(voiceUi, contains('textOverride: submission.text'));
     expect(speechBridge, contains('SFSpeechRecognizer'));
     expect(speechBridge, contains('SFSpeechAudioBufferRecognitionRequest'));
   });

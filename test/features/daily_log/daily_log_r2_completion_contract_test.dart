@@ -26,7 +26,12 @@ void main() {
     expect(mealEntry, contains('quantity.text = amount.toStringAsFixed'));
     expect(inputSections, contains("Key('daily-log-note-field')"));
     expect(inputSections, contains("Key('daily-log-exercise-section')"));
-    expect(actions, contains('exerciseNotes: exerciseNotes.text.trim()'));
+    // Dart Formatter can wrap the argument after the colon. Preserve
+    // the behavioral source guard without depending on whitespace layout.
+    expect(
+      actions,
+      contains(RegExp(r'exerciseNotes:\s*exerciseNotes\.text\.trim\(\)')),
+    );
     expect(
       actions.indexOf('final quantityValue = _parsePositiveQuantity'),
       lessThan(actions.indexOf('addReviewedMealItemsAtomically')),

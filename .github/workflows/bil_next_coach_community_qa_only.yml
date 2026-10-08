@@ -199,6 +199,7 @@ jobs:
           git rev-parse HEAD > /tmp/bil-next-visual/commit.txt
           printf 'Current Flutter host render, synthetic data only. NOT device screenshots or approved-reference parity.\n' > /tmp/bil-next-visual/scope.txt
           flutter test --no-pub --reporter expanded test/features/community/community_polish_visual_test.dart --timeout 2m 2>&1 | tee /tmp/bil-next-visual/tests.log
+          BIL_REFERENCE_CAPTURE_DIR=/tmp/bil-next-visual/coach flutter test --no-pub --reporter expanded test/qa_next/coach_reference_workspace_capture_test.dart --timeout 2m 2>&1 | tee /tmp/bil-next-visual/coach-tests.log
       - name: Upload rendered PNGs and test log, never fonts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -250,6 +251,8 @@ jobs:
           PGDATABASE=bil_notification_qa_next node tool/release/test_notification_delivery_preferences_isolated.mjs 2>&1 | tee /tmp/bil-next-sql/notification-preferences.log
           psql -X -v ON_ERROR_STOP=1 -d community_qa -c 'CREATE DATABASE bil_prebuild_qa_next'
           PGDATABASE=bil_prebuild_qa_next node tool/release/test_community_prebuild_hardening_isolated.mjs 2>&1 | tee /tmp/bil-next-sql/privacy.log
+          psql -X -v ON_ERROR_STOP=1 -d community_qa -c 'CREATE DATABASE bil_profile_activity_qa_next'
+          psql -X -v ON_ERROR_STOP=1 -d bil_profile_activity_qa_next -f tool/qa_next/test_bil08_profile_activity_isolated.sql 2>&1 | tee /tmp/bil-next-sql/profile-activity.log
       - name: Upload isolated SQL results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

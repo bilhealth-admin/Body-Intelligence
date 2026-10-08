@@ -75,7 +75,12 @@ void main() {
     expect(coach, contains('await _analyzeFoodImageInChat()'));
     expect(coach, contains('showMealImageReviewDialog'));
     expect(coach, contains('Nothing was logged'));
-    expect(coach, contains('Review and confirm a verified BIL food match'));
+    // The former copy literal moved behind Food V2. Check the actual two
+    // review gates and the guarded repository commit instead of stale copy.
+    expect(coach, contains('selections.isEmpty'));
+    expect(coach, contains('CoachFoodReviewCard('));
+    expect(coach, contains('if (!writeAllowed())'));
+    expect(coach, contains('commitCoachMeal('));
     expect(vision, contains("'x-idempotency-key': idempotencyKey"));
     expect(usage, contains("rpc('bil_get_ai_usage_status')"));
     expect(usage, isNot(contains("rpc('bil_get_vision_usage')")));
