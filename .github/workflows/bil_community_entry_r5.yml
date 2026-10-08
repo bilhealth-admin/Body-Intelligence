@@ -13,6 +13,9 @@ on:
       - lib/app/router/app_community_routes.dart
       - lib/app/router/app_router.dart
       - test/features/community/community_entry*
+      - test/features/community/community_polish_visual_test.dart
+      - test/qa_next/community_composer_reference_capture_test.dart
+      - test/qa_next/community_profile_drafts_reference_capture_test.dart
       - test/features/community/community_composer_auth_session_test.dart
       - test/features/community/community_post_moderation_test.dart
       - test/features/community/community_publish_operation*
