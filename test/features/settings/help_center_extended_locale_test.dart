@@ -111,10 +111,7 @@ void main() {
         expect(tile.minTileHeight, greaterThanOrEqualTo(48));
         expect(tile.trailing, isA<Icon>());
         expect((tile.trailing! as Icon).size, 16);
-        expect(
-          find.byKey(Key('help-center-icon-${item.id}')),
-          findsNothing,
-        );
+        expect(find.byKey(Key('help-center-icon-${item.id}')), findsNothing);
       }
 
       await tester.tap(find.text('About BIL'));

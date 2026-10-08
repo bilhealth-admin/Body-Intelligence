@@ -45,7 +45,8 @@ void main() {
     expect(
       historyLabel.hasMatch(source),
       isTrue,
-      reason: 'Localized fasting history stays available despite Dart formatting',
+      reason:
+          'Localized fasting history stays available despite Dart formatting',
     );
   });
 }
