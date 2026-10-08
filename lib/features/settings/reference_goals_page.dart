@@ -689,20 +689,3 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
     );
   }
 }
-
-const _weeklyOptions = [
-  'Lose 0.2 kg per week',
-  'Lose 0.5 kg per week',
-  'Lose 0.8 kg per week',
-  'Lose 1 kg per week',
-  'Maintain weight',
-  'Gain 0.2 kg per week',
-  'Gain 0.5 kg per week',
-];
-const _activityLabels = {
-  'sedentary': 'Not Very Active',
-  'light': 'Lightly Active',
-  'moderate': 'Active',
-  'active': 'Very Active',
-  'very_active': 'Very Active',
-};

@@ -30,6 +30,7 @@ import 'widgets/analytics_weight_trend_chart.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'widgets/analytics_page_primitives.dart';
+part 'analytics_progress_confidence.dart';
 
 /// Single clock boundary for Analytics range and recovery calculations.
 ///
@@ -55,18 +56,6 @@ class AnalyticsPage extends ConsumerStatefulWidget {
 
 class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   AnalyticsRange range = AnalyticsRange.thirtyDays;
-
-  String _localizedProgressConfidence(
-    BuildContext context,
-    ProgressConfidence confidence,
-  ) {
-    return analyticsText(context, confidence.name, switch (confidence) {
-      ProgressConfidence.insufficient => 'غير كافية',
-      ProgressConfidence.low => 'منخفضة',
-      ProgressConfidence.medium => 'متوسطة',
-      ProgressConfidence.high => 'مرتفعة',
-    });
-  }
 
   String _rangeLabel(BuildContext context, AnalyticsRange selected) {
     return switch (selected) {
