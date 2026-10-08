@@ -32,54 +32,41 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
       ),
     );
-    final publish = DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: busy
-              ? const [Color(0xFF719ED4), Color(0xFF4775B5)]
-              : const [Color(0xFF278BFF), Color(0xFF0061FF)],
-        ),
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: busy
-            ? null
-            : const [
-                BoxShadow(
-                  color: Color(0x24136CFF),
-                  blurRadius: 16,
-                  offset: Offset(0, 6),
-                ),
-              ],
-      ),
+    // Preserve the publishing button's geometry, text, and surface while a
+    // request is pending. The progress glyph occupies the same icon slot.
+    final publishColor =
+        dark ? const Color(0xFF285778) : const Color(0xFF17629E);
+    final publish = Semantics(
+      liveRegion: _publishing,
+      label: _publishing
+          ? communityText(context, 'Publishing…', 'جارٍ النشر…')
+          : communityText(context, 'Publish', 'نشر'),
       child: FilledButton.icon(
         key: const Key('community-post-publish'),
         onPressed: busy ? null : _publish,
         style: FilledButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          disabledBackgroundColor: Colors.transparent,
+          backgroundColor: publishColor,
+          disabledBackgroundColor: publishColor,
           foregroundColor: Colors.white,
           disabledForegroundColor: Colors.white,
-          shadowColor: Colors.transparent,
-          minimumSize: const Size(0, 68),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+          elevation: 0,
+          minimumSize: const Size(0, 56),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
-        icon: _publishing
-            ? const SizedBox.square(
-                dimension: 18,
-                child: CircularProgressIndicator(
+        icon: SizedBox.square(
+          dimension: 20,
+          child: _publishing
+              ? const CircularProgressIndicator(
                   strokeWidth: 2,
                   color: Colors.white,
-                ),
-              )
-            : const Icon(Icons.near_me_outlined, size: 25),
+                )
+              : const Icon(Icons.arrow_upward_rounded, size: 20),
+        ),
         label: Text(
-          _publishing && _selectedImages.isNotEmpty
-              ? communityText(context, 'Uploading photo…', 'جارٍ رفع الصورة…')
-              : communityText(context, 'Publish', 'نشر'),
+          communityText(context, 'Publish', 'نشر'),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
@@ -116,9 +103,15 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                   ),
                 ),
               ),
-            if (_publishing && _selectedImages.isNotEmpty) ...[
-              const LinearProgressIndicator(
-                key: Key('community-post-upload-progress'),
+            if (_selectedImages.isNotEmpty) ...[
+              Visibility(
+                visible: _publishing,
+                maintainState: true,
+                maintainAnimation: true,
+                maintainSize: true,
+                child: const LinearProgressIndicator(
+                  key: Key('community-post-upload-progress'),
+                ),
               ),
               const SizedBox(height: 8),
             ],
