@@ -71,15 +71,70 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     await _commit((current) => current.copyWith(reduceMotion: enabled));
   }
 
-  Future<void> _commit(AppSettings Function(AppSettings) update) {
-    final operation = _mutationTail.then((_) async {
-      await _loaded;
-      final candidate = update(state);
-      await _service.save(candidate);
-      state = candidate;
-    });
-    _mutationTail = operation.then<void>((_) {}, onError: (_, _) {});
+  Future<AppSettingsOperation> commitCoachSetting({
+    required String operationId,
+    required String field,
+    required String value,
+    bool Function()? checkWritePermission,
+  }) => _enqueue(() async {
+    await _loaded;
+    final operation = await _service.commitCoachSetting(
+      operationId: operationId,
+      field: field,
+      value: value,
+      checkWritePermission: checkWritePermission,
+    );
+    state = await _service.readCommitted();
+    if (field == 'localeCode') _queueLocaleSync(state.localeCode);
     return operation;
+  });
+
+  Future<AppSettingsOperation?> readCoachSettingOperation(
+    String operationId,
+  ) async {
+    await _loaded;
+    return _service.readCoachSettingOperation(operationId);
+  }
+
+  Future<AppSettingsOperation> undoCoachSetting({
+    required String operationId,
+    bool Function()? checkWritePermission,
+  }) => _enqueue(() async {
+    await _loaded;
+    final operation = await _service.undoCoachSetting(
+      operationId: operationId,
+      checkWritePermission: checkWritePermission,
+    );
+    state = await _service.readCommitted();
+    if (operation.field == 'localeCode') _queueLocaleSync(state.localeCode);
+    return operation;
+  });
+
+  Future<void> _commit(AppSettings Function(AppSettings) update) =>
+      _enqueue(() async {
+        await _loaded;
+        final candidate = update(state);
+        await _service.save(candidate);
+        final persisted = await _service.load();
+        if (persisted.localeCode != candidate.localeCode ||
+            persisted.themeMode != candidate.themeMode ||
+            persisted.highContrast != candidate.highContrast ||
+            persisted.reduceMotion != candidate.reduceMotion) {
+          throw StateError('App settings readback did not match the request.');
+        }
+        state = persisted;
+      });
+
+  Future<T> _enqueue<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _mutationTail = _mutationTail.then((_) async {
+      try {
+        completer.complete(await action());
+      } on Object catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
   }
 
   Future<void> _syncCurrentLocaleAfterLoad() async {

@@ -7,6 +7,10 @@ void main() {
       [
             'intelligence_center_page.dart',
             'intelligence_center_page_message.dart',
+            // These part files contain the live composer, greeting, and voice
+            // transcript contracts extracted under the 700-line source guard.
+            'intelligence_reference_chat_body.dart',
+            'intelligence_conversation_voice_transcript.dart',
             'intelligence_center_widgets.dart',
             'intelligence_coach_reference_header.dart',
             'intelligence_reference_workspace_flow.dart',
@@ -49,15 +53,18 @@ void main() {
     expect(page, contains("String pendingVoiceTranscript = ''"));
     expect(page, contains('pendingVoiceTranscript = transcript'));
     expect(page, contains('question.value = TextEditingValue('));
-    expect(
-      page,
-      contains('if (await _startNativeVoiceCapture(generation)) return;'),
-    );
+    // Native capture now validates request freshness and edit ownership before
+    // accepting the transcript. Preserve the stronger guarded call contract.
+    expect(page, contains('if (await _startNativeVoiceCapture('));
+    expect(page, contains('writeTranscript: writeTranscript'));
+    expect(page, contains('hasUserEdited: hasUserEdited'));
     expect(page, contains('_LiveVoiceTranscript'));
     expect(page, contains('Writing your words'));
     expect(page, contains('Live call transcript'));
     expect(page, contains('Duration(milliseconds: 3500)'));
-    expect(page, contains('_submitVoiceTranscript()'));
+    expect(page, contains('_submitVoiceTranscript('));
+    expect(page, contains('request: request'));
+    expect(page, contains('generation: generation'));
   });
 
   test('bottom microphone owns the live-call state machine', () {

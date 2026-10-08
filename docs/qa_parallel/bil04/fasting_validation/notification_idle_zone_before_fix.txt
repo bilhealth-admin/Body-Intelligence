@@ -1,0 +1,14 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart
+00:00 +0: idle notification queue can be reused across independent visit zones
+00:00 +0 -1: idle notification queue can be reused across independent visit zones [E]
+  Expected: CoachFastingNotificationStatus:<CoachFastingNotificationStatus.cancelled>
+    Actual: <null>
+  
+  package:matcher                                               expect
+  package:flutter_test/src/widget_tester.dart 473:18            expect
+  test/parallel/bil04/fasting_notification_sync_test.dart 68:7  main.<fn>
+  
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart: idle notification queue can be reused across independent visit zones

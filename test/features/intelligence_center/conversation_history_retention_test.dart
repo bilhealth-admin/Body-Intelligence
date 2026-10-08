@@ -249,6 +249,10 @@ void main() {
       );
       expect(migrated.conversations, hasLength(26));
       expect(migrated.activeConversationId, 'conversation-23');
+      // Dispose the second host mount *inside* the fake test clock, allowing
+      // the brief provider's Drift stream-cancellation timer to be drained.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
     },
   );
 

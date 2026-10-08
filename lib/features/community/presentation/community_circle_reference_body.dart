@@ -12,6 +12,17 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
     required this.onMembership,
     required this.onOpen,
     required this.onCompose,
+    required this.serverSearch,
+    required this.serverRows,
+    required this.serverLoading,
+    required this.serverError,
+    required this.serverHasMore,
+    required this.onLoadMore,
+    required this.searchStarting,
+    required this.searchUnavailable,
+    required this.onSearchMore,
+    required this.onLocalSearch,
+    required this.onManage,
   });
 
   final Future<List<CommunityCircle>> circles;
@@ -24,6 +35,17 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
   final ValueChanged<CommunityCircle> onMembership;
   final ValueChanged<CommunityCircle> onOpen;
   final ValueChanged<CommunityCircle>? onCompose;
+  final bool serverSearch;
+  final List<ManagedCommunityCircle> serverRows;
+  final bool serverLoading;
+  final Object? serverError;
+  final bool serverHasMore;
+  final Future<void> Function() onLoadMore;
+  final bool searchStarting;
+  final bool searchUnavailable;
+  final VoidCallback onSearchMore;
+  final VoidCallback onLocalSearch;
+  final VoidCallback? onManage;
 
   @override
   Widget build(BuildContext context) => RefreshIndicator(
@@ -38,72 +60,151 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
             myCircles: myCircles,
             onSearch: onSearch,
             onSelect: onSelect,
+            serverSearch: serverSearch,
+            searchStarting: searchStarting,
+            searchUnavailable: searchUnavailable,
+            onSearchMore: onSearchMore,
+            onLocalSearch: onLocalSearch,
+            onManage: onManage,
           ),
         ),
-        FutureBuilder<List<CommunityCircle>>(
-          future: circles,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done &&
-                !snapshot.hasData) {
-              return const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            if (snapshot.hasError) {
-              return SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: FilledButton.icon(
-                    key: const Key('community-circles-retry'),
-                    onPressed: onRefresh,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: Text(
-                      communityText(context, 'Retry', 'إعادة المحاولة'),
+        if (serverSearch)
+          if (serverLoading && serverRows.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (serverError != null && serverRows.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: _serverRetry(context)),
+            )
+          else
+            _results(context, serverRows, filterLocal: false)
+        else
+          FutureBuilder<List<CommunityCircle>>(
+            future: circles,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done &&
+                  !snapshot.hasData) {
+                return const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (snapshot.hasError) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: FilledButton.icon(
+                      key: const Key('community-circles-retry'),
+                      onPressed: onRefresh,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(
+                        communityText(context, 'Retry', 'إعادة المحاولة'),
+                      ),
                     ),
                   ),
-                ),
+                );
+              }
+              return _results(
+                context,
+                snapshot.data ?? const <CommunityCircle>[],
               );
-            }
-            final query = search.text.trim().toLowerCase();
-            final rows = (snapshot.data ?? const <CommunityCircle>[])
-                .where((c) {
-                  if (myCircles && !c.activeMember && !c.pending) return false;
-                  if (query.isEmpty) return true;
-                  return [
-                    c.slug,
-                    _circleRecordTitle(context, c),
-                    _circleKnownDescription(context, c) ?? '',
-                  ].any((value) => value.toLowerCase().contains(query));
-                })
-                .toList(growable: false);
-            if (rows.isEmpty) {
-              return SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(28),
-                    child: Text(
-                      _emptyText(context, query.isNotEmpty),
-                      key: const Key('community-circles-empty'),
-                      textAlign: TextAlign.center,
-                    ),
+            },
+          ),
+        if (serverSearch && serverRows.isNotEmpty && serverError != null)
+          SliverToBoxAdapter(child: _serverRetry(context)),
+        if (serverSearch &&
+            serverRows.isNotEmpty &&
+            (serverHasMore || serverLoading))
+          SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextButton.icon(
+                  key: const Key('bil06-search-more-results'),
+                  onPressed: serverLoading ? null : onLoadMore,
+                  icon: serverLoading
+                      ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.expand_more_rounded),
+                  label: Text(
+                    communityText(context, 'Load more', 'تحميل المزيد'),
                   ),
                 ),
-              );
-            }
-            return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
-              sliver: SliverList.builder(
-                itemCount: rows.length,
-                itemBuilder: (context, index) => _row(context, rows[index]),
               ),
-            );
-          },
+            ),
+          ),
+      ],
+    ),
+  );
+
+  Widget _serverRetry(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          circleManagementText(
+            context,
+            'Could not load circle search results. Try again.',
+            'تعذر تحميل نتائج البحث عن الدوائر. حاول مجددًا.',
+          ),
+        ),
+        TextButton.icon(
+          key: const Key('bil06-server-search-retry'),
+          onPressed: serverLoading ? null : onRefresh,
+          icon: const Icon(Icons.refresh_rounded),
+          label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
         ),
       ],
     ),
   );
+
+  Widget _results(
+    BuildContext context,
+    List<CommunityCircle> records, {
+    bool filterLocal = true,
+  }) {
+    final query = search.text.trim().toLowerCase();
+    final rows = records
+        .where((c) {
+          if (!filterLocal) return true;
+          if (myCircles && !c.activeMember && !c.pending) return false;
+          if (query.isEmpty) return true;
+          return [
+            c.slug,
+            _circleRecordTitle(context, c),
+            _circleKnownDescription(context, c) ?? '',
+          ].any((value) => value.toLowerCase().contains(query));
+        })
+        .toList(growable: false);
+    if (rows.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Text(
+              _emptyText(context, query.isNotEmpty),
+              key: const Key('community-circles-empty'),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+      sliver: SliverList.builder(
+        itemCount: rows.length,
+        itemBuilder: (context, index) => _row(context, rows[index]),
+      ),
+    );
+  }
 
   String _emptyText(BuildContext context, bool searching) => searching
       ? communityText(
@@ -194,7 +295,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _CommunityCircleCover(slug: circle.slug),
+                  _CommunityCircleCover(circle: circle),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

@@ -14,6 +14,7 @@ class _MessageBubble extends StatelessWidget {
     this.onAction,
     this.actionPhases = const <String, _CoachActionExecutionPhase>{},
     this.animateReveal = false,
+    this.richContent,
   });
   final IntelligenceMessage message;
   final bool? feedbackValue;
@@ -27,6 +28,7 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<IntelligenceAction>? onAction;
   final Map<String, _CoachActionExecutionPhase> actionPhases;
   final bool animateReveal;
+  final Widget? richContent;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +103,7 @@ class _MessageBubble extends StatelessWidget {
                   animateReveal: animateReveal,
                   showTime: false,
                 ),
+                ?richContent,
                 const SizedBox(height: 4),
                 Row(
                   mainAxisSize: MainAxisSize.max,
@@ -605,9 +608,15 @@ IconData _iconForAction(IntelligenceActionType type) => switch (type) {
   IntelligenceActionType.manageSubscription => BilSemanticIcons.subscription,
   IntelligenceActionType.setThemeMode => Icons.contrast_rounded,
   IntelligenceActionType.setLanguage => Icons.language_rounded,
+  IntelligenceActionType.setUnitPreference => Icons.straighten_rounded,
+  IntelligenceActionType.setReminder => Icons.notifications_outlined,
+  IntelligenceActionType.reviewMemories => Icons.psychology_alt_outlined,
+  IntelligenceActionType.prepareLocalExport => Icons.file_download_outlined,
   IntelligenceActionType.updateGoal => Icons.flag_outlined,
   IntelligenceActionType.saveMeasurements => Icons.straighten_outlined,
   IntelligenceActionType.quickAddMacros => BilSemanticIcons.meal,
+  IntelligenceActionType.logFoods => BilSemanticIcons.meal,
+  IntelligenceActionType.replaceMealItem => Icons.edit_outlined,
   IntelligenceActionType.updateMealItem => Icons.edit_outlined,
   IntelligenceActionType.moveMealItem => Icons.drive_file_move_outline,
   IntelligenceActionType.deleteMealItem => Icons.delete_outline_rounded,
@@ -615,33 +624,43 @@ IconData _iconForAction(IntelligenceActionType type) => switch (type) {
     BilSemanticIcons.deleteAccount,
   IntelligenceActionType.signOut => Icons.logout_rounded,
   IntelligenceActionType.saveMemory => Icons.bookmark_add_outlined,
+  IntelligenceActionType.healthCommand => BilSemanticIcons.diary,
+  IntelligenceActionType.readHealthData => BilSemanticIcons.insights,
 };
 
-BilSemanticIconKind? _semanticKindForAction(IntelligenceActionType type) =>
-    switch (type) {
-      IntelligenceActionType.readNutritionRemaining ||
-      IntelligenceActionType.openPlan ||
-      IntelligenceActionType.quickAddMacros => BilSemanticIconKind.nutrition,
-      IntelligenceActionType.readProfileIdentity => BilSemanticIconKind.profile,
-      IntelligenceActionType.openDailyLog ||
-      IntelligenceActionType.updateMealItem ||
-      IntelligenceActionType.moveMealItem ||
-      IntelligenceActionType.saveMemory => BilSemanticIconKind.notes,
-      IntelligenceActionType.addWater => BilSemanticIconKind.water,
-      IntelligenceActionType.addWeight => BilSemanticIconKind.weight,
-      IntelligenceActionType.reviewMeal => BilSemanticIconKind.meal,
-      IntelligenceActionType.reviewWorkout => BilSemanticIconKind.exercise,
-      IntelligenceActionType.openReport => BilSemanticIconKind.report,
-      IntelligenceActionType.setThemeMode => BilSemanticIconKind.appearance,
-      IntelligenceActionType.setLanguage => BilSemanticIconKind.language,
-      IntelligenceActionType.updateGoal => BilSemanticIconKind.goals,
-      IntelligenceActionType.saveMeasurements =>
-        BilSemanticIconKind.measurements,
-      IntelligenceActionType.openAiCoachSubscription ||
-      IntelligenceActionType.buyAiBoost ||
-      IntelligenceActionType.manageSubscription ||
-      IntelligenceActionType.navigate => BilSemanticIconKind.aiCoach,
-      IntelligenceActionType.deleteMealItem ||
-      IntelligenceActionType.requestAccountDeletion ||
-      IntelligenceActionType.signOut => null,
-    };
+BilSemanticIconKind? _semanticKindForAction(
+  IntelligenceActionType type,
+) => switch (type) {
+  IntelligenceActionType.readNutritionRemaining ||
+  IntelligenceActionType.openPlan ||
+  IntelligenceActionType.quickAddMacros ||
+  IntelligenceActionType.logFoods => BilSemanticIconKind.nutrition,
+  IntelligenceActionType.readProfileIdentity => BilSemanticIconKind.profile,
+  IntelligenceActionType.openDailyLog ||
+  IntelligenceActionType.replaceMealItem ||
+  IntelligenceActionType.updateMealItem ||
+  IntelligenceActionType.moveMealItem ||
+  IntelligenceActionType.healthCommand ||
+  IntelligenceActionType.saveMemory => BilSemanticIconKind.notes,
+  IntelligenceActionType.addWater => BilSemanticIconKind.water,
+  IntelligenceActionType.addWeight => BilSemanticIconKind.weight,
+  IntelligenceActionType.reviewMeal => BilSemanticIconKind.meal,
+  IntelligenceActionType.reviewWorkout => BilSemanticIconKind.exercise,
+  IntelligenceActionType.openReport ||
+  IntelligenceActionType.readHealthData => BilSemanticIconKind.report,
+  IntelligenceActionType.setThemeMode => BilSemanticIconKind.appearance,
+  IntelligenceActionType.setLanguage => BilSemanticIconKind.language,
+  IntelligenceActionType.setUnitPreference => BilSemanticIconKind.measurements,
+  IntelligenceActionType.setReminder => BilSemanticIconKind.notifications,
+  IntelligenceActionType.reviewMemories => BilSemanticIconKind.notes,
+  IntelligenceActionType.prepareLocalExport => BilSemanticIconKind.report,
+  IntelligenceActionType.updateGoal => BilSemanticIconKind.goals,
+  IntelligenceActionType.saveMeasurements => BilSemanticIconKind.measurements,
+  IntelligenceActionType.openAiCoachSubscription ||
+  IntelligenceActionType.buyAiBoost ||
+  IntelligenceActionType.manageSubscription ||
+  IntelligenceActionType.navigate => BilSemanticIconKind.aiCoach,
+  IntelligenceActionType.deleteMealItem ||
+  IntelligenceActionType.requestAccountDeletion ||
+  IntelligenceActionType.signOut => null,
+};

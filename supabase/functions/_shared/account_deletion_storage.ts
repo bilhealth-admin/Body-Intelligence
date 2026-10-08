@@ -1,6 +1,7 @@
 export const BIL_USER_STORAGE_BUCKETS = [
   "profile-avatars",
   "community-post-images",
+  "community-circle-media",
 ] as const;
 
 const PAGE_SIZE = 1000;

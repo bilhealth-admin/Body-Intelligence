@@ -170,9 +170,12 @@ void main() {
         'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
       ).readAsStringSync();
       expect(settings, contains('coordinator.revokeAndVerify()'));
-      final page = File(
+      // The reference chat UI was extracted into a part to respect the
+      // source-size ceiling. Test the combined library and its part.
+      final page = [
         'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
-      ).readAsStringSync();
+        'lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       expect(page, contains('showReplyThinking'));
       expect(page, isNot(contains('Preparing your answer')));
       expect(page, isNot(contains("? tr('Thinking with your BIL data'")));

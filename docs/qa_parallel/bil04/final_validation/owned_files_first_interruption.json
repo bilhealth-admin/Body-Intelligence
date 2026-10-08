@@ -1,0 +1,11 @@
+{
+  "result": "FAIL",
+  "exit_code": 130,
+  "status": "INTERRUPTED_AFTER_UI_COMPILER_EXIT",
+  "completed_file_gates": 6,
+  "completed_cases": 121,
+  "compiler_failure_file": "health_coach_ui_test.dart",
+  "observed_error": "The Dart compiler exited unexpectedly",
+  "source_gate": "Only the six finished file reports have before/after source proof. This is not a complete owned gate.",
+  "time_utc": "2026-10-07T09:29:46.545994+00:00"
+}

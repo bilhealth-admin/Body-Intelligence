@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_WITH_DOCUMENTED_INTERNAL_SQL_EXCLUSION",
+  "reviewedAtUtc": "2026-10-07T09:12:15.506346+00:00",
+  "baseSha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "rawExtractorStatus": "REVIEW_REQUIRED",
+  "rawExtractionReport": "health_strings_extraction.json",
+  "rawExtractionReportSha256": "c2f486aca317e30d42a5884ac5c8de287170483a1d4725174bac42e87cf4ee4a",
+  "rawAstAudit": "health_strings_ast.json",
+  "rawAstAuditSha256": "3448a79b383e4b52607ecd500c170e607545fb17296467e922da11fe59adf70a",
+  "reviewMethod": "Read the exact new recovery SQL literal and its database.customSelect call. The statement is a parameterized internal query and is never presented to users; exclude it from localization. No product, test or extraction-tool source was changed.",
+  "humanLinguisticReviewPerformed": false,
+  "decisions": [
+    {
+      "sourcePath": "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart",
+      "sourceSha256": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+      "line": 62,
+      "column": 13,
+      "offset": 2370,
+      "length": 785,
+      "literalTemplateSha256": "ca0dda88c8cab4be12ef3a4fe4f67b280e7e4bfae82674fff7bcd0d3cf8beb88",
+      "template": "SELECT key, value FROM preferences WHERE substr(key, 1, ?) = ? AND CASE WHEN json_valid(value) THEN json_type(value, '$.healthReceiptRecovery') = 'object' AND json_type(value, '$.healthReceiptRecovery.conversationId') = 'text' AND json_extract(value, '$.healthReceiptRecovery.conversationId') = ? AND json_type(value, '$.healthReceiptRecovery.receiptAcknowledged') = 'false' AND json_extract(value, '$.ownerScope') = ? AND json_extract(value, '$.command.kind') = 'health' AND json_type(value, '$.command.operationId') = 'text' AND key = ? || json_extract(value, '$.command.operationId') ELSE 0 END ORDER BY rowid DESC LIMIT ?",
+      "originalClassification": "REVIEW_UNPAIRED",
+      "finalClassification": "INTERNAL_PARAMETERIZED_SQL_QUERY",
+      "requiresTranslation": false,
+      "reason": "Only passed to database.customSelect. SQL keywords, JSON paths and placeholders are protocol syntax, not UI copy."
+    }
+  ],
+  "pairedTemplateCount": 147,
+  "unresolvedUserFacingLiterals": 0,
+  "placeholderDiagnosticCount": 0,
+  "rebuildRule": "The raw extractor remains conservative. Reapply this reviewed exclusion only if the source SHA-256 and exact literal template hash match; otherwise review again.",
+  "finalCatalogSha256": {
+    "en": "2cebc5494a6523e08a1f2bd13e20ee012680d6c6da27d3c689a99031119d219f",
+    "ar": "fe285c826fb2873f045382e1a2caee53733d45b8942fceb1b0f80e165799f638"
+  }
+}

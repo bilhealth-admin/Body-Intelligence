@@ -1,0 +1,21 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/closed_day_food_test.dart
+00:00 +0: closed day rejects existing bucket lookup without any mutation
+00:00 +1: closed day rejects direct item insertion without any mutation
+00:00 +2: closed day rejects quantity edit without any mutation
+00:00 +3: closed day rejects item deletion without any mutation
+00:00 +4: closed day rejects item restore without any mutation
+00:00 +5: closed day rejects meal cascade deletion without any mutation
+00:00 +6: closed day rejects item reorder without any mutation
+00:00 +7: closed day rejects meal type move without any mutation
+00:00 +8: closed day rejects same-type move without any mutation
+00:00 +9: closed day rejects item duplication without any mutation
+00:00 +10: empty closed day blocks every ordinary destination writer
+00:00 +11: empty source cannot silently succeed when its destination is closed
+00:00 +12: multiple destination copy rejects one closed day before any insert
+00:00 +13: closed source remains readable and copyable into open destinations
+00:00 +14: either persisted closure marker fences mutations: closed
+00:00 +15: either persisted closure marker fences mutations: closed_at_only
+00:00 +16: deleted item cannot be restored until the day is reopened
+00:00 +17: explicit reopen allows ordinary edits without changing food semantics
+00:00 +18: pending closure and ordinary insertion serialize in one database
+00:00 +19: All tests passed!

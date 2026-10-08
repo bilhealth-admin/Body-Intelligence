@@ -1,0 +1,35 @@
+{
+  "at_utc": "2026-10-07T09:21:37Z",
+  "authorization": "Root confirmed both own runner/logger stopped (CTRL-C exit130); no replacement process started. Only the three named own stale temp directories authorized.",
+  "process_cmdline_references": [],
+  "removed": [
+    {
+      "directory": "/tmp/flutter_tools.DBVJHN",
+      "logical_bytes": 205217385,
+      "allocated_bytes": 205230080,
+      "verified_own_listener": [
+        "/tmp/flutter_tools.DBVJHN/flutter_test_listener.RRKSHX/listener.dart"
+      ]
+    },
+    {
+      "directory": "/tmp/flutter_tools.KMKRVC",
+      "logical_bytes": 93539145,
+      "allocated_bytes": 93552640,
+      "verified_own_listener": [
+        "/tmp/flutter_tools.KMKRVC/flutter_test_listener.FHJCVB/listener.dart"
+      ]
+    },
+    {
+      "directory": "/tmp/flutter_tools.NAENEH",
+      "logical_bytes": 98370513,
+      "allocated_bytes": 98381824,
+      "verified_own_listener": [
+        "/tmp/flutter_tools.NAENEH/flutter_test_listener.RBLFWJ/listener.dart"
+      ]
+    }
+  ],
+  "dev_shm_removed_bytes": 0,
+  "allocated_bytes_removed": 397164544,
+  "logical_bytes_removed": 397127043,
+  "allocated_mib_removed": 378.77
+}

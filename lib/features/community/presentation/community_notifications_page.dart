@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
+import '../activity_rewards/community_post_moderation_receipt.dart';
 import '../data/community_repository.dart';
 import '../domain/community_attention.dart';
 import 'community_copy.dart';
@@ -18,6 +19,7 @@ import 'community_copy.dart';
 part 'community_notifications_filters.dart';
 part 'community_notifications_rendering.dart';
 part 'community_notifications_reference_widgets.dart';
+part 'community_notifications_title.dart';
 part 'community_notification_read_receipts.dart';
 
 class CommunityNotificationsPage extends StatefulWidget {
@@ -60,6 +62,7 @@ class _CommunityNotificationsPageState
   bool _receiptSignedOut = false;
   bool _visibleReadBusy = false;
   Object? _visibleReadOperation;
+  bool _attentionRefreshQueued = false;
   // A failed explicit action waits for the user's explicit retry. The automatic
   // dwell must not silently issue another write behind the error snackbar.
   final _manualReceiptIds = <String>{};
@@ -109,12 +112,26 @@ class _CommunityNotificationsPageState
     final next = _attentionController?.value.communityUpdates;
     if (next == null || next == _lastCommunityUpdates) return;
     _lastCommunityUpdates = next;
-    if (mounted &&
-        !_visibleReadBusy &&
-        _markingSeen.isEmpty &&
-        _respondingCollaboration.isEmpty) {
-      _retry();
+    if (!mounted) return;
+    if (_activityAcknowledgementBusy) {
+      _attentionRefreshQueued = true;
+      return;
     }
+    _retry();
+  }
+
+  bool get _activityAcknowledgementBusy =>
+      _visibleReadBusy ||
+      _markingPageSeen ||
+      _markingSeen.isNotEmpty ||
+      _respondingCollaboration.isNotEmpty;
+
+  void _drainQueuedAttentionRefresh() {
+    if (!mounted || !_attentionRefreshQueued || _activityAcknowledgementBusy) {
+      return;
+    }
+    _attentionRefreshQueued = false;
+    _retry();
   }
 
   @override
@@ -272,6 +289,7 @@ class _CommunityNotificationsPageState
   }
 
   void _retry() {
+    _attentionRefreshQueued = false;
     final retry = _load();
     setState(() {
       _updates = retry;
@@ -349,6 +367,7 @@ class _CommunityNotificationsPageState
         _markingSeen.removeAll(ids);
         setState(() => _markingPageSeen = false);
       }
+      _drainQueuedAttentionRefresh();
     }
   }
 
@@ -393,6 +412,7 @@ class _CommunityNotificationsPageState
       );
     } finally {
       if (generation == _loadGeneration) _markingSeen.remove(notification.id);
+      _drainQueuedAttentionRefresh();
     }
   }
 
@@ -459,8 +479,18 @@ class _CommunityNotificationsPageState
         _respondingCollaboration.remove(notification.id);
         setState(() {});
       }
+      _drainQueuedAttentionRefresh();
     }
   }
+
+  CommunityPostModerationReceipt? _postModerationReceipt(
+    CommunityNotification notification,
+  ) => CommunityPostModerationReceipt.tryParse(
+    entityKind: notification.entityKind,
+    entityId: notification.entityId,
+    copyKey: notification.copyKey,
+    metadata: notification.metadata,
+  );
 
   Widget _notificationTrailing(CommunityNotification notification) {
     if (notification.kind != CommunityNotificationKind.collaborationInvite) {
@@ -500,6 +530,8 @@ class _CommunityNotificationsPageState
   }
 
   String _routeFor(CommunityNotification notification) {
+    final moderationReceipt = _postModerationReceipt(notification);
+    if (moderationReceipt != null) return moderationReceipt.route;
     const liveRoutes = {
       '/community',
       '/community/connections',
@@ -528,133 +560,6 @@ class _CommunityNotificationsPageState
       CommunityNotificationKind.challengeUpdate ||
       CommunityNotificationKind.collaborationInvite ||
       CommunityNotificationKind.collaborationAccepted => '/community',
-    };
-  }
-
-  String _notificationTitle(CommunityNotification notification) {
-    final actor = notification.actorDisplayName;
-    return switch (notification.kind) {
-      CommunityNotificationKind.friendRequest =>
-        actor == null
-            ? communityText(context, 'New friend request', 'طلب صداقة جديد')
-            : communityText(
-                context,
-                '{actor} sent you a friend request',
-                '{actor} أرسل إليك طلب صداقة',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.friendAccepted =>
-        actor == null
-            ? communityText(
-                context,
-                'Your friend request was accepted',
-                'تم قبول طلب صداقتك',
-              )
-            : communityText(
-                context,
-                '{actor} accepted your friend request',
-                '{actor} قبل طلب صداقتك',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.postLike =>
-        actor == null
-            ? communityText(
-                context,
-                'Someone liked your post',
-                'أعجب شخص بمنشورك',
-              )
-            : communityText(
-                context,
-                '{actor} liked your post',
-                '{actor} أعجب بمنشورك',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.postSave => communityText(
-        context,
-        'Your post was saved',
-        'تم حفظ منشورك',
-      ),
-      CommunityNotificationKind.comment =>
-        actor == null
-            ? communityText(
-                context,
-                'New comment on your post',
-                'تعليق جديد على منشورك',
-              )
-            : communityText(
-                context,
-                '{actor} commented on your post',
-                '{actor} علّق على منشورك',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.reply =>
-        actor == null
-            ? communityText(
-                context,
-                'New reply to your comment',
-                'رد جديد على تعليقك',
-              )
-            : communityText(
-                context,
-                '{actor} replied to your comment',
-                '{actor} رد على تعليقك',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.follow =>
-        actor == null
-            ? communityText(context, 'New follower', 'متابع جديد')
-            : communityText(
-                context,
-                '{actor} followed you',
-                '{actor} بدأ بمتابعتك',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.mention =>
-        actor == null
-            ? communityText(
-                context,
-                'You were mentioned in a post',
-                'تمت الإشارة إليك في منشور',
-              )
-            : communityText(
-                context,
-                '{actor} mentioned you in a post',
-                '{actor} أشار إليك في منشور',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.rewardEarned => communityText(
-        context,
-        'You earned a Community reward',
-        'حصلت على مكافأة في المجتمع',
-      ),
-      CommunityNotificationKind.questCompleted => communityText(
-        context,
-        'Quest completed',
-        'اكتملت المهمة',
-      ),
-      CommunityNotificationKind.badgeEarned => communityText(
-        context,
-        'New badge earned',
-        'حصلت على شارة جديدة',
-      ),
-      CommunityNotificationKind.challengeUpdate => communityText(
-        context,
-        'Challenge update',
-        'تحديث للتحدي',
-      ),
-      CommunityNotificationKind.collaborationInvite =>
-        actor == null
-            ? communityText(context, 'Collaboration invitation', 'دعوة للتعاون')
-            : communityText(
-                context,
-                '{actor} invited you to collaborate on a post',
-                '{actor} دعاك للتعاون على منشور',
-              ).replaceAll('{actor}', actor),
-      CommunityNotificationKind.collaborationAccepted =>
-        actor == null
-            ? communityText(
-                context,
-                'Collaboration invitation accepted',
-                'تم قبول دعوة التعاون',
-              )
-            : communityText(
-                context,
-                '{actor} accepted your collaboration invitation',
-                '{actor} قبل دعوة التعاون الخاصة بك',
-              ).replaceAll('{actor}', actor),
     };
   }
 

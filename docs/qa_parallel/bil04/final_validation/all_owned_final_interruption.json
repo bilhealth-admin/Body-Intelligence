@@ -1,0 +1,24 @@
+{
+  "name": "all_owned_final_interrupted",
+  "result": "FAIL",
+  "status": "INTERRUPTED_AFTER_COMPILER_DISAPPEARED",
+  "exit_code": 130,
+  "signal": "SIGINT via write_stdin CTRL-C",
+  "time_utc": "2026-10-07T09:20:55.553018+00:00",
+  "completed_assertion_cases": 48,
+  "observed_assertion_failures": 0,
+  "last_stage": "loading fasting_command_adapter_test.dart",
+  "observation": "No frontend/compiler child remained under the live Flutter runner, and output stopped at the next file.",
+  "cgroup_memory_events": "low 0\nhigh 0\nmax 4839990\noom 54\noom_kill 33\noom_group_kill 0\n",
+  "source_snapshot_status": "Interrupted recorder did not emit the final source report; not an authoritative gate.",
+  "next_step": "Run every original owned _test.dart file once in separate serial Flutter invocations, preserving all tests and assertions.",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/parallel/bil04"
+  ]
+}

@@ -3,8 +3,9 @@ part of 'intelligence_center_page.dart';
 extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
   Future<bool> _commitPreparedCoachNativeAction(
     IntelligenceAction action,
-    _PreparedCoachNativeAction? prepared,
-  ) async {
+    _PreparedCoachNativeAction? prepared, {
+    void Function()? checkWritePermission,
+  }) async {
     if (prepared == null) {
       if (action.type == IntelligenceActionType.addWeight &&
           action.payload.isEmpty) {
@@ -18,9 +19,15 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
     prepared.scope.check(prepared.database.localOwnerId);
     prepared.confirmedCommitInFlight = true;
     try {
+      final healthConversationId =
+          prepared.command!.kind == CoachNativeCommandKind.health
+          ? await _healthRecoveryConversationForCommit(prepared)
+          : null;
       final result = await prepared.repository.commit(
         command: prepared.command!,
         scope: prepared.scope,
+        checkWritePermission: checkWritePermission,
+        healthRecoveryConversationId: healthConversationId,
       );
       await _retireDurableAction(action);
       if (!mounted ||
@@ -51,16 +58,46 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
                         prepared.conversationEpoch) {
                   _refreshCommittedCoachNative(undone.kind);
                   _syncCommittedCoachMemory(prepared, undone, undo: true);
+                  await _syncCoachHealthEffects(
+                    result: undone,
+                    preferences: prepared.repository.preferences,
+                    scope: prepared.scope,
+                  );
+                  prepared.scope.check(
+                    prepared.database.localOwnerId,
+                    committed: true,
+                  );
                 }
                 return _coachNativeReceipt(action.id, undone, undo: true);
               }
             : null,
+      );
+      if (healthConversationId != null) {
+        await _acknowledgePersistedHealthReceipt(
+          result: result,
+          receipt: _coachNativeReceipt(action.id, result),
+          repository: prepared.repository,
+          scope: prepared.scope,
+          conversationId: healthConversationId,
+          conversationEpoch: prepared.conversationEpoch,
+        );
+      }
+      await _syncCoachHealthEffects(
+        result: result,
+        preferences: prepared.repository.preferences,
+        scope: prepared.scope,
       );
       return true;
     } on CoachNativeConflict catch (error) {
       if (error.committed) {
         completedActionOperationIds.add(action.operationId!);
         await _retireDurableAction(action);
+        if (prepared.command!.kind == CoachNativeCommandKind.health &&
+            mounted &&
+            conversationPersistenceEpoch == prepared.conversationEpoch &&
+            prepared.scope.isCurrent) {
+          _refreshCommittedCoachNative(CoachNativeCommandKind.health);
+        }
       }
       if (mounted &&
           conversationPersistenceEpoch == prepared.conversationEpoch) {
@@ -74,6 +111,7 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
 
   void _refreshCommittedCoachNative(CoachNativeCommandKind kind) {
     ref.invalidate(coachContextSnapshotProvider);
+    ref.invalidate(coachHealthBriefProvider);
     switch (kind) {
       case CoachNativeCommandKind.water:
         ref.invalidate(dailyWaterProvider);
@@ -86,6 +124,13 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
         ref.invalidate(bodyMeasurementHistoryProvider);
       case CoachNativeCommandKind.memory:
         break;
+      case CoachNativeCommandKind.health:
+        ref.invalidate(latestDailyLogProvider);
+        ref.invalidate(selectedDailyLogProvider);
+        ref.invalidate(selectedDailyLedgerProvider);
+        ref.invalidate(nutritionGoalScheduleProvider);
+        ref.invalidate(todayLifeContextProvider);
+        ref.invalidate(insightLifeContextProvider);
     }
   }
 
@@ -118,6 +163,7 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
       CoachNativeCommandKind.measurements => after.measurement!.id.toString(),
       CoachNativeCommandKind.memory =>
         result.command.resolved['memoryId']! as String,
+      CoachNativeCommandKind.health => result.operationId,
     };
     final entityType = switch (result.kind) {
       CoachNativeCommandKind.water => 'water_entry',
@@ -125,6 +171,7 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
       CoachNativeCommandKind.goal => 'goal',
       CoachNativeCommandKind.measurements => 'body_measurement',
       CoachNativeCommandKind.memory => 'coach_memory',
+      CoachNativeCommandKind.health => 'health_record',
     };
     return BilActionReceipt(
       actionId: actionId,
@@ -142,6 +189,11 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
         'bodyMeasurements',
         'profile',
         'goal',
+        'dailyLog',
+        'dailyLedger',
+        'lifeContext',
+        'nutritionGoalSchedule',
+        'fastingPreferences',
       },
       before: (undo ? result.after : result.before).receiptPayload(
         result.command,
@@ -200,6 +252,11 @@ extension _CoachNativeActionFlow on _IntelligenceCenterPageState {
         return tr(
           'BIL will remember this. You can review or remove it any time.',
           'سيتذكر BIL هذه المعلومة. يمكنك مراجعتها أو حذفها في أي وقت.',
+        );
+      case CoachNativeCommandKind.health:
+        return _healthCopy.saved(
+          result.toolId,
+          result.after.receiptPayload(result.command),
         );
     }
   }

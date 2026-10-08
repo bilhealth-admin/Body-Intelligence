@@ -1,0 +1,72 @@
+{
+  "checked_at_utc": "2026-10-07T08:48:15.717984+00:00",
+  "files": [
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+      "repository_sha256": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+      "validation_sha256": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+      "matches_tested_source": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+      "repository_sha256": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+      "validation_sha256": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+      "matches_tested_source": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_daily_commands.dart",
+      "repository_sha256": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+      "validation_sha256": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+      "matches_tested_source": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart",
+      "repository_sha256": "bd96d70af1ba7fe8bd8902d8ad9bdfa17bfeda7a0fe256d7e4455a27a11f1bca",
+      "validation_sha256": "bd96d70af1ba7fe8bd8902d8ad9bdfa17bfeda7a0fe256d7e4455a27a11f1bca",
+      "matches_tested_source": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+      "repository_sha256": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+      "validation_sha256": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+      "matches_tested_source": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart",
+      "repository_sha256": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+      "validation_sha256": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+      "matches_tested_source": true
+    },
+    {
+      "path": "test/parallel/bil04/fasting_command_adapter_test.dart",
+      "repository_sha256": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+      "validation_sha256": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+      "matches_tested_source": true
+    },
+    {
+      "path": "test/parallel/bil04/fasting_notification_sync_test.dart",
+      "repository_sha256": "6aa92ee41f979cbb700d40fbf6fcb4017471fcce9f43e438161008a1753bd202",
+      "validation_sha256": "6aa92ee41f979cbb700d40fbf6fcb4017471fcce9f43e438161008a1753bd202",
+      "matches_tested_source": true
+    },
+    {
+      "path": "test/parallel/bil04/daily_life_commands_test.dart",
+      "repository_sha256": "2f4b957ff63cdc09f0a4d5aefad830521cbbd13814d1893ce016e4b9b231ff6d",
+      "validation_sha256": "2f4b957ff63cdc09f0a4d5aefad830521cbbd13814d1893ce016e4b9b231ff6d",
+      "matches_tested_source": true
+    },
+    {
+      "path": "test/parallel/bil04/health_read_guard_brief_test.dart",
+      "repository_sha256": "e1c23d74e5eddd7e4d91459965a1cf645b2ca0143269e5782a933ea9104cdae3",
+      "validation_sha256": "e1c23d74e5eddd7e4d91459965a1cf645b2ca0143269e5782a933ea9104cdae3",
+      "matches_tested_source": true
+    },
+    {
+      "path": "pubspec.lock",
+      "repository_sha256": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46",
+      "validation_sha256": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46",
+      "matches_tested_source": true
+    }
+  ],
+  "all_match": true
+}

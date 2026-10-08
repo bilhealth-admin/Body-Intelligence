@@ -1,0 +1,54 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "analyze",
+    "--no-pub",
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart",
+    "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+    "test/parallel/bil04/health_query_adapter_test.dart",
+    "test/parallel/bil04/health_query_connected_test.dart",
+    "test/parallel/bil04/closed_day_food_test.dart",
+    "test/parallel/bil04/health_parser_test.dart",
+    "lib/data/repositories/meal_repository.dart",
+    "lib/data/repositories/meal_repository_copying.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "environment": {
+    "TAR_OPTIONS": "--no-same-owner"
+  },
+  "exit_code": 0,
+  "status": "PASS",
+  "duration_seconds": 14.229947090148926,
+  "source_before": {
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart": "d00b8dd761387dd95b3732a3c09e3ca7e45690e3a2de1d09fb8cb1579a3f37c1",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+    "lib/features/intelligence_center/app_commands/coach_health_parser.dart": "6411458996129ef308305dff897b05e8c25f2c9f189b2b5316b9c504e7ec147b",
+    "test/parallel/bil04/health_query_adapter_test.dart": "addd54cb00331e17b4646076aa76bc169ba270ec61feb879b65110aade5460d9",
+    "test/parallel/bil04/health_query_connected_test.dart": "4226edceebfededf1c233da14bea2ac04cc8ede2aeab5fdf3077a9e7a55b49c3",
+    "test/parallel/bil04/closed_day_food_test.dart": "aabc095fba971fd7576ec1adbdae6d15cb4b98ce5258a8f9c30f19cbb0836733",
+    "test/parallel/bil04/health_parser_test.dart": "02712a5192a1d3c7e80a048df9f40bf5c88866b53a4d657ebf87168ac74d6175",
+    "lib/data/repositories/meal_repository.dart": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+    "lib/data/repositories/meal_repository_copying.dart": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de",
+    "lib/data/repositories/daily_log_repository.dart": "f06045fe870402393ca9090d327987169798c921ed591cb2594c97ada06d7d24",
+    "lib/features/intelligence_center/domain/bil_tool_registry.dart": "b8d6a3b256a03348dd223d5e97660fef7ee71e1e073852f647e93241b16edeb6",
+    "lib/features/intelligence_center/domain/intelligence_action.dart": "dc8593b2be402f9a47fb1905e73b98231e41675bdfc17b5fc75f0ebef676df59",
+    "lib/features/intelligence_center/app_commands/coach_health_tools.dart": "bb4adff801dee0bc7d9b37cbc2f4fb08f9cbcc799f553e24ae4019d7198b5167"
+  },
+  "source_after": {
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart": "d00b8dd761387dd95b3732a3c09e3ca7e45690e3a2de1d09fb8cb1579a3f37c1",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+    "lib/features/intelligence_center/app_commands/coach_health_parser.dart": "6411458996129ef308305dff897b05e8c25f2c9f189b2b5316b9c504e7ec147b",
+    "test/parallel/bil04/health_query_adapter_test.dart": "addd54cb00331e17b4646076aa76bc169ba270ec61feb879b65110aade5460d9",
+    "test/parallel/bil04/health_query_connected_test.dart": "4226edceebfededf1c233da14bea2ac04cc8ede2aeab5fdf3077a9e7a55b49c3",
+    "test/parallel/bil04/closed_day_food_test.dart": "aabc095fba971fd7576ec1adbdae6d15cb4b98ce5258a8f9c30f19cbb0836733",
+    "test/parallel/bil04/health_parser_test.dart": "02712a5192a1d3c7e80a048df9f40bf5c88866b53a4d657ebf87168ac74d6175",
+    "lib/data/repositories/meal_repository.dart": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+    "lib/data/repositories/meal_repository_copying.dart": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de",
+    "lib/data/repositories/daily_log_repository.dart": "f06045fe870402393ca9090d327987169798c921ed591cb2594c97ada06d7d24",
+    "lib/features/intelligence_center/domain/bil_tool_registry.dart": "b8d6a3b256a03348dd223d5e97660fef7ee71e1e073852f647e93241b16edeb6",
+    "lib/features/intelligence_center/domain/intelligence_action.dart": "dc8593b2be402f9a47fb1905e73b98231e41675bdfc17b5fc75f0ebef676df59",
+    "lib/features/intelligence_center/app_commands/coach_health_tools.dart": "bb4adff801dee0bc7d9b37cbc2f4fb08f9cbcc799f553e24ae4019d7198b5167"
+  },
+  "source_unchanged": true
+}

@@ -1,0 +1,51 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart
+lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart:203:32: Error: Property 'startedAt' cannot be accessed on 'FastingSession?' because it is potentially null.
+ - 'FastingSession' is from 'package:body_intelligence_log/features/wellness/domain/fasting_session.dart' ('lib/features/wellness/domain/fasting_session.dart').
+Try accessing using ?. instead.
+            startedAt: session.startedAt,
+                               ^^^^^^^^^
+00:00 +0 -1: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart [E]
+  Failed to load "/workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart":
+  Compilation failed for testPath=/workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart: lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart:203:32: Error: Property 'startedAt' cannot be accessed on 'FastingSession?' because it is potentially null.
+   - 'FastingSession' is from 'package:body_intelligence_log/features/wellness/domain/fasting_session.dart' ('lib/features/wellness/domain/fasting_session.dart').
+  Try accessing using ?. instead.
+              startedAt: session.startedAt,
+                                 ^^^^^^^^^
+  .
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1009:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 733:19                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 726:19                      _CustomZone.run
+  dart:async/zone.dart 625:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 666:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart:203:32: Error: Property 'startedAt' cannot be accessed on 'FastingSession?' because it is potentially null.
+ - 'FastingSession' is from 'package:body_intelligence_log/features/wellness/domain/fasting_session.dart' ('lib/features/wellness/domain/fasting_session.dart').
+Try accessing using ?. instead.
+            startedAt: session.startedAt,
+                               ^^^^^^^^^
+00:00 +0 -2: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart [E]
+  Failed to load "/workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart":
+  Compilation failed for testPath=/workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart: lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart:203:32: Error: Property 'startedAt' cannot be accessed on 'FastingSession?' because it is potentially null.
+   - 'FastingSession' is from 'package:body_intelligence_log/features/wellness/domain/fasting_session.dart' ('lib/features/wellness/domain/fasting_session.dart').
+  Try accessing using ?. instead.
+              startedAt: session.startedAt,
+                                 ^^^^^^^^^
+  .
+00:00 +0 -2: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_notification_sync_test.dart

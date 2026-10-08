@@ -1,0 +1,16 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart
+00:00 +0: catalog projection matches the existing workout library exactly
+00:00 +1: appends accepted schema and preserves unrelated day fields
+00:00 +2: closed exercise day marked by state requires explicit reopen
+00:00 +3: closed exercise day marked by timestamp requires explicit reopen
+00:00 +4: missing same-day evidence leaves calories unknown
+00:00 +5: historical date is frozen and shown on its actual local day
+00:00 +6: unknown identities, invented energy and invalid inputs fail closed
+00:00 +7: a concurrent daily editor makes a prepared exercise stale
+00:00 +8: Undo restores the complete prior row and does not duplicate history
+00:00 +9: Undo of a newly created exercise day restores absence
+00:00 +10: Undo refuses to replace later edits to the affected daily row
+00:00 +11: a silent repository failure cannot produce a successful receipt
+00:00 +12: revocation during an evidence read prevents a proposal
+00:00 +13: revocation after the repository write rolls the native transaction back
+00:00 +14: All tests passed!

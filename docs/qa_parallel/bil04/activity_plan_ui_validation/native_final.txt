@@ -1,0 +1,18 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart
+00:00 +0: log_exercise durable commit survives lost readback without replaying health data
+00:00 +1: log_exercise owner A-B-A observed during journal write cannot regain authority
+00:00 +2: log_exercise permission epoch revocation after journal write rolls everything back
+00:00 +3: activate_plan durable commit survives lost readback without replaying health data
+00:00 +4: activate_plan owner A-B-A observed during journal write cannot regain authority
+00:00 +5: activate_plan permission epoch revocation after journal write rolls everything back
+00:00 +6: later identical plan activation fences Undo even when row timestamps share a second
+00:00 +7: unrelated health and foreign-owner journals preserve valid plan Undo
+00:00 +8: health overlap scan fails closed beyond 128 later same-owner journals
+00:00 +9: activity native replay, repository restart and Undo use one journal
+00:00 +10: plan preview stays read-only while native activation has replay and Undo
+00:00 +11: log_exercise rolls back its health mutation when the native journal fails
+00:00 +12: log_exercise native readback reports a later edit and denies stale Undo
+00:00 +13: activate_plan rolls back its health mutation when the native journal fails
+00:01 +14: activate_plan native readback reports a later edit and denies stale Undo
+00:01 +15: cancelled owner scope cannot recover during a paid activation await
+00:01 +16: All tests passed!

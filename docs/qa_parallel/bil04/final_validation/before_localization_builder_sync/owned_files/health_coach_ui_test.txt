@@ -1,0 +1,27 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart
+00:00 +0: Arabic sleep review has RTL and an accessible tappable Continue label
+00:02 +1: Arabic exercise review uses trusted Arabic name and accessible cancel
+00:02 +2: 320px health review at text scale 2 has no overflow and keeps Continue accessible
+00:03 +3: fasting save stays verified while UI reports denied device notifications
+00:03 +4: closing route cancels a hung fasting device deadline after durable save
+00:04 +5: failed postcommit readback recovers exact receipt and Undo after reopening Coach
+00:05 +6: approved health commit finishing after route close recovers one receipt and Undo
+00:05 +7: log_sleep requires fresh confirmation in writeAllowed
+00:06 +8: log_exercise requires fresh confirmation in writeAllowed
+00:06 +9: cancelling model sleep and exercise proposals changes no health data
+00:07 +10: log_sleep saved in the real page can Undo after route recreation
+00:08 +11: log_exercise saved in the real page can Undo after route recreation
+00:08 +12: local plan preview reads saved draft without activation or entitlement calls
+00:09 +13: model clinical flag leaves checkbox unchecked until user reviews plan
+00:09 +14: checking clinical review cannot adopt a draft edited during the dialog
+00:09 +15: log_sleep rejects permission revoked during dialog, restored=false
+00:10 +16: log_sleep rejects delivered owner A B A during dialog
+00:10 +17: log_exercise rejects permission revoked during dialog, restored=true
+00:10 +18: log_exercise rejects delivered owner A B A during dialog
+00:11 +19: activate_plan rejects permission revoked during dialog, restored=true
+00:11 +20: activate_plan rejects delivered owner A B A during dialog
+00:11 +21: sleep read uses only requested days and never builds full context or calls model
+00:11 +22: disabled habits focus blocks sleep read before any daily query
+00:12 +23: ambiguous local sleep request clarifies without model or mutation
+00:12 +24: silent database write failure cannot show successful sleep save
+00:12 +25: All tests passed!

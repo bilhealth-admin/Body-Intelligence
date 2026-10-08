@@ -1,3 +1,4 @@
+import 'runtime_copy_integration_gap.dart';
 import 'runtime_copy_next_workspace.dart';
 import 'runtime_copy_coach_controls.dart';
 import 'runtime_copy_primary.dart';
@@ -69,6 +70,8 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final integrated = IntegrationRuntimeCopy.resolve(english, localeTag);
+    if (integrated != null) return integrated;
     final controls = CoachControlsRuntimeCopy.resolve(english, localeTag);
     if (controls != null) return controls;
     final next = NextWorkspaceRuntimeCopy.resolve(english, localeTag);
@@ -233,6 +236,7 @@ abstract final class RuntimeCopy {
         BodyModelRuntimeCopy.balanced &&
         AiAccessRuntimeCopy.balanced &&
         AccessibilityWellnessRuntimeCopy.balanced &&
+        IntegrationRuntimeCopy.balanced &&
         CloudSyncConsentCopy.balanced &&
         ConnectedHealthRuntimeCopy.balanced &&
         ReleasePolishRuntimeCopy.balanced &&

@@ -89,78 +89,106 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   return showDialog<List<MealImageReviewSelection>>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => StatefulBuilder(
-      builder: (context, setDialogState) => AlertDialog(
-        title: Text(copy.review),
-        content: SizedBox(
-          width: 480,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              _NaturalText(analysis.notice),
-              const SizedBox(height: 12),
-              for (var index = 0; index < analysis.candidates.length; index++)
-                _CandidateReviewCard(
-                  candidate: analysis.candidates[index],
-                  selected: selected.contains(index),
-                  amount: amounts[index],
-                  unit: units[index],
-                  copy: copy,
-                  onSelected: (value) => setDialogState(() {
-                    value ? selected.add(index) : selected.remove(index);
-                  }),
-                ),
-            ],
+    builder: (dialogContext) => _MealImageReviewControllerOwner(
+      controllers: [...amounts, ...units],
+      child: StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(copy.review),
+          content: SizedBox(
+            width: 480,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                _NaturalText(analysis.notice),
+                const SizedBox(height: 12),
+                for (var index = 0; index < analysis.candidates.length; index++)
+                  _CandidateReviewCard(
+                    candidate: analysis.candidates[index],
+                    selected: selected.contains(index),
+                    amount: amounts[index],
+                    unit: units[index],
+                    copy: copy,
+                    onSelected: (value) => setDialogState(() {
+                      value ? selected.add(index) : selected.remove(index);
+                    }),
+                  ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(copy.cancel),
-          ),
-          FilledButton(
-            onPressed: selected.isEmpty
-                ? null
-                : () {
-                    final result = <MealImageReviewSelection>[];
-                    for (final index in selected) {
-                      final amount = double.tryParse(
-                        amounts[index].text.trim(),
-                      );
-                      final unit = mealImageCanonicalUnit(
-                        units[index].text,
-                        locale,
-                      );
-                      if (amount == null ||
-                          !amount.isFinite ||
-                          amount <= 0 ||
-                          amount > 100000 ||
-                          unit.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(copy.amountRequired)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(copy.cancel),
+            ),
+            FilledButton(
+              onPressed: selected.isEmpty
+                  ? null
+                  : () {
+                      final result = <MealImageReviewSelection>[];
+                      for (final index in selected) {
+                        final amount = double.tryParse(
+                          amounts[index].text.trim(),
                         );
-                        return;
+                        final unit = mealImageCanonicalUnit(
+                          units[index].text,
+                          locale,
+                        );
+                        if (amount == null ||
+                            !amount.isFinite ||
+                            amount <= 0 ||
+                            amount > 100000 ||
+                            unit.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(copy.amountRequired)),
+                          );
+                          return;
+                        }
+                        result.add(
+                          MealImageReviewSelection(
+                            candidate: analysis.candidates[index],
+                            amount: amount,
+                            unit: unit,
+                          ),
+                        );
                       }
-                      result.add(
-                        MealImageReviewSelection(
-                          candidate: analysis.candidates[index],
-                          amount: amount,
-                          unit: unit,
-                        ),
-                      );
-                    }
-                    Navigator.pop(dialogContext, result);
-                  },
-            child: Text(copy.continueLabel),
-          ),
-        ],
+                      Navigator.pop(dialogContext, result);
+                    },
+              child: Text(copy.continueLabel),
+            ),
+          ],
+        ),
       ),
     ),
-  ).whenComplete(() {
-    for (final controller in [...amounts, ...units]) {
+  );
+}
+
+/// Owns editable fields through the route's exit transition. The showDialog
+/// Future completes at pop, before an outgoing focused TextField is unmounted.
+class _MealImageReviewControllerOwner extends StatefulWidget {
+  const _MealImageReviewControllerOwner({
+    required this.controllers,
+    required this.child,
+  });
+  final List<TextEditingController> controllers;
+  final Widget child;
+
+  @override
+  State<_MealImageReviewControllerOwner> createState() =>
+      _MealImageReviewControllerOwnerState();
+}
+
+class _MealImageReviewControllerOwnerState
+    extends State<_MealImageReviewControllerOwner> {
+  @override
+  void dispose() {
+    for (final controller in widget.controllers) {
       controller.dispose();
     }
-  });
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _CandidateReviewCard extends StatelessWidget {

@@ -177,11 +177,13 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             ),
             if (food.verified) ...[
               const SizedBox(width: 7),
-              const Icon(
-                Icons.verified_rounded,
+              const KeyedSubtree(
                 key: Key('daily-search-verified-food-badge'),
-                size: 19,
-                color: Color(0xFF56C878),
+                child: Icon(
+                  Icons.verified_rounded,
+                  size: 19,
+                  color: Color(0xFF56C878),
+                ),
               ),
             ],
           ],

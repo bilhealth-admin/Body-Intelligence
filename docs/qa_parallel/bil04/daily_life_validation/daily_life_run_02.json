@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/parallel/bil04/daily_life_commands_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 0,
+  "elapsed_seconds": 3.74,
+  "status": "PASS",
+  "source_sha256": {
+    "lib/features/intelligence_center/app_commands/coach_daily_commands.dart": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+    "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart": "c00f9e89da36b3cabbc6e18386ded639a6562b037715a73901d0b5845e27da5c",
+    "test/parallel/bil04/daily_life_commands_test.dart": "2f4b957ff63cdc09f0a4d5aefad830521cbbd13814d1893ce016e4b9b231ff6d",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  }
+}

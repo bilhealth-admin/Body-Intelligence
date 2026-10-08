@@ -489,23 +489,51 @@ class _CommunityImageFallback extends StatelessWidget {
   const _CommunityImageFallback();
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
-    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-    child: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.broken_image_outlined),
-            const SizedBox(height: 6),
-            Text(
-              communityText(context, 'Photo unavailable', 'الصورة غير متاحة'),
-              textAlign: TextAlign.center,
+  Widget build(BuildContext context) {
+    final label = communityText(
+      context,
+      'Photo unavailable',
+      'الصورة غير متاحة',
+    );
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Four-photo tiles can be as short as 58 logical pixels after
+          // surrounding insets. Never squeeze a full icon + caption into
+          // an unbounded Column or lose its accessible description.
+          final compact =
+              constraints.maxHeight <
+                  MediaQuery.textScalerOf(context).scale(96) ||
+              constraints.maxWidth <
+                  MediaQuery.textScalerOf(context).scale(110);
+          return Semantics(
+            label: label,
+            child: Center(
+              child: compact
+                  ? const ExcludeSemantics(
+                      child: Icon(Icons.broken_image_outlined, size: 24),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.broken_image_outlined),
+                          const SizedBox(height: 6),
+                          Text(
+                            label,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
             ),
-          ],
-        ),
+          );
+        },
       ),
-    ),
-  );
+    );
+  }
 }

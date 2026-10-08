@@ -1,0 +1,1941 @@
+{
+  "schema_version": 1,
+  "role_id": "BIL-06",
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "catalog_status": "LOCAL_REVIEWED_EN_AR_SOURCE_CATALOG",
+  "runtime_binding": {
+    "resolver": "circleManagementText",
+    "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+    "selection": "Localizations.localeOf(context).languageCode == ar selects Arabic; every other language selects the English source.",
+    "json_loaded_by_runtime": false,
+    "shared_runtime_copy_modified": false,
+    "integration_note": "This catalog carries portable EN/AR copy and source locations; the role UI already uses the independent Dart resolver. A future shared translation integration must preserve source semantics and must not promote EN fallback to translated status."
+  },
+  "supported_locale_reference": {
+    "file": "lib/app/localization/bil_locale_rollout_manifest.dart",
+    "symbol": "BilLocaleRolloutManifest.releaseTargets25",
+    "sha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+    "runtime_list_file": "lib/app/localization/app_localizations.dart",
+    "count": 25
+  },
+  "locales": {
+    "ar": {
+      "translation_status": "REVIEWED_SOURCE",
+      "runtime_source": "ar",
+      "runtime_verification": "PASS_LOCAL_LARGE_TEXT_PANEL_SAMPLE; NOT_FULL_LOCALE_CERTIFICATION"
+    },
+    "en": {
+      "translation_status": "REVIEWED_SOURCE",
+      "runtime_source": "en",
+      "runtime_verification": "PASS_LOCAL_FUNCTIONAL_WIDGET_SCOPE; NOT_FULL_LOCALE_CERTIFICATION"
+    },
+    "fr": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK",
+      "fallback_runtime_verification": "PASS_LOCAL_EN_FALLBACK_LARGE_TEXT_PANEL_SAMPLE; NOT_A_VERIFIED_FRENCH_TRANSLATION"
+    },
+    "es": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "tr": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "de": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "it": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "pt-BR": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "pt-PT": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "ur": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "fa": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "hi": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "id": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "ms": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "ja": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "ko": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "zh-Hans": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "zh-Hant": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "ru": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "bn": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "vi": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "th": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "pl": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "nl": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    },
+    "uk": {
+      "translation_status": "NOT_TRANSLATED",
+      "verification_status": "NOT_VERIFIED",
+      "runtime_source": "en",
+      "fallback_status": "EXPLICIT_EN_FALLBACK"
+    }
+  },
+  "review": {
+    "en": "Reviewed source wording for functional meaning, explicit actions, privacy and truthful unavailable/result states.",
+    "ar": "مراجعة نصوص المصدر العربية من حيث المعنى الوظيفي والإجراءات الصريحة والخصوصية وحالات التعذر والنتيجة المؤكدة.",
+    "review_type": "AUTHOR_SOURCE_REVIEW",
+    "external_human_translation_review": false,
+    "runtime_locale_test_status": "The pre-completion BIL-06 widget suite ui_fix_005 passed 22/22 cases and the unchanged BASE topic/circle resilience suite ui_resilience_002 passed 16/16. The two completion-delta recovery strings are source-reviewed EN/AR and covered by the final source/static verification inventory; a new Flutter runtime rerun is not claimed by this catalog entry.",
+    "other_locales": "23 supported locale tags intentionally use English source; NOT_TRANSLATED and NOT_VERIFIED."
+  },
+  "extraction": {
+    "method": "Exact local Dart string-pair extraction of every circleManagementText(context, EN, AR) call; identical pairs deduplicated with all references retained.",
+    "source_file_count": 11,
+    "resolver_call_sites": 112,
+    "extracted_call_sites": 112,
+    "unique_en_ar_pairs": 99,
+    "unmatched_calls": [],
+    "coverage": "112/112 resolver call sites extracted (100%); 99 distinct EN/AR pairs.",
+    "sources": [
+      {
+        "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+        "sha256": "3c0c4165436a8316fcb87996bd56d6b346e054713af3c2f6a7c2774c534f5558",
+        "resolver_call_sites": 22,
+        "extracted_call_sites": 22
+      },
+      {
+        "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+        "sha256": "9192bb08bb35e4297fb422bb1aeb5592e1226b2d352ab6208878cbe94658a8c4",
+        "resolver_call_sites": 29,
+        "extracted_call_sites": 29
+      },
+      {
+        "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+        "sha256": "6999e98197dd7999fb3163877d84665b24fd5cecfe02e778be86a38b358588a2",
+        "resolver_call_sites": 13,
+        "extracted_call_sites": 13
+      },
+      {
+        "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+        "sha256": "1679a7e5104a065f5af4a92ba0ea07498cbb7d8bea7761954a084a1f7b9449d6",
+        "resolver_call_sites": 22,
+        "extracted_call_sites": 22
+      },
+      {
+        "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+        "sha256": "f5690c95dd82f3aecd407cfdb241fa181882038e71b778605e01a745020aae2c",
+        "resolver_call_sites": 17,
+        "extracted_call_sites": 17
+      },
+      {
+        "file": "lib/features/community/presentation/community_circles_page.dart",
+        "sha256": "267e23a1d9c5028d250bac29f2c74e447186b17dccbf55225133d335d528316f",
+        "resolver_call_sites": 1,
+        "extracted_call_sites": 1
+      },
+      {
+        "file": "lib/features/community/presentation/community_circle_detail_page.dart",
+        "sha256": "d87c5e911ddb420c6ebb64882892d2dfd716543d1a69ea7abc78897f013bfa5d",
+        "resolver_call_sites": 2,
+        "extracted_call_sites": 2
+      },
+      {
+        "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+        "sha256": "9acfdc0cc3f8af51858097d02996e750c3f005cdc969ce4ca9bb6345a127d588",
+        "resolver_call_sites": 5,
+        "extracted_call_sites": 5
+      },
+      {
+        "file": "lib/features/community/presentation/community_circle_reference_body.dart",
+        "sha256": "ff677df4c32b653726625e6342dfff5bac8f95787f9b39d605dafde03e7c5acd",
+        "resolver_call_sites": 1,
+        "extracted_call_sites": 1
+      },
+      {
+        "file": "lib/features/community/presentation/community_circle_owner_scope.dart",
+        "sha256": "79296d34e40e580580e41e1494ec7ac0c043bd9f92b5ac56ed65385b67f1f029",
+        "resolver_call_sites": 0,
+        "extracted_call_sites": 0
+      },
+      {
+        "file": "lib/features/community/presentation/community_circle_copy.dart",
+        "sha256": "a065b4db6b59da40e9d931760657a14b772785e32bc887a0160c8ab4342f3bf4",
+        "resolver_call_sites": 0,
+        "extracted_call_sites": 0
+      }
+    ],
+    "declaration_excluded": {
+      "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+      "symbol": "String circleManagementText(BuildContext context, String en, String ar)"
+    },
+    "other_copy_dependencies": [
+      "Unchanged BASE communityText labels such as Retry, Load more, existing circle taxonomy names and membership states remain owned by the existing locale catalogs.",
+      "The close tooltip comes from MaterialLocalizations, not a new role string.",
+      "Circle names/descriptions/rules and authorized participant names are server data and are not translated or replaced by stock copy."
+    ]
+  },
+  "placeholder_contract": {
+    "format": "Named {placeholder} in this JSON; retain the listed literal Dart $placeholder at source until native catalog integration.",
+    "must_preserve_placeholder_names": true,
+    "must_not_drop_or_duplicate_placeholders": true,
+    "single_pair_with_interpolation": "bil06.ui.use_at_most_maximum_characters",
+    "composed_labels": "The five composition templates below are source shapes, separate from the 99 translatable pairs. Insert authorized text as plain Flutter text; do not interpret it as HTML, localization keys or navigation.",
+    "bidi": "Use the existing app locale direction. Codes remain exact public identifiers; no user data is inserted into translation keys.",
+    "counts": "No live member/post/invitation count is fabricated by this catalog; existing server-derived counts retain the BASE formatter."
+  },
+  "messages": {
+    "bil06.ui.accept": {
+      "en": "Accept",
+      "ar": "قبول",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 136
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.accept_this_invitation_and_join_this_circle": {
+      "en": "Accept this invitation and join this circle?",
+      "ar": "هل تريد قبول هذه الدعوة والانضمام إلى الدائرة؟",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 417
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.accepted": {
+      "en": "Accepted",
+      "ar": "مقبولة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 113
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.anyone_eligible_can_join": {
+      "en": "Anyone eligible can join",
+      "ar": "يمكن لكل مستخدم مستوفٍ للشروط الانضمام",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 232
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.back_to_circle_management": {
+      "en": "Back to circle management",
+      "ar": "العودة إلى إدارة الدوائر",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 127
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.cancel_invitation": {
+      "en": "Cancel invitation",
+      "ar": "إلغاء الدعوة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 146
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.cancelled": {
+      "en": "Cancelled",
+      "ar": "ملغاة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 123
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.check_permissions_again": {
+      "en": "Check permissions again",
+      "ar": "التحقق من الصلاحيات مجددًا",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 287
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.check_result": {
+      "en": "Check result",
+      "ar": "التحقق من النتيجة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 181
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.check_the_text_and_privacy_choices_before_continuing": {
+      "en": "Check the text and privacy choices before continuing.",
+      "ar": "راجع النص واختيارات الخصوصية قبل المتابعة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 73
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.checking_the_saved_result": {
+      "en": "Checking the saved result…",
+      "ar": "جارٍ التحقق من النتيجة المحفوظة…",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 124
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.choose_an_image_you_have_permission_to_share_a": {
+      "en": "Choose an image you have permission to share. A selected preview stays on your device until you choose Upload. Images follow this circle’s access rules.",
+      "ar": "اختر صورة تملك حق مشاركتها. تبقى معاينة الصورة المختارة على جهازك حتى تضغط رفع. تتبع الصور صلاحيات الوصول إلى هذه الدائرة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 144
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.choose_circle_privacy": {
+      "en": "Choose circle privacy",
+      "ar": "اختر خصوصية الدائرة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 201
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.choose_how_members_join": {
+      "en": "Choose how members join.",
+      "ar": "اختر طريقة الانضمام.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 269
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.choose_image": {
+      "en": "Choose image",
+      "ar": "اختيار صورة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 269
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.choose_privacy": {
+      "en": "Choose privacy.",
+      "ar": "اختر الخصوصية.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 224
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.choosing_image": {
+      "en": "Choosing image…",
+      "ar": "جارٍ اختيار الصورة…",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 264
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.circle_created_and_confirmed": {
+      "en": "Circle created and confirmed.",
+      "ar": "تم إنشاء الدائرة والتحقق منها.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 391
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.circle_image": {
+      "en": "Circle image",
+      "ar": "صورة الدائرة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 197
+        },
+        {
+          "file": "lib/features/community/presentation/community_circles_page.dart",
+          "line": 450
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.circle_image_and_cover": {
+      "en": "Circle image and cover",
+      "ar": "صورة الدائرة وغلافها",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 234
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 135
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.circle_management_is_unavailable_until_access_can_be_verified": {
+      "en": "Circle management is unavailable until access can be verified. Existing circles remain available.",
+      "ar": "إدارة الدوائر غير متاحة حتى يتم التحقق من الصلاحية. تبقى الدوائر الحالية متاحة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 171
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.circle_name": {
+      "en": "Circle name",
+      "ar": "اسم الدائرة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 169
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.circle_rules_optional": {
+      "en": "Circle rules (optional)",
+      "ar": "قواعد الدائرة (اختياري)",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 285
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.continue_upload": {
+      "en": "Continue upload",
+      "ar": "متابعة الرفع",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 196
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.could_not_confirm_this_action_check_your_access_then": {
+      "en": "Could not confirm this action. Check your access, then retry the same request.",
+      "ar": "تعذر تأكيد هذا الإجراء. تحقق من صلاحيتك ثم أعد محاولة الطلب نفسه.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 139
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.could_not_finish_this_step_check_the_request_status": {
+      "en": "Could not finish this step. Check the request status before continuing.",
+      "ar": "تعذر إتمام هذه الخطوة. تحقق من حالة الطلب قبل المتابعة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 219
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.could_not_load_circle_search_results_try_again": {
+      "en": "Could not load circle search results. Try again.",
+      "ar": "تعذر تحميل نتائج البحث عن الدوائر. حاول مجددًا.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/presentation/community_circle_reference_body.dart",
+          "line": 151
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.could_not_read_that_image_choose_a_supported_image": {
+      "en": "Could not read that image. Choose a supported image and try again.",
+      "ar": "تعذر قراءة هذه الصورة. اختر صورة مدعومة وحاول مجددًا.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 213
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.could_not_refresh_invitations_check_again_for_their_current": {
+      "en": "Could not refresh invitations. Check again for their current state.",
+      "ar": "تعذر تحديث الدعوات. تحقق مجددًا لمعرفة حالتها الحالية.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 305
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.cover_image": {
+      "en": "Cover image",
+      "ar": "صورة الغلاف",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 198
+        },
+        {
+          "file": "lib/features/community/presentation/community_circle_detail_page.dart",
+          "line": 366
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.create_a_circle": {
+      "en": "Create a circle",
+      "ar": "إنشاء دائرة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 141
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 187
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.create_another_circle": {
+      "en": "Create another circle",
+      "ar": "إنشاء دائرة أخرى",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 421
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.create_this_circle": {
+      "en": "Create this circle",
+      "ar": "إنشاء هذه الدائرة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 356
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.creating_this_circle_makes_you_its_owner_invitations_are": {
+      "en": "Creating this circle makes you its owner. Invitations are sent only when you explicitly choose a recipient and send one.",
+      "ar": "إنشاء هذه الدائرة يجعلك مالكها. لا تُرسل الدعوات إلا عندما تختار مستلمًا وترسل الدعوة صراحةً.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 345
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.current_circle_images_could_not_be_verified": {
+      "en": "Current circle images could not be verified.",
+      "ar": "تعذر التحقق من صور الدائرة الحالية.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 161
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.decline": {
+      "en": "Decline",
+      "ar": "رفض",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 141
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.declined": {
+      "en": "Declined",
+      "ar": "مرفوضة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 118
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.description": {
+      "en": "Description",
+      "ar": "الوصف",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 186
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.discard_selection": {
+      "en": "Discard selection",
+      "ar": "إلغاء اختيار الصورة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 290
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.edit_details": {
+      "en": "Edit details",
+      "ar": "تعديل التفاصيل",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 381
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.enter_a_name_of_at_least_2_characters": {
+      "en": "Enter a name of at least 2 characters.",
+      "ar": "أدخل اسمًا من حرفين على الأقل.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 112
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.enter_a_valid_bil_code": {
+      "en": "Enter a valid BIL Code.",
+      "ar": "أدخل رمز BIL صالحًا.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 206
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.expanded_search_is_unavailable_the_results_below_include_only": {
+      "en": "Expanded search is unavailable. The results below include only loaded circles.",
+      "ar": "البحث الموسّع غير متاح. تقتصر النتائج أدناه على الدوائر المحمّلة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+          "line": 93
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.expired": {
+      "en": "Expired",
+      "ar": "منتهية الصلاحية",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 128
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.how_members_join": {
+      "en": "How members join",
+      "ar": "طريقة الانضمام",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 248
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.image_saved_and_confirmed": {
+      "en": "Image saved and confirmed.",
+      "ar": "تم حفظ الصورة والتحقق منها.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 346
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.image_unavailable": {
+      "en": "Image unavailable",
+      "ar": "الصورة غير متاحة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 274
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 282
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.invitation_access_is_unavailable": {
+      "en": "Invitation access is unavailable.",
+      "ar": "صلاحية الوصول إلى الدعوات غير متاحة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 295
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.invitation_required": {
+      "en": "Invitation required",
+      "ar": "تحتاج إلى دعوة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 242
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.invitation_saved_and_confirmed": {
+      "en": "Invitation saved and confirmed.",
+      "ar": "تم حفظ الدعوة والتحقق منها.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 286
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.invitation_state_confirmed": {
+      "en": "Invitation state confirmed.",
+      "ar": "تم التحقق من حالة الدعوة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 462
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.invitations": {
+      "en": "Invitations",
+      "ar": "الدعوات",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 166
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 211
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.invited_by": {
+      "en": "Invited by",
+      "ar": "الداعي",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 386
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.join_requests_require_approval": {
+      "en": "Join requests require approval",
+      "ar": "طلبات الانضمام تحتاج إلى موافقة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 237
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.keep_invitation_unchanged": {
+      "en": "Keep invitation unchanged",
+      "ar": "إبقاء الدعوة كما هي",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 440
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.load_more_invitations": {
+      "en": "Load more invitations",
+      "ar": "تحميل المزيد من الدعوات",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 335
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.manage_circles": {
+      "en": "Manage circles",
+      "ar": "إدارة الدوائر",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 137
+        },
+        {
+          "file": "lib/features/community/presentation/community_circle_detail_page.dart",
+          "line": 313
+        },
+        {
+          "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+          "line": 177
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.name_unavailable": {
+      "en": "Name unavailable",
+      "ar": "الاسم غير متاح",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 386
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.no_additional_circle_rules_provided": {
+      "en": "No additional circle rules provided.",
+      "ar": "لم تُضَف قواعد إضافية للدائرة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 336
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.no_description_provided": {
+      "en": "No description provided.",
+      "ar": "لم يُضَف وصف.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 322
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.no_invitations_are_available": {
+      "en": "No invitations are available.",
+      "ar": "لا توجد دعوات متاحة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 319
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.only_an_authorized_circle_manager_can_change_images": {
+      "en": "Only an authorized circle manager can change images.",
+      "ar": "يمكن لمدير الدائرة المخوّل فقط تغيير الصور.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 243
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 152
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.opening_an_invitation_does_not_accept_it": {
+      "en": "Opening an invitation does not accept it.",
+      "ar": "فتح الدعوة لا يعني قبولها.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 218
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.pending": {
+      "en": "Pending",
+      "ar": "قيد الانتظار",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 108
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.preview_unavailable": {
+      "en": "Preview unavailable.",
+      "ar": "المعاينة غير متاحة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 244
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.private": {
+      "en": "Private",
+      "ar": "خاصة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 228
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.public": {
+      "en": "Public",
+      "ar": "عامة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 227
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.public_circles_can_appear_in_discovery_private_circles_are": {
+      "en": "Public circles can appear in discovery. Private circles are visible only to people with access. Your selection does not accept Community policy for anyone.",
+      "ar": "قد تظهر الدوائر العامة في الاكتشاف. لا تظهر الدوائر الخاصة إلا لمن يملك صلاحية عرضها. لا يُعد اختيارك قبولًا لسياسة المجتمع نيابةً عن أي شخص.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 233
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.reading_this_list_does_not_accept_invitations_accept_joins": {
+      "en": "Reading this list does not accept invitations. Accept joins the named circle; it does not follow a person.",
+      "ar": "قراءة هذه القائمة لا تقبل الدعوات. القبول ينضم إلى الدائرة المحددة ولا يتابع أي شخص.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 172
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.recipient": {
+      "en": "Recipient",
+      "ar": "المستلم",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 386
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.recipient_bil_code": {
+      "en": "Recipient BIL Code",
+      "ar": "رمز BIL للمستلم",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 189
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 391
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.refresh_invitations": {
+      "en": "Refresh invitations",
+      "ar": "تحديث الدعوات",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 349
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.request_upload_cancellation": {
+      "en": "Request upload cancellation",
+      "ar": "طلب إلغاء الرفع",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 324
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.retry": {
+      "en": "Retry",
+      "ar": "إعادة المحاولة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 36
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.retry_cleanup": {
+      "en": "Retry cleanup",
+      "ar": "إعادة محاولة الحذف",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 207
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.retry_the_same_upload_request": {
+      "en": "Retry the same upload request",
+      "ar": "إعادة محاولة طلب الرفع نفسه",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 308
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.review_before_creating": {
+      "en": "Review before creating",
+      "ar": "المراجعة قبل الإنشاء",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 310
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.review_circle": {
+      "en": "Review circle",
+      "ar": "مراجعة الدائرة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 298
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.review_invitation": {
+      "en": "Review invitation",
+      "ar": "مراجعة الدعوة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 235
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.search_all_circles_available_to_you": {
+      "en": "Search all circles available to you.",
+      "ar": "ابحث في جميع الدوائر المتاحة لك.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 266
+        },
+        {
+          "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+          "line": 73
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.search_loaded_circles_only": {
+      "en": "Search loaded circles only",
+      "ar": "البحث في الدوائر المحمّلة فقط",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+          "line": 162
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.search_more_circles": {
+      "en": "Search more circles",
+      "ar": "البحث في مزيد من الدوائر",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 259
+        },
+        {
+          "file": "lib/features/community/presentation/community_circle_discovery_header.dart",
+          "line": 167
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.selected_image_preview": {
+      "en": "Selected image preview",
+      "ar": "معاينة الصورة المختارة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 230
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.selected_preview_not_uploaded": {
+      "en": "Selected preview — not uploaded",
+      "ar": "معاينة الصورة المختارة — لم تُرفع بعد",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 225
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.send_an_invitation_to_this_bil_code": {
+      "en": "Send an invitation to this BIL Code?",
+      "ar": "هل تريد إرسال دعوة إلى رمز BIL هذا؟",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 244
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.send_invitation": {
+      "en": "Send invitation",
+      "ar": "إرسال الدعوة",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 262
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.sending_your_request": {
+      "en": "Sending your request…",
+      "ar": "جارٍ إرسال طلبك…",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 119
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.the_image_could_not_be_uploaded_cancellation_was_confirmed": {
+      "en": "The image could not be uploaded. Cancellation was confirmed. You can choose the image again.",
+      "ar": "تعذر رفع الصورة. تم التأكد من إلغاء العملية. يمكنك اختيار الصورة مجددًا.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 153
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.the_result_is_not_confirmed_yet_check_the_result": {
+      "en": "The result is not confirmed yet. Check the result before trying a new action; this will not send the request again.",
+      "ar": "لم تتأكد النتيجة بعد. تحقق منها قبل تنفيذ إجراء جديد؛ لن يُعاد إرسال الطلب.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 129
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.the_upload_is_reserved_but_the_image_has_not": {
+      "en": "The upload is reserved but the image has not been uploaded. Continue or cancel this upload.",
+      "ar": "تم حجز عملية الرفع، لكن الصورة لم تُرفع. تابع الرفع أو ألغِه.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 134
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.this_operation_was_cancelled": {
+      "en": "This operation was cancelled.",
+      "ar": "أُلغيت هذه العملية.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 158
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.upload": {
+      "en": "Upload",
+      "ar": "رفع",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_media_sheet.dart",
+          "line": 280
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.upload_cancelled_temporary_image_cleanup_is_still_pending_retry": {
+      "en": "Upload cancelled. Temporary image cleanup is still pending. Retry cleanup before starting another upload.",
+      "ar": "أُلغي الرفع. ما زال حذف الصورة المؤقتة قيد الانتظار. أعد محاولة الحذف قبل بدء رفع جديد.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 147
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.use_at_most_maximum_characters": {
+      "en": "Use at most {maximum} characters.",
+      "ar": "استخدم {maximum} حرفًا كحد أقصى.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 119
+        }
+      ],
+      "placeholders": {
+        "maximum": {
+          "type": "integer",
+          "source_expression": "$maximum",
+          "meaning": "Maximum allowed Unicode code points for the current field.",
+          "allowed_current_values": [
+            80,
+            1000,
+            2000
+          ],
+          "format": "Dart integer interpolation; JSON uses named brace placeholder."
+        }
+      },
+      "dart_source_literals": {
+        "en": "Use at most $maximum characters.",
+        "ar": "استخدم $maximum حرفًا كحد أقصى."
+      }
+    },
+    "bil06.ui.use_the_exact_code_shared_by_the_recipient": {
+      "en": "Use the exact code shared by the recipient.",
+      "ar": "استخدم الرمز الذي شاركه المستلم نفسه.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 194
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.your_account_does_not_have_permission_to_create_circles": {
+      "en": "Your account does not have permission to create circles.",
+      "ar": "لا يملك حسابك صلاحية إنشاء دوائر.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 150
+        },
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 196
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.your_account_or_circle_changed_close_this_view_and": {
+      "en": "Your account or circle changed. Close this view and open it again.",
+      "ar": "تغير الحساب أو الدائرة. أغلق هذه الشاشة وافتحها مجددًا.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 54
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.pending_circle_actions_recovery_failed": {
+      "en": "Pending circle actions could not be recovered safely. New changes are blocked until recovery succeeds.",
+      "ar": "تعذر استعادة إجراءات الدوائر المعلّقة بأمان. تم إيقاف التغييرات الجديدة حتى تنجح الاستعادة.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_surfaces.dart",
+          "line": 177
+        }
+      ],
+      "placeholders": {}
+    },
+    "bil06.ui.recovered_upload_reservation_choose_same_image": {
+      "en": "The upload reservation was recovered after reopening. Choose the same image to continue safely, or cancel the reservation.",
+      "ar": "تمت استعادة حجز الرفع بعد إعادة فتح التطبيق. اختر الصورة نفسها للمتابعة بأمان، أو ألغِ الحجز.",
+      "review_status": {
+        "en": "REVIEWED_SOURCE",
+        "ar": "REVIEWED_SOURCE"
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 142
+        }
+      ],
+      "placeholders": {}
+    }
+  },
+  "composition_templates": [
+    {
+      "key": "bil06.compose.privacy_and_join_policy",
+      "en": "{privacy} · {joinPolicy}",
+      "ar": "{privacy} · {joinPolicy}",
+      "placeholders": {
+        "privacy": "Reviewed access label: public/private.",
+        "joinPolicy": "Reviewed open/request/invite policy label."
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_create_sheet.dart",
+          "line": 331,
+          "source_expression": "'${_accessLabel(context, review.access)} · ${_joinLabel(context, review.joinPolicy)}'"
+        }
+      ],
+      "status": "SOURCE_COMPOSITION_OF_REVIEWED_LABELS"
+    },
+    {
+      "key": "bil06.compose.invitation_person",
+      "en": "{personRole}: {personName}",
+      "ar": "{personRole}: {personName}",
+      "placeholders": {
+        "personRole": "Invited by for the current invitee; Recipient for a sender/manager.",
+        "personName": "Authorized inviterName/inviteeName from server; localized Name unavailable if null/blank. Never a private UUID."
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 386,
+          "source_expression": "'${received ? circleManagementText(context, 'Invited by', 'الداعي')"
+        }
+      ],
+      "status": "SOURCE_COMPOSITION_OF_REVIEWED_LABELS"
+    },
+    {
+      "key": "bil06.compose.recipient_public_code",
+      "en": "{recipientCodeLabel}: {recipientCode}",
+      "ar": "{recipientCodeLabel}: {recipientCode}",
+      "placeholders": {
+        "recipientCodeLabel": "Reviewed Recipient BIL Code label.",
+        "recipientCode": "Existing valid public BIL code, rendered only if supplied by authorized server response; never synthesized."
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 391,
+          "source_expression": "'${circleManagementText(context, 'Recipient BIL Code', 'رمز BIL للمستلم')}: ${record.recipientCode}'"
+        }
+      ],
+      "status": "SOURCE_COMPOSITION_OF_REVIEWED_LABELS"
+    },
+    {
+      "key": "bil06.compose.invitation_action_question",
+      "en": "{actionLabel}?",
+      "ar": "{actionLabel}?",
+      "placeholders": {
+        "actionLabel": "Reviewed Decline or Cancel invitation action label; Accept uses its complete reviewed question."
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_invites_sheet.dart",
+          "line": 422,
+          "source_expression": "'${_actionLabel(action)}?'"
+        }
+      ],
+      "note": "This records the existing source composition and ASCII question mark in both languages; it is not an additional independently translated message.",
+      "status": "SOURCE_COMPOSITION_OF_REVIEWED_LABELS"
+    },
+    {
+      "key": "bil06.compose.unavailable_media_semantics",
+      "en": "{mediaLabel}: {unavailableLabel}",
+      "ar": "{mediaLabel}: {unavailableLabel}",
+      "placeholders": {
+        "mediaLabel": "Reviewed Circle image or Cover image label.",
+        "unavailableLabel": "Reviewed Image unavailable label."
+      },
+      "source_refs": [
+        {
+          "file": "lib/features/community/circle_management/presentation/circle_management_widgets.dart",
+          "line": 274,
+          "source_expression": "'$label: ${circleManagementText(context, 'Image unavailable', 'الصورة غير متاحة')}'"
+        }
+      ],
+      "status": "SOURCE_COMPOSITION_OF_REVIEWED_LABELS"
+    }
+  ],
+  "runtime_widget_evidence": {
+    "run_id": "ui_fix_005",
+    "test_file": "test/parallel/bil06/circle_management_widget_test.dart",
+    "result": "22_PASS_0_FAIL_0_SKIP",
+    "exit_code": 0,
+    "source_before_after_identical": true,
+    "run_manifest_sha256": "8a21e98a404b10a34fc43062eebcce40dc316af21bd643c04e23a4e8988fd499",
+    "locale_cases": [
+      "management copy uses ar policy at large text without overflow",
+      "management copy uses fr policy at large text without overflow"
+    ],
+    "limits": "The recorded ui_fix_005 run belongs to the previously verified BIL-06 baseline. Completion-delta strings for durable recovery and recovered reservations were added afterward; this JSON does not relabel that earlier run as evidence for the new source."
+  },
+  "responsive_regression_evidence": {
+    "run_id": "ui_resilience_002",
+    "test_file": "test/features/community/community_topic_circle_resilience_test.dart",
+    "test_identical_to_base": true,
+    "base_test_sha256": "18a48d2049d591904e5a14a65ae47b933f4171e3e8d1ecc6d7dfc2af48a07355",
+    "result": "16_PASS_0_FAIL_0_SKIP",
+    "exit_code": 0,
+    "source_before_after_identical": true,
+    "run_manifest_sha256": "3dc2fec26a3de84ceaa30beec81b9041e6c4d45bdf761d42248bc68aefcfeac4",
+    "scope": "Complete unchanged BASE topic/circle resilience file, including EN/AR circle navigation at 320x568 and 200% text. Constrained headers retain exact labels as Material tooltips with at least 48x48 touch targets; ordinary-width labels are unchanged."
+  }
+}

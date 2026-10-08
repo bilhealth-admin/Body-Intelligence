@@ -1,0 +1,201 @@
+{
+  "status": "PASS_SOURCE_OWNERSHIP_WITH_STALE_MANIFEST_ENTRY",
+  "actualOtherRoleOwnedChanges": [],
+  "listedOtherRoleOwnedEntries": [
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+      "owner": "BIL-01",
+      "actuallyChanged": false,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": false
+    }
+  ],
+  "baseHashMismatch": [],
+  "staleProposalHashes": [
+    "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart"
+  ],
+  "entries": [
+    {
+      "path": "lib/data/repositories/meal_repository_copying.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/data/repositories/daily_log_repository.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/data/repositories/life_context_repository.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_message.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_action.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_undo.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_models.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_api.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_writes.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_snapshot.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+      "owner": "BIL-01",
+      "actuallyChanged": false,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": false
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery_owner.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_owner.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "owner": "BIL-00",
+      "actuallyChanged": true,
+      "baseHashMatches": true,
+      "proposedHashStillCurrent": true
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 import 'intelligence_action.dart';
+import '../app_commands/coach_health_tools.dart';
 import 'bil_navigation_registry.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import 'food_v2/coach_food_v2.dart';
 
 enum BilToolRisk { readOnly, lowRisk, reversibleWrite, sensitive, destructive }
 
@@ -152,6 +154,50 @@ class BilToolDescriptor {
         if (date != null && !_isCanonicalDate(date)) {
           return null;
         }
+      case 'log_foods':
+        final logDate = raw['date'];
+        if (logDate == null || !_isCanonicalDate(logDate)) return null;
+        if (!const {
+          'breakfast',
+          'lunch',
+          'dinner',
+          'snack',
+        }.contains(raw['mealType'])) {
+          return null;
+        }
+        final occurredAt = raw['occurredAt'];
+        if (occurredAt != null &&
+            (occurredAt is! String || DateTime.tryParse(occurredAt) == null)) {
+          return null;
+        }
+        final portions = raw['portions'];
+        if (portions is! List || portions.isEmpty || portions.length > 30) {
+          return null;
+        }
+        try {
+          CoachFoodReview(portions.map(CoachFoodPortion.fromJson));
+        } on Object {
+          return null;
+        }
+      case 'replace_meal_item':
+        final itemId = raw['itemId'];
+        final expected = raw['expected'];
+        if (itemId is! int || itemId < 1 || expected is! Map) return null;
+        final expectedId = expected['id'];
+        final expectedUuid = expected['uuid'];
+        final expectedRevision = expected['revision'];
+        if (expectedId != itemId ||
+            expectedUuid is! String ||
+            expectedUuid.isEmpty ||
+            expectedRevision is! int ||
+            expectedRevision < 1) {
+          return null;
+        }
+        try {
+          CoachFoodPortion.fromJson(raw['replacement']);
+        } on Object {
+          return null;
+        }
       case 'update_meal_item':
         if (raw['itemId'] is! int || (raw['itemId'] as int) < 1) return null;
         final quantity = raw['quantityGrams'];
@@ -178,14 +224,19 @@ class BilToolDescriptor {
         }
       case 'move_meal_item':
         if (raw['itemId'] is! int || (raw['itemId'] as int) < 1) return null;
-        if (!const {
-          'breakfast',
-          'lunch',
-          'dinner',
-          'snack',
-        }.contains(raw['mealType'])) {
+        final mealType = raw['mealType'];
+        final date = raw['date'];
+        if (mealType == null && date == null) return null;
+        if (mealType != null &&
+            !const {
+              'breakfast',
+              'lunch',
+              'dinner',
+              'snack',
+            }.contains(mealType)) {
           return null;
         }
+        if (date != null && !_isCanonicalDate(date)) return null;
     }
     return Map<String, Object?>.unmodifiable(raw);
   }
@@ -212,6 +263,7 @@ class BilToolRegistry {
   const BilToolRegistry();
 
   static const tools = <String, BilToolDescriptor>{
+    ...coachHealthToolsByName,
     'navigate': BilToolDescriptor(
       name: 'navigate',
       type: IntelligenceActionType.navigate,
@@ -328,6 +380,22 @@ class BilToolRegistry {
         'fat',
       },
     ),
+    'log_foods': BilToolDescriptor(
+      name: 'log_foods',
+      type: IntelligenceActionType.logFoods,
+      risk: BilToolRisk.reversibleWrite,
+      trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
+      requiredArguments: {'date', 'mealType', 'portions'},
+      allowedArguments: {'date', 'mealType', 'occurredAt', 'portions'},
+    ),
+    'replace_meal_item': BilToolDescriptor(
+      name: 'replace_meal_item',
+      type: IntelligenceActionType.replaceMealItem,
+      risk: BilToolRisk.reversibleWrite,
+      trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
+      requiredArguments: {'itemId', 'expected', 'replacement'},
+      allowedArguments: {'itemId', 'expected', 'replacement'},
+    ),
     'update_meal_item': BilToolDescriptor(
       name: 'update_meal_item',
       type: IntelligenceActionType.updateMealItem,
@@ -349,8 +417,8 @@ class BilToolRegistry {
       type: IntelligenceActionType.moveMealItem,
       risk: BilToolRisk.reversibleWrite,
       trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
-      requiredArguments: {'itemId', 'mealType'},
-      allowedArguments: {'itemId', 'mealType'},
+      requiredArguments: {'itemId'},
+      allowedArguments: {'itemId', 'mealType', 'date'},
     ),
     'request_account_deletion': BilToolDescriptor(
       name: 'request_account_deletion',

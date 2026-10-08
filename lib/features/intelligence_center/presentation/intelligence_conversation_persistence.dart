@@ -178,6 +178,8 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
       if (!loadIsCurrent()) return;
       await _restoreCoachNativeUndoOperations(restored);
       if (!loadIsCurrent()) return;
+      await _restoreCoachSettingsUndoOperations(restored);
+      if (!loadIsCurrent()) return;
       // Keep the fingerprint for diagnostics/migrations, but never rewrite the
       // transcript merely because the current health context changed.
       if (contextFingerprintChanged ||
@@ -434,6 +436,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
 
   Future<void> _invalidatePendingConversationSaves() async {
     conversationPersistenceEpoch += 1;
+    _cancelCoachMediaRequests();
     _disposePreparedCoachNativeActions(cancelConfirmedCommit: true);
     _disposePreparedCoachMealActions();
     if (mounted) _updateState(undoOperations.clear);

@@ -1,0 +1,7 @@
+Analyzing 4 items...                                            
+
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • test/parallel/bil04/health_receipt_recovery_test.dart:694:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • test/parallel/bil04/health_receipt_recovery_test.dart:700:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • test/parallel/bil04/health_receipt_recovery_test.dart:712:7 • curly_braces_in_flow_control_structures
+
+3 issues found. (ran in 22.0s)

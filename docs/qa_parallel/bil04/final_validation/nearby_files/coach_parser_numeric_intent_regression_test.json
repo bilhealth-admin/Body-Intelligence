@@ -1,0 +1,40 @@
+{
+  "name": "coach_parser_numeric_intent_regression_test",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/features/intelligence_center/coach_parser_numeric_intent_regression_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "started_at_utc": "2026-10-07T09:53:18.686785+00:00",
+  "ended_at_utc": "2026-10-07T09:53:22.618754+00:00",
+  "duration_seconds": 3.932,
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "TZ": "Asia/Almaty",
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime_requirement": "Flutter 3.44.6 / Dart 3.12.2, unchanged pubspec.lock",
+    "live_providers": false,
+    "test_data": "synthetic, local host"
+  },
+  "exit_code": 0,
+  "result": "PASS",
+  "passed_test_count": 80,
+  "source_digest_algorithm": "SHA256 of sorted compact JSON path-to-SHA256 map",
+  "source_scope": "lib/test/tool .dart/.py/.sh/.yaml/.json and four root build configuration files",
+  "source_digest_before": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "source_digest_after": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "source_stable": true,
+  "source_file_count": 2979,
+  "source_manifest": "coach_parser_numeric_intent_regression_test.sources.json",
+  "changed_during_run": [],
+  "log": "coach_parser_numeric_intent_regression_test.txt",
+  "log_sha256": "b5a8abb6309f9a3fd186c5fa4cb52dae51a1daa31fe403800855e73bb00a8eb2",
+  "skips_or_exclusions_added_by_recorder": false
+}

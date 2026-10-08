@@ -1,0 +1,53 @@
+from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+import time
+
+ROOT = Path('/workspace/scratch/ada7a97de764')
+WORK = ROOT / 'validation'
+OUT = ROOT / 'repository/docs/qa_parallel/bil04/final_validation'
+FILES = [WORK / 'test/features/nutrition' / name for name in ['coach_meal_commit_boundary_test.dart', 'coach_meal_compensation_readback_test.dart', 'coach_meal_undo_permission_test.dart', 'coach_meal_quantity_unit_test.dart']]
+assert all(p.is_file() for p in FILES)
+started = time.monotonic()
+reports = []
+env = {**os.environ, 'TAR_OPTIONS': '--no-same-owner'}
+for path in FILES:
+    relative = path.relative_to(WORK).as_posix()
+    name = path.stem
+    command = [str(ROOT / 'runtime/with-flutter'), 'test', '--frontend-server-starter-path=' + str(ROOT / 'runtime/compiler_heap_starter.dart'), '--no-pub', '--reporter', 'expanded', '--concurrency=1', relative]
+    record = ['python3', 'tool/qa_parallel/bil04/record_validation.py', '--name', name, '--output', str(OUT / 'food_journal_files'), '--', *command]
+    result = subprocess.run(record, cwd=WORK, env=env)
+    if result.returncode != 0:
+        print('Stopped at nonpassing file:', relative, flush=True)
+        sys.exit(result.returncode)
+    reports.append(json.loads((OUT / 'food_journal_files' / (name + '.json')).read_text()))
+
+reference = reports[0]
+digest = reference['source_digest_before']
+assert all(r['result'] == 'PASS' and r['exit_code'] == 0 and r['source_stable']
+           and r['source_digest_before'] == r['source_digest_after'] == digest
+           and isinstance(r['passed_test_count'], int) for r in reports)
+source_name = 'food_journal_regressions.sources.json'
+(OUT / source_name).write_bytes((OUT / 'food_journal_files' / reference['source_manifest']).read_bytes())
+summary = {
+    'name': 'food_journal_regressions', 'result': 'PASS', 'exit_code': 0,
+    'passed_test_count': sum(r['passed_test_count'] for r in reports),
+    'test_file_count': len(FILES), 'single_process_run': False,
+    'aggregation': 'Four unchanged BASE food journal, commit/readback, Undo permission and quantity-unit regression files, one serial Flutter process per file. Counts are from disjoint files; no previous attempts or overlapping suites are added.',
+    'command_argv': [r['command_argv'] for r in reports], 'cwd': str(WORK),
+    'environment': reference['environment'], 'duration_seconds': round(time.monotonic() - started, 3),
+    'source_digest_algorithm': reference['source_digest_algorithm'],
+    'source_scope': reference['source_scope'], 'source_digest_before': digest,
+    'source_digest_after': digest, 'source_stable': True,
+    'source_file_count': reference['source_file_count'], 'source_manifest': source_name,
+    'file_reports': ['food_journal_files/' + r['name'] + '.json' for r in reports],
+    'auxiliary_runtime_configuration': 'compiler_launch_configuration.json',
+    'log': 'food_journal_regressions.txt', 'skips_or_exclusions_added': False,
+}
+(OUT / 'food_journal_regressions.json').write_text(json.dumps(summary, indent=2) + '\n')
+lines = [f"{r['name']}: PASS {r['passed_test_count']} tests, exit 0, source {digest}" for r in reports]
+lines.append(f"Total: {summary['passed_test_count']} passing cases across {len(FILES)} independent serial file runs.")
+(OUT / 'food_journal_regressions.txt').write_text('\n'.join(lines) + '\n')
+print(json.dumps({k: summary[k] for k in ('result', 'passed_test_count', 'test_file_count', 'single_process_run', 'source_stable')}, indent=2), flush=True)

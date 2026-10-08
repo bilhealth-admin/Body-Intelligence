@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/parallel/bil04/fasting_notification_sync_test.dart",
+    "--plain-name",
+    "idle notification queue can be reused across independent visit zones"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 1,
+  "elapsed_seconds": 5.54,
+  "status": "FAIL",
+  "expected_to_fail_before_fix": true,
+  "notification_source_sha256": "e8e01f4bd06cd20623c9ea0e48a71d8d3380c3b26a7367a25a05ff89a258e977"
+}

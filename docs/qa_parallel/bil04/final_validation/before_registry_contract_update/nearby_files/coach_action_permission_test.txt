@@ -1,0 +1,4 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_action_permission_test.dart
+00:00 +0: read-only blocks writes but preserves reads and navigation
+00:00 +1: write allowed never bypasses sensitive confirmation
+00:00 +2: All tests passed!

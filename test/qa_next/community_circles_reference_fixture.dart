@@ -3,6 +3,47 @@ part of 'community_circles_reference_capture_test.dart';
 const _viewer = '11111111-1111-4111-8111-111111111111';
 const _circleChanged = 'Your account changed. Return to Community to continue.';
 
+Future<http.Response> _circleVisualHttp(http.Request request) async {
+  if (request.url.path == '/auth/v1/token') {
+    final claims = base64Url
+        .encode(utf8.encode(jsonEncode({'sub': _viewer, 'exp': 4102444800})))
+        .replaceAll('=', '');
+    return http.Response(
+      jsonEncode({
+        'access_token': 'eyJhbGciOiJIUzI1NiJ9.$claims.fixture',
+        'refresh_token': 'synthetic-refresh',
+        'token_type': 'bearer',
+        'expires_in': 3600,
+        'user': {
+          'id': _viewer,
+          'email': 'circle-visual@example.invalid',
+          'app_metadata': {},
+          'user_metadata': {},
+          'aud': 'authenticated',
+          'created_at': '2026-10-07T00:00:00Z',
+        },
+      }),
+      200,
+      headers: {'content-type': 'application/json'},
+      request: request,
+    );
+  }
+  if (request.url.path == '/rest/v1/rpc/bil_circle_read_v1') {
+    return http.Response(
+      jsonEncode({
+        'code': 'PGRST202',
+        'details': null,
+        'hint': null,
+        'message': 'Could not find function public.bil_circle_read_v1()',
+      }),
+      404,
+      headers: {'content-type': 'application/json'},
+      request: request,
+    );
+  }
+  throw StateError('Unexpected visual fixture transport: ${request.url.path}');
+}
+
 CommunityCircle _circleRecord(
   String slug, {
   int members = 17,

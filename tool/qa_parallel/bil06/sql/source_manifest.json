@@ -1,0 +1,95 @@
+{
+  "role_id": "BIL-06_SQL",
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "production_deployed": false,
+  "source_files": [
+    {
+      "path": "docs/qa_parallel/bil06/SERVER_CONTRACT.md",
+      "status": "added",
+      "sha256": "bf9cb0d44977758273ad5e66a8a25fdbb8fc22608bb9ca565d5c333681a6d8be",
+      "bytes": 19571
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/circle_management_v1.sql",
+      "status": "added",
+      "sha256": "c746aecc2928c731a661dd18c5e25bf9291f8ba796e06bb69f3f121483383230",
+      "bytes": 47821
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/fixtures/account_deletion_storage_base.ts",
+      "status": "added",
+      "sha256": "505fe46b057f9f8ad12b18e5fa89316d32d402dae34edd4752e9876230ee9d84",
+      "bytes": 3144
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/fixtures/base_circles_foundation.sql",
+      "status": "added",
+      "sha256": "d18197fe31f5c005e94c313aeef5b4e7e641982548383e4e3ff17e7e254376a1",
+      "bytes": 13885
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/fixtures/base_profile_visibility.sql",
+      "status": "added",
+      "sha256": "6ea6aa5ceb21ad811b4ffea4b6934d1e29c34b7adee33fb22f257d6902d8a940",
+      "bytes": 872
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/fixtures/base_public_code_resolver.sql",
+      "status": "added",
+      "sha256": "522a759916e7af8fe9cfe434cd381b79559b2706cddeb95a06ac2e1984965400",
+      "bytes": 3853
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/fixtures/seed.sql",
+      "status": "added",
+      "sha256": "73128702f441df9130ad0ec5dfccf6fb08ebee56a9741287e53c0bc180f096f3",
+      "bytes": 2294
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/runtime-package-lock.json",
+      "status": "added",
+      "sha256": "430de55bc9862f6ae13376d0d4fc6d47b608bd08d4ec692fa26d62c01425e3d8",
+      "bytes": 9835
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql/runtime-package.json",
+      "status": "added",
+      "sha256": "d9dc6b951a7e4d6ac0e550832e25d94e19407e9f25fcbe7a1208fee1955a5265",
+      "bytes": 129
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql_account_deletion.patch",
+      "status": "added",
+      "sha256": "ab637fcecac9fd9e374d860a429b97005063e040357f4705f628dbfdbc950828",
+      "bytes": 398
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql_deletion_test.mjs",
+      "status": "added",
+      "sha256": "079f68901e68d3f9adc2dff0195abf86582a272ef4c2df470d31e29ee06fafb3",
+      "bytes": 5182
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql_run.mjs",
+      "status": "added",
+      "sha256": "252edf1706f4ead487912f3b7bef998aafb347ee70632373d171c29d90889ba3",
+      "bytes": 8006
+    },
+    {
+      "path": "tool/qa_parallel/bil06/sql_tests.mjs",
+      "status": "added",
+      "sha256": "98bf7661358ec3af3ae035f68dae0888e409d65cf5fc189719c921199efbb524",
+      "bytes": 31168
+    }
+  ],
+  "source_digest": "2249fc2cff96e067f05dfeb9207ebcbb47e2887e409fa9cd8310591475567608",
+  "sql_groups_pass": 40,
+  "cleanup_groups_pass": 4,
+  "native_independent_session_concurrency": "NOT_RUN",
+  "sql_groups_pass_scope": "PRE_COMPLETION_BASELINE_ONLY",
+  "completion_delta_groups_added": 1,
+  "expected_groups_in_current_source": 41,
+  "completion_delta_runtime_status": "NOT_RUN_CURRENT_CONTAINER",
+  "completion_delta_runtime_reason": "PGlite/Node runtime dependencies from the prior run are not installed in the current container; baseline evidence is retained without relabeling it as a current-source run.",
+  "cleanup_groups_pass_scope": "PRE_COMPLETION_BASELINE_UNCHANGED_PATH"
+}

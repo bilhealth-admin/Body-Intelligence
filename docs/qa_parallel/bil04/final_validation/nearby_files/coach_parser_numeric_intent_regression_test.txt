@@ -1,0 +1,82 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_parser_numeric_intent_regression_test.dart
+00:00 +0: target unit conversion precedes kilogram bounds: Set my target weight to 180 lb
+00:00 +1: target unit conversion precedes kilogram bounds: Change target weight to 180 pounds
+00:00 +2: target unit conversion precedes kilogram bounds: اجعل هدفي ١٨٠ رطل
+00:00 +3: target unit conversion precedes kilogram bounds: غير الوزن المستهدف إلى ١٨٠ باوند
+00:00 +4: target unit conversion precedes kilogram bounds: Set my target weight to 1000 lb
+00:00 +5: target unit conversion precedes kilogram bounds: Set my target weight to 78 kg
+00:00 +6: unknown, conflicting or unsafe mass cannot become a write: Set my target weight to 80 stones
+00:00 +7: unknown, conflicting or unsafe mass cannot become a write: My weight is 80 stones
+00:00 +8: unknown, conflicting or unsafe mass cannot become a write: اجعل هدفي ٨٠ أونصة
+00:00 +9: unknown, conflicting or unsafe mass cannot become a write: My weight is 80 percent
+00:00 +10: unknown, conflicting or unsafe mass cannot become a write: Set my target weight to 100 g
+00:00 +11: unknown, conflicting or unsafe mass cannot become a write: Set my target weight to 20 lb
+00:00 +12: unknown, conflicting or unsafe mass cannot become a write: Set my target weight to 80 kg or 175 lb
+00:00 +13: unknown, conflicting or unsafe mass cannot become a write: My weight is 80 kg or 82 kg
+00:00 +14: unknown, conflicting or unsafe mass cannot become a write: My weight is 80 kg/lb
+00:00 +15: explicit water amount keeps its actual volume: سجل ٢٥٠ مليلتر ماء
+00:00 +16: explicit water amount keeps its actual volume: سجل ٢٥٠ ملليلتر ماء
+00:00 +17: explicit water amount keeps its actual volume: شربت لترين ماء
+00:00 +18: explicit water amount keeps its actual volume: شربت ربع لتر ماء
+00:00 +19: explicit water amount keeps its actual volume: شربت لتر ونص ماء
+00:00 +20: explicit water amount keeps its actual volume: Log 1.5 liters of water
+00:00 +21: explicit water amount keeps its actual volume: شربت نص لتر موية
+00:00 +22: explicit water amount keeps its actual volume: Log .5 liters of water
+00:00 +23: unknown or ambiguous water measure never falls through as ml: Log 2 gallons of water
+00:00 +24: unknown or ambiguous water measure never falls through as ml: Log 2 deciliters of water
+00:00 +25: unknown or ambiguous water measure never falls through as ml: Log 2 tablespoons of water
+00:00 +26: unknown or ambiguous water measure never falls through as ml: شربت ٢ عبوة ماء
+00:00 +27: unknown or ambiguous water measure never falls through as ml: شربت ٢ قناني ماء
+00:00 +28: unknown or ambiguous water measure never falls through as ml: شربت ٢ ديسيلتر ماء
+00:00 +29: unknown or ambiguous water measure never falls through as ml: Log 250 ml and 500 ml water
+00:00 +30: unknown or ambiguous water measure never falls through as ml: سجل ٢٥٠ مل و٥٠٠ مل ماء
+00:00 +31: unknown or ambiguous water measure never falls through as ml: شربت ٢ ونص لتر ماء
+00:00 +32: unknown or ambiguous water measure never falls through as ml: شربت نصف ونصف لتر ماء
+00:00 +33: unknown or ambiguous water measure never falls through as ml: Log 1 or 2 liters of water
+00:00 +34: unknown or ambiguous water measure never falls through as ml: Log water 1e3 ml
+00:00 +35: unknown or ambiguous water measure never falls through as ml: Log 1,905 ml water
+00:00 +36: unknown or ambiguous water measure never falls through as ml: Should I drink 500 ml water?
+00:00 +37: calorie-only text prepares only known calories: 1905 calories
+00:00 +38: calorie-only text prepares only known calories: 1905 kcal
+00:00 +39: calorie-only text prepares only known calories: Log 1905 calories only
+00:00 +40: calorie-only text prepares only known calories: 1905 calories without meals
+00:00 +41: calorie-only text prepares only known calories: السعرات: ١٩٠٥
+00:00 +42: calorie-only text prepares only known calories: سجل ١٩٠٥ سعرة حرارية
+00:00 +43: calorie-only text prepares only known calories: أضف ۱۹۰۵ سعرات فقط
+00:00 +44: calorie-only text prepares only known calories: I ate 1905 calories for dinner
+00:00 +45: calorie-only text prepares only known calories: Log 1905 calories for lunch on 2026-10-01
+00:00 +46: calorie-only text prepares only known calories: أضف ١٩٠٥ سعرة للعشاء بتاريخ ٢٠٢٦-١٠-٠١
+00:00 +47: a total, food mixture or ambiguous calorie statement does not append: My total today is 1905 calories
+00:00 +48: a total, food mixture or ambiguous calorie statement does not append: Log a total of 1905 calories
+00:00 +49: a total, food mixture or ambiguous calorie statement does not append: إجمالي اليوم ١٩٠٥ سعرات
+00:00 +50: a total, food mixture or ambiguous calorie statement does not append: Make today total 1905 calories
+00:00 +51: a total, food mixture or ambiguous calorie statement does not append: 1905 calories or 1800 calories
+00:00 +52: a total, food mixture or ambiguous calorie statement does not append: 1905 calories and 30 g protein
+00:00 +53: a total, food mixture or ambiguous calorie statement does not append: 19,05 calories
+00:00 +54: a total, food mixture or ambiguous calorie statement does not append: 1905 calories per 100 g
+00:00 +55: a total, food mixture or ambiguous calorie statement does not append: I ate two eggs and 1905 calories
+00:00 +56: a total, food mixture or ambiguous calorie statement does not append: 1905 kJ
+00:00 +57: a total, food mixture or ambiguous calorie statement does not append: 1905 calories?
+00:00 +58: a total, food mixture or ambiguous calorie statement does not append: 0 calories
+00:00 +59: a total, food mixture or ambiguous calorie statement does not append: -1905 calories
+00:00 +60: a total, food mixture or ambiguous calorie statement does not append: 10001 calories
+00:00 +61: a total, food mixture or ambiguous calorie statement does not append: 1905 calories for breakfast and dinner
+00:00 +62: a total, food mixture or ambiguous calorie statement does not append: Log 1905 calories on 2026-02-30
+00:00 +63: a total, food mixture or ambiguous calorie statement does not append: Log 1905 calories on 2026-10-01 and 2026-10-02
+00:00 +64: calorie date uses the caller local calendar: Log 1905 calories today
+00:00 +65: calorie date uses the caller local calendar: Log 1905 calories yesterday
+00:00 +66: calorie date uses the caller local calendar: سجل ١٩٠٥ سعرة امس
+00:00 +67: calorie date uses the caller local calendar: Yesterday log 1905 calories on 2025-12-20
+00:00 +68: weight date uses the same caller local calendar: My weight is 82 kg today
+00:00 +69: weight date uses the same caller local calendar: My weight is 82 kg yesterday
+00:00 +70: weight date uses the same caller local calendar: سجل وزني ٨٢ كغ امس
+00:00 +71: weight date uses the same caller local calendar: Yesterday my weight is 82 kg on 2025-12-20
+00:00 +72: unsupported/conflicting dates cannot target an unintended day: Log 1905 calories today yesterday
+00:00 +73: unsupported/conflicting dates cannot target an unintended day: My weight is 82 kg today yesterday
+00:00 +74: unsupported/conflicting dates cannot target an unintended day: Log 250 ml water on 2026-02-30
+00:00 +75: water keeps its explicit local calendar day: Log 250 ml water today
+00:00 +76: water keeps its explicit local calendar day: Log 250 ml water yesterday
+00:00 +77: water keeps its explicit local calendar day: Log 250 ml water on 2025-12-31
+00:00 +78: water keeps its explicit local calendar day: سجل ٢٥٠ مل ماء امس
+00:00 +79: water keeps its explicit local calendar day: Yesterday log 250 ml water on 2025-12-20
+00:00 +80: All tests passed!

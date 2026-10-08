@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-07T09:09:40.652939+00:00",
+  "base_commit": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "attestation_scope": "Current handoff source hashes captured after executions. Separate ui_final_source_stability.json records actual before/after hashes for all validation/lib Dart files, both UI files and pubspec/lock during the final 25-case run. No per-run before/after claim for older logs. Root final aggregate is the merge-point gate.",
+  "owned_sources": [
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+      "repository_sha256": "f9ba156f64ad6295a671dac7f5b75102f18f293f6abeb80ce4a239b9fd3119c4",
+      "validation_sha256": "f9ba156f64ad6295a671dac7f5b75102f18f293f6abeb80ce4a239b9fd3119c4",
+      "identical": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_activity_adapter.dart",
+      "repository_sha256": "db0307bc430ce7aa4de09561cbbe9643782802cd1c3dc17ae1729c937eab1e99",
+      "validation_sha256": "db0307bc430ce7aa4de09561cbbe9643782802cd1c3dc17ae1729c937eab1e99",
+      "identical": true
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_plan_adapter.dart",
+      "repository_sha256": "551bda60a87f6ff3894f80875271273a008d3fed005799f4703e4ff897919f9a",
+      "validation_sha256": "551bda60a87f6ff3894f80875271273a008d3fed005799f4703e4ff897919f9a",
+      "identical": true
+    },
+    {
+      "path": "test/parallel/bil04/activity_command_adapter_test.dart",
+      "repository_sha256": "0ffb907efb7104ff0e7897fca809f51ed1a194efda68b53b7e71e5a89e4d3de1",
+      "validation_sha256": "0ffb907efb7104ff0e7897fca809f51ed1a194efda68b53b7e71e5a89e4d3de1",
+      "identical": true
+    },
+    {
+      "path": "test/parallel/bil04/plan_command_adapter_test.dart",
+      "repository_sha256": "ea4aba241ab843f876c554cabfa757585007d9a3f3ca88b479ace9eb444ddbde",
+      "validation_sha256": "ea4aba241ab843f876c554cabfa757585007d9a3f3ca88b479ace9eb444ddbde",
+      "identical": true
+    },
+    {
+      "path": "test/parallel/bil04/activity_plan_native_test.dart",
+      "repository_sha256": "cf6a5fbfda6e0ae8b14ce2c2ff7c71367c0f48fa001d748e26576dc154418d8f",
+      "validation_sha256": "cf6a5fbfda6e0ae8b14ce2c2ff7c71367c0f48fa001d748e26576dc154418d8f",
+      "identical": true
+    },
+    {
+      "path": "test/parallel/bil04/activity_plan_native_failure_cases.dart",
+      "repository_sha256": "1fc942a1d454e8bf3d2225fff913fbf3a22ae1147e24602f02b11c655598cc7a",
+      "validation_sha256": "1fc942a1d454e8bf3d2225fff913fbf3a22ae1147e24602f02b11c655598cc7a",
+      "identical": true
+    },
+    {
+      "path": "test/parallel/bil04/health_coach_ui_test.dart",
+      "repository_sha256": "3b1cae690abe092edec1fefadbb5126cd6bb858791ce08450788c61b595f19e1",
+      "validation_sha256": "3b1cae690abe092edec1fefadbb5126cd6bb858791ce08450788c61b595f19e1",
+      "identical": true
+    },
+    {
+      "path": "test/parallel/bil04/health_coach_ui_fixture.dart",
+      "repository_sha256": "af0bdbe2600c45b8bd8384fa57d00546c32001b9bf3364808826b55090f8d2ef",
+      "validation_sha256": "af0bdbe2600c45b8bd8384fa57d00546c32001b9bf3364808826b55090f8d2ef",
+      "identical": true
+    }
+  ],
+  "all_owned_identical_between_repository_and_validation": true,
+  "integration_validation_sources": [
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "sha256": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226"
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+      "sha256": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba"
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "sha256": "ae013dc9f637ae0a51a81cc7d853651ad39323cdcbd42f3244ac4f3ed0ac491e"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_adapter.dart",
+      "sha256": "1ef94c735dcd1f867ad2fa155ac764d2131c93324565f871dd04a088510b18f6"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+      "sha256": "376c25027bb531efb75e968f6cf2bcdc8cf78ac0c7bb03013387dae9656b1346"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart",
+      "sha256": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+      "sha256": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_recovery.dart",
+      "sha256": "6a328d90d14036260ed919bdd24c7bdc334a8d5d0319c38a3414bc7e97d85828"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart",
+      "sha256": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265"
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+      "sha256": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "sha256": "309231e02d1fcadebcbc45d638e43b094e1dfe87c8de5723ffe80ebaeb06c545"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "sha256": "c9aff8ba0ec502fc64b149a8920c5fbc6b59582d7ae487bfb881e7c72720a036"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "sha256": "815db53a68ba9bf6c0f160dded4f73df842a5ddb7e7f5205706e3e24a003c17c"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_owner.dart",
+      "sha256": "50ce0b32672526da8f8f03ba6bad60e8a3646db0b58635fc94d3c233a89162cb"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_conversation_persistence.dart",
+      "sha256": "5197192ac41b68b0689a5be45100661f69d48627d87a2494ce343cd031290b14"
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_repository_test.dart",
+      "sha256": "f3dd688340b4e163f165f907bf4cc3e29849ae810d0f1e85d3c33070100bb07a"
+    }
+  ]
+}

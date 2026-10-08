@@ -1,0 +1,10 @@
+coach_native_command_behavior_test: PASS 48 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_native_command_repository_test: PASS 43 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_meal_gram_boundary_behavior_test: PASS 4 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_food_receipt_binding_test: PASS 13 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_nutrition_remaining_evidence_test: PASS 74 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_action_admission_contract_test: PASS 29 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_parser_numeric_intent_regression_test: PASS 80 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+coach_action_permission_test: PASS 2 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+bil_tool_registry_test: PASS 7 tests, exit 0, source 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+Total: 300 passing cases across 9 independent serial file runs.

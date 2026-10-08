@@ -62,6 +62,19 @@ abstract final class _CommunityRoutes {
           ),
         ),
       ),
+      GoRoute(
+        path: '/community/post/:postId',
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityPostReceiptPage(
+                postId: state.pathParameters['postId']!,
+              ),
+            ),
+          ),
+        ),
+      ),
       // Referral attribution must be reachable before Premium or even sign-in.
       // Server policy still decides whether tracked invitations are active.
       GoRoute(
@@ -186,6 +199,28 @@ abstract final class _CommunityRoutes {
           feature: PremiumGateFeature.community,
           child: CommunityEntryGate(
             child: CommunitySurface(child: NewCommunityMessagePage()),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/community/channels',
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityEntryGate(
+            child: CommunitySurface(child: CommunityChannelsRoute()),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/community/channels/:channelId',
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityEntryGate(
+            child: CommunitySurface(
+              child: CommunityChannelsRoute(
+                channelId: state.pathParameters['channelId']!,
+              ),
+            ),
           ),
         ),
       ),

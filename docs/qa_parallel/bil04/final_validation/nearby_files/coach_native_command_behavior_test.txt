@@ -1,0 +1,72 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_behavior_test.dart
+00:00 +0: water confirmation rejects delivered owner A B A
+00:02 +1: weight changed during confirmation is preserved
+00:02 +2: water Undo preserves a later revision of its row
+00:03 +3: weight Undo preserves a later check-in revision
+00:04 +4: goal Undo preserves later profile changes atomically
+00:04 +5: measurement receipt includes the committed preserved fields
+00:04 +6: measurement Undo preserves a later partial edit
+00:05 +7: memory Undo restores a deduplicated pre-existing memory
+00:05 +8: native recovery restores log_water Undo without replay
+00:06 +9: native recovery restores log_weight Undo without replay
+00:07 +10: native recovery restores update_goal Undo without replay
+00:07 +11: native recovery restores save_measurements Undo without replay
+00:08 +12: native recovery restores save_memory Undo without replay
+00:09 +13: native recovery rejects wrong digest without touching data
+00:09 +14: native recovery rejects wrong tool without touching data
+00:09 +15: native recovery rejects wrong entity without touching data
+00:10 +16: native recovery rejects wrong entity kind without touching data
+00:10 +17: native recovery rejects not committed without touching data
+00:11 +18: native recovery rejects not verified without touching data
+00:11 +19: native recovery rejects already undone without touching data
+00:11 +20: native recovery rejects user message without touching data
+00:12 +21: native recovery rejects missing journal without touching data
+00:12 +22: native recovery rejects corrupt journal without touching data
+00:13 +23: native recovery rejects stale row without touching data
+00:13 +24: native recovered callback refuses later row edit
+00:14 +25: native recovered callback refuses A B A
+00:14 +26: native recovered callback refuses sign out and back
+00:14 +27: native recovery keeps one Undo for duplicated receipt evidence
+00:15 +28: native recovery rejects copied receipt with equal operation digest and integer ID
+WARNING (drift): It looks like you've created the database class AppDatabase multiple times. When these two databases use the same QueryExecutor, race conditions will occur and might corrupt the database. 
+Try to follow the advice at https://drift.simonbinder.eu/faq/#using-the-database or, if you know what you're doing, set driftRuntimeOptions.dontWarnAboutMultipleDatabases = true
+Here is the stacktrace from when the database was opened a second time:
+#0      GeneratedDatabase._handleInstantiated (package:drift/src/runtime/api/db_base.dart:96:30)
+#1      GeneratedDatabase._whenConstructed (package:drift/src/runtime/api/db_base.dart:73:12)
+#2      new GeneratedDatabase (package:drift/src/runtime/api/db_base.dart:64:5)
+#3      new _$AppDatabase (package:body_intelligence_log/data/database/app_database.g.dart:14689:36)
+#4      new AppDatabase.forTesting (package:body_intelligence_log/data/database/app_database.dart)
+#5      new _NativeFixture (file:///workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_behavior_test.dart:175:30)
+#6      _nativeRecoveryLifecycleCases.<anonymous closure>.<anonymous closure> (file:///workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_recovery_lifecycle_cases.dart:66:21)
+<asynchronous suspension>
+#7      _withCoach (file:///workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_behavior_test.dart:62:5)
+<asynchronous suspension>
+#8      _nativeRecoveryLifecycleCases.<anonymous closure> (file:///workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_recovery_lifecycle_cases.dart:57:7)
+<asynchronous suspension>
+#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#11     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+This warning will only appear on debug builds.
+00:15 +29: native recovery fences A B A while restore reads the journal
+00:15 +30: native recovery fences A B A while Undo reads the journal
+00:16 +31: native recovery closes its visit during a delayed read without disposed ref use
+00:16 +32: native recovered callback cannot survive repository replacement
+00:17 +33: native Undo belongs to the selected conversation and is revalidated on return
+00:17 +34: read only preserves log_water on Undo restored=false
+00:18 +35: read only preserves log_water on Undo restored=true
+00:18 +36: read only preserves log_weight on Undo restored=false
+00:19 +37: read only preserves log_weight on Undo restored=true
+00:19 +38: read only preserves update_goal on Undo restored=false
+00:20 +39: read only preserves update_goal on Undo restored=true
+00:20 +40: read only preserves save_measurements on Undo restored=false
+00:20 +41: read only preserves save_measurements on Undo restored=true
+00:21 +42: read only preserves save_memory on Undo restored=false
+00:21 +43: read only preserves save_memory on Undo restored=true
+00:22 +44: Undo revoked during journal read stays cancelled grantAgain=false
+00:22 +45: Undo revoked during journal read stays cancelled grantAgain=true
+00:22 +46: Undo revoked during journal write stays cancelled grantAgain=false
+00:23 +47: Undo revoked during journal write stays cancelled grantAgain=true
+00:23 +48: All tests passed!

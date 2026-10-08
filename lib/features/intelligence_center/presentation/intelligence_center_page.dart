@@ -11,16 +11,19 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/services/app_settings_provider.dart';
+import '../../../app/services/app_settings_service.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../../app/services/recoverable_image_picker.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_meal_voice.dart';
 import '../../../data/database/database_provider.dart';
 import '../../../data/database/app_database.dart';
+import '../../../data/database/database_scope.dart';
 import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
@@ -34,6 +37,12 @@ import '../../commerce/providers/commerce_providers.dart';
 import '../../community/presentation/community_gold_balance_action.dart';
 import '../../foods/providers/food_provider.dart';
 import '../domain/intelligence_action.dart';
+import '../domain/food_v2/coach_food_v2.dart';
+import '../media_bridge/coach_media_attempt.dart';
+import '../media_bridge/coach_media_food_bridge.dart';
+import '../media_bridge/coach_media_catalog_entry.dart';
+import '../media_bridge/coach_media_bridge_copy.dart';
+import '../media_bridge/coach_voice_transcript_bridge.dart';
 import '../domain/coach_action_permission.dart';
 import '../domain/coach_action_admission.dart';
 import '../domain/bil_navigation_registry.dart';
@@ -52,18 +61,39 @@ import '../services/coach_speech_policy.dart';
 import '../services/coach_voice_turn_policy.dart';
 import '../services/coach_daily_brief.dart';
 import '../services/coach_memory_repository.dart';
+import '../settings_commands/coach_unit_settings_command.dart';
+import '../settings_commands/coach_reminder_command.dart';
+import '../../notifications/domain/daily_reminder.dart';
 import '../services/coach_native_command_repository.dart';
 import '../services/coach_voice_transcript_normalizer.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
 import '../services/local_coach_api.dart';
 import '../services/remote_ai_consent_coordinator.dart';
+import '../food_flow/coach_food_flow.dart';
+import '../app_commands/coach_health_adapter.dart';
+import '../app_commands/coach_health_copy.dart';
+import '../app_commands/coach_health_parser.dart';
+import '../app_commands/coach_health_read_guard.dart';
+import '../app_commands/coach_health_brief_provider.dart';
+import '../app_commands/coach_daily_commands.dart';
+import '../app_commands/coach_life_context_commands.dart';
+import '../app_commands/coach_fasting_commands.dart';
+import '../app_commands/coach_activity_adapter.dart';
+import '../app_commands/coach_plan_adapter.dart';
+import '../app_commands/health_query_adapter.dart';
+import '../../life_context/providers/life_context_provider.dart';
+import '../../wellness/presentation/wellness_tools_pages.dart'
+    show fastingNotificationServiceProvider;
+import '../../nutrition_plans/data/diet_plan_repository.dart'
+    show NutritionPathwayActivationException, NutritionPathwayActivationFailure;
 
 import '../services/local_model_gateway.dart';
 import '../services/coach_catalog_grounding.dart';
 import '../services/coach_action_presentation_policy.dart';
 import '../services/ai_coach_feedback_service.dart';
 import '../../nutrition/domain/barcode_identity.dart';
+import '../../nutrition/services/food_search_normalizer.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
@@ -75,6 +105,8 @@ import 'coach_message_text.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import '../../../app/router/bil_quick_add_presenter.dart';
 import 'workspace/coach_reference_workspace.dart';
+import 'workspace/coach_food_review_card.dart';
+import 'workspace/coach_food_receipt_card.dart';
 import 'coach_anchored_history.dart';
 
 part 'intelligence_center_page_message.dart';
@@ -87,8 +119,11 @@ part 'intelligence_center_voice_widgets.dart';
 part 'intelligence_conversation_persistence.dart';
 part 'intelligence_conversation_history.dart';
 part 'intelligence_conversation_viewport.dart';
+part 'intelligence_reference_chat_body.dart';
 part 'intelligence_conversation_voice.dart';
+part 'intelligence_conversation_voice_transcript.dart';
 part 'intelligence_vision_flow.dart';
+part 'intelligence_media_confirmation.dart';
 part 'intelligence_query_flow.dart';
 part 'intelligence_query_decision.dart';
 part 'intelligence_action_flow.dart';
@@ -97,10 +132,14 @@ part 'intelligence_meal_owner.dart';
 part 'intelligence_native_owner.dart';
 part 'intelligence_native_action_flow.dart';
 part 'intelligence_native_recovery.dart';
+part 'intelligence_settings_recovery.dart';
 part 'intelligence_native_recovery_owner.dart';
 part 'intelligence_meal_recovery.dart';
 part 'intelligence_action_runtime.dart';
 part 'intelligence_action_confirmation.dart';
+part '../food_flow/intelligence_food_flow.dart';
+part '../app_commands/coach_health_flow.dart';
+part '../app_commands/coach_health_recovery.dart';
 
 /// Single injectable wall clock for conversation copy and seeded messages.
 ///
@@ -176,19 +215,24 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   int voiceTransientRestarts = 0;
   bool analyzingFoodImage = false;
   bool foodImageFlowOpening = false;
+  _CoachMediaPageRequest? foodMediaRequest;
+  _CoachMediaPageRequest? voiceMediaRequest;
+  String? queuedMediaBarcode;
+  final voiceTranscriptBridge = CoachVoiceTranscriptBridge();
   bool consentPromptVisible = false;
   Future<_RemoteAiConsentChoice>? consentChoiceInFlight;
   IntelligenceMessage? sessionWelcomeMessage;
   bool introVisible = true;
   bool conversationReady = false;
   bool conversationLoadFailed = false;
-  CoachContextSnapshot? lastCoachContextSnapshot;
   bool conversationHistoryOpening = false;
   bool coachMenuOpening = false;
   bool entryWelcomeVisible = true;
   String? activeConversationId;
   Future<void> conversationPersistenceTail = Future<void>.value();
   int conversationPersistenceEpoch = 0;
+  ProviderSubscription<AppDatabase>? healthEffectOwnerSubscription;
+  final healthEffectCancellers = <VoidCallback>{};
   int conversationLoadGeneration = 0;
   late final PreferencesRepository conversationPreferences;
   late final WeightRepository conversationWeightRepository;
@@ -233,9 +277,20 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     conversationWeightRepository = ref.read(weightRepositoryProvider);
     conversationDailyLogRepository = ref.read(dailyLogRepositoryProvider);
     WidgetsBinding.instance.addObserver(this);
+    healthEffectOwnerSubscription = ref.listenManual(databaseProvider, (
+      previous,
+      next,
+    ) {
+      if (!identical(previous, next)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_resumeCoachFastingEffects());
+        });
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadConversation();
       if (!mounted) return;
+      unawaited(_resumeCoachFastingEffects());
       unawaited(_syncCoachMemory());
       _applyInitialBarcode(widget.initialBarcode);
       if (widget.startWithVisionCapture) await _analyzeFoodImageInChat();
@@ -283,11 +338,16 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) coachInBackground = false;
+    if (state == AppLifecycleState.resumed) {
+      coachInBackground = false;
+      unawaited(_resumeCoachFastingEffects());
+    }
     if (state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       coachInBackground = true;
+      voiceMediaRequest?.attempt.cancel();
+      voiceTranscriptBridge.cancel();
       voiceCaptureGeneration++;
       if (voiceMode == _CoachVoiceMode.liveCall) liveCallPaused = true;
       unawaited(const BilTextToSpeech().stop());
@@ -322,6 +382,11 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   void _applyInitialBarcode(String? rawBarcode) {
     final barcode = rawBarcode?.trim();
     if (barcode == null || barcode.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && conversationReady) {
+        unawaited(_reviewBarcodeInChat(barcode));
+      }
+    });
     final identity = BarcodeIdentity.parse(barcode);
     if (!identity.isValid) {
       final evidenceKey =
@@ -396,6 +461,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   void dispose() {
+    _cancelCoachMediaRequests(notify: false);
+    voiceTranscriptBridge.dispose();
+    healthEffectOwnerSubscription?.close();
+    for (final cancel in healthEffectCancellers.toList()) {
+      cancel();
+    }
+    healthEffectCancellers.clear();
     _disposePreparedCoachMealActions();
     _disposePreparedCoachNativeActions();
     voiceCaptureGeneration++;
@@ -416,304 +488,4 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   @override
   Widget build(BuildContext context) => _buildReferencePresentation(context);
-
-  Widget _buildReferenceChat(BuildContext context) {
-    if (entryWelcomeVisible) {
-      return const _AiCoachEntryWelcome();
-    }
-    final scheme = Theme.of(context).colorScheme;
-    final coachContext = ref.watch(coachContextSnapshotProvider);
-    final currentCoachContext = coachContext.asData?.value;
-    if (currentCoachContext != null) {
-      lastCoachContextSnapshot = currentCoachContext;
-    }
-    // A background context refresh must not temporarily erase the brief or
-    // make the conversation appear to reload. Keep the last valid snapshot
-    // until the updated one arrives.
-    final snapshot = currentCoachContext ?? lastCoachContextSnapshot;
-    final dailyBrief = snapshot == null
-        ? null
-        : const CoachDailyBriefEngine().build(
-            context: snapshot,
-            now: DateTime.now(),
-            locale: BilLocalePolicy.canonicalTag(
-              Localizations.localeOf(context),
-            ),
-          );
-    final visibleMessages = messages.isEmpty && sessionWelcomeMessage != null
-        ? <IntelligenceMessage>[sessionWelcomeMessage!]
-        : messages.toList(growable: false);
-    final showLiveVoiceDraft =
-        listening && pendingVoiceTranscript.trim().isNotEmpty;
-    // A sent turn is already visible at the newest end of the conversation.
-    // Failures are rendered once as a transcript message with its Retry
-    // action; retain the progress row only as a defensive fallback if a
-    // failure has no persisted message yet.
-    final showReplyFailure =
-        replyPhase == _CoachReplyPhase.failed &&
-        retryableErrorMessageIds.isEmpty;
-    final showReplyThinking = sending;
-    final showIntroBrief = introVisible && dailyBrief != null;
-    const coachNavy = Color(0xFF07111B);
-    return Scaffold(
-      bottomNavigationBar: MediaQuery.viewInsetsOf(context).bottom > 0
-          ? null
-          : BilReferenceBottomBar(
-              selected: 1,
-              dark: true,
-              onSelected: (index) => unawaited(_navigateReference(index)),
-            ),
-      backgroundColor: coachNavy,
-      body: ColoredBox(
-        color: coachNavy,
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.zero,
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                width: double.infinity,
-                constraints: const BoxConstraints(maxWidth: 760),
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  color: scheme.surface,
-                  borderRadius: BorderRadius.zero,
-                  border: Border.all(color: Colors.transparent, width: 0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .3),
-                      blurRadius: 28,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    _CoachHero(
-                      key: const ValueKey('ai-coach-hero'),
-                      interactionEnabled: conversationReady,
-                      onBack: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('/dashboard');
-                        }
-                      },
-                      onHistory: () => unawaited(_openConversationHistory()),
-                      onMenu: () => unawaited(_openCoachMenuSheet()),
-                    ),
-                    if (conversationLoadFailed)
-                      _CoachReplyFailure(
-                        labelOverride: tr(
-                          'Conversation history',
-                          'سجل المحادثات',
-                        ),
-                        onDismiss: () {},
-                        onRetry: () => unawaited(_loadConversation()),
-                      ),
-                    Expanded(
-                      child: ChatHistoryViewport(
-                        controller: conversationScroll,
-                        latestMessageId: visibleMessages.isEmpty
-                            ? null
-                            : visibleMessages.last.id,
-                        centerJumpButton: true,
-                        child: AbsorbPointer(
-                          absorbing: !conversationReady,
-                          // Do not paint a provisional greeting and replace it
-                          // with the restored transcript one frame later. The
-                          // stable surface keeps the coach shell opaque while
-                          // local history is read, then paints user content
-                          // exactly once.
-                          child: !conversationReady
-                              ? ColoredBox(color: scheme.surface)
-                              : visibleMessages.isEmpty
-                              ? _CoachEmptyState(
-                                  onVoice: _toggleLiveCall,
-                                  onCamera: _analyzeFoodImageInChat,
-                                )
-                              : _buildConversationHistory(
-                                  visibleMessages,
-                                  dailyBrief: showIntroBrief
-                                      ? dailyBrief
-                                      : null,
-                                  showLiveVoiceDraft: showLiveVoiceDraft,
-                                  showReplyThinking: showReplyThinking,
-                                  showReplyFailure: showReplyFailure,
-                                ),
-                        ),
-                      ),
-                    ),
-                    SafeArea(
-                      top: false,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        margin: const EdgeInsets.fromLTRB(12, 5, 12, 12),
-                        padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: listening
-                                ? scheme.primary.withValues(alpha: .62)
-                                : scheme.outlineVariant.withValues(alpha: .55),
-                            width: listening ? 1.5 : .8,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: scheme.shadow.withValues(alpha: .07),
-                              blurRadius: 22,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            _buildCoachPermissionMenu(),
-                            Expanded(
-                              child: listening
-                                  ? _ListeningComposerLabel(
-                                      label: tr(
-                                        'Listening — pause when you’re done',
-                                        'أستمع — اسكت عندما تنتهي',
-                                      ),
-                                      transcript: pendingVoiceTranscript,
-                                    )
-                                  : TextField(
-                                      key: const Key('ai-coach-question-field'),
-                                      controller: question,
-                                      enabled: conversationReady,
-                                      minLines: 1,
-                                      maxLines:
-                                          MediaQuery.viewInsetsOf(
-                                                    context,
-                                                  ).bottom >
-                                                  0 &&
-                                              MediaQuery.sizeOf(
-                                                    context,
-                                                  ).height <
-                                                  740
-                                          ? 2
-                                          : 4,
-                                      textAlignVertical:
-                                          TextAlignVertical.center,
-                                      textInputAction: TextInputAction.send,
-                                      onTap: _scrollToLatest,
-                                      onSubmitted: (_) => ask(),
-                                      scrollPadding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                      ),
-                                      onChanged: (_) => setState(() {}),
-                                      decoration: InputDecoration(
-                                        hintMaxLines: 1,
-                                        hintText: tr(
-                                          'Ask BIL anything about your day…',
-                                          'اسأل BIL أي شيء عن يومك…',
-                                        ),
-                                        border: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                        filled: false,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 8,
-                                            ),
-                                      ),
-                                    ),
-                            ),
-                            const SizedBox(width: 4),
-                            if (sending)
-                              IconButton.filled(
-                                key: const Key('ai-coach-send-button'),
-                                tooltip: tr('Sending', 'جارٍ الإرسال'),
-                                onPressed: null,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
-                                  disabledBackgroundColor: const Color(
-                                    0xFF12394E,
-                                  ).withValues(alpha: .58),
-                                  disabledForegroundColor: const Color(
-                                    0xFFC8F3FF,
-                                  ).withValues(alpha: .58),
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: const Icon(Icons.arrow_upward_rounded),
-                              )
-                            else if (question.text.trim().isEmpty || listening)
-                              IconButton.filled(
-                                key: const Key('ai-coach-voice-button'),
-                                tooltip: voiceMode == _CoachVoiceMode.liveCall
-                                    ? tr('End live call', 'إنهاء المكالمة')
-                                    : tr('Talk to BIL', 'تحدث مع BIL'),
-                                onPressed: !conversationReady
-                                    ? null
-                                    : voiceMode == _CoachVoiceMode.liveCall
-                                    ? _stopLiveCall
-                                    : _toggleLiveCall,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: listening
-                                    ? const _VoiceListeningWave(
-                                        color: Color(0xFFC8F3FF),
-                                        compact: true,
-                                      )
-                                    : const Icon(Icons.graphic_eq_rounded),
-                              )
-                            else
-                              IconButton.filled(
-                                key: const Key('ai-coach-send-button'),
-                                tooltip: tr('Send', 'إرسال'),
-                                onPressed: !conversationReady ? null : ask,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: const Color(0xFF12394E),
-                                  foregroundColor: const Color(0xFFC8F3FF),
-                                  minimumSize: const Size.square(48),
-                                ),
-                                icon: const Icon(Icons.arrow_upward_rounded),
-                              ),
-                            const SizedBox(width: 2),
-                            IconButton(
-                              key: const Key('ai-coach-food-image-button'),
-                              tooltip: tr('Open camera', 'افتح الكاميرا'),
-                              onPressed:
-                                  !conversationReady ||
-                                      foodImageFlowOpening ||
-                                      sending
-                                  ? null
-                                  : _analyzeFoodImageInChat,
-                              style: IconButton.styleFrom(
-                                foregroundColor: const Color(0xFFBFD0E5),
-                                minimumSize: const Size.square(44),
-                              ),
-                              icon: analyzingFoodImage
-                                  ? const SizedBox.square(
-                                      dimension: 19,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.camera_alt_outlined,
-                                      size: 22,
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

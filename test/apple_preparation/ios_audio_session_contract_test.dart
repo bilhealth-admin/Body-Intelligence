@@ -44,11 +44,15 @@ void main() {
       final voice = File(
         'lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart',
       ).readAsStringSync();
-      final captureStart = voice.indexOf('Future<void> _startVoiceCapture(');
+      // Permission and audible-cue sequencing now live in the extracted
+      // preparation method; the public start method only creates the attempt.
+      final captureStart = voice.indexOf('Future<void> _prepareVoiceCapture(');
       final captureEnd = voice.indexOf(
-        'Future<void> _playVoiceActivationCue()',
+        'Future<void> _playVoiceActivationCue(',
         captureStart,
       );
+      expect(captureStart, greaterThanOrEqualTo(0));
+      expect(captureEnd, greaterThan(captureStart));
       final startCapture = voice.substring(captureStart, captureEnd);
 
       expect(iosSound, contains('audioPlayerDidFinishPlaying'));
@@ -59,10 +63,8 @@ void main() {
         RegExp(r'active\.start\(\)\s+result\.success').hasMatch(androidSound),
         isFalse,
       );
-      final cue = startCapture.indexOf('await _playVoiceActivationCue()');
-      final capture = startCapture.indexOf(
-        'await _startNativeVoiceCapture(generation)',
-      );
+      final cue = startCapture.indexOf('await _playVoiceActivationCue(');
+      final capture = startCapture.indexOf('await _startNativeVoiceCapture(');
       expect(cue, greaterThanOrEqualTo(0));
       expect(capture, greaterThanOrEqualTo(0));
       expect(cue, lessThan(capture));

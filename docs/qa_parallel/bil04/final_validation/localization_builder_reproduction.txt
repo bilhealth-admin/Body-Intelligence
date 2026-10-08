@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "templateCount": 147,
+  "sharedPairedOccurrences": 1,
+  "unpairedReviewRequiredCount": 1,
+  "placeholderDiagnosticCount": 0,
+  "sourceUnchangedDuringExtraction": true,
+  "status": "REVIEW_REQUIRED"
+}

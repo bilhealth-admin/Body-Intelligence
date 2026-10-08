@@ -8,6 +8,7 @@ final class _NativeJournal {
     required this.after,
     this.undoneAt,
     this.undoAfter,
+    this.healthReceiptRecovery,
   });
   final CoachNativeCommand command;
   final String ownerScope;
@@ -15,6 +16,7 @@ final class _NativeJournal {
   final CoachNativeSnapshot after;
   final DateTime? undoneAt;
   final CoachNativeSnapshot? undoAfter;
+  final _HealthReceiptRecovery? healthReceiptRecovery;
 
   _NativeJournal compensated(CoachNativeSnapshot readback) => _NativeJournal(
     command: command,
@@ -23,6 +25,7 @@ final class _NativeJournal {
     after: after,
     undoneAt: DateTime.now(),
     undoAfter: readback,
+    healthReceiptRecovery: healthReceiptRecovery,
   );
 
   String encode() => jsonEncode({
@@ -34,6 +37,8 @@ final class _NativeJournal {
     'undoneAt': undoneAt?.toIso8601String(),
     'undoAfter': undoAfter?.toJson(),
     'argumentsDigest': command.argumentsDigest,
+    if (healthReceiptRecovery != null)
+      'healthReceiptRecovery': healthReceiptRecovery!.toJson(),
   });
 
   factory _NativeJournal.decode(String raw) {
@@ -57,9 +62,14 @@ final class _NativeJournal {
             : CoachNativeSnapshot._fromJson(
                 Map<String, dynamic>.from(json['undoAfter'] as Map),
               ),
+        healthReceiptRecovery: json.containsKey('healthReceiptRecovery')
+            ? _HealthReceiptRecovery.fromJson(json['healthReceiptRecovery'])
+            : null,
       );
       if (result.command.argumentsDigest != json['argumentsDigest'] ||
-          (result.undoneAt == null) != (result.undoAfter == null)) {
+          (result.undoneAt == null) != (result.undoAfter == null) ||
+          result.healthReceiptRecovery != null &&
+              result.command.kind != CoachNativeCommandKind.health) {
         throw const FormatException('Journal identity');
       }
       return result;
@@ -121,6 +131,77 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
     }
   }
 
+  /// Preference-backed health rows have no revision column and their clocks
+  /// have second precision. A later accepted command may therefore write the
+  /// same values and timestamp. The existing native journal's insertion order
+  /// supplies a durable, clock-independent guard without another journal or
+  /// schema. Legacy native commands retain their existing revision behavior.
+  Future<bool> _laterOverlappingHealthOperation(
+    _NativeJournal original,
+    CoachNativeOwnerScope scope, {
+    bool committed = false,
+  }) async {
+    if (original.command.kind != CoachNativeCommandKind.health) return false;
+    final affected = _nativeHealthAffectedIdentities(original);
+    if (affected == null || affected.isEmpty) return true;
+    final key = _journalKey(original.command.operationId);
+    final anchor = await _awaitOwner(
+      () => database
+          .customSelect(
+            'SELECT rowid AS journal_rowid FROM preferences WHERE key = ?',
+            variables: [Variable<String>(key)],
+            readsFrom: {database.preferences},
+          )
+          .getSingleOrNull(),
+      scope,
+      committed: committed,
+    );
+    if (anchor == null) return true;
+    final prefix = 'coachNativeOperationV1.${original.ownerScope}.';
+    final later = await _awaitOwner(
+      () => database
+          .customSelect(
+            'SELECT key, value FROM preferences '
+            'WHERE rowid > ? AND substr(key, 1, ?) = ? '
+            'ORDER BY rowid DESC LIMIT 129',
+            variables: [
+              Variable<int>(anchor.read<int>('journal_rowid')),
+              Variable<int>(prefix.length),
+              Variable<String>(prefix),
+            ],
+            readsFrom: {database.preferences},
+          )
+          .get(),
+      scope,
+      committed: committed,
+    );
+    // There may be an older overlapping operation beyond this bounded scan.
+    if (later.length > 128) return true;
+    for (final row in later) {
+      _NativeJournal candidate;
+      try {
+        candidate = _NativeJournal.decode(row.read<String>('value'));
+        if (candidate.ownerScope != original.ownerScope ||
+            _journalKey(candidate.command.operationId) !=
+                row.read<String>('key')) {
+          return true;
+        }
+      } on Object {
+        // An unverifiable later journal cannot authorize destructive recovery.
+        return true;
+      }
+      if (candidate.command.kind != CoachNativeCommandKind.health) continue;
+      final candidateAffected = _nativeHealthAffectedIdentities(candidate);
+      if (candidateAffected == null ||
+          candidateAffected.any(affected.contains)) {
+        return true;
+      }
+      // Already-undone later commands deliberately still fence the older
+      // command: a subsequent explicit choice must never be silently erased.
+    }
+    return false;
+  }
+
   Future<CoachNativeCommit> _commitReadback(
     String operationId,
     CoachNativeOwnerScope scope, {
@@ -159,6 +240,14 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
           waterId: journal.after.water?.id,
           committed: committed,
         );
+        final superseded =
+            journal.command.kind == CoachNativeCommandKind.health &&
+            journal.undoneAt == null &&
+            await _laterOverlappingHealthOperation(
+              journal,
+              scope,
+              committed: committed,
+            );
         return CoachNativeCommit._(
           command: journal.command,
           committedAt: journal.committedAt,
@@ -166,7 +255,7 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
           current: current,
           state: journal.undoneAt != null
               ? CoachNativeResultState.undone
-              : _sameNativeSnapshot(journal.after, current)
+              : !superseded && _sameNativeSnapshot(journal.after, current)
               ? CoachNativeResultState.committed
               : CoachNativeResultState.modified,
           replayed: replayed,
@@ -184,4 +273,68 @@ extension _NativeJournalStorage on CoachNativeCommandRepository {
       );
     }
   }
+}
+
+/// Only affected record identities are inspected. Receipts and private health
+/// contents do not participate in cross-operation overlap classification.
+Set<String>? _nativeHealthAffectedIdentities(_NativeJournal journal) {
+  final command = journal.command;
+  final result = <String>{};
+  final states = [
+    command.before.health,
+    journal.after.health,
+    journal.undoAfter?.health,
+  ];
+  for (final state in states) {
+    if (state == null) continue;
+    final preferences = state['preferences'];
+    if (preferences != null) {
+      if (preferences is! Map || preferences.isEmpty) return null;
+      for (final key in preferences.keys) {
+        if (key is! String || key.isEmpty) return null;
+        result.add('preference:$key');
+      }
+    }
+  }
+
+  if (const {
+    'log_exercise',
+    'close_day',
+    'reopen_day',
+    'log_sleep',
+    'save_day_note',
+  }.contains(command.toolId)) {
+    final date = command.resolved['date'];
+    if (date is! String || date.isEmpty) return null;
+    result.add('daily-day:$date');
+    for (final state in states) {
+      if (state == null) continue;
+      final record =
+          state[command.toolId == 'log_exercise' ? 'dailyLog' : 'record'];
+      if (record == null) continue;
+      if (record is! Map) return null;
+      final uuid = record['uuid'];
+      final day = record['dayKey'];
+      if (uuid is! String || uuid.isEmpty || day is! String || day.isEmpty) {
+        return null;
+      }
+      result.add('daily-uuid:$uuid');
+      result.add('daily-day:$day');
+    }
+  } else if (command.toolId == 'save_life_context') {
+    final uuid = command.resolved['uuid'];
+    if (uuid is! String || uuid.isEmpty) return null;
+    result.add('life-uuid:$uuid');
+    for (final state in states) {
+      if (state == null) continue;
+      final record = state['record'];
+      if (record == null) continue;
+      if (record is! Map || record['uuid'] is! String || record['id'] is! int) {
+        return null;
+      }
+      result.add('life-uuid:${record['uuid']}');
+      result.add('life-id:${record['id']}');
+    }
+  }
+  return result.isEmpty ? null : result;
 }

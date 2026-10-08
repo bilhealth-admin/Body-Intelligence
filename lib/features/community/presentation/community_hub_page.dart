@@ -17,7 +17,11 @@ import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import '../../../app/router/bil_quick_add_presenter.dart';
 import '../../profile/services/profile_photo_service.dart';
+import '../circle_management/circle_management.dart';
+import '../circle_management/presentation/circle_management_surfaces.dart';
 import '../data/community_repository.dart';
+import '../channels/presentation/community_channels_copy.dart';
+import '../home_profile/community_profile_activity_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_composer_persistence.dart';
 import '../domain/community_comment_threads.dart';
@@ -51,6 +55,10 @@ import 'community_post_gallery_page.dart';
 import 'community_welcome.dart';
 import 'community_sapphire.dart';
 
+part '../home_profile/community_home_owner_scope.dart';
+part '../home_profile/community_feed_owner_scope.dart';
+part '../home_profile/community_profile_activity_slivers.dart';
+part '../home_profile/community_profile_activity_media.dart';
 part 'community_feed_tab.dart';
 part 'community_feed_reference_suggestions.dart';
 part 'community_feed_reference_header.dart';
@@ -101,6 +109,7 @@ part 'community_drafts_preview.dart';
 part 'community_account_widgets.dart';
 part 'community_navigation_sheet.dart';
 part 'community_friends_tab.dart';
+part 'community_hub_sign_in_required.dart';
 part 'community_food_tab.dart';
 
 class CommunityHubPage extends StatefulWidget {
@@ -131,12 +140,18 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   CommunityFeedMode _feedMode = CommunityFeedMode.explore;
   StreamSubscription<AuthState>? _authSubscription;
   String? _ownerId;
+  String? _deliveredOwnerId;
+  int _homeVisitEpoch = 0;
+  int _homeAuthBinding = 0;
+  final _homeOwnerChanges = ValueNotifier<int>(0);
+  bool _homeSignalDisposed = false;
   Future<CommunityProfileOverview?>? _profilePreview;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
+    _ownerId = _readHomeRepositoryOwner(_repository);
     _profilePreview = _repository?.loadMyProfileOverview();
     _watchProductionSession();
   }
@@ -146,7 +161,11 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.repository, widget.repository) ||
         !identical(oldWidget.client, widget.client)) {
+      _invalidateHomeVisit();
+      _homeAuthBinding++;
       _repository = widget.repository ?? _productionRepository();
+      _ownerId = _readHomeRepositoryOwner(_repository);
+      _deliveredOwnerId = _ownerId;
       _profilePreview = _repository?.loadMyProfileOverview();
       _feedKey = GlobalKey<_FeedTabState>();
       _watchProductionSession();
@@ -173,36 +192,17 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         : CommunityRepository(client!);
   }
 
-  void _watchProductionSession() {
-    unawaited(_authSubscription?.cancel());
-    _authSubscription = null;
-    if (widget.repository != null) return;
-    final client = _productionClient();
-    if (client == null) return;
-    _ownerId = client.auth.currentUser?.id;
-    _authSubscription = client.auth.onAuthStateChange.listen(
-      (state) {
-        final nextOwner = state.session?.user.id;
-        if (!mounted || nextOwner == _ownerId) return;
-        setState(() {
-          _ownerId = nextOwner;
-          _repository = nextOwner == null ? null : CommunityRepository(client);
-          _profilePreview = _repository?.loadMyProfileOverview();
-          // Discard cached member posts, not just the visible sign-in label.
-          _feedKey = GlobalKey<_FeedTabState>();
-        });
-      },
-      onError: (Object _, StackTrace _) {
-        // Auth owns refresh/recovery. Do not invent a new session on failure.
-      },
-    );
-  }
+  void _watchProductionSession() => _bindHomeOwnerSession();
 
   @override
   void dispose() {
+    _homeAuthBinding++;
     unawaited(_authSubscription?.cancel());
+    _notifyHomeVisitChanged(dispose: true);
     super.dispose();
   }
+
+  void _setHomeState(VoidCallback action) => setState(action);
 
   @override
   Widget build(BuildContext context) => CommunitySurface(
@@ -214,13 +214,15 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
 
   Widget _buildHub(BuildContext context, double width) {
     final repository = _repository;
+    final visit = repository == null ? null : _captureHomeVisit(repository);
     final topTabsHeight = _communityHubTopTabsHeight(context, width);
     return Scaffold(
-      bottomNavigationBar: repository == null
+      bottomNavigationBar: visit == null
           ? null
           : BilReferenceBottomBar(
               selected: 3,
               onSelected: (index) {
+                if (!visit.isCurrent()) return;
                 if (index == 2) {
                   unawaited(showBilQuickAdd(context, originPath: '/community'));
                 } else if (index != 3) {
@@ -245,9 +247,11 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
           IconButton(
             key: const Key('community-search'),
             tooltip: communityText(context, 'Find people', 'البحث عن أشخاص'),
-            onPressed: repository == null
+            onPressed: visit == null
                 ? null
-                : () => context.push('/community/people'),
+                : () {
+                    if (visit.isCurrent()) context.push('/community/people');
+                  },
             icon: const Icon(Icons.search_rounded, size: 32),
           ),
           IconButton(
@@ -257,9 +261,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               'Community updates',
               'تحديثات المجتمع',
             ),
-            onPressed: repository == null
+            onPressed: visit == null
                 ? null
-                : () => context.push('/community/notifications'),
+                : () {
+                    if (visit.isCurrent()) {
+                      context.push('/community/notifications');
+                    }
+                  },
             icon: const CommunityUnreadBadge(
               child: Icon(Icons.notifications_none_rounded, size: 32),
             ),
@@ -273,9 +281,9 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 'Community profile and actions',
                 'ملف المجتمع وإجراءاته',
               ),
-              onPressed: repository == null
+              onPressed: visit == null
                   ? null
-                  : () => _openNavigation(context, repository),
+                  : () => _openNavigation(context, visit),
               icon: BilAccountAvatar(
                 radius: 20.5,
                 networkUrl: snapshot.data?.avatarUrl,
@@ -283,7 +291,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             ),
           ),
         ],
-        bottom: repository == null
+        bottom: visit == null
             ? null
             : PreferredSize(
                 preferredSize: Size.fromHeight(topTabsHeight),
@@ -298,7 +306,11 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                           selected:
                               _section == _CommunityHubSection.explore &&
                               _feedMode == CommunityFeedMode.explore,
-                          onTap: () => _showFeedMode(CommunityFeedMode.explore),
+                          onTap: () {
+                            if (visit.isCurrent()) {
+                              _showFeedMode(CommunityFeedMode.explore);
+                            }
+                          },
                         ),
                       ),
                       Expanded(
@@ -310,8 +322,11 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                             'المتابَعون',
                           ),
                           selected: _section == _CommunityHubSection.following,
-                          onTap: () =>
-                              _showFeedMode(CommunityFeedMode.following),
+                          onTap: () {
+                            if (visit.isCurrent()) {
+                              _showFeedMode(CommunityFeedMode.following);
+                            }
+                          },
                         ),
                       ),
                       Expanded(
@@ -319,9 +334,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                           key: const Key('community-hub-circles-tab'),
                           label: communityText(context, 'Circles', 'الدوائر'),
                           selected: _section == _CommunityHubSection.circles,
-                          onTap: () => setState(
-                            () => _section = _CommunityHubSection.circles,
-                          ),
+                          onTap: () {
+                            if (visit.isCurrent()) {
+                              setState(
+                                () => _section = _CommunityHubSection.circles,
+                              );
+                            }
+                          },
                         ),
                       ),
                     ],
@@ -331,6 +350,8 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       ),
       body: repository == null
           ? const _SignInRequired()
+          : visit == null
+          ? const _CommunityProfileOwnerChangedBody()
           : switch (_section) {
               _CommunityHubSection.explore => _FeedTab(
                 key: _feedKey,
@@ -339,8 +360,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: _feedMode,
                 entryWelcomeHandled: widget.entryWelcomeHandled,
-                onOpenCircles: () =>
-                    setState(() => _section = _CommunityHubSection.circles),
+                ownerIsCurrent: visit.isCurrent,
+                ownerChanges: visit.changes,
+                onOpenCircles: () {
+                  if (visit.isCurrent()) {
+                    setState(() => _section = _CommunityHubSection.circles);
+                  }
+                },
               ),
               _CommunityHubSection.following => _FeedTab(
                 key: _feedKey,
@@ -349,13 +375,21 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     widget.postImagePicker ?? CommunityPostImagePicker(),
                 initialMode: _feedMode,
                 entryWelcomeHandled: widget.entryWelcomeHandled,
-                onOpenCircles: () =>
-                    setState(() => _section = _CommunityHubSection.circles),
+                ownerIsCurrent: visit.isCurrent,
+                ownerChanges: visit.changes,
+                onOpenCircles: () {
+                  if (visit.isCurrent()) {
+                    setState(() => _section = _CommunityHubSection.circles);
+                  }
+                },
               ),
               _CommunityHubSection.circles => CommunityCirclesPage(
                 repository: repository,
                 embedded: true,
-                onComposeCircle: _composeCircleFromHub,
+                onComposeCircle: (slug) async {
+                  if (!visit.isCurrent()) return;
+                  await _composeCircleFromHub(slug);
+                },
               ),
             },
     );
@@ -373,21 +407,25 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   }
 
   Future<void> _composeCircleFromHub(String slug) async {
+    final repository = _repository;
+    final visit = repository == null ? null : _captureHomeVisit(repository);
+    if (visit == null) return;
     if (_section != _CommunityHubSection.explore) {
       setState(() => _section = _CommunityHubSection.explore);
     }
     final ready = Completer<void>();
     WidgetsBinding.instance.addPostFrameCallback((_) => ready.complete());
     await ready.future;
-    if (!mounted) return;
+    if (!visit.isCurrent()) return;
     await _feedKey.currentState?._openComposer(circle: slug);
   }
 
   Future<void> _openNavigation(
     BuildContext context,
-    CommunityRepository repository,
+    _CommunityHomeVisit visit,
   ) async {
-    if (_openingNavigation) return;
+    if (_openingNavigation || !visit.isCurrent()) return;
+    final repository = visit.repository;
     _openingNavigation = true;
     FocusManager.instance.primaryFocus?.unfocus();
     try {
@@ -398,15 +436,18 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         showDragHandle: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         constraints: const BoxConstraints(maxWidth: 560),
-        builder: (_) => _CommunityNavigationSheet(
-          repository: repository,
-          selectedFeedMode: _feedMode,
+        builder: (_) => visit.guard(
+          _CommunityNavigationSheet(
+            repository: repository,
+            selectedFeedMode: _feedMode,
+          ),
         ),
       );
       if (!context.mounted || destination == null) return;
+      visit.check();
       for (final mode in CommunityFeedMode.values) {
         if (destination == 'feed-mode:${mode.wireValue}') {
-          if (identical(_repository, repository)) _showFeedMode(mode);
+          if (visit.isCurrent()) _showFeedMode(mode);
           return;
         }
       }
@@ -420,7 +461,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
           await pushCommunityPage<void>(
             context,
             CommunityMemberProfilePage(
-              userId: repository.currentUserId,
+              userId: visit.ownerId,
               repository: repository,
             ),
           );
@@ -463,8 +504,9 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             CommunityTopicsPage(
               repository: repository,
               onComposeTopic: (tag) async {
+                if (!visit.isCurrent()) return;
                 if (context.mounted) Navigator.of(context).pop();
-                if (!context.mounted) return;
+                if (!context.mounted || !visit.isCurrent()) return;
                 await _feedKey.currentState?._openComposer(tag: tag);
               },
             ),
@@ -475,18 +517,21 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             CommunityCirclesPage(
               repository: repository,
               onComposeCircle: (slug) async {
+                if (!visit.isCurrent()) return;
                 if (context.mounted) Navigator.of(context).pop();
-                if (!context.mounted) return;
+                if (!context.mounted || !visit.isCurrent()) return;
                 await _feedKey.currentState?._openComposer(circle: slug);
               },
             ),
           );
         default:
-          await context.push(destination);
+          if (visit.isCurrent()) await context.push(destination);
       }
+    } on CommunityOwnerOperationCancelled {
+      // A menu captured by an old owner never becomes a route for a later one.
     } finally {
       _openingNavigation = false;
-      if (mounted) {
+      if (mounted && visit.isCurrent()) {
         setState(() {
           _profilePreview = repository.loadMyProfileOverview();
         });
@@ -587,84 +632,3 @@ PopupMenuItem<String> _communityAction(
     ],
   ),
 );
-
-class _SignInRequired extends StatelessWidget {
-  const _SignInRequired();
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.lock_person_outlined, size: 54),
-              const SizedBox(height: 16),
-              Text(
-                communityText(
-                  context,
-                  'Sign in to open community, friends, and messages.',
-                  'سجّل الدخول لفتح المجتمع والأصدقاء والرسائل.',
-                ),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                communityText(
-                  context,
-                  'Health logs are never posted automatically. You choose every share.',
-                  'لا تُنشر سجلاتك الصحية تلقائيًا. أنت تختار كل مشاركة.',
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: () => context.push('/login'),
-                icon: const Icon(Icons.login_rounded),
-                label: Text(communityText(context, 'Sign in', 'تسجيل الدخول')),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                key: const Key('community-browse-topics-signed-out'),
-                onPressed: () => CommunityTaxonomySheet.show(
-                  context,
-                  onSelectTag: (_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          communityText(
-                            context,
-                            'Sign in to start a discussion in this topic.',
-                            'سجّل الدخول لبدء نقاش في هذا الموضوع.',
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                icon: const Icon(Icons.grid_view_rounded),
-                label: Text(CommunityTaxonomySheet.browseLabel(context)),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () => context.push('/trust-support'),
-                icon: const Icon(Icons.privacy_tip_outlined),
-                label: Text(
-                  communityText(
-                    context,
-                    'Privacy & safety',
-                    'الخصوصية والأمان',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}

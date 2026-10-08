@@ -1,0 +1,23 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart
+00:00 +0: read tools map to only their required local context category
+00:00 +1: read guard rejects an excluded category and closes its subscription
+00:00 +2: a category-free read checks ownership without reading preferences
+00:00 +3: a delivered category revoke stays latched after re-enabling it
+00:00 +4: A to B to A during a guarded preference read cannot revive its owner visit
+00:00 +5: a read exception cannot hide owner cancellation after its await
+00:00 +6: closing a read guard removes observation and invalidates further use
+00:00 +7: an explicitly empty focus set skips every health repository read
+00:00 +8: habits-only brief preserves zero sleep without exposing training or nutrition
+00:00 +9: training-only brief preserves zero steps and excludes sleep
+00:00 +10: analytics reads exactly seven civil days and excludes older, future, deleted and invalid weights
+00:00 +11: partial nutrition keeps unknown macros absent and never derives a false remaining total
+00:00 +12: explicit known zero nutrition remains zero in both English and Arabic briefs
+00:00 +13: saved weekly targets win over conflicting defaults and gram overrides
+00:00 +14: valid saved percentage defaults retain the existing gram conversion
+00:00 +15: no saved goals or meal evidence creates neither a target nor zero intake
+00:00 +16: an incomplete or invalid saved goal is omitted instead of completed with invented zeros
+00:00 +17: brief rejects A to B to A during a repository await before any health result escapes
+00:00 +18: an initial witness owner mismatch rejects the brief before personal reads
+00:00 +19: a saved goal edit invalidates the short brief and publishes the latest target
+00:00 +20: a same-day meal write refreshes the brief using only the current ledger
+00:00 +21: All tests passed!

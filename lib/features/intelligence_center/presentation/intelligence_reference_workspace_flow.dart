@@ -27,6 +27,7 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
   Future<void> _navigateReference(int index) async {
     if (_referenceNavigating || sending || !conversationReady) return;
     _referenceNavigating = true;
+    _cancelCoachMediaRequests();
     try {
       FocusManager.instance.primaryFocus?.unfocus();
       final draft = pendingVoiceTranscript.trim();

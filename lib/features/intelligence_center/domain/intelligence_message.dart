@@ -2,6 +2,7 @@ import '../../../core/health_evidence/health_evidence_catalog.dart';
 import 'bil_navigation_registry.dart';
 import 'coach_action_admission.dart';
 import 'intelligence_action.dart';
+import '../settings_commands/coach_settings_tool_catalog.dart';
 
 enum IntelligenceMessageRole { bil, user }
 
@@ -318,13 +319,23 @@ class IntelligenceMessageAction {
       case IntelligenceActionType.openAiCoachSubscription:
       case IntelligenceActionType.buyAiBoost:
       case IntelligenceActionType.manageSubscription:
+      case IntelligenceActionType.reviewMemories:
         if (raw.isNotEmpty) return null;
         return const <String, Object?>{};
+      case IntelligenceActionType.prepareLocalExport:
+        return const CoachSettingsToolCatalog().validate(
+          'prepare_local_export',
+          raw,
+        );
       case IntelligenceActionType.setThemeMode:
       case IntelligenceActionType.setLanguage:
+      case IntelligenceActionType.setUnitPreference:
+      case IntelligenceActionType.setReminder:
       case IntelligenceActionType.addWater:
       case IntelligenceActionType.saveMeasurements:
       case IntelligenceActionType.quickAddMacros:
+      case IntelligenceActionType.logFoods:
+      case IntelligenceActionType.replaceMealItem:
       case IntelligenceActionType.updateMealItem:
       case IntelligenceActionType.moveMealItem:
       case IntelligenceActionType.deleteMealItem:
@@ -365,6 +376,8 @@ class IntelligenceMessageAction {
         if (targetDate != null) validated['targetDate'] = targetDate;
         return Map<String, Object?>.unmodifiable(validated);
       case IntelligenceActionType.saveMemory:
+      case IntelligenceActionType.healthCommand:
+      case IntelligenceActionType.readHealthData:
         return null;
     }
   }

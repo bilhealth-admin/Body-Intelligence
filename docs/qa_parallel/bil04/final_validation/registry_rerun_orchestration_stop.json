@@ -1,0 +1,7 @@
+{
+  "result": "ORCHESTRATOR_STOPPED_BEFORE_TESTS",
+  "exit_code": 1,
+  "reason": "An old per-file evidence directory was present again after archiving. The digest guard correctly rejected stale 5097 reports for source93005; no stale results were accepted. Verified duplicate files were removed only after byte-for-byte comparison against preserved before_registry_contract_update archive.",
+  "source_digest": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "tests_started": false
+}

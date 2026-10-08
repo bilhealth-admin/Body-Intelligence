@@ -1,0 +1,42 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/authoritative_daily_ledger_test.dart
+00:00 +0: /workspace/scratch/ada7a97de764/validation/test/authoritative_daily_ledger_test.dart: day opens, closes to an authoritative snapshot, and reopens
+00:00 +1: /workspace/scratch/ada7a97de764/validation/test/authoritative_daily_ledger_test.dart: completion is explicit per day and records a closure timestamp
+00:00 +2: /workspace/scratch/ada7a97de764/validation/test/authoritative_daily_ledger_test.dart: quick macros preserve selected day, timestamp, and exact totals
+00:00 +3: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: daily repository keeps one record per local day
+00:00 +4: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: daily repository keeps one record per local day
+00:00 +5: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: body context update preserves the rest of the daily record
+00:00 +6: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: sleep update preserves every other daily-ledger field
+00:00 +7: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: sleep update rejects non-finite and out-of-range values
+00:00 +8: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: personal experiments preserve cautious evidence states
+00:00 +9: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: private challenges persist and shared audiences fail honestly
+00:00 +10: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal items derive nutrition from foods and cascade with their meal
+00:00 +11: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: reviewed image meal batch rolls back every item on failure
+00:00 +12: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: usual meals require repetition and copy only after confirmation
+00:00 +13: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_session_test.dart: elapsed survives restart and timezone change
+00:00 +14: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal item order is durable and revisioned
+00:00 +15: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal item order is durable and revisioned
+00:00 +16: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal item order is durable and revisioned
+00:00 +17: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal item order is durable and revisioned
+00:00 +18: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_session_test.dart: history round trips, rejects corruption, and remains bounded
+00:00 +19: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal item moves atomically to another meal type on the same day
+00:00 +20: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: meal item moves atomically to another meal type on the same day
+00:00 +21: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: food search matches Arabic names and favorites are unique
+00:00 +22: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: custom food edits and tombstones preserve meal history
+00:00 +23: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: food search ranks favorites first then personal recency/frequency and barcode fallback
+00:00 +24: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: plan overrides preserve recommendation snapshot and reset safely
+00:00 +25: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: weight supports add update and soft delete
+00:00 +26: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: daily weight check-in preserves one active entry and durable id
+00:00 +27: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: deleted daily weight can be recorded again without resurrection
+00:00 +28: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +29: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +30: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +31: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +32: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +33: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +34: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +35: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +36: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: fasting snapshot set and removal commit together
+00:00 +37: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: decision memory forgets only explicitly unhelpful records
+00:00 +38: /workspace/scratch/ada7a97de764/validation/test/features/wellness/fasting_preferences_transaction_test.dart: invalid mutation rolls back every preference write
+00:00 +39: /workspace/scratch/ada7a97de764/validation/test/repository_test.dart: known zero and unavailable nutrient evidence remain distinct
+00:00 +40: All tests passed!

@@ -1,0 +1,246 @@
+{
+  "role_id": "BIL-06",
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "runtime": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+  "node": "v24.19.0",
+  "platform": "linux",
+  "architecture": "x64",
+  "exit_code": 0,
+  "production_deployed": false,
+  "connection_scope": "new empty in-memory PostgreSQL via TCP 127.0.0.1 only",
+  "source_hashes": {
+    "../../release/community_atomic_publish_live_baseline.sql": "b3623e8bc3f94699c1c65cedcf9f64d908e1332e12d69293c5119eac19079ee5",
+    "sql/fixtures/base_circles_foundation.sql": "d18197fe31f5c005e94c313aeef5b4e7e641982548383e4e3ff17e7e254376a1",
+    "sql/fixtures/base_profile_visibility.sql": "6ea6aa5ceb21ad811b4ffea4b6934d1e29c34b7adee33fb22f257d6902d8a940",
+    "sql/fixtures/base_public_code_resolver.sql": "522a759916e7af8fe9cfe434cd381b79559b2706cddeb95a06ac2e1984965400",
+    "sql/circle_management_v1.sql": "2f0cb8e889be995b2d50f20ff1d3b3b6db957c1293d33355e2dc385714255403",
+    "sql/fixtures/seed.sql": "73128702f441df9130ad0ec5dfccf6fb08ebee56a9741287e53c0bc180f096f3",
+    "sql_run.mjs": "252edf1706f4ead487912f3b7bef998aafb347ee70632373d171c29d90889ba3",
+    "sql_tests.mjs": "2f5a2fc965ec9e23634abe6781b3fd9c29c6d5599f83333334077897ec1bd381"
+  },
+  "tests": [
+    {
+      "name": "BASE list/join/leave/post functions remain byte-identical",
+      "status": "PASS",
+      "duration_ms": 2
+    },
+    {
+      "name": "New tables have RLS; all private helpers and anon RPCs are denied",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "anon cannot bypass RPC authority with direct table DML",
+      "status": "PASS",
+      "duration_ms": 13
+    },
+    {
+      "name": "actor 1 cannot bypass RPC authority with direct table DML",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "actor 2 cannot bypass RPC authority with direct table DML",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "actor 3 cannot bypass RPC authority with direct table DML",
+      "status": "PASS",
+      "duration_ms": 10
+    },
+    {
+      "name": "Create capability uses saved name+BIL Code and policy without bio/chosen handle",
+      "status": "PASS",
+      "duration_ms": 19
+    },
+    {
+      "name": "Policy refusal never accepts policy or leaves a create receipt",
+      "status": "PASS",
+      "duration_ms": 7
+    },
+    {
+      "name": "Create commits real text, one real moderator and zero invented invites/media",
+      "status": "PASS",
+      "duration_ms": 16
+    },
+    {
+      "name": "Duplicate create request is idempotent; changed payload is rejected",
+      "status": "PASS",
+      "duration_ms": 20
+    },
+    {
+      "name": "Authoritative receipt belongs only to actor; readback never repeats a mutation",
+      "status": "PASS",
+      "duration_ms": 12
+    },
+    {
+      "name": "Create rejects unsafe controls, invalid lengths and private open autojoin",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "Private circles are absent from third-party search, direct read and membership metadata",
+      "status": "PASS",
+      "duration_ms": 7
+    },
+    {
+      "name": "Server search pages globally after privacy filter with no duplicates and real counts",
+      "status": "PASS",
+      "duration_ms": 11
+    },
+    {
+      "name": "Search treats percent/underscore literally and bounds query/cursor/page",
+      "status": "PASS",
+      "duration_ms": 12
+    },
+    {
+      "name": "Invite send resolves actual BIL Code and duplicate clicks create one pending invite",
+      "status": "PASS",
+      "duration_ms": 45
+    },
+    {
+      "name": "Unauthorized member/third party cannot send, cancel or accept another invite",
+      "status": "PASS",
+      "duration_ms": 12
+    },
+    {
+      "name": "Invite reads grant metadata preview only and never accept/subscribe/follow",
+      "status": "PASS",
+      "duration_ms": 21
+    },
+    {
+      "name": "Accept activates exactly one real membership and supplies authoritative terminal status",
+      "status": "PASS",
+      "duration_ms": 6
+    },
+    {
+      "name": "Unchanged BASE leave works and an old accepted invitation cannot rejoin",
+      "status": "PASS",
+      "duration_ms": 5
+    },
+    {
+      "name": "Decline/cancel are role-scoped terminal transitions; stale opposing action fails",
+      "status": "PASS",
+      "duration_ms": 18
+    },
+    {
+      "name": "Invites page only authorized rows by unique ascending id",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "Expired invite is read-only expired; accept fails without membership",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "Blocked, private, rotated-code and self recipients are indistinguishably unavailable",
+      "status": "PASS",
+      "duration_ms": 11
+    },
+    {
+      "name": "Role revocation denies new invite/media actions and pending invitation acceptance",
+      "status": "PASS",
+      "duration_ms": 15
+    },
+    {
+      "name": "Banned membership cannot be revived through invitation acceptance",
+      "status": "PASS",
+      "duration_ms": 12
+    },
+    {
+      "name": "Media byte, dimension and pixel bounds match client contract",
+      "status": "PASS",
+      "duration_ms": 2
+    },
+    {
+      "name": "Media prepare reserves exact owner/circle/slot/id path with no success before upload",
+      "status": "PASS",
+      "duration_ms": 9
+    },
+    {
+      "name": "Storage RLS blocks other actors, anon, wrong paths, wrong owner, size and MIME",
+      "status": "PASS",
+      "duration_ms": 14
+    },
+    {
+      "name": "Reserved upload is visible only to uploader; finish binds actual Storage metadata",
+      "status": "PASS",
+      "duration_ms": 16
+    },
+    {
+      "name": "Private published media is visible to members but not third parties or anon",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "Published object cannot be updated, overwritten or deleted before detach",
+      "status": "PASS",
+      "duration_ms": 7
+    },
+    {
+      "name": "Cancel retires reservation; late upload/finish fail and no false image is shown",
+      "status": "PASS",
+      "duration_ms": 9
+    },
+    {
+      "name": "Revoked manager cannot upload/finish; own unfinished upload remains cancellable",
+      "status": "PASS",
+      "duration_ms": 13
+    },
+    {
+      "name": "Replacing media keeps one authoritative slot and retires old immutable object",
+      "status": "PASS",
+      "duration_ms": 18
+    },
+    {
+      "name": "Authoritative media projection hides missing object instead of inventing an image",
+      "status": "PASS",
+      "duration_ms": 12
+    },
+    {
+      "name": "BASE join/request/cancel remains functional and no social side effects appear",
+      "status": "PASS",
+      "duration_ms": 7
+    },
+    {
+      "name": "Membership permission read distinguishes active membership from missing publish policy",
+      "status": "PASS",
+      "duration_ms": 5
+    },
+    {
+      "name": "Membership cap disables create while existing manager invite/media permission remains",
+      "status": "PASS",
+      "duration_ms": 33
+    },
+    {
+      "name": "Asset deletion clears metadata pointer without deleting circle identity",
+      "status": "PASS",
+      "duration_ms": 10
+    },
+    {
+      "name": "Native PostgreSQL17 multi-session concurrency and lock ordering",
+      "status": "NOT_RUN",
+      "reason": "Native PostgreSQL unavailable; namespace maps root only; PGlite is one backend and cannot prove simultaneous PostgreSQL transaction races."
+    },
+    {
+      "name": "Supabase Auth/PostgREST/Storage HTTP and actual image bytes",
+      "status": "NOT_RUN",
+      "reason": "Local PostgreSQL tests execute real SQL/RLS with synthetic JWT GUCs and Storage metadata; no hosted service, byte upload or image decoder."
+    }
+  ],
+  "evidence_scope": "PRE_COMPLETION_BASELINE_EXECUTED_RUN",
+  "source_superseded_by_completion_delta": true,
+  "executed_sql_groups_pass": 40,
+  "completion_delta": {
+    "runtime_status": "NOT_RUN_CURRENT_CONTAINER",
+    "groups_added": 1,
+    "added_group_name": "Committed operation keeps immutable invite/media identity after current row deletion",
+    "current_source_hashes": {
+      "tool/qa_parallel/bil06/sql/circle_management_v1.sql": "c746aecc2928c731a661dd18c5e25bf9291f8ba796e06bb69f3f121483383230",
+      "tool/qa_parallel/bil06/sql_tests.mjs": "98bf7661358ec3af3ae035f68dae0888e409d65cf5fc189719c921199efbb524"
+    },
+    "reason": "The exact local PGlite runtime dependencies used by this historical run are not present in the current container. No historical PASS was promoted to cover the new group."
+  }
+}

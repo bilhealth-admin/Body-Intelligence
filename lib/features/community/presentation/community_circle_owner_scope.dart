@@ -1,5 +1,25 @@
 part of 'community_hub_page.dart';
 
+CircleManagementController _newCircleManagementController(
+  _CommunityProfileVisit visit,
+  CircleManagementGatewayFactory? factory, {
+  String? circleSlug,
+}) => CircleManagementController(
+  gateway:
+      factory?.call(
+        visit.repository,
+        visit.isCurrent,
+        visit.changes,
+        circleSlug,
+      ) ??
+      RepositoryCircleManagementGateway(
+        repository: visit.repository,
+        isCurrentVisit: visit.isCurrent,
+        ownerChanges: visit.changes,
+        circleSlug: circleSlug,
+      ),
+);
+
 /// One list/detail visit keeps its original account, repository and circle.
 /// The event payload also invalidates a queued A -> B -> A transition.
 class _CommunityCircleOwnerScope {

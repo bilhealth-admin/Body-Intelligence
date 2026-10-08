@@ -1,0 +1,15 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_food_receipt_binding_test.dart
+00:00 +0: rejects operation even with a real commit beside the receipt
+00:00 +1: rejects tool even with a real commit beside the receipt
+00:00 +2: rejects time even with a real commit beside the receipt
+00:00 +3: rejects uncommitted even with a real commit beside the receipt
+00:00 +4: rejects entity type even with a real commit beside the receipt
+00:00 +5: rejects entity id even with a real commit beside the receipt
+00:00 +6: rejects digest even with a real commit beside the receipt
+00:00 +7: rejects state even with a real commit beside the receipt
+00:00 +8: rejects item even with a real commit beside the receipt
+00:00 +9: rejects current item even with a real commit beside the receipt
+00:00 +10: real journal replay retains original receipt time and exact readback
+00:00 +11: modified readback and completed undo remain bound without becoming successful
+00:00 +12: readback totals preserve unknown protein, known zero and all thirteen fields
+00:00 +13: All tests passed!

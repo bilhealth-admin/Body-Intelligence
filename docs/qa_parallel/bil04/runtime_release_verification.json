@@ -1,0 +1,94 @@
+{
+  "official_manifest_url": "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json",
+  "release": {
+    "hash": "ee80f08bbf97172ec030b8751ceab557177a34a6",
+    "channel": "stable",
+    "version": "3.44.6",
+    "dart_sdk_version": "3.12.2",
+    "dart_sdk_arch": "x64",
+    "release_date": "2026-07-09T18:35:32.476978Z",
+    "archive": "stable/linux/flutter_linux_3.44.6-stable.tar.xz",
+    "sha256": "a6320fd72e9a2690c08e2a6a70874a30cb120dee7c78f49d2c628bd7c9e20525"
+  },
+  "verified_download_bytes": 1544352104,
+  "verified_download_sha256": "a6320fd72e9a2690c08e2a6a70874a30cb120dee7c78f49d2c628bd7c9e20525",
+  "archive_sha256_matches_official_manifest": true,
+  "archive_removed_after_verification_to_recover_disk": true,
+  "public_sdk_readonly_source": "/workspace/scratch/561c907a7782/bil02_runtime/flutter",
+  "public_sdk_git_head": "ee80f08bbf97172ec030b8751ceab557177a34a6",
+  "public_sdk_git_status_porcelain": "",
+  "recorded_at_utc": "2026-10-07T08:00:03.406845+00:00",
+  "private_runtime": "/workspace/scratch/ada7a97de764/runtime/flutter-bil04",
+  "runner": "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+  "runner_uses_official_prebuilt_snapshot_directly": true,
+  "reason_direct_snapshot": "Prevent timestamp-based bootstrap pub upgrade in synchronized workspace; official snapshot matches exact SDK Git commit.",
+  "pub_cache": "/workspace/scratch/ada7a97de764/runtime/pub-cache",
+  "config_home": "/workspace/scratch/ada7a97de764/runtime/config",
+  "verified_flutter_machine": {
+    "frameworkVersion": "3.44.6",
+    "channel": "stable",
+    "repositoryUrl": "https://github.com/flutter/flutter.git",
+    "frameworkRevision": "ee80f08bbf97172ec030b8751ceab557177a34a6",
+    "frameworkCommitDate": "2026-07-08 15:02:06 -0700",
+    "engineRevision": "83675ed27633283e7fc296c8bca22e841224c096",
+    "engineCommitDate": "2026-06-30 16:59:03.000Z",
+    "engineContentHash": "d3a3293399556a85388faf8c6f0723a7a5597aa8",
+    "engineBuildDate": "2026-06-30 11:58:16.871",
+    "dartSdkVersion": "3.12.2",
+    "devToolsVersion": "2.57.0",
+    "flutterVersion": "3.44.6",
+    "flutterRoot": "/workspace/scratch/ada7a97de764/runtime/flutter-bil04"
+  },
+  "flutter_tester_missing_shared_libraries": false,
+  "immutable_artifacts_hardlinked": [
+    "dart-sdk",
+    "artifacts/engine/common",
+    "artifacts/engine/linux-x64",
+    "artifacts/material_fonts",
+    ".pub-preload-cache"
+  ],
+  "mutable_metadata_and_flutter_tools_snapshot_copied": true,
+  "project_dependencies_changed": false,
+  "private_tool_dependencies": {
+    "checked_at_utc": "2026-10-07T08:39:26.774800+00:00",
+    "package_count": 103,
+    "all_roots_exist": true,
+    "all_roots_private": true,
+    "sdk_tools_lock_sha256": "1aa193fc5df798338a2ca97d1737450f9c2cc1984ec0095b2efbaa0f4dcad340",
+    "project_lock_sha256": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  },
+  "sdk_sparse_paths": [
+    "bin",
+    "packages",
+    "dev",
+    "examples"
+  ],
+  "sdk_dev_examples_restored_from_same_pinned_git_tree": true,
+  "host_flutter_test_available": true,
+  "host_flutter_analyze_available": true,
+  "final_focused_test_count": 95,
+  "baseline_regression_test_count": 40,
+  "final_analyze_file_count": 10,
+  "final_format_files_changed": 0,
+  "final_evidence_directory": "docs/qa_parallel/bil04/health_read_brief_validation",
+  "isolated_configuration_changes": [
+    "Run official pinned Flutter tool snapshot via private Dart to avoid timestamp-based shell bootstrap pub upgrade.",
+    "Resolve SDK tooling dependencies with offline enforced lockfile into private PUB_CACHE.",
+    "Restore dev/examples from same pinned SDK commit because analyzer expects its dev directory.",
+    "Pass TAR_OPTIONS=--no-same-owner to avoid unmapped archive UID extraction failures."
+  ],
+  "earlier_failures_retained": [
+    "Original official manifest path with extra flutter segment was 404; canonical manifest succeeded.",
+    "Full archive extraction first hit unmappable UID ownership, then workspace disk exhaustion; own incomplete extraction and verified archive removed.",
+    "SDK shell timestamp bootstrap attempted dependency refresh; private SDK tools offline locked get completed with unchanged lock.",
+    "First host analyzer lacked sparse SDK dev directory; restored pinned dev/examples."
+  ],
+  "final_tests_breakdown": {
+    "fasting_data": 23,
+    "fasting_notifications": 21,
+    "daily_life_native": 28,
+    "health_read_guard_brief": 23
+  },
+  "final_evidence_prefix": "docs/qa_parallel/bil04/health_read_brief_validation/focused_*_after_queue_fix",
+  "final_sources_stable_during_tests_analyze_format": true
+}

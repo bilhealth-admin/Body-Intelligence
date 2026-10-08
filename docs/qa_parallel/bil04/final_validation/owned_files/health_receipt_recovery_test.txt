@@ -1,0 +1,22 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart
+00:00 +0: lost postcommit readback is rediscovered after closing and reopening SQLite
+00:00 +1: metadata and health values roll back together when permission is revoked after journal write
+00:00 +2: SQLite filters exact conversation before limit despite unrelated and malformed newer journals
+00:00 +3: valid metadata cannot admit a corrupt immutable journal
+00:00 +4: pending IDs are newest first with a default of 16 and a maximum of 32
+00:00 +5: pending limit -1 is rejected without mutation
+00:00 +6: pending limit 0 is rejected without mutation
+00:00 +7: pending limit 33 is rejected without mutation
+00:00 +8: pending limit 100 is rejected without mutation
+00:00 +9: acknowledgement changes only metadata, preserves SQLite rowid and is an idempotent UPDATE
+00:00 +10: Undo preserves recovery metadata with acknowledgement false
+00:00 +11: Undo preserves recovery metadata with acknowledgement true
+00:00 +12: acknowledging an earlier journal cannot reorder or reauthorize superseded Undo
+00:00 +13: replay preserves acknowledgement and cannot move an operation into another conversation
+00:00 +14: owner and conversation mismatches grant no recovery or acknowledgement authority
+00:00 +15: owner revocation observed during acknowledgement read prevents its UPDATE
+00:00 +16: malformed recovery metadata cannot be acknowledged or silently repaired
+00:00 +17: legacy native and health journal bytes omit all optional recovery metadata
+00:00 +18: recovery locator is rejected for a non-health commit before any write
+00:00 +19: invalid conversation identities are rejected before mutation
+00:00 +20: All tests passed!

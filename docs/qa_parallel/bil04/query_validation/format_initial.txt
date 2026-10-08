@@ -1,0 +1,9 @@
+Formatted lib/features/intelligence_center/app_commands/health_query_adapter.dart
+Formatted lib/features/intelligence_center/app_commands/health_query_projection.dart
+Formatted test/parallel/bil04/health_query_adapter_test.dart
+Formatted test/parallel/bil04/health_query_connected_test.dart
+Formatted 4 files (4 changed) in 0.04 seconds.
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/workspace/scratch/ada7a97de764/repository/analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/workspace/scratch/ada7a97de764/repository/analysis_options.yaml".

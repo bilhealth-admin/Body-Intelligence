@@ -56,27 +56,30 @@ class MealRepository {
       throw ArgumentError.value(type, 'type', 'Unsupported meal type');
     }
     final key = dayKeyFor(date);
-    final existing =
-        await (_database.select(_database.meals)
-              ..where(
-                (row) =>
-                    row.dayKey.equals(key) &
-                    row.type.equals(type) &
-                    row.deletedAt.isNull(),
-              )
-              ..limit(1))
-            .getSingleOrNull();
-    if (existing != null) return existing.id;
-    return _database
-        .into(_database.meals)
-        .insert(
-          MealsCompanion.insert(
-            date: date,
-            dayKey: key,
-            name: Value(name),
-            type: Value(type),
-          ),
-        );
+    return _database.transaction(() async {
+      await _requireOpenDayForMeals(key);
+      final existing =
+          await (_database.select(_database.meals)
+                ..where(
+                  (row) =>
+                      row.dayKey.equals(key) &
+                      row.type.equals(type) &
+                      row.deletedAt.isNull(),
+                )
+                ..limit(1))
+              .getSingleOrNull();
+      if (existing != null) return existing.id;
+      return _database
+          .into(_database.meals)
+          .insert(
+            MealsCompanion.insert(
+              date: date,
+              dayKey: key,
+              name: Value(name),
+              type: Value(type),
+            ),
+          );
+    });
   }
 
   Future<void> addMealItem({
@@ -87,6 +90,7 @@ class MealRepository {
   }) async {
     _validateQuantity(quantity);
     await _database.transaction(() async {
+      await _requireOpenMealDay(mealId);
       final food = await _activeFood(foodId);
       final values = _mealFoodPortionValues(
         food,
@@ -186,6 +190,7 @@ class MealRepository {
       fat: fat,
     );
     return _database.transaction(() async {
+      await _requireOpenDayForMeals(dayKeyFor(date));
       var food =
           await (_database.select(_database.foods)
                 ..where((row) => row.uuid.equals(foodUuid))
@@ -325,6 +330,7 @@ class MealRepository {
       clock.minute,
     );
     return _database.transaction(() async {
+      await _requireOpenDayForMeals(dayKeyFor(timestamp));
       final label =
           'Quick Add • ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
       final foodId = await _database
@@ -368,6 +374,7 @@ class MealRepository {
     _validateQuantity(quantity);
     await _database.transaction(() async {
       final existing = await _mealItem(id);
+      await _requireOpenMealDay(existing.mealId);
       if (existing.deletedAt != null) {
         throw StateError('Cannot change a deleted meal item');
       }
@@ -402,17 +409,20 @@ class MealRepository {
   }
 
   Future<void> deleteMealItem(int id) async {
-    final existing = await _mealItem(id);
-    await (_database.update(
-      _database.mealItems,
-    )..where((row) => row.id.equals(id))).write(
-      MealItemsCompanion(
-        deletedAt: Value(DateTime.now()),
-        updatedAt: Value(DateTime.now()),
-        revision: Value(existing.revision + 1),
-        syncStatus: const Value('pendingDelete'),
-      ),
-    );
+    await _database.transaction(() async {
+      final existing = await _mealItem(id);
+      await _requireOpenMealDay(existing.mealId);
+      await (_database.update(
+        _database.mealItems,
+      )..where((row) => row.id.equals(id))).write(
+        MealItemsCompanion(
+          deletedAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+          revision: Value(existing.revision + 1),
+          syncStatus: const Value('pendingDelete'),
+        ),
+      );
+    });
   }
 
   Future<MealItem> getMealItem(int id) => _mealItem(id);
@@ -428,20 +438,23 @@ class MealRepository {
   }
 
   Future<void> restoreMealItem(int id) async {
-    final existing = await (_database.select(
-      _database.mealItems,
-    )..where((row) => row.id.equals(id))).getSingleOrNull();
-    if (existing == null) throw StateError('Meal item $id does not exist');
-    await (_database.update(
-      _database.mealItems,
-    )..where((row) => row.id.equals(id))).write(
-      MealItemsCompanion(
-        deletedAt: const Value(null),
-        updatedAt: Value(DateTime.now()),
-        revision: Value(existing.revision + 1),
-        syncStatus: const Value('pending'),
-      ),
-    );
+    await _database.transaction(() async {
+      final existing = await (_database.select(
+        _database.mealItems,
+      )..where((row) => row.id.equals(id))).getSingleOrNull();
+      if (existing == null) throw StateError('Meal item $id does not exist');
+      await _requireOpenMealDay(existing.mealId);
+      await (_database.update(
+        _database.mealItems,
+      )..where((row) => row.id.equals(id))).write(
+        MealItemsCompanion(
+          deletedAt: const Value(null),
+          updatedAt: Value(DateTime.now()),
+          revision: Value(existing.revision + 1),
+          syncStatus: const Value('pending'),
+        ),
+      );
+    });
   }
 
   Future<void> deleteMealCascade(int mealId) async {
@@ -450,6 +463,7 @@ class MealRepository {
         _database.meals,
       )..where((row) => row.id.equals(mealId))).getSingleOrNull();
       if (meal == null) return;
+      await _requireOpenDayForMeals(meal.dayKey);
       final now = DateTime.now();
       await (_database.update(
         _database.mealItems,
@@ -479,6 +493,7 @@ class MealRepository {
     }
     await _database.transaction(() async {
       final current = await _mealItem(id);
+      await _requireOpenMealDay(current.mealId);
       final siblings =
           await (_database.select(_database.mealItems)
                 ..where(
@@ -539,6 +554,7 @@ class MealRepository {
                 (row) => row.id.equals(item.mealId) & row.deletedAt.isNull(),
               ))
               .getSingle();
+      await _requireOpenDayForMeals(sourceMeal.dayKey);
       if (sourceMeal.type == mealType) return;
       final candidates =
           await (_database.select(_database.meals)..where(
@@ -586,6 +602,7 @@ class MealRepository {
   Future<int> duplicateMealItem(int id) async {
     return _database.transaction(() async {
       final source = await _mealItem(id);
+      await _requireOpenMealDay(source.mealId);
       if (!MealFoodEvidence.read(source, ownerKey: _coachOwnerKey).isValid) {
         throw const CoachMealConflict(CoachMealConflictReason.invalidEvidence);
       }
@@ -638,6 +655,25 @@ class MealRepository {
     )..where((row) => row.id.equals(id))).getSingleOrNull();
     if (item == null) throw StateError('Meal item $id does not exist');
     return item;
+  }
+
+  /// Call only inside the transaction that writes the diary. A closedAt
+  /// marker also fences a partially recovered legacy lifecycle state.
+  Future<void> _requireOpenDayForMeals(String dayKey) async {
+    final log = await (_database.select(
+      _database.dailyLogs,
+    )..where((row) => row.dayKey.equals(dayKey))).getSingleOrNull();
+    if (log?.lifecycleState == 'closed' || log?.closedAt != null) {
+      throw const CoachMealConflict(CoachMealConflictReason.closedDay);
+    }
+  }
+
+  Future<void> _requireOpenMealDay(int mealId) async {
+    final meal = await (_database.select(
+      _database.meals,
+    )..where((row) => row.id.equals(mealId))).getSingleOrNull();
+    if (meal == null) throw StateError('Meal $mealId does not exist');
+    await _requireOpenDayForMeals(meal.dayKey);
   }
 
   Future<Food> _activeFood(int id) async {

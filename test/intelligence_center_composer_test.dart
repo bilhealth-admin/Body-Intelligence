@@ -146,8 +146,13 @@ void main() {
       );
       expect(send.onPressed, isNull);
       gateway.release();
-      await tester.pump(const Duration(milliseconds: 80));
+      // Await the settled delayed response before unmounting the subscriptions.
+      // Drift schedules zero-duration stream-cleanup timers when Riverpod
+      // disposes the brief provider; a final pumped frame must flush them.
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
     },
   );
 

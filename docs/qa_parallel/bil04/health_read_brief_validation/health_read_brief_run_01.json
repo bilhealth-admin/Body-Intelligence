@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/parallel/bil04/health_read_guard_brief_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 1,
+  "elapsed_seconds": 9.72,
+  "status": "FAIL",
+  "source_sha256": {
+    "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+    "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart": "d2aff6ae94a63b85e4274cfcbb08ab97549ae2e1971e1ca9fcd7904e261b5057",
+    "test/parallel/bil04/health_read_guard_brief_test.dart": "039f40f2b3c08a7dd18891d218b4ba78b3a9fb164bd3591dd8e775e96d19862c",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  }
+}

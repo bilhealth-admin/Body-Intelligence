@@ -1,0 +1,185 @@
+{
+  "name": "all_owned_files_final",
+  "result": "PASS",
+  "exit_code": 0,
+  "passed_test_count": 239,
+  "test_file_count": 13,
+  "single_process_run": false,
+  "auxiliary_runtime_configuration": "compiler_launch_configuration.json",
+  "aggregation": "All original owned *_test.dart files, one serial Flutter process per file. Counts are from disjoint files; no previous attempts or overlapping suites are added.",
+  "command_argv": [
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/activity_command_adapter_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/activity_plan_native_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/closed_day_food_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/daily_life_commands_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/fasting_command_adapter_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/fasting_notification_sync_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/health_coach_ui_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/health_parser_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/health_query_adapter_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/health_query_connected_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/health_read_guard_brief_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/health_receipt_recovery_test.dart"
+    ],
+    [
+      "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+      "test",
+      "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+      "--no-pub",
+      "--reporter",
+      "expanded",
+      "--concurrency=1",
+      "test/parallel/bil04/plan_command_adapter_test.dart"
+    ]
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "TZ": "Asia/Almaty",
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime_requirement": "Flutter 3.44.6 / Dart 3.12.2, unchanged pubspec.lock",
+    "live_providers": false,
+    "test_data": "synthetic, local host"
+  },
+  "source_digest_algorithm": "SHA256 of sorted compact JSON path-to-SHA256 map",
+  "source_scope": "lib/test/tool .dart/.py/.sh/.yaml/.json and four root build configuration files",
+  "source_digest_before": "5097d15188508964d143584c9b2d6eb0ab01dcf46cdd955eb4786fdb1f2824cd",
+  "source_digest_after": "5097d15188508964d143584c9b2d6eb0ab01dcf46cdd955eb4786fdb1f2824cd",
+  "source_stable": true,
+  "source_file_count": 2978,
+  "source_manifest": "all_owned_files_final.sources.json",
+  "file_reports": [
+    "owned_files/activity_command_adapter_test.json",
+    "owned_files/activity_plan_native_test.json",
+    "owned_files/closed_day_food_test.json",
+    "owned_files/daily_life_commands_test.json",
+    "owned_files/fasting_command_adapter_test.json",
+    "owned_files/fasting_notification_sync_test.json",
+    "owned_files/health_coach_ui_test.json",
+    "owned_files/health_parser_test.json",
+    "owned_files/health_query_adapter_test.json",
+    "owned_files/health_query_connected_test.json",
+    "owned_files/health_read_guard_brief_test.json",
+    "owned_files/health_receipt_recovery_test.json",
+    "owned_files/plan_command_adapter_test.json"
+  ],
+  "log": "all_owned_files_final.txt",
+  "skips_or_exclusions_added": false,
+  "final_resume_invocation_duration_seconds": 49.163,
+  "summed_file_duration_seconds": 79.774,
+  "first_file_started_at_utc": "2026-10-07T09:22:09.567124+00:00",
+  "last_file_ended_at_utc": "2026-10-07T09:33:46.269223+00:00",
+  "evidence_span_seconds": 696.702099,
+  "duration_note": "The final resume invocation reused six already completed exact-source reports. Summed file durations exclude the gap between batches; evidence span includes it. No single-process aggregate runtime is claimed.",
+  "retained_exact_source_file_reports": [
+    "owned_files/activity_command_adapter_test.json",
+    "owned_files/activity_plan_native_test.json",
+    "owned_files/closed_day_food_test.json",
+    "owned_files/daily_life_commands_test.json",
+    "owned_files/fasting_command_adapter_test.json",
+    "owned_files/fasting_notification_sync_test.json"
+  ],
+  "log_sha256": "afdc3636518d17f2b20a72d2111210f05b47f12d6a5208eba8db7515b324de88"
+}

@@ -1,0 +1,73 @@
+{
+  "status": "PASS_TOOL_ONLY_SYNC",
+  "capturedAtUtc": "2026-10-07T09:55:43.921241+00:00",
+  "baseSha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "priorTestedSourceDigest": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "currentTestedSourceDigest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "priorSourceFileCount": 2978,
+  "currentSourceFileCount": 2979,
+  "method": "Compare archived and final source manifests, verify exact existing owned helper bytes, and read the six completed fresh gate reports. No source/tool edit, compiler/test invocation, Git operation or network in this documentation audit.",
+  "priorManifest": "final_validation/before_localization_builder_sync/full_analyze_final.sources.json",
+  "priorManifestSha256": "76d5a5eccb99d787acfb3c096c17a7b2e785bff6ef891d281d90fbf864602543",
+  "currentManifest": "final_validation/full_analyze_final.sources.json",
+  "currentManifestSha256": "2414e7f18bad5fa867bc4c5fdedcf74bcea2e4a03a6d175b3d5143aadf4f4717",
+  "addedToValidation": [
+    "tool/qa_parallel/bil04/build_health_strings.py"
+  ],
+  "removedPaths": [],
+  "modifiedExistingPaths": [],
+  "allPrior2978SourceHashesPreserved": true,
+  "helperAlreadyExistedInOwnedDelivery": true,
+  "helperBytes": 8271,
+  "helperSha256": "98f2cb42bca07861b9e922a402a6135bbba21971d846387b3f50b2fcaf7e48f7",
+  "sameHelperBytesInRepositoryAndValidation": true,
+  "freshGateReports": {
+    "all_owned_files_final": {
+      "result": "PASS",
+      "passed_test_count": 239,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "nearby_regressions": {
+      "result": "PASS",
+      "passed_test_count": 300,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "food_journal_regressions": {
+      "result": "PASS",
+      "passed_test_count": 50,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "new_york_dst_final": {
+      "result": "PASS",
+      "passed_test_count": 27,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "full_analyze_final": {
+      "result": "PASS",
+      "passed_test_count": null,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "format_final": {
+      "result": "PASS",
+      "passed_test_count": null,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    }
+  },
+  "catalogReproductionReports": [
+    "final_validation/localization_builder_reproduction.json"
+  ],
+  "catalogReproduction": {
+    "status": "PASS",
+    "exactPairs": 147,
+    "exactSourceHashes": 39,
+    "rawReviewRequiredInternalSqlLiterals": 1
+  },
+  "counting": "239 owned +300 nearby +50 food =589 disjoint cases. DST27 and every prior rerun are not added to that total.",
+  "historicalRegistryTransition": "query_validation/registry_contract_source_transition.json"
+}

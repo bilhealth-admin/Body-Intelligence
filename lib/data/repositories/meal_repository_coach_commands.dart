@@ -219,9 +219,28 @@ extension _CoachMealCommandWrites on MealRepository {
           scope,
         );
       case CoachMealCommandKind.move:
+        final requestedDay = command.arguments['day'] as String?;
+        final originalTime = snapshot.meal.date.toLocal();
+        final day = requestedDay == null ? null : DateTime.parse(requestedDay);
+        final destinationDate = day == null
+            ? snapshot.meal.date
+            : DateTime(
+                day.year,
+                day.month,
+                day.day,
+                originalTime.hour,
+                originalTime.minute,
+                originalTime.second,
+              );
+        final destinationType =
+            command.arguments['mealType'] as String? ?? snapshot.meal.type;
+        CoachMealCommand._validateMealType(destinationType);
+        if (dayKeyFor(destinationDate) != snapshot.meal.dayKey) {
+          await _requireCoachOpenDay(dayKeyFor(destinationDate), scope);
+        }
         final destination = await _coachDestination(
-          date: snapshot.meal.date,
-          type: command.arguments['mealType']! as String,
+          date: destinationDate,
+          type: destinationType,
           scope: scope,
           createdMeals: createdMeals,
         );

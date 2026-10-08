@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "analyze",
+    "--no-pub",
+    "--fatal-infos",
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+    "lib/features/intelligence_center/app_commands/coach_daily_commands.dart",
+    "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart",
+    "test/parallel/bil04/fasting_command_adapter_test.dart",
+    "test/parallel/bil04/fasting_notification_sync_test.dart",
+    "test/parallel/bil04/daily_life_commands_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 1,
+  "elapsed_seconds": 3.06,
+  "status": "FAIL",
+  "source_sha256": {
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart": "e8e01f4bd06cd20623c9ea0e48a71d8d3380c3b26a7367a25a05ff89a258e977",
+    "lib/features/intelligence_center/app_commands/coach_daily_commands.dart": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+    "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart": "c00f9e89da36b3cabbc6e18386ded639a6562b037715a73901d0b5845e27da5c",
+    "test/parallel/bil04/fasting_command_adapter_test.dart": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+    "test/parallel/bil04/fasting_notification_sync_test.dart": "2a0ac109966ac9d352a3ac5f99d3156e1630bbdf1398775b26fd27126039c837",
+    "test/parallel/bil04/daily_life_commands_test.dart": "2f4b957ff63cdc09f0a4d5aefad830521cbbd13814d1893ce016e4b9b231ff6d"
+  }
+}

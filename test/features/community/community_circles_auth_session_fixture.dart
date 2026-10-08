@@ -62,6 +62,23 @@ class _CircleAuthFixture {
       body = {};
     } else if (request.url.path.startsWith('/rest/v1/rpc/')) {
       final method = request.url.pathSegments.last;
+      // The optional metadata endpoint is absent on the legacy fixture
+      // backend. Represent the real PostgREST missing-RPC response instead
+      // of throwing a synthetic client StateError. Legacy circle rows must
+      // still render, but no privileged metadata is fabricated.
+      if (method == 'bil_circle_read_v1') {
+        return http.Response(
+          jsonEncode({
+            'code': 'PGRST202',
+            'details': null,
+            'hint': null,
+            'message': 'Could not find function public.bil_circle_read_v1()',
+          }),
+          404,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      }
       final token = request.headers['authorization']!.split(' ').last;
       final claims =
           jsonDecode(

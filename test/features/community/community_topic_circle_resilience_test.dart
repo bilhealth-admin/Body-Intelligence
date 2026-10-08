@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:body_intelligence_log/features/community/domain/community_circles.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_topics.dart';
@@ -9,15 +11,63 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _postId = '33333333-3333-4333-8333-333333333333';
+const _viewerId = '11111111-1111-4111-8111-111111111111';
+
+// The circle entry surface is owner-scoped even for read-only browsing.
+// Authenticate solely against the local fake transport, and simulate the
+// optional legacy-server metadata endpoint being absent without fabricating
+// privileged membership or post-view records.
+Future<http.Response> _legacyCircleFixture(http.Request request) async {
+  if (request.url.path == '/auth/v1/token') {
+    final tokenPayload = base64Url
+        .encode(utf8.encode(jsonEncode({'sub': _viewerId, 'exp': 4102444800})))
+        .replaceAll('=', '');
+    return http.Response(
+      jsonEncode({
+        'access_token': 'eyJhbGciOiJIUzI1NiJ9.$tokenPayload.fixture',
+        'refresh_token': 'offline-fixture-refresh',
+        'token_type': 'bearer',
+        'expires_in': 3600,
+        'user': {
+          'id': _viewerId,
+          'email': 'read-only-fixture@example.invalid',
+          'app_metadata': {},
+          'user_metadata': {},
+          'aud': 'authenticated',
+          'created_at': '2026-10-07T00:00:00Z',
+        },
+      }),
+      200,
+      headers: {'content-type': 'application/json'},
+      request: request,
+    );
+  }
+  if (request.url.path == '/rest/v1/rpc/bil_circle_read_v1') {
+    return http.Response(
+      jsonEncode({
+        'code': 'PGRST202',
+        'details': null,
+        'hint': null,
+        'message': 'Could not find function public.bil_circle_read_v1()',
+      }),
+      404,
+      headers: {'content-type': 'application/json'},
+      request: request,
+    );
+  }
+  throw StateError('Unexpected read-only fixture call: ${request.url.path}');
+}
 
 class _BrowseRepository extends CommunityRepository {
   _BrowseRepository(super.client);
 
   @override
-  String get currentUserId => '11111111-1111-4111-8111-111111111111';
+  String get currentUserId => _viewerId;
   final requests = <({DateTime? before, String? id})>[];
   Completer<void>? more;
   bool failMore = true;
@@ -171,11 +221,16 @@ Future<void> _more(WidgetTester tester, String language) async {
 
 void main() {
   late SupabaseClient client;
-  setUp(() {
+  setUp(() async {
     client = SupabaseClient(
       'https://browse.invalid',
       'synthetic-key',
       authOptions: const AuthClientOptions(autoRefreshToken: false),
+      httpClient: CommunityOwnerHttpClient(MockClient(_legacyCircleFixture)),
+    );
+    await client.auth.signInWithPassword(
+      email: 'read-only-fixture@example.invalid',
+      password: 'synthetic',
     );
   });
   tearDown(() async => client.dispose());

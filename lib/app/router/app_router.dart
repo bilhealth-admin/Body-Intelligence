@@ -44,7 +44,9 @@ import '../../features/commerce/presentation/bil_store_plans_page.dart';
 import '../../features/commerce/presentation/premium_route_glass_gate.dart';
 import '../../features/commerce/presentation/premium_logging_intro_page.dart';
 import '../../features/community/presentation/community_hub_page.dart';
+import '../../features/community/activity_rewards/community_post_receipt_page.dart';
 import '../../features/community/presentation/community_entry_gate.dart';
+import '../../features/community/channels/presentation/community_channels_route.dart';
 import '../../features/community/presentation/community_surface.dart';
 import '../../features/community/presentation/community_bil_code_page.dart';
 import '../../features/community/presentation/community_people_page.dart';
@@ -477,9 +479,18 @@ class AppRouter {
         builder: (_, state) {
           DateTime? parse(String key) =>
               DateTime.tryParse(state.uri.queryParameters[key] ?? '');
+          final rawDatasets = state.uri.queryParameters['datasets'];
+          final datasets = rawDatasets == null || rawDatasets.trim().isEmpty
+              ? null
+              : rawDatasets
+                    .split(',')
+                    .map((value) => value.trim())
+                    .where((value) => value.isNotEmpty)
+                    .toSet();
           return LocalExportRangePage(
             initialFrom: parse('from'),
             initialTo: parse('to'),
+            initialDatasets: datasets,
           );
         },
       ),

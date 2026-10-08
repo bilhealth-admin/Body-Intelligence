@@ -1,0 +1,6 @@
+Formatted /workspace/scratch/ada7a97de764/repository/test/parallel/bil04/closed_day_food_test.dart
+Formatted 4 files (1 changed) in 0.09 seconds.
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/workspace/scratch/ada7a97de764/repository/analysis_options.yaml".
+Warning: Package resolution error when reading "analysis_options.yaml" file:
+Failed to resolve package URI "package:flutter_lints/flutter.yaml" in include at "/workspace/scratch/ada7a97de764/repository/analysis_options.yaml".

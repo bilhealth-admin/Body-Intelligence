@@ -9,6 +9,7 @@ class _CommunityFeedReferenceHeader extends StatefulWidget {
     required this.onCompose,
     required this.onOpenTopic,
     this.onOpenCircles,
+    this.ownerIsCurrent,
   });
 
   final CommunityRepository repository;
@@ -18,6 +19,7 @@ class _CommunityFeedReferenceHeader extends StatefulWidget {
   final Future<void> Function({String? tag, String? circle}) onCompose;
   final ValueChanged<CommunityTopic> onOpenTopic;
   final VoidCallback? onOpenCircles;
+  final ValueGetter<bool>? ownerIsCurrent;
 
   @override
   State<_CommunityFeedReferenceHeader> createState() =>
@@ -41,6 +43,8 @@ class _CommunityFeedReferenceHeaderState
       _profile = widget.repository.loadMyProfileOverview();
     }
   }
+
+  bool get _ownerCurrent => widget.ownerIsCurrent?.call() ?? true;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +74,11 @@ class _CommunityFeedReferenceHeaderState
                   avatarUrl: snapshot.data?.avatarUrl,
                   accent: false,
                   add: true,
-                  onTap: widget.enabled ? () => widget.onCompose() : null,
+                  onTap: widget.enabled && _ownerCurrent
+                      ? () {
+                          if (_ownerCurrent) widget.onCompose();
+                        }
+                      : null,
                 ),
               ),
               for (final post in uniqueAuthors.values)
@@ -80,9 +88,12 @@ class _CommunityFeedReferenceHeaderState
                       communityText(context, 'BIL member', 'عضو BIL'),
                   avatarUrl: post.authorAvatarUrl,
                   accent: true,
-                  onTap: widget.enabled
-                      ? () =>
-                            context.push('/community/profile/${post.authorId}')
+                  onTap: widget.enabled && _ownerCurrent
+                      ? () {
+                          if (_ownerCurrent) {
+                            context.push('/community/profile/${post.authorId}');
+                          }
+                        }
                       : null,
                 ),
             ],
@@ -173,8 +184,12 @@ class _CommunityFeedReferenceHeaderState
                   key: const Key('community-compose-coach'),
                   icon: Icons.auto_awesome_outlined,
                   label: communityText(context, 'AI Help', 'مساعدة AI'),
-                  onTap: widget.enabled
-                      ? () => context.push('/intelligence-center')
+                  onTap: widget.enabled && _ownerCurrent
+                      ? () {
+                          if (_ownerCurrent) {
+                            context.push('/intelligence-center');
+                          }
+                        }
                       : null,
                 ),
               ),

@@ -9,6 +9,15 @@ extension _NativeCommandWrites on CoachNativeCommandRepository {
     final args = command.resolved;
     int? waterId;
     switch (command.kind) {
+      case CoachNativeCommandKind.health:
+        await _awaitOwner(
+          () => _healthCommands.apply(
+            resolved: args,
+            before: before.health!,
+            checkAccess: () => scope.check(database.localOwnerId),
+          ),
+          scope,
+        );
       case CoachNativeCommandKind.water:
         waterId = await _awaitOwner(
           () => water.add(
@@ -157,6 +166,10 @@ bool _matchesNativeWrite(
 ) {
   final args = command.resolved;
   switch (command.kind) {
+    case CoachNativeCommandKind.health:
+      // Adapters verify their exact repository result before returning. This
+      // receipt is then reread in the enclosing transaction and after commit.
+      return after.health?['receipt'] is Map;
     case CoachNativeCommandKind.water:
       return after.water != null &&
           after.water!.deletedAt == null &&

@@ -24,6 +24,7 @@ class LifeContextRepository {
   };
 
   Future<int> add({
+    String? uuid,
     required DateTime occurredAt,
     required String type,
     String? details,
@@ -36,6 +37,7 @@ class LifeContextRepository {
         .into(database.lifeContextEntries)
         .insert(
           LifeContextEntriesCompanion.insert(
+            uuid: uuid == null ? const Value.absent() : Value(uuid),
             occurredAt: occurredAt,
             dayKey: dayKeyFor(occurredAt),
             type: type,
@@ -56,6 +58,14 @@ class LifeContextRepository {
           ..orderBy([(row) => OrderingTerm.desc(row.occurredAt)]))
         .watch();
   }
+
+  /// A bounded identity read used for native command readback and recovery.
+  /// Includes a tombstone so Undo can distinguish deletion from missing data.
+  Future<LifeContextEntry?> getByUuid(String uuid) =>
+      (database.select(database.lifeContextEntries)
+            ..where((row) => row.uuid.equals(uuid))
+            ..limit(1))
+          .getSingleOrNull();
 
   Stream<List<LifeContextEntry>> watchAllForInsights() {
     return (database.select(database.lifeContextEntries)

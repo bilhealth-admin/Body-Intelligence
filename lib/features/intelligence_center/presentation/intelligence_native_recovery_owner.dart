@@ -40,6 +40,9 @@ extension _CoachNativeRecoveryOwner on _IntelligenceCenterPageState {
     final profiles = ref.read(userProfileRepositoryProvider);
     final goals = ref.read(goalRepositoryProvider);
     final measurements = ref.read(bodyMeasurementRepositoryProvider);
+    final daily = ref.read(dailyLogRepositoryProvider);
+    final life = ref.read(lifeContextRepositoryProvider);
+    final dietCommand = ref.read(dietPlanCommandProvider);
     final witness = ref.read(coachNativeOwnerWitnessProvider);
     final epoch = conversationPersistenceEpoch;
     final generation = conversationLoadGeneration;
@@ -60,6 +63,9 @@ extension _CoachNativeRecoveryOwner on _IntelligenceCenterPageState {
           identical(ref.read(weightRepositoryProvider), weights) &&
           identical(ref.read(userProfileRepositoryProvider), profiles) &&
           identical(ref.read(goalRepositoryProvider), goals) &&
+          identical(ref.read(dailyLogRepositoryProvider), daily) &&
+          identical(ref.read(lifeContextRepositoryProvider), life) &&
+          identical(ref.read(dietPlanCommandProvider), dietCommand) &&
           identical(
             ref.read(bodyMeasurementRepositoryProvider),
             measurements,
@@ -78,6 +84,7 @@ extension _CoachNativeRecoveryOwner on _IntelligenceCenterPageState {
         profiles: profiles,
         goals: goals,
         measurements: measurements,
+        healthCommands: _newCoachHealthAdapters(database),
       ),
       memoryRepository: CoachMemoryRepository(preferences: preferences),
       scope: scope,
@@ -101,6 +108,9 @@ extension _CoachNativeRecoveryOwner on _IntelligenceCenterPageState {
       watch(userProfileRepositoryProvider, profiles);
       watch(goalRepositoryProvider, goals);
       watch(bodyMeasurementRepositoryProvider, measurements);
+      watch(dailyLogRepositoryProvider, daily);
+      watch(lifeContextRepositoryProvider, life);
+      watch(dietPlanCommandProvider, dietCommand);
       watch(coachNativeOwnerWitnessProvider, witness);
       scope.check(database.localOwnerId);
       return owner;

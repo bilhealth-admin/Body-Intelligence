@@ -1,0 +1,33 @@
+{
+  "status": "INTERRUPTED_AFTER_COMPILER_EXIT",
+  "timestamp_utc": "2026-10-07T09:16:02.190007+00:00",
+  "process_id": 99325,
+  "signal": "SIGINT via write_stdin CTRL-C",
+  "observed_error": "The Dart compiler exited unexpectedly; runner remained on next file loading with no compiler child",
+  "cgroup_memory_events": "low 0\nhigh 0\nmax 4569112\noom 52\noom_kill 31\noom_group_kill 0\n",
+  "causality": "Shared memory pressure is consistent with the failure; the exact compiler exit cause was not independently captured.",
+  "source_changed": false,
+  "assertions_or_timeouts_changed": false,
+  "runner_exit_code": 130,
+  "stopped_at_utc": "2026-10-07T09:17:06.674620+00:00",
+  "prior_direct_signal_attempt": "SIGTERM addressed host PID from a separate PID namespace and failed with ProcessLookupError; no process was signalled by that attempt.",
+  "source_snapshot_status": "Recorder was interrupted before writing final source report. Do not treat this attempt as an authoritative source-stable gate.",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/parallel/bil04"
+  ],
+  "result": "FAIL",
+  "completed_assertion_cases": 23,
+  "compiler_load_errors": 1,
+  "environment": {
+    "flutter": "3.44.6",
+    "dart": "3.12.2",
+    "TAR_OPTIONS": "--no-same-owner",
+    "live_providers": false
+  }
+}

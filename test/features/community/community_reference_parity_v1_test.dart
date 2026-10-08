@@ -466,7 +466,9 @@ void main() {
     expect(detailHeader, contains("value: 'block'"));
     expect(detailHeader, contains('Wrap('));
     expect(circles, contains("Key('community-circle-cover-\$slug')"));
-    expect(circles, contains('_CommunityCircleCover(slug: circle.slug)'));
+    // BIL-06 passes the immutable circle record to the extracted row body.
+    // Keep checking the concrete cover and its keyed slug affordance.
+    expect(circles, contains('_CommunityCircleCover(circle: circle)'));
     expect(circles, contains('final headerAction ='));
     expect(circles, contains("'community-circle-membership-\${circle.slug}'"));
   });

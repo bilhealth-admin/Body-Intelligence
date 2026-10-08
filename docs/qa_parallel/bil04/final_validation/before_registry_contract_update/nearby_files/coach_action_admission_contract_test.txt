@@ -1,0 +1,31 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_action_admission_contract_test.dart
+00:00 +0: setThemeMode cannot persist with normal or goal-shaped payload
+00:00 +1: setLanguage cannot persist with normal or goal-shaped payload
+00:00 +2: addWater cannot persist with normal or goal-shaped payload
+00:00 +3: addWeight cannot persist with normal or goal-shaped payload
+00:00 +4: saveMeasurements cannot persist with normal or goal-shaped payload
+00:00 +5: quickAddMacros cannot persist with normal or goal-shaped payload
+00:00 +6: updateMealItem cannot persist with normal or goal-shaped payload
+00:00 +7: moveMealItem cannot persist with normal or goal-shaped payload
+00:00 +8: deleteMealItem cannot persist with normal or goal-shaped payload
+00:00 +9: requestAccountDeletion cannot persist with normal or goal-shaped payload
+00:00 +10: signOut cannot persist with normal or goal-shaped payload
+00:00 +11: saveMemory cannot persist with normal or goal-shaped payload
+00:00 +12: legacy goal rejects mismatched or unknown identity navigate
+00:00 +13: legacy goal rejects mismatched or unknown identity unknown_native_write
+00:00 +14: canonical tool identity is independent of the legacy presentation ID
+00:00 +15: mutation cannot borrow missing/unknown/mismatched tool null
+00:00 +16: mutation cannot borrow missing/unknown/mismatched tool unknown_tool
+00:00 +17: mutation cannot borrow missing/unknown/mismatched tool navigate
+00:00 +18: mutation cannot borrow missing/unknown/mismatched tool read_profile_identity
+00:00 +19: proposal admission freezes arguments and allocates identity only once
+00:00 +20: production UUIDs distinguish equal explicit requests with equal UI IDs
+00:00 +21: local water and model factory share the canonical validated tool contract
+00:00 +22: model metadata cannot choose native operation identity or weaken tool policy
+00:00 +23: native binding validates numeric bounds and rejects extra keys
+00:00 +24: app-derived navigation aliases retain their exact schema
+00:00 +25: canonical risk cannot lose destructive confirmation through caller flags
+00:00 +26: calorie-only Quick Add preserves missing/null macro knowledge
+00:00 +27: goal identity survives conversion JSON restore and repeated toAction
+00:00 +28: legacy migration identity is stable and distinct between source messages
+00:00 +29: All tests passed!

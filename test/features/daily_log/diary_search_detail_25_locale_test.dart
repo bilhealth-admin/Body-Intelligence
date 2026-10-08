@@ -224,15 +224,30 @@ void main() {
       expect(verifiedIcon, findsOneWidget, reason: '$tag verified icon');
       expect(
         tester.widget<Icon>(verifiedIcon).color,
-        const Color(0xFF087A43),
-        reason: '$tag verified green',
+        const Color(0xFF56C878),
+        reason: '$tag verified badge keeps the Food Search reference green',
       );
       final addFood = find.byKey(const Key('daily-search-add-food-action'));
       expect(addFood, findsOneWidget, reason: '$tag styled add action');
       expect(
         tester.widget(addFood),
-        isA<FilledButton>(),
-        reason: '$tag add action uses a filled tonal button',
+        isA<Semantics>(),
+        reason: '$tag icon-only add action has an accessible button label',
+      );
+      expect(
+        find.descendant(of: addFood, matching: find.byIcon(Icons.add_rounded)),
+        findsOneWidget,
+        reason: '$tag icon-only action contains a single plus',
+      );
+      expect(
+        find.descendant(of: addFood, matching: find.byType(InkWell)),
+        findsOneWidget,
+        reason: '$tag plus retains an independently tappable ripple',
+      );
+      expect(
+        find.descendant(of: addFood, matching: find.byType(Text)),
+        findsNothing,
+        reason: '$tag must not regress to the + Add text button',
       );
       expect(
         tester.takeException(),

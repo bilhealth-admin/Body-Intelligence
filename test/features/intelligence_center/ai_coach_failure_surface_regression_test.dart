@@ -14,7 +14,13 @@ void main() {
       'lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart',
     ).readAsStringSync();
 
-    expect(page, contains('retryableErrorMessageIds.isEmpty'));
+    // The retry visibility condition lives in the extracted reference body.
+    // Inspect both owning parts without weakening the single-retry assertion.
+    final presentation = File(
+      'lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart',
+    ).readAsStringSync();
+    expect(page, contains('final retryableErrorMessageIds = <String>{};'));
+    expect(presentation, contains('retryableErrorMessageIds.isEmpty'));
     final rendering = File(
       'lib/features/intelligence_center/presentation/intelligence_center_page_message.dart',
     ).readAsStringSync();

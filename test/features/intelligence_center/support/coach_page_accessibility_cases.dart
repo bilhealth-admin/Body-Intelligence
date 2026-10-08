@@ -1,36 +1,46 @@
 part of '../coach_page_lifecycle_regression_test.dart';
 
 void registerCoachAccessibilityCases() {
-  testWidgets('pending or failed context keeps one welcome and no request', (
-    tester,
-  ) async {
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    final gateway = _HeldGateway();
-    final pending = Completer<CoachContextSnapshot>();
-    await _mount(
-      tester,
-      database: database,
-      gateway: gateway,
-      contextLoader: () => pending.future,
-    );
-    void expectWelcomeOnly() {
-      final history = tester.widget<CoachAnchoredHistory>(
-        find.byType(CoachAnchoredHistory),
+  testWidgets(
+    'pending or failed context keeps one bounded intro and no request',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final gateway = _HeldGateway();
+      final pending = Completer<CoachContextSnapshot>();
+      // The bounded brief may never subscribe to the separate full-context
+      // future. Observe its intended test error so FakeAsync does not report an
+      // unrelated unhandled Future while still allowing the provider to fail.
+      pending.future.then<void>(
+        (_) {},
+        onError: (Object error, StackTrace stackTrace) {},
       );
-      expect(history.rowIds, hasLength(1));
-      expect(history.rowIds.single, startsWith('welcome'));
-      expect(find.byKey(const Key('ai-coach-retry')), findsNothing);
-      expect(gateway.calls, 0);
-      expect(tester.takeException(), isNull);
-    }
+      await _mount(
+        tester,
+        database: database,
+        gateway: gateway,
+        contextLoader: () => pending.future,
+      );
+      void expectSafeIntroOnly() {
+        final history = tester.widget<CoachAnchoredHistory>(
+          find.byType(CoachAnchoredHistory),
+        );
+        expect(history.rowIds, hasLength(1));
+        // The bounded brief may resolve independently of the rich context; it
+        // must remain a single stable introduction with no model invocation.
+        expect(history.rowIds.single, 'coach-session-brief');
+        expect(find.byKey(const Key('ai-coach-retry')), findsNothing);
+        expect(gateway.calls, 0);
+        expect(tester.takeException(), isNull);
+      }
 
-    expectWelcomeOnly();
-    pending.completeError(StateError('context unavailable'));
-    await tester.pumpAndSettle();
-    expectWelcomeOnly();
-    await _unmount(tester);
-  });
+      expectSafeIntroOnly();
+      pending.completeError(StateError('context unavailable'));
+      await tester.pumpAndSettle();
+      expectSafeIntroOnly();
+      await _unmount(tester);
+    },
+  );
 
   for (final arabic in [false, true]) {
     testWidgets(

@@ -121,6 +121,7 @@ void _cardOwnerTests(
                     ? 'community-post-add-friend-$_postId'
                     : 'community-poll-option-$_option',
               ),
+              skipOffstage: false,
             ),
           );
           expect(
@@ -176,7 +177,10 @@ void _cardOwnerTests(
       );
       await _tap(
         tester,
-        find.byKey(const Key('community-post-comments-$_postId')),
+        find.byKey(
+          const Key('community-post-comments-$_postId'),
+          skipOffstage: false,
+        ),
       );
       await tester.pumpAndSettle();
       final readsBeforeFollow = repository.count('profile');

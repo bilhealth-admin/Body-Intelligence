@@ -1,0 +1,5 @@
+Analyzing 7 items...                                            
+
+   info • 'NAMESPACE_URL' is deprecated and shouldn't be used. Please use the Namespace enum in enums.dart instead. Try replacing the use of the deprecated member with the replacement • lib/features/intelligence_center/app_commands/coach_life_context_commands.dart:61:14 • deprecated_member_use
+
+1 issue found. (ran in 2.6s)

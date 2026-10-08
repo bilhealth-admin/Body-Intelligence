@@ -9,6 +9,24 @@ import 'remote_ai_consent_coordinator.dart';
 
 part 'coach_memory_owner_sync.dart';
 
+class CoachMemoryVersionConflict implements Exception {
+  const CoachMemoryVersionConflict(this.id);
+  final String id;
+
+  @override
+  String toString() => 'CoachMemoryVersionConflict($id)';
+}
+
+class CoachMemorySelection {
+  const CoachMemorySelection({
+    required this.id,
+    required this.expectedUpdatedAt,
+  });
+
+  final String id;
+  final String expectedUpdatedAt;
+}
+
 class CoachMemoryRepository {
   CoachMemoryRepository({required this.preferences, SupabaseClient? cloud})
     : cloud = cloud ?? _activeCloud();
@@ -106,6 +124,63 @@ class CoachMemoryRepository {
     CommunityOwnerOperation.checkCurrent();
     await syncCommittedChange(id: id, expectedLocal: null);
   });
+
+  /// Deletes only memories the user explicitly selected from a reviewed
+  /// snapshot. Each selection carries the row's updatedAt token so a newer
+  /// edit cannot be silently removed by an older confirmation dialog.
+  Future<List<String>> deleteSelected(
+    List<CoachMemorySelection> selections, {
+    bool Function()? isCurrentOwner,
+  }) async {
+    if (selections.isEmpty) return const <String>[];
+    final ids = selections.map((item) => item.id).toList(growable: false);
+    if (ids.any((id) => id.trim().isEmpty) ||
+        ids.toSet().length != ids.length) {
+      throw ArgumentError.value(selections, 'selections');
+    }
+    if (isCurrentOwner?.call() == false) {
+      throw const CommunityOwnerOperationCancelled();
+    }
+    final deleted = await _runForMemoryOwner(() async {
+      if (isCurrentOwner?.call() == false) {
+        throw const CommunityOwnerOperationCancelled();
+      }
+      await preferences.update(storageKey, (raw) {
+        CommunityOwnerOperation.checkCurrent();
+        if (isCurrentOwner?.call() == false) {
+          throw const CommunityOwnerOperationCancelled();
+        }
+        final entries = _strictMemoryEntries(raw);
+        for (final selection in selections) {
+          final matches = entries.where((item) => item['id'] == selection.id);
+          if (matches.length != 1 ||
+              matches.single['updatedAt']?.toString() !=
+                  selection.expectedUpdatedAt) {
+            throw CoachMemoryVersionConflict(selection.id);
+          }
+        }
+        entries.removeWhere((item) => ids.contains(item['id']));
+        return jsonEncode(entries);
+      });
+      CommunityOwnerOperation.checkCurrent();
+      if (isCurrentOwner?.call() == false) {
+        throw const CommunityOwnerOperationCancelled();
+      }
+      final readback = _strictMemoryEntries(await preferences.get(storageKey));
+      if (readback.any((item) => ids.contains(item['id']))) {
+        throw StateError('Selected Coach memories were not deleted');
+      }
+      return List<String>.unmodifiable(ids);
+    }, isCurrentOwner: isCurrentOwner);
+    for (final id in deleted) {
+      await syncCommittedChange(
+        id: id,
+        expectedLocal: null,
+        isCurrentOwner: isCurrentOwner,
+      );
+    }
+    return deleted;
+  }
 
   Future<void> mergeFromCloud() async {
     try {

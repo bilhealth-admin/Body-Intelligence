@@ -98,7 +98,22 @@ void main() {
     ).readAsStringSync();
     expect(router, contains("initialFrom: parse('from')"));
     expect(router, contains("initialTo: parse('to')"));
-    expect(page, contains('exportCsvFiles(from: from, to: to)'));
+    // The current privacy-reviewed export contract prepares local bytes first,
+    // then requires a separate explicit Share action. Assert that boundary,
+    // rather than the pre-refactor direct CSV call from the page.
+    final service = File(
+      'lib/features/intelligence_center/settings_commands/coach_export_command.dart',
+    ).readAsStringSync();
+    expect(page, contains('final ready = await _service.prepare('));
+    expect(page, contains('datasets: Set<String>.of(datasets)'));
+    expect(page, contains('await _service.sharePrepared(ready)'));
+    expect(page, contains('prepared = null;'));
+    expect(service, contains('lifecycle.exportCsvFiles(from: from, to: to)'));
+    expect(service, contains('Future<CoachExportShareStatus> sharePrepared('));
+    expect(
+      service,
+      contains('await share.sharePortableCsvFiles(prepared.files)'),
+    );
     expect(page, contains('DateUtils.dateOnly(widget.initialFrom!)'));
     expect(page, contains('DateUtils.dateOnly(widget.initialTo!)'));
   });

@@ -1,0 +1,17 @@
+[
+  {
+    "path": "lib/data/repositories/meal_repository.dart",
+    "before_sha256": "e2441a31b74c52a8dfeaad5f639237a3f0f2a9eb38fb8b4ec2c2ac1e2aa9f90d",
+    "matches_base": true
+  },
+  {
+    "path": "lib/data/repositories/meal_repository_copying.dart",
+    "before_sha256": "e9148b29217692be655ae0320b487f635b86519d8bd30ea08925974534aedb96",
+    "matches_base": true
+  },
+  {
+    "path": "lib/data/repositories/meal_repository_queries.dart",
+    "before_sha256": "9af49475369b600cdcf7c4ade0d4be76bc4ff566347746f3d163d3def5dc36a8",
+    "matches_base": true
+  }
+]

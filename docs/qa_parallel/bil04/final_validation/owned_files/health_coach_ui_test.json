@@ -1,0 +1,40 @@
+{
+  "name": "health_coach_ui_test",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/parallel/bil04/health_coach_ui_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "started_at_utc": "2026-10-07T09:51:35.310125+00:00",
+  "ended_at_utc": "2026-10-07T09:51:57.398087+00:00",
+  "duration_seconds": 22.088,
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "TZ": "Asia/Almaty",
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime_requirement": "Flutter 3.44.6 / Dart 3.12.2, unchanged pubspec.lock",
+    "live_providers": false,
+    "test_data": "synthetic, local host"
+  },
+  "exit_code": 0,
+  "result": "PASS",
+  "passed_test_count": 25,
+  "source_digest_algorithm": "SHA256 of sorted compact JSON path-to-SHA256 map",
+  "source_scope": "lib/test/tool .dart/.py/.sh/.yaml/.json and four root build configuration files",
+  "source_digest_before": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "source_digest_after": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "source_stable": true,
+  "source_file_count": 2979,
+  "source_manifest": "health_coach_ui_test.sources.json",
+  "changed_during_run": [],
+  "log": "health_coach_ui_test.txt",
+  "log_sha256": "9c2e3f03f1722953984cd2ed4a111178de4e53155de39528a379db1f73e9462a",
+  "skips_or_exclusions_added_by_recorder": false
+}

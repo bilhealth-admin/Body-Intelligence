@@ -1,0 +1,9 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/bil_tool_registry_test.dart
+00:00 +0: unknown tools fail closed
+00:00 +1: weight schema validates bounds, date, and extra arguments
+00:00 +2: navigation is low risk and deletion is destructive
+00:00 +3: open weight log is read-only navigation to weight history
+00:00 +4: registry is the finite model-visible allow-list
+00:00 +5: navigation accepts target ids only and ambiguous meal moves fail closed
+00:00 +6: meal goal and measurement writes are typed and bounded
+00:00 +7: All tests passed!

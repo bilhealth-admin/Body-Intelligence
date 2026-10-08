@@ -1,0 +1,5 @@
+Analyzing validation...                                         
+
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • test/parallel/bil04/health_coach_ui_test.dart:885:19 • curly_braces_in_flow_control_structures
+
+1 issue found. (ran in 19.2s)

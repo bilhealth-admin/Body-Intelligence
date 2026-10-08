@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('first Coach message remains single-flight and single-rendered', () {
-    final page = File(
+    final page = [
       'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
-    ).readAsStringSync();
+      // The chat body was extracted without changing its transcript gate.
+      'lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final flow = File(
       'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
     ).readAsStringSync();

@@ -1,0 +1,14 @@
+activity_command_adapter_test: PASS 14 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+activity_plan_native_test: PASS 16 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+closed_day_food_test: PASS 19 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+daily_life_commands_test: PASS 28 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+fasting_command_adapter_test: PASS 23 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+fasting_notification_sync_test: PASS 21 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+health_coach_ui_test: PASS 25 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+health_parser_test: PASS 13 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+health_query_adapter_test: PASS 14 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+health_query_connected_test: PASS 8 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+health_read_guard_brief_test: PASS 23 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+health_receipt_recovery_test: PASS 20 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+plan_command_adapter_test: PASS 15 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+Total: 239 passing cases across 13 independent serial file runs.

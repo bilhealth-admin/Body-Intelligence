@@ -1,0 +1,25 @@
+BIL-07 | Community Channels
+
+BASE_SHA: 1744788e6bfbdffc3a168bbaf36b3abf3e2c698a
+BASE_TREE_SHA: 8f140791e1c2adcb21122ce64a65cb168bbe90d7
+حالة التسليم: READY_FOR_INTEGRATION
+
+اكتمل نطاق BIL-07 المحلي: directory، messages، paging overlap، explicit send،
+idempotent retry، owner/channel drafts، exact read/readback، unread، presence
+TTL/heartbeat، membership/block/policy/text limits، ABA/lifecycle، وحماية private chat.
+
+التحقق النهائي:
+- format PASS exit0.
+- scoped analyze PASS exit0 / No issues found.
+- channels+routing PASS 69/69.
+- nearby regression PASS 97/97.
+- PostgreSQL17.11 SQL/RLS/concurrency PASS 95/95 assertions، 0 FAIL، تحت
+  مستخدم غير root وعلى127.0.0.1 وقاعدة disposable؛ cluster توقف وحذف.
+- Realtime client disconnect/reconnect/catch-up PASS؛ العقد نفسه يعلن
+  realtime_available=false ومسار v1 polling، بلا publication/feed مصطنع.
+
+لم يحدث GitHub write أو CI جديد أو production connection/deploy أو store build.
+full portable/composition والمطابقة البصرية النهائية تبقى لدى BIL-00 بنص TASK.
+`owned.patch` و`integration-proposal.patch` منفصلان؛ المقترح المشترك5 ملفات.
+
+هذه READY_FOR_INTEGRATION لدور BIL-07 فقط، وليست عبارة أن المشروع كله جاهز للإنتاج.

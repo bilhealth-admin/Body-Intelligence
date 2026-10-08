@@ -1,0 +1,19 @@
+{
+  "result": "PASS",
+  "command_argv": [
+    "git",
+    "-C",
+    "/workspace/scratch/ada7a97de764/repository",
+    "rev-parse",
+    "HEAD",
+    "HEAD^{tree}"
+  ],
+  "exit_code": 0,
+  "stdout": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a\n8f140791e1c2adcb21122ce64a65cb168bbe90d7\n",
+  "stderr": "",
+  "checked_at_utc": "2026-10-07T09:47:34.431741+00:00",
+  "network_allowed_for_command": false,
+  "git_no_lazy_fetch": true,
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "base_tree_sha": "8f140791e1c2adcb21122ce64a65cb168bbe90d7"
+}

@@ -1,0 +1,142 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart
+00:00 +0: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: catalog projection matches the existing workout library exactly
+00:00 +1: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: appends accepted schema and preserves unrelated day fields
+00:00 +2: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: closed exercise day marked by state requires explicit reopen
+00:00 +3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: closed exercise day marked by timestamp requires explicit reopen
+00:00 +4: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: missing same-day evidence leaves calories unknown
+00:00 +5: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: historical date is frozen and shown on its actual local day
+00:00 +6: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: unknown identities, invented energy and invalid inputs fail closed
+00:00 +7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: a concurrent daily editor makes a prepared exercise stale
+00:00 +8: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: Undo restores the complete prior row and does not duplicate history
+00:00 +9: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: Undo of a newly created exercise day restores absence
+00:00 +10: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: Undo refuses to replace later edits to the affected daily row
+00:00 +11: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: a silent repository failure cannot produce a successful receipt
+00:00 +12: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: revocation during an evidence read prevents a proposal
+00:00 +13: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_command_adapter_test.dart: revocation after the repository write rolls the native transaction back
+00:00 +14: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart
+00:01 +14: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: preview reads saved drafts and requirements without any mutation
+00:01 +15: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: free activation uses exact command and updates the live weekly goal
+00:01 +16: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: Premium requires current verified authority and the exact grant
+00:01 +17: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: verified Premium activates the exact saved personalized draft
+00:01 +18: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: clinician review is never inferred from a request to activate
+00:01 +19: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: hidden and malformed pathways never inherit another plan
+00:01 +20: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: changed draft invalidates accepted proposal before activation
+00:01 +21: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: draft changed between resolve and snapshot cannot replace the frozen draft
+00:01 +22: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: changed meal schedule makes activation stale without overwriting it
+00:01 +23: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: Undo from an empty state removes active plan, draft, and schedule
+00:01 +24: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: Undo restores previous plan, exact saved draft, and meal schedule
+00:01 +25: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: Undo refuses to replace a later independent schedule edit
+00:01 +26: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: a silent activation cannot produce a saved receipt
+00:01 +27: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: revocation during entitlement loading prevents mutation
+00:01 +28: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/plan_command_adapter_test.dart: snapshot and proposal stay stable and immutable without state changes
+00:01 +29: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart
+00:02 +29: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise durable commit survives lost readback without replaying health data
+00:02 +29 -1: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise durable commit survives lost readback without replaying health data [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_failure_cases.dart 12:37                                              _healthNativeFailureCases.<fn>
+  
+00:02 +29 -1: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise owner A-B-A observed during journal write cannot regain authority
+00:02 +29 -2: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise owner A-B-A observed during journal write cannot regain authority [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_failure_cases.dart 71:37                                              _healthNativeFailureCases.<fn>
+  
+00:02 +29 -2: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise permission epoch revocation after journal write rolls everything back
+00:02 +29 -3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise permission epoch revocation after journal write rolls everything back [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_failure_cases.dart 106:37                                             _healthNativeFailureCases.<fn>
+  
+00:02 +29 -3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activate_plan durable commit survives lost readback without replaying health data
+00:02 +30 -3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activate_plan owner A-B-A observed during journal write cannot regain authority
+00:02 +31 -3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activate_plan permission epoch revocation after journal write rolls everything back
+00:02 +32 -3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: later identical plan activation fences Undo even when row timestamps share a second
+00:02 +33 -3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: unrelated health and foreign-owner journals preserve valid plan Undo
+00:02 +33 -4: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: unrelated health and foreign-owner journals preserve valid plan Undo [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_failure_cases.dart 221:36                                             _healthNativeFailureCases.<fn>
+  
+00:02 +33 -4: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: health overlap scan fails closed beyond 128 later same-owner journals
+00:03 +34 -4: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activity native replay, repository restart and Undo use one journal
+00:03 +34 -5: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activity native replay, repository restart and Undo use one journal [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 39:35                                                       main.<fn>
+  
+00:03 +34 -5: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: plan preview stays read-only while native activation has replay and Undo
+00:03 +35 -5: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise rolls back its health mutation when the native journal fails
+00:03 +35 -6: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise rolls back its health mutation when the native journal fails [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 147:37                                                      main.<fn>
+  
+00:03 +35 -6: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise native readback reports a later edit and denies stale Undo
+00:03 +35 -7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise native readback reports a later edit and denies stale Undo [E]
+  Invalid argument(s): Invalid native command arguments
+  package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart 77:7  CoachNativeCommandRepository.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 294:20                                                      _HealthNativeStore.prepare
+  test/parallel/bil04/activity_plan_native_test.dart 169:37                                                      main.<fn>
+  
+00:03 +35 -7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activate_plan rolls back its health mutation when the native journal fails
+00:03 +36 -7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activate_plan native readback reports a later edit and denies stale Undo
+00:03 +37 -7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: cancelled owner scope cannot recover during a paid activation await
+00:03 +38 -7: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart
+00:03 +38 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water commits a durable readback and compensates its exact snapshot
+00:03 +39 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water rolls back every data write when journal insertion fails
+00:03 +40 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight commits a durable readback and compensates its exact snapshot
+00:03 +41 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight rolls back every data write when journal insertion fails
+00:03 +42 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal commits a durable readback and compensates its exact snapshot
+00:04 +43 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal rolls back every data write when journal insertion fails
+00:04 +44 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements commits a durable readback and compensates its exact snapshot
+00:04 +45 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements rolls back every data write when journal insertion fails
+00:04 +46 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory commits a durable readback and compensates its exact snapshot
+00:04 +47 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory rolls back every data write when journal insertion fails
+00:04 +48 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: same operation coalesces in the repository and survives repository recreation
+00:04 +49 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: equal requests with distinct operation IDs remain separate writes
+00:04 +50 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: a persisted operation rejects changed tool or changed arguments
+00:04 +51 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: owner change after an insert rolls back the insert and journal together
+00:04 +52 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: another owner cannot prepare against this database
+00:04 +53 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: UUID replacement rejects Undo even when numeric ID and revision match
+00:04 +54 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: void measurement save cannot generate a receipt after an ignored database write
+00:04 +55 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: lost commit readback reports committed and a retry never duplicates data
+00:04 +56 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: Undo verifies the compensated row and rolls back a changed readback
+00:04 +57 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: a changed memory collection cannot be overwritten by an older Undo
+00:04 +58 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of log_water is read-only before commit and after Undo
+00:04 +59 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of log_weight is read-only before commit and after Undo
+00:04 +60 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of update_goal is read-only before commit and after Undo
+00:04 +61 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of save_measurements is read-only before commit and after Undo
+00:04 +62 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of save_memory is read-only before commit and after Undo
+00:04 +63 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback marks a later row version modified without repairing it
+00:04 +64 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects broken JSON as uncommitted read failure
+00:04 +65 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects wrong owner as uncommitted read failure
+00:04 +66 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects wrong operation as uncommitted read failure
+00:04 +67 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects wrong digest as uncommitted read failure
+00:04 +68 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects owner change delivered inside journal read
+00:04 +69 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback failure does not claim that a new write committed
+00:04 +70 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: foreign owner cannot read even a missing operation
+00:04 +71 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water Undo permission rolls back rows and journal afterWrite=false
+00:04 +72 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water Undo permission rolls back rows and journal afterWrite=true
+00:04 +73 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight Undo permission rolls back rows and journal afterWrite=false
+00:04 +74 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight Undo permission rolls back rows and journal afterWrite=true
+00:04 +75 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal Undo permission rolls back rows and journal afterWrite=false
+00:04 +76 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal Undo permission rolls back rows and journal afterWrite=true
+00:04 +77 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements Undo permission rolls back rows and journal afterWrite=false
+00:04 +78 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements Undo permission rolls back rows and journal afterWrite=true
+00:04 +79 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory Undo permission rolls back rows and journal afterWrite=false
+00:04 +80 -7: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory Undo permission rolls back rows and journal afterWrite=true
+00:04 +81 -7: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: activity native replay, repository restart and Undo use one journal
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise durable commit survives lost readback without replaying health data
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise native readback reports a later edit and denies stale Undo
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/activity_plan_native_test.dart: log_exercise owner A-B-A observed during journal write cannot regain authority
+  ... and 3 more

@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dart",
+    "format",
+    "--output=none",
+    "--set-exit-if-changed",
+    "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+    "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+    "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart",
+    "test/parallel/bil04/health_receipt_recovery_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "source_hashes_before": {
+    "lib/features/intelligence_center/services/coach_native_command_repository.dart": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+    "lib/features/intelligence_center/services/coach_native_command_journal.dart": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+    "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+    "test/parallel/bil04/health_receipt_recovery_test.dart": "e7902e4fd88a6f6baa56d66a0f8231bef43f2763312a658f7fb2b1d155236e9a"
+  },
+  "started_at_utc": "2026-10-07T09:07:13Z",
+  "exit_code": 0,
+  "elapsed_seconds": 0.1,
+  "source_hashes_after": {
+    "lib/features/intelligence_center/services/coach_native_command_repository.dart": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+    "lib/features/intelligence_center/services/coach_native_command_journal.dart": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+    "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+    "test/parallel/bil04/health_receipt_recovery_test.dart": "e7902e4fd88a6f6baa56d66a0f8231bef43f2763312a658f7fb2b1d155236e9a"
+  },
+  "source_stable": true
+}

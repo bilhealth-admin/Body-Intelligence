@@ -103,7 +103,51 @@ void main() {
   });
 
   test('registry is the finite model-visible allow-list', () {
-    expect(BilToolRegistry.tools, hasLength(23));
+    // Keep the BASE capabilities, explicit health additions and both
+    // Food V2 tools enumerated. Any unexpected capability must be reviewed.
+    const expectedToolNames = <String>{
+      'navigate',
+      'read_nutrition_remaining',
+      'read_profile_identity',
+      'open_weight_log',
+      'open_meals',
+      'open_meals_yesterday',
+      'open_workouts',
+      'open_plan',
+      'open_report',
+      'manage_subscription',
+      'set_theme_mode',
+      'set_language',
+      'update_goal',
+      'save_measurements',
+      'quick_add_macros',
+      'log_foods',
+      'replace_meal_item',
+      'update_meal_item',
+      'delete_meal_item',
+      'move_meal_item',
+      'request_account_deletion',
+      'sign_out',
+      'log_water',
+      'log_weight',
+      'save_memory',
+      'close_day',
+      'reopen_day',
+      'log_sleep',
+      'save_day_note',
+      'save_life_context',
+      'start_fasting',
+      'stop_fasting',
+      'adjust_fasting',
+      'log_exercise',
+      'activate_plan',
+      'read_health_history',
+      'read_health_progress',
+      'read_fasting',
+      'preview_plan',
+      'search_health_content',
+    };
+    expect(BilToolRegistry.tools.keys, unorderedEquals(expectedToolNames));
     expect(BilToolRegistry.tools['sign_out']?.risk, BilToolRisk.sensitive);
     expect(
       const BilToolRegistry()

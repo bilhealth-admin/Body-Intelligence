@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../../../core/health_evidence/health_evidence_catalog.dart';
 import '../domain/coach_context_snapshot.dart';
+import '../app_commands/coach_health_tools.dart' show coachHealthToolProtocol;
 import 'coach_cloud_privacy_boundary.dart';
 import 'local_model_gateway.dart';
 import 'remote_ai_consent_coordinator.dart';
@@ -481,7 +482,9 @@ open_workouts, open_plan, open_report, log_water, log_weight,
 set_theme_mode, set_language, update_goal, save_measurements,
 quick_add_macros, update_meal_item, move_meal_item, delete_meal_item,
 read_nutrition_remaining, read_profile_identity, navigate,
-manage_subscription, request_account_deletion, sign_out, save_memory. For writes include
+manage_subscription, request_account_deletion, sign_out, save_memory,
+log_foods, replace_meal_item,
+set_unit_preference, set_reminder, review_memories, prepare_local_export. For writes include
 the exact validated value and expect BIL to request confirmation. Use these
 argument names exactly:
 navigate {"target":"dashboard|daily_log|nutrition|weight_history|measurements|goals|analytics|profile|settings|notifications|ai_coach"};
@@ -489,6 +492,10 @@ log_water {"amountMl":number};
 log_weight {"weightKg":number,"date"?:"YYYY-MM-DD"};
 set_theme_mode {"mode":"dark|light|system"};
 set_language {"locale":"BCP-47"};
+set_unit_preference {"dimension":"weight|height|distance|energy|water","value":string};
+set_reminder {"kind":"weight|meals|water|sleep|fasting|weeklyReview","enabled":boolean,"hour"?:0-23,"minute"?:0-59};
+prepare_local_export {"from"?:"YYYY-MM-DD","to"?:"YYYY-MM-DD","datasets"?:["progress"|"meal_nutrition"|"exercise_notes"]};
+review_memories uses {} and only opens the review surface; deletion remains item-selected in the app.
 update_goal {"targetWeightKg":number,"targetDate"?:"YYYY-MM-DD"};
 save_measurements {"date"?:"YYYY-MM-DD", one or more of "neckCm", "waistCm",
 "hipsCm", "chestCm", "armCm", "thighCm":number};
@@ -508,7 +515,14 @@ manage_subscription, request_account_deletion, sign_out use {}.
 When the exact write value is clear, return the action now. Do not ask the user
 to type confirmation in chat because BIL presents the confirmation UI. Use
 save_memory with {"text":string,"kind":"user_fact|preference|constraint|goal|routine"}
-only when the user explicitly asks BIL to remember something. /no_think
+only when the user explicitly asks BIL to remember something.
+log_foods and replace_meal_item require complete, verified client-side food
+portions and (for replacement) the current opaque item revision/UUID. Never
+invent food identities, item revisions, or conversion factors; if unavailable,
+ask for the missing input instead. Local Health commands follow the separate
+strict protocol below; do not infer clinician review or insight consent.
+$coachHealthToolProtocol
+/no_think
 ''';
 
   String _languageName(String locale) {

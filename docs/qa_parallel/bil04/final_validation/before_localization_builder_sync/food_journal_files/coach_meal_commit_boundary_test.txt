@@ -1,0 +1,18 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/nutrition/coach_meal_commit_boundary_test.dart
+00:00 +0: Coach meal journal 1905 calorie-only command has unknown macros in stored item, receipt and totals
+00:00 +1: Coach meal journal Undo add touches only its item and preserves a reused bucket and older food
+00:00 +2: Coach meal journal Undo removes a newly created empty bucket but preserves later unrelated food
+00:00 +3: Coach meal journal same operation after repository restart reads committed rows and a changed command conflicts
+00:00 +4: Coach meal journal concurrent same-operation calls write one item and one durable journal
+00:00 +5: Coach meal journal duplicate Undo and retry after Undo do not reapply or increment revisions
+00:00 +6: Coach meal journal a later quantity edit rejects stale Undo and retry discloses modified state
+00:00 +7: Coach meal journal update delete and move restore immutable snapshots and original positions
+00:00 +8: Coach meal journal stale UUID or revision is rejected before item mutation
+00:00 +9: Coach meal journal closed day blocks all four commands and Undo without changing its ledger
+00:00 +10: Coach meal journal journal write failure rolls back its food, meal and item atomically
+00:00 +11: Coach meal journal Undo journal failure rolls compensation back and preserves original committed rows
+00:00 +12: Coach meal journal nested command arguments are immutable and cannot change the retry digest
+00:00 +13: Coach meal owner atomicity different owner and permanently cancelled A B A scope cannot write
+00:00 +14: Coach meal owner atomicity owner cancellation at every commit boundary either rolls back or reports a durable commit
+00:00 +15: quantity correction scales the logged nutrition after catalog changes
+00:00 +16: All tests passed!

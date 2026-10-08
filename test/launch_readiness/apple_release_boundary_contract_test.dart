@@ -155,7 +155,7 @@ void main() {
       'lib/features/commerce/services/verified_store_purchase_processing.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final voice = File(
-      'lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart',
+      'lib/features/intelligence_center/presentation/intelligence_conversation_voice_transcript.dart',
     ).readAsStringSync();
     final gateway = File(
       'lib/features/intelligence_center/services/local_model_gateway_io.dart',
@@ -175,7 +175,11 @@ void main() {
     expect(auth, contains("'phone': phone"));
     expect(purchase, contains("'verification_data':"));
     expect(purchase, contains('serverVerificationData'));
-    expect(voice, contains('textOverride: transcript'));
+    // The guarded transcript bridge carries only recognized text into ask().
+    // No recorded audio or stale composer value is submitted to the model.
+    expect(voice, contains('voiceTranscriptBridge.takeForSubmission('));
+    expect(voice, contains('textOverride: submission.text'));
+    expect(voice, contains('inputChannel: CoachInputChannel.voice'));
     expect(gateway, isNot(contains("'audio':")));
     expect(gateway, isNot(contains("'audio_data':")));
     expect(coachContext, contains("'displayName': displayName"));

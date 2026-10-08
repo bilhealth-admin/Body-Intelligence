@@ -1,0 +1,3 @@
+Formatted lib/features/intelligence_center/app_commands/coach_health_parser.dart
+Formatted test/parallel/bil04/closed_day_food_test.dart
+Formatted 7 files (2 changed) in 0.09 seconds.

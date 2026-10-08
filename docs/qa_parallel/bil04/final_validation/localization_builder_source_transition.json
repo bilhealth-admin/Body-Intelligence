@@ -1,0 +1,13 @@
+{
+  "result": "VERIFIED_TOOL_ONLY_ADDITION",
+  "before_source_digest": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "after_source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "previous_source_file_count": 2978,
+  "current_source_file_count": 2979,
+  "added_path": "tool/qa_parallel/bil04/build_health_strings.py",
+  "added_sha256": "98f2cb42bca07861b9e922a402a6135bbba21971d846387b3f50b2fcaf7e48f7",
+  "application_and_test_files_changed": [],
+  "reason": "The package consistency check found the reusable localization inventory builder in primary owned tools but absent from validation. Copy its unchanged bytes into validation and rerun every final gate. No application or test assertion changed.",
+  "package_attempt_result": "STOPPED_BEFORE_PATCH_OUTPUT",
+  "package_attempt_exit_code": 1
+}

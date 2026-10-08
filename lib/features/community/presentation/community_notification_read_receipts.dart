@@ -101,6 +101,16 @@ extension _CommunityNotificationReadReceipts
       if (!_receiptIsCurrent(repository, owner, generation)) return {};
       final remote = <String, CommunityNotification>{};
       final kinds = _CommunityNotificationsFilters(this).filterKinds;
+      // Reconcile the authoritative head after the write *before* reading
+      // the captured page windows. A new row can arrive while an existing
+      // row is marked seen without changing the unread count. Importantly,
+      // the final paginated read retains its original cursor instead of
+      // silently re-requesting the first page as the last read.
+      final headRows = await repository.loadCommunityNotifications(
+        kinds: kinds,
+        limit: _CommunityNotificationsPageState._pageSize,
+      );
+      if (!_receiptIsCurrent(repository, owner, generation)) return {};
       for (final window in windows) {
         final rows = await repository.loadCommunityNotifications(
           before: window.before,
@@ -117,11 +127,33 @@ extension _CommunityNotificationReadReceipts
       if (!_receiptIsCurrent(repository, owner, generation)) return {};
       final latest = await _updates;
       if (!_receiptIsCurrent(repository, owner, generation)) return {};
+      final knownIds = latest.notifications.map((row) => row.id).toSet();
+      final arrivals = headRows
+          .where((row) => knownIds.add(row.id))
+          .toList(growable: false);
+      if (arrivals.isNotEmpty) {
+        _newActivityIds.addAll(
+          arrivals.where((row) => !row.seen).map((row) => row.id),
+        );
+        var attachedToHeadWindow = false;
+        for (final window in _activityReadWindows) {
+          if (window.before != null) continue;
+          window.ids.addAll(arrivals.map((row) => row.id));
+          attachedToHeadWindow = true;
+          break;
+        }
+        if (!attachedToHeadWindow) {
+          _activityReadWindows.add(
+            _ActivityReadWindow(ids: arrivals.map((row) => row.id).toSet()),
+          );
+        }
+      }
       final readback = _CommunityUpdates(
         incomingRequests: attention.incomingRequests,
         unreadMessages: attention.unreadMessages,
         communityUpdates: attention.communityUpdates,
         notifications: [
+          ...arrivals,
           for (final row in latest.notifications)
             if (remote[row.id] case final value? when !row.seen || value.seen)
               value
@@ -146,6 +178,7 @@ extension _CommunityNotificationReadReceipts
         _visibleReadOperation = null;
         _visibleReadBusy = false;
       }
+      _drainQueuedAttentionRefresh();
     }
   }
 }

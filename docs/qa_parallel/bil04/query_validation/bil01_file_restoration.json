@@ -1,0 +1,9 @@
+{
+  "path": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+  "owner": "BIL-01",
+  "action": "Removed only BIL-04 added invalidation; exact BASE restored",
+  "baseSha256": "d2149d2d5f05b073547bddd80bded6b2003ab2c24d88a1c49fa204a65b9de958",
+  "beforeSha256": "c888558c3d663580c3823d3892fd46e65b528909adf0ab47f156d16f0bd837ba",
+  "afterSha256": "d2149d2d5f05b073547bddd80bded6b2003ab2c24d88a1c49fa204a65b9de958",
+  "matchesBase": true
+}

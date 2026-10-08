@@ -1,0 +1,66 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart
+00:00 +0: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: lost postcommit readback is rediscovered after closing and reopening SQLite
+00:04 +1: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: metadata and health values roll back together when permission is revoked after journal write
+00:04 +2: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: SQLite filters exact conversation before limit despite unrelated and malformed newer journals
+00:04 +3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: valid metadata cannot admit a corrupt immutable journal
+00:04 +4: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: pending IDs are newest first with a default of 16 and a maximum of 32
+00:04 +5: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: pending limit -1 is rejected without mutation
+00:04 +6: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: pending limit 0 is rejected without mutation
+00:04 +7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: pending limit 33 is rejected without mutation
+00:04 +8: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: pending limit 100 is rejected without mutation
+00:04 +9: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: acknowledgement changes only metadata, preserves SQLite rowid and is an idempotent UPDATE
+00:04 +10: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: Undo preserves recovery metadata with acknowledgement false
+00:04 +11: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: Undo preserves recovery metadata with acknowledgement true
+00:04 +12: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: acknowledging an earlier journal cannot reorder or reauthorize superseded Undo
+00:04 +13: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: replay preserves acknowledgement and cannot move an operation into another conversation
+00:04 +14: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: owner and conversation mismatches grant no recovery or acknowledgement authority
+00:04 +15: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: owner revocation observed during acknowledgement read prevents its UPDATE
+00:04 +16: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: malformed recovery metadata cannot be acknowledged or silently repaired
+00:04 +17: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: legacy native and health journal bytes omit all optional recovery metadata
+00:04 +18: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: recovery locator is rejected for a non-health commit before any write
+00:04 +19: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_receipt_recovery_test.dart: invalid conversation identities are rejected before mutation
+00:04 +20: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart
+00:05 +20: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water commits a durable readback and compensates its exact snapshot
+00:06 +21: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water rolls back every data write when journal insertion fails
+00:06 +22: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight commits a durable readback and compensates its exact snapshot
+00:06 +23: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight rolls back every data write when journal insertion fails
+00:06 +24: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal commits a durable readback and compensates its exact snapshot
+00:06 +25: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal rolls back every data write when journal insertion fails
+00:06 +26: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements commits a durable readback and compensates its exact snapshot
+00:06 +27: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements rolls back every data write when journal insertion fails
+00:06 +28: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory commits a durable readback and compensates its exact snapshot
+00:06 +29: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory rolls back every data write when journal insertion fails
+00:06 +30: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: same operation coalesces in the repository and survives repository recreation
+00:06 +31: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: equal requests with distinct operation IDs remain separate writes
+00:06 +32: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: a persisted operation rejects changed tool or changed arguments
+00:06 +33: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: owner change after an insert rolls back the insert and journal together
+00:06 +34: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: another owner cannot prepare against this database
+00:06 +35: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: UUID replacement rejects Undo even when numeric ID and revision match
+00:06 +36: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: void measurement save cannot generate a receipt after an ignored database write
+00:06 +37: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: lost commit readback reports committed and a retry never duplicates data
+00:06 +38: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: Undo verifies the compensated row and rolls back a changed readback
+00:06 +39: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: a changed memory collection cannot be overwritten by an older Undo
+00:06 +40: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of log_water is read-only before commit and after Undo
+00:06 +41: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of log_weight is read-only before commit and after Undo
+00:06 +42: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of update_goal is read-only before commit and after Undo
+00:06 +43: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of save_measurements is read-only before commit and after Undo
+00:06 +44: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback of save_memory is read-only before commit and after Undo
+00:06 +45: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback marks a later row version modified without repairing it
+00:06 +46: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects broken JSON as uncommitted read failure
+00:06 +47: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects wrong owner as uncommitted read failure
+00:06 +48: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects wrong operation as uncommitted read failure
+00:06 +49: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects wrong digest as uncommitted read failure
+00:06 +50: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback rejects owner change delivered inside journal read
+00:06 +51: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: readback failure does not claim that a new write committed
+00:06 +52: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: foreign owner cannot read even a missing operation
+00:06 +53: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water Undo permission rolls back rows and journal afterWrite=false
+00:06 +54: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_water Undo permission rolls back rows and journal afterWrite=true
+00:07 +55: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight Undo permission rolls back rows and journal afterWrite=false
+00:07 +56: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: log_weight Undo permission rolls back rows and journal afterWrite=true
+00:07 +57: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal Undo permission rolls back rows and journal afterWrite=false
+00:07 +58: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: update_goal Undo permission rolls back rows and journal afterWrite=true
+00:07 +59: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements Undo permission rolls back rows and journal afterWrite=false
+00:07 +60: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_measurements Undo permission rolls back rows and journal afterWrite=true
+00:07 +61: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory Undo permission rolls back rows and journal afterWrite=false
+00:07 +62: /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart: save_memory Undo permission rolls back rows and journal afterWrite=true
+00:07 +63: All tests passed!

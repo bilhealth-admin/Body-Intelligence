@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_names.dart';
@@ -86,6 +87,10 @@ void main() {
       await fresh.save(AppSettings(localeCode: 'fa', themeMode: 'light'));
       final restarted = AppSettingsService(store: store);
       expect((await restarted.load()).localeCode, 'fa');
+      // The settings service serializes writes process-wide. Let its
+      // completed queue callback leave this non-widget test zone before the
+      // next FakeAsync widget test attaches to the same queue.
+      await Future<void>.delayed(Duration.zero);
     },
   );
 
@@ -94,10 +99,12 @@ void main() {
     (tester) async {
       final store = _MemorySettingsStore();
       final service = AppSettingsService(store: store);
+      final persistedBeforePop = _PersistedLocaleAtSheetPop(store);
       await tester.pumpWidget(
         _app(
           locale: const Locale('ar'),
           service: service,
+          navigatorObservers: [persistedBeforePop],
           home: const Scaffold(body: AuthLanguageSelector()),
         ),
       );
@@ -130,8 +137,12 @@ void main() {
 
       await tester.tap(arabicRow);
       await tester.pumpAndSettle();
-      expect(arabicRow, findsNothing);
+      // Inspect the actual stored setting at the moment Navigator pops the
+      // sheet, not after-the-fact. Awaiting the scheduled route animations
+      // avoids racing the controller's serialized, verified settings write.
+      expect(persistedBeforePop.localeAtDismiss, 'ar');
       expect((await service.load()).localeCode, 'ar');
+      expect(arabicRow, findsNothing);
       expect(
         tester
             .widget<Text>(find.byKey(const Key('auth-language-selector-label')))
@@ -250,10 +261,12 @@ Widget _app({
   required Locale locale,
   required AppSettingsService service,
   required Widget home,
+  List<NavigatorObserver> navigatorObservers = const [],
 }) => ProviderScope(
   overrides: [appSettingsServiceProvider.overrideWithValue(service)],
   child: MaterialApp(
     locale: locale,
+    navigatorObservers: navigatorObservers,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: const [
       AppLocalizations.delegate,
@@ -264,6 +277,22 @@ Widget _app({
     home: home,
   ),
 );
+
+class _PersistedLocaleAtSheetPop extends NavigatorObserver {
+  _PersistedLocaleAtSheetPop(this.store);
+
+  final _MemorySettingsStore store;
+  String? localeAtDismiss;
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PopupRoute && store.value != null) {
+      final saved = jsonDecode(store.value!) as Map<String, dynamic>;
+      localeAtDismiss = saved['localeCode'] as String?;
+    }
+    super.didPop(route, previousRoute);
+  }
+}
 
 class _LanguageSettingsHost extends StatelessWidget {
   const _LanguageSettingsHost();

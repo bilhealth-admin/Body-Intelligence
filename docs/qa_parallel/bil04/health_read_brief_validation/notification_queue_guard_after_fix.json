@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/parallel/bil04/fasting_command_adapter_test.dart",
+    "test/parallel/bil04/fasting_notification_sync_test.dart",
+    "test/parallel/bil04/health_read_guard_brief_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 0,
+  "elapsed_seconds": 11.02,
+  "status": "PASS",
+  "source_sha256_before": {
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+    "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart": "d2aff6ae94a63b85e4274cfcbb08ab97549ae2e1971e1ca9fcd7904e261b5057",
+    "test/parallel/bil04/fasting_command_adapter_test.dart": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+    "test/parallel/bil04/fasting_notification_sync_test.dart": "6aa92ee41f979cbb700d40fbf6fcb4017471fcce9f43e438161008a1753bd202",
+    "test/parallel/bil04/health_read_guard_brief_test.dart": "d2567a04935f559216679a31a3ea157461fade79e2028a40f939d92096671627"
+  },
+  "source_sha256_after": {
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+    "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+    "test/parallel/bil04/fasting_command_adapter_test.dart": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+    "test/parallel/bil04/fasting_notification_sync_test.dart": "6aa92ee41f979cbb700d40fbf6fcb4017471fcce9f43e438161008a1753bd202",
+    "test/parallel/bil04/health_read_guard_brief_test.dart": "d2567a04935f559216679a31a3ea157461fade79e2028a40f939d92096671627"
+  },
+  "source_stable_during_execution": false
+}

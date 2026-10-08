@@ -7,6 +7,7 @@ import 'bil_navigation_registry.dart';
 import 'bil_tool_registry.dart';
 import 'coach_action_permission.dart';
 import 'intelligence_action.dart';
+import '../settings_commands/coach_settings_tool_catalog.dart';
 
 /// A validated, immutable native command. A missing descriptor is possible
 /// only for an explicitly validated, route-only legacy action.
@@ -21,7 +22,8 @@ final class CoachActionBinding {
       (descriptor!.trustBoundary ==
                   BilToolTrustBoundary.trustedLocalRepository &&
               descriptor!.risk != BilToolRisk.readOnly ||
-          action.type == IntelligenceActionType.signOut);
+          action.type == IntelligenceActionType.signOut ||
+          action.type == IntelligenceActionType.healthCommand);
 
   bool allows(CoachActionPermissionMode mode) =>
       descriptor == null ||
@@ -69,9 +71,16 @@ final class CoachActionAdmission {
     BilToolDescriptor? descriptor;
     Map<String, Object?>? payload;
     if (declaredTool != null) {
-      descriptor = const BilToolRegistry().lookup(declaredTool);
+      final canonical = const BilToolRegistry().lookup(declaredTool);
+      final local = const CoachSettingsToolCatalog().lookup(declaredTool);
+      descriptor = canonical ?? local;
       if (descriptor == null || descriptor.type != action.type) return null;
-      payload = _toolPayload(descriptor, action.payload);
+      payload = canonical != null
+          ? _toolPayload(descriptor, action.payload)
+          : const CoachSettingsToolCatalog().validate(
+              declaredTool,
+              action.payload,
+            );
     } else if (action.type == IntelligenceActionType.manageSubscription &&
         action.id == 'manage-subscription') {
       // This old persisted shortcut is a confirmed handoff, not a purchase.
@@ -179,9 +188,15 @@ final class CoachActionAdmission {
       case IntelligenceActionType.addWater:
       case IntelligenceActionType.setThemeMode:
       case IntelligenceActionType.setLanguage:
+      case IntelligenceActionType.setUnitPreference:
+      case IntelligenceActionType.setReminder:
+      case IntelligenceActionType.reviewMemories:
+      case IntelligenceActionType.prepareLocalExport:
       case IntelligenceActionType.updateGoal:
       case IntelligenceActionType.saveMeasurements:
       case IntelligenceActionType.quickAddMacros:
+      case IntelligenceActionType.logFoods:
+      case IntelligenceActionType.replaceMealItem:
       case IntelligenceActionType.updateMealItem:
       case IntelligenceActionType.moveMealItem:
       case IntelligenceActionType.deleteMealItem:
@@ -189,6 +204,8 @@ final class CoachActionAdmission {
       case IntelligenceActionType.signOut:
       case IntelligenceActionType.saveMemory:
       case IntelligenceActionType.manageSubscription:
+      case IntelligenceActionType.healthCommand:
+      case IntelligenceActionType.readHealthData:
         return null;
     }
   }

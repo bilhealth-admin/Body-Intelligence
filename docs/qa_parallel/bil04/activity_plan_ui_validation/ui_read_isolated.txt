@@ -1,0 +1,37 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart
+00:00 +0: sleep read uses only requested days and never builds full context or calls model
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+pumpAndSettle timed out
+
+When the exception was thrown, this was the stack:
+#0      WidgetTester.pumpAndSettle.<anonymous closure> (package:flutter_test/src/widget_tester.dart:717:11)
+<asynchronous suspension>
+#1      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#2      _waitHealthEvidence (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_fixture.dart:184:7)
+<asynchronous suspension>
+#3      main.<anonymous closure>.<anonymous closure> (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart:296:11)
+<asynchronous suspension>
+#4      _withHealthCoach (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_fixture.dart:24:5)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart:289:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  sleep read uses only requested days and never builds full context or calls model
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:05 +0 -1: sleep read uses only requested days and never builds full context or calls model [E]
+  Test failed. See exception logs above.
+  The test description was: sleep read uses only requested days and never builds full context or calls model
+  
+00:05 +0 -1: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: sleep read uses only requested days and never builds full context or calls model

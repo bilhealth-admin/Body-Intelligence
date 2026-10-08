@@ -19,6 +19,23 @@ extension _NativeCommandCompensation on CoachNativeCommandRepository {
     }
 
     switch (journal.command.kind) {
+      case CoachNativeCommandKind.health:
+        await _awaitOwner(
+          () => _healthCommands.compensate(
+            resolved: journal.command.resolved,
+            before: before.health!,
+            after: after.health!,
+            checkAccess: () => scope.check(database.localOwnerId),
+          ),
+          scope,
+        );
+        // The adapter verifies the intended restoration. Its actual revision
+        // or tombstone is persisted as undoAfter by the existing native journal.
+        return _readSnapshot(
+          journal.command.kind,
+          journal.command.resolved,
+          scope,
+        );
       case CoachNativeCommandKind.water:
         final saved = after.water!;
         await changed(

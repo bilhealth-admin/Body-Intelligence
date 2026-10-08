@@ -1,0 +1,10 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_query_connected_test.dart
+00:00 +0: sleep keeps manual duration and connected provenance separately
+00:00 +1: denied or unverified connected data cannot become measured evidence
+00:00 +2: 31-day steps include known zero without adding latest to history
+00:00 +3: manual steps and native steps are not silently summed
+00:00 +4: existing energy projection avoids counting daily and latest twice
+00:00 +5: stale degraded cache is identified and future signals are excluded
+00:00 +6: only requested context is inspected and free text is excluded
+00:00 +7: exercise payload has a global bound and keeps actual log fields only
+00:00 +8: All tests passed!

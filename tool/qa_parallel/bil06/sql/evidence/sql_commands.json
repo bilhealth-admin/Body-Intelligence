@@ -1,0 +1,58 @@
+{
+  "sql_final": {
+    "command": "BIL06_SQL_NODE_MODULES=/dev/shm/bil06-sql-159dc23b3ce4/runtime/node_modules node tool/qa_parallel/bil06/sql_run.mjs",
+    "cwd": "/workspace/scratch/159dc23b3ce4/bil06-source",
+    "exit_code": 0,
+    "result": "PASS",
+    "groups": 40,
+    "report": "tool/qa_parallel/bil06/sql/evidence/sql_results.json",
+    "report_sha256": "73769cdd32c09198d6c841ecfabab43915775a3d1895834e89728a684e57646d",
+    "log_sha256": "5305f11014029515544164cab09a01bc3925761340bfd972db4bead0e9e82978",
+    "protocol_samples_sha256": "2cf4f9dc43ce26a4305c25b0737158ab4cf67dfaf24fcda8630bde2f9c5f4bff"
+  },
+  "cleanup_final": {
+    "command": "BIL06_SQL_WORK=/dev/shm/bil06-sql-159dc23b3ce4 node tool/qa_parallel/bil06/sql_deletion_test.mjs",
+    "cwd": "/workspace/scratch/159dc23b3ce4/bil06-source",
+    "exit_code": 0,
+    "result": "PASS",
+    "groups": 4,
+    "report": "tool/qa_parallel/bil06/sql/evidence/sql_deletion_results.json",
+    "report_sha256": "50156570538663c038a5fcf001266d5377cfbc96467fcd6f9dea1d0ae13250ca",
+    "log_sha256": "672fba1d5a3e7dff1f8df96a9415dc48d0834d088320b4aaf76c1a46639a2858"
+  },
+  "runtime": {
+    "node": "v24.19.0",
+    "PostgreSQL": "18.3 (PGlite0.5.8, WASM)",
+    "pglite_socket": "0.2.11",
+    "pg": "8.16.3",
+    "host": "127.0.0.1",
+    "backend_count": 1,
+    "database": "new empty in-memory fixture",
+    "production_contacted": false
+  },
+  "native_attempt": {
+    "result": "NOT_RUN",
+    "evidence": [
+      "command -v psql/initdb/pg_ctl found no executable",
+      "/proc/self/uid_map: 0 0 1",
+      "setpriv --reuid=65534 --regid=65534 --clear-groups id: setresuid failed: Invalid argument (individual command exit was not captured)",
+      "apt-get update: exit100, setgroups/seteuid not permitted",
+      "overlay filesystem had zero available bytes; isolated /dev/shm runtime used"
+    ],
+    "reason": "No native PostgreSQL and no mapped non-root UID. No permission workaround or production fallback."
+  },
+  "setup": {
+    "result": "PASS",
+    "note": "Executed as two sequential pinned installs; reproducible dependency lock is included. No repository pubspec/npm dependency changed.",
+    "commands": [
+      "npm --cache /dev/shm/bil06-sql-159dc23b3ce4/npm-cache --prefix /dev/shm/bil06-sql-159dc23b3ce4/runtime install --save-exact @electric-sql/pglite@0.5.8 --ignore-scripts --no-audit --no-fund",
+      "npm --cache /dev/shm/bil06-sql-159dc23b3ce4/npm-cache --prefix /dev/shm/bil06-sql-159dc23b3ce4/runtime install --save-exact @electric-sql/pglite-socket@0.2.11 pg@8.16.3 --ignore-scripts --no-audit --no-fund"
+    ]
+  },
+  "verification_refresh": {
+    "at_utc": "2026-10-07T08:40:15.445505+00:00",
+    "reason": "Whitespace-only resolver EOF normalization and minimal four-line-context deletion patch; both suites rerun successfully.",
+    "source_manifest_sha256": "0d5b687c543bc01850ca90baef328237bce8909f93d0dbd58e3fce44c3498975",
+    "source_digest": "af9d7828c738a2fcc7e6bbbc5b61aa878ae3bbf32064b1b05d9001129555b2ba"
+  }
+}

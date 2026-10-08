@@ -1,0 +1,42 @@
+BIL-04 | Health Commands — رسالة تسليم إلى BIL-00
+
+BASE_SHA: 1744788e6bfbdffc3a168bbaf36b3abf3e2c698a
+BASE_TREE_SHA: 8f140791e1c2adcb21122ce64a65cb168bbe90d7
+حالة التسليم: READY_FOR_INTEGRATION
+الكوميت المحلي: لا يوجد؛ مصدر جديد في owned.patch وتوصيلات مشتركة في integration-proposal.patch.
+
+المنجز الفعلي: 15 أداة صحية (10 كتابة و5 قراءة) موصولة في Coach: إغلاق/فتح اليوم، النوم والملاحظة والسياق الحياتي، بدء/إيقاف/تعديل الصيام وقراءة حالته، تسجيل التمرين وسجله، معاينة الخطة وتفعيلها عبر الخدمة القائمة، واستعلامات صحية محدودة. الكتابة تمر بالمراجعة والمالك والإذن والمعاملة الفعلية والقراءة اللاحقة، مع Native Undo واستعادة الإيصال المفقود دون تكرار الأثر. البيانات والإشعارات نتيجتان منفصلتان.
+
+الموجود سابقًا الذي حُفظ ولم يُعَد بناؤه: أوامر الماء والوزن والأهداف والقياسات والذاكرة، معاملات الطعام وحدود quantityGrams، Native journal/Undo، حسابات الصحة والتقدم وخدمة DietPlanCommand. unknown لا يتحول إلى zero. لا تعديل في ملفات الأدوار الأخرى، وملف BIL-01 المشترك في الاقتراح الأولي أُعيد إلى BASE قبل التحقق النهائي.
+
+المتبقي أو غير المختبر: دمج جميع الأدوار وفحص portable لدى BIL-00؛ مراجعة المظهر واللغات البشرية والأجهزة؛ تسليم الإشعار الفعلي وHealthKit/Health Connect والاشتراك/AI الحي. بيانات المصدر المتصل غير موصولة في واجهة Coach لأن snapshot في BASE لا يثبت المالك؛ محولها الاختياري مختبر بمصادر مصطنعة فقط. نصوص EN/AR عددها147 زوجًا بفحوص source/placeholders، والمراجعة البشرية الشاملة لم تُجرَ؛23 لغة أخرى PENDING_HUMAN_REVIEW. لا لقطات Flutter أو جهاز حي أو golden جديد.
+
+الاعتماد على دور آخر أو دمج المنسق: 26 ملفًا قائمًا مقترحًا ضمن integration-proposal.patch، جميعها بملكية BIL-00. يلزم دمج hunks يدويًا مع الأدوار الأخرى ثم بوابة مشتركة. لم يُركب تنفيذ دور آخر في نسخة الاختبار.
+أي خادم جديد غير منشور: لا يوجد. لا migrations أو اعتماد مدفوع جديد.
+
+الملفات المملوكة: ملفات جديدة فقط داخل lib/features/intelligence_center/app_commands/ وtest/parallel/bil04/ وdocs/qa_parallel/bil04/ وtool/qa_parallel/bil04/. القائمة الكاملة وبصمات الملفات في manifest.json.
+التوصيلات المشتركة: registry/action/parser، Native journal/models/snapshot/write/Undo/recovery، DailyLog/LifeContext/Meal repositories، تدفق ومكونات Coach، واختبار عقد registry. الملف الأخير يحفظ23 اسم BASE ويضيف15 اسمًا محددًا مع مقارنة exact38؛ جميع assertions الأخرى محفوظة. فشل النسخة القديمة التي تتوقع23 محفوظ صراحة، ولم يتحول إلى PASS أو SKIP.
+
+الأوامر والنتائج النهائية على المصدر نفسه:
+- flutter analyze --no-pub --fatal-infos: PASS، exit0، No issues.
+- dart format --output=none --set-exit-if-changed للقائمة المسجلة: PASS، exit0،60 ملفًا،0 تغييرات.
+- flutter test --no-pub --reporter expanded --concurrency=1 لكل ملف BIL-04: PASS،239 حالة/13 ملفًا، كل ملف exit0.
+- الأمر نفسه لتسعة ملفات التوافق القريبة: PASS،300 حالة/9 ملفات، كل ملف exit0؛ ثمانية ملفات BASE دون تعديل واختبار registry المحدّث.
+- الأمر نفسه لأربعة ملفات معاملات الطعام وUndo ووحدات الكمية من BASE دون تعديل: PASS،50 حالة/4 ملفات، كل ملف exit0.
+- TZ=America/New_York للـhealth_query_adapter_test وhealth_parser_test: PASS،27 حالة مُعادة، exit0.
+- المجموع غير المتداخل589 حالة عبر26 ملفًا. لا تُجمع إعادة DST أو التشغيلات التاريخية مع هذا العدد.
+
+أوامر الاختبارات الفعلية تستخدم Flutter3.44.6/Dart3.12.2 وpubspec.lock القائم. استُخدم خيار --frontend-server-starter-path لتشغيل المترجم المثبت نفسه بحد ذاكرة1024MB/16MB في البيئة المشتركة. مصدر المشغّل وبصمته وبصمات المترجم ضمن tests/logs/compiler_launch_configuration.json، منفصلًا عن بصمة التطبيق. لم يغير هذا الإعداد SDK أو assertions أو timeouts أو exclusions. محاولات توقف المترجم وتجربة512MB الفاشلة محفوظة بحالتها؛ لا تُحسب نجاحًا.
+
+حالة full analyze والاعتمادات/الأصول: PASS على مصدر كامل lib/test/tool والقفل القائم، مع الاعتمادات العامة المقفلة والأصول اللازمة للتحليل والاختبارات. لا ترقية SDK أو قفل حزم أو تعديل shared cache. لا claim لبناء متجر أو بوابة portable لجميع الأدوار.
+ما الذي اختُبر تحديدًا: BASE + owned.patch + integration-proposal.patch داخل validation معزول. owned وحده غير موصول ولا تُنسب إليه نتائج التركيب.
+أداة إعادة بناء كتالوج النصوص ضمن source النهائي؛ إعادة إنتاجها طابقت147 زوجًا و39 بصمة مصدر. أُعيدت جميع البوابات بعد استكمال نسخ الأداة إلى validation، دون تغيير أي كود تطبيق أو اختبار. التفاصيل في localization_builder_source_transition.json وlocalization_builder_reproduction.json.
+source digest للنسخة المختبرة: 48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87
+الخوارزمية: SHA256 of sorted compact JSON path-to-SHA256 map؛2979 مدخل source/config؛ القائمة في tested_source_manifest.json. بصمات المصدر قبل/بعد جميع البوابات متطابقة.
+لقطات Flutter: NOT_RUN؛ لا لقطات مولدة أو HTML بديلة. اختبارات host غطت RTL/semantics وحوار320px مع textScale2 دون overflow.
+
+رابط ZIP الفعلي للكود والأدلة: [BIL_04_RESULT_1744788.zip](sandbox:/workspace/scratch/ada7a97de764/BIL_04_RESULT_1744788.zip)
+SHA256 لحزمة ZIP: تُرسل البصمة الفعلية بعد إغلاق الأرشيف في رسالة التسليم الخارجية بجانب الرابط؛ لا تُضمّن بصمة ZIP داخل نفسه لتجنب اعتماد دائري.
+
+تأكيد نطاق: لا push/GitHub API write/CI trigger/production deploy/store build، لا تغيير35/32 أو الأسعار أو Trial، لا خطوط أو أسرار أو بيانات مالك في الحزمة. لا اتصال اختبار بمشروع الإنتاج.
+هذه نتيجة نطاق BIL-04 محليًا وطلب دمج قابل للمراجعة، وليست موافقة إنتاج أو شهادة اكتمال المشروع.

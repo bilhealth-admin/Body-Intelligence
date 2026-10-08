@@ -111,9 +111,12 @@ void main() {
     final catalog = File(
       'lib/features/dashboard/presentation/dashboard_preferences_catalog.dart',
     ).readAsStringSync();
-    final page = File(
+    // The unchanged editor tree is split into a same-library Dart part to
+    // respect the architecture source ceiling. Check both pieces together.
+    final page = [
       'lib/features/dashboard/presentation/dashboard_preferences_page.dart',
-    ).readAsStringSync();
+      'lib/features/dashboard/presentation/dashboard_preferences_body.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(provider, isNot(contains("'daily_intelligence'")));
     expect(catalog, isNot(contains('Daily intelligence')));

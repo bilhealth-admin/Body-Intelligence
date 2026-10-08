@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dart",
+    "analyze",
+    "--fatal-infos",
+    "tool/qa_parallel/bil04/extract_health_strings.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exitCode": 0,
+  "status": "PASS"
+}

@@ -13,11 +13,14 @@ import 'package:body_intelligence_log/features/community/domain/community_models
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_surface.dart';
+import 'package:body_intelligence_log/features/community/services/community_owner_http_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../visual_closure/visual_evidence_font.dart';
@@ -29,11 +32,18 @@ void main() {
   late SupabaseClient client;
   late _CircleVisualRepository repository;
   setUpAll(loadVisualEvidenceFont);
-  setUp(() {
+  setUp(() async {
     client = SupabaseClient(
       'https://circle-visual.invalid',
       'synthetic-key',
       authOptions: const AuthClientOptions(autoRefreshToken: false),
+      httpClient: CommunityOwnerHttpClient(MockClient(_circleVisualHttp)),
+    );
+    // A visual capture must exercise the same authenticated owner fence as
+    // the actual screen. The synthetic auth transport is fully local.
+    await client.auth.signInWithPassword(
+      email: 'circle-visual@example.invalid',
+      password: 'synthetic',
     );
     repository = _CircleVisualRepository(client);
   });

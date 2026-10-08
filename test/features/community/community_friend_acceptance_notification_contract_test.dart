@@ -13,6 +13,9 @@ void main() {
     final page = [
       'lib/features/community/presentation/community_notifications_page.dart',
       'lib/features/community/presentation/community_notifications_rendering.dart',
+      // The localized notification titles were extracted from the widget
+      // without changing the visible friend-accepted contract.
+      'lib/features/community/presentation/community_notifications_title.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(attention, contains('communityUpdates'));
     expect(attention, contains('CommunityNotificationKind.friendAccepted'));

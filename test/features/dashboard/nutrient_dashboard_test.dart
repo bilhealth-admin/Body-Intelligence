@@ -29,24 +29,69 @@ void main() {
     expect(NutrientDashboardPreset.caloriesAndMacros.evidenceMetrics, isEmpty);
   });
 
-  test('a missing nutrient snapshot keeps the aggregate unknown', () {
+  test('partial nutrient evidence retains only the known subtotal', () {
     final known = NutrientDashboardSample(
       evidenceMask: NutrientEvidenceMask.bit(TrackedNutrient.sodium),
       values: const {TrackedNutrient.sodium: 400},
     );
     const unknown = NutrientDashboardSample(evidenceMask: 0, values: {});
+    final partial = NutrientDashboardEvidence.total([
+      known,
+      unknown,
+    ], TrackedNutrient.sodium);
+    expect(partial.value, 400);
+    expect(partial.complete, isFalse);
     expect(
-      NutrientDashboardEvidence.total([
-        known,
-        unknown,
-      ], TrackedNutrient.sodium).value,
+      NutrientDashboardEvidence.total([unknown], TrackedNutrient.sodium).value,
       isNull,
     );
-    expect(
-      NutrientDashboardEvidence.total([known], TrackedNutrient.sodium).value,
-      400,
-    );
+    final complete = NutrientDashboardEvidence.total([
+      known,
+    ], TrackedNutrient.sodium);
+    expect(complete.value, 400);
+    expect(complete.complete, isTrue);
   });
+
+  test(
+    'sodium, sugar, fiber and potassium never invent missing quantities',
+    () {
+      const nutrients = [
+        TrackedNutrient.sodium,
+        TrackedNutrient.sugar,
+        TrackedNutrient.fiber,
+        TrackedNutrient.potassium,
+      ];
+      for (final nutrient in nutrients) {
+        final present = NutrientDashboardSample(
+          evidenceMask: NutrientEvidenceMask.bit(nutrient),
+          values: {nutrient: 37.5},
+        );
+        final knownZero = NutrientDashboardSample(
+          evidenceMask: NutrientEvidenceMask.bit(nutrient),
+          values: {nutrient: 0},
+        );
+        const absent = NutrientDashboardSample(evidenceMask: 0, values: {});
+        final partial = NutrientDashboardEvidence.total([
+          present,
+          absent,
+          knownZero,
+        ], nutrient);
+        expect(partial.value, 37.5);
+        expect(partial.complete, isFalse);
+        expect(
+          NutrientDashboardEvidence.total([
+            present,
+            knownZero,
+          ], nutrient).complete,
+          isTrue,
+        );
+        expect(
+          NutrientDashboardEvidence.total([absent], nutrient).value,
+          isNull,
+        );
+      }
+    },
+  );
 
   test('progress policy distinguishes minimum and upper-limit goals', () {
     expect(

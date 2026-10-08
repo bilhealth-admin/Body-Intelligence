@@ -1,0 +1,26 @@
+{
+  "role": "BIL-04",
+  "configuration": "Supported Flutter frontend-server-starter-path hook; exact pinned AOT snapshot launched with lower compiler heap limits only",
+  "sdk_modified": false,
+  "application_or_test_source_changed": false,
+  "assertions_filters_tolerances_timeouts_changed": false,
+  "launcher_sha256": "35bd0043a4fcfbf470040310d8d0ce136e10fd60b1dabe0bc68ea7f903f41244",
+  "frontend_snapshot_sha256": "c538f3be137067d674993c36255e6b56ffcdf49a7cc867a6a7e850a2da46f045",
+  "dartaotruntime_sha256": "297f6b68adf22140d0bfc92cf974dc0e22bd54be6e15d730b911ad5b661d6a89",
+  "probe_command": [
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dartaotruntime",
+    "--old_gen_heap_size=512",
+    "--new_gen_semi_max_size=16",
+    "--print_flags",
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot",
+    "--help"
+  ],
+  "probe_exit_code": 1,
+  "probe_note": "This invokes frontend help to inspect VM flags, not a passing test. The two values below are verified from actual VM output.",
+  "observed_vm_flags": [
+    "new_gen_semi_max_size: 16 (Max size of new gen semi space in MB)",
+    "old_gen_heap_size: 512 (Max size of old gen heap size in MB, or 0 for unlimited,e.g: --old_gen_heap_size=1024 allows up to 1024MB old gen heap)"
+  ],
+  "launcher_source": "compiler_heap_starter.dart.txt",
+  "source_digest_scope_note": "This auxiliary runtime launcher is outside application source; its exact bytes and SHA256 are included separately."
+}

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/parallel/bil04/fasting_command_adapter_test.dart",
+    "test/parallel/bil04/fasting_notification_sync_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 0,
+  "elapsed_seconds": 4.06,
+  "status": "PASS",
+  "source_sha256": {
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart": "e8e01f4bd06cd20623c9ea0e48a71d8d3380c3b26a7367a25a05ff89a258e977",
+    "test/parallel/bil04/fasting_command_adapter_test.dart": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+    "test/parallel/bil04/fasting_notification_sync_test.dart": "2a0ac109966ac9d352a3ac5f99d3156e1630bbdf1398775b26fd27126039c837",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  }
+}

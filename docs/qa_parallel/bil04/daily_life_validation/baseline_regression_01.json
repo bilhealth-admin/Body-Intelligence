@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/authoritative_daily_ledger_test.dart",
+    "test/repository_test.dart",
+    "test/features/wellness/fasting_session_test.dart",
+    "test/features/wellness/fasting_preferences_transaction_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 0,
+  "elapsed_seconds": 3.84,
+  "status": "PASS",
+  "source_sha256": {
+    "test/authoritative_daily_ledger_test.dart": "46618d9550639ff9918ae2c5d316c5d060d393c6cfb65e0e17df923b06736132",
+    "test/repository_test.dart": "265b1fa9bb8c4d2058f10ba9b03d79e7ee68c8a9a539a42c508f052266da2a65",
+    "test/features/wellness/fasting_session_test.dart": "4fe08ad4445ee9e36e8a204203b676edc5f00c5d11fd531625e1c5bef6af55e5",
+    "test/features/wellness/fasting_preferences_transaction_test.dart": "c7f9ff1d8207e318a5422ad36d3c14ec11ed57c9a20418706a2af669959bc344",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  }
+}

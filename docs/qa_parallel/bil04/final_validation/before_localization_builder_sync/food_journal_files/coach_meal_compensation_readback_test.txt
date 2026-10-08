@@ -1,0 +1,8 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/nutrition/coach_meal_compensation_readback_test.dart
+00:00 +0: meal Undo verifies the complete quick compensation readback
+00:00 +1: meal Undo verifies the complete quantity compensation readback
+00:00 +2: meal Undo verifies the complete remove compensation readback
+00:00 +3: meal Undo verifies the complete move compensation readback
+00:00 +4: meal Undo verifies the complete parent compensation readback
+00:00 +5: meal Undo verifies the complete bucket compensation readback
+00:00 +6: All tests passed!

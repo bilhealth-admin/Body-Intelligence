@@ -44,6 +44,26 @@ final class _ModerationRepository extends CommunityRepository {
   String get currentUserId => moderatorId;
 
   @override
+  Future<bool> isCommunityModerator() async => true;
+
+  @override
+  Future<T> runForCommunityOwner<T>(
+    Future<T> Function() action, {
+    required String ownerId,
+    required bool Function() isCurrentOwner,
+  }) async {
+    if (ownerId != moderatorId || !isCurrentOwner()) {
+      throw const AuthException('QA owner changed');
+    }
+    return action();
+  }
+
+  @override
+  Future<List<CommunityPost>> hydrateModerationReviewContents(
+    List<CommunityPost> posts,
+  ) async => posts;
+
+  @override
   Future<List<CommunityPost>> loadPendingPostsForModeration({
     int limit = 100,
   }) async => includePendingPost ? [pendingPost] : const [];

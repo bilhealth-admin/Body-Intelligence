@@ -4,9 +4,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
+import '../activity_rewards/community_moderation_visit.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
+import '../domain/community_polls.dart';
 import 'community_copy.dart';
+part 'community_post_moderation_widgets.dart';
 
 class CommunityPostModerationPage extends StatefulWidget {
   const CommunityPostModerationPage({this.repository, super.key});
@@ -23,12 +26,52 @@ class _CommunityPostModerationPageState
   CommunityRepository? _repository;
   late Future<_CommunityModerationQueue> _queue;
   final Set<String> _busyTargets = <String>{};
+  CommunityModerationVisit? _visit;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
+    _bindVisit();
     _queue = _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityPostModerationPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _visit?.dispose();
+      _repository = widget.repository ?? _productionRepository();
+      _bindVisit();
+      _queue = _load();
+    }
+  }
+
+  @override
+  void dispose() {
+    _visit?.dispose();
+    super.dispose();
+  }
+
+  void _bindVisit() {
+    final repository = _repository;
+    _visit = repository == null
+        ? null
+        : CommunityModerationVisit(
+            repository: repository,
+            isAttached: () => mounted && identical(repository, _repository),
+            onRetired: _retireVisit,
+          );
+  }
+
+  void _retireVisit() {
+    if (!mounted) return;
+    _busyTargets.clear();
+    setState(() {
+      _queue = Future<_CommunityModerationQueue>.error(
+        const AuthException('Moderator session changed'),
+      );
+    });
   }
 
   CommunityRepository? _productionRepository() {
@@ -48,21 +91,60 @@ class _CommunityPostModerationPageState
 
   Future<_CommunityModerationQueue> _load() async {
     final repository = _repository;
-    if (repository == null) {
+    final visit = _visit;
+    if (repository == null || visit == null || !visit.isCurrent) {
       throw const AuthException('Sign-in required');
     }
-    final posts = await repository.loadPendingPostsForModeration();
-    final hiddenPosts = await repository.loadHiddenPostsForModeration();
-    final reports = await repository.loadOpenModerationReports();
-    return _CommunityModerationQueue(
-      posts: posts,
-      hiddenPosts: hiddenPosts,
-      reports: reports,
-    );
+    await visit.requireFreshModerator();
+    return visit.run(() async {
+      final values = await Future.wait<Object>([
+        repository.loadPendingPostsForModeration(),
+        repository.loadHiddenPostsForModeration(),
+        repository.loadOpenModerationReports(),
+      ]);
+      if (!visit.isCurrent) {
+        throw const AuthException('Moderator session changed');
+      }
+      final posts = values[0] as List<CommunityPost>;
+      final hiddenPosts = values[1] as List<CommunityPost>;
+      final reports = values[2] as List<Map<String, dynamic>>;
+      final reviewContent = await repository.hydrateModerationReviewContents([
+        ...posts,
+        ...hiddenPosts,
+      ]);
+      if (!visit.isCurrent) {
+        throw const AuthException('Moderator session changed');
+      }
+      final byId = {for (final post in reviewContent) post.id: post};
+      return _CommunityModerationQueue(
+        posts: [for (final post in posts) byId[post.id] ?? post],
+        hiddenPosts: [for (final post in hiddenPosts) byId[post.id] ?? post],
+        reports: reports,
+      );
+    });
+  }
+
+  Future<void> _reloadAndReadback(CommunityModerationVisit visit) async {
+    if (!visit.isCurrent || !mounted) return;
+    final refreshed = _load();
+    setState(() {
+      _queue = refreshed;
+    });
+    await refreshed;
+    if (!visit.isCurrent) {
+      throw const AuthException('Moderator session changed');
+    }
   }
 
   Future<void> _restorePost(CommunityPost post) async {
-    if (_busyTargets.contains(post.id)) return;
+    final visit = _visit;
+    final repository = _repository;
+    if (visit == null ||
+        repository == null ||
+        !visit.isCurrent ||
+        _busyTargets.contains(post.id)) {
+      return;
+    }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -91,11 +173,16 @@ class _CommunityPostModerationPageState
         ],
       ),
     );
-    if (confirmed != true || !mounted) return;
+    if (confirmed != true || !mounted || !visit.isCurrent) return;
     setState(() => _busyTargets.add(post.id));
     try {
-      await _repository!.restoreHiddenPostAsModerator(postId: post.id);
-      if (!mounted) return;
+      await visit.requireFreshModerator();
+      await visit.run(
+        () => repository.restoreHiddenPostAsModerator(postId: post.id),
+      );
+      if (!mounted || !visit.isCurrent) return;
+      await _reloadAndReadback(visit);
+      if (!mounted || !visit.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -103,9 +190,8 @@ class _CommunityPostModerationPageState
           ),
         ),
       );
-      _reload();
     } on Object {
-      if (!mounted) return;
+      if (!mounted || !visit.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -118,7 +204,9 @@ class _CommunityPostModerationPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _busyTargets.remove(post.id));
+      if (mounted && visit.isCurrent) {
+        setState(() => _busyTargets.remove(post.id));
+      }
     }
   }
 
@@ -129,10 +217,6 @@ class _CommunityPostModerationPageState
     });
     await refreshed;
   }
-
-  void _reload() => setState(() {
-    _queue = _load();
-  });
 
   Future<bool> _confirmPostDecision(
     CommunityPostModerationDecision decision,
@@ -152,10 +236,10 @@ class _CommunityPostModerationPageState
               communityText(
                 context,
                 approving
-                    ? 'Approval makes the post visible under its audience rules and grants the author 5 BIL AI Boost tokens once.'
+                    ? 'Approval makes the post visible under its audience rules. An eligible +5 AI token award is issued only when the server reward receipt confirms it; daily limits may result in no token grant.'
                     : 'The rejected post stays visible only to its author.',
                 approving
-                    ? 'سيجعل الاعتماد المنشور ظاهرًا وفق نطاق جمهوره، ويمنح صاحبه 5 رموز BIL AI Boost مرة واحدة.'
+                    ? 'سيجعل الاعتماد المنشور ظاهرًا وفق نطاق جمهوره. لا تُمنح +5 توكنات AI إلا إذا أكد إيصال المكافأة من الخادم الاستحقاق، وقد تؤدي الحدود اليومية إلى عدم منح توكنات.'
                     : 'سيظل المنشور المرفوض ظاهرًا لصاحبه فقط.',
               ),
             ),
@@ -185,18 +269,26 @@ class _CommunityPostModerationPageState
     CommunityPost post,
     CommunityPostModerationDecision decision,
   ) async {
-    if (_busyTargets.contains(post.id) ||
+    final visit = _visit;
+    final repository = _repository;
+    if (visit == null ||
+        repository == null ||
+        !visit.isCurrent ||
+        _busyTargets.contains(post.id) ||
         !await _confirmPostDecision(decision) ||
-        !mounted) {
+        !mounted ||
+        !visit.isCurrent) {
       return;
     }
     setState(() => _busyTargets.add(post.id));
     try {
-      final result = await _repository!.moderatePost(
-        postId: post.id,
-        decision: decision,
+      await visit.requireFreshModerator();
+      final result = await visit.run(
+        () => repository.moderatePost(postId: post.id, decision: decision),
       );
-      if (!mounted) return;
+      if (!mounted || !visit.isCurrent) return;
+      await _reloadAndReadback(visit);
+      if (!mounted || !visit.isCurrent) return;
       final approved =
           result.decision == CommunityPostModerationDecision.approved;
       final message = result.duplicate
@@ -214,8 +306,8 @@ class _CommunityPostModerationPageState
           : approved
           ? communityText(
               context,
-              'Post approved. No duplicate token grant was added.',
-              'تم اعتماد المنشور دون إضافة منحة رموز مكررة.',
+              'Post approved. No AI token grant was confirmed for this decision.',
+              'تم اعتماد المنشور، ولم تُؤكد منحة توكنات AI لهذا القرار.',
             )
           : communityText(
               context,
@@ -225,9 +317,8 @@ class _CommunityPostModerationPageState
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
-      _reload();
     } on Object {
-      if (!mounted) return;
+      if (!mounted || !visit.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -240,7 +331,9 @@ class _CommunityPostModerationPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _busyTargets.remove(post.id));
+      if (mounted && visit.isCurrent) {
+        setState(() => _busyTargets.remove(post.id));
+      }
     }
   }
 
@@ -249,7 +342,15 @@ class _CommunityPostModerationPageState
     required bool removeContent,
   }) async {
     final id = report['id'];
-    if (id is! String || _busyTargets.contains(id)) return;
+    final visit = _visit;
+    final repository = _repository;
+    if (id is! String ||
+        visit == null ||
+        repository == null ||
+        !visit.isCurrent ||
+        _busyTargets.contains(id)) {
+      return;
+    }
     if (removeContent) {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -282,16 +383,21 @@ class _CommunityPostModerationPageState
           ],
         ),
       );
-      if (confirmed != true || !mounted) return;
+      if (confirmed != true || !mounted || !visit.isCurrent) return;
     }
     setState(() => _busyTargets.add(id));
     try {
-      await _repository!.moderateReport(
-        reportId: id,
-        resolution: 'closed',
-        action: removeContent ? 'remove_content' : 'none',
+      await visit.requireFreshModerator();
+      await visit.run(
+        () => repository.moderateReport(
+          reportId: id,
+          resolution: 'closed',
+          action: removeContent ? 'remove_content' : 'none',
+        ),
       );
-      if (!mounted) return;
+      if (!mounted || !visit.isCurrent) return;
+      await _reloadAndReadback(visit);
+      if (!mounted || !visit.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -303,9 +409,8 @@ class _CommunityPostModerationPageState
           ),
         ),
       );
-      _reload();
     } on Object {
-      if (!mounted) return;
+      if (!mounted || !visit.isCurrent) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -318,7 +423,9 @@ class _CommunityPostModerationPageState
         ),
       );
     } finally {
-      if (mounted) setState(() => _busyTargets.remove(id));
+      if (mounted && visit.isCurrent) {
+        setState(() => _busyTargets.remove(id));
+      }
     }
   }
 
@@ -450,266 +557,4 @@ class _CommunityPostModerationPageState
       },
     ),
   );
-}
-
-class _HiddenPostCard extends StatelessWidget {
-  const _HiddenPostCard({
-    required this.post,
-    required this.busy,
-    required this.onRestore,
-  });
-
-  final CommunityPost post;
-  final bool busy;
-  final VoidCallback onRestore;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    key: Key('community-hidden-post-${post.id}'),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            post.authorName ?? communityText(context, 'BIL member', 'عضو BIL'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          SelectableText(post.body),
-          const SizedBox(height: 12),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: FilledButton.tonalIcon(
-              key: Key('community-hidden-post-restore-${post.id}'),
-              onPressed: busy ? null : onRestore,
-              icon: const Icon(Icons.restore_rounded),
-              label: Text(
-                communityText(context, 'Restore post', 'استعادة المنشور'),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _PendingPostCard extends StatelessWidget {
-  const _PendingPostCard({
-    required this.post,
-    required this.busy,
-    required this.onApprove,
-    required this.onReject,
-  });
-
-  final CommunityPost post;
-  final bool busy;
-  final VoidCallback onApprove;
-  final VoidCallback onReject;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    key: Key('community-moderation-post-${post.id}'),
-    clipBehavior: Clip.antiAlias,
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              BilAccountAvatar(radius: 20, networkUrl: post.authorAvatarUrl),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  post.authorName ??
-                      communityText(context, 'BIL member', 'عضو BIL'),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Text(
-                MaterialLocalizations.of(
-                  context,
-                ).formatShortDate(post.createdAt.toLocal()),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SelectableText(
-            post.body,
-            textDirection: BilWrittenLanguageResolver.directionFor(
-              post.body,
-              fallback: Directionality.of(context),
-            ),
-          ),
-          if (post.hasImage) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: AspectRatio(
-                aspectRatio: (post.mediaAspectRatio ?? 1)
-                    .clamp(0.8, 1.91)
-                    .toDouble(),
-                child: post.mediaUrl == null
-                    ? const ColoredBox(
-                        color: Color(0xFFE8EBF0),
-                        child: Icon(Icons.broken_image_outlined),
-                      )
-                    : Image.network(
-                        post.mediaUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const ColoredBox(
-                          color: Color(0xFFE8EBF0),
-                          child: Icon(Icons.broken_image_outlined),
-                        ),
-                      ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              FilledButton.icon(
-                key: Key('community-moderation-approve-${post.id}'),
-                onPressed: busy ? null : onApprove,
-                icon: const Icon(Icons.check_circle_outline_rounded),
-                label: Text(communityText(context, 'Approve', 'اعتماد')),
-              ),
-              OutlinedButton.icon(
-                key: Key('community-moderation-reject-${post.id}'),
-                onPressed: busy ? null : onReject,
-                icon: const Icon(Icons.cancel_outlined),
-                label: Text(communityText(context, 'Reject', 'رفض')),
-              ),
-              if (busy)
-                const SizedBox.square(
-                  dimension: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _OpenReportCard extends StatelessWidget {
-  const _OpenReportCard({
-    required this.report,
-    required this.busy,
-    required this.onClose,
-    required this.onRemove,
-  });
-
-  final Map<String, dynamic> report;
-  final bool busy;
-  final VoidCallback onClose;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final targetKind = report['target_kind']?.toString() ?? 'unknown';
-    final canRemove = const {'post', 'message'}.contains(targetKind);
-    return Card(
-      key: Key('community-moderation-report-${report['id']}'),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              '$targetKind · ${report['target_id']}',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 8),
-            SelectableText(report['reason']?.toString() ?? ''),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonal(
-                  onPressed: busy ? null : onClose,
-                  child: Text(
-                    communityText(context, 'Close report', 'إغلاق البلاغ'),
-                  ),
-                ),
-                if (canRemove)
-                  OutlinedButton(
-                    onPressed: busy ? null : onRemove,
-                    child: Text(
-                      communityText(
-                        context,
-                        'Remove reported content',
-                        'إزالة المحتوى المُبلّغ عنه',
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ModerationUnavailable extends StatelessWidget {
-  const _ModerationUnavailable({required this.onRetry});
-
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.admin_panel_settings_outlined, size: 56),
-          const SizedBox(height: 14),
-          Text(
-            communityText(
-              context,
-              'Moderator access is required.',
-              'يتطلب هذا القسم صلاحية مشرف.',
-            ),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            communityText(
-              context,
-              'The server verifies moderator access before returning any pending content.',
-              'يتحقق الخادم من صلاحية المشرف قبل إرجاع أي محتوى معلّق.',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 18),
-          FilledButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _CommunityModerationQueue {
-  const _CommunityModerationQueue({
-    required this.posts,
-    required this.hiddenPosts,
-    required this.reports,
-  });
-
-  final List<CommunityPost> posts;
-  final List<CommunityPost> hiddenPosts;
-  final List<Map<String, dynamic>> reports;
 }

@@ -65,6 +65,7 @@ extension MealRepositoryCopying on MealRepository {
     }
 
     return _database.transaction(() async {
+      await _requireOpenDayForMeals(destinationKey);
       final existingDestination =
           await (_database.select(_database.meals)..where(
                 (row) =>
@@ -174,6 +175,7 @@ extension MealRepositoryCopying on MealRepository {
     }
     return _database.transaction(() async {
       for (final key in byKey.keys) {
+        await _requireOpenDayForMeals(key);
         final occupied =
             await (_database.select(_database.meals)
                   ..where(

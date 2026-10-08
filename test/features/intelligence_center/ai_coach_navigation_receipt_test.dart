@@ -48,6 +48,7 @@ void main() {
 
       expect(gateway.locales, <String>['ar', 'ar', 'en']);
       expect(gateway.detected, everyElement(isTrue));
+      await _disposeCoachAndFlushDrift(tester);
     },
   );
 
@@ -127,6 +128,7 @@ void main() {
       ('/daily-log?focus=meal', false),
       ('/wellness/workouts/log', true),
     ]);
+    await _disposeCoachAndFlushDrift(tester);
   });
 
   testWidgets('failed screen open is explicit and retry runs the same route', (
@@ -206,6 +208,7 @@ void main() {
       ),
       findsNothing,
     );
+    await _disposeCoachAndFlushDrift(tester);
   });
 
   testWidgets('open it reuses the latest trusted read-only action', (
@@ -254,6 +257,7 @@ void main() {
 
     expect(openedPaths, <String>['/plan?origin=dashboard']);
     expect(tester.takeException(), isNull);
+    await _disposeCoachAndFlushDrift(tester);
   });
 
   testWidgets('Arabic weight-history request opens the real history route', (
@@ -294,7 +298,16 @@ void main() {
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
+    await _disposeCoachAndFlushDrift(tester);
   });
+}
+
+Future<void> _disposeCoachAndFlushDrift(WidgetTester tester) async {
+  // Dispose Coach providers before the fake clock is torn down; cancelling
+  // Drift query streams schedules a zero-delay timer in the same test zone.
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump();
+  await tester.pump(Duration.zero);
 }
 
 Widget _coachApp({

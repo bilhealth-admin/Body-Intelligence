@@ -128,9 +128,15 @@ final class _CoachUndoPermissionDenied implements Exception {
 }
 
 final class _CoachUndoOperation {
-  _CoachUndoOperation({required this.receipt, this.undo, this.undoReadback});
+  _CoachUndoOperation({
+    required this.receipt,
+    this.undo,
+    this.undoReadback,
+    this.mealCommit,
+  });
 
   final BilActionReceipt receipt;
+  final CoachMealCommit? mealCommit;
   final Future<void> Function()? undo;
   final Future<BilActionReceipt> Function(void Function() checkWritePermission)?
   undoReadback;

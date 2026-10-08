@@ -1,6 +1,13 @@
 part of 'coach_native_command_repository.dart';
 
-enum CoachNativeCommandKind { water, weight, goal, measurements, memory }
+enum CoachNativeCommandKind {
+  water,
+  weight,
+  goal,
+  measurements,
+  memory,
+  health,
+}
 
 enum CoachNativeResultState { committed, modified, undone }
 
@@ -106,6 +113,10 @@ final class CoachNativeCommand {
             })) {
       throw const FormatException('Invalid native command');
     }
+    if (command.kind == CoachNativeCommandKind.health &&
+        command.resolved['healthToolId'] != command.toolId) {
+      throw const FormatException('Health command identity');
+    }
     return command;
   }
 }
@@ -135,16 +146,21 @@ final class CoachNativeCommit {
   bool get canUndo => state == CoachNativeResultState.committed;
 }
 
-CoachNativeCommandKind _nativeKind(String toolId) => switch (toolId) {
-  'log_water' => CoachNativeCommandKind.water,
-  'log_weight' => CoachNativeCommandKind.weight,
-  'update_goal' => CoachNativeCommandKind.goal,
-  'save_measurements' => CoachNativeCommandKind.measurements,
-  'save_memory' => CoachNativeCommandKind.memory,
-  _ => throw const CoachNativeConflict(
-    CoachNativeConflictReason.operationMismatch,
-  ),
-};
+CoachNativeCommandKind _nativeKind(String toolId) {
+  if (coachHealthWriteToolIds.contains(toolId)) {
+    return CoachNativeCommandKind.health;
+  }
+  return switch (toolId) {
+    'log_water' => CoachNativeCommandKind.water,
+    'log_weight' => CoachNativeCommandKind.weight,
+    'update_goal' => CoachNativeCommandKind.goal,
+    'save_measurements' => CoachNativeCommandKind.measurements,
+    'save_memory' => CoachNativeCommandKind.memory,
+    _ => throw const CoachNativeConflict(
+      CoachNativeConflictReason.operationMismatch,
+    ),
+  };
+}
 
 Object? _canonicalNativeJson(Object? value) {
   if (value is Map) {

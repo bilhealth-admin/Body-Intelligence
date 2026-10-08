@@ -1,0 +1,6 @@
+Changed lib/data/repositories/life_context_repository.dart
+Changed lib/features/intelligence_center/services/coach_native_command_models.dart
+Changed lib/features/intelligence_center/services/coach_native_command_snapshot.dart
+Changed lib/features/intelligence_center/services/coach_native_command_undo.dart
+Changed lib/features/intelligence_center/app_commands/coach_health_tools.dart
+Formatted 59 files (5 changed) in 0.47 seconds.

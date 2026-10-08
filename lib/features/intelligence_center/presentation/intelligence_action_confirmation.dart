@@ -30,7 +30,7 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
               : Theme.of(context).colorScheme.primary,
         ),
         title: Text(tr('Confirm action', 'تأكيد الإجراء')),
-        content: Text(action.label),
+        content: Text(_coachActionConfirmationText(action)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -46,6 +46,25 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
     if (accepted != true) return false;
     if (!action.destructive || !mounted) return true;
     return _confirmDestructiveAction(action);
+  }
+
+  String _coachActionConfirmationText(IntelligenceAction action) {
+    if (action.type != IntelligenceActionType.moveMealItem ||
+        action.payload['date'] == null) {
+      return action.label;
+    }
+    final meal = switch (action.payload['mealType']) {
+      'breakfast' => tr('Breakfast', 'الإفطار'),
+      'lunch' => tr('Lunch', 'الغداء'),
+      'dinner' => tr('Dinner', 'العشاء'),
+      'snack' => tr('Snack', 'وجبة خفيفة'),
+      _ => null,
+    };
+    return [
+      action.label,
+      _coachDateLabel(DateTime.parse(action.payload['date']! as String)),
+      if (meal != null) '${tr('Meal', 'الوجبة')}: $meal',
+    ].join('\n');
   }
 
   Future<bool> _confirmDestructiveAction(IntelligenceAction action) async {

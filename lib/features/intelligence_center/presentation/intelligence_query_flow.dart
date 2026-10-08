@@ -9,6 +9,12 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool autoSpeakReply = false,
   }) async {
     if (!mounted) return;
+    if (inputChannel == CoachInputChannel.text &&
+        textOverride == null &&
+        await _submitPendingVoiceDraft()) {
+      return;
+    }
+    if (!mounted) return;
     final rawText = (textOverride ?? question.text).trim();
     final text = inputChannel == CoachInputChannel.voice
         ? normalizeCoachVoiceTranscript(rawText)
@@ -96,6 +102,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       };
       unawaited(_speakCoachText(acknowledgement, questionLocale));
     }
+    var localHealthHandled = false;
     try {
       if (_isCoachUndoRequest(text)) {
         await _undoLatestCoachAction();
@@ -127,6 +134,23 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             ),
           );
         }
+        return;
+      }
+      // A recognized health command (including an invalid one needing
+      // clarification) must not be eaten by Food V2's generic "log"/"سجل"
+      // prefix. Both hosts validate their own payload and ask for human review;
+      // do not let the food host reinterpret exercise duration as a portion.
+      localHealthHandled = await _answerLocalHealthIntent(
+        text,
+        locale: questionLocale,
+      );
+      if (localHealthHandled) return;
+      // Food/Personal BIL owns its remaining intents and their frozen
+      // nutrition evidence before any catalog/model fallback.
+      if (await _tryHandleCoachFoodTurn(
+        text: text,
+        localeTag: questionLocale,
+      )) {
         return;
       }
       final immediateEngine = const IntelligenceCenterEngine();
@@ -479,7 +503,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       _scrollToLatest();
       unawaited(_saveConversation());
     } finally {
-      if (mounted) {
+      if (mounted && !localHealthHandled) {
         // Refresh even when the local request generation was cancelled: the
         // server may still have settled a reservation before its reply was
         // discarded. autoDispose clears the snapshot when this page is gone.

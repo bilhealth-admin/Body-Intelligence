@@ -1,0 +1,584 @@
+{
+  "status": "PASS",
+  "capturedAtUtc": "2026-10-07T09:43:17.727628+00:00",
+  "baseSha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "baseTreeSha": "8f140791e1c2adcb21122ce64a65cb168bbe90d7",
+  "method": "Local byte comparison and Git blob SHA-1 against verified source_tree.json; no Git command, object fetch, network, source write or compiler.",
+  "sharedManifestSha256": "893d10e98e7f465441b095f262020c6be5dfaf31eeb37ed7e5834a3e4ccf8556",
+  "sharedChangedFileCount": 26,
+  "registryTestIsDefaultCoordinatorOwned": true,
+  "restoredBil01FileExcludedFromSharedManifest": true,
+  "otherRoleBaseFilesChecked": 40,
+  "errors": [],
+  "sharedEntries": [
+    {
+      "path": "lib/data/repositories/daily_log_repository.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "38f514156cfdced075a9225fb0285b1fc9394c47",
+      "baseSha256": "4a614734ed9dae3a77f21a1b9b79e79e13a59bd06e188974c92d0d7f7e8b4f83",
+      "overlaySha256": "592567163308dde6214f37339275fbc1117a8da4a106c29fc0332b1f3612c05a",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/data/repositories/life_context_repository.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "769ba47b5180c0ee315d15285c07a138596e09d4",
+      "baseSha256": "ac478348a12369861e2cb000f1139acdef118f2a299b033ab0d4f03614b22f98",
+      "overlaySha256": "215d87f0465368cfc9438c6ab1ed7219239b5a7b852f7eae324b0dbc71bb3a96",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "e18501a98cab10b0b9eb39381246738e6395fbc4",
+      "baseSha256": "e2441a31b74c52a8dfeaad5f639237a3f0f2a9eb38fb8b4ec2c2ac1e2aa9f90d",
+      "overlaySha256": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_copying.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "6e45b9e4a6d705b249feb3552c3b889ff84fa993",
+      "baseSha256": "e9148b29217692be655ae0320b487f635b86519d8bd30ea08925974534aedb96",
+      "overlaySha256": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "d7ae13f1403240e51a9ecce0ce76a523156b94de",
+      "baseSha256": "a19e9dd85affcf06dc70cb2eeffe4506dab455c7b2a1345c1acadb2388b6a4ee",
+      "overlaySha256": "b8d6a3b256a03348dd223d5e97660fef7ee71e1e073852f647e93241b16edeb6",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "5eeed059b7fbf6c5b56edc517e9abb627a831c6f",
+      "baseSha256": "9c92bfe155c887b24ee9f9a1658a4a14d2c4eb473223cfa74fe294765cd14b74",
+      "overlaySha256": "ae013dc9f637ae0a51a81cc7d853651ad39323cdcbd42f3244ac4f3ed0ac491e",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_action.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "5d11d960967a600f8d4c1d13645f5e4d213fc586",
+      "baseSha256": "665b90820de77c2682495af46815d327eebca9db432b7ff060bd7efc470ff3b5",
+      "overlaySha256": "dc8593b2be402f9a47fb1905e73b98231e41675bdfc17b5fc75f0ebef676df59",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_message.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "0081272e8acbcdb41363fec5c0e6a7172bf4e060",
+      "baseSha256": "6ec2f9b8beae8d13295353abc24690b1859fac9420a8f00fa78f8124b96f557a",
+      "overlaySha256": "1617e3dca27cc22f4a7dd15d21d5a037383f40f5bda17a63969bff77a25a2b41",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "efb5f8352cecf269c00ba9b7e6d6e149685d1fec",
+      "baseSha256": "9c0aa87046c201c0a1dbda91e5154e2bdd8cb755513240d5484199dde782b0e4",
+      "overlaySha256": "c9aff8ba0ec502fc64b149a8920c5fbc6b59582d7ae487bfb881e7c72720a036",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "8080c6fe74e32802c5307f52828c3741a96d9d51",
+      "baseSha256": "c3c7c3ad0973f4ebfa0420e0c2e0bdf5fbe1826ac216b8134208d00507d1227c",
+      "overlaySha256": "1ea2187e6b81eb301752e1aa3ddbf1b5f29ea0e7cc5508ebfeefc8231da50cfc",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "3bb4f762e016fd090dd4fb5c2da145dcb0c67841",
+      "baseSha256": "5e7a7876a0d8c2e94736babbbae7e941c716997810001aa3f1a7baa978837de4",
+      "overlaySha256": "309231e02d1fcadebcbc45d638e43b094e1dfe87c8de5723ffe80ebaeb06c545",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "fee970b0a8f03d47f73595974ce27a48f548d8bd",
+      "baseSha256": "ddae7c798851c8b673f1c1d537c121aae7ba321877dabbea332d607c5fc21483",
+      "overlaySha256": "815db53a68ba9bf6c0f160dded4f73df842a5ddb7e7f5205706e3e24a003c17c",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_owner.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "1b8a6dbc452fbbc95d5ff36a7299dc1dfc675778",
+      "baseSha256": "903ba64725377204acba4239e3c8b1092002b38c79320f6dadb9af59269095b5",
+      "overlaySha256": "50ce0b32672526da8f8f03ba6bad60e8a3646db0b58635fc94d3c233a89162cb",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "dceff3d2d658d0b4412b66de90b87fd453c27ae9",
+      "baseSha256": "fb91ea7f57f4c03982f92ad09d04b2502b0a3af3dd1fa1846fb4eafd8a2701e6",
+      "overlaySha256": "1b2ad30d69753c3f2ca8da8a7ade01ae4e10cb739b2507ad18067c509a072fd7",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery_owner.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "d9af8adf7b68de62bb0abaf4d9ca13a2826b8232",
+      "baseSha256": "eccd1bb986333e8bb8d789f96d3c36c4e2f6f7b1946e1298e0de7037e4949aef",
+      "overlaySha256": "ddc6a8a9cdc4bb4098dcc8aac270a4fcb43636ed73e3a6456576ee46d39da9c0",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "c80a2b48e4de205594b5d7442ded73b5639f4ddd",
+      "baseSha256": "84dc295c05d6d1408e167ac02dbc68dca5723112153d8a76571cae96087f2d34",
+      "overlaySha256": "6ad056a44cd17bc5c41ed6750b385cd3bee4e515b69afea58d196b9543c4d2d1",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "7cb2c28f8b0ce4aafd1d98cc91ceeb431b4b11c4",
+      "baseSha256": "560016bd51a62ef73a2e807f71e2bf4df2c55a94b6d69a4e16b7defe95e299f8",
+      "overlaySha256": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_models.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "c8ca0888f5f1e0dbbb121221449720f486015b84",
+      "baseSha256": "a17cf2a7b320cdb411f7957b06ebd5bae3d75c5bf885d8055993e4d228a9c6f0",
+      "overlaySha256": "4ca8f1eeb19a825dfaa1b4053172bfdd238928bf8f3a4ff7a54a4bb08f6aebde",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "38da42bb632130599b66785127fc55f5176e0d07",
+      "baseSha256": "2ef8821981692d9a9ef50ad38884ffe1180f53e4d4c533c919888bd0725e7b8e",
+      "overlaySha256": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_snapshot.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "23a5a7041f2a4ab82623e1c400ec49b158f5fa85",
+      "baseSha256": "e517d1383b1b4478b700c36e1fb69353f2c742a06e6da229b1fdfdf5d6e78ef6",
+      "overlaySha256": "6a86dba6fa2281aa35a757d1931343402d25eb17930de070a193fb2792a4407b",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_undo.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "7da68567952902e220633187de68877ce201ee10",
+      "baseSha256": "376787bf070b8223e9cbef1f3de56e3e48d3d4936435a8fd587e4789ed4dfe79",
+      "overlaySha256": "ef6df6740c7aebb2db067311eeaf4f4d9d17cda3a11b5ce7021409ac0ba2ed6c",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_writes.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "f82b17ce9f7b263e30fc7579730a675aa6e82153",
+      "baseSha256": "c18a892543506a8c62b68417e397d028ea54eafa0b2e826fd61b41c535f80256",
+      "overlaySha256": "d1b3ee96d3f9eaf0234fabd2f922a85722a2da0e33978918af4917eab27188ac",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_api.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "dea17eebc29b1a4d3f12f286dd22efdabca2622f",
+      "baseSha256": "ff7ee164066ad1267f8af8594111ddd9360694be073f989f4f4e57cf3839b215",
+      "overlaySha256": "165f983bf2a060b0842f439dbca3d2de881a1662d8ee9309f7564777ebb5fca6",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "d73aeb80444bf215aee445fd0d00bdf40062b968",
+      "baseSha256": "bbfb36f10e57c5165875717f52286932916ba3c8c3ec86cef5b727229708a1be",
+      "overlaySha256": "44cdec5627466ef5d09dfc2ea0d03d29aa543ef70a3caf501ff09df1ec8a572e",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "1bf55dcb5f48fa5eca04ebd3fc18467c1aae3314",
+      "baseSha256": "6d04e9ddfdcb7402acc6d0531d8db6440db704170b4eea73d0c42bb4d69dd2b5",
+      "overlaySha256": "c8a8b420eec8800b4d1861cfe10a48c058302b4206ecd0772888244c30f4f237",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    },
+    {
+      "path": "test/features/intelligence_center/bil_tool_registry_test.dart",
+      "owner": "BIL-00",
+      "baseGitBlob": "30bd5740c7d1da42f5c3a1fee4e9004231986f8a",
+      "baseSha256": "d328739664e6396cd58a61bffb2ae590b7b52c6cac9c36f97ee0224c4c0cce17",
+      "overlaySha256": "6ffed63c7187983a560c305865119a0fd93791ae39cb71c96d5f5adc7d2b4cf3",
+      "baseMatchesTree": true,
+      "manifestBaseHashMatches": true,
+      "manifestOverlayHashMatches": true,
+      "actuallyChanged": true
+    }
+  ],
+  "otherRoleEntries": [
+    {
+      "path": "lib/app/services/app_settings_provider.dart",
+      "owner": "BIL-03",
+      "baseGitBlob": "fef424db08777f2fe8451cb4462924f0bbdbe134",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/app/services/app_settings_service.dart",
+      "owner": "BIL-03",
+      "baseGitBlob": "e585f2411f1ea730c822e579c47689264003b560",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/app/services/settings_store.dart",
+      "owner": "BIL-03",
+      "baseGitBlob": "ea4ae9c65a867f67ee0a6c8ce799628611328973",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_commands.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "aeeb3d92db3ca1dc63398ea273ebdb5e7d8c06cd",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_food.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "da064d6161e5f76888d0da81e505fa47ec8a514d",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_journal.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "d42c6e9519544b7d728974613d5dd08b9192da11",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_models.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "155ff14fc7931506b4e304eae9016f86189e9639",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_undo.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "56b5e2cbed1a53534111195f250a81236e688dc2",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_food_portions.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "568d77de3407b73f5321f762ab923551af2ceb65",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_ai_reward_notice.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "2d03a07303ae4c7119a7a596e48edc6f9bccb894",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_circle_copy.dart",
+      "owner": "BIL-06",
+      "baseGitBlob": "3e3175020e0eb4714986e40c78f5dd2b2229cba4",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_circle_detail_page.dart",
+      "owner": "BIL-06",
+      "baseGitBlob": "03a2f3f5f0b2a6e5fc33ad40519676d92ae4add1",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_circle_discovery_header.dart",
+      "owner": "BIL-06",
+      "baseGitBlob": "dafedd557030c0d23f7c085b4c9465c66ecc8b1a",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_circle_owner_scope.dart",
+      "owner": "BIL-06",
+      "baseGitBlob": "953ceb0242b636c011e7878892f842febf17b193",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_circle_reference_body.dart",
+      "owner": "BIL-06",
+      "baseGitBlob": "09c34333e573154068cb461468951811fbfa35cf",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_circles_page.dart",
+      "owner": "BIL-06",
+      "baseGitBlob": "ad80676b60f1bdb0a45e7273503e8d2a5be80f82",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_mode_control.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "b0c6c4ea4510f81820f49d06d59f19b5bc107b0c",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_pagination.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "42f162c93138c7554b478be6e99ea90c6ac10bd0",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_feed_tab.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "3658e1c1634c5b1808aa4f0784a90746a9a094f7",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_hub_page.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "85240b5d9007ad972016e75af5c53b614083fa98",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_member_profile_actions.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "31717f9ce235debdc6629e37034c66ae03528f1a",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_member_profile_connections.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "96c064a938ee5d5cada7d1fb72e3418d85c71952",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_member_profile_content.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "13d21d51366b5f6f9ca9f845753b0c8156fdedab",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_member_profile_owner_scope.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "b4b89c18fd961a05faedf6338df274d9fc5612bc",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_member_profile_page.dart",
+      "owner": "BIL-08",
+      "baseGitBlob": "d4b66a696902dddd19e70cbebd2301fe4fa46fb9",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_notification_read_receipts.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "f75e6572a34e5064071fb2550a6ecee7f2cd3f3a",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_notifications_filters.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "81982c4e8a17dc030c506259c9e53d3a4e48debe",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_notifications_page.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "173416afceafc90b5bb3a9bbedea796493728668",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_notifications_reference_widgets.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "531e2944c213e73d805fd9d02cdd05cf720145cf",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_notifications_rendering.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "0947f2351edc5d9ca0dfcb543ef48dc757372ee6",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_post_moderation_page.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "31a468ad350fd2915aacdb794f92dd11ff9981e7",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_rewards_cards.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "d142cd351c7136e1aa9dfc0b97e6eba983f7eb75",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_rewards_owner_scope.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "347c0a0bfcbeb55e48eaf677c71b3ff1ff22cb79",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/community/presentation/community_rewards_page.dart",
+      "owner": "BIL-05",
+      "baseGitBlob": "5d3953a918475556920fde0c50adeabec143ef9d",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "ce4767df299753181acd2be7c63207b4aec6bf69",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_owner.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "19069f10c1dd7effc8df074677673e531ac59a0f",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_recovery.dart",
+      "owner": "BIL-01",
+      "baseGitBlob": "49b35a88d28c037a27d24a5f3aa32cdcc0640074",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_vision_flow.dart",
+      "owner": "BIL-02",
+      "baseGitBlob": "37bf3c4bf44eb6b817348d5f30c60634232b9a80",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_memory_owner_sync.dart",
+      "owner": "BIL-03",
+      "baseGitBlob": "83e7f03c5f7ec3bdfd8ccae64ef83b275758bf3d",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_memory_repository.dart",
+      "owner": "BIL-03",
+      "baseGitBlob": "b6817679cfdfd9196a56a85d13a54e807d0f6413",
+      "baseMatchesTree": true,
+      "overlayMatchesBase": true
+    }
+  ],
+  "historicalAudit": "shared_ownership_audit.json retains the earlier stale manifest entry; this final audit verifies its removal and the exact38 registry contract addition."
+}

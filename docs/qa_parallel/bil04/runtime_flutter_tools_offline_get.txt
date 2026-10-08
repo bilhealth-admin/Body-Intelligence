@@ -1,0 +1,18 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 95.0.0 (99.0.0 available)
+  analyzer 10.1.0 (12.1.0 available)
+  built_value 8.12.5 (8.12.6 available)
+  code_assets 1.0.0 (1.2.1 available)
+  coverage 1.15.0 (1.15.1 available)
+  dart_style 3.1.7 (3.1.8 available)
+  hooks 1.0.2 (2.0.2 available)
+  js 0.7.2 (discontinued)
+  json_annotation 4.11.0 (4.12.0 available)
+  usage 4.1.1 (discontinued)
+  vm_service 15.0.2 (15.2.0 available)
+  xml 6.6.1 (7.0.1 available)
+Got dependencies!
+2 packages are discontinued.
+10 packages have newer versions incompatible with dependency constraints.
+Try `dart pub outdated` for more information.

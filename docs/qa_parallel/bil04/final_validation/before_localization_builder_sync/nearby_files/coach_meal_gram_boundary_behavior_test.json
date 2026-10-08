@@ -1,0 +1,40 @@
+{
+  "name": "coach_meal_gram_boundary_behavior_test",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/features/intelligence_center/coach_meal_gram_boundary_behavior_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "started_at_utc": "2026-10-07T09:44:04.307708+00:00",
+  "ended_at_utc": "2026-10-07T09:44:12.332379+00:00",
+  "duration_seconds": 8.025,
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "TZ": "Asia/Almaty",
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime_requirement": "Flutter 3.44.6 / Dart 3.12.2, unchanged pubspec.lock",
+    "live_providers": false,
+    "test_data": "synthetic, local host"
+  },
+  "exit_code": 0,
+  "result": "PASS",
+  "passed_test_count": 4,
+  "source_digest_algorithm": "SHA256 of sorted compact JSON path-to-SHA256 map",
+  "source_scope": "lib/test/tool .dart/.py/.sh/.yaml/.json and four root build configuration files",
+  "source_digest_before": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "source_digest_after": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "source_stable": true,
+  "source_file_count": 2978,
+  "source_manifest": "coach_meal_gram_boundary_behavior_test.sources.json",
+  "changed_during_run": [],
+  "log": "coach_meal_gram_boundary_behavior_test.txt",
+  "log_sha256": "8f8fd819f4a9694dce0fe2306c55a13f1a47d4391f9adc4382f094d5d2824dd5",
+  "skips_or_exclusions_added_by_recorder": false
+}

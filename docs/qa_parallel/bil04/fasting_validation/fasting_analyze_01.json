@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "analyze",
+    "--no-pub",
+    "--fatal-infos",
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+    "test/parallel/bil04/fasting_command_adapter_test.dart",
+    "test/parallel/bil04/fasting_notification_sync_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "environment": {
+    "TAR_OPTIONS": "--no-same-owner",
+    "Flutter": "3.44.6",
+    "Dart": "3.12.2",
+    "PUB_CACHE": "/workspace/scratch/ada7a97de764/runtime/pub-cache"
+  },
+  "exit_code": 1,
+  "elapsed_seconds": 0.21,
+  "status": "FAIL"
+}

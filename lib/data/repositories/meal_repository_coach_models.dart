@@ -215,14 +215,22 @@ final class CoachMealCommand {
   factory CoachMealCommand.moveItem({
     required String operationId,
     required CoachMealItemVersion expected,
-    required String mealType,
+    String? mealType,
+    DateTime? date,
   }) {
-    _validateMealType(mealType);
+    if (mealType == null && date == null) {
+      throw ArgumentError('A destination meal type or day is required');
+    }
+    if (mealType != null) _validateMealType(mealType);
     return CoachMealCommand._(
       operationId: operationId,
       kind: CoachMealCommandKind.move,
       expectedItem: expected,
-      arguments: {'expected': expected.toJson(), 'mealType': mealType},
+      arguments: {
+        'expected': expected.toJson(),
+        'mealType': ?mealType,
+        if (date != null) 'day': dayKeyFor(date),
+      },
     );
   }
 

@@ -63,8 +63,18 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   Future<bool> _ensureCoachRuntimePermission(
     BilRuntimeCapability capability, {
     bool includeSpeechRecognition = false,
+    bool Function()? isCurrent,
   }) async {
-    if (!mounted || coachInBackground) return false;
+    bool currentRequest() {
+      if (!mounted || coachInBackground) return false;
+      try {
+        return isCurrent?.call() ?? true;
+      } on Object {
+        return false;
+      }
+    }
+
+    if (!currentRequest()) return false;
     const policy = BilRuntimePermissionPolicy();
     final permissionSequence = coachRuntimePermissionSequence(
       capability: capability,
@@ -73,14 +83,16 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     );
     var effectiveCapability = permissionSequence.first;
     var current = await policy.status(effectiveCapability);
+    if (!currentRequest()) return false;
     if (permissionSequence.length > 1 &&
         current == BilRuntimePermissionState.granted &&
         effectiveCapability == BilRuntimeCapability.microphone) {
       effectiveCapability = permissionSequence.last;
       current = await policy.status(effectiveCapability);
+      if (!currentRequest()) return false;
     }
     if (current == BilRuntimePermissionState.granted) return true;
-    if (!mounted) return false;
+    if (!mounted || !currentRequest()) return false;
     final permissionTitle = switch (effectiveCapability) {
       BilRuntimeCapability.microphone => MealVoiceRuntimeCopy.resolve(
         MealVoiceCopyKey.microphonePermissionTitle,
@@ -124,14 +136,15 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           ],
         ),
       );
+      if (!currentRequest()) return false;
       if (open == true) await policy.openSettings();
       return false;
     }
-    if (!mounted || coachInBackground) return false;
+    if (!currentRequest()) return false;
     final granted =
         await policy.request(effectiveCapability) ==
         BilRuntimePermissionState.granted;
-    if (!granted) return false;
+    if (!currentRequest() || !granted) return false;
     if (effectiveCapability != BilRuntimeCapability.microphone ||
         permissionSequence.length == 1) {
       return true;
@@ -139,6 +152,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     return _ensureCoachRuntimePermission(
       capability,
       includeSpeechRecognition: includeSpeechRecognition,
+      isCurrent: isCurrent,
     );
   }
 
@@ -154,12 +168,12 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     String locale, {
     bool showFailure = false,
   }) async {
-    if (!mounted || coachInBackground || (!showFailure && liveCallPaused)) {
+    if (!_voiceRouteIsCurrent || (!showFailure && liveCallPaused)) {
       return;
     }
     try {
       final voiceGender = await _preferredCoachVoice();
-      if (!mounted || coachInBackground || (!showFailure && liveCallPaused)) {
+      if (!_voiceRouteIsCurrent || (!showFailure && liveCallPaused)) {
         return;
       }
       await const BilTextToSpeech().speak(
@@ -168,7 +182,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         voiceGender: voiceGender,
       );
     } on Object {
-      if (!showFailure || !mounted) return;
+      if (!showFailure || !_voiceRouteIsCurrent) return;
       _showActionCompleted(
         tr(
           'A coach voice for this language is unavailable on this device.',
@@ -203,14 +217,26 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   Future<void> _pauseLiveCall() async {
     liveCallPaused = true;
     voiceSilenceTimer?.cancel();
-    await _stopVoiceCapture(resetMode: false);
-    await _playVoiceDeactivationCue();
+    final epoch = conversationPersistenceEpoch;
+    final queryGeneration = requestGeneration;
+    final stop = _stopVoiceCapture(resetMode: false);
+    final captureGeneration = voiceCaptureGeneration;
+    bool current() =>
+        mounted &&
+        !coachInBackground &&
+        conversationPersistenceEpoch == epoch &&
+        requestGeneration == queryGeneration &&
+        voiceCaptureGeneration == captureGeneration;
+    await stop;
+    if (!current()) return;
+    await _playVoiceDeactivationCue(isCurrent: current);
+    if (!current()) return;
     try {
       await const BilTextToSpeech().stop();
     } on Object {
       // The call still pauses if a device has no active TTS engine.
     }
-    if (mounted) _updateState(() {});
+    if (current()) _updateState(() {});
   }
 
   Future<void> _stopLiveCall() async {
@@ -218,14 +244,26 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     liveCallNoSpeechRestarts = 0;
     requestGeneration += 1;
     replyDelayTimer?.cancel();
-    await _stopVoiceCapture(resetMode: true);
-    await _playVoiceDeactivationCue();
+    final epoch = conversationPersistenceEpoch;
+    final queryGeneration = requestGeneration;
+    final stop = _stopVoiceCapture(resetMode: true);
+    final captureGeneration = voiceCaptureGeneration;
+    bool current() =>
+        mounted &&
+        !coachInBackground &&
+        conversationPersistenceEpoch == epoch &&
+        requestGeneration == queryGeneration &&
+        voiceCaptureGeneration == captureGeneration;
+    await stop;
+    if (!current()) return;
+    await _playVoiceDeactivationCue(isCurrent: current);
+    if (!current()) return;
     try {
       await const BilTextToSpeech().stop();
     } on Object {
       // Ending the call never depends on a working TTS engine.
     }
-    if (mounted) {
+    if (current()) {
       _updateState(() {
         sending = false;
         replyPhase = _CoachReplyPhase.idle;
@@ -235,35 +273,118 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   }
 
   Future<void> _startVoiceCapture({bool playCue = true}) async {
-    if (!_canCaptureVoice || voiceCaptureStarting) return;
-    voiceCaptureStarting = true;
+    if (!_canCaptureVoice || voiceCaptureStarting || sending) return;
+    final previous = voiceMediaRequest;
+    if (previous != null) {
+      _finishVoiceMediaRequest(previous, pauseLiveCall: false);
+    }
     final generation = ++voiceCaptureGeneration;
+    voiceCaptureStarting = true;
+    _CoachMediaPageRequest? request;
     try {
-      await _prepareVoiceCapture(generation, playCue: playCue);
+      // Capture the owner and request before the first permission/platform
+      // await. A later callback must never obtain a new owner scope.
+      final captured = _newCoachMediaRequest();
+      request = captured;
+      voiceMediaRequest = captured;
+      if (!voiceTranscriptBridge.begin(captured.attempt)) return;
+      voiceSilenceTimer?.cancel();
+      voiceLanguageHint = null;
+      pendingVoiceTranscript = '';
+      voiceSubmitPending = false;
+      var writingTranscript = false;
+      var userEdited = false;
+      var lastComposerText = question.text;
+
+      void composerChanged() {
+        final text = question.text;
+        if (text == lastComposerText) return;
+        lastComposerText = text;
+        if (writingTranscript ||
+            voiceSubmitPending ||
+            !_voiceRequestCurrent(captured, generation)) {
+          return;
+        }
+        userEdited = true;
+        if (!voiceTranscriptBridge.updateDraft(captured.attempt, text)) return;
+        pendingVoiceTranscript = text;
+        voiceSilenceTimer?.cancel();
+        if (!voiceCaptureStarting) {
+          unawaited(_finishVoiceTranscriptForReview(captured, generation));
+        }
+      }
+
+      question.addListener(composerChanged);
+      captured.releaseVoiceDraftListener = () =>
+          question.removeListener(composerChanged);
+      void writeTranscript(String text) {
+        writingTranscript = true;
+        try {
+          question.value = TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+          lastComposerText = text;
+        } finally {
+          writingTranscript = false;
+        }
+      }
+
+      await _prepareVoiceCapture(
+        captured,
+        generation,
+        playCue: playCue,
+        writeTranscript: writeTranscript,
+        hasUserEdited: () => userEdited,
+      );
     } on Object {
-      if (_canCaptureVoice && generation == voiceCaptureGeneration) {
+      if (request != null && _voiceRequestCurrent(request, generation)) {
         _showVoiceUnavailable();
+        request.attempt.cancel();
       }
     } finally {
-      voiceCaptureStarting = false;
+      if (request == null && generation == voiceCaptureGeneration) {
+        voiceCaptureStarting = false;
+      } else if (request != null && identical(voiceMediaRequest, request)) {
+        voiceCaptureStarting = false;
+        if (generation != voiceCaptureGeneration ||
+            !request.attempt.isCurrent) {
+          _finishVoiceMediaRequest(request);
+        }
+      }
+    }
+  }
+
+  bool get _voiceRouteIsCurrent {
+    if (!mounted || coachInBackground) return false;
+    try {
+      // An outgoing route remains mounted throughout its transition. Its old
+      // reply must not speak or open another recognizer before dispose runs.
+      return ModalRoute.of(context)?.isCurrent == true;
+    } on Object {
+      // The element can already be deactivated while native work completes.
+      return false;
     }
   }
 
   bool get _canCaptureVoice =>
-      mounted &&
-      !coachInBackground &&
+      _voiceRouteIsCurrent &&
       voiceMode != _CoachVoiceMode.idle &&
       !(voiceMode == _CoachVoiceMode.liveCall && liveCallPaused);
 
   Future<void> _prepareVoiceCapture(
+    _CoachMediaPageRequest request,
     int generation, {
     required bool playCue,
+    required void Function(String) writeTranscript,
+    required bool Function() hasUserEdited,
   }) async {
     final permissionGranted = await _ensureCoachRuntimePermission(
       BilRuntimeCapability.microphone,
       includeSpeechRecognition: true,
+      isCurrent: () => _voiceRequestCurrent(request, generation),
     );
-    if (generation != voiceCaptureGeneration || !_canCaptureVoice) return;
+    if (!_voiceRequestCurrent(request, generation)) return;
     if (!permissionGranted) {
       if (mounted) {
         _updateState(() {
@@ -274,24 +395,61 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           }
         });
       }
+      request.attempt.cancel();
       return;
     }
+    request.capabilities.addAll(
+      coachRuntimePermissionSequence(
+        capability: BilRuntimeCapability.microphone,
+        includeSpeechRecognition: true,
+        platform: defaultTargetPlatform,
+      ),
+    );
+    if (!await _voiceRequestAllowed(request, generation)) return;
+    if (hasUserEdited()) {
+      await _finishVoiceTranscriptForReview(request, generation);
+      return;
+    }
+    if (!_canCaptureVoice) return;
     _updateState(() => introVisible = false);
-    if (playCue) await _playVoiceActivationCue();
-    if (generation != voiceCaptureGeneration || !_canCaptureVoice) return;
+    if (playCue) {
+      await _playVoiceActivationCue(
+        isCurrent: () => _voiceRequestCurrent(request, generation),
+      );
+      if (!await _voiceRequestAllowed(request, generation)) return;
+    }
+    if (!_canCaptureVoice || hasUserEdited()) {
+      if (hasUserEdited()) {
+        await _finishVoiceTranscriptForReview(request, generation);
+      }
+      return;
+    }
     // Both microphones use the OS recognizer. Only its resulting text can
     // cross the AI boundary; raw microphone bytes never enter a model request.
-    if (await _startNativeVoiceCapture(generation)) return;
-    if (_canCaptureVoice && generation == voiceCaptureGeneration) {
+    if (await _startNativeVoiceCapture(
+      request,
+      generation,
+      writeTranscript: writeTranscript,
+      hasUserEdited: hasUserEdited,
+    )) {
+      return;
+    }
+    if (_voiceRequestCurrent(request, generation) && _canCaptureVoice) {
       _showVoiceUnavailable();
+      request.attempt.cancel();
     }
   }
 
-  Future<void> _playVoiceActivationCue() async {
+  Future<void> _playVoiceActivationCue({bool Function()? isCurrent}) async {
+    bool current() =>
+        mounted && !coachInBackground && (isCurrent?.call() ?? true);
+    if (!current()) return;
     try {
       await HapticFeedback.lightImpact();
+      if (!current()) return;
       await BilMicSound.playOpen();
     } on Object {
+      if (!current()) return;
       try {
         await SystemSound.play(SystemSoundType.click);
       } on Object {
@@ -300,11 +458,16 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
   }
 
-  Future<void> _playVoiceDeactivationCue() async {
+  Future<void> _playVoiceDeactivationCue({bool Function()? isCurrent}) async {
+    bool current() =>
+        mounted && !coachInBackground && (isCurrent?.call() ?? true);
+    if (!current()) return;
     try {
       await HapticFeedback.selectionClick();
+      if (!current()) return;
       await BilMicSound.playEnd();
     } on Object {
+      if (!current()) return;
       try {
         await SystemSound.play(SystemSoundType.click);
       } on Object {
@@ -313,69 +476,75 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
   }
 
-  Future<bool> _startNativeVoiceCapture(int generation) async {
-    voiceSilenceTimer?.cancel();
-    voiceLanguageHint = null;
-    voiceSubmitPending = false;
-    pendingVoiceTranscript = '';
-    final initialDraft = question.value;
+  Future<bool> _startNativeVoiceCapture(
+    _CoachMediaPageRequest request,
+    int generation, {
+    required void Function(String) writeTranscript,
+    required bool Function() hasUserEdited,
+  }) async {
     try {
       final available = await speech.initialize(
         onError: (error) {
-          if (_canCaptureVoice && generation == voiceCaptureGeneration) {
-            unawaited(_handleVoiceFailure(error));
+          if (_voiceRequestCurrent(request, generation) &&
+              !voiceSubmitPending &&
+              !voiceTranscriptBridge.hasFinal) {
+            unawaited(
+              _handleVoiceFailure(
+                error,
+                request: request,
+                generation: generation,
+              ),
+            );
           }
         },
       );
-      if (!available ||
-          !_canCaptureVoice ||
-          generation != voiceCaptureGeneration) {
+      if (!await _voiceRequestAllowed(request, generation) ||
+          !available ||
+          !_canCaptureVoice) {
         return false;
       }
       // Speech language is deliberately independent from the BIL interface.
       // Supplying the UI locale here makes Android lock recognition to that
       // language before its language-switch model gets a chance to run.
-      if (!mounted) return false;
       final speechLocaleAllowList = await _coachSpeechLocaleAllowList();
-      if (!_canCaptureVoice || generation != voiceCaptureGeneration) {
+      if (!await _voiceRequestAllowed(request, generation) ||
+          !_canCaptureVoice) {
         return false;
+      }
+      if (hasUserEdited()) {
+        await _finishVoiceTranscriptForReview(request, generation);
+        return true;
       }
       _updateState(() {
         listening = true;
       });
       await speech.listen(
         onResult: (result) {
-          if (!_canCaptureVoice ||
-              generation != voiceCaptureGeneration ||
-              voiceSubmitPending) {
+          if (!_voiceRequestCurrent(request, generation) ||
+              !_canCaptureVoice ||
+              voiceSubmitPending ||
+              hasUserEdited()) {
             return;
           }
-          final transcript = result.recognizedWords.trim();
-          if (transcript.isEmpty) return;
-          if (result.localeId?.trim().isNotEmpty == true) {
-            voiceLanguageHint = result.localeId!.trim();
-          }
-          pendingVoiceTranscript = transcript;
-          liveCallNoSpeechRestarts = 0;
-          voiceTransientRestarts = 0;
-          _updateState(() {
-            listening = true;
-            question.value = TextEditingValue(
-              text: transcript,
-              selection: TextSelection.collapsed(offset: transcript.length),
-            );
-          });
-          _scrollToLatest();
-          voiceSilenceTimer?.cancel();
-          voiceSilenceTimer = Timer(
-            result.isFinal
-                ? const Duration(milliseconds: 900)
-                // Match the native recognizer's silence window. A shorter
-                // Dart timer submitted the first partial phrase while the
-                // user was still speaking, especially on Android devices
-                // that emit a partial result immediately after route setup.
-                : const Duration(milliseconds: 3500),
-            () => unawaited(_submitVoiceTranscript()),
+          final accepted = result.isFinal
+              ? voiceTranscriptBridge.acceptFinal(
+                  request.attempt,
+                  result.recognizedWords,
+                  languageTag: result.localeId,
+                )
+              : voiceTranscriptBridge.acceptPartial(
+                  request.attempt,
+                  result.recognizedWords,
+                  languageTag: result.localeId,
+                );
+          if (!accepted) return;
+          unawaited(
+            _publishVoiceTranscript(
+              request,
+              generation,
+              writeTranscript: writeTranscript,
+              hasUserEdited: hasUserEdited,
+            ),
           );
         },
         listenOptions: SpeechListenOptions(
@@ -398,25 +567,147 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           allowedLocaleIds: speechLocaleAllowList,
         ),
       );
-      if (!_canCaptureVoice || generation != voiceCaptureGeneration) {
-        await speech.cancel();
+      if (!await _voiceRequestAllowed(request, generation)) {
+        // Do not cancel a shared native recognizer on behalf of an old attempt:
+        // a newer deliberate capture may already own it.
         return false;
+      }
+      if (hasUserEdited()) {
+        await _finishVoiceTranscriptForReview(request, generation);
       }
       return true;
     } on Object {
+      if (!_voiceRequestCurrent(request, generation)) return false;
       try {
         await speech.cancel();
       } on Object {
         // The inline composer remains available as a fallback.
       }
-      if (mounted) {
-        _updateState(() {
-          listening = false;
-          if (question.text.isEmpty) question.value = initialDraft;
-        });
-      }
+      if (!await _voiceRequestAllowed(request, generation)) return false;
+      _updateState(() => listening = false);
       return false;
     }
+  }
+
+  bool _voiceRequestCurrent(_CoachMediaPageRequest request, int generation) {
+    if (!_voiceRouteIsCurrent) {
+      request.attempt.cancel();
+      return false;
+    }
+    return generation == voiceCaptureGeneration &&
+        identical(voiceMediaRequest, request) &&
+        request.attempt.isCurrent;
+  }
+
+  Future<bool> _voiceRequestAllowed(
+    _CoachMediaPageRequest request,
+    int generation,
+  ) async {
+    if (!_voiceRequestCurrent(request, generation)) return false;
+    final allowed = await _mediaRequestCurrent(request);
+    return allowed && _voiceRequestCurrent(request, generation);
+  }
+
+  Future<void> _publishVoiceTranscript(
+    _CoachMediaPageRequest request,
+    int generation, {
+    required void Function(String) writeTranscript,
+    required bool Function() hasUserEdited,
+  }) async {
+    if (!await _voiceRequestAllowed(request, generation) ||
+        voiceSubmitPending ||
+        hasUserEdited()) {
+      return;
+    }
+    // Read the newest bridge state after the permission await. An earlier
+    // partial callback cannot publish its old text over a newer final.
+    final transcript = voiceTranscriptBridge.draftText;
+    if (transcript.isEmpty) return;
+    _updateState(() {
+      pendingVoiceTranscript = transcript;
+      voiceLanguageHint = voiceTranscriptBridge.languageTag;
+      liveCallNoSpeechRestarts = 0;
+      voiceTransientRestarts = 0;
+      // The final's review window must expose the editable composer instead
+      // of the listening label used while recognition is still changing.
+      listening = !voiceTranscriptBridge.hasFinal;
+      writeTranscript(transcript);
+    });
+    _scrollToLatest();
+    voiceSilenceTimer?.cancel();
+    if (voiceTranscriptBridge.hasFinal) {
+      if (voiceMode == _CoachVoiceMode.liveCall) {
+        // Preserve the deliberate live-call loop, but only a real final can
+        // use its existing review window. Any composer edit cancels this timer.
+        voiceSilenceTimer = Timer(const Duration(milliseconds: 900), () {
+          unawaited(
+            _submitVoiceTranscript(request: request, generation: generation),
+          );
+        });
+      } else {
+        await _finishVoiceTranscriptForReview(request, generation);
+      }
+    } else {
+      voiceSilenceTimer = Timer(const Duration(milliseconds: 3500), () {
+        unawaited(_finishVoiceTranscriptForReview(request, generation));
+      });
+    }
+  }
+
+  Future<void> _finishVoiceTranscriptForReview(
+    _CoachMediaPageRequest request,
+    int generation,
+  ) async {
+    if (!await _voiceRequestAllowed(request, generation) ||
+        voiceSubmitPending) {
+      return;
+    }
+    voiceTranscriptBridge.finish(request.attempt);
+    voiceSilenceTimer?.cancel();
+    final shouldStop = listening || voiceCaptureStarting;
+    _updateState(() {
+      listening = false;
+      if (voiceMode == _CoachVoiceMode.liveCall) liveCallPaused = true;
+    });
+    if (!shouldStop) return;
+    try {
+      await speech.stop();
+    } on Object {
+      // The reviewed composer text remains usable if native stop is unavailable.
+    }
+    if (!await _voiceRequestAllowed(request, generation) ||
+        request.attempt.isClaimed) {
+      return;
+    }
+    if (voiceMode == _CoachVoiceMode.dictation) {
+      await _playVoiceDeactivationCue(
+        isCurrent: () => _voiceRequestCurrent(request, generation),
+      );
+    }
+  }
+
+  /// Called by the existing composer Send/keyboard-submit path. A stale media
+  /// handoff consumes this invocation and preserves the composer for a fresh
+  /// user action; it cannot silently become an ordinary text request.
+  Future<bool> _submitPendingVoiceDraft() async {
+    final request = voiceMediaRequest;
+    if (request == null) return false;
+    final generation = voiceCaptureGeneration;
+    if (!_voiceRequestCurrent(request, generation)) {
+      _finishVoiceMediaRequest(request);
+      return true;
+    }
+    if (voiceSubmitPending) return true;
+    if (question.text.trim().isEmpty) return false;
+    // A typed correction made while the permission sheet is open stays local
+    // until that deliberate capture has completed permission admission.
+    if (request.capabilities.isEmpty) return true;
+    await _submitVoiceTranscript(
+      request: request,
+      generation: generation,
+      userInitiated: true,
+    );
+    return true;
   }
 
   Future<List<String>> _coachSpeechLocaleAllowList() async {
@@ -432,230 +723,4 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       return const <String>[];
     }
   }
-
-  Future<void> _submitVoiceTranscript() async {
-    if (!mounted || coachInBackground || voiceSubmitPending) return;
-    final transcript = pendingVoiceTranscript.trim();
-    if (transcript.isEmpty) {
-      await _stopVoiceCapture();
-      if (voiceMode == _CoachVoiceMode.dictation) {
-        await _playVoiceDeactivationCue();
-      }
-      return;
-    }
-    voiceSubmitPending = true;
-    voiceSilenceTimer?.cancel();
-    final detectedLanguageTag = voiceLanguageHint;
-    question.clear();
-    try {
-      await speech.stop();
-    } on Object {
-      // The recognized text is already in the composer and remains usable.
-    }
-    if (!mounted || coachInBackground) {
-      voiceSubmitPending = false;
-      return;
-    }
-    if (voiceMode == _CoachVoiceMode.dictation) {
-      await _playVoiceDeactivationCue();
-    }
-    if (mounted) _updateState(() => listening = false);
-    final autoSpeakReply = _IntelligenceCenterPageState._voiceTurnPolicy
-        .planFor(
-          voiceMode == _CoachVoiceMode.liveCall
-              ? CoachVoiceEntryPoint.liveCall
-              : CoachVoiceEntryPoint.composerDictation,
-        )
-        .autoSpeakReply;
-    await ask(
-      inputChannel: CoachInputChannel.voice,
-      detectedLanguageTag: detectedLanguageTag,
-      textOverride: transcript,
-      autoSpeakReply: autoSpeakReply,
-    );
-    if (!mounted) return;
-    voiceLanguageHint = null;
-    pendingVoiceTranscript = '';
-    // A user may already be typing the next turn while the answer arrives.
-    // Do not erase that new draft when this voice request finishes.
-    voiceSubmitPending = false;
-    if (!autoSpeakReply && voiceMode == _CoachVoiceMode.dictation) {
-      voiceMode = _CoachVoiceMode.idle;
-      if (mounted) _updateState(() {});
-    }
-  }
-
-  Future<void> _resumeLiveCallIfNeeded(int generation) async {
-    if (!mounted ||
-        coachInBackground ||
-        generation != requestGeneration ||
-        voiceMode != _CoachVoiceMode.liveCall ||
-        liveCallPaused ||
-        listening ||
-        sending) {
-      return;
-    }
-    if (question.text.trim().isNotEmpty) {
-      _updateState(() => liveCallPaused = true);
-      return;
-    }
-    await _startVoiceCapture(playCue: false);
-  }
-
-  Future<void> _stopVoiceCapture({bool resetMode = false}) async {
-    voiceCaptureGeneration++;
-    voiceSilenceTimer?.cancel();
-    if (mounted) {
-      _updateState(() {
-        listening = false;
-        if (resetMode) voiceMode = _CoachVoiceMode.idle;
-      });
-    }
-    try {
-      await speech.cancel();
-    } on Object {
-      // The inline composer remains available even if native cancellation fails.
-    }
-  }
-
-  Future<void> _handleVoiceFailure([SpeechRecognitionError? error]) async {
-    if (!mounted) return;
-    if (pendingVoiceTranscript.trim().isNotEmpty) {
-      await _submitVoiceTranscript();
-      return;
-    }
-    await _stopVoiceCapture();
-    if (!mounted) return;
-    final errorCode = error?.errorMsg;
-    final transient =
-        errorCode == 'recognizer_error_5' ||
-        errorCode == 'speech_recognizer_busy' ||
-        errorCode == 'speech_start_failed' ||
-        errorCode == 'audio_input_unavailable' ||
-        errorCode == 'audio_session_unavailable';
-    if (transient &&
-        !sending &&
-        voiceMode != _CoachVoiceMode.idle &&
-        voiceTransientRestarts < 1) {
-      // Android speech services can return ERROR_CLIENT while the audio
-      // route is still being released. Recreate the recognizer once so the
-      // user's first deliberate tap does not look like an immediate stop.
-      voiceTransientRestarts += 1;
-      await Future<void>.delayed(const Duration(milliseconds: 450));
-      if (mounted && !sending && voiceMode != _CoachVoiceMode.idle) {
-        await _startVoiceCapture(playCue: false);
-      }
-      return;
-    }
-    if (errorCode case 'speech_timeout' || 'speech_no_match') {
-      // A live call should keep its listening session alive when the OS
-      // recognizer times out before any words arrive. Retry a couple of times
-      // silently; only then pause and show an actionable message. Dictation
-      // remains a deliberate one-shot action and keeps the existing prompt.
-      if (voiceMode == _CoachVoiceMode.liveCall &&
-          !liveCallPaused &&
-          !sending &&
-          liveCallNoSpeechRestarts < 2) {
-        liveCallNoSpeechRestarts += 1;
-        await Future<void>.delayed(const Duration(milliseconds: 350));
-        if (mounted &&
-            voiceMode == _CoachVoiceMode.liveCall &&
-            !liveCallPaused &&
-            !sending) {
-          await _startVoiceCapture(playCue: false);
-        }
-        return;
-      }
-      if (voiceMode == _CoachVoiceMode.liveCall) {
-        _updateState(() => liveCallPaused = true);
-      }
-      await _playVoiceDeactivationCue();
-      _showActionCompleted(
-        tr(
-          voiceMode == _CoachVoiceMode.liveCall
-              ? 'I did not hear a clear sentence. Tap the call icon to listen again.'
-              : 'I didn’t catch that. Tap the microphone and try again.',
-          voiceMode == _CoachVoiceMode.liveCall
-              ? 'لم أسمع جملة واضحة. اضغط أيقونة المكالمة للاستماع مجددًا.'
-              : 'لم ألتقط كلامًا واضحًا. اضغط الميكروفون وحاول مرة أخرى.',
-        ),
-      );
-      return;
-    }
-    if (voiceMode == _CoachVoiceMode.liveCall) {
-      _updateState(() => liveCallPaused = true);
-    }
-    _showVoiceUnavailable();
-  }
-
-  void _showVoiceUnavailable() {
-    if (!mounted) return;
-    _updateState(() {
-      listening = false;
-      if (voiceMode == _CoachVoiceMode.liveCall) liveCallPaused = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          tr(
-            'Voice input is unavailable right now. You can type and send your question.',
-            'تعذر تشغيل الإدخال الصوتي الآن. يمكنك كتابة سؤالك وإرساله.',
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-List<String> _matchCoachSpeechLocales(List<String> available) {
-  final candidates = available
-      .map((value) => value.replaceAll('_', '-'))
-      .where((value) => value.isNotEmpty)
-      .toSet()
-      .toList(growable: false);
-  if (candidates.isEmpty) return const <String>[];
-  final orderedCandidates = candidates.toList()..sort();
-  final orderedTargets = BilLocalePolicy.productionTags.toList()..sort();
-  final selected = <String>[];
-  for (final target in orderedTargets) {
-    final normalizedTarget = target.toLowerCase();
-    String? match;
-    for (final candidate in orderedCandidates) {
-      if (candidate.toLowerCase() == normalizedTarget) {
-        match = candidate;
-        break;
-      }
-    }
-    if (match == null) {
-      final language = normalizedTarget.split('-').first;
-      final languageMatches = orderedCandidates.where(
-        (candidate) => candidate.toLowerCase().split('-').first == language,
-      );
-      final preferredVariant = switch (normalizedTarget) {
-        'zh-hans' =>
-          (String value) =>
-              value.endsWith('-cn') ||
-              value.endsWith('-sg') ||
-              value.endsWith('-hans'),
-        'zh-hant' =>
-          (String value) =>
-              value.endsWith('-tw') ||
-              value.endsWith('-hk') ||
-              value.endsWith('-mo') ||
-              value.endsWith('-hant'),
-        'pt-br' => (String value) => value.endsWith('-br'),
-        'pt-pt' => (String value) => value.endsWith('-pt'),
-        _ => (String value) => false,
-      };
-      for (final candidate in languageMatches) {
-        if (preferredVariant(candidate.toLowerCase())) {
-          match = candidate;
-          break;
-        }
-      }
-      match ??= languageMatches.isEmpty ? null : languageMatches.first;
-    }
-    if (match != null && !selected.contains(match)) selected.add(match);
-  }
-  return selected;
 }

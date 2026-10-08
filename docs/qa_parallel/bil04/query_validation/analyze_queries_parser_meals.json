@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "analyze",
+    "--no-pub",
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart",
+    "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+    "test/parallel/bil04/health_query_adapter_test.dart",
+    "test/parallel/bil04/health_query_connected_test.dart",
+    "test/parallel/bil04/closed_day_food_test.dart",
+    "test/parallel/bil04/health_parser_test.dart",
+    "lib/data/repositories/meal_repository.dart",
+    "lib/data/repositories/meal_repository_copying.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 1,
+  "status": "FAIL",
+  "duration_seconds": 10.273074388504028,
+  "source_before": {
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart": "b60d8c627c364cc0dcb1440be580a3353725865fb76e33773b558d8396a980a8",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+    "lib/features/intelligence_center/app_commands/coach_health_parser.dart": "6641217e5714dd3a01d1ae08398323f9a6745fdf92278f497b2bc58ec1bb311b",
+    "test/parallel/bil04/health_query_adapter_test.dart": "addd54cb00331e17b4646076aa76bc169ba270ec61feb879b65110aade5460d9",
+    "test/parallel/bil04/health_query_connected_test.dart": "39efd0f4bbadad109454de666dcd58fe3c9437b192eb53a966d7036ae7011f80",
+    "test/parallel/bil04/closed_day_food_test.dart": "934cfd2edcc71c60cd067dc604fc8af8ba4ab60d325988525aa32340140ba1d5",
+    "test/parallel/bil04/health_parser_test.dart": "ef491d403927955f5d66c567aa0b78f00135db47b69b5e4bc8039efc6caa7f4d",
+    "lib/data/repositories/meal_repository.dart": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+    "lib/data/repositories/meal_repository_copying.dart": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de"
+  },
+  "source_after": {
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart": "b60d8c627c364cc0dcb1440be580a3353725865fb76e33773b558d8396a980a8",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+    "lib/features/intelligence_center/app_commands/coach_health_parser.dart": "6641217e5714dd3a01d1ae08398323f9a6745fdf92278f497b2bc58ec1bb311b",
+    "test/parallel/bil04/health_query_adapter_test.dart": "addd54cb00331e17b4646076aa76bc169ba270ec61feb879b65110aade5460d9",
+    "test/parallel/bil04/health_query_connected_test.dart": "39efd0f4bbadad109454de666dcd58fe3c9437b192eb53a966d7036ae7011f80",
+    "test/parallel/bil04/closed_day_food_test.dart": "934cfd2edcc71c60cd067dc604fc8af8ba4ab60d325988525aa32340140ba1d5",
+    "test/parallel/bil04/health_parser_test.dart": "ef491d403927955f5d66c567aa0b78f00135db47b69b5e4bc8039efc6caa7f4d",
+    "lib/data/repositories/meal_repository.dart": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+    "lib/data/repositories/meal_repository_copying.dart": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de"
+  },
+  "source_unchanged": true
+}

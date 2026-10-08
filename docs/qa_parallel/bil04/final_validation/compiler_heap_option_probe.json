@@ -1,0 +1,30 @@
+[
+  {
+    "DART_VM_OPTIONS": null,
+    "exit_code": 1,
+    "output_length": 20229,
+    "matches": [
+      "abort_on_oom: false (Abort if memory allocation fails - use only with --old-gen-heap-size)",
+      "ignore_unrecognized_flags: false (Ignore unrecognized flags.)",
+      "old_gen_growth_rate: 280 (The max number of pages the old generation can grow at a time)",
+      "old_gen_growth_space_ratio: 20 (The desired maximum percentage of free space after old gen GC)",
+      "old_gen_growth_time_ratio: 3 (The desired maximum percentage of time spent in old gen GC)",
+      "old_gen_heap_size: 30720 (Max size of old gen heap size in MB, or 0 for unlimited,e.g: --old_gen_heap_size=1024 allows up to 1024MB old gen heap)"
+    ],
+    "start": "Flag settings:\nabort_on_oom: false (Abort if memory allocation fails - use only with --old-gen-heap-size)\nadd_readonly_data_symbols: false (Add static symbols f"
+  },
+  {
+    "DART_VM_OPTIONS": "--old_gen_heap_size=768 --print_flags",
+    "exit_code": 1,
+    "output_length": 20229,
+    "matches": [
+      "abort_on_oom: false (Abort if memory allocation fails - use only with --old-gen-heap-size)",
+      "ignore_unrecognized_flags: false (Ignore unrecognized flags.)",
+      "old_gen_growth_rate: 280 (The max number of pages the old generation can grow at a time)",
+      "old_gen_growth_space_ratio: 20 (The desired maximum percentage of free space after old gen GC)",
+      "old_gen_growth_time_ratio: 3 (The desired maximum percentage of time spent in old gen GC)",
+      "old_gen_heap_size: 30720 (Max size of old gen heap size in MB, or 0 for unlimited,e.g: --old_gen_heap_size=1024 allows up to 1024MB old gen heap)"
+    ],
+    "start": "Flag settings:\nabort_on_oom: false (Abort if memory allocation fails - use only with --old-gen-heap-size)\nadd_readonly_data_symbols: false (Add static symbols f"
+  }
+]

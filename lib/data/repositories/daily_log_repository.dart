@@ -209,7 +209,7 @@ class DailyLogRepository {
 
   Future<void> startDay(DateTime date) => save(date: date);
 
-  Future<void> closeDay(DateTime date) async {
+  Future<void> closeDay(DateTime date) => _database.transaction(() async {
     final ledger = await readLedger(date);
     if (ledger.state == DayLifecycleState.notStarted) {
       throw StateError('Start the day before closing it.');
@@ -237,7 +237,7 @@ class DailyLogRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
-  }
+  });
 
   Future<void> reopenDay(DateTime date) async {
     final key = dayKeyFor(date);
@@ -379,5 +379,29 @@ class DailyLogRepository {
 
   Future<void> deleteAll() async {
     await _database.delete(_database.dailyLogs).go();
+  }
+
+  /// Lossless compensation for a confirmed native Coach operation. The caller
+  /// owns the transaction and has compared the complete saved after-snapshot.
+  /// Ordinary editors must use their existing field-specific methods.
+  Future<void> restoreCoachRecord({
+    required DateTime date,
+    required DailyLog? prior,
+  }) async {
+    final key = dayKeyFor(date);
+    if (prior != null && prior.dayKey != key) {
+      throw ArgumentError('Daily compensation date does not match');
+    }
+    final count = prior == null
+        ? await (_database.delete(
+            _database.dailyLogs,
+          )..where((row) => row.dayKey.equals(key))).go()
+        : await (_database.update(_database.dailyLogs)..where(
+                (row) => row.dayKey.equals(key) & row.id.equals(prior.id),
+              ))
+              .write(prior.toCompanion(false));
+    if (count != 1) {
+      throw StateError('Daily record changed during compensation');
+    }
   }
 }

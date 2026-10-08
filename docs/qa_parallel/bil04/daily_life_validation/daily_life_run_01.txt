@@ -1,0 +1,94 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/daily_life_commands_test.dart
+00:00 +0: empty day closes with unknown totals and Undo restores absence
+00:00 +1: close freezes real meal totals; reopen exposes current source totals
+00:00 +2: manual zero sleep is distinct from absent sleep and Undo restores absence
+00:00 +3: sleep write preserves notes, steps, activity and record identity
+00:00 +4: day-note replacement and Undo preserve every unrelated daily field
+00:00 +5: sleep and note reject a day closed by its lifecycle marker
+00:00 +6: sleep and note reject a day closed by its timestamp marker
+00:01 +6 -1: sleep and note reject a day closed by its timestamp marker [E]
+  Expected: throws <Instance of 'StateError'>
+    Actual: <Instance of 'Future<CoachNativeCommit>'>
+     Which: emitted <Instance of 'CoachNativeCommit'>
+  
+  package:matcher                                           expectLater
+  package:flutter_test/src/widget_tester.dart 507:8         expectLater
+  test/parallel/bil04/daily_life_commands_test.dart 172:15  main.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                                _CustomZone.registerUnaryCallback
+  test/parallel/bil04/daily_life_commands_test.dart 165:7   main.<fn>
+  
+00:01 +6 -1: timestamp-only closure is reported closed and explicit reopen clears it
+00:01 +6 -2: timestamp-only closure is reported closed and explicit reopen clears it [E]
+  Expected: 'closed'
+    Actual: 'open'
+     Which: is different.
+            Expected: closed
+              Actual: open
+                      ^
+             Differ at offset 0
+  
+  package:matcher                                          expect
+  package:flutter_test/src/widget_tester.dart 473:18       expect
+  test/parallel/bil04/daily_life_commands_test.dart 184:7  main.<fn>
+  
+00:01 +6 -2: explicit close repairs a legacy closed state missing its timestamp
+00:01 +6 -3: explicit close repairs a legacy closed state missing its timestamp [E]
+  Expected: not null
+    Actual: <null>
+  
+  package:matcher                                          expect
+  package:flutter_test/src/widget_tester.dart 473:18       expect
+  test/parallel/bil04/daily_life_commands_test.dart 203:7  main.<fn>
+  
+00:01 +6 -3: reopening a missing day creates no data or operation journal
+00:01 +7 -3: invalid and future calendar days are rejected before any write
+00:01 +8 -3: invalid sleep duration and empty or oversized notes are rejected
+00:01 +9 -3: daily operation survives repository restart and replay never redoes Undo
+00:01 +10 -3: a later manual daily change rejects both stale commit and stale Undo
+00:01 +11 -3: owner revocation rejects a prepared daily command without a journal
+00:01 +12 -3: Undo permission rejection preserves daily data and committed operation
+00:01 +13 -3: daily write readback exception rolls back actual data and native journal
+00:01 +14 -3: failed compensation readback rolls Undo back with its journal untouched
+00:01 +15 -3: life context missing consent defaults to false in the real repository
+00:01 +16 -3: explicit life-context consent, type and exact trimmed text are persisted
+00:01 +17 -3: life context rejects invalid type, consent, text and date
+00:01 +18 -3: life-context Undo uses the same UUID tombstone without losing other fields
+00:01 +19 -3: life-context restart and replay never add a second record or resurrect Undo
+00:01 +20 -3: life-context write on the wrong date fails real readback and rolls back
+00:01 +20 -4: life-context write on the wrong date fails real readback and rolls back [E]
+  Expected: throws <Instance of 'StateError'>
+    Actual: <Instance of 'Future<CoachNativeCommit>'>
+     Which: emitted <Instance of 'CoachNativeCommit'>
+  
+  package:matcher                                           expectLater
+  package:flutter_test/src/widget_tester.dart 507:8         expectLater
+  test/parallel/bil04/daily_life_commands_test.dart 580:13  main.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                                _CustomZone.registerUnaryCallback
+  test/parallel/bil04/daily_life_commands_test.dart 575:23  main.<fn>
+  
+00:01 +20 -4: life-context wrong UUID cannot be accepted as the requested identity
+00:01 +20 -5: life-context wrong UUID cannot be accepted as the requested identity [E]
+  Expected: throws <Instance of 'StateError'>
+    Actual: <Instance of 'Future<CoachNativeCommit>'>
+     Which: emitted <Instance of 'CoachNativeCommit'>
+  
+  package:matcher                                           expectLater
+  package:flutter_test/src/widget_tester.dart 507:8         expectLater
+  test/parallel/bil04/daily_life_commands_test.dart 627:13  main.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                                _CustomZone.registerUnaryCallback
+  test/parallel/bil04/daily_life_commands_test.dart 622:23  main.<fn>
+  
+00:01 +20 -5: life-context readback exception rolls data and operation journal back
+00:01 +21 -5: owner revocation after life-context insertion rolls back before commit
+00:01 +22 -5: later consent edit blocks stale life-context Undo
+00:02 +23 -5: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/daily_life_commands_test.dart: explicit close repairs a legacy closed state missing its timestamp
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/daily_life_commands_test.dart: life-context write on the wrong date fails real readback and rolls back
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/daily_life_commands_test.dart: life-context wrong UUID cannot be accepted as the requested identity
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/daily_life_commands_test.dart: sleep and note reject a day closed by its timestamp marker
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/daily_life_commands_test.dart: timestamp-only closure is reported closed and explicit reopen clears it

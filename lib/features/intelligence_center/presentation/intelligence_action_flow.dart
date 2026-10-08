@@ -32,22 +32,62 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     if (!executingActionKeys.add(executionKey)) return false;
     final tracksInlineNavigation = const CoachActionPresentationPolicy()
         .isNavigation(action);
+    var writePermissionRevoked = false;
+    void checkWritePermission() {
+      if (writePermissionRevoked ||
+          mounted &&
+              !binding.allows(ref.read(coachActionPermissionModeProvider))) {
+        throw const _CoachHealthWritePermissionDenied();
+      }
+    }
+
+    final permissionSubscription = binding.writesData
+        ? ref.listenManual(coachActionPermissionModeProvider, (previous, next) {
+            if (!binding.allows(next)) writePermissionRevoked = true;
+          })
+        : null;
     var succeeded = false;
     try {
       final preparedMeal = await _prepareCoachMealAction(action);
-      final preparedNative = await _prepareCoachNativeAction(action);
+      var preparedNative = await _prepareCoachNativeAction(action);
       if (!mounted) return false;
       final acceptsTypedConfirmation =
           confirmationAlreadyProvided && !action.destructive;
       final requiresConfirmation = binding.requiresConfirmation(
         ref.read(coachActionPermissionModeProvider),
       );
-      if (requiresConfirmation &&
+      if (action.type == IntelligenceActionType.healthCommand) {
+        final confirmed = await _confirmCoachHealthAction(
+          action,
+          preparedNative!,
+        );
+        if (confirmed == null) return false;
+        checkWritePermission();
+        if (!mapEquals(confirmed.payload, action.payload)) {
+          final reviewedCommand = preparedNative.command!;
+          preparedNativeActions.remove(action.operationId)?.dispose();
+          action = confirmed;
+          preparedNative = await _prepareCoachNativeAction(action);
+          // Only the app-owned checkbox assertion may change after review.
+          // Re-preparing must not silently adopt a concurrently edited draft.
+          if (!healthJsonEquals(
+                reviewedCommand.before.health?['preferences'],
+                preparedNative!.command!.before.health?['preferences'],
+              ) ||
+              reviewedCommand.resolved['draftJson'] !=
+                  preparedNative.command!.resolved['draftJson']) {
+            throw const CoachNativeConflict(
+              CoachNativeConflictReason.staleRecord,
+            );
+          }
+        }
+      } else if (requiresConfirmation &&
           !acceptsTypedConfirmation &&
           !await _confirmAction(action)) {
         return false;
       }
       if (!mounted) return false;
+      if (binding.writesData) checkWritePermission();
       if (!_allowsCoachAction(
         binding,
         ref.read(coachActionPermissionModeProvider),
@@ -118,7 +158,11 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           );
         case IntelligenceActionType.addWater:
         case IntelligenceActionType.addWeight:
-          if (!await _commitPreparedCoachNativeAction(action, preparedNative)) {
+          if (!await _commitPreparedCoachNativeAction(
+            action,
+            preparedNative,
+            checkWritePermission: checkWritePermission,
+          )) {
             return false;
           }
         case IntelligenceActionType.reviewMeal:
@@ -142,29 +186,36 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           await _openCoachRoute('/plans', push: true);
         case IntelligenceActionType.setThemeMode:
           final mode = action.payload['mode']?.toString();
-          if (!const {'dark', 'light', 'system'}.contains(mode)) {
+          if (!const {'dark', 'light', 'system'}.contains(mode) ||
+              action.operationId == null) {
             throw StateError('invalid_theme_mode');
           }
-          final previousMode = ref.read(appSettingsProvider).themeMode;
-          await ref.read(appSettingsProvider.notifier).setThemeMode(mode!);
+          final operation = await _runCoachPermissionBoundWrite(
+            (canWrite) => ref
+                .read(appSettingsProvider.notifier)
+                .commitCoachSetting(
+                  operationId: action.operationId!,
+                  field: 'themeMode',
+                  value: mode!,
+                  checkWritePermission: canWrite,
+                ),
+          );
           if (mounted) {
             _appendToolReceipt(
               tr('App appearance updated.', 'تم تحديث مظهر التطبيق.'),
-              receipt: BilActionReceipt(
-                actionId: action.id,
-                committed: true,
-                completedAt: DateTime.now(),
-                entityType: 'app_setting',
-                entityId: 'theme_mode',
-                before: {'theme_mode': previousMode},
-                after: {'theme_mode': mode},
-                toolId: action.toolId,
-                operationId: action.operationId,
-                undoable: true,
-              ),
-              undo: () => ref
-                  .read(appSettingsProvider.notifier)
-                  .setThemeMode(previousMode),
+              receipt: _coachSettingReceipt(action, operation),
+              undoReadback: (checkWritePermission) async {
+                final undone = await ref
+                    .read(appSettingsProvider.notifier)
+                    .undoCoachSetting(
+                      operationId: operation.operationId,
+                      checkWritePermission: () {
+                        checkWritePermission();
+                        return true;
+                      },
+                    );
+                return _coachSettingReceipt(action, undone, undone: true);
+              },
             );
             _showActionCompleted(tr('Appearance updated.', 'تم تحديث المظهر.'));
           }
@@ -172,36 +223,204 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           final locale = BilLocalePolicy.canonicalSupportedTag(
             action.payload['locale']?.toString(),
           );
-          if (locale == null) throw StateError('invalid_locale');
-          final previousLocale = ref.read(appSettingsProvider).localeCode;
-          await ref.read(appSettingsProvider.notifier).setLocale(locale);
+          if (locale == null || action.operationId == null) {
+            throw StateError('invalid_locale');
+          }
+          final operation = await _runCoachPermissionBoundWrite(
+            (canWrite) => ref
+                .read(appSettingsProvider.notifier)
+                .commitCoachSetting(
+                  operationId: action.operationId!,
+                  field: 'localeCode',
+                  value: locale,
+                  checkWritePermission: canWrite,
+                ),
+          );
           if (mounted) {
             _appendToolReceipt(
               tr('App language updated.', 'تم تحديث لغة التطبيق.'),
-              receipt: BilActionReceipt(
-                actionId: action.id,
-                committed: true,
-                completedAt: DateTime.now(),
-                entityType: 'app_setting',
-                entityId: 'locale',
-                before: {'locale': previousLocale},
-                after: {'locale': locale},
-                toolId: action.toolId,
-                operationId: action.operationId,
-                undoable: true,
-              ),
-              undo: () => ref
-                  .read(appSettingsProvider.notifier)
-                  .setLocale(previousLocale),
+              receipt: _coachSettingReceipt(action, operation),
+              undoReadback: (checkWritePermission) async {
+                final undone = await ref
+                    .read(appSettingsProvider.notifier)
+                    .undoCoachSetting(
+                      operationId: operation.operationId,
+                      checkWritePermission: () {
+                        checkWritePermission();
+                        return true;
+                      },
+                    );
+                return _coachSettingReceipt(action, undone, undone: true);
+              },
             );
             _showActionCompleted(tr('Language updated.', 'تم تحديث اللغة.'));
           }
+        case IntelligenceActionType.setUnitPreference:
+          final dimensionName = action.payload['dimension']?.toString();
+          final value = action.payload['value']?.toString();
+          final dimension = CoachUnitDimension.values
+              .where((item) => item.name == dimensionName)
+              .firstOrNull;
+          if (dimension == null ||
+              value == null ||
+              action.operationId == null) {
+            throw StateError('invalid_unit_preference');
+          }
+          final ownerIsCurrent = _captureCoachSettingsOwnerGuard();
+          final service = CoachUnitSettingsCommandService(
+            ref.read(preferencesRepositoryProvider),
+          );
+          final unitOperation = await _runCoachPermissionBoundWrite(
+            (canWrite) => service.commit(
+              operationId: action.operationId!,
+              dimension: dimension,
+              value: value,
+              isCurrentOwner: ownerIsCurrent,
+              checkWritePermission: canWrite,
+            ),
+          );
+          if (mounted) {
+            BilActionReceipt receipt({DateTime? undoneAt}) => BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: unitOperation.committedAt,
+              entityType: 'unit_preference',
+              entityId: dimension.name,
+              before: {'value': unitOperation.beforeValue},
+              after: {'value': unitOperation.afterValue},
+              toolId: action.toolId,
+              operationId: unitOperation.operationId,
+              undoable: true,
+              undoneAt: undoneAt,
+            );
+            _appendToolReceipt(
+              tr('Display units updated.', 'تم تحديث وحدات العرض.'),
+              receipt: receipt(),
+              undoReadback: (checkWritePermission) async {
+                checkWritePermission();
+                final undone = await service.undo(
+                  operationId: unitOperation.operationId,
+                  isCurrentOwner: ownerIsCurrent,
+                  checkWritePermission: () {
+                    checkWritePermission();
+                    return true;
+                  },
+                );
+                return receipt(undoneAt: undone.undoneAt);
+              },
+            );
+          }
+        case IntelligenceActionType.setReminder:
+          final kindName = action.payload['kind']?.toString();
+          final kind = DailyReminderKind.values
+              .where((item) => item.name == kindName)
+              .firstOrNull;
+          final enabled = action.payload['enabled'];
+          if (kind == null || enabled is! bool) {
+            throw StateError('invalid_reminder');
+          }
+          final ownerIsCurrent = _captureCoachSettingsOwnerGuard();
+          final reminderService = await CoachReminderCommandService.production(
+            languageCode: ref.read(appSettingsProvider).localeCode,
+          );
+          final result = await _runCoachPermissionBoundWrite(
+            (canWrite) => reminderService.commit(
+              kind: kind,
+              enabled: enabled,
+              hour: action.payload['hour'] as int?,
+              minute: action.payload['minute'] as int?,
+              isCurrentOwner: ownerIsCurrent,
+              checkWritePermission: canWrite,
+            ),
+          );
+          if (!result.committed) {
+            if (mounted) {
+              _appendToolReceipt(
+                result.status == CoachReminderCommitStatus.permissionDenied
+                    ? tr(
+                        'Notification permission was not granted, so the reminder was not changed.',
+                        'لم يُمنح إذن الإشعارات، لذلك لم يتغير التذكير.',
+                      )
+                    : tr(
+                        'The reminder could not be verified in the device scheduler. The previous setting was restored.',
+                        'تعذر التحقق من التذكير في مجدول الجهاز. تمت استعادة الإعداد السابق.',
+                      ),
+                verifiedResult: false,
+              );
+            }
+            return false;
+          }
+          if (mounted) {
+            BilActionReceipt receipt({DateTime? undoneAt}) => BilActionReceipt(
+              actionId: action.id,
+              committed: true,
+              completedAt: DateTime.now(),
+              entityType: 'notification_reminder',
+              entityId: kind.name,
+              before: _reminderReceiptMap(result.before),
+              after: _reminderReceiptMap(result.persisted),
+              toolId: action.toolId,
+              operationId: action.operationId,
+              undoable: true,
+              undoneAt: undoneAt,
+            );
+            _appendToolReceipt(
+              tr(
+                'Reminder updated and verified.',
+                'تم تحديث التذكير والتحقق منه.',
+              ),
+              receipt: receipt(),
+              undoReadback: (checkWritePermission) async {
+                checkWritePermission();
+                final undone = await reminderService.commit(
+                  kind: result.before.kind,
+                  enabled: result.before.enabled,
+                  hour: result.before.hour,
+                  minute: result.before.minute,
+                  isCurrentOwner: ownerIsCurrent,
+                  checkWritePermission: () {
+                    checkWritePermission();
+                    return true;
+                  },
+                );
+                if (!undone.committed) {
+                  throw StateError('reminder_undo_readback_failed');
+                }
+                return receipt(undoneAt: DateTime.now());
+              },
+            );
+          }
+        case IntelligenceActionType.reviewMemories:
+          await _openCoachRoute('/decision-memory', push: true);
+        case IntelligenceActionType.prepareLocalExport:
+          final query = <String, String>{};
+          for (final key in const ['from', 'to']) {
+            final value = action.payload[key];
+            if (value is String) query[key] = value;
+          }
+          final datasets = action.payload['datasets'];
+          if (datasets is List) {
+            query['datasets'] = datasets.whereType<String>().join(',');
+          }
+          await _openCoachRoute(
+            Uri(
+              path: '/settings/local-export',
+              queryParameters: query.isEmpty ? null : query,
+            ).toString(),
+            push: true,
+          );
         case IntelligenceActionType.updateGoal:
         case IntelligenceActionType.saveMeasurements:
-          if (!await _commitPreparedCoachNativeAction(action, preparedNative)) {
+          if (!await _commitPreparedCoachNativeAction(
+            action,
+            preparedNative,
+            checkWritePermission: checkWritePermission,
+          )) {
             return false;
           }
         case IntelligenceActionType.quickAddMacros:
+        case IntelligenceActionType.logFoods:
+        case IntelligenceActionType.replaceMealItem:
         case IntelligenceActionType.updateMealItem:
         case IntelligenceActionType.deleteMealItem:
         case IntelligenceActionType.moveMealItem:
@@ -222,23 +441,48 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             );
           }
         case IntelligenceActionType.saveMemory:
-          if (!await _commitPreparedCoachNativeAction(action, preparedNative)) {
+        case IntelligenceActionType.healthCommand:
+          if (!await _commitPreparedCoachNativeAction(
+            action,
+            preparedNative,
+            checkWritePermission: checkWritePermission,
+          )) {
             return false;
           }
+        case IntelligenceActionType.readHealthData:
+          if (!await _executeCoachHealthRead(action)) return false;
       }
       if (action.operationId case final operationId?) {
         completedActionOperationIds.add(operationId);
       }
       succeeded = true;
       return true;
+    } on _CoachHealthWritePermissionDenied {
+      if (mounted) {
+        _appendToolReceipt(
+          tr(
+            'Write permission changed during this action. Review the shield setting and prepare the action again.',
+            'تغير إذن الكتابة أثناء هذا الإجراء. راجع إعداد الدرع وجهّز الإجراء مجددًا.',
+          ),
+          verifiedResult: false,
+        );
+      }
+      return false;
     } on CoachMealConflict catch (error) {
       if (mounted) _showCoachMealConflict(error);
       return false;
     } on CoachNativeConflict catch (error) {
       if (mounted) _showCoachNativeConflict(error);
       return false;
-    } on Object {
+    } on Object catch (error) {
       if (!mounted) return false;
+      if (action.type == IntelligenceActionType.healthCommand) {
+        _appendToolReceipt(
+          _healthActionFailureText(error),
+          verifiedResult: false,
+        );
+        return false;
+      }
       if (tracksInlineNavigation) {
         _updateState(
           () => actionExecutionPhases[executionKey] =
@@ -257,6 +501,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
       );
       return false;
     } finally {
+      permissionSubscription?.close();
       executingActionKeys.remove(executionKey);
       if (mounted && succeeded && tracksInlineNavigation) {
         _updateState(() => actionExecutionPhases.remove(executionKey));
@@ -267,6 +512,72 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
   Future<void> _openCoachRoute(String path, {bool push = false}) => ref.read(
     intelligenceCenterNavigationExecutorProvider,
   )(context, path, push);
+
+  Future<T> _runCoachPermissionBoundWrite<T>(
+    Future<T> Function(bool Function() canWrite) action,
+  ) async {
+    var revoked =
+        ref.read(coachActionPermissionModeProvider) ==
+        CoachActionPermissionMode.readOnly;
+    final subscription = ref.listenManual(coachActionPermissionModeProvider, (
+      previous,
+      next,
+    ) {
+      if (next == CoachActionPermissionMode.readOnly) revoked = true;
+    });
+    bool canWrite() =>
+        !revoked &&
+        mounted &&
+        ref.read(coachActionPermissionModeProvider) !=
+            CoachActionPermissionMode.readOnly;
+    try {
+      if (!canWrite()) throw StateError('coach_write_permission_revoked');
+      return await action(canWrite);
+    } finally {
+      subscription.close();
+    }
+  }
+
+  bool Function() _captureCoachSettingsOwnerGuard() {
+    final database = ref.read(databaseProvider);
+    final preferences = ref.read(preferencesRepositoryProvider);
+    final witness = ref.read(coachNativeOwnerWitnessProvider);
+    final epoch = conversationPersistenceEpoch;
+    return () =>
+        mounted &&
+        conversationPersistenceEpoch == epoch &&
+        preferences.localOwnerId == database.localOwnerId &&
+        (witness == null || witness.readOwner() == database.localOwnerId) &&
+        identical(ref.read(databaseProvider), database) &&
+        identical(ref.read(preferencesRepositoryProvider), preferences);
+  }
+
+  BilActionReceipt _coachSettingReceipt(
+    IntelligenceAction action,
+    AppSettingsOperation operation, {
+    bool undone = false,
+  }) => BilActionReceipt(
+    actionId: action.id,
+    committed: true,
+    completedAt: operation.committedAt,
+    entityType: 'app_setting',
+    entityId: operation.field == 'themeMode' ? 'theme_mode' : 'locale',
+    before: {
+      'value': operation.beforeValue,
+      'revision': operation.beforeRevision,
+    },
+    after: {'value': operation.afterValue, 'revision': operation.afterRevision},
+    toolId: action.toolId,
+    operationId: operation.operationId,
+    undoable: true,
+    undoneAt: undone ? operation.undoneAt : null,
+  );
+
+  Map<String, Object?> _reminderReceiptMap(DailyReminder reminder) => {
+    'enabled': reminder.enabled,
+    'hour': reminder.hour,
+    'minute': reminder.minute,
+  };
 
   Future<void> _retireDurableAction(IntelligenceAction action) async {
     var changed = false;
@@ -312,6 +623,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     Future<void> Function()? undo,
     Future<BilActionReceipt> Function(void Function() checkWritePermission)?
     undoReadback,
+    CoachMealCommit? mealCommit,
     bool verifiedResult = true,
   }) {
     if (!mounted) return;
@@ -338,6 +650,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           receipt: receipt,
           undo: undo,
           undoReadback: undoReadback,
+          mealCommit: mealCommit,
         );
       }
     });

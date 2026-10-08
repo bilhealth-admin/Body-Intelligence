@@ -96,15 +96,8 @@ class DecisionMemoryPage extends ConsumerWidget {
                               ),
                               trailing: IconButton(
                                 tooltip: t('Forget this'),
-                                onPressed: () async {
-                                  await CoachMemoryRepository(
-                                    preferences: ref.read(
-                                      preferencesRepositoryProvider,
-                                    ),
-                                  ).delete(row['id']?.toString() ?? '');
-                                  ref.invalidate(explicitCoachMemoriesProvider);
-                                  ref.invalidate(coachContextSnapshotProvider);
-                                },
+                                onPressed: () =>
+                                    _confirmForgetExplicit(context, ref, row),
                                 icon: const Icon(Icons.close_rounded),
                               ),
                             ),
@@ -253,6 +246,60 @@ class DecisionMemoryPage extends ConsumerWidget {
     'routine' => 'Routine',
     _ => 'Personal fact',
   };
+
+  Future<void> _confirmForgetExplicit(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, Object?> row,
+  ) async {
+    final id = row['id']?.toString() ?? '';
+    final expectedUpdatedAt = row['updatedAt']?.toString() ?? '';
+    final text = row['text']?.toString().trim() ?? '';
+    if (id.isEmpty || expectedUpdatedAt.isEmpty || text.isEmpty) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.strings.text('Forget this memory?')),
+        content: Text(
+          '${context.strings.text('Only the memory you selected will be deleted.')}\n\n$text',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.strings.text('Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.strings.text('Forget')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final preferences = ref.read(preferencesRepositoryProvider);
+    try {
+      await CoachMemoryRepository(preferences: preferences).deleteSelected(
+        [CoachMemorySelection(id: id, expectedUpdatedAt: expectedUpdatedAt)],
+        isCurrentOwner: () =>
+            context.mounted &&
+            identical(ref.read(preferencesRepositoryProvider), preferences),
+      );
+      if (!context.mounted) return;
+      ref.invalidate(explicitCoachMemoriesProvider);
+      ref.invalidate(coachContextSnapshotProvider);
+    } on CoachMemoryVersionConflict {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text(
+              'This memory changed after review. Refresh and select it again.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
 
   Future<void> _confirmForgetUnhelpful(
     BuildContext context,

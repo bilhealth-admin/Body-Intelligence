@@ -12,6 +12,10 @@ const _circleSlugByTitleKey = <String, String>{
 };
 
 String _circleRecordTitle(BuildContext context, CommunityCircle circle) {
+  if (circle is ManagedCommunityCircle &&
+      circle.displayName?.trim().isNotEmpty == true) {
+    return circle.displayName!;
+  }
   final known = _circleSlugByTitleKey[circle.titleCopyKey];
   // A new unmapped server identity keeps its slug. A familiar slug must not
   // override a different title key returned by the current server record.
@@ -19,6 +23,10 @@ String _circleRecordTitle(BuildContext context, CommunityCircle circle) {
 }
 
 String? _circleKnownDescription(BuildContext context, CommunityCircle circle) {
+  if (circle is ManagedCommunityCircle &&
+      circle.description?.trim().isNotEmpty == true) {
+    return circle.description;
+  }
   const suffix = '_body';
   final key = circle.descriptionCopyKey;
   if (!key.endsWith(suffix)) return null;
@@ -32,7 +40,9 @@ String _circleRecordDescription(BuildContext context, CommunityCircle circle) =>
     communityText(context, 'Description unavailable.', 'الوصف غير متاح.');
 
 String _circleRecordRules(BuildContext context, CommunityCircle circle) =>
-    circle.rulesCopyKey == 'community_circle_standard_rules'
+    circle is ManagedCommunityCircle && circle.rules?.trim().isNotEmpty == true
+    ? circle.rules!
+    : circle.rulesCopyKey == 'community_circle_standard_rules'
     ? communityText(
         context,
         'Be respectful, avoid private health details, and follow Community policy.',

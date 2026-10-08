@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dart",
+    "format",
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart",
+    "test/parallel/bil04/health_query_adapter_test.dart",
+    "test/parallel/bil04/health_query_connected_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/repository",
+  "exit_code": 0,
+  "status": "PASS"
+}

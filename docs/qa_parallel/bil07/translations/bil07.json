@@ -1,0 +1,331 @@
+{
+  "role_id": "BIL-07",
+  "source_locale": "en",
+  "runtime_source": "lib/features/community/channels/presentation/community_channels_copy.dart",
+  "key_prefix": "bil07.channels.",
+  "validation": {
+    "en": "AUTHORED_AND_KEY_COVERAGE_PASS",
+    "ar": "AUTHORED_AND_KEY_COVERAGE_PASS",
+    "placeholder_parity": "PASS_STATIC",
+    "flutter_widgets": {
+      "status": "PASS",
+      "passed": 23,
+      "failed": 0,
+      "log": "ui_final_widget_and_capture.log",
+      "languages_exercised": [
+        "en",
+        "ar"
+      ],
+      "arabic_text_scale": 2.0,
+      "arabic_viewport_logical_pixels": [
+        320,
+        568
+      ],
+      "accessibility": [
+        "labeledTapTargetGuideline",
+        "androidTapTargetGuideline"
+      ],
+      "visual_fidelity": "NOT_CLAIMED",
+      "capture_tests": 4,
+      "source_digest": "74578806973fce042512cb1ab7b6335a44b72448d2fc7ab8dfc9e7df2b14387e",
+      "functional_cases": 19,
+      "widget_cases_without_captures": 18,
+      "copy_unit_cases": 1
+    },
+    "captures": {
+      "status": "PASS",
+      "provenance": "Flutter RenderRepaintBoundary.toImage, in-process synthetic repository",
+      "surfaces": [
+        "directory_en_1x",
+        "messages_en_1x",
+        "directory_ar_2x",
+        "messages_ar_2x"
+      ],
+      "visual_reference_match": "NOT_CLAIMED"
+    }
+  },
+  "locales": {
+    "en": {
+      "status": "authored"
+    },
+    "ar": {
+      "status": "authored"
+    },
+    "fr": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "es": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "tr": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "de": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "it": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "pt-BR": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "pt-PT": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "ur": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "fa": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "hi": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "id": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "ms": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "ja": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "ko": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "zh-Hans": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "zh-Hant": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "ru": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "bn": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "vi": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "th": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "pl": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "nl": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    },
+    "uk": {
+      "status": "not_translated",
+      "runtime_fallback": "en"
+    }
+  },
+  "messages": {
+    "bil07.channels.channels": {
+      "en": "Channels",
+      "ar": "القنوات"
+    },
+    "bil07.channels.publicChannels": {
+      "en": "Community channels",
+      "ar": "قنوات المجتمع"
+    },
+    "bil07.channels.publicScope": {
+      "en": "Messages are shared with people who can access this channel.",
+      "ar": "تظهر الرسائل للأشخاص الذين يملكون صلاحية دخول هذه القناة."
+    },
+    "bil07.channels.directoryEmpty": {
+      "en": "No channels are available for your account yet.",
+      "ar": "لا توجد قنوات متاحة لحسابك حاليًا."
+    },
+    "bil07.channels.directoryUnavailable": {
+      "en": "Channels could not be loaded. Check your connection and retry.",
+      "ar": "تعذر تحميل القنوات. تحقق من الاتصال وأعد المحاولة."
+    },
+    "bil07.channels.signIn": {
+      "en": "Sign in to open Community channels.",
+      "ar": "سجّل الدخول لفتح قنوات المجتمع."
+    },
+    "bil07.channels.ownerChanged": {
+      "en": "Your account changed. Return to Community to continue.",
+      "ar": "تغير الحساب. ارجع إلى المجتمع للمتابعة."
+    },
+    "bil07.channels.retry": {
+      "en": "Retry",
+      "ar": "إعادة المحاولة"
+    },
+    "bil07.channels.refresh": {
+      "en": "Refresh",
+      "ar": "تحديث"
+    },
+    "bil07.channels.openChannel": {
+      "en": "Open {channel}",
+      "ar": "فتح {channel}"
+    },
+    "bil07.channels.unreadCount": {
+      "en": "Unread: {count}",
+      "ar": "غير المقروء: {count}"
+    },
+    "bil07.channels.unreadUnknown": {
+      "en": "Unread count unavailable",
+      "ar": "عدد غير المقروء غير متاح"
+    },
+    "bil07.channels.onlineCount": {
+      "en": "Online: {count}",
+      "ar": "المتصلون الآن: {count}"
+    },
+    "bil07.channels.onlineUnknown": {
+      "en": "Online count unavailable",
+      "ar": "عدد المتصلين غير متاح"
+    },
+    "bil07.channels.readOnly": {
+      "en": "Read-only channel",
+      "ar": "قناة للقراءة فقط"
+    },
+    "bil07.channels.channelDisabled": {
+      "en": "This channel is disabled. Messages cannot be sent.",
+      "ar": "هذه القناة معطّلة. لا يمكن إرسال رسائل إليها."
+    },
+    "bil07.channels.accessRestricted": {
+      "en": "Your account cannot access this channel.",
+      "ar": "لا يملك حسابك صلاحية دخول هذه القناة."
+    },
+    "bil07.channels.policyRequired": {
+      "en": "Review the active Community policy before sending a message.",
+      "ar": "راجع سياسة المجتمع الفعالة قبل إرسال رسالة."
+    },
+    "bil07.channels.reviewPolicy": {
+      "en": "Review policy",
+      "ar": "مراجعة السياسة"
+    },
+    "bil07.channels.noMessages": {
+      "en": "No messages in this channel yet.",
+      "ar": "لا توجد رسائل في هذه القناة بعد."
+    },
+    "bil07.channels.historyUnavailable": {
+      "en": "Messages could not be updated. Check your connection and retry.",
+      "ar": "تعذر تحديث الرسائل. تحقق من الاتصال وأعد المحاولة."
+    },
+    "bil07.channels.loadOlder": {
+      "en": "Load older messages",
+      "ar": "تحميل الرسائل الأقدم"
+    },
+    "bil07.channels.loadNewer": {
+      "en": "Load newer messages",
+      "ar": "تحميل الرسائل الأحدث"
+    },
+    "bil07.channels.loadMoreChannels": {
+      "en": "Load more channels",
+      "ar": "تحميل المزيد من القنوات"
+    },
+    "bil07.channels.retryRead": {
+      "en": "Retry read confirmation",
+      "ar": "إعادة تأكيد القراءة"
+    },
+    "bil07.channels.readUnconfirmed": {
+      "en": "Some visible messages could not be confirmed as read.",
+      "ar": "تعذر تأكيد قراءة بعض الرسائل الظاهرة."
+    },
+    "bil07.channels.message": {
+      "en": "Message",
+      "ar": "رسالة"
+    },
+    "bil07.channels.send": {
+      "en": "Send message",
+      "ar": "إرسال الرسالة"
+    },
+    "bil07.channels.retrySend": {
+      "en": "Retry original message",
+      "ar": "إعادة محاولة الرسالة الأصلية"
+    },
+    "bil07.channels.sending": {
+      "en": "Sending…",
+      "ar": "جارٍ الإرسال…"
+    },
+    "bil07.channels.sendFailed": {
+      "en": "The message could not be confirmed. Your text is kept.",
+      "ar": "تعذر تأكيد إرسال الرسالة. احتفظنا بالنص."
+    },
+    "bil07.channels.retryOriginal": {
+      "en": "Retry sends the original message. Any newer draft stays separate.",
+      "ar": "تعيد المحاولة إرسال الرسالة الأصلية. تبقى مسودتك الأحدث منفصلة."
+    },
+    "bil07.channels.originalAttempt": {
+      "en": "Original message",
+      "ar": "الرسالة الأصلية"
+    },
+    "bil07.channels.textLimit": {
+      "en": "Channel messages can contain up to {limit} Unicode characters. Your text has not been shortened.",
+      "ar": "حد رسالة القناة {limit} محرف Unicode. لم يُقصّ نصك."
+    },
+    "bil07.channels.blocked": {
+      "en": "Your Community access is restricted. You cannot send here.",
+      "ar": "الوصول إلى المجتمع مقيّد لحسابك. لا يمكنك الإرسال هنا."
+    },
+    "bil07.channels.permissionsUnknown": {
+      "en": "Channel permissions could not be verified. Sending stays locked.",
+      "ar": "تعذر التحقق من صلاحيات القناة. يبقى الإرسال مقفلًا."
+    },
+    "bil07.channels.refreshPermission": {
+      "en": "Check access again",
+      "ar": "التحقق من الصلاحية مجددًا"
+    },
+    "bil07.channels.connectionOffline": {
+      "en": "Live updates are disconnected. Refresh to check for messages.",
+      "ar": "انقطع التحديث المباشر. حدّث للتحقق من الرسائل."
+    },
+    "bil07.channels.reconnect": {
+      "en": "Reconnect",
+      "ar": "إعادة الاتصال"
+    },
+    "bil07.channels.channelUnavailable": {
+      "en": "This channel is currently unavailable.",
+      "ar": "هذه القناة غير متاحة حاليًا."
+    },
+    "bil07.channels.membershipRequired": {
+      "en": "Channel membership is required to send messages.",
+      "ar": "تحتاج إلى عضوية في القناة لإرسال الرسائل."
+    },
+    "bil07.channels.sent": {
+      "en": "Sent",
+      "ar": "مُرسلة"
+    },
+    "bil07.channels.unread": {
+      "en": "Unread",
+      "ar": "غير مقروءة"
+    },
+    "bil07.channels.loading": {
+      "en": "Loading channels…",
+      "ar": "جارٍ تحميل القنوات…"
+    },
+    "bil07.channels.member": {
+      "en": "Community member",
+      "ar": "عضو في المجتمع"
+    }
+  },
+  "scope_note": "Server-authored channel titles/descriptions and message bodies remain stored content. Privacy-filtered missing author names use localized Community member; no author ID fallback. EN/AR are the only newly authored languages. Existing shared widgets and text-policy copy retain their existing locale support.",
+  "runtime_source_sha256": "223b4b9f1de55cfd4d1c13bb70792cc0f164a86dd9540c43a45d4351843a56f2"
+}

@@ -1,0 +1,30 @@
+{
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "base_file": "supabase/functions/_shared/account_deletion_storage.ts",
+  "base_blob_sha": "f971edd92360a1cc3d450ea57a4d092948de54a9",
+  "base_sha256": "505fe46b057f9f8ad12b18e5fa89316d32d402dae34edd4752e9876230ee9d84",
+  "candidate_sha256": "8e19043cfbb6340ec62271f9b56e2ae418e1f9f088311077d41ca38ac634037b",
+  "proposal_sha256": "ab637fcecac9fd9e374d860a429b97005063e040357f4705f628dbfdbc950828",
+  "runner_sha256": "079f68901e68d3f9adc2dff0195abf86582a272ef4c2df470d31e29ee06fafb3",
+  "node": "v24.19.0",
+  "exit_code": 0,
+  "tests": [
+    {
+      "name": "BASE omission reproduced: circle objects survive old default cleanup",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact one-line overlay visits circle bucket recursively and clears only owner paths",
+      "status": "PASS"
+    },
+    {
+      "name": "Circle Storage removal failure is surfaced instead of authorizing completion",
+      "status": "PASS"
+    },
+    {
+      "name": "Circle removal readback mismatch fails closed",
+      "status": "PASS"
+    }
+  ],
+  "scope": "real BASE function plus exact patch; synthetic Storage API; no Auth deletion/HTTP calls"
+}

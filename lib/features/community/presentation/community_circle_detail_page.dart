@@ -10,6 +10,9 @@ class CommunityCirclePage extends StatefulWidget {
     this.onComposeCircle,
     this.ownerIsCurrent,
     this.ownerChanges,
+    this.managementGatewayFactory,
+    this.circleImagePicker,
+    this.onManagementChanged,
     super.key,
   });
 
@@ -18,6 +21,9 @@ class CommunityCirclePage extends StatefulWidget {
   final Future<void> Function(String slug)? onComposeCircle;
   final ValueGetter<bool>? ownerIsCurrent;
   final Listenable? ownerChanges;
+  final CircleManagementGatewayFactory? managementGatewayFactory;
+  final CommunityPostImagePickerContract? circleImagePicker;
+  final Future<void> Function()? onManagementChanged;
 
   @override
   State<CommunityCirclePage> createState() => _CommunityCirclePageState();
@@ -35,6 +41,15 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
   bool _loadingMore = false;
   bool _refreshing = false;
   int _loadGeneration = 0;
+  CircleManagementController? _management;
+  bool _openingManagement = false;
+
+  CommunityCircle get _record {
+    final managed = _management?.managedCircle;
+    return managed != null && managed.slug == widget.circle.slug
+        ? managed
+        : widget.circle;
+  }
 
   @override
   void initState() {
@@ -52,7 +67,11 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
         oldWidget.circle.joinPolicy != widget.circle.joinPolicy ||
         oldWidget.circle.access != widget.circle.access ||
         !identical(oldWidget.ownerIsCurrent, widget.ownerIsCurrent) ||
-        !identical(oldWidget.ownerChanges, widget.ownerChanges)) {
+        !identical(oldWidget.ownerChanges, widget.ownerChanges) ||
+        !identical(
+          oldWidget.managementGatewayFactory,
+          widget.managementGatewayFactory,
+        )) {
       _owner.dispose();
       _clearVisit();
       _bindOwner();
@@ -62,11 +81,14 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
 
   @override
   void dispose() {
+    _disposeManagement();
     _owner.dispose();
     super.dispose();
   }
 
   void _clearVisit() {
+    _disposeManagement();
+    _openingManagement = false;
     _loadGeneration++;
     _posts.clear();
     _viewCounts.clear();
@@ -75,6 +97,63 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
     _hasMore = false;
     _loadingMore = false;
     _refreshing = false;
+  }
+
+  void _disposeManagement() {
+    _management?.removeListener(_managementChanged);
+    _management?.dispose();
+    _management = null;
+  }
+
+  void _managementChanged() {
+    if (mounted && _owner.isCurrent) setState(() {});
+  }
+
+  Future<void> _openManagement(_CommunityProfileVisit visit) async {
+    if (!visit.isCurrent() || _openingManagement) return;
+    var controller = _management;
+    if (controller == null) {
+      controller = _newCircleManagementController(
+        visit,
+        widget.managementGatewayFactory,
+        circleSlug: widget.circle.slug,
+      );
+      _management = controller;
+      controller.addListener(_managementChanged);
+    }
+    final capturedController = controller;
+    final changed = widget.onManagementChanged;
+    setState(() => _openingManagement = true);
+    try {
+      await visit.run(() async {
+        visit.check();
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (sheetContext) => visit.guard(
+            CircleManagementPanel(
+              controller: capturedController,
+              isCurrent: visit.isCurrent,
+              circle: _record,
+              imagePicker: widget.circleImagePicker,
+              onChanged: () async {
+                if (!visit.isCurrent()) return;
+                await capturedController.loadCircle(visit.targetId);
+                if (!visit.isCurrent()) return;
+                await _refresh();
+                if (visit.isCurrent()) await changed?.call();
+              },
+            ),
+          ),
+        );
+        visit.check();
+      });
+    } on CommunityOwnerOperationCancelled {
+      // All actions retain the exact repository/circle that opened the sheet.
+    } finally {
+      if (visit.isCurrent()) setState(() => _openingManagement = false);
+    }
   }
 
   void _bindOwner() {
@@ -223,12 +302,25 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
     }
     final compose = widget.onComposeCircle;
     final slug = widget.circle.slug;
+    final circle = _record;
     return Scaffold(
       appBar: AppBar(
         leading: const CommunityReturnButton(),
-        title: Text(_circleRecordTitle(context, widget.circle)),
+        title: Text(_circleRecordTitle(context, circle)),
+        actions: [
+          IconButton(
+            key: const Key('bil06-manage-circle'),
+            tooltip: circleManagementText(
+              context,
+              'Manage circles',
+              'إدارة الدوائر',
+            ),
+            onPressed: _openingManagement ? null : () => _openManagement(visit),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+        ],
       ),
-      floatingActionButton: widget.circle.activeMember && compose != null
+      floatingActionButton: circle.activeMember && compose != null
           ? FloatingActionButton.extended(
               onPressed: () =>
                   _composeFromCircle(context, visit, slug, compose),
@@ -267,7 +359,20 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_circleRecordDescription(context, widget.circle)),
+                        if (circle is ManagedCommunityCircle) ...[
+                          CircleVerifiedMedia(
+                            key: const Key('bil06-circle-detail-cover'),
+                            media: circle.cover,
+                            label: circleManagementText(
+                              context,
+                              'Cover image',
+                              'صورة الغلاف',
+                            ),
+                            width: double.infinity,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        Text(_circleRecordDescription(context, circle)),
                         const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
@@ -275,19 +380,19 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                           children: [
                             _CircleMetric(
                               icon: Icons.people_outline_rounded,
-                              value: widget.circle.memberCount,
+                              value: circle.memberCount,
                               label: communityText(context, 'members', 'أعضاء'),
                             ),
                             _CircleMetric(
                               icon: Icons.article_outlined,
-                              value: widget.circle.postCount,
+                              value: circle.postCount,
                               label: communityText(context, 'posts', 'منشورات'),
                             ),
                           ],
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          _circleRecordRules(context, widget.circle),
+                          _circleRecordRules(context, circle),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],

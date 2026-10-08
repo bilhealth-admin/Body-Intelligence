@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--concurrency=1",
+    "--reporter=expanded",
+    "test/parallel/bil04/health_receipt_recovery_test.dart",
+    "test/features/intelligence_center/coach_native_command_repository_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "source_hashes_before": {
+    "lib/features/intelligence_center/services/coach_native_command_repository.dart": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+    "lib/features/intelligence_center/services/coach_native_command_journal.dart": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+    "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+    "test/parallel/bil04/health_receipt_recovery_test.dart": "2c3c4a81af7dc9256fffd80be9b398f00d3e18c21c42289de1d26b6006db85c9"
+  },
+  "started_at_utc": "2026-10-07T09:05:45Z",
+  "exit_code": 0,
+  "elapsed_seconds": 14.89,
+  "source_hashes_after": {
+    "lib/features/intelligence_center/services/coach_native_command_repository.dart": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+    "lib/features/intelligence_center/services/coach_native_command_journal.dart": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+    "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+    "test/parallel/bil04/health_receipt_recovery_test.dart": "2c3c4a81af7dc9256fffd80be9b398f00d3e18c21c42289de1d26b6006db85c9"
+  },
+  "source_stable": true
+}

@@ -12,11 +12,30 @@ void main() {
       'lib/features/intelligence_center/services/local_model_gateway_io.dart',
     ).readAsStringSync();
 
-    expect(BilToolRegistry.tools, hasLength(23));
+    // BIL-04 adds 15 health commands while preserving the original 25 tools.
+    // The local system prompt interpolates the shared Health tool protocol.
+    // Audit that source too so we verify its actual instructions, not merely
+    // the shorter top-level list after the BIL-04 source split.
+    final healthProtocol = File(
+      'lib/features/intelligence_center/app_commands/coach_health_tools.dart',
+    ).readAsStringSync();
+    expect(localGateway, contains(r'$coachHealthToolProtocol'));
+    final localPromptSources = '$localGateway\n$healthProtocol';
+    expect(BilToolRegistry.tools, hasLength(40));
+    // The cloud must admit exactly the same finite allow-list the device
+    // validates. A free-form prompt alone cannot authorize a new action.
+    final cloudAllowList = RegExp(
+      r'const allowedActions = new Set\(\[([\s\S]*?)\]\);',
+    ).firstMatch(server)?.group(1);
+    expect(cloudAllowList, isNotNull);
+    final allowed = RegExp(
+      r'"([a-z_]+)"',
+    ).allMatches(cloudAllowList!).map((match) => match.group(1)!).toSet();
+    expect(allowed, BilToolRegistry.tools.keys.toSet());
     for (final name in BilToolRegistry.tools.keys) {
       expect(server, contains(name), reason: 'server missing $name');
       expect(
-        localGateway,
+        localPromptSources,
         contains(name),
         reason: 'local prompt missing $name',
       );

@@ -12,6 +12,7 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/intell
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_daily_brief.dart';
+import 'package:body_intelligence_log/features/intelligence_center/app_commands/coach_health_brief_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_api.dart';
@@ -105,6 +106,10 @@ Future<GoRouter> mount(
         coachContextSnapshotProvider.overrideWith(
           (ref) async => snapshot ?? CoachContextSnapshot.empty(),
         ),
+        // The chat introduction now reads the bounded health brief, not the
+        // complete analysis snapshot. Feed the same evidence to both views.
+        if (snapshot != null)
+          coachHealthBriefProvider.overrideWith((ref) async => snapshot),
         intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
         intelligenceHealthContextProvider.overrideWith(
           (ref) async => const IntelligenceHealthContext(

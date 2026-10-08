@@ -54,6 +54,19 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
               key: 'community-nav-messages',
             ),
             _item(
+              '/community/channels',
+              Icons.forum_outlined,
+              CommunityChannelsCopy.text(
+                context,
+                CommunityChannelsCopyKey.channels,
+              ),
+              CommunityChannelsCopy.text(
+                context,
+                CommunityChannelsCopyKey.channels,
+              ),
+              key: 'community-nav-channels',
+            ),
+            _item(
               '/community/connections',
               Icons.people_outline_rounded,
               'Friends and requests',

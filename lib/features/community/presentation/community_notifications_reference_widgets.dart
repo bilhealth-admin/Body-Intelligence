@@ -76,6 +76,7 @@ extension _CommunityNotificationsReferenceWidgets
     Key marker,
   ) {
     final scheme = Theme.of(context).colorScheme;
+    final moderationReceipt = _postModerationReceipt(notification);
     final palette = _activityPalette(notification.kind);
     final actorAvatar = notification.actorAvatarUrl;
     final actorDriven = switch (notification.kind) {
@@ -132,19 +133,31 @@ extension _CommunityNotificationsReferenceWidgets
                     : FontWeight.w800,
               ),
             ),
-            subtitle:
-                notification.kind == CommunityNotificationKind.rewardEarned
-                ? Padding(
+            subtitle: moderationReceipt == null
+                ? null
+                : Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: _CommunityRewardNoticePill(
-                      label: communityText(
-                        context,
-                        'Reward added to your AI balance',
-                        'أُضيفت المكافأة إلى رصيد الذكاء الاصطناعي',
-                      ),
+                      label: moderationReceipt.hasConfirmedAiGrant
+                          ? communityText(
+                              context,
+                              '+5 AI tokens confirmed by the server receipt',
+                              '+5 توكنات AI مؤكدة بإيصال الخادم',
+                            )
+                          : moderationReceipt.decision ==
+                                CommunityPostModerationReceiptDecision.approved
+                          ? communityText(
+                              context,
+                              'Approved · no AI token grant was confirmed',
+                              'تم الاعتماد · لم تُؤكد منحة توكنات AI',
+                            )
+                          : communityText(
+                              context,
+                              'Open the post to review the moderation result',
+                              'افتح المنشور لمراجعة نتيجة الإشراف',
+                            ),
                     ),
-                  )
-                : null,
+                  ),
             trailing:
                 notification.kind ==
                     CommunityNotificationKind.collaborationInvite

@@ -759,7 +759,16 @@ void main() {
     await _tapLatestUndo(tester);
     expect(container.read(appSettingsProvider).localeCode, 'en');
     await _tapLatestUndo(tester);
-    expect(container.read(appSettingsProvider).themeMode, 'light');
+    // Undo is revision-fenced globally. Language commit and its Undo both
+    // advanced the revision, so the older appearance Undo must fail closed
+    // rather than rolling back a setting across newer edits.
+    expect(container.read(appSettingsProvider).themeMode, 'dark');
+    expect(
+      AppSettings.fromJson(
+        jsonDecode(settingsStore.value!) as Map<String, dynamic>,
+      ).themeMode,
+      'dark',
+    );
     await _disposeCoach(tester);
   });
 

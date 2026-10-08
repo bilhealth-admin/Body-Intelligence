@@ -1,0 +1,4011 @@
+{
+  "metadata": {
+    "schemaVersion": 1,
+    "role": "BIL-04",
+    "baseSha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+    "format": "Template inventory with per-occurrence exact Dart bindings; not runtime locale catalogs",
+    "sourceMethod": "Dart analyzer AST; local BASE-to-overlay comparison restricts shared strings to new/changed spans; one source-hashed internal SQL literal classified by documented code review",
+    "runtimeSourceStatus": "EN_AR_AUTHORED_AND_EXTRACTED",
+    "humanLinguisticAndRtlVisualReview": "PENDING",
+    "productionTargetCount": 25,
+    "otherLocalesPendingCount": 23,
+    "otherLocales": {
+      "fr": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "es": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "tr": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "de": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "it": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "pt-BR": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "pt-PT": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "ur": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "fa": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "hi": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "id": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "ms": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "ja": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "ko": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "zh-Hans": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "zh-Hant": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "ru": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "bn": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "vi": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "th": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "pl": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "nl": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      },
+      "uk": {
+        "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+        "translated": false,
+        "runtimeFallbackIsNotTranslationEvidence": true
+      }
+    },
+    "localeManifest": "lib/app/localization/bil_locale_rollout_manifest.dart",
+    "localeManifestSha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+    "placeholderConvention": "{p1}, {p2}, ... are positional within each template; source bindings retain nested expressions and locale-specific terms; do not evaluate code",
+    "sourceFiles": [
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_activity_adapter.dart",
+        "mode": "owned",
+        "sourceSha256": "db0307bc430ce7aa4de09561cbbe9643782802cd1c3dc17ae1729c937eab1e99",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+        "mode": "owned",
+        "sourceSha256": "f9ba156f64ad6295a671dac7f5b75102f18f293f6abeb80ce4a239b9fd3119c4",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_daily_commands.dart",
+        "mode": "owned",
+        "sourceSha256": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+        "mode": "owned",
+        "sourceSha256": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+        "mode": "owned",
+        "sourceSha256": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_adapter.dart",
+        "mode": "owned",
+        "sourceSha256": "1ef94c735dcd1f867ad2fa155ac764d2131c93324565f871dd04a088510b18f6",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+        "mode": "owned",
+        "sourceSha256": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+        "mode": "owned",
+        "sourceSha256": "da382bb416bd37b8e92482f2454618df54f34d5dd961aea685f28244aa3a25b6",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+        "mode": "owned",
+        "sourceSha256": "376c25027bb531efb75e968f6cf2bcdc8cf78ac0c7bb03013387dae9656b1346",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+        "mode": "owned",
+        "sourceSha256": "bc666ec3ae25e1184992eedb40931db1aec755017e365442fbf2fa10e7b47e66",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart",
+        "mode": "owned",
+        "sourceSha256": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart",
+        "mode": "owned",
+        "sourceSha256": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_recovery.dart",
+        "mode": "owned",
+        "sourceSha256": "6a328d90d14036260ed919bdd24c7bdc334a8d5d0319c38a3414bc7e97d85828",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+        "mode": "owned",
+        "sourceSha256": "d74ff17ccb9db3793391705662bfe71b357c452d8dd505e50905ba7381df3afb",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart",
+        "mode": "owned",
+        "sourceSha256": "bd96d70af1ba7fe8bd8902d8ad9bdfa17bfeda7a0fe256d7e4455a27a11f1bca",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/coach_plan_adapter.dart",
+        "mode": "owned",
+        "sourceSha256": "551bda60a87f6ff3894f80875271273a008d3fed005799f4703e4ff897919f9a",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/health_query_adapter.dart",
+        "mode": "owned",
+        "sourceSha256": "d00b8dd761387dd95b3732a3c09e3ca7e45690e3a2de1d09fb8cb1579a3f37c1",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/app_commands/health_query_projection.dart",
+        "mode": "owned",
+        "sourceSha256": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+        "mode": "shared_added",
+        "sourceSha256": "b8d6a3b256a03348dd223d5e97660fef7ee71e1e073852f647e93241b16edeb6",
+        "baseSha256": "a19e9dd85affcf06dc70cb2eeffe4506dab455c7b2a1345c1acadb2388b6a4ee",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+        "mode": "shared_added",
+        "sourceSha256": "ae013dc9f637ae0a51a81cc7d853651ad39323cdcbd42f3244ac4f3ed0ac491e",
+        "baseSha256": "9c92bfe155c887b24ee9f9a1658a4a14d2c4eb473223cfa74fe294765cd14b74",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/domain/intelligence_action.dart",
+        "mode": "shared_added",
+        "sourceSha256": "dc8593b2be402f9a47fb1905e73b98231e41675bdfc17b5fc75f0ebef676df59",
+        "baseSha256": "665b90820de77c2682495af46815d327eebca9db432b7ff060bd7efc470ff3b5",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/domain/intelligence_message.dart",
+        "mode": "shared_added",
+        "sourceSha256": "1617e3dca27cc22f4a7dd15d21d5a037383f40f5bda17a63969bff77a25a2b41",
+        "baseSha256": "6ec2f9b8beae8d13295353abc24690b1859fac9420a8f00fa78f8124b96f557a",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+        "mode": "shared_added",
+        "sourceSha256": "c9aff8ba0ec502fc64b149a8920c5fbc6b59582d7ae487bfb881e7c72720a036",
+        "baseSha256": "9c0aa87046c201c0a1dbda91e5154e2bdd8cb755513240d5484199dde782b0e4",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+        "mode": "shared_added",
+        "sourceSha256": "1ea2187e6b81eb301752e1aa3ddbf1b5f29ea0e7cc5508ebfeefc8231da50cfc",
+        "baseSha256": "c3c7c3ad0973f4ebfa0420e0c2e0bdf5fbe1826ac216b8134208d00507d1227c",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+        "mode": "shared_added",
+        "sourceSha256": "309231e02d1fcadebcbc45d638e43b094e1dfe87c8de5723ffe80ebaeb06c545",
+        "baseSha256": "5e7a7876a0d8c2e94736babbbae7e941c716997810001aa3f1a7baa978837de4",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+        "mode": "shared_added",
+        "sourceSha256": "815db53a68ba9bf6c0f160dded4f73df842a5ddb7e7f5205706e3e24a003c17c",
+        "baseSha256": "ddae7c798851c8b673f1c1d537c121aae7ba321877dabbea332d607c5fc21483",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_native_owner.dart",
+        "mode": "shared_added",
+        "sourceSha256": "50ce0b32672526da8f8f03ba6bad60e8a3646db0b58635fc94d3c233a89162cb",
+        "baseSha256": "903ba64725377204acba4239e3c8b1092002b38c79320f6dadb9af59269095b5",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+        "mode": "shared_added",
+        "sourceSha256": "1b2ad30d69753c3f2ca8da8a7ade01ae4e10cb739b2507ad18067c509a072fd7",
+        "baseSha256": "fb91ea7f57f4c03982f92ad09d04b2502b0a3af3dd1fa1846fb4eafd8a2701e6",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery_owner.dart",
+        "mode": "shared_added",
+        "sourceSha256": "ddc6a8a9cdc4bb4098dcc8aac270a4fcb43636ed73e3a6456576ee46d39da9c0",
+        "baseSha256": "eccd1bb986333e8bb8d789f96d3c36c4e2f6f7b1946e1298e0de7037e4949aef",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+        "mode": "shared_added",
+        "sourceSha256": "6ad056a44cd17bc5c41ed6750b385cd3bee4e515b69afea58d196b9543c4d2d1",
+        "baseSha256": "84dc295c05d6d1408e167ac02dbc68dca5723112153d8a76571cae96087f2d34",
+        "userCopyExpected": true
+      },
+      {
+        "path": "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+        "mode": "shared_added",
+        "sourceSha256": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+        "baseSha256": "560016bd51a62ef73a2e807f71e2bf4df2c55a94b6d69a4e16b7defe95e299f8",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/coach_native_command_models.dart",
+        "mode": "shared_added",
+        "sourceSha256": "4ca8f1eeb19a825dfaa1b4053172bfdd238928bf8f3a4ff7a54a4bb08f6aebde",
+        "baseSha256": "a17cf2a7b320cdb411f7957b06ebd5bae3d75c5bf885d8055993e4d228a9c6f0",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+        "mode": "shared_added",
+        "sourceSha256": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+        "baseSha256": "2ef8821981692d9a9ef50ad38884ffe1180f53e4d4c533c919888bd0725e7b8e",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/coach_native_command_snapshot.dart",
+        "mode": "shared_added",
+        "sourceSha256": "6a86dba6fa2281aa35a757d1931343402d25eb17930de070a193fb2792a4407b",
+        "baseSha256": "e517d1383b1b4478b700c36e1fb69353f2c742a06e6da229b1fdfdf5d6e78ef6",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/coach_native_command_undo.dart",
+        "mode": "shared_added",
+        "sourceSha256": "ef6df6740c7aebb2db067311eeaf4f4d9d17cda3a11b5ce7021409ac0ba2ed6c",
+        "baseSha256": "376787bf070b8223e9cbef1f3de56e3e48d3d4936435a8fd587e4789ed4dfe79",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/coach_native_command_writes.dart",
+        "mode": "shared_added",
+        "sourceSha256": "d1b3ee96d3f9eaf0234fabd2f922a85722a2da0e33978918af4917eab27188ac",
+        "baseSha256": "c18a892543506a8c62b68417e397d028ea54eafa0b2e826fd61b41c535f80256",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/local_coach_api.dart",
+        "mode": "shared_added",
+        "sourceSha256": "165f983bf2a060b0842f439dbca3d2de881a1662d8ee9309f7564777ebb5fca6",
+        "baseSha256": "ff7ee164066ad1267f8af8594111ddd9360694be073f989f4f4e57cf3839b215",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+        "mode": "shared_added",
+        "sourceSha256": "44cdec5627466ef5d09dfc2ea0d03d29aa543ef70a3caf501ff09df1ec8a572e",
+        "baseSha256": "bbfb36f10e57c5165875717f52286932916ba3c8c3ec86cef5b727229708a1be",
+        "userCopyExpected": false
+      },
+      {
+        "path": "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+        "mode": "shared_added",
+        "sourceSha256": "c8a8b420eec8800b4d1861cfe10a48c058302b4206ecd0772888244c30f4f237",
+        "baseSha256": "6d04e9ddfdcb7402acc6d0531d8db6440db704170b4eea73d0c42bb4d69dd2b5",
+        "userCopyExpected": false
+      }
+    ],
+    "pairedTemplateCount": 147,
+    "placeholderDiagnostics": [],
+    "unpairedReviewRequired": [],
+    "excludedLiteralClassificationCounts": {
+      "source_directive": 103,
+      "identifier_or_enum": 524,
+      "internal_diagnostic": 96,
+      "data_key": 165,
+      "locale_neutral_format": 24,
+      "catalog_id_or_category": 36,
+      "grammar_or_formatting": 42,
+      "internal_diagnostic_comparison": 6,
+      "grammar_or_argument": 199,
+      "REVIEW_UNPAIRED": 1,
+      "tool_protocol_or_argument": 161,
+      "shared_internal_protocol_or_schema": 32,
+      "reviewed_internal_parameterized_sql": 1
+    },
+    "astAudit": "query_validation/health_strings_ast.json",
+    "rebuildTool": "tool/qa_parallel/bil04/build_health_strings.py",
+    "locale": "en",
+    "manualExcludedLiteralCount": 1,
+    "sourceReviewStatus": "PASS_WITH_DOCUMENTED_INTERNAL_SQL_EXCLUSION",
+    "manualSourceReview": "query_validation/health_strings_manual_review.json",
+    "rawExtractorReport": "query_validation/health_strings_extraction.json",
+    "extractionReplayNote": "The raw extractor remains conservative. Reapply this reviewed exclusion only if the source SHA-256 and exact literal template hash match; otherwise review again."
+  },
+  "strings": {
+    "bil04.00ac79ec8e2f67c8": {
+      "template": "no",
+      "kinds": [
+        "interpolation_choice"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 42,
+          "column": 185,
+          "endLine": 42,
+          "offset": 2078,
+          "length": 4,
+          "dartLiteral": "'no'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 88,
+          "column": 125,
+          "endLine": 88,
+          "offset": 5435,
+          "length": 4,
+          "dartLiteral": "'no'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 390,
+          "column": 149,
+          "endLine": 390,
+          "offset": 14225,
+          "length": 4,
+          "dartLiteral": "'no'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.00af337b4dbe2cd8": {
+      "template": "Record {p1} minutes of {p2} for {p3} as an exercise you performed? This will not increase your calorie budget.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 58,
+          "column": 9,
+          "endLine": 58,
+          "offset": 3249,
+          "length": 170,
+          "dartLiteral": "'Record ${resolved['minutes']} minutes of ${resolved['name'] ?? resolved['workoutId']} for $day as an exercise you performed? This will not increase your calorie budget.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['minutes']",
+            "p2": "resolved['name'] ?? resolved['workoutId']",
+            "p3": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.01db5ba0b1f7dc09": {
+      "template": "Start a {p1}-hour fast now",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 169,
+          "column": 11,
+          "endLine": 169,
+          "offset": 6263,
+          "length": 30,
+          "dartLiteral": "'Start a $hours-hour fast now'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.09530b918666dc93": {
+      "template": "clinician review required",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 242,
+          "column": 7,
+          "endLine": 242,
+          "offset": 13516,
+          "length": 27,
+          "dartLiteral": "'clinician review required'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.0a9fe6fb2997c95e": {
+      "template": "Activated {p1}. Verified weekly targets:\n{p2}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 104,
+          "column": 7,
+          "endLine": 104,
+          "offset": 6469,
+          "length": 99,
+          "dartLiteral": "'Activated ${receipt['name']}. Verified weekly targets:\\n${_week(receipt['effectiveWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['name']",
+            "p2": "_week(receipt['effectiveWeekTargets'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.0ee8d7d7a106d9ba": {
+      "template": "moderate",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 253,
+          "column": 34,
+          "endLine": 253,
+          "offset": 13859,
+          "length": 10,
+          "dartLiteral": "'moderate'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.11f40b7ced399d9f": {
+      "template": "Friday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 272,
+          "column": 7,
+          "endLine": 272,
+          "offset": 14446,
+          "length": 8,
+          "dartLiteral": "'Friday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.1346f145da0ec797": {
+      "template": "Additional exercise records omitted by the limit.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 224,
+          "column": 11,
+          "endLine": 224,
+          "offset": 12857,
+          "length": 51,
+          "dartLiteral": "'Additional exercise records omitted by the limit.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.145c291bd81303c8": {
+      "template": "weight",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 471,
+          "column": 14,
+          "endLine": 471,
+          "offset": 16606,
+          "length": 8,
+          "dartLiteral": "'weight'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.157c413928e240dc": {
+      "template": "Stop the fasting session that began at {p1} and save it in fasting history?",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 50,
+          "column": 9,
+          "endLine": 50,
+          "offset": 2708,
+          "length": 100,
+          "dartLiteral": "'Stop the fasting session that began at ${resolved['startedAtUtc']} and save it in fasting history?'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['startedAtUtc']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.16d430c695bd666e": {
+      "template": "This day has no saved record to reopen.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 460,
+          "column": 9,
+          "endLine": 460,
+          "offset": 17657,
+          "length": 41,
+          "dartLiteral": "'This day has no saved record to reopen.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.17072b189cb13388": {
+      "template": "Full-body strength",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 20,
+          "column": 11,
+          "endLine": 20,
+          "offset": 813,
+          "length": 20,
+          "dartLiteral": "'Full-body strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.18fb4a3db26705b4": {
+      "template": "Record performed exercise",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 16,
+          "column": 24,
+          "endLine": 16,
+          "offset": 764,
+          "length": 27,
+          "dartLiteral": "'Record performed exercise'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.1907cf5997054a28": {
+      "template": "Read recorded weight progress",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 25,
+          "column": 7,
+          "endLine": 25,
+          "offset": 1156,
+          "length": 31,
+          "dartLiteral": "'Read recorded weight progress'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.1bd1eadd4d538e76": {
+      "template": "protein",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 115,
+          "endLine": 288,
+          "offset": 14852,
+          "length": 9,
+          "dartLiteral": "'protein'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.1f622814faa77fd7": {
+      "template": "Confirm action",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 112,
+          "column": 26,
+          "endLine": 112,
+          "offset": 4222,
+          "length": 16,
+          "dartLiteral": "'Confirm action'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.230f7f6ba65f1691": {
+      "template": "fat",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 283,
+          "endLine": 288,
+          "offset": 15020,
+          "length": 5,
+          "dartLiteral": "'fat'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.244fd5b484eef4bf": {
+      "template": "Save life context",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 12,
+          "column": 29,
+          "endLine": 12,
+          "offset": 511,
+          "length": 19,
+          "dartLiteral": "'Save life context'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.280e71411dd49302": {
+      "template": "This day is closed. Reopen it before changing sleep, notes, or exercise. Nothing was saved.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 439,
+          "column": 9,
+          "endLine": 439,
+          "offset": 16821,
+          "length": 93,
+          "dartLiteral": "'This day is closed. Reopen it before changing sleep, notes, or exercise. Nothing was saved.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.2faba8498ed0dc36": {
+      "template": "Continue",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 153,
+          "column": 30,
+          "endLine": 153,
+          "offset": 5957,
+          "length": 10,
+          "dartLiteral": "'Continue'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.30dbf47077556094": {
+      "template": "No active fasting session. Completed sessions: {p1}. Last duration: {p2}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 131,
+          "column": 15,
+          "endLine": 131,
+          "offset": 8053,
+          "length": 146,
+          "dartLiteral": "'No active fasting session. Completed sessions: ${value(result['historyCount'])}. Last duration: ${value(result['lastMinutes'], suffix: ' min')}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(result['historyCount'])",
+            "p2": "value(result['lastMinutes'], suffix: ' min')"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.33010fe15cc5615e": {
+      "template": "Lower-body strength",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 32,
+          "column": 11,
+          "endLine": 32,
+          "offset": 1051,
+          "length": 21,
+          "dartLiteral": "'Lower-body strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.336a51c0b1804a2b": {
+      "template": "activity",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 470,
+          "column": 16,
+          "endLine": 470,
+          "offset": 16570,
+          "length": 10,
+          "dartLiteral": "'activity'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.37e0923e04552f4a": {
+      "template": "progress",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 473,
+          "column": 16,
+          "endLine": 473,
+          "offset": 16689,
+          "length": 10,
+          "dartLiteral": "'progress'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.3a1c57b23dc82975": {
+      "template": "Save {p1} hours of manually recorded sleep for {p2}? Previous value: {p3}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 34,
+          "column": 9,
+          "endLine": 34,
+          "offset": 1324,
+          "length": 126,
+          "dartLiteral": "'Save ${value(resolved['hours'])} hours of manually recorded sleep for $day? Previous value: ${value(before['sleep_hours'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(resolved['hours'])",
+            "p2": "day",
+            "p3": "value(before['sleep_hours'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.3c4af07b95aa7906": {
+      "template": "Saved {p1} hours of manual sleep for {p2}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 80,
+          "column": 7,
+          "endLine": 80,
+          "offset": 4949,
+          "length": 86,
+          "dartLiteral": "'Saved ${value(receipt['sleep_hours'])} hours of manual sleep for ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(receipt['sleep_hours'])",
+            "p2": "receipt['date']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.3e6b712c8df3f1d3": {
+      "template": "Reopen {p1} so its records can be edited?",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 30,
+          "column": 9,
+          "endLine": 30,
+          "offset": 1185,
+          "length": 43,
+          "dartLiteral": "'Reopen $day so its records can be edited?'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.422ee6c81e0c0d6b": {
+      "template": "A fasting session is already active. Stop it or correct its target before starting another.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 445,
+          "column": 9,
+          "endLine": 445,
+          "offset": 17106,
+          "length": 93,
+          "dartLiteral": "'A fasting session is already active. Stop it or correct its target before starting another.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4326cae1d52fe2da": {
+      "template": "Rowing",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 56,
+          "column": 21,
+          "endLine": 56,
+          "offset": 1640,
+          "length": 8,
+          "dartLiteral": "'Rowing'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.451861cd64ce9af4": {
+      "template": "The health action was not completed. No data was saved; review the date and value, then prepare it again.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 465,
+          "column": 7,
+          "endLine": 465,
+          "offset": 17789,
+          "length": 107,
+          "dartLiteral": "'The health action was not completed. No data was saved; review the date and value, then prepare it again.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4a482e0031bfb704": {
+      "template": "Change the active fasting target to {p1} hours",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 195,
+          "column": 11,
+          "endLine": 195,
+          "offset": 7095,
+          "length": 50,
+          "dartLiteral": "'Change the active fasting target to $hours hours'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4a7e20908a519d53": {
+      "template": "insufficient",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 255,
+          "column": 26,
+          "endLine": 255,
+          "offset": 13941,
+          "length": 14,
+          "dartLiteral": "'insufficient'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4b65984dea9b1b09": {
+      "template": "Recorded {p1} minutes of {p2} for {p3}. Your calorie budget is unchanged.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 100,
+          "column": 7,
+          "endLine": 100,
+          "offset": 6124,
+          "length": 152,
+          "dartLiteral": "'Recorded ${receipt['minutes']} minutes of ${_workout(receipt['workoutId'], receipt['name'])} for ${receipt['date']}. Your calorie budget is unchanged.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['minutes']",
+            "p2": "_workout(receipt['workoutId'], receipt['name'])",
+            "p3": "receipt['date']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4bdde0d05a6be1b5": {
+      "template": "Stop fasting",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 14,
+          "column": 24,
+          "endLine": 14,
+          "offset": 634,
+          "length": 14,
+          "dartLiteral": "'Stop fasting'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4d11fefc4864caa2": {
+      "template": "Record {p1}: {p2} minutes on {p3}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 254,
+          "column": 11,
+          "endLine": 254,
+          "offset": 9335,
+          "length": 45,
+          "dartLiteral": "'Record $workoutId: $minutes minutes on $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "workoutId",
+            "p2": "minutes",
+            "p3": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4e1cb43dcb5a27e5": {
+      "template": " g",
+      "kinds": [
+        "unit_suffix",
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 72,
+          "column": 121,
+          "endLine": 72,
+          "offset": 4587,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 93,
+          "endLine": 156,
+          "offset": 9316,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 146,
+          "endLine": 156,
+          "offset": 9369,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 187,
+          "endLine": 156,
+          "offset": 9410,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 179,
+          "endLine": 288,
+          "offset": 14916,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 263,
+          "endLine": 288,
+          "offset": 15000,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 337,
+          "endLine": 288,
+          "offset": 15074,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.4ec87b75643d6f97": {
+      "template": "carbs",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 199,
+          "endLine": 288,
+          "offset": 14936,
+          "length": 7,
+          "dartLiteral": "'carbs'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.501b5bcf6efd1bd1": {
+      "template": "Mobility flow",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 38,
+          "column": 11,
+          "endLine": 38,
+          "offset": 1174,
+          "length": 15,
+          "dartLiteral": "'Mobility flow'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.557f86c8fd2463fc": {
+      "template": "Sunday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 274,
+          "column": 7,
+          "endLine": 274,
+          "offset": 14480,
+          "length": 8,
+          "dartLiteral": "'Sunday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.55b23513ff7e0628": {
+      "template": "Easy run",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 16,
+          "column": 21,
+          "endLine": 16,
+          "offset": 655,
+          "length": 10,
+          "dartLiteral": "'Easy run'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5627ab1a4d8e03d2": {
+      "template": "Reopen day {p1}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 151,
+          "column": 9,
+          "endLine": 151,
+          "offset": 5595,
+          "length": 17,
+          "dartLiteral": "'Reopen day $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.59fcf8c09a5f341f": {
+      "template": "Hiking",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 49,
+          "column": 22,
+          "endLine": 49,
+          "offset": 1460,
+          "length": 8,
+          "dartLiteral": "'Hiking'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5bac01dc18f72d55": {
+      "template": " kg",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 160,
+          "column": 57,
+          "endLine": 160,
+          "offset": 9761,
+          "length": 5,
+          "dartLiteral": "' kg'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5c48783571cd3cc3": {
+      "template": "Reopened {p1}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 76,
+          "column": 7,
+          "endLine": 76,
+          "offset": 4838,
+          "length": 30,
+          "dartLiteral": "'Reopened ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5d32905f48fcfdb3": {
+      "template": "Correct fasting session",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 15,
+          "column": 26,
+          "endLine": 15,
+          "offset": 692,
+          "length": 25,
+          "dartLiteral": "'Correct fasting session'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5d74fb7932844d2e": {
+      "template": "Preview: {p1} ({p2}). No plan was activated and no targets changed.\nAccess: {p3}; safety requirement: {p4}.\nDraft targets:\n{p5}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 113,
+          "column": 9,
+          "endLine": 113,
+          "offset": 6870,
+          "length": 243,
+          "dartLiteral": "'Preview: ${result['name']} (${result['pathwayId']}). No plan was activated and no targets changed.\\nAccess: ${_access(result['access'])}; safety requirement: ${_safety(result['safety'])}.\\nDraft targets:\\n${_week(result['draftWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['name']",
+            "p2": "result['pathwayId']",
+            "p3": "_access(result['access'])",
+            "p4": "_safety(result['safety'])",
+            "p5": "_week(result['draftWeekTargets'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5eae6c81d9cc2042": {
+      "template": "Save day note",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 11,
+          "column": 25,
+          "endLine": 11,
+          "offset": 445,
+          "length": 15,
+          "dartLiteral": "'Save day note'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.5fc8f24d9716cf70": {
+      "template": "Session data is saved. Device reminder scheduling was checked; target reminder scheduled: {p1}. Actual delivery depends on the device.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 390,
+          "column": 7,
+          "endLine": 390,
+          "offset": 14083,
+          "length": 188,
+          "dartLiteral": "'Session data is saved. Device reminder scheduling was checked; target reminder scheduled: ${result.targetReminderScheduled == true ? 'yes' : 'no'}. Actual delivery depends on the device.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result.targetReminderScheduled == true ? 'yes' : 'no'"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.6080f406fb91cb80": {
+      "template": "Review plan activation",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 17,
+          "column": 25,
+          "endLine": 17,
+          "offset": 842,
+          "length": 24,
+          "dartLiteral": "'Review plan activation'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.6555846dccb9126b": {
+      "template": " h",
+      "kinds": [
+        "unit_suffix"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 166,
+          "column": 76,
+          "endLine": 166,
+          "offset": 10494,
+          "length": 4,
+          "dartLiteral": "' h'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.667cddfc4692d311": {
+      "template": "Close day",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 8,
+          "column": 21,
+          "endLine": 8,
+          "offset": 285,
+          "length": 11,
+          "dartLiteral": "'Close day'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.6eca6169dfeb8468": {
+      "template": "Close day {p1}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 138,
+          "column": 9,
+          "endLine": 138,
+          "offset": 5239,
+          "length": 16,
+          "dartLiteral": "'Close day $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.7033c18075ad0335": {
+      "template": "Write permission changed during this action. Review the shield setting and prepare the action again.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+          "scope": "shared_added",
+          "line": 293,
+          "column": 13,
+          "endLine": 293,
+          "offset": 11988,
+          "length": 102,
+          "dartLiteral": "'Write permission changed during this action. Review the shield setting and prepare the action again.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.708698c32c06be35": {
+      "template": "nutrition",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 474,
+          "column": 13,
+          "endLine": 474,
+          "offset": 16724,
+          "length": 11,
+          "dartLiteral": "'nutrition'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.70e956da5a9f0af6": {
+      "template": "open",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 232,
+          "column": 18,
+          "endLine": 232,
+          "offset": 13103,
+          "length": 6,
+          "dartLiteral": "'open'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.721339a346769d88": {
+      "template": "No matching verified local content was found.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 139,
+          "column": 15,
+          "endLine": 139,
+          "offset": 8555,
+          "length": 47,
+          "dartLiteral": "'No matching verified local content was found.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.765dbe71cf79899b": {
+      "template": "manual sleep {p1}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 166,
+          "column": 11,
+          "endLine": 166,
+          "offset": 10429,
+          "length": 72,
+          "dartLiteral": "'manual sleep ${value((row['manual'] as Map?)?['hours'], suffix: ' h')}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value((row['manual'] as Map?)?['hours'], suffix: ' h')"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.76b82a97aeb13f1b": {
+      "template": "Session data is saved. The device has not allowed notifications; no permission setting was changed.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 402,
+          "column": 7,
+          "endLine": 402,
+          "offset": 14918,
+          "length": 101,
+          "dartLiteral": "'Session data is saved. The device has not allowed notifications; no permission setting was changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.7731efe2ae12a5d3": {
+      "template": "verified program access required",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 238,
+          "column": 12,
+          "endLine": 238,
+          "offset": 13306,
+          "length": 34,
+          "dartLiteral": "'verified program access required'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.779b6eb76b74b244": {
+      "template": "high",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 252,
+          "column": 18,
+          "endLine": 252,
+          "offset": 13807,
+          "length": 6,
+          "dartLiteral": "'high'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.783d6a8d5f13b19f": {
+      "template": "Strength circuit",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 71,
+          "column": 11,
+          "endLine": 71,
+          "offset": 1932,
+          "length": 18,
+          "dartLiteral": "'Strength circuit'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.79424d816f7cdc90": {
+      "template": "measurements",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 472,
+          "column": 20,
+          "endLine": 472,
+          "offset": 16645,
+          "length": 14,
+          "dartLiteral": "'measurements'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.796de05f9c6b3ede": {
+      "template": "This plan could not be validated. Open the program and review it again.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 428,
+          "column": 11,
+          "endLine": 428,
+          "offset": 16414,
+          "length": 73,
+          "dartLiteral": "'This plan could not be validated. Open the program and review it again.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.7b9e82fea1c4275b": {
+      "template": "Activate {p1} ({p2})? This replaces the active program and its weekly nutrition targets after the app verifies access.\n\nProposed targets:\n{p3}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 62,
+          "column": 9,
+          "endLine": 62,
+          "offset": 3636,
+          "length": 212,
+          "dartLiteral": "'Activate ${before['name']} (${resolved['pathwayId']})? This replaces the active program and its weekly nutrition targets after the app verifies access.\\n\\nProposed targets:\\n${_week(before['draftWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "before['name']",
+            "p2": "resolved['pathwayId']",
+            "p3": "_week(before['draftWeekTargets'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8097599b5c4250e7": {
+      "template": "waist {p1}, hips {p2}, neck {p3}, chest {p4}, arm {p5}, thigh {p6}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 11,
+          "endLine": 162,
+          "offset": 9817,
+          "length": 274,
+          "dartLiteral": "'waist ${value(row['waistCm'], suffix: ' cm')}, hips ${value(row['hipsCm'], suffix: ' cm')}, neck ${value(row['neckCm'], suffix: ' cm')}, chest ${value(row['chestCm'], suffix: ' cm')}, arm ${value(row['armCm'], suffix: ' cm')}, thigh ${value(row['thighCm'], suffix: ' cm')}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(row['waistCm'], suffix: ' cm')",
+            "p2": "value(row['hipsCm'], suffix: ' cm')",
+            "p3": "value(row['neckCm'], suffix: ' cm')",
+            "p4": "value(row['chestCm'], suffix: ' cm')",
+            "p5": "value(row['armCm'], suffix: ' cm')",
+            "p6": "value(row['thighCm'], suffix: ' cm')"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.80e476e36db41702": {
+      "template": "Session data is saved. Reminder scheduling could not be verified; check fasting reminders in the app.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 407,
+          "column": 7,
+          "endLine": 407,
+          "offset": 15217,
+          "length": 103,
+          "dartLiteral": "'Session data is saved. Reminder scheduling could not be verified; check fasting reminders in the app.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8213cbe47d207bdd": {
+      "template": "recorded exercise",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 262,
+          "column": 39,
+          "endLine": 262,
+          "offset": 14222,
+          "length": 19,
+          "dartLiteral": "'recorded exercise'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.83e141cbf20cce83": {
+      "template": "End the active fast now",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 181,
+          "column": 11,
+          "endLine": 181,
+          "offset": 6574,
+          "length": 25,
+          "dartLiteral": "'End the active fast now'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8495817d35f62e59": {
+      "template": "Read saved {p1}: {p2} to {p3}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 332,
+          "column": 7,
+          "endLine": 332,
+          "offset": 11946,
+          "length": 54,
+          "dartLiteral": "'Read saved ${topicLabel.$1}: $fromKey to $throughKey'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "topicLabel.$1",
+            "p2": "fromKey",
+            "p3": "throughKey"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.85879929de5d052e": {
+      "template": "Reopen day",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 9,
+          "column": 22,
+          "endLine": 9,
+          "offset": 335,
+          "length": 12,
+          "dartLiteral": "'Reopen day'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8841b275a4a1867d": {
+      "template": "This answer uses manual records; device health data was not requested. Manual sleep has no saved start/end time.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 192,
+          "column": 11,
+          "endLine": 192,
+          "offset": 11241,
+          "length": 114,
+          "dartLiteral": "'This answer uses manual records; device health data was not requested. Manual sleep has no saved start/end time.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.89a546883f85d600": {
+      "template": "This plan requires verified program access. Review your subscription before activating it; the plan was not changed.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 416,
+          "column": 11,
+          "endLine": 416,
+          "offset": 15649,
+          "length": 118,
+          "dartLiteral": "'This plan requires verified program access. Review your subscription before activating it; the plan was not changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8ac8db2825de72d9": {
+      "template": "Close {p1} with its recorded nutrition totals? Food changes will require reopening this day.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 26,
+          "column": 9,
+          "endLine": 26,
+          "offset": 953,
+          "length": 94,
+          "dartLiteral": "'Close $day with its recorded nutrition totals? Food changes will require reopening this day.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8e5922a147a8ac7c": {
+      "template": "Thursday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 271,
+          "column": 7,
+          "endLine": 271,
+          "offset": 14428,
+          "length": 10,
+          "dartLiteral": "'Thursday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8f16c65b6a896897": {
+      "template": "Replace the private note for {p1} with:\n{p2}\n\nPrevious note: {p3}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 38,
+          "column": 9,
+          "endLine": 38,
+          "offset": 1624,
+          "length": 106,
+          "dartLiteral": "'Replace the private note for $day with:\\n${resolved['text']}\\n\\nPrevious note: ${value(before['note'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day",
+            "p2": "resolved['text']",
+            "p3": "value(before['note'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.8f9bc5c70c2bb62a": {
+      "template": "Gentle stretching",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 44,
+          "column": 11,
+          "endLine": 44,
+          "offset": 1289,
+          "length": 19,
+          "dartLiteral": "'Gentle stretching'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.903f1cbe0a3fa631": {
+      "template": "Yoga",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 75,
+          "column": 22,
+          "endLine": 75,
+          "offset": 2041,
+          "length": 6,
+          "dartLiteral": "'Yoga'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.90ae43836266c301": {
+      "template": "Save the daily note for {p1}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 106,
+          "column": 11,
+          "endLine": 106,
+          "offset": 4251,
+          "length": 30,
+          "dartLiteral": "'Save the daily note for $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.90db2b4bdc46f93c": {
+      "template": "unavailable",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 256,
+          "column": 13,
+          "endLine": 256,
+          "offset": 13983,
+          "length": 13,
+          "dartLiteral": "'unavailable'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.90eccbb63c861121": {
+      "template": "calories {p1}, protein {p2}, carbs {p3}, fat {p4}; {p5}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 11,
+          "endLine": 156,
+          "offset": 9234,
+          "length": 208,
+          "dartLiteral": "'calories ${value(row['caloriesKcal'])}, protein ${value(row['proteinG'], suffix: ' g')}, carbs ${value(row['carbohydratesG'], suffix: ' g')}, fat ${value(row['fatG'], suffix: ' g')}; ${_state(row['state'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(row['caloriesKcal'])",
+            "p2": "value(row['proteinG'], suffix: ' g')",
+            "p3": "value(row['carbohydratesG'], suffix: ' g')",
+            "p4": "value(row['fatG'], suffix: ' g')",
+            "p5": "_state(row['state'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.917dc478839275db": {
+      "template": "manual steps {p1}",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 217,
+          "column": 9,
+          "endLine": 217,
+          "offset": 12476,
+          "length": 63,
+          "dartLiteral": "'manual steps ${value((row['manualSteps'] as Map?)?['count'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value((row['manualSteps'] as Map?)?['count'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.96f67b9ca73dac20": {
+      "template": "Find verified local content",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 29,
+          "column": 7,
+          "endLine": 29,
+          "offset": 1268,
+          "length": 29,
+          "dartLiteral": "'Find verified local content'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.98ca9dfe9b6b07c2": {
+      "template": "Start a {p1}-hour fasting session at {p2}? Your existing notification setting will be used.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 46,
+          "column": 9,
+          "endLine": 46,
+          "offset": 2395,
+          "length": 138,
+          "dartLiteral": "'Start a ${resolved['targetHours']}-hour fasting session at ${resolved['startedAtUtc']}? Your existing notification setting will be used.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['targetHours']",
+            "p2": "resolved['startedAtUtc']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9abf31f895ad5992": {
+      "template": "closed",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 231,
+          "column": 20,
+          "endLine": 231,
+          "offset": 13067,
+          "length": 8,
+          "dartLiteral": "'closed'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9b8de10fe1e0e22f": {
+      "template": "There is no active fasting session to stop or correct.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 454,
+          "column": 9,
+          "endLine": 454,
+          "offset": 17452,
+          "length": 56,
+          "dartLiteral": "'There is no active fasting session to stop or correct.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9b8df96c532a9271": {
+      "template": " kg/week",
+      "kinds": [
+        "unit_suffix"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 205,
+          "column": 79,
+          "endLine": 205,
+          "offset": 11916,
+          "length": 10,
+          "dartLiteral": "' kg/week'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9bee120411c65834": {
+      "template": "sleep",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 469,
+          "column": 13,
+          "endLine": 469,
+          "offset": 16536,
+          "length": 7,
+          "dartLiteral": "'sleep'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9c1d428ba39cc698": {
+      "template": "not recorded",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 12,
+          "column": 12,
+          "endLine": 12,
+          "offset": 482,
+          "length": 14,
+          "dartLiteral": "'not recorded'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 266,
+          "column": 32,
+          "endLine": 266,
+          "offset": 14324,
+          "length": 14,
+          "dartLiteral": "'not recorded'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9ca4279d9c3c24ad": {
+      "template": "This program requires medical supervision and cannot be activated here. Open the program to review its requirements.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 137,
+          "column": 21,
+          "endLine": 137,
+          "offset": 5236,
+          "length": 118,
+          "dartLiteral": "'This program requires medical supervision and cannot be activated here. Open the program to review its requirements.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.9cb3f6dab310f6cb": {
+      "template": "Monday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 268,
+          "column": 7,
+          "endLine": 268,
+          "offset": 14376,
+          "length": 8,
+          "dartLiteral": "'Monday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.a01e3b7c44262a0e": {
+      "template": "Core strength",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 65,
+          "column": 11,
+          "endLine": 65,
+          "offset": 1824,
+          "length": 15,
+          "dartLiteral": "'Core strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.a295e8f5de18c50c": {
+      "template": "Showing the newest {p1} recorded days.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 184,
+          "column": 11,
+          "endLine": 184,
+          "offset": 11022,
+          "length": 50,
+          "dartLiteral": "'Showing the newest ${rows.length} recorded days.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "rows.length"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.a953c82a2d92ef29": {
+      "template": "Cancel",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 146,
+          "column": 30,
+          "endLine": 146,
+          "offset": 5675,
+          "length": 8,
+          "dartLiteral": "'Cancel'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.ab13f61ea71b2a55": {
+      "template": "Closed {p1}. Calories: {p2}; protein: {p3}. Missing nutrients remain unrecorded.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 72,
+          "column": 7,
+          "endLine": 72,
+          "offset": 4473,
+          "length": 159,
+          "dartLiteral": "'Closed ${receipt['date']}. Calories: ${value(receipt['calories'])}; protein: ${value(receipt['protein'], suffix: ' g')}. Missing nutrients remain unrecorded.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']",
+            "p2": "value(receipt['calories'])",
+            "p3": "value(receipt['protein'], suffix: ' g')"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.adad03dac43e762f": {
+      "template": "Read fasting status",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 19,
+          "column": 24,
+          "endLine": 19,
+          "offset": 970,
+          "length": 21,
+          "dartLiteral": "'Read fasting status'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.b46ad30815d1a93e": {
+      "template": "This program requires medical supervision and cannot be activated from Coach.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 424,
+          "column": 11,
+          "endLine": 424,
+          "offset": 16222,
+          "length": 79,
+          "dartLiteral": "'This program requires medical supervision and cannot be activated from Coach.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.b5b0cca5a0f3e21a": {
+      "template": "Review this plan with a qualified clinician before activating it. The plan was not changed.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 420,
+          "column": 11,
+          "endLine": 420,
+          "offset": 15956,
+          "length": 93,
+          "dartLiteral": "'Review this plan with a qualified clinician before activating it. The plan was not changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.b6fc686ebcce862b": {
+      "template": "yes",
+      "kinds": [
+        "interpolation_choice"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 42,
+          "column": 177,
+          "endLine": 42,
+          "offset": 2070,
+          "length": 5,
+          "dartLiteral": "'yes'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 88,
+          "column": 117,
+          "endLine": 88,
+          "offset": 5427,
+          "length": 5,
+          "dartLiteral": "'yes'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 390,
+          "column": 141,
+          "endLine": 390,
+          "offset": 14217,
+          "length": 5,
+          "dartLiteral": "'yes'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.b7cc5c475015d0ef": {
+      "template": "Find related app health content",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 94,
+          "column": 11,
+          "endLine": 94,
+          "offset": 3869,
+          "length": 33,
+          "dartLiteral": "'Find related app health content'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.bacbc93e4ed337d7": {
+      "template": "Save {p1} hours of manual sleep for {p2}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 216,
+          "column": 11,
+          "endLine": 216,
+          "offset": 7914,
+          "length": 44,
+          "dartLiteral": "'Save $hours hours of manual sleep for $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours",
+            "p2": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.bb4895b063801606": {
+      "template": "Save private life context for {p1}",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 117,
+          "column": 11,
+          "endLine": 117,
+          "offset": 4603,
+          "length": 36,
+          "dartLiteral": "'Save private life context for $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.bd364aad153ba7a4": {
+      "template": "{p1} days have no record. Missing values are not zero.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 177,
+          "column": 9,
+          "endLine": 177,
+          "offset": 10805,
+          "length": 60,
+          "dartLiteral": "'$missing days have no record. Missing values are not zero.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "missing"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.bdee8a50b08ecb89": {
+      "template": " cm",
+      "kinds": [
+        "unit_suffix"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 50,
+          "endLine": 162,
+          "offset": 9856,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 95,
+          "endLine": 162,
+          "offset": 9901,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 140,
+          "endLine": 162,
+          "offset": 9946,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 187,
+          "endLine": 162,
+          "offset": 9993,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 230,
+          "endLine": 162,
+          "offset": 10036,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 277,
+          "endLine": 162,
+          "offset": 10083,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.c0f06c68b47c8d13": {
+      "template": "There is not enough comparable weight evidence for a trend.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 201,
+          "column": 17,
+          "endLine": 201,
+          "offset": 11669,
+          "length": 61,
+          "dartLiteral": "'There is not enough comparable weight evidence for a trend.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.c4e1638466b4175a": {
+      "template": "Dance fitness",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 59,
+          "column": 11,
+          "endLine": 59,
+          "offset": 1721,
+          "length": 15,
+          "dartLiteral": "'Dance fitness'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.c5a5a0f733c77c9a": {
+      "template": "Weight trend: {p1} across {p2} readings. Confidence: {p3}. This does not measure fat or muscle.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 205,
+          "column": 17,
+          "endLine": 205,
+          "offset": 11854,
+          "length": 208,
+          "dartLiteral": "'Weight trend: ${value(analysis['weeklyDirectionKg'], suffix: ' kg/week')} across ${analysis['sampleCount']} readings. Confidence: ${_confidence(analysis['confidence'])}. This does not measure fat or muscle.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(analysis['weeklyDirectionKg'], suffix: ' kg/week')",
+            "p2": "analysis['sampleCount']",
+            "p3": "_confidence(analysis['confidence'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.c62df779591db761": {
+      "template": "Record sleep",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 10,
+          "column": 21,
+          "endLine": 10,
+          "offset": 389,
+          "length": 14,
+          "dartLiteral": "'Record sleep'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.c6c8324d68a33048": {
+      "template": "This category is disabled in Coach context settings. Enable it there before asking Coach to read these records.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 266,
+          "column": 13,
+          "endLine": 266,
+          "offset": 10030,
+          "length": 113,
+          "dartLiteral": "'This category is disabled in Coach context settings. Enable it there before asking Coach to read these records.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.cadc40d5fb517210": {
+      "template": "Please give one clear health action with a date and exact value. For example: “I slept 7 hours yesterday”, “log exercise walk 20 minutes today”, or “show sleep history 7 days”. Nothing was changed.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 69,
+          "column": 11,
+          "endLine": 69,
+          "offset": 2283,
+          "length": 199,
+          "dartLiteral": "'Please give one clear health action with a date and exact value. For example: “I slept 7 hours yesterday”, “log exercise walk 20 minutes today”, or “show sleep history 7 days”. Nothing was changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.cd8e612bfd144237": {
+      "template": "Stair climbing",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 52,
+          "column": 11,
+          "endLine": 52,
+          "offset": 1547,
+          "length": 16,
+          "dartLiteral": "'Stair climbing'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d02e679d9b63e3b0": {
+      "template": "Read the saved fasting session",
+      "kinds": [
+        "parser_action_label"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 293,
+          "column": 9,
+          "endLine": 293,
+          "offset": 10618,
+          "length": 32,
+          "dartLiteral": "'Read the saved fasting session'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d07efa98fbea01cd": {
+      "template": "I have reviewed this plan with a qualified clinician.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 129,
+          "column": 23,
+          "endLine": 129,
+          "offset": 4955,
+          "length": 55,
+          "dartLiteral": "'I have reviewed this plan with a qualified clinician.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d1a14210d79c4a4c": {
+      "template": "Upper-body strength",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 26,
+          "column": 11,
+          "endLine": 26,
+          "offset": 931,
+          "length": 21,
+          "dartLiteral": "'Upper-body strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d44cf074a029599f": {
+      "template": "Save this life-context entry for {p1}?\n{p2}\n\nUse in insights: {p3}. This is separate from Coach memory.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 42,
+          "column": 9,
+          "endLine": 42,
+          "offset": 1902,
+          "length": 219,
+          "dartLiteral": "'Save this life-context entry for ${resolved['occurredAt'].toString().split('T').first}?\\n${resolved['text']}\\n\\nUse in insights: ${resolved['useInInsights'] == true ? 'yes' : 'no'}. This is separate from Coach memory.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['occurredAt'].toString().split('T').first",
+            "p2": "resolved['text']",
+            "p3": "resolved['useInInsights'] == true ? 'yes' : 'no'"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d4dd9fb81475a3ec": {
+      "template": "Swimming",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 48,
+          "column": 22,
+          "endLine": 48,
+          "offset": 1389,
+          "length": 10,
+          "dartLiteral": "'Swimming'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d526b9fb163afe67": {
+      "template": "Read recorded health history",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 21,
+          "column": 7,
+          "endLine": 21,
+          "offset": 1052,
+          "length": 30,
+          "dartLiteral": "'Read recorded health history'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d55ebca94e17139a": {
+      "template": "Fasting stopped and saved in history. Duration: {p1}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 96,
+          "column": 7,
+          "endLine": 96,
+          "offset": 5887,
+          "length": 99,
+          "dartLiteral": "'Fasting stopped and saved in history. Duration: ${value(receipt['lastMinutes'], suffix: ' min')}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(receipt['lastMinutes'], suffix: ' min')"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.d65da4b2a1016975": {
+      "template": "Active fasting session: started {p1}, target {p2} hours. Completed sessions: {p3}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 127,
+          "column": 15,
+          "endLine": 127,
+          "offset": 7697,
+          "length": 153,
+          "dartLiteral": "'Active fasting session: started ${result['startedAtUtc']}, target ${result['targetHours']} hours. Completed sessions: ${value(result['historyCount'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['startedAtUtc']",
+            "p2": "result['targetHours']",
+            "p3": "value(result['historyCount'])"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.db558d14d09acac6": {
+      "template": "Cycling",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 17,
+          "column": 23,
+          "endLine": 17,
+          "offset": 730,
+          "length": 9,
+          "dartLiteral": "'Cycling'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.dbc195aa53b655a4": {
+      "template": " min",
+      "kinds": [
+        "unit_suffix",
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 96,
+          "column": 96,
+          "endLine": 96,
+          "offset": 5976,
+          "length": 6,
+          "dartLiteral": "' min'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 131,
+          "column": 151,
+          "endLine": 131,
+          "offset": 8189,
+          "length": 6,
+          "dartLiteral": "' min'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 221,
+          "column": 97,
+          "endLine": 221,
+          "offset": 12762,
+          "length": 6,
+          "dartLiteral": "' min'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.dc80b957b1761612": {
+      "template": "Nothing is saved until you confirm. You can undo a verified save while its records remain unchanged.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 67,
+          "column": 35,
+          "endLine": 67,
+          "offset": 4167,
+          "length": 102,
+          "dartLiteral": "'Nothing is saved until you confirm. You can undo a verified save while its records remain unchanged.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.dc8b62815d51b6b3": {
+      "template": "The saved fasting session could not be verified.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 120,
+          "column": 11,
+          "endLine": 120,
+          "offset": 7479,
+          "length": 50,
+          "dartLiteral": "'The saved fasting session could not be verified.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.dd12052aea282dad": {
+      "template": "Pilates",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 76,
+          "column": 25,
+          "endLine": 76,
+          "offset": 2112,
+          "length": 9,
+          "dartLiteral": "'Pilates'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.dda1a77304e438af": {
+      "template": "standard program",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 240,
+          "column": 22,
+          "endLine": 240,
+          "offset": 13446,
+          "length": 18,
+          "dartLiteral": "'standard program'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.ded278739e8ae602": {
+      "template": "Tuesday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 269,
+          "column": 7,
+          "endLine": 269,
+          "offset": 14392,
+          "length": 9,
+          "dartLiteral": "'Tuesday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.df74c01154b2547e": {
+      "template": "No records in this period.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 151,
+          "column": 12,
+          "endLine": 151,
+          "offset": 9065,
+          "length": 28,
+          "dartLiteral": "'No records in this period.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.e11d36f014d4ee22": {
+      "template": "Recorded data: {p1} to {p2} ({p3} days).",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 147,
+          "column": 9,
+          "endLine": 147,
+          "offset": 8820,
+          "length": 91,
+          "dartLiteral": "'Recorded data: ${result['from']} to ${result['through']} (${result['queriedDays']} days).'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['from']",
+            "p2": "result['through']",
+            "p3": "result['queriedDays']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.eae667ddf863503a": {
+      "template": "not started",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 233,
+          "column": 24,
+          "endLine": 233,
+          "offset": 13144,
+          "length": 13,
+          "dartLiteral": "'not started'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.eaef0fe1f5bb0ee2": {
+      "template": "Preview plan",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 18,
+          "column": 24,
+          "endLine": 18,
+          "offset": 914,
+          "length": 14,
+          "dartLiteral": "'Preview plan'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.ef0e82a5e920690b": {
+      "template": "Saturday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 273,
+          "column": 7,
+          "endLine": 273,
+          "offset": 14462,
+          "length": 10,
+          "dartLiteral": "'Saturday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.efb006bb0ba5f159": {
+      "template": " kcal",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 89,
+          "endLine": 288,
+          "offset": 14826,
+          "length": 7,
+          "dartLiteral": "' kcal'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f05064bda3a97c4c": {
+      "template": "Session data is saved. Fasting reminders were cancelled on the device.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 394,
+          "column": 7,
+          "endLine": 394,
+          "offset": 14515,
+          "length": 72,
+          "dartLiteral": "'Session data is saved. Fasting reminders were cancelled on the device.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f090ccaae77c3a9b": {
+      "template": "Preview nutrition plan {p1}",
+      "kinds": [
+        "parser_action_label:false_branch"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 278,
+          "column": 15,
+          "endLine": 278,
+          "offset": 10231,
+          "length": 35,
+          "dartLiteral": "'Preview nutrition plan $pathwayId'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "pathwayId"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f0c56d46b6b0771e": {
+      "template": "Breathing recovery",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 79,
+          "column": 11,
+          "endLine": 79,
+          "offset": 2199,
+          "length": 20,
+          "dartLiteral": "'Breathing recovery'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f2c9cdf5eccadea3": {
+      "template": "Fasting session saved: started {p1}; target {p2} hours.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 92,
+          "column": 7,
+          "endLine": 92,
+          "offset": 5634,
+          "length": 100,
+          "dartLiteral": "'Fasting session saved: started ${receipt['startedAtUtc']}; target ${receipt['targetHours']} hours.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['startedAtUtc']",
+            "p2": "receipt['targetHours']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f4113d9187c08f47": {
+      "template": "Saved the life-context entry for {p1}. Use in insights: {p2}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 88,
+          "column": 7,
+          "endLine": 88,
+          "offset": 5317,
+          "length": 125,
+          "dartLiteral": "'Saved the life-context entry for ${receipt['date']}. Use in insights: ${receipt['use_in_insights'] == true ? 'yes' : 'no'}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']",
+            "p2": "receipt['use_in_insights'] == true ? 'yes' : 'no'"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f50adb63ee301735": {
+      "template": "Session data is saved. Its target time has already passed.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 398,
+          "column": 7,
+          "endLine": 398,
+          "offset": 14723,
+          "length": 60,
+          "dartLiteral": "'Session data is saved. Its target time has already passed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f5172d70e7c6ea6a": {
+      "template": "Activate nutrition plan {p1}",
+      "kinds": [
+        "parser_action_label:true_branch"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 277,
+          "column": 15,
+          "endLine": 277,
+          "offset": 10180,
+          "length": 36,
+          "dartLiteral": "'Activate nutrition plan $pathwayId'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "pathwayId"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f5c8dfe20da2311d": {
+      "template": "Saved the private note for {p1}.",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 84,
+          "column": 7,
+          "endLine": 84,
+          "offset": 5167,
+          "length": 48,
+          "dartLiteral": "'Saved the private note for ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.f76aaa372f01c597": {
+      "template": "unavailable",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 234,
+          "column": 13,
+          "endLine": 234,
+          "offset": 13183,
+          "length": 13,
+          "dartLiteral": "'unavailable'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 249,
+          "column": 13,
+          "endLine": 249,
+          "offset": 13701,
+          "length": 13,
+          "dartLiteral": "'unavailable'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fa07e5a99902ca33": {
+      "template": "medical supervision required",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 246,
+          "column": 7,
+          "endLine": 246,
+          "offset": 13621,
+          "length": 30,
+          "dartLiteral": "'medical supervision required'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fa40ff3a2e83ea49": {
+      "template": "Brisk walk",
+      "kinds": [
+        "catalog_display_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 15,
+          "column": 22,
+          "endLine": 15,
+          "offset": 580,
+          "length": 12,
+          "dartLiteral": "'Brisk walk'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fad5e90622d44049": {
+      "template": "free",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 237,
+          "column": 12,
+          "endLine": 237,
+          "offset": 13278,
+          "length": 6,
+          "dartLiteral": "'free'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fb58d6655418924a": {
+      "template": "low",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 254,
+          "column": 17,
+          "endLine": 254,
+          "offset": 13898,
+          "length": 5,
+          "dartLiteral": "'low'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fca228c758a354d7": {
+      "template": "Start fasting",
+      "kinds": [
+        "bilingual_record"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 13,
+          "column": 25,
+          "endLine": 13,
+          "offset": 579,
+          "length": 15,
+          "dartLiteral": "'Start fasting'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fd874f02ddf909fe": {
+      "template": "Wednesday",
+      "kinds": [
+        "weekday_name"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 270,
+          "column": 7,
+          "endLine": 270,
+          "offset": 14409,
+          "length": 11,
+          "dartLiteral": "'Wednesday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    },
+    "bil04.fe96d02d89ccc89e": {
+      "template": "Correct the active fasting session to start at {p1} with a {p2}-hour target?",
+      "kinds": [
+        "translation_call"
+      ],
+      "placeholderParity": true,
+      "sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 54,
+          "column": 9,
+          "endLine": 54,
+          "offset": 2950,
+          "length": 123,
+          "dartLiteral": "'Correct the active fasting session to start at ${resolved['startedAtUtc']} with a ${resolved['targetHours']}-hour target?'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['startedAtUtc']",
+            "p2": "resolved['targetHours']"
+          }
+        }
+      ],
+      "status": "AUTHORED_SOURCE_EXTRACTED"
+    }
+  }
+}

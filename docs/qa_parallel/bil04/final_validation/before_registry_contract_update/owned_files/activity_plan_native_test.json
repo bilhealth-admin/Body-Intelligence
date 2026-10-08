@@ -1,0 +1,39 @@
+{
+  "name": "activity_plan_native_test",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/parallel/bil04/activity_plan_native_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "started_at_utc": "2026-10-07T09:22:15.170001+00:00",
+  "ended_at_utc": "2026-10-07T09:22:21.224788+00:00",
+  "duration_seconds": 6.055,
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "TZ": "Asia/Almaty",
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime_requirement": "Flutter 3.44.6 / Dart 3.12.2, unchanged pubspec.lock",
+    "live_providers": false,
+    "test_data": "synthetic, local host"
+  },
+  "exit_code": 0,
+  "result": "PASS",
+  "passed_test_count": 16,
+  "source_digest_algorithm": "SHA256 of sorted compact JSON path-to-SHA256 map",
+  "source_scope": "lib/test/tool .dart/.py/.sh/.yaml/.json and four root build configuration files",
+  "source_digest_before": "5097d15188508964d143584c9b2d6eb0ab01dcf46cdd955eb4786fdb1f2824cd",
+  "source_digest_after": "5097d15188508964d143584c9b2d6eb0ab01dcf46cdd955eb4786fdb1f2824cd",
+  "source_stable": true,
+  "source_file_count": 2978,
+  "source_manifest": "activity_plan_native_test.sources.json",
+  "changed_during_run": [],
+  "log": "activity_plan_native_test.txt",
+  "log_sha256": "9a72a47435d08d0ff81bf4edded3e5ac912525ec15f25babe3c032eceaf14478",
+  "skips_or_exclusions_added_by_recorder": false
+}

@@ -8,7 +8,11 @@ final class CoachNativeSnapshot {
     this.goal,
     this.measurement,
     List<Map<String, Object?>>? memories,
-  }) : memories = memories == null
+    Map<String, Object?>? health,
+  }) : health = health == null
+           ? null
+           : _freezeNativeJson(health) as Map<String, Object?>,
+       memories = memories == null
            ? null
            : List<Map<String, Object?>>.unmodifiable(
                memories.map(
@@ -22,6 +26,7 @@ final class CoachNativeSnapshot {
   final Goal? goal;
   final BodyMeasurementEntry? measurement;
   final List<Map<String, Object?>>? memories;
+  final Map<String, Object?>? health;
 
   Map<String, Object?>? memory(String id) {
     for (final entry in memories ?? const <Map<String, Object?>>[]) {
@@ -37,12 +42,17 @@ final class CoachNativeSnapshot {
     'goal': goal?.toJson(),
     'measurement': measurement?.toJson(),
     'memories': memories,
+    // Omit absent additions so every pre-BIL-04 journal retains its digest.
+    if (health != null) 'health': health,
   };
 
   factory CoachNativeSnapshot._fromJson(Map<String, dynamic> raw) {
     Map<String, dynamic> row(String key) =>
         Map<String, dynamic>.from(raw[key] as Map);
     return CoachNativeSnapshot(
+      health: raw['health'] == null
+          ? null
+          : Map<String, Object?>.from(raw['health'] as Map),
       water: raw['water'] == null ? null : WaterEntry.fromJson(row('water')),
       weight: raw['weight'] == null
           ? null
@@ -64,6 +74,11 @@ final class CoachNativeSnapshot {
 
   Map<String, Object?> receiptPayload(CoachNativeCommand command) {
     switch (command.kind) {
+      case CoachNativeCommandKind.health:
+        final value = health?['receipt'];
+        return value is Map
+            ? Map<String, Object?>.from(value)
+            : const {'exists': false};
       case CoachNativeCommandKind.water:
         final value = water;
         return value == null
@@ -150,6 +165,16 @@ extension _NativeSnapshotReads on CoachNativeCommandRepository {
     Future<T> read<T>(Future<T> Function() action) =>
         _awaitOwner(action, scope, committed: committed);
     switch (kind) {
+      case CoachNativeCommandKind.health:
+        return CoachNativeSnapshot(
+          health: await read(
+            () => _healthCommands.snapshot(
+              resolved: resolved,
+              checkAccess: () =>
+                  scope.check(database.localOwnerId, committed: committed),
+            ),
+          ),
+        );
       case CoachNativeCommandKind.water:
         return CoachNativeSnapshot(
           water: waterId == null

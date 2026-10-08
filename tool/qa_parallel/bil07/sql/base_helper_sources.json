@@ -1,0 +1,56 @@
+{
+  "fixture_only": true,
+  "production_connected": false,
+  "functions": [
+    {
+      "name": "public.bil_can_use_community",
+      "source_url": "https://github.com/bilhealth-admin/Body-Intelligence/blob/1744788e6bfbdffc3a168bbaf36b3abf3e2c698a/supabase/migrations/20260905160000_admin_community_access_control.sql",
+      "source_blob_sha": "c857f00d7d937ea37d92b37fa9cb20dffa0b8916",
+      "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+      "extraction": "exact function statement, unchanged",
+      "extracted_function_sha256": "ae57672375a32bc5f9f5fe090a1e6f40f098c576ae9b6df81950bffe0e35683f"
+    },
+    {
+      "name": "private.bil_assert_current_community_policy",
+      "source_url": "https://github.com/bilhealth-admin/Body-Intelligence/blob/1744788e6bfbdffc3a168bbaf36b3abf3e2c698a/supabase/migrations/20260908032057_community_policy_v1_activation.sql",
+      "source_blob_sha": "b343a44a9ba4f0034a935e5a2a4392d443d867c3",
+      "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+      "extraction": "exact function statement, unchanged",
+      "extracted_function_sha256": "b7f8cd86afde3927d1fe92cee578127743d81432d81c2a4cffac8bbac0fc9f0f"
+    },
+    {
+      "name": "public.bil_social_member_visible_v2",
+      "source_url": "https://github.com/bilhealth-admin/Body-Intelligence/blob/1744788e6bfbdffc3a168bbaf36b3abf3e2c698a/supabase/migrations/20260908013800_bil_community_social_v2.sql",
+      "source_blob_sha": "08e726231da0167489aa53c096e2e4881090f48b",
+      "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+      "extraction": "exact function statement, unchanged",
+      "extracted_function_sha256": "574ea43082906552c82381d1e81b47d4066d4f9b1f54091a84231b8ff35d4310"
+    },
+    {
+      "name": "public.bil_social_profile_visible_v2",
+      "source_url": "https://github.com/bilhealth-admin/Body-Intelligence/blob/1744788e6bfbdffc3a168bbaf36b3abf3e2c698a/supabase/migrations/20260908013800_bil_community_social_v2.sql",
+      "source_blob_sha": "08e726231da0167489aa53c096e2e4881090f48b",
+      "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+      "extraction": "exact function statement, unchanged",
+      "extracted_function_sha256": "1be20472581b18e031a8486da896725bd34a6747a360d83dafc5636d74afc022"
+    },
+    {
+      "name": "public.bil_assert_community_publish_ready",
+      "source_url": "https://github.com/bilhealth-admin/Body-Intelligence/blob/1744788e6bfbdffc3a168bbaf36b3abf3e2c698a/supabase/migrations/20260908132433_community_policy_client_status_rpc.sql",
+      "source_blob_sha": "e5572d263a8a78cc1f4e8c52c02b62ca110c4dc3",
+      "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+      "extraction": "exact function statement, unchanged",
+      "extracted_function_sha256": "c73dc5251b084083692bdf705b864910f8dd58608b7148c7b62db0f88c44889d"
+    },
+    {
+      "name": "public.bil_community_contact_exchange_violation",
+      "source_url": "https://github.com/bilhealth-admin/Body-Intelligence/blob/1744788e6bfbdffc3a168bbaf36b3abf3e2c698a/supabase/migrations/20260824015152_community_contact_exchange_policy.sql",
+      "source_blob_sha": "cb1e37267c3450003fca5de3200ad7161f60f96a",
+      "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+      "extraction": "exact function statement, unchanged",
+      "extracted_function_sha256": "a6489f8176348d13f1b230545ce98396b28c431cb40558b96c0093d8bbedfffa"
+    }
+  ],
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "fixture_file_sha256": "0860043c679965867c9781411b6deb97bd380c631256f02038b46e0d04fe09cf"
+}

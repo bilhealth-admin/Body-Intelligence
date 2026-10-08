@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../activity_rewards/community_moderation_content_loader.dart';
 import '../domain/community_attention.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_composer_persistence.dart';
@@ -53,6 +54,15 @@ class CommunityRepository
 
   @override
   SupabaseClient get communitySocialClient => _client;
+
+  /// Server-authorized review enrichment; overridable by synthetic QA
+  /// repositories without changing production moderator permissions.
+  Future<List<CommunityPost>> hydrateModerationReviewContents(
+    List<CommunityPost> posts,
+  ) => CommunityModerationContentLoader.hydrate(
+    client: communitySocialClient,
+    posts: posts,
+  );
 
   @override
   CommunityPostStoreContract get communityPostStore => _posts;

@@ -1,0 +1,60 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart
+00:00 +0 -1: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1009:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 733:19                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 726:19                      _CustomZone.run
+  dart:async/zone.dart 625:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 666:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+00:00 +0 -1: sleep read uses only requested days and never builds full context or calls model
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: [DateTime:2026-10-07 00:00:00.000, DateTime:2026-10-06 00:00:00.000]
+  Actual: [
+            DateTime:2026-10-07 12:00:00.000,
+            DateTime:2026-10-06 12:00:00.000,
+            DateTime:2026-10-07 00:00:00.000
+          ]
+   Which: at location [0] is DateTime:<2026-10-07 12:00:00.000> instead of DateTime:<2026-10-07
+00:00:00.000>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart:310:11)
+<asynchronous suspension>
+#5      _withHealthCoach (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_fixture.dart:24:5)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart:289:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart line 310
+The test description was:
+  sleep read uses only requested days and never builds full context or calls model
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:02 +0 -2: sleep read uses only requested days and never builds full context or calls model [E]
+  Test failed. See exception logs above.
+  The test description was: sleep read uses only requested days and never builds full context or calls model
+  
+00:02 +0 -2: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart
+  /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: sleep read uses only requested days and never builds full context or calls model

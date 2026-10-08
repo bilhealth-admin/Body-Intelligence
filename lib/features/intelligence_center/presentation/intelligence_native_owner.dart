@@ -52,6 +52,7 @@ extension _CoachNativePreparation on _IntelligenceCenterPageState {
           IntelligenceActionType.updateGoal,
           IntelligenceActionType.saveMeasurements,
           IntelligenceActionType.saveMemory,
+          IntelligenceActionType.healthCommand,
         }.contains(action.type) ||
         action.type == IntelligenceActionType.addWeight &&
             action.payload['weightKg'] == null) {
@@ -83,6 +84,9 @@ extension _CoachNativePreparation on _IntelligenceCenterPageState {
     final goals = ref.read(goalRepositoryProvider);
     final measurements = ref.read(bodyMeasurementRepositoryProvider);
     final preferences = ref.read(preferencesRepositoryProvider);
+    final daily = ref.read(dailyLogRepositoryProvider);
+    final life = ref.read(lifeContextRepositoryProvider);
+    final dietCommand = ref.read(dietPlanCommandProvider);
     if (!identical(preferences, conversationPreferences) ||
         preferences.localOwnerId != database.localOwnerId) {
       throw const CoachNativeConflict(CoachNativeConflictReason.ownerChanged);
@@ -103,6 +107,9 @@ extension _CoachNativePreparation on _IntelligenceCenterPageState {
             identical(ref.read(weightRepositoryProvider), weights) &&
             identical(ref.read(userProfileRepositoryProvider), profiles) &&
             identical(ref.read(goalRepositoryProvider), goals) &&
+            identical(ref.read(dailyLogRepositoryProvider), daily) &&
+            identical(ref.read(lifeContextRepositoryProvider), life) &&
+            identical(ref.read(dietPlanCommandProvider), dietCommand) &&
             identical(
               ref.read(bodyMeasurementRepositoryProvider),
               measurements,
@@ -121,6 +128,7 @@ extension _CoachNativePreparation on _IntelligenceCenterPageState {
         goals: goals,
         measurements: measurements,
         preferences: preferences,
+        healthCommands: _newCoachHealthAdapters(database),
       ),
       memoryRepository: CoachMemoryRepository(preferences: preferences),
       scope: scope,

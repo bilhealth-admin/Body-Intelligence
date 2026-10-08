@@ -11,6 +11,9 @@ extension _CoachMemoryOwner on CoachMemoryRepository {
       throw const CommunityOwnerOperationCancelled();
     }
     if (client == null) {
+      if (isCurrentOwner?.call() == false) {
+        throw const CommunityOwnerOperationCancelled();
+      }
       final result = await action();
       if (isCurrentOwner?.call() == false) {
         throw const CommunityOwnerOperationCancelled();

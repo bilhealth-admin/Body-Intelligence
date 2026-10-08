@@ -1,10 +1,12 @@
 import '../domain/bil_tool_registry.dart';
 import '../domain/intelligence_action.dart';
+import '../settings_commands/coach_settings_tool_catalog.dart';
 import 'local_coach_command_parser.dart';
 import 'local_model_gateway.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../intelligence_locale_copy.dart';
 import 'coach_intent_normalizer.dart';
+import '../app_commands/coach_health_tools.dart';
 
 class LocalCoachRequest {
   const LocalCoachRequest({
@@ -165,6 +167,32 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         ? Map<String, Object?>.from(raw['arguments']! as Map)
         : const <String, Object?>{};
     String tr(String en, String ar) => intelligenceTextFor(locale, en, ar);
+    if (name != null) {
+      final localLabel = switch (name) {
+        'set_unit_preference' => tr(
+          'Change display units',
+          'تغيير وحدات العرض',
+        ),
+        'set_reminder' => tr('Update reminder', 'تحديث التذكير'),
+        'review_memories' => tr(
+          'Review saved memories',
+          'مراجعة الذكريات المحفوظة',
+        ),
+        'prepare_local_export' => tr(
+          'Review local export',
+          'مراجعة التصدير المحلي',
+        ),
+        _ => null,
+      };
+      if (localLabel != null) {
+        final local = const CoachSettingsToolCatalog().createAction(
+          name: name,
+          arguments: arguments,
+          label: localLabel,
+        );
+        if (local != null) return local;
+      }
+    }
     final legacy = switch (name) {
       'navigate' => IntelligenceAction(
         id: name!,
@@ -329,6 +357,15 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         ),
       _ => null,
     };
+    if (name != null &&
+        (coachHealthWriteToolIds.contains(name) ||
+            coachHealthReadToolIds.contains(name))) {
+      return registry.createAction(
+        name: name,
+        arguments: arguments,
+        label: coachHealthActionLabel(name, locale),
+      );
+    }
     if (name == null || legacy == null) return null;
     return registry.createAction(
       name: name,

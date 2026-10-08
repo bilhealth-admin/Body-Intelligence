@@ -1,0 +1,14 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/nutrition/coach_meal_quantity_unit_test.dart
+00:00 +0: gram command rejects entry without changing item or journal
+00:00 +1: explicit stored-unit edits still work for entry and Undo
+00:00 +2: gram command rejects ml without changing item or journal
+00:00 +3: explicit stored-unit edits still work for ml and Undo
+00:00 +4: gram command rejects serving without changing item or journal
+00:00 +5: explicit stored-unit edits still work for serving and Undo
+00:00 +6: gram command rejects item without changing item or journal
+00:00 +7: explicit stored-unit edits still work for item and Undo
+00:00 +8: gram command rejects cup without changing item or journal
+00:00 +9: explicit stored-unit edits still work for cup and Undo
+00:00 +10: gram quantity freezes unit meaning in operation digest
+00:00 +11: gram edit never reads a newer catalog conversion
+00:00 +12: All tests passed!

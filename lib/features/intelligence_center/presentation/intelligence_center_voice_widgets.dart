@@ -40,21 +40,23 @@ class _LiveVoiceTranscript extends StatelessWidget {
               children: [
                 _VoiceListeningWave(color: scheme.primary, compact: true),
                 const SizedBox(width: 7),
-                Text(
-                  liveCall
-                      ? intelligenceText(
-                          context,
-                          'Live call transcript · pause to send',
-                          'نص المكالمة · اسكت للإرسال',
-                        )
-                      : intelligenceText(
-                          context,
-                          'Writing your words · pause to send',
-                          'أكتب كلامك · اسكت للإرسال',
-                        ),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: scheme.primary,
-                    fontWeight: FontWeight.w800,
+                Flexible(
+                  child: Text(
+                    liveCall
+                        ? intelligenceText(
+                            context,
+                            'Live call transcript · pause to send',
+                            'نص المكالمة · اسكت للإرسال',
+                          )
+                        : intelligenceText(
+                            context,
+                            'Writing your words · pause to send',
+                            'أكتب كلامك · اسكت للإرسال',
+                          ),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],

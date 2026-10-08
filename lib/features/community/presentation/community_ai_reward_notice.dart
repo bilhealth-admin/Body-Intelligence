@@ -39,8 +39,8 @@ class CommunityAiRewardNotice extends StatelessWidget {
             Text(
               communityText(
                 context,
-                'Eligible posts earn +5 AI tokens after moderator approval. AI tokens are not BIL Gold and cannot be cashed out. Opening or saving a draft earns nothing.',
-                'المنشورات المؤهلة تكسب +5 توكنات AI بعد موافقة المشرف. توكنات AI ليست BIL Gold ولا تُستبدل بنقود. فتح المسودة أو حفظها لا يمنح مكافأة.',
+                'An eligible approved post may earn +5 AI tokens only when the server reward receipt confirms the grant. Approval alone does not guarantee a token award; daily limits may apply. AI tokens are not BIL Gold and cannot be cashed out. Opening or saving a draft earns nothing.',
+                'قد يكسب المنشور المؤهل بعد اعتماده +5 توكنات AI فقط عندما يؤكد إيصال المكافأة من الخادم المنحة. الاعتماد وحده لا يضمن منح توكنات، وقد تنطبق حدود يومية. توكنات AI ليست BIL Gold ولا تُستبدل بنقود. فتح المسودة أو حفظها لا يمنح مكافأة.',
               ),
               style: TextStyle(color: scheme.onPrimaryContainer, height: 1.4),
             ),

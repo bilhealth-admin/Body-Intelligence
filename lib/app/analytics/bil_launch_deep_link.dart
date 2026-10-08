@@ -41,7 +41,13 @@ final class BilLaunchDeepLink {
     final route = segments.length == 1
         ? _routes[segments.single.toLowerCase()]
         : null;
+    // Public member invitations must be validated as HTTPS before any
+    // legacy web-to-bil alias conversion (which would discard the host).
+    final memberInvitation = isWeb && uri.path == '/download'
+        ? CommunityDeepLink.routeFor(uri)
+        : null;
     final normalizedRoute =
+        memberInvitation ??
         route ??
         (isCustom
             ? CommunityDeepLink.routeFor(uri)

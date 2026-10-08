@@ -1,0 +1,12 @@
+{
+  "original_source_digest": "5097d15188508964d143584c9b2d6eb0ab01dcf46cdd955eb4786fdb1f2824cd",
+  "result": "BASE_REGISTRY_COUNT_CONTRACT_FAILURE",
+  "original_expected_tool_count": 23,
+  "actual_tool_count": 38,
+  "reason": "BIL-04 intentionally adds 15 health capabilities. Replace count-only assertion with an independently enumerated exact 38-name allow-list. All other BASE checks remain unchanged.",
+  "proposed_test": "test/features/intelligence_center/bil_tool_registry_test.dart",
+  "delivery": "integration-proposal.patch only; primary BASE test remains unchanged",
+  "skips_filters_timeouts_relaxed": false,
+  "failure_report": "nearby_files/bil_tool_registry_test.json",
+  "failure_log": "nearby_files/bil_tool_registry_test.txt"
+}

@@ -1,0 +1,40 @@
+{
+  "name": "bil_tool_registry_test",
+  "command_argv": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--frontend-server-starter-path=/workspace/scratch/ada7a97de764/runtime/compiler_heap_starter.dart",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "--concurrency=1",
+    "test/features/intelligence_center/bil_tool_registry_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "started_at_utc": "2026-10-07T09:44:32.317046+00:00",
+  "ended_at_utc": "2026-10-07T09:44:35.690906+00:00",
+  "duration_seconds": 3.374,
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "TZ": "Asia/Almaty",
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime_requirement": "Flutter 3.44.6 / Dart 3.12.2, unchanged pubspec.lock",
+    "live_providers": false,
+    "test_data": "synthetic, local host"
+  },
+  "exit_code": 0,
+  "result": "PASS",
+  "passed_test_count": 7,
+  "source_digest_algorithm": "SHA256 of sorted compact JSON path-to-SHA256 map",
+  "source_scope": "lib/test/tool .dart/.py/.sh/.yaml/.json and four root build configuration files",
+  "source_digest_before": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "source_digest_after": "93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65",
+  "source_stable": true,
+  "source_file_count": 2978,
+  "source_manifest": "bil_tool_registry_test.sources.json",
+  "changed_during_run": [],
+  "log": "bil_tool_registry_test.txt",
+  "log_sha256": "5f19212c0ba6d56902ca1c7660754d723c0cba7e47615d3e21a14809e3fb004f",
+  "skips_or_exclusions_added_by_recorder": false
+}

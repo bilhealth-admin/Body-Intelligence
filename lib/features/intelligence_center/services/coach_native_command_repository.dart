@@ -15,6 +15,8 @@ import '../../../data/repositories/water_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../domain/bil_tool_registry.dart';
 import '../domain/coach_action_admission.dart';
+import '../app_commands/coach_health_adapter.dart';
+import '../app_commands/coach_health_tools.dart';
 import 'coach_memory_repository.dart';
 
 part 'coach_native_command_models.dart';
@@ -22,6 +24,7 @@ part 'coach_native_command_snapshot.dart';
 part 'coach_native_command_journal.dart';
 part 'coach_native_command_writes.dart';
 part 'coach_native_command_undo.dart';
+part '../app_commands/coach_health_receipt_recovery.dart';
 
 /// The native Coach owns one transaction, one immutable proposal and one
 /// durable readback. Ordinary editors keep their existing repository APIs.
@@ -34,6 +37,7 @@ final class CoachNativeCommandRepository {
     GoalRepository? goals,
     BodyMeasurementRepository? measurements,
     PreferencesRepository? preferences,
+    this.healthCommands,
   }) : water = water ?? WaterRepository(database),
        weights = weights ?? WeightRepository(database),
        profiles = profiles ?? UserProfileRepository(database),
@@ -48,6 +52,10 @@ final class CoachNativeCommandRepository {
   final GoalRepository goals;
   final BodyMeasurementRepository measurements;
   final PreferencesRepository preferences;
+  final CoachHealthCommandAdapter? healthCommands;
+
+  CoachHealthCommandAdapter get _healthCommands =>
+      healthCommands ?? (throw StateError('Health adapters are unavailable'));
 
   Future<CoachNativeCommand> prepare({
     required String toolId,
@@ -84,7 +92,7 @@ final class CoachNativeCommandRepository {
         }
         return prior.command;
       }
-      final resolved = <String, Object?>{
+      var resolved = <String, Object?>{
         ...validated,
         'occurredAt':
             (kind == CoachNativeCommandKind.water
@@ -97,6 +105,18 @@ final class CoachNativeCommandRepository {
                     : now)
                 .toIso8601String(),
       };
+      if (kind == CoachNativeCommandKind.health) {
+        resolved = await _awaitOwner(
+          () => _healthCommands.resolve(
+            toolId: toolId,
+            operationId: operationId,
+            arguments: validated,
+            now: now,
+            checkAccess: () => scope.check(database.localOwnerId),
+          ),
+          scope,
+        );
+      }
       if (kind == CoachNativeCommandKind.weight ||
           kind == CoachNativeCommandKind.measurements) {
         resolved['date'] = validated['date'] ?? dayKeyFor(now);
@@ -137,12 +157,31 @@ final class CoachNativeCommandRepository {
   Future<CoachNativeCommit> commit({
     required CoachNativeCommand command,
     required CoachNativeOwnerScope scope,
+    void Function()? checkWritePermission,
+    String? healthRecoveryConversationId,
   }) async {
+    final recovery = healthRecoveryConversationId == null
+        ? null
+        : _HealthReceiptRecovery.pending(healthRecoveryConversationId);
+    if (recovery != null && command.kind != CoachNativeCommandKind.health) {
+      throw ArgumentError(
+        'Receipt recovery is only available for health commands',
+      );
+    }
+    checkWritePermission?.call();
     var replayed = false;
     await database.transaction(() async {
+      checkWritePermission?.call();
       final prior = await _readJournal(command.operationId, scope);
       if (prior != null) {
         _requireMatchingOperation(prior, command);
+        if (recovery != null &&
+            prior.healthReceiptRecovery?.conversationId !=
+                recovery.conversationId) {
+          throw const CoachNativeConflict(
+            CoachNativeConflictReason.operationMismatch,
+          );
+        }
         replayed = true;
         return;
       }
@@ -150,15 +189,18 @@ final class CoachNativeCommandRepository {
       if (!_sameNativeSnapshot(command.before, before)) {
         throw const CoachNativeConflict(CoachNativeConflictReason.staleRecord);
       }
+      checkWritePermission?.call();
       final after = await _apply(command, before, scope);
       final journal = _NativeJournal(
         command: command,
         ownerScope: LocalDatabaseScope.keyForOwner(database.localOwnerId),
         committedAt: DateTime.now(),
         after: after,
+        healthReceiptRecovery: recovery,
       );
       await _writeJournal(journal, scope);
       scope.check(database.localOwnerId);
+      checkWritePermission?.call();
     });
     return _commitReadback(command.operationId, scope, replayed: replayed);
   }
@@ -171,6 +213,22 @@ final class CoachNativeCommandRepository {
     required CoachNativeOwnerScope scope,
   }) =>
       _operationReadback(operationId, scope, replayed: false, committed: false);
+
+  /// Returns only unacknowledged health journals for this exact conversation.
+  /// This bounded discovery never applies or repairs a command.
+  Future<List<String>> listPendingHealthReceiptOperationIds({
+    required CoachNativeOwnerScope scope,
+    required String conversationId,
+    int limit = 16,
+  }) => _listPendingHealthReceiptOperationIds(scope, conversationId, limit);
+
+  /// Acknowledges an independently verified, durable conversation receipt.
+  /// Only existing journal metadata changes; health rows and Undo do not.
+  Future<void> markHealthReceiptPersisted({
+    required String operationId,
+    required CoachNativeOwnerScope scope,
+    required String conversationId,
+  }) => _markHealthReceiptPersisted(operationId, scope, conversationId);
 
   Future<CoachNativeCommit> undo({
     required String operationId,
@@ -201,7 +259,10 @@ final class CoachNativeCommandRepository {
         scope,
         waterId: journal.after.water?.id,
       );
-      if (!_sameNativeSnapshot(journal.after, current)) {
+      final superseded =
+          journal.command.kind == CoachNativeCommandKind.health &&
+          await _laterOverlappingHealthOperation(journal, scope);
+      if (superseded || !_sameNativeSnapshot(journal.after, current)) {
         throw const CoachNativeConflict(CoachNativeConflictReason.staleRecord);
       }
       checkWritePermission?.call();

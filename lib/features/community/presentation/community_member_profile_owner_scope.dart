@@ -104,6 +104,7 @@ extension _CommunityMemberProfileOwnerScope
     _coverUrl = null;
     _posts.clear();
     _reviews.clear();
+    _profileActivity.reset();
     _draftSummaries.clear();
     _viewCounts.clear();
     _referenceByPost.clear();

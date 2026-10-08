@@ -325,6 +325,18 @@ void main() {
               250,
               scrollable: _outer(tester, CustomScrollView),
             );
+            // RTL and 200% text may stop the coarse 250-pixel drag with
+            // the lazily built tab still outside the real hit-test viewport.
+            await Scrollable.ensureVisible(
+              tester.element(
+                find.byKey(
+                  const Key('community-profile-tab-reviews'),
+                  skipOffstage: false,
+                ),
+              ),
+              alignment: .5,
+            );
+            await tester.pump();
             await tester.tap(tab.hitTestable());
             await tester.pump();
           }

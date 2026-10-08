@@ -14,15 +14,23 @@ enum IntelligenceActionType {
   manageSubscription,
   setThemeMode,
   setLanguage,
+  setUnitPreference,
+  setReminder,
+  reviewMemories,
+  prepareLocalExport,
   updateGoal,
   saveMeasurements,
   quickAddMacros,
+  logFoods,
+  replaceMealItem,
   updateMealItem,
   moveMealItem,
   deleteMealItem,
   requestAccountDeletion,
   signOut,
   saveMemory,
+  healthCommand,
+  readHealthData,
 }
 
 class IntelligenceAction {

@@ -90,6 +90,8 @@ extension _CoachMealPreparation on _IntelligenceCenterPageState {
       IntelligenceActionType.updateMealItem,
       IntelligenceActionType.deleteMealItem,
       IntelligenceActionType.moveMealItem,
+      IntelligenceActionType.logFoods,
+      IntelligenceActionType.replaceMealItem,
     }.contains(action.type)) {
       return null;
     }
@@ -134,6 +136,42 @@ extension _CoachMealPreparation on _IntelligenceCenterPageState {
           // civil date instead of borrowing the clock from the later commit.
           occurredAt: date,
         );
+      } else if (action.type == IntelligenceActionType.logFoods) {
+        final review = CoachFoodReview(
+          (action.payload['portions']! as List).map(CoachFoodPortion.fromJson),
+        );
+        final day = DateTime.parse(action.payload['date']! as String);
+        final occurredAt = action.payload['occurredAt'] == null
+            ? day
+            : DateTime.parse(action.payload['occurredAt']! as String);
+        prepared.command = CoachMealCommand.foods(
+          operationId: operationId,
+          date: day,
+          mealType: action.payload['mealType']! as String,
+          review: review,
+          occurredAt: occurredAt,
+        );
+      } else if (action.type == IntelligenceActionType.replaceMealItem) {
+        final expectedRaw = Map<String, Object?>.from(
+          action.payload['expected']! as Map,
+        );
+        final expected = CoachMealItemVersion(
+          id: expectedRaw['id']! as int,
+          uuid: expectedRaw['uuid']! as String,
+          revision: expectedRaw['revision']! as int,
+        );
+        final current = await repository.getMealItem(expected.id);
+        scope.check(database.localOwnerId);
+        if (current.deletedAt != null ||
+            current.uuid != expected.uuid ||
+            current.revision != expected.revision) {
+          throw const CoachMealConflict(CoachMealConflictReason.staleItem);
+        }
+        prepared.command = CoachMealCommand.replaceFood(
+          operationId: operationId,
+          expected: expected,
+          replacement: CoachFoodPortion.fromJson(action.payload['replacement']),
+        );
       } else {
         final item = await repository.getMealItem(
           action.payload['itemId']! as int,
@@ -155,7 +193,10 @@ extension _CoachMealPreparation on _IntelligenceCenterPageState {
           IntelligenceActionType.moveMealItem => CoachMealCommand.moveItem(
             operationId: operationId,
             expected: expected,
-            mealType: action.payload['mealType']! as String,
+            mealType: action.payload['mealType'] as String?,
+            date: action.payload['date'] == null
+                ? null
+                : DateTime.parse(action.payload['date']! as String),
           ),
           _ => throw StateError('Unexpected meal action'),
         };

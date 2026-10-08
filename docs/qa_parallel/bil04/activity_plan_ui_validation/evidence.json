@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "captured_at_utc": "2026-10-07T09:09:40.652939+00:00",
+  "base_commit": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "runtime": {
+    "platform": "Linux Flutter host tests",
+    "flutter": "3.44.6",
+    "dart": "3.12.2",
+    "database": "real in-memory Drift",
+    "live_device": false,
+    "live_subscription": false,
+    "live_model": false
+  },
+  "commands": {
+    "test_prefix": "TAR_OPTIONS=--no-same-owner /workspace/scratch/ada7a97de764/runtime/with-flutter test --no-pub --reporter expanded --concurrency=1",
+    "working_directory": "/workspace/scratch/ada7a97de764/validation",
+    "core_initial_paths": [
+      "test/parallel/bil04/activity_command_adapter_test.dart",
+      "test/parallel/bil04/plan_command_adapter_test.dart",
+      "test/parallel/bil04/activity_plan_native_test.dart",
+      "test/features/intelligence_center/coach_native_command_repository_test.dart"
+    ],
+    "native_final_paths": [
+      "test/parallel/bil04/activity_plan_native_test.dart"
+    ],
+    "ui_final_paths": [
+      "test/parallel/bil04/health_coach_ui_test.dart"
+    ],
+    "core_analyze_prefix": "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dart analyze --fatal-infos",
+    "core_analyze_paths": [
+      "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+      "lib/features/intelligence_center/app_commands/coach_activity_adapter.dart",
+      "lib/features/intelligence_center/app_commands/coach_plan_adapter.dart",
+      "test/parallel/bil04/activity_command_adapter_test.dart",
+      "test/parallel/bil04/plan_command_adapter_test.dart",
+      "test/parallel/bil04/activity_plan_native_test.dart",
+      "test/parallel/bil04/activity_plan_native_failure_cases.dart",
+      "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "lib/features/intelligence_center/services/coach_native_command_journal.dart"
+    ]
+  },
+  "unique_case_evidence": {
+    "activity": 14,
+    "plan": 15,
+    "native_health": 16,
+    "native_legacy": 43,
+    "actual_ui": 25,
+    "total": 113,
+    "one_combined_113_case_run_claimed": false
+  },
+  "ui_final_exit_code": 0,
+  "ui_final_source_stability": {
+    "manifest": "ui_final_source_stability.json",
+    "source_files": 1411,
+    "stable_before_after": true,
+    "changed_paths": [],
+    "started_at_utc": "2026-10-07T09:08:12.985356+00:00",
+    "completed_at_utc": "2026-10-07T09:08:32.676377+00:00"
+  },
+  "source_freeze": "Owned activity/plan/native/UI sources frozen after ui_final; no new source changes unless root requests them.",
+  "source_hash_manifest": "source_hashes.json",
+  "root_final_gates": "Root owns final all-BIL04 aggregate, nearby BASE regressions and full analyzer. This report does not assert results for those separate runs.",
+  "runs": [
+    {
+      "name": "core_initial",
+      "log": "core_initial.txt",
+      "log_sha256": "876806576a4a153c239b5e07765f95b2b73567802bc7da0b2bc75f717aab8cc4",
+      "outcome": "FAIL",
+      "exit_code": 1,
+      "passed": 81,
+      "failed": 7,
+      "note": "Activity 14, plan 15, original native regression 43 all passed. Seven native exercise fixtures omitted registry-required date. Do not treat this entire command as PASS."
+    },
+    {
+      "name": "native_final",
+      "log": "native_final.txt",
+      "log_sha256": "378852cdea14357e2b145bbb88c6e0a2434d827ed59843ca7f3e1287f1c5afbd",
+      "outcome": "PASS",
+      "exit_code": 0,
+      "passed": 16,
+      "failed": 0,
+      "note": "Final real native activity/plan rerun after supplying explicit canonical date; replaces the seven failing fixture cases without double counting."
+    },
+    {
+      "name": "core_analyze_final",
+      "log": "core_analyze_final.txt",
+      "log_sha256": "bd09462c637e945c890085fa80082cd4006acfaddbf8d32b426950a6f882ef15",
+      "outcome": "PASS",
+      "exit_code": 0,
+      "passed": null,
+      "failed": null,
+      "note": "Nine specified activity/plan/native source and test files: No issues found."
+    },
+    {
+      "name": "ui_initial",
+      "log": "ui_initial.txt",
+      "log_sha256": "5ca05a42fd6d286c5a7f93b3871b11f02c6170a08662ebbb594f5fde61741684",
+      "outcome": "INTERRUPTED_WITH_FAILURES",
+      "exit_code": 130,
+      "passed": null,
+      "failed": null,
+      "note": "Stopped after observed modal-background pumpAndSettle failures and pending device timeout timers. Partial run, not a final result."
+    },
+    {
+      "name": "ui_initial_analyze",
+      "log": "ui_initial_analyze.txt",
+      "log_sha256": "dd21709724e2aa4b6dc1128b3e295dc9f0c73321ac4d1a21f27e99451086f073",
+      "outcome": "WARNING",
+      "exit_code": 2,
+      "passed": null,
+      "failed": null,
+      "note": "One unused test import removed. This earlier warning log is retained; final root analyzer covers the frozen expanded tests."
+    },
+    {
+      "name": "ui_second",
+      "log": "ui_second.txt",
+      "log_sha256": "4790a9531151014892607b9dedb5f00dd93e74114c8ff1ee1d5d4b8ff4406833",
+      "outcome": "FAIL",
+      "exit_code": 1,
+      "passed": 2,
+      "failed": 15,
+      "note": "After modal spinner fix: read cleanup settling and static notification queue zone/lifecycle defects remained."
+    },
+    {
+      "name": "ui_read_isolated",
+      "log": "ui_read_isolated.txt",
+      "log_sha256": "7ded8298aed86a44ebfe22d4170fb475443fc103dbcf3608a44e9caa5a6e8597",
+      "outcome": "FAIL",
+      "exit_code": 1,
+      "passed": 0,
+      "failed": 1,
+      "note": "Confirmed that completed-read cleanup settling was separate from the cross-test notification queue."
+    },
+    {
+      "name": "ui_read_after_cleanup",
+      "log": "ui_read_after_cleanup.txt",
+      "log_sha256": "793a852c865a1bc6acd4165a5d2112e7f4c9f80c4f1b720a3c1b3ad028e1b4a7",
+      "outcome": "FAIL",
+      "exit_code": 1,
+      "passed": null,
+      "failed": null,
+      "note": "Read cleanup no longer stalled. Fixture incorrectly required midnight and exactly two calls; actual civil-noon query plus bounded current-day brief was corrected. Compiler also reported an unexpected exit during concurrent host pressure."
+    },
+    {
+      "name": "ui_third",
+      "log": "ui_third.txt",
+      "log_sha256": "bcd980dcadf3836ff67b41392d643b21f1a54f33afea18949bfdf14b50be5d54",
+      "outcome": "PASS",
+      "exit_code": 0,
+      "passed": 18,
+      "failed": 0,
+      "note": "First complete 18-case UI pass after integration lifecycle fixes; superseded for expanded coverage by ui_final."
+    },
+    {
+      "name": "ui_expanded",
+      "log": "ui_expanded.txt",
+      "log_sha256": "ab1bdd00ddf8d7f3d92b8438a090d71741d4addac3552a297710438c3fe1bd48",
+      "outcome": "FAIL",
+      "exit_code": 1,
+      "passed": 20,
+      "failed": 3,
+      "note": "The three accessibility cases reached behavior assertions but failed SemanticsHandle end invariants. Fixture disposal moved from addTearDown into body finally."
+    },
+    {
+      "name": "ui_before_recovery",
+      "log": "ui_before_recovery.txt",
+      "log_sha256": "c2716d279e71b976233173ed2bfb80330679d6d01f5465006ec97545fd81863b",
+      "outcome": "PASS",
+      "exit_code": 0,
+      "passed": 23,
+      "failed": 0,
+      "note": "Earlier 23-case actual-page suite: Arabic RTL/semantics, 320 logical px and text scale 2.0, durable fasting outcome and managed deadline cancellation included. Superseded by ui_final for receipt recovery coverage."
+    },
+    {
+      "name": "ui_final",
+      "log": "ui_final.txt",
+      "log_sha256": "b1fd17b7d6d5422b033a74c9cc12824bbc9f7d75e6a1574ccfab8e90aaa72e3d",
+      "outcome": "PASS",
+      "exit_code": 0,
+      "passed": 25,
+      "failed": 0,
+      "note": "Final 25-case actual-page suite adds postcommit readback loss and route-close recovery. Both verify exact persisted receipt, acknowledgement only after durable transcript, second-open deduplication and actual Undo. First case pauses receipt persistence before its transaction to prove no early acknowledgement."
+    }
+  ]
+}

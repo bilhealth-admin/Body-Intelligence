@@ -12,6 +12,8 @@ import '../data/community_public_code_failure.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_copy.dart';
+import 'community_member_share.dart';
+import '../../notifications/domain/community_deep_link.dart';
 
 part 'community_code_failure_widgets.dart';
 
@@ -58,14 +60,10 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
       final box = anchorContext.findRenderObject() as RenderBox?;
       await SharePlus.instance.share(
         ShareParams(
-          text:
-              communityText(
-                    context,
-                    'Add @{handle} on BIL: {uri}',
-                    'أضف @{handle} على BIL: {uri}',
-                  )
-                  .replaceAll('{handle}', code.handle)
-                  .replaceAll('{uri}', code.uri.toString()),
+          text: CommunityMemberShare.messageFor(
+            code,
+            locale: Localizations.localeOf(context).toLanguageTag(),
+          ),
           sharePositionOrigin: box == null
               ? null
               : box.localToGlobal(Offset.zero) & box.size,
@@ -247,6 +245,13 @@ class CommunityCodeScannerPage extends StatefulWidget {
 
   static String? codeFromPayload(String? rawValue) {
     final uri = rawValue == null ? null : Uri.tryParse(rawValue.trim());
+    if (uri?.scheme.toLowerCase() == 'https') {
+      final route = CommunityDeepLink.routeFor(uri!);
+      const prefix = '/community/member/';
+      return route != null && route.startsWith(prefix)
+          ? route.substring(prefix.length)
+          : null;
+    }
     if (uri == null ||
         uri.scheme != 'bil' ||
         uri.host != 'community' ||

@@ -1,0 +1,49 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "analyze",
+    "--no-pub",
+    "--fatal-infos",
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+    "lib/features/intelligence_center/app_commands/coach_daily_commands.dart",
+    "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart",
+    "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+    "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart",
+    "test/parallel/bil04/fasting_command_adapter_test.dart",
+    "test/parallel/bil04/fasting_notification_sync_test.dart",
+    "test/parallel/bil04/daily_life_commands_test.dart",
+    "test/parallel/bil04/health_read_guard_brief_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "exit_code": 0,
+  "elapsed_seconds": 3.41,
+  "status": "PASS",
+  "source_sha256_before": {
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+    "lib/features/intelligence_center/app_commands/coach_daily_commands.dart": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+    "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart": "bd96d70af1ba7fe8bd8902d8ad9bdfa17bfeda7a0fe256d7e4455a27a11f1bca",
+    "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+    "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+    "test/parallel/bil04/fasting_command_adapter_test.dart": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+    "test/parallel/bil04/fasting_notification_sync_test.dart": "6aa92ee41f979cbb700d40fbf6fcb4017471fcce9f43e438161008a1753bd202",
+    "test/parallel/bil04/daily_life_commands_test.dart": "2f4b957ff63cdc09f0a4d5aefad830521cbbd13814d1893ce016e4b9b231ff6d",
+    "test/parallel/bil04/health_read_guard_brief_test.dart": "e1c23d74e5eddd7e4d91459965a1cf645b2ca0143269e5782a933ea9104cdae3",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  },
+  "source_sha256_after": {
+    "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+    "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+    "lib/features/intelligence_center/app_commands/coach_daily_commands.dart": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+    "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart": "bd96d70af1ba7fe8bd8902d8ad9bdfa17bfeda7a0fe256d7e4455a27a11f1bca",
+    "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+    "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+    "test/parallel/bil04/fasting_command_adapter_test.dart": "6a69d4d3cd5bb719eb9f90a1b11a3f9d32e616cdadc93fc558598eaa17d46d42",
+    "test/parallel/bil04/fasting_notification_sync_test.dart": "6aa92ee41f979cbb700d40fbf6fcb4017471fcce9f43e438161008a1753bd202",
+    "test/parallel/bil04/daily_life_commands_test.dart": "2f4b957ff63cdc09f0a4d5aefad830521cbbd13814d1893ce016e4b9b231ff6d",
+    "test/parallel/bil04/health_read_guard_brief_test.dart": "e1c23d74e5eddd7e4d91459965a1cf645b2ca0143269e5782a933ea9104cdae3",
+    "pubspec.lock": "359caf1c42418012a7d9943c0413e7c243afd7dd21f605f5b3754d4d587c5a46"
+  },
+  "source_stable_during_execution": true
+}

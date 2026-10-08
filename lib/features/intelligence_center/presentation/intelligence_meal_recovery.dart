@@ -5,6 +5,7 @@ final class _CoachMealReceiptReference {
     required this.actionId,
     required this.operationId,
     required this.toolId,
+    required this.entityType,
     required this.entityId,
     required this.argumentsDigest,
   });
@@ -12,6 +13,7 @@ final class _CoachMealReceiptReference {
   final String actionId;
   final String operationId;
   final String toolId;
+  final String entityType;
   final String entityId;
   final String argumentsDigest;
 
@@ -29,12 +31,13 @@ final class _CoachMealReceiptReference {
             value['verified'] != true ||
             value['undoable'] != true ||
             value['undone_at'] != null ||
-            value['entity_type'] != 'meal_item') {
+            !const {'meal_item', 'meal'}.contains(value['entity_type'])) {
           continue;
         }
         final actionId = value['action_id'];
         final operationId = value['operation_id'];
         final toolId = value['tool_id'];
+        final entityType = value['entity_type'];
         final entityId = value['entity_id'];
         final after = value['after'];
         final digest = after is Map ? after['arguments_digest'] : null;
@@ -50,7 +53,11 @@ final class _CoachMealReceiptReference {
               'update_meal_item',
               'delete_meal_item',
               'move_meal_item',
+              'log_foods',
+              'replace_meal_item',
             }.contains(toolId) ||
+            entityType is! String ||
+            !const {'meal_item', 'meal'}.contains(entityType) ||
             entityId is! String ||
             entityId.isEmpty ||
             digest is! String ||
@@ -61,6 +68,7 @@ final class _CoachMealReceiptReference {
           actionId: actionId,
           operationId: operationId,
           toolId: toolId,
+          entityType: entityType,
           entityId: entityId,
           argumentsDigest: digest,
         );
@@ -70,6 +78,23 @@ final class _CoachMealReceiptReference {
     }
     return null;
   }
+}
+
+bool _coachMealRecoveryEntityMatches(
+  CoachMealCommit result,
+  _CoachMealReceiptReference reference,
+) {
+  if (reference.entityType == 'meal_item') {
+    return result.after.length == 1 &&
+        result.after.single.item.id.toString() == reference.entityId;
+  }
+  if (reference.entityType == 'meal') {
+    return result.after.isNotEmpty &&
+        result.after.every(
+          (snapshot) => snapshot.meal.id.toString() == reference.entityId,
+        );
+  }
+  return false;
 }
 
 extension _CoachMealRecovery on _IntelligenceCenterPageState {
@@ -112,8 +137,7 @@ extension _CoachMealRecovery on _IntelligenceCenterPageState {
             !result.canUndo ||
             result.toolId != reference.toolId ||
             result.argumentsDigest != reference.argumentsDigest ||
-            result.after.length != 1 ||
-            result.after.single.item.id.toString() != reference.entityId ||
+            !_coachMealRecoveryEntityMatches(result, reference) ||
             !messages.any((message) => message.id == candidate.messageId) ||
             undoOperations.containsKey(candidate.messageId)) {
           continue;
@@ -123,6 +147,7 @@ extension _CoachMealRecovery on _IntelligenceCenterPageState {
         _updateState(() {
           undoOperations[candidate.messageId] = _CoachUndoOperation(
             receipt: receipt,
+            mealCommit: verifiedResult,
             undoReadback: (checkWritePermission) => _undoCommittedCoachMeal(
               actionId: reference.actionId,
               result: verifiedResult,

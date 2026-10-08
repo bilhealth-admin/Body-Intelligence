@@ -1,0 +1,5 @@
+Analyzing health_coach_ui_test.dart, health_coach_ui_fixture.dart...
+
+warning - test/parallel/bil04/health_coach_ui_test.dart:22:8 - Unused import: 'package:body_intelligence_log/features/intelligence_center/services/coach_native_command_repository.dart'. Try removing the import directive. - unused_import
+
+1 issue found.

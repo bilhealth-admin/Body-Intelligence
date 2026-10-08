@@ -13,7 +13,9 @@ class CoachActionPresentationPolicy {
       IntelligenceActionType.reviewMeal ||
       IntelligenceActionType.reviewWorkout ||
       IntelligenceActionType.openPlan ||
-      IntelligenceActionType.openReport => true,
+      IntelligenceActionType.openReport ||
+      IntelligenceActionType.reviewMemories ||
+      IntelligenceActionType.prepareLocalExport => true,
       IntelligenceActionType.addWeight => action.payload['weightKg'] == null,
       _ => false,
     };

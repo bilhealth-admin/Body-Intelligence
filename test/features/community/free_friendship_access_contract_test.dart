@@ -79,6 +79,7 @@ void main() {
       '/community/code/scan',
       '/community/member/:code',
       '/community/notifications',
+      '/community/post/:postId',
       '/community/drafts',
       '/community/compose',
       '/community/rewards',
@@ -90,6 +91,8 @@ void main() {
       '/community/chat/:userId',
       '/community/messages',
       '/community/messages/new',
+      '/community/channels',
+      '/community/channels/:channelId',
     });
     expect(freeCommunityRoutes, contains('/community/profile/:userId'));
     expect(

@@ -15,6 +15,7 @@ extension _CoachMealActionFlow on _IntelligenceCenterPageState {
     _appendToolReceipt(
       _coachMealResultText(result),
       receipt: receipt,
+      mealCommit: result,
       undoReadback: result.canUndo
           ? (checkWritePermission) => _undoCommittedCoachMeal(
               actionId: action.id,

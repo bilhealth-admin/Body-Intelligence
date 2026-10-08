@@ -1,0 +1,25 @@
+import 'dart:io';
+
+// Flutter's supported --frontend-server-starter-path hook. This launches the
+// exact pinned frontend snapshot with a smaller compilation heap so other
+// isolated workspaces' shared-memory allocations do not cause host OOM kills.
+// The application, assertions, test timing and compiler arguments are unchanged.
+Future<void> main(List<String> arguments) async {
+  final sdkBin = File(Platform.resolvedExecutable).parent.path;
+  final child = await Process.start('$sdkBin/dartaotruntime', [
+    '--old_gen_heap_size=1024',
+    '--new_gen_semi_max_size=16',
+    '$sdkBin/snapshots/frontend_server_aot.dart.snapshot',
+    ...arguments,
+  ], mode: ProcessStartMode.inheritStdio);
+  final interrupt = ProcessSignal.sigint.watch().listen(
+    (_) => child.kill(ProcessSignal.sigint),
+  );
+  final terminate = ProcessSignal.sigterm.watch().listen(
+    (_) => child.kill(ProcessSignal.sigterm),
+  );
+  final status = await child.exitCode;
+  await interrupt.cancel();
+  await terminate.cancel();
+  exit(status);
+}

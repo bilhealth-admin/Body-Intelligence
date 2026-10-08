@@ -19,9 +19,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('custom cards keep cached values instead of flashing on refresh', () {
-    final source = File(
+    // Check the original page and its extracted parts together, without
+    // loosening any of the cache, icon or layout expectations.
+    final source = [
       'lib/features/dashboard/presentation/dashboard_preferences_page.dart',
-    ).readAsStringSync();
+      'lib/features/dashboard/presentation/dashboard_preferences_body.dart',
+      'lib/features/dashboard/presentation/dashboard_preferences_polish.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(source, contains('_stableSectionValues'));
     expect(source, contains('cachedVisible == null'));
     expect(source, contains('_DashboardPreferenceSurface('));

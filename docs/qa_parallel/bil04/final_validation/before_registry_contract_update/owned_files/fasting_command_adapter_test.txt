@@ -1,0 +1,25 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart
+00:00 +0: only canonical fasting commands are claimed
+00:00 +1: read-only absent fasting status creates no preferences or command
+00:00 +2: proposal is read-only and requires an explicit bounded target
+00:00 +3: start persists both session formats and preserves unrelated state
+00:00 +4: a second start cannot replace an active session
+00:00 +5: adjust corrects explicit instants and target without changing history
+00:00 +6: adjust rejects ambiguous DST, rollover, future and empty corrections
+00:00 +7: DST repeated wall hour remains distinct through explicit offsets
+00:00 +8: target-only adjustment preserves the active start
+00:00 +9: stop derives history and duration from its immutable end instant
+00:00 +10: stop preserves the existing bounded history policy
+00:00 +11: stop requires an active session with a positive elapsed duration
+00:00 +12: restart restores the same active record; receipts do not tick
+00:00 +13: Undo start restores exact data and preserves a later notification setting
+00:00 +14: Undo stop restores legacy-only session and exact raw history
+00:00 +15: Undo adjustment restores the entire prior active snapshot
+00:00 +16: Undo rejects a later manual edit without overwriting it
+00:00 +17: partial persistence is detected and caller transaction rolls back
+00:00 +18: readback failure inside write transaction cannot report a saved session
+00:00 +19: owner epoch change after an await rolls data back even after return
+00:00 +20: malformed persisted session or history is preserved and rejected
+00:00 +21: unknown history and missing last duration are not reported as zeros
+00:00 +22: legacy larger target is preserved when only start time is corrected
+00:00 +23: All tests passed!

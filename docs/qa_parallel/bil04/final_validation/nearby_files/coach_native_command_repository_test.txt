@@ -1,0 +1,45 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/coach_native_command_repository_test.dart
+00:00 +0: log_water commits a durable readback and compensates its exact snapshot
+00:00 +1: log_water rolls back every data write when journal insertion fails
+00:00 +2: log_weight commits a durable readback and compensates its exact snapshot
+00:00 +3: log_weight rolls back every data write when journal insertion fails
+00:00 +4: update_goal commits a durable readback and compensates its exact snapshot
+00:00 +5: update_goal rolls back every data write when journal insertion fails
+00:00 +6: save_measurements commits a durable readback and compensates its exact snapshot
+00:00 +7: save_measurements rolls back every data write when journal insertion fails
+00:00 +8: save_memory commits a durable readback and compensates its exact snapshot
+00:00 +9: save_memory rolls back every data write when journal insertion fails
+00:00 +10: same operation coalesces in the repository and survives repository recreation
+00:00 +11: equal requests with distinct operation IDs remain separate writes
+00:00 +12: a persisted operation rejects changed tool or changed arguments
+00:00 +13: owner change after an insert rolls back the insert and journal together
+00:00 +14: another owner cannot prepare against this database
+00:00 +15: UUID replacement rejects Undo even when numeric ID and revision match
+00:00 +16: void measurement save cannot generate a receipt after an ignored database write
+00:00 +17: lost commit readback reports committed and a retry never duplicates data
+00:00 +18: Undo verifies the compensated row and rolls back a changed readback
+00:00 +19: a changed memory collection cannot be overwritten by an older Undo
+00:00 +20: readback of log_water is read-only before commit and after Undo
+00:00 +21: readback of log_weight is read-only before commit and after Undo
+00:00 +22: readback of update_goal is read-only before commit and after Undo
+00:00 +23: readback of save_measurements is read-only before commit and after Undo
+00:00 +24: readback of save_memory is read-only before commit and after Undo
+00:00 +25: readback marks a later row version modified without repairing it
+00:00 +26: readback rejects broken JSON as uncommitted read failure
+00:00 +27: readback rejects wrong owner as uncommitted read failure
+00:00 +28: readback rejects wrong operation as uncommitted read failure
+00:00 +29: readback rejects wrong digest as uncommitted read failure
+00:00 +30: readback rejects owner change delivered inside journal read
+00:00 +31: readback failure does not claim that a new write committed
+00:00 +32: foreign owner cannot read even a missing operation
+00:00 +33: log_water Undo permission rolls back rows and journal afterWrite=false
+00:00 +34: log_water Undo permission rolls back rows and journal afterWrite=true
+00:00 +35: log_weight Undo permission rolls back rows and journal afterWrite=false
+00:00 +36: log_weight Undo permission rolls back rows and journal afterWrite=true
+00:00 +37: update_goal Undo permission rolls back rows and journal afterWrite=false
+00:00 +38: update_goal Undo permission rolls back rows and journal afterWrite=true
+00:01 +39: save_measurements Undo permission rolls back rows and journal afterWrite=false
+00:01 +40: save_measurements Undo permission rolls back rows and journal afterWrite=true
+00:01 +41: save_memory Undo permission rolls back rows and journal afterWrite=false
+00:01 +42: save_memory Undo permission rolls back rows and journal afterWrite=true
+00:01 +43: All tests passed!

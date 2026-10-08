@@ -1,0 +1,5706 @@
+{
+  "schema_version": 1,
+  "role_id": "BIL-04",
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "source_locales": [
+    "en",
+    "ar"
+  ],
+  "template_count": 147,
+  "review_status": "EN_AR_SOURCE_PAIRS_REVIEWED_WITH_HOST_UI_TESTS",
+  "human_linguistic_and_complete_visual_review": "PENDING",
+  "placeholder_checks": "PASS",
+  "remaining_release_locales": {
+    "fr": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "es": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "tr": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "de": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "it": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "pt-BR": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "pt-PT": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "ur": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "fa": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "hi": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "id": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "ms": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "ja": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "ko": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "zh-Hans": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "zh-Hant": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "ru": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "bn": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "vi": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "th": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "pl": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "nl": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    },
+    "uk": {
+      "status": "PENDING_HUMAN_TRANSLATION_AND_REVIEW",
+      "translated": false,
+      "runtimeFallbackIsNotTranslationEvidence": true
+    }
+  },
+  "runtime_copy_modified": false,
+  "review_evidence": [
+    "translations/health_strings_catalog_checks.json",
+    "translations/health_strings_manual_review.json"
+  ],
+  "source_catalog_sha256": {
+    "en": "2cebc5494a6523e08a1f2bd13e20ee012680d6c6da27d3c689a99031119d219f",
+    "ar": "fe285c826fb2873f045382e1a2caee53733d45b8942fceb1b0f80e165799f638"
+  },
+  "strings": {
+    "bil04.00ac79ec8e2f67c8": {
+      "en": "no",
+      "ar": "لا",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 42,
+          "column": 185,
+          "endLine": 42,
+          "offset": 2078,
+          "length": 4,
+          "dartLiteral": "'no'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 88,
+          "column": 125,
+          "endLine": 88,
+          "offset": 5435,
+          "length": 4,
+          "dartLiteral": "'no'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 390,
+          "column": 149,
+          "endLine": 390,
+          "offset": 14225,
+          "length": 4,
+          "dartLiteral": "'no'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 43,
+          "column": 185,
+          "endLine": 43,
+          "offset": 2307,
+          "length": 4,
+          "dartLiteral": "'لا'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 89,
+          "column": 122,
+          "endLine": 89,
+          "offset": 5565,
+          "length": 4,
+          "dartLiteral": "'لا'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 391,
+          "column": 136,
+          "endLine": 391,
+          "offset": 14408,
+          "length": 4,
+          "dartLiteral": "'لا'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.00af337b4dbe2cd8": {
+      "en": "Record {p1} minutes of {p2} for {p3} as an exercise you performed? This will not increase your calorie budget.",
+      "ar": "تسجيل {p1} دقيقة من {p2} ليوم {p3} كتمرين أديته؟ لن يزيد ذلك ميزانية السعرات.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 58,
+          "column": 9,
+          "endLine": 58,
+          "offset": 3249,
+          "length": 170,
+          "dartLiteral": "'Record ${resolved['minutes']} minutes of ${resolved['name'] ?? resolved['workoutId']} for $day as an exercise you performed? This will not increase your calorie budget.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['minutes']",
+            "p2": "resolved['name'] ?? resolved['workoutId']",
+            "p3": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 59,
+          "column": 9,
+          "endLine": 59,
+          "offset": 3429,
+          "length": 159,
+          "dartLiteral": "'تسجيل ${resolved['minutes']} دقيقة من ${resolved['nameAr'] ?? resolved['name'] ?? resolved['workoutId']} ليوم $day كتمرين أديته؟ لن يزيد ذلك ميزانية السعرات.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['minutes']",
+            "p2": "resolved['nameAr'] ?? resolved['name'] ?? resolved['workoutId']",
+            "p3": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.01db5ba0b1f7dc09": {
+      "en": "Start a {p1}-hour fast now",
+      "ar": "بدء صيام {p1} ساعة الآن",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 169,
+          "column": 11,
+          "endLine": 169,
+          "offset": 6263,
+          "length": 30,
+          "dartLiteral": "'Start a $hours-hour fast now'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 170,
+          "column": 11,
+          "endLine": 170,
+          "offset": 6305,
+          "length": 27,
+          "dartLiteral": "'بدء صيام $hours ساعة الآن'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.09530b918666dc93": {
+      "en": "clinician review required",
+      "ar": "تتطلب مراجعة مختص صحي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 242,
+          "column": 7,
+          "endLine": 242,
+          "offset": 13516,
+          "length": 27,
+          "dartLiteral": "'clinician review required'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 243,
+          "column": 7,
+          "endLine": 243,
+          "offset": 13551,
+          "length": 23,
+          "dartLiteral": "'تتطلب مراجعة مختص صحي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.0a9fe6fb2997c95e": {
+      "en": "Activated {p1}. Verified weekly targets:\n{p2}",
+      "ar": "فُعّلت خطة {p1}. الأهداف الأسبوعية الموثقة:\n{p2}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 104,
+          "column": 7,
+          "endLine": 104,
+          "offset": 6469,
+          "length": 99,
+          "dartLiteral": "'Activated ${receipt['name']}. Verified weekly targets:\\n${_week(receipt['effectiveWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['name']",
+            "p2": "_week(receipt['effectiveWeekTargets'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 105,
+          "column": 7,
+          "endLine": 105,
+          "offset": 6576,
+          "length": 104,
+          "dartLiteral": "'فُعّلت خطة ${receipt['nameAr']}. الأهداف الأسبوعية الموثقة:\\n${_week(receipt['effectiveWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['nameAr']",
+            "p2": "_week(receipt['effectiveWeekTargets'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.0ee8d7d7a106d9ba": {
+      "en": "moderate",
+      "ar": "متوسطة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 253,
+          "column": 34,
+          "endLine": 253,
+          "offset": 13859,
+          "length": 10,
+          "dartLiteral": "'moderate'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 253,
+          "column": 46,
+          "endLine": 253,
+          "offset": 13871,
+          "length": 8,
+          "dartLiteral": "'متوسطة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.11f40b7ced399d9f": {
+      "en": "Friday",
+      "ar": "الجمعة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 272,
+          "column": 7,
+          "endLine": 272,
+          "offset": 14446,
+          "length": 8,
+          "dartLiteral": "'Friday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 281,
+          "column": 7,
+          "endLine": 281,
+          "offset": 14589,
+          "length": 8,
+          "dartLiteral": "'الجمعة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.1346f145da0ec797": {
+      "en": "Additional exercise records omitted by the limit.",
+      "ar": "حُجبت سجلات تمرين إضافية بسبب حد العرض.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 224,
+          "column": 11,
+          "endLine": 224,
+          "offset": 12857,
+          "length": 51,
+          "dartLiteral": "'Additional exercise records omitted by the limit.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 225,
+          "column": 11,
+          "endLine": 225,
+          "offset": 12920,
+          "length": 41,
+          "dartLiteral": "'حُجبت سجلات تمرين إضافية بسبب حد العرض.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.145c291bd81303c8": {
+      "en": "weight",
+      "ar": "الوزن",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 471,
+          "column": 14,
+          "endLine": 471,
+          "offset": 16606,
+          "length": 8,
+          "dartLiteral": "'weight'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 471,
+          "column": 24,
+          "endLine": 471,
+          "offset": 16616,
+          "length": 7,
+          "dartLiteral": "'الوزن'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.157c413928e240dc": {
+      "en": "Stop the fasting session that began at {p1} and save it in fasting history?",
+      "ar": "إنهاء جلسة الصيام التي بدأت عند {p1} وحفظها في سجل الصيام؟",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 50,
+          "column": 9,
+          "endLine": 50,
+          "offset": 2708,
+          "length": 100,
+          "dartLiteral": "'Stop the fasting session that began at ${resolved['startedAtUtc']} and save it in fasting history?'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['startedAtUtc']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 51,
+          "column": 9,
+          "endLine": 51,
+          "offset": 2818,
+          "length": 83,
+          "dartLiteral": "'إنهاء جلسة الصيام التي بدأت عند ${resolved['startedAtUtc']} وحفظها في سجل الصيام؟'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['startedAtUtc']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.16d430c695bd666e": {
+      "en": "This day has no saved record to reopen.",
+      "ar": "لا يوجد سجل محفوظ لهذا اليوم لإعادة فتحه.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 460,
+          "column": 9,
+          "endLine": 460,
+          "offset": 17657,
+          "length": 41,
+          "dartLiteral": "'This day has no saved record to reopen.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 461,
+          "column": 9,
+          "endLine": 461,
+          "offset": 17708,
+          "length": 43,
+          "dartLiteral": "'لا يوجد سجل محفوظ لهذا اليوم لإعادة فتحه.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.17072b189cb13388": {
+      "en": "Full-body strength",
+      "ar": "مقاومة لكامل الجسم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 20,
+          "column": 11,
+          "endLine": 20,
+          "offset": 813,
+          "length": 20,
+          "dartLiteral": "'Full-body strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 21,
+          "column": 13,
+          "endLine": 21,
+          "offset": 847,
+          "length": 20,
+          "dartLiteral": "'مقاومة لكامل الجسم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.18fb4a3db26705b4": {
+      "en": "Record performed exercise",
+      "ar": "تسجيل تمرين تم أداؤه",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 16,
+          "column": 24,
+          "endLine": 16,
+          "offset": 764,
+          "length": 27,
+          "dartLiteral": "'Record performed exercise'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 16,
+          "column": 53,
+          "endLine": 16,
+          "offset": 793,
+          "length": 22,
+          "dartLiteral": "'تسجيل تمرين تم أداؤه'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.1907cf5997054a28": {
+      "en": "Read recorded weight progress",
+      "ar": "قراءة تقدم الوزن المسجل",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 25,
+          "column": 7,
+          "endLine": 25,
+          "offset": 1156,
+          "length": 31,
+          "dartLiteral": "'Read recorded weight progress'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 26,
+          "column": 7,
+          "endLine": 26,
+          "offset": 1195,
+          "length": 25,
+          "dartLiteral": "'قراءة تقدم الوزن المسجل'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.1bd1eadd4d538e76": {
+      "en": "protein",
+      "ar": "البروتين",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 115,
+          "endLine": 288,
+          "offset": 14852,
+          "length": 9,
+          "dartLiteral": "'protein'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 126,
+          "endLine": 288,
+          "offset": 14863,
+          "length": 10,
+          "dartLiteral": "'البروتين'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.1f622814faa77fd7": {
+      "en": "Confirm action",
+      "ar": "تأكيد الإجراء",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 112,
+          "column": 26,
+          "endLine": 112,
+          "offset": 4222,
+          "length": 16,
+          "dartLiteral": "'Confirm action'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 112,
+          "column": 44,
+          "endLine": 112,
+          "offset": 4240,
+          "length": 15,
+          "dartLiteral": "'تأكيد الإجراء'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.230f7f6ba65f1691": {
+      "en": "fat",
+      "ar": "الدهون",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 283,
+          "endLine": 288,
+          "offset": 15020,
+          "length": 5,
+          "dartLiteral": "'fat'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 290,
+          "endLine": 288,
+          "offset": 15027,
+          "length": 8,
+          "dartLiteral": "'الدهون'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.244fd5b484eef4bf": {
+      "en": "Save life context",
+      "ar": "حفظ السياق الحياتي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 12,
+          "column": 29,
+          "endLine": 12,
+          "offset": 511,
+          "length": 19,
+          "dartLiteral": "'Save life context'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 12,
+          "column": 50,
+          "endLine": 12,
+          "offset": 532,
+          "length": 20,
+          "dartLiteral": "'حفظ السياق الحياتي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.280e71411dd49302": {
+      "en": "This day is closed. Reopen it before changing sleep, notes, or exercise. Nothing was saved.",
+      "ar": "هذا اليوم مغلق. أعد فتحه قبل تعديل النوم أو الملاحظات أو التمرين. لم يُحفظ شيء.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 439,
+          "column": 9,
+          "endLine": 439,
+          "offset": 16821,
+          "length": 93,
+          "dartLiteral": "'This day is closed. Reopen it before changing sleep, notes, or exercise. Nothing was saved.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 440,
+          "column": 9,
+          "endLine": 440,
+          "offset": 16924,
+          "length": 81,
+          "dartLiteral": "'هذا اليوم مغلق. أعد فتحه قبل تعديل النوم أو الملاحظات أو التمرين. لم يُحفظ شيء.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.2faba8498ed0dc36": {
+      "en": "Continue",
+      "ar": "متابعة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 153,
+          "column": 30,
+          "endLine": 153,
+          "offset": 5957,
+          "length": 10,
+          "dartLiteral": "'Continue'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 153,
+          "column": 42,
+          "endLine": 153,
+          "offset": 5969,
+          "length": 8,
+          "dartLiteral": "'متابعة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.30dbf47077556094": {
+      "en": "No active fasting session. Completed sessions: {p1}. Last duration: {p2}.",
+      "ar": "لا توجد جلسة صيام نشطة. الجلسات المكتملة: {p1}. آخر مدة: {p2}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 131,
+          "column": 15,
+          "endLine": 131,
+          "offset": 8053,
+          "length": 146,
+          "dartLiteral": "'No active fasting session. Completed sessions: ${value(result['historyCount'])}. Last duration: ${value(result['lastMinutes'], suffix: ' min')}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(result['historyCount'])",
+            "p2": "value(result['lastMinutes'], suffix: ' min')"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 132,
+          "column": 15,
+          "endLine": 132,
+          "offset": 8215,
+          "length": 137,
+          "dartLiteral": "'لا توجد جلسة صيام نشطة. الجلسات المكتملة: ${value(result['historyCount'])}. آخر مدة: ${value(result['lastMinutes'], suffix: ' دقيقة')}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(result['historyCount'])",
+            "p2": "value(result['lastMinutes'], suffix: ' دقيقة')"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.33010fe15cc5615e": {
+      "en": "Lower-body strength",
+      "ar": "مقاومة للجزء السفلي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 32,
+          "column": 11,
+          "endLine": 32,
+          "offset": 1051,
+          "length": 21,
+          "dartLiteral": "'Lower-body strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 33,
+          "column": 13,
+          "endLine": 33,
+          "offset": 1086,
+          "length": 21,
+          "dartLiteral": "'مقاومة للجزء السفلي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.336a51c0b1804a2b": {
+      "en": "activity",
+      "ar": "النشاط",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 470,
+          "column": 16,
+          "endLine": 470,
+          "offset": 16570,
+          "length": 10,
+          "dartLiteral": "'activity'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 470,
+          "column": 28,
+          "endLine": 470,
+          "offset": 16582,
+          "length": 8,
+          "dartLiteral": "'النشاط'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.37e0923e04552f4a": {
+      "en": "progress",
+      "ar": "التقدم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 473,
+          "column": 16,
+          "endLine": 473,
+          "offset": 16689,
+          "length": 10,
+          "dartLiteral": "'progress'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 473,
+          "column": 28,
+          "endLine": 473,
+          "offset": 16701,
+          "length": 8,
+          "dartLiteral": "'التقدم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.3a1c57b23dc82975": {
+      "en": "Save {p1} hours of manually recorded sleep for {p2}? Previous value: {p3}.",
+      "ar": "حفظ {p1} ساعات نوم مسجلة يدويًا ليوم {p2}؟ القيمة السابقة: {p3}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 34,
+          "column": 9,
+          "endLine": 34,
+          "offset": 1324,
+          "length": 126,
+          "dartLiteral": "'Save ${value(resolved['hours'])} hours of manually recorded sleep for $day? Previous value: ${value(before['sleep_hours'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(resolved['hours'])",
+            "p2": "day",
+            "p3": "value(before['sleep_hours'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 35,
+          "column": 9,
+          "endLine": 35,
+          "offset": 1460,
+          "length": 116,
+          "dartLiteral": "'حفظ ${value(resolved['hours'])} ساعات نوم مسجلة يدويًا ليوم $day؟ القيمة السابقة: ${value(before['sleep_hours'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(resolved['hours'])",
+            "p2": "day",
+            "p3": "value(before['sleep_hours'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.3c4af07b95aa7906": {
+      "en": "Saved {p1} hours of manual sleep for {p2}.",
+      "ar": "حُفظت {p1} ساعات نوم يدويًا ليوم {p2}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 80,
+          "column": 7,
+          "endLine": 80,
+          "offset": 4949,
+          "length": 86,
+          "dartLiteral": "'Saved ${value(receipt['sleep_hours'])} hours of manual sleep for ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(receipt['sleep_hours'])",
+            "p2": "receipt['date']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 81,
+          "column": 7,
+          "endLine": 81,
+          "offset": 5043,
+          "length": 82,
+          "dartLiteral": "'حُفظت ${value(receipt['sleep_hours'])} ساعات نوم يدويًا ليوم ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(receipt['sleep_hours'])",
+            "p2": "receipt['date']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.3e6b712c8df3f1d3": {
+      "en": "Reopen {p1} so its records can be edited?",
+      "ar": "إعادة فتح يوم {p1} للسماح بتعديل سجلاته؟",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 30,
+          "column": 9,
+          "endLine": 30,
+          "offset": 1185,
+          "length": 43,
+          "dartLiteral": "'Reopen $day so its records can be edited?'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 31,
+          "column": 9,
+          "endLine": 31,
+          "offset": 1238,
+          "length": 42,
+          "dartLiteral": "'إعادة فتح يوم $day للسماح بتعديل سجلاته؟'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.422ee6c81e0c0d6b": {
+      "en": "A fasting session is already active. Stop it or correct its target before starting another.",
+      "ar": "توجد جلسة صيام نشطة بالفعل. أنهِها أو صحح هدفها قبل بدء جلسة أخرى.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 445,
+          "column": 9,
+          "endLine": 445,
+          "offset": 17106,
+          "length": 93,
+          "dartLiteral": "'A fasting session is already active. Stop it or correct its target before starting another.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 446,
+          "column": 9,
+          "endLine": 446,
+          "offset": 17209,
+          "length": 68,
+          "dartLiteral": "'توجد جلسة صيام نشطة بالفعل. أنهِها أو صحح هدفها قبل بدء جلسة أخرى.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4326cae1d52fe2da": {
+      "en": "Rowing",
+      "ar": "التجديف",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 56,
+          "column": 21,
+          "endLine": 56,
+          "offset": 1640,
+          "length": 8,
+          "dartLiteral": "'Rowing'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 56,
+          "column": 39,
+          "endLine": 56,
+          "offset": 1658,
+          "length": 9,
+          "dartLiteral": "'التجديف'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.451861cd64ce9af4": {
+      "en": "The health action was not completed. No data was saved; review the date and value, then prepare it again.",
+      "ar": "لم يكتمل الإجراء الصحي. لم تُحفظ بيانات؛ راجع التاريخ والقيمة ثم جهزه مجددًا.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 465,
+          "column": 7,
+          "endLine": 465,
+          "offset": 17789,
+          "length": 107,
+          "dartLiteral": "'The health action was not completed. No data was saved; review the date and value, then prepare it again.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 466,
+          "column": 7,
+          "endLine": 466,
+          "offset": 17904,
+          "length": 79,
+          "dartLiteral": "'لم يكتمل الإجراء الصحي. لم تُحفظ بيانات؛ راجع التاريخ والقيمة ثم جهزه مجددًا.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4a482e0031bfb704": {
+      "en": "Change the active fasting target to {p1} hours",
+      "ar": "تعديل هدف الصيام الجاري إلى {p1} ساعة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 195,
+          "column": 11,
+          "endLine": 195,
+          "offset": 7095,
+          "length": 50,
+          "dartLiteral": "'Change the active fasting target to $hours hours'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 196,
+          "column": 11,
+          "endLine": 196,
+          "offset": 7157,
+          "length": 41,
+          "dartLiteral": "'تعديل هدف الصيام الجاري إلى $hours ساعة'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4a7e20908a519d53": {
+      "en": "insufficient",
+      "ar": "غير كافية",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 255,
+          "column": 26,
+          "endLine": 255,
+          "offset": 13941,
+          "length": 14,
+          "dartLiteral": "'insufficient'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 255,
+          "column": 42,
+          "endLine": 255,
+          "offset": 13957,
+          "length": 11,
+          "dartLiteral": "'غير كافية'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4b65984dea9b1b09": {
+      "en": "Recorded {p1} minutes of {p2} for {p3}. Your calorie budget is unchanged.",
+      "ar": "سُجلت {p1} دقيقة من {p2} ليوم {p3}. بقيت ميزانية السعرات كما هي.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 100,
+          "column": 7,
+          "endLine": 100,
+          "offset": 6124,
+          "length": 152,
+          "dartLiteral": "'Recorded ${receipt['minutes']} minutes of ${_workout(receipt['workoutId'], receipt['name'])} for ${receipt['date']}. Your calorie budget is unchanged.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['minutes']",
+            "p2": "_workout(receipt['workoutId'], receipt['name'])",
+            "p3": "receipt['date']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 101,
+          "column": 7,
+          "endLine": 101,
+          "offset": 6284,
+          "length": 143,
+          "dartLiteral": "'سُجلت ${receipt['minutes']} دقيقة من ${_workout(receipt['workoutId'], receipt['name'])} ليوم ${receipt['date']}. بقيت ميزانية السعرات كما هي.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['minutes']",
+            "p2": "_workout(receipt['workoutId'], receipt['name'])",
+            "p3": "receipt['date']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4bdde0d05a6be1b5": {
+      "en": "Stop fasting",
+      "ar": "إنهاء الصيام",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 14,
+          "column": 24,
+          "endLine": 14,
+          "offset": 634,
+          "length": 14,
+          "dartLiteral": "'Stop fasting'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 14,
+          "column": 40,
+          "endLine": 14,
+          "offset": 650,
+          "length": 14,
+          "dartLiteral": "'إنهاء الصيام'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4d11fefc4864caa2": {
+      "en": "Record {p1}: {p2} minutes on {p3}",
+      "ar": "تسجيل {p1}: {p2} دقيقة في {p3}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 254,
+          "column": 11,
+          "endLine": 254,
+          "offset": 9335,
+          "length": 45,
+          "dartLiteral": "'Record $workoutId: $minutes minutes on $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "workoutId",
+            "p2": "minutes",
+            "p3": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 255,
+          "column": 11,
+          "endLine": 255,
+          "offset": 9392,
+          "length": 42,
+          "dartLiteral": "'تسجيل $workoutId: $minutes دقيقة في $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "workoutId",
+            "p2": "minutes",
+            "p3": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4e1cb43dcb5a27e5": {
+      "en": " g",
+      "ar": " غ",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 72,
+          "column": 121,
+          "endLine": 72,
+          "offset": 4587,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 93,
+          "endLine": 156,
+          "offset": 9316,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 146,
+          "endLine": 156,
+          "offset": 9369,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 187,
+          "endLine": 156,
+          "offset": 9410,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 179,
+          "endLine": 288,
+          "offset": 14916,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 263,
+          "endLine": 288,
+          "offset": 15000,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 337,
+          "endLine": 288,
+          "offset": 15074,
+          "length": 4,
+          "dartLiteral": "' g'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 73,
+          "column": 124,
+          "endLine": 73,
+          "offset": 4757,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 157,
+          "column": 93,
+          "endLine": 157,
+          "offset": 9536,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 157,
+          "column": 153,
+          "endLine": 157,
+          "offset": 9596,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 157,
+          "column": 197,
+          "endLine": 157,
+          "offset": 9640,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 185,
+          "endLine": 288,
+          "offset": 14922,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 269,
+          "endLine": 288,
+          "offset": 15006,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 343,
+          "endLine": 288,
+          "offset": 15080,
+          "length": 4,
+          "dartLiteral": "' غ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.4ec87b75643d6f97": {
+      "en": "carbs",
+      "ar": "الكربوهيدرات",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 199,
+          "endLine": 288,
+          "offset": 14936,
+          "length": 7,
+          "dartLiteral": "'carbs'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 208,
+          "endLine": 288,
+          "offset": 14945,
+          "length": 14,
+          "dartLiteral": "'الكربوهيدرات'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.501b5bcf6efd1bd1": {
+      "en": "Mobility flow",
+      "ar": "تمارين مرونة وحركة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 38,
+          "column": 11,
+          "endLine": 38,
+          "offset": 1174,
+          "length": 15,
+          "dartLiteral": "'Mobility flow'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 39,
+          "column": 13,
+          "endLine": 39,
+          "offset": 1203,
+          "length": 20,
+          "dartLiteral": "'تمارين مرونة وحركة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.557f86c8fd2463fc": {
+      "en": "Sunday",
+      "ar": "الأحد",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 274,
+          "column": 7,
+          "endLine": 274,
+          "offset": 14480,
+          "length": 8,
+          "dartLiteral": "'Sunday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 283,
+          "column": 7,
+          "endLine": 283,
+          "offset": 14620,
+          "length": 7,
+          "dartLiteral": "'الأحد'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.55b23513ff7e0628": {
+      "en": "Easy run",
+      "ar": "جري خفيف",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 16,
+          "column": 21,
+          "endLine": 16,
+          "offset": 655,
+          "length": 10,
+          "dartLiteral": "'Easy run'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 16,
+          "column": 41,
+          "endLine": 16,
+          "offset": 675,
+          "length": 10,
+          "dartLiteral": "'جري خفيف'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5627ab1a4d8e03d2": {
+      "en": "Reopen day {p1}",
+      "ar": "إعادة فتح يوم {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 151,
+          "column": 9,
+          "endLine": 151,
+          "offset": 5595,
+          "length": 17,
+          "dartLiteral": "'Reopen day $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 152,
+          "column": 9,
+          "endLine": 152,
+          "offset": 5622,
+          "length": 20,
+          "dartLiteral": "'إعادة فتح يوم $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.59fcf8c09a5f341f": {
+      "en": "Hiking",
+      "ar": "المشي الجبلي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 49,
+          "column": 22,
+          "endLine": 49,
+          "offset": 1460,
+          "length": 8,
+          "dartLiteral": "'Hiking'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 49,
+          "column": 40,
+          "endLine": 49,
+          "offset": 1478,
+          "length": 14,
+          "dartLiteral": "'المشي الجبلي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5bac01dc18f72d55": {
+      "en": " kg",
+      "ar": " كغ",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 160,
+          "column": 57,
+          "endLine": 160,
+          "offset": 9761,
+          "length": 5,
+          "dartLiteral": "' kg'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 160,
+          "column": 64,
+          "endLine": 160,
+          "offset": 9768,
+          "length": 5,
+          "dartLiteral": "' كغ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5c48783571cd3cc3": {
+      "en": "Reopened {p1}.",
+      "ar": "أُعيد فتح يوم {p1}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 76,
+          "column": 7,
+          "endLine": 76,
+          "offset": 4838,
+          "length": 30,
+          "dartLiteral": "'Reopened ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 77,
+          "column": 7,
+          "endLine": 77,
+          "offset": 4876,
+          "length": 35,
+          "dartLiteral": "'أُعيد فتح يوم ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5d32905f48fcfdb3": {
+      "en": "Correct fasting session",
+      "ar": "تصحيح جلسة الصيام",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 15,
+          "column": 26,
+          "endLine": 15,
+          "offset": 692,
+          "length": 25,
+          "dartLiteral": "'Correct fasting session'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 15,
+          "column": 53,
+          "endLine": 15,
+          "offset": 719,
+          "length": 19,
+          "dartLiteral": "'تصحيح جلسة الصيام'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5d74fb7932844d2e": {
+      "en": "Preview: {p1} ({p2}). No plan was activated and no targets changed.\nAccess: {p3}; safety requirement: {p4}.\nDraft targets:\n{p5}",
+      "ar": "معاينة: {p1} ({p2}). لم تُفعّل خطة ولم تتغير الأهداف.\nالوصول: {p3}؛ متطلب السلامة: {p4}.\nأهداف المسودة:\n{p5}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 113,
+          "column": 9,
+          "endLine": 113,
+          "offset": 6870,
+          "length": 243,
+          "dartLiteral": "'Preview: ${result['name']} (${result['pathwayId']}). No plan was activated and no targets changed.\\nAccess: ${_access(result['access'])}; safety requirement: ${_safety(result['safety'])}.\\nDraft targets:\\n${_week(result['draftWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['name']",
+            "p2": "result['pathwayId']",
+            "p3": "_access(result['access'])",
+            "p4": "_safety(result['safety'])",
+            "p5": "_week(result['draftWeekTargets'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 114,
+          "column": 9,
+          "endLine": 114,
+          "offset": 7123,
+          "length": 226,
+          "dartLiteral": "'معاينة: ${result['nameAr']} (${result['pathwayId']}). لم تُفعّل خطة ولم تتغير الأهداف.\\nالوصول: ${_access(result['access'])}؛ متطلب السلامة: ${_safety(result['safety'])}.\\nأهداف المسودة:\\n${_week(result['draftWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['nameAr']",
+            "p2": "result['pathwayId']",
+            "p3": "_access(result['access'])",
+            "p4": "_safety(result['safety'])",
+            "p5": "_week(result['draftWeekTargets'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5eae6c81d9cc2042": {
+      "en": "Save day note",
+      "ar": "حفظ ملاحظة اليوم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 11,
+          "column": 25,
+          "endLine": 11,
+          "offset": 445,
+          "length": 15,
+          "dartLiteral": "'Save day note'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 11,
+          "column": 42,
+          "endLine": 11,
+          "offset": 462,
+          "length": 18,
+          "dartLiteral": "'حفظ ملاحظة اليوم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.5fc8f24d9716cf70": {
+      "en": "Session data is saved. Device reminder scheduling was checked; target reminder scheduled: {p1}. Actual delivery depends on the device.",
+      "ar": "بيانات الجلسة محفوظة. جرى التحقق من جدولة تذكيرات الجهاز؛ تذكير الهدف مجدول: {p1}. يعتمد التسليم الفعلي على الجهاز.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 390,
+          "column": 7,
+          "endLine": 390,
+          "offset": 14083,
+          "length": 188,
+          "dartLiteral": "'Session data is saved. Device reminder scheduling was checked; target reminder scheduled: ${result.targetReminderScheduled == true ? 'yes' : 'no'}. Actual delivery depends on the device.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result.targetReminderScheduled == true ? 'yes' : 'no'"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 391,
+          "column": 7,
+          "endLine": 391,
+          "offset": 14279,
+          "length": 169,
+          "dartLiteral": "'بيانات الجلسة محفوظة. جرى التحقق من جدولة تذكيرات الجهاز؛ تذكير الهدف مجدول: ${result.targetReminderScheduled == true ? 'نعم' : 'لا'}. يعتمد التسليم الفعلي على الجهاز.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result.targetReminderScheduled == true ? 'نعم' : 'لا'"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.6080f406fb91cb80": {
+      "en": "Review plan activation",
+      "ar": "مراجعة تفعيل الخطة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 17,
+          "column": 25,
+          "endLine": 17,
+          "offset": 842,
+          "length": 24,
+          "dartLiteral": "'Review plan activation'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 17,
+          "column": 51,
+          "endLine": 17,
+          "offset": 868,
+          "length": 20,
+          "dartLiteral": "'مراجعة تفعيل الخطة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.6555846dccb9126b": {
+      "en": " h",
+      "ar": " ساعة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 166,
+          "column": 76,
+          "endLine": 166,
+          "offset": 10494,
+          "length": 4,
+          "dartLiteral": "' h'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 167,
+          "column": 76,
+          "endLine": 167,
+          "offset": 10578,
+          "length": 7,
+          "dartLiteral": "' ساعة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.667cddfc4692d311": {
+      "en": "Close day",
+      "ar": "إغلاق اليوم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 8,
+          "column": 21,
+          "endLine": 8,
+          "offset": 285,
+          "length": 11,
+          "dartLiteral": "'Close day'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 8,
+          "column": 34,
+          "endLine": 8,
+          "offset": 298,
+          "length": 13,
+          "dartLiteral": "'إغلاق اليوم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.6eca6169dfeb8468": {
+      "en": "Close day {p1}",
+      "ar": "قفل يوم {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 138,
+          "column": 9,
+          "endLine": 138,
+          "offset": 5239,
+          "length": 16,
+          "dartLiteral": "'Close day $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 139,
+          "column": 9,
+          "endLine": 139,
+          "offset": 5265,
+          "length": 14,
+          "dartLiteral": "'قفل يوم $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.7033c18075ad0335": {
+      "en": "Write permission changed during this action. Review the shield setting and prepare the action again.",
+      "ar": "تغير إذن الكتابة أثناء هذا الإجراء. راجع إعداد الدرع وجهّز الإجراء مجددًا.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+          "scope": "shared_added",
+          "line": 293,
+          "column": 13,
+          "endLine": 293,
+          "offset": 11988,
+          "length": 102,
+          "dartLiteral": "'Write permission changed during this action. Review the shield setting and prepare the action again.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+          "scope": "shared_added",
+          "line": 294,
+          "column": 13,
+          "endLine": 294,
+          "offset": 12104,
+          "length": 76,
+          "dartLiteral": "'تغير إذن الكتابة أثناء هذا الإجراء. راجع إعداد الدرع وجهّز الإجراء مجددًا.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.708698c32c06be35": {
+      "en": "nutrition",
+      "ar": "التغذية",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 474,
+          "column": 13,
+          "endLine": 474,
+          "offset": 16724,
+          "length": 11,
+          "dartLiteral": "'nutrition'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 474,
+          "column": 26,
+          "endLine": 474,
+          "offset": 16737,
+          "length": 9,
+          "dartLiteral": "'التغذية'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.70e956da5a9f0af6": {
+      "en": "open",
+      "ar": "مفتوح",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 232,
+          "column": 18,
+          "endLine": 232,
+          "offset": 13103,
+          "length": 6,
+          "dartLiteral": "'open'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 232,
+          "column": 26,
+          "endLine": 232,
+          "offset": 13111,
+          "length": 7,
+          "dartLiteral": "'مفتوح'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.721339a346769d88": {
+      "en": "No matching verified local content was found.",
+      "ar": "لم يُعثر على محتوى محلي موثق يطابق الطلب.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 139,
+          "column": 15,
+          "endLine": 139,
+          "offset": 8555,
+          "length": 47,
+          "dartLiteral": "'No matching verified local content was found.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 140,
+          "column": 15,
+          "endLine": 140,
+          "offset": 8618,
+          "length": 43,
+          "dartLiteral": "'لم يُعثر على محتوى محلي موثق يطابق الطلب.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.765dbe71cf79899b": {
+      "en": "manual sleep {p1}",
+      "ar": "النوم اليدوي {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 166,
+          "column": 11,
+          "endLine": 166,
+          "offset": 10429,
+          "length": 72,
+          "dartLiteral": "'manual sleep ${value((row['manual'] as Map?)?['hours'], suffix: ' h')}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value((row['manual'] as Map?)?['hours'], suffix: ' h')"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 167,
+          "column": 11,
+          "endLine": 167,
+          "offset": 10513,
+          "length": 75,
+          "dartLiteral": "'النوم اليدوي ${value((row['manual'] as Map?)?['hours'], suffix: ' ساعة')}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value((row['manual'] as Map?)?['hours'], suffix: ' ساعة')"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.76b82a97aeb13f1b": {
+      "en": "Session data is saved. The device has not allowed notifications; no permission setting was changed.",
+      "ar": "بيانات الجلسة محفوظة. لم يسمح الجهاز بالإشعارات؛ لم يتغير إعداد الإذن.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 402,
+          "column": 7,
+          "endLine": 402,
+          "offset": 14918,
+          "length": 101,
+          "dartLiteral": "'Session data is saved. The device has not allowed notifications; no permission setting was changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 403,
+          "column": 7,
+          "endLine": 403,
+          "offset": 15027,
+          "length": 72,
+          "dartLiteral": "'بيانات الجلسة محفوظة. لم يسمح الجهاز بالإشعارات؛ لم يتغير إعداد الإذن.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.7731efe2ae12a5d3": {
+      "en": "verified program access required",
+      "ar": "تتطلب صلاحية موثقة للبرامج",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 238,
+          "column": 12,
+          "endLine": 238,
+          "offset": 13306,
+          "length": 34,
+          "dartLiteral": "'verified program access required'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 238,
+          "column": 48,
+          "endLine": 238,
+          "offset": 13342,
+          "length": 28,
+          "dartLiteral": "'تتطلب صلاحية موثقة للبرامج'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.779b6eb76b74b244": {
+      "en": "high",
+      "ar": "مرتفعة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 252,
+          "column": 18,
+          "endLine": 252,
+          "offset": 13807,
+          "length": 6,
+          "dartLiteral": "'high'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 252,
+          "column": 26,
+          "endLine": 252,
+          "offset": 13815,
+          "length": 8,
+          "dartLiteral": "'مرتفعة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.783d6a8d5f13b19f": {
+      "en": "Strength circuit",
+      "ar": "دائرة تمارين المقاومة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 71,
+          "column": 11,
+          "endLine": 71,
+          "offset": 1932,
+          "length": 18,
+          "dartLiteral": "'Strength circuit'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 72,
+          "column": 13,
+          "endLine": 72,
+          "offset": 1964,
+          "length": 23,
+          "dartLiteral": "'دائرة تمارين المقاومة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.79424d816f7cdc90": {
+      "en": "measurements",
+      "ar": "القياسات",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 472,
+          "column": 20,
+          "endLine": 472,
+          "offset": 16645,
+          "length": 14,
+          "dartLiteral": "'measurements'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 472,
+          "column": 36,
+          "endLine": 472,
+          "offset": 16661,
+          "length": 10,
+          "dartLiteral": "'القياسات'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.796de05f9c6b3ede": {
+      "en": "This plan could not be validated. Open the program and review it again.",
+      "ar": "تعذر التحقق من هذه الخطة. افتح البرنامج وراجعه مجددًا.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 428,
+          "column": 11,
+          "endLine": 428,
+          "offset": 16414,
+          "length": 73,
+          "dartLiteral": "'This plan could not be validated. Open the program and review it again.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 429,
+          "column": 11,
+          "endLine": 429,
+          "offset": 16499,
+          "length": 56,
+          "dartLiteral": "'تعذر التحقق من هذه الخطة. افتح البرنامج وراجعه مجددًا.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.7b9e82fea1c4275b": {
+      "en": "Activate {p1} ({p2})? This replaces the active program and its weekly nutrition targets after the app verifies access.\n\nProposed targets:\n{p3}",
+      "ar": "تفعيل {p1} ({p2})؟ سيستبدل ذلك البرنامج النشط وأهداف التغذية الأسبوعية بعد تحقق التطبيق من صلاحية الوصول.\n\nالأهداف المقترحة:\n{p3}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 62,
+          "column": 9,
+          "endLine": 62,
+          "offset": 3636,
+          "length": 212,
+          "dartLiteral": "'Activate ${before['name']} (${resolved['pathwayId']})? This replaces the active program and its weekly nutrition targets after the app verifies access.\\n\\nProposed targets:\\n${_week(before['draftWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "before['name']",
+            "p2": "resolved['pathwayId']",
+            "p3": "_week(before['draftWeekTargets'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 63,
+          "column": 9,
+          "endLine": 63,
+          "offset": 3858,
+          "length": 201,
+          "dartLiteral": "'تفعيل ${before['nameAr']} (${resolved['pathwayId']})؟ سيستبدل ذلك البرنامج النشط وأهداف التغذية الأسبوعية بعد تحقق التطبيق من صلاحية الوصول.\\n\\nالأهداف المقترحة:\\n${_week(before['draftWeekTargets'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "before['nameAr']",
+            "p2": "resolved['pathwayId']",
+            "p3": "_week(before['draftWeekTargets'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8097599b5c4250e7": {
+      "en": "waist {p1}, hips {p2}, neck {p3}, chest {p4}, arm {p5}, thigh {p6}",
+      "ar": "الخصر {p1}، الورك {p2}، الرقبة {p3}، الصدر {p4}، الذراع {p5}، الفخذ {p6}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 11,
+          "endLine": 162,
+          "offset": 9817,
+          "length": 274,
+          "dartLiteral": "'waist ${value(row['waistCm'], suffix: ' cm')}, hips ${value(row['hipsCm'], suffix: ' cm')}, neck ${value(row['neckCm'], suffix: ' cm')}, chest ${value(row['chestCm'], suffix: ' cm')}, arm ${value(row['armCm'], suffix: ' cm')}, thigh ${value(row['thighCm'], suffix: ' cm')}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(row['waistCm'], suffix: ' cm')",
+            "p2": "value(row['hipsCm'], suffix: ' cm')",
+            "p3": "value(row['neckCm'], suffix: ' cm')",
+            "p4": "value(row['chestCm'], suffix: ' cm')",
+            "p5": "value(row['armCm'], suffix: ' cm')",
+            "p6": "value(row['thighCm'], suffix: ' cm')"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 11,
+          "endLine": 163,
+          "offset": 10103,
+          "length": 280,
+          "dartLiteral": "'الخصر ${value(row['waistCm'], suffix: ' سم')}، الورك ${value(row['hipsCm'], suffix: ' سم')}، الرقبة ${value(row['neckCm'], suffix: ' سم')}، الصدر ${value(row['chestCm'], suffix: ' سم')}، الذراع ${value(row['armCm'], suffix: ' سم')}، الفخذ ${value(row['thighCm'], suffix: ' سم')}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(row['waistCm'], suffix: ' سم')",
+            "p2": "value(row['hipsCm'], suffix: ' سم')",
+            "p3": "value(row['neckCm'], suffix: ' سم')",
+            "p4": "value(row['chestCm'], suffix: ' سم')",
+            "p5": "value(row['armCm'], suffix: ' سم')",
+            "p6": "value(row['thighCm'], suffix: ' سم')"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.80e476e36db41702": {
+      "en": "Session data is saved. Reminder scheduling could not be verified; check fasting reminders in the app.",
+      "ar": "بيانات الجلسة محفوظة. تعذر التحقق من جدولة التذكيرات؛ راجع تذكيرات الصيام في التطبيق.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 407,
+          "column": 7,
+          "endLine": 407,
+          "offset": 15217,
+          "length": 103,
+          "dartLiteral": "'Session data is saved. Reminder scheduling could not be verified; check fasting reminders in the app.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 408,
+          "column": 7,
+          "endLine": 408,
+          "offset": 15328,
+          "length": 87,
+          "dartLiteral": "'بيانات الجلسة محفوظة. تعذر التحقق من جدولة التذكيرات؛ راجع تذكيرات الصيام في التطبيق.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8213cbe47d207bdd": {
+      "en": "recorded exercise",
+      "ar": "تمرين مسجل",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 262,
+          "column": 39,
+          "endLine": 262,
+          "offset": 14222,
+          "length": 19,
+          "dartLiteral": "'recorded exercise'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 262,
+          "column": 60,
+          "endLine": 262,
+          "offset": 14243,
+          "length": 12,
+          "dartLiteral": "'تمرين مسجل'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.83e141cbf20cce83": {
+      "en": "End the active fast now",
+      "ar": "إنهاء الصيام الجاري الآن",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 181,
+          "column": 11,
+          "endLine": 181,
+          "offset": 6574,
+          "length": 25,
+          "dartLiteral": "'End the active fast now'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 182,
+          "column": 11,
+          "endLine": 182,
+          "offset": 6611,
+          "length": 26,
+          "dartLiteral": "'إنهاء الصيام الجاري الآن'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8495817d35f62e59": {
+      "en": "Read saved {p1}: {p2} to {p3}",
+      "ar": "قراءة سجل {p1}: {p2} إلى {p3}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 332,
+          "column": 7,
+          "endLine": 332,
+          "offset": 11946,
+          "length": 54,
+          "dartLiteral": "'Read saved ${topicLabel.$1}: $fromKey to $throughKey'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "topicLabel.$1",
+            "p2": "fromKey",
+            "p3": "throughKey"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 333,
+          "column": 7,
+          "endLine": 333,
+          "offset": 12008,
+          "length": 54,
+          "dartLiteral": "'قراءة سجل ${topicLabel.$2}: $fromKey إلى $throughKey'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "topicLabel.$2",
+            "p2": "fromKey",
+            "p3": "throughKey"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.85879929de5d052e": {
+      "en": "Reopen day",
+      "ar": "إعادة فتح اليوم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 9,
+          "column": 22,
+          "endLine": 9,
+          "offset": 335,
+          "length": 12,
+          "dartLiteral": "'Reopen day'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 9,
+          "column": 36,
+          "endLine": 9,
+          "offset": 349,
+          "length": 17,
+          "dartLiteral": "'إعادة فتح اليوم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8841b275a4a1867d": {
+      "en": "This answer uses manual records; device health data was not requested. Manual sleep has no saved start/end time.",
+      "ar": "تستخدم هذه الإجابة السجلات اليدوية؛ لم تُطلب بيانات الصحة من الجهاز. لا يحتوي النوم اليدوي على وقت بداية ونهاية محفوظ.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 192,
+          "column": 11,
+          "endLine": 192,
+          "offset": 11241,
+          "length": 114,
+          "dartLiteral": "'This answer uses manual records; device health data was not requested. Manual sleep has no saved start/end time.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 193,
+          "column": 11,
+          "endLine": 193,
+          "offset": 11367,
+          "length": 120,
+          "dartLiteral": "'تستخدم هذه الإجابة السجلات اليدوية؛ لم تُطلب بيانات الصحة من الجهاز. لا يحتوي النوم اليدوي على وقت بداية ونهاية محفوظ.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.89a546883f85d600": {
+      "en": "This plan requires verified program access. Review your subscription before activating it; the plan was not changed.",
+      "ar": "تتطلب هذه الخطة صلاحية موثقة للبرامج. راجع اشتراكك قبل تفعيلها؛ لم تتغير الخطة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 416,
+          "column": 11,
+          "endLine": 416,
+          "offset": 15649,
+          "length": 118,
+          "dartLiteral": "'This plan requires verified program access. Review your subscription before activating it; the plan was not changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 417,
+          "column": 11,
+          "endLine": 417,
+          "offset": 15779,
+          "length": 81,
+          "dartLiteral": "'تتطلب هذه الخطة صلاحية موثقة للبرامج. راجع اشتراكك قبل تفعيلها؛ لم تتغير الخطة.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8ac8db2825de72d9": {
+      "en": "Close {p1} with its recorded nutrition totals? Food changes will require reopening this day.",
+      "ar": "إغلاق يوم {p1} بمجاميع التغذية المسجلة؟ ستحتاج إلى إعادة فتح اليوم لتعديل الطعام.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 26,
+          "column": 9,
+          "endLine": 26,
+          "offset": 953,
+          "length": 94,
+          "dartLiteral": "'Close $day with its recorded nutrition totals? Food changes will require reopening this day.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 27,
+          "column": 9,
+          "endLine": 27,
+          "offset": 1057,
+          "length": 83,
+          "dartLiteral": "'إغلاق يوم $day بمجاميع التغذية المسجلة؟ ستحتاج إلى إعادة فتح اليوم لتعديل الطعام.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8e5922a147a8ac7c": {
+      "en": "Thursday",
+      "ar": "الخميس",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 271,
+          "column": 7,
+          "endLine": 271,
+          "offset": 14428,
+          "length": 10,
+          "dartLiteral": "'Thursday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 280,
+          "column": 7,
+          "endLine": 280,
+          "offset": 14573,
+          "length": 8,
+          "dartLiteral": "'الخميس'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8f16c65b6a896897": {
+      "en": "Replace the private note for {p1} with:\n{p2}\n\nPrevious note: {p3}.",
+      "ar": "استبدال الملاحظة الخاصة بيوم {p1} بالنص:\n{p2}\n\nالملاحظة السابقة: {p3}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 38,
+          "column": 9,
+          "endLine": 38,
+          "offset": 1624,
+          "length": 106,
+          "dartLiteral": "'Replace the private note for $day with:\\n${resolved['text']}\\n\\nPrevious note: ${value(before['note'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day",
+            "p2": "resolved['text']",
+            "p3": "value(before['note'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 39,
+          "column": 9,
+          "endLine": 39,
+          "offset": 1740,
+          "length": 110,
+          "dartLiteral": "'استبدال الملاحظة الخاصة بيوم $day بالنص:\\n${resolved['text']}\\n\\nالملاحظة السابقة: ${value(before['note'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day",
+            "p2": "resolved['text']",
+            "p3": "value(before['note'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.8f9bc5c70c2bb62a": {
+      "en": "Gentle stretching",
+      "ar": "إطالة خفيفة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 44,
+          "column": 11,
+          "endLine": 44,
+          "offset": 1289,
+          "length": 19,
+          "dartLiteral": "'Gentle stretching'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 45,
+          "column": 13,
+          "endLine": 45,
+          "offset": 1322,
+          "length": 13,
+          "dartLiteral": "'إطالة خفيفة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.903f1cbe0a3fa631": {
+      "en": "Yoga",
+      "ar": "يوغا",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 75,
+          "column": 22,
+          "endLine": 75,
+          "offset": 2041,
+          "length": 6,
+          "dartLiteral": "'Yoga'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 75,
+          "column": 38,
+          "endLine": 75,
+          "offset": 2057,
+          "length": 6,
+          "dartLiteral": "'يوغا'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.90ae43836266c301": {
+      "en": "Save the daily note for {p1}",
+      "ar": "حفظ ملاحظة يوم {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 106,
+          "column": 11,
+          "endLine": 106,
+          "offset": 4251,
+          "length": 30,
+          "dartLiteral": "'Save the daily note for $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 107,
+          "column": 11,
+          "endLine": 107,
+          "offset": 4293,
+          "length": 21,
+          "dartLiteral": "'حفظ ملاحظة يوم $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.90db2b4bdc46f93c": {
+      "en": "unavailable",
+      "ar": "غير متاحة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 256,
+          "column": 13,
+          "endLine": 256,
+          "offset": 13983,
+          "length": 13,
+          "dartLiteral": "'unavailable'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 256,
+          "column": 28,
+          "endLine": 256,
+          "offset": 13998,
+          "length": 11,
+          "dartLiteral": "'غير متاحة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.90eccbb63c861121": {
+      "en": "calories {p1}, protein {p2}, carbs {p3}, fat {p4}; {p5}",
+      "ar": "السعرات {p1}، البروتين {p2}، الكربوهيدرات {p3}، الدهون {p4}؛ {p5}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 156,
+          "column": 11,
+          "endLine": 156,
+          "offset": 9234,
+          "length": 208,
+          "dartLiteral": "'calories ${value(row['caloriesKcal'])}, protein ${value(row['proteinG'], suffix: ' g')}, carbs ${value(row['carbohydratesG'], suffix: ' g')}, fat ${value(row['fatG'], suffix: ' g')}; ${_state(row['state'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(row['caloriesKcal'])",
+            "p2": "value(row['proteinG'], suffix: ' g')",
+            "p3": "value(row['carbohydratesG'], suffix: ' g')",
+            "p4": "value(row['fatG'], suffix: ' g')",
+            "p5": "_state(row['state'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 157,
+          "column": 11,
+          "endLine": 157,
+          "offset": 9454,
+          "length": 218,
+          "dartLiteral": "'السعرات ${value(row['caloriesKcal'])}، البروتين ${value(row['proteinG'], suffix: ' غ')}، الكربوهيدرات ${value(row['carbohydratesG'], suffix: ' غ')}، الدهون ${value(row['fatG'], suffix: ' غ')}؛ ${_state(row['state'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(row['caloriesKcal'])",
+            "p2": "value(row['proteinG'], suffix: ' غ')",
+            "p3": "value(row['carbohydratesG'], suffix: ' غ')",
+            "p4": "value(row['fatG'], suffix: ' غ')",
+            "p5": "_state(row['state'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.917dc478839275db": {
+      "en": "manual steps {p1}",
+      "ar": "الخطوات اليدوية {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 217,
+          "column": 9,
+          "endLine": 217,
+          "offset": 12476,
+          "length": 63,
+          "dartLiteral": "'manual steps ${value((row['manualSteps'] as Map?)?['count'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value((row['manualSteps'] as Map?)?['count'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 218,
+          "column": 9,
+          "endLine": 218,
+          "offset": 12549,
+          "length": 66,
+          "dartLiteral": "'الخطوات اليدوية ${value((row['manualSteps'] as Map?)?['count'])}'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value((row['manualSteps'] as Map?)?['count'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.96f67b9ca73dac20": {
+      "en": "Find verified local content",
+      "ar": "البحث في المحتوى المحلي الموثق",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 29,
+          "column": 7,
+          "endLine": 29,
+          "offset": 1268,
+          "length": 29,
+          "dartLiteral": "'Find verified local content'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 30,
+          "column": 7,
+          "endLine": 30,
+          "offset": 1305,
+          "length": 32,
+          "dartLiteral": "'البحث في المحتوى المحلي الموثق'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.98ca9dfe9b6b07c2": {
+      "en": "Start a {p1}-hour fasting session at {p2}? Your existing notification setting will be used.",
+      "ar": "بدء جلسة صيام لمدة {p1} ساعة عند {p2}؟ سيُستخدم إعداد الإشعارات الحالي.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 46,
+          "column": 9,
+          "endLine": 46,
+          "offset": 2395,
+          "length": 138,
+          "dartLiteral": "'Start a ${resolved['targetHours']}-hour fasting session at ${resolved['startedAtUtc']}? Your existing notification setting will be used.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['targetHours']",
+            "p2": "resolved['startedAtUtc']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 47,
+          "column": 9,
+          "endLine": 47,
+          "offset": 2543,
+          "length": 118,
+          "dartLiteral": "'بدء جلسة صيام لمدة ${resolved['targetHours']} ساعة عند ${resolved['startedAtUtc']}؟ سيُستخدم إعداد الإشعارات الحالي.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['targetHours']",
+            "p2": "resolved['startedAtUtc']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9abf31f895ad5992": {
+      "en": "closed",
+      "ar": "مغلق",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 231,
+          "column": 20,
+          "endLine": 231,
+          "offset": 13067,
+          "length": 8,
+          "dartLiteral": "'closed'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 231,
+          "column": 30,
+          "endLine": 231,
+          "offset": 13077,
+          "length": 6,
+          "dartLiteral": "'مغلق'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9b8de10fe1e0e22f": {
+      "en": "There is no active fasting session to stop or correct.",
+      "ar": "لا توجد جلسة صيام نشطة لإنهائها أو تصحيحها.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 454,
+          "column": 9,
+          "endLine": 454,
+          "offset": 17452,
+          "length": 56,
+          "dartLiteral": "'There is no active fasting session to stop or correct.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 455,
+          "column": 9,
+          "endLine": 455,
+          "offset": 17518,
+          "length": 45,
+          "dartLiteral": "'لا توجد جلسة صيام نشطة لإنهائها أو تصحيحها.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9b8df96c532a9271": {
+      "en": " kg/week",
+      "ar": " كغ/أسبوع",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 205,
+          "column": 79,
+          "endLine": 205,
+          "offset": 11916,
+          "length": 10,
+          "dartLiteral": "' kg/week'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 206,
+          "column": 78,
+          "endLine": 206,
+          "offset": 12141,
+          "length": 11,
+          "dartLiteral": "' كغ/أسبوع'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9bee120411c65834": {
+      "en": "sleep",
+      "ar": "النوم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 469,
+          "column": 13,
+          "endLine": 469,
+          "offset": 16536,
+          "length": 7,
+          "dartLiteral": "'sleep'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 469,
+          "column": 22,
+          "endLine": 469,
+          "offset": 16545,
+          "length": 7,
+          "dartLiteral": "'النوم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9c1d428ba39cc698": {
+      "en": "not recorded",
+      "ar": "غير مسجل",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 12,
+          "column": 12,
+          "endLine": 12,
+          "offset": 482,
+          "length": 14,
+          "dartLiteral": "'not recorded'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 266,
+          "column": 32,
+          "endLine": 266,
+          "offset": 14324,
+          "length": 14,
+          "dartLiteral": "'not recorded'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 12,
+          "column": 28,
+          "endLine": 12,
+          "offset": 498,
+          "length": 10,
+          "dartLiteral": "'غير مسجل'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 266,
+          "column": 48,
+          "endLine": 266,
+          "offset": 14340,
+          "length": 10,
+          "dartLiteral": "'غير مسجل'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9ca4279d9c3c24ad": {
+      "en": "This program requires medical supervision and cannot be activated here. Open the program to review its requirements.",
+      "ar": "يتطلب هذا البرنامج إشرافًا طبيًا ولا يمكن تفعيله هنا. افتح البرنامج لمراجعة متطلباته.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 137,
+          "column": 21,
+          "endLine": 137,
+          "offset": 5236,
+          "length": 118,
+          "dartLiteral": "'This program requires medical supervision and cannot be activated here. Open the program to review its requirements.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 138,
+          "column": 21,
+          "endLine": 138,
+          "offset": 5376,
+          "length": 87,
+          "dartLiteral": "'يتطلب هذا البرنامج إشرافًا طبيًا ولا يمكن تفعيله هنا. افتح البرنامج لمراجعة متطلباته.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.9cb3f6dab310f6cb": {
+      "en": "Monday",
+      "ar": "الاثنين",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 268,
+          "column": 7,
+          "endLine": 268,
+          "offset": 14376,
+          "length": 8,
+          "dartLiteral": "'Monday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 277,
+          "column": 7,
+          "endLine": 277,
+          "offset": 14520,
+          "length": 9,
+          "dartLiteral": "'الاثنين'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.a01e3b7c44262a0e": {
+      "en": "Core strength",
+      "ar": "تقوية الجذع",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 65,
+          "column": 11,
+          "endLine": 65,
+          "offset": 1824,
+          "length": 15,
+          "dartLiteral": "'Core strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 66,
+          "column": 13,
+          "endLine": 66,
+          "offset": 1853,
+          "length": 13,
+          "dartLiteral": "'تقوية الجذع'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.a295e8f5de18c50c": {
+      "en": "Showing the newest {p1} recorded days.",
+      "ar": "تُعرض أحدث {p1} أيام مسجلة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 184,
+          "column": 11,
+          "endLine": 184,
+          "offset": 11022,
+          "length": 50,
+          "dartLiteral": "'Showing the newest ${rows.length} recorded days.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "rows.length"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 185,
+          "column": 11,
+          "endLine": 185,
+          "offset": 11084,
+          "length": 39,
+          "dartLiteral": "'تُعرض أحدث ${rows.length} أيام مسجلة.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "rows.length"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.a953c82a2d92ef29": {
+      "en": "Cancel",
+      "ar": "إلغاء",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 146,
+          "column": 30,
+          "endLine": 146,
+          "offset": 5675,
+          "length": 8,
+          "dartLiteral": "'Cancel'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 146,
+          "column": 40,
+          "endLine": 146,
+          "offset": 5685,
+          "length": 7,
+          "dartLiteral": "'إلغاء'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.ab13f61ea71b2a55": {
+      "en": "Closed {p1}. Calories: {p2}; protein: {p3}. Missing nutrients remain unrecorded.",
+      "ar": "أُغلق يوم {p1}. السعرات: {p2}؛ البروتين: {p3}. المغذيات المفقودة تبقى غير مسجلة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 72,
+          "column": 7,
+          "endLine": 72,
+          "offset": 4473,
+          "length": 159,
+          "dartLiteral": "'Closed ${receipt['date']}. Calories: ${value(receipt['calories'])}; protein: ${value(receipt['protein'], suffix: ' g')}. Missing nutrients remain unrecorded.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']",
+            "p2": "value(receipt['calories'])",
+            "p3": "value(receipt['protein'], suffix: ' g')"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 73,
+          "column": 7,
+          "endLine": 73,
+          "offset": 4640,
+          "length": 159,
+          "dartLiteral": "'أُغلق يوم ${receipt['date']}. السعرات: ${value(receipt['calories'])}؛ البروتين: ${value(receipt['protein'], suffix: ' غ')}. المغذيات المفقودة تبقى غير مسجلة.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']",
+            "p2": "value(receipt['calories'])",
+            "p3": "value(receipt['protein'], suffix: ' غ')"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.adad03dac43e762f": {
+      "en": "Read fasting status",
+      "ar": "قراءة حالة الصيام",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 19,
+          "column": 24,
+          "endLine": 19,
+          "offset": 970,
+          "length": 21,
+          "dartLiteral": "'Read fasting status'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 19,
+          "column": 47,
+          "endLine": 19,
+          "offset": 993,
+          "length": 19,
+          "dartLiteral": "'قراءة حالة الصيام'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.b46ad30815d1a93e": {
+      "en": "This program requires medical supervision and cannot be activated from Coach.",
+      "ar": "يتطلب هذا البرنامج إشرافًا طبيًا ولا يمكن تفعيله من المدرب.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 424,
+          "column": 11,
+          "endLine": 424,
+          "offset": 16222,
+          "length": 79,
+          "dartLiteral": "'This program requires medical supervision and cannot be activated from Coach.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 425,
+          "column": 11,
+          "endLine": 425,
+          "offset": 16313,
+          "length": 61,
+          "dartLiteral": "'يتطلب هذا البرنامج إشرافًا طبيًا ولا يمكن تفعيله من المدرب.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.b5b0cca5a0f3e21a": {
+      "en": "Review this plan with a qualified clinician before activating it. The plan was not changed.",
+      "ar": "راجع هذه الخطة مع مختص صحي مؤهل قبل تفعيلها. لم تتغير الخطة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 420,
+          "column": 11,
+          "endLine": 420,
+          "offset": 15956,
+          "length": 93,
+          "dartLiteral": "'Review this plan with a qualified clinician before activating it. The plan was not changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 421,
+          "column": 11,
+          "endLine": 421,
+          "offset": 16061,
+          "length": 62,
+          "dartLiteral": "'راجع هذه الخطة مع مختص صحي مؤهل قبل تفعيلها. لم تتغير الخطة.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.b6fc686ebcce862b": {
+      "en": "yes",
+      "ar": "نعم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 42,
+          "column": 177,
+          "endLine": 42,
+          "offset": 2070,
+          "length": 5,
+          "dartLiteral": "'yes'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 88,
+          "column": 117,
+          "endLine": 88,
+          "offset": 5427,
+          "length": 5,
+          "dartLiteral": "'yes'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 390,
+          "column": 141,
+          "endLine": 390,
+          "offset": 14217,
+          "length": 5,
+          "dartLiteral": "'yes'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 43,
+          "column": 177,
+          "endLine": 43,
+          "offset": 2299,
+          "length": 5,
+          "dartLiteral": "'نعم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 89,
+          "column": 114,
+          "endLine": 89,
+          "offset": 5557,
+          "length": 5,
+          "dartLiteral": "'نعم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 391,
+          "column": 128,
+          "endLine": 391,
+          "offset": 14400,
+          "length": 5,
+          "dartLiteral": "'نعم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.b7cc5c475015d0ef": {
+      "en": "Find related app health content",
+      "ar": "البحث في المحتوى الصحي للتطبيق",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 94,
+          "column": 11,
+          "endLine": 94,
+          "offset": 3869,
+          "length": 33,
+          "dartLiteral": "'Find related app health content'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 95,
+          "column": 11,
+          "endLine": 95,
+          "offset": 3914,
+          "length": 32,
+          "dartLiteral": "'البحث في المحتوى الصحي للتطبيق'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.bacbc93e4ed337d7": {
+      "en": "Save {p1} hours of manual sleep for {p2}",
+      "ar": "حفظ نوم يدوي {p1} ساعة ليوم {p2}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 216,
+          "column": 11,
+          "endLine": 216,
+          "offset": 7914,
+          "length": 44,
+          "dartLiteral": "'Save $hours hours of manual sleep for $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours",
+            "p2": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 217,
+          "column": 11,
+          "endLine": 217,
+          "offset": 7970,
+          "length": 36,
+          "dartLiteral": "'حفظ نوم يدوي $hours ساعة ليوم $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "hours",
+            "p2": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.bb4895b063801606": {
+      "en": "Save private life context for {p1}",
+      "ar": "حفظ سياق حياتي خاص ليوم {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 117,
+          "column": 11,
+          "endLine": 117,
+          "offset": 4603,
+          "length": 36,
+          "dartLiteral": "'Save private life context for $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 118,
+          "column": 11,
+          "endLine": 118,
+          "offset": 4651,
+          "length": 30,
+          "dartLiteral": "'حفظ سياق حياتي خاص ليوم $day'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "day"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.bd364aad153ba7a4": {
+      "en": "{p1} days have no record. Missing values are not zero.",
+      "ar": "{p1} أيام بلا سجل. القيم المفقودة ليست صفرًا.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 177,
+          "column": 9,
+          "endLine": 177,
+          "offset": 10805,
+          "length": 60,
+          "dartLiteral": "'$missing days have no record. Missing values are not zero.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "missing"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 178,
+          "column": 9,
+          "endLine": 178,
+          "offset": 10875,
+          "length": 51,
+          "dartLiteral": "'$missing أيام بلا سجل. القيم المفقودة ليست صفرًا.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "missing"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.bdee8a50b08ecb89": {
+      "en": " cm",
+      "ar": " سم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 50,
+          "endLine": 162,
+          "offset": 9856,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 95,
+          "endLine": 162,
+          "offset": 9901,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 140,
+          "endLine": 162,
+          "offset": 9946,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 187,
+          "endLine": 162,
+          "offset": 9993,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 230,
+          "endLine": 162,
+          "offset": 10036,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 162,
+          "column": 277,
+          "endLine": 162,
+          "offset": 10083,
+          "length": 5,
+          "dartLiteral": "' cm'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 50,
+          "endLine": 163,
+          "offset": 10142,
+          "length": 5,
+          "dartLiteral": "' سم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 96,
+          "endLine": 163,
+          "offset": 10188,
+          "length": 5,
+          "dartLiteral": "' سم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 143,
+          "endLine": 163,
+          "offset": 10235,
+          "length": 5,
+          "dartLiteral": "' سم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 190,
+          "endLine": 163,
+          "offset": 10282,
+          "length": 5,
+          "dartLiteral": "' سم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 236,
+          "endLine": 163,
+          "offset": 10328,
+          "length": 5,
+          "dartLiteral": "' سم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 163,
+          "column": 283,
+          "endLine": 163,
+          "offset": 10375,
+          "length": 5,
+          "dartLiteral": "' سم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.c0f06c68b47c8d13": {
+      "en": "There is not enough comparable weight evidence for a trend.",
+      "ar": "لا توجد قياسات وزن قابلة للمقارنة تكفي لتقدير اتجاه.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 201,
+          "column": 17,
+          "endLine": 201,
+          "offset": 11669,
+          "length": 61,
+          "dartLiteral": "'There is not enough comparable weight evidence for a trend.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 202,
+          "column": 17,
+          "endLine": 202,
+          "offset": 11748,
+          "length": 54,
+          "dartLiteral": "'لا توجد قياسات وزن قابلة للمقارنة تكفي لتقدير اتجاه.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.c4e1638466b4175a": {
+      "en": "Dance fitness",
+      "ar": "لياقة الرقص",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 59,
+          "column": 11,
+          "endLine": 59,
+          "offset": 1721,
+          "length": 15,
+          "dartLiteral": "'Dance fitness'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 60,
+          "column": 13,
+          "endLine": 60,
+          "offset": 1750,
+          "length": 13,
+          "dartLiteral": "'لياقة الرقص'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.c5a5a0f733c77c9a": {
+      "en": "Weight trend: {p1} across {p2} readings. Confidence: {p3}. This does not measure fat or muscle.",
+      "ar": "اتجاه الوزن: {p1} عبر {p2} قياسات. الثقة: {p3}. لا يقيس ذلك الدهون أو العضلات.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 205,
+          "column": 17,
+          "endLine": 205,
+          "offset": 11854,
+          "length": 208,
+          "dartLiteral": "'Weight trend: ${value(analysis['weeklyDirectionKg'], suffix: ' kg/week')} across ${analysis['sampleCount']} readings. Confidence: ${_confidence(analysis['confidence'])}. This does not measure fat or muscle.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(analysis['weeklyDirectionKg'], suffix: ' kg/week')",
+            "p2": "analysis['sampleCount']",
+            "p3": "_confidence(analysis['confidence'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 206,
+          "column": 17,
+          "endLine": 206,
+          "offset": 12080,
+          "length": 192,
+          "dartLiteral": "'اتجاه الوزن: ${value(analysis['weeklyDirectionKg'], suffix: ' كغ/أسبوع')} عبر ${analysis['sampleCount']} قياسات. الثقة: ${_confidence(analysis['confidence'])}. لا يقيس ذلك الدهون أو العضلات.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(analysis['weeklyDirectionKg'], suffix: ' كغ/أسبوع')",
+            "p2": "analysis['sampleCount']",
+            "p3": "_confidence(analysis['confidence'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.c62df779591db761": {
+      "en": "Record sleep",
+      "ar": "تسجيل النوم",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 10,
+          "column": 21,
+          "endLine": 10,
+          "offset": 389,
+          "length": 14,
+          "dartLiteral": "'Record sleep'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 10,
+          "column": 37,
+          "endLine": 10,
+          "offset": 405,
+          "length": 13,
+          "dartLiteral": "'تسجيل النوم'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.c6c8324d68a33048": {
+      "en": "This category is disabled in Coach context settings. Enable it there before asking Coach to read these records.",
+      "ar": "هذه الفئة معطلة في إعدادات سياق المدرب. فعّلها هناك قبل طلب قراءة هذه السجلات.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 266,
+          "column": 13,
+          "endLine": 266,
+          "offset": 10030,
+          "length": 113,
+          "dartLiteral": "'This category is disabled in Coach context settings. Enable it there before asking Coach to read these records.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 267,
+          "column": 13,
+          "endLine": 267,
+          "offset": 10157,
+          "length": 80,
+          "dartLiteral": "'هذه الفئة معطلة في إعدادات سياق المدرب. فعّلها هناك قبل طلب قراءة هذه السجلات.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.cadc40d5fb517210": {
+      "en": "Please give one clear health action with a date and exact value. For example: “I slept 7 hours yesterday”, “log exercise walk 20 minutes today”, or “show sleep history 7 days”. Nothing was changed.",
+      "ar": "اكتب إجراءً صحيًا واحدًا بوضوح مع التاريخ والقيمة الدقيقة. مثال: «نمت 7 ساعات أمس»، أو «سجل تمرين مشي 20 دقيقة اليوم»، أو «اعرض سجل النوم 7 أيام». لم يتغير شيء.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 69,
+          "column": 11,
+          "endLine": 69,
+          "offset": 2283,
+          "length": 199,
+          "dartLiteral": "'Please give one clear health action with a date and exact value. For example: “I slept 7 hours yesterday”, “log exercise walk 20 minutes today”, or “show sleep history 7 days”. Nothing was changed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 70,
+          "column": 11,
+          "endLine": 70,
+          "offset": 2494,
+          "length": 162,
+          "dartLiteral": "'اكتب إجراءً صحيًا واحدًا بوضوح مع التاريخ والقيمة الدقيقة. مثال: «نمت 7 ساعات أمس»، أو «سجل تمرين مشي 20 دقيقة اليوم»، أو «اعرض سجل النوم 7 أيام». لم يتغير شيء.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.cd8e612bfd144237": {
+      "en": "Stair climbing",
+      "ar": "صعود الدرج",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 52,
+          "column": 11,
+          "endLine": 52,
+          "offset": 1547,
+          "length": 16,
+          "dartLiteral": "'Stair climbing'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 53,
+          "column": 13,
+          "endLine": 53,
+          "offset": 1577,
+          "length": 12,
+          "dartLiteral": "'صعود الدرج'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d02e679d9b63e3b0": {
+      "en": "Read the saved fasting session",
+      "ar": "قراءة جلسة الصيام المحفوظة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 293,
+          "column": 9,
+          "endLine": 293,
+          "offset": 10618,
+          "length": 32,
+          "dartLiteral": "'Read the saved fasting session'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 294,
+          "column": 9,
+          "endLine": 294,
+          "offset": 10660,
+          "length": 28,
+          "dartLiteral": "'قراءة جلسة الصيام المحفوظة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d07efa98fbea01cd": {
+      "en": "I have reviewed this plan with a qualified clinician.",
+      "ar": "راجعت هذه الخطة مع مختص صحي مؤهل.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 129,
+          "column": 23,
+          "endLine": 129,
+          "offset": 4955,
+          "length": 55,
+          "dartLiteral": "'I have reviewed this plan with a qualified clinician.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 130,
+          "column": 23,
+          "endLine": 130,
+          "offset": 5034,
+          "length": 35,
+          "dartLiteral": "'راجعت هذه الخطة مع مختص صحي مؤهل.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d1a14210d79c4a4c": {
+      "en": "Upper-body strength",
+      "ar": "مقاومة للجزء العلوي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 26,
+          "column": 11,
+          "endLine": 26,
+          "offset": 931,
+          "length": 21,
+          "dartLiteral": "'Upper-body strength'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 27,
+          "column": 13,
+          "endLine": 27,
+          "offset": 966,
+          "length": 21,
+          "dartLiteral": "'مقاومة للجزء العلوي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d44cf074a029599f": {
+      "en": "Save this life-context entry for {p1}?\n{p2}\n\nUse in insights: {p3}. This is separate from Coach memory.",
+      "ar": "حفظ هذا السياق الحياتي لتاريخ {p1}؟\n{p2}\n\nالاستخدام في الرؤى: {p3}. هذا السجل منفصل عن ذاكرة المدرب.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 42,
+          "column": 9,
+          "endLine": 42,
+          "offset": 1902,
+          "length": 219,
+          "dartLiteral": "'Save this life-context entry for ${resolved['occurredAt'].toString().split('T').first}?\\n${resolved['text']}\\n\\nUse in insights: ${resolved['useInInsights'] == true ? 'yes' : 'no'}. This is separate from Coach memory.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['occurredAt'].toString().split('T').first",
+            "p2": "resolved['text']",
+            "p3": "resolved['useInInsights'] == true ? 'yes' : 'no'"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 43,
+          "column": 9,
+          "endLine": 43,
+          "offset": 2131,
+          "length": 216,
+          "dartLiteral": "'حفظ هذا السياق الحياتي لتاريخ ${resolved['occurredAt'].toString().split('T').first}؟\\n${resolved['text']}\\n\\nالاستخدام في الرؤى: ${resolved['useInInsights'] == true ? 'نعم' : 'لا'}. هذا السجل منفصل عن ذاكرة المدرب.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['occurredAt'].toString().split('T').first",
+            "p2": "resolved['text']",
+            "p3": "resolved['useInInsights'] == true ? 'نعم' : 'لا'"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d4dd9fb81475a3ec": {
+      "en": "Swimming",
+      "ar": "سباحة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 48,
+          "column": 22,
+          "endLine": 48,
+          "offset": 1389,
+          "length": 10,
+          "dartLiteral": "'Swimming'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 48,
+          "column": 42,
+          "endLine": 48,
+          "offset": 1409,
+          "length": 7,
+          "dartLiteral": "'سباحة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d526b9fb163afe67": {
+      "en": "Read recorded health history",
+      "ar": "قراءة السجل الصحي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 21,
+          "column": 7,
+          "endLine": 21,
+          "offset": 1052,
+          "length": 30,
+          "dartLiteral": "'Read recorded health history'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 22,
+          "column": 7,
+          "endLine": 22,
+          "offset": 1090,
+          "length": 19,
+          "dartLiteral": "'قراءة السجل الصحي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d55ebca94e17139a": {
+      "en": "Fasting stopped and saved in history. Duration: {p1}.",
+      "ar": "أُوقف الصيام وحُفظ في السجل. المدة: {p1}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 96,
+          "column": 7,
+          "endLine": 96,
+          "offset": 5887,
+          "length": 99,
+          "dartLiteral": "'Fasting stopped and saved in history. Duration: ${value(receipt['lastMinutes'], suffix: ' min')}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(receipt['lastMinutes'], suffix: ' min')"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 97,
+          "column": 7,
+          "endLine": 97,
+          "offset": 5994,
+          "length": 89,
+          "dartLiteral": "'أُوقف الصيام وحُفظ في السجل. المدة: ${value(receipt['lastMinutes'], suffix: ' دقيقة')}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "value(receipt['lastMinutes'], suffix: ' دقيقة')"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.d65da4b2a1016975": {
+      "en": "Active fasting session: started {p1}, target {p2} hours. Completed sessions: {p3}.",
+      "ar": "جلسة صيام نشطة: البداية {p1}، الهدف {p2} ساعة. الجلسات المكتملة: {p3}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 127,
+          "column": 15,
+          "endLine": 127,
+          "offset": 7697,
+          "length": 153,
+          "dartLiteral": "'Active fasting session: started ${result['startedAtUtc']}, target ${result['targetHours']} hours. Completed sessions: ${value(result['historyCount'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['startedAtUtc']",
+            "p2": "result['targetHours']",
+            "p3": "value(result['historyCount'])"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 128,
+          "column": 15,
+          "endLine": 128,
+          "offset": 7866,
+          "length": 141,
+          "dartLiteral": "'جلسة صيام نشطة: البداية ${result['startedAtUtc']}، الهدف ${result['targetHours']} ساعة. الجلسات المكتملة: ${value(result['historyCount'])}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['startedAtUtc']",
+            "p2": "result['targetHours']",
+            "p3": "value(result['historyCount'])"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.db558d14d09acac6": {
+      "en": "Cycling",
+      "ar": "دراجة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 17,
+          "column": 23,
+          "endLine": 17,
+          "offset": 730,
+          "length": 9,
+          "dartLiteral": "'Cycling'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 17,
+          "column": 42,
+          "endLine": 17,
+          "offset": 749,
+          "length": 7,
+          "dartLiteral": "'دراجة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.dbc195aa53b655a4": {
+      "en": " min",
+      "ar": " دقيقة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 96,
+          "column": 96,
+          "endLine": 96,
+          "offset": 5976,
+          "length": 6,
+          "dartLiteral": "' min'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 131,
+          "column": 151,
+          "endLine": 131,
+          "offset": 8189,
+          "length": 6,
+          "dartLiteral": "' min'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 221,
+          "column": 97,
+          "endLine": 221,
+          "offset": 12762,
+          "length": 6,
+          "dartLiteral": "' min'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 97,
+          "column": 84,
+          "endLine": 97,
+          "offset": 6071,
+          "length": 8,
+          "dartLiteral": "' دقيقة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 132,
+          "column": 140,
+          "endLine": 132,
+          "offset": 8340,
+          "length": 8,
+          "dartLiteral": "' دقيقة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 221,
+          "column": 105,
+          "endLine": 221,
+          "offset": 12770,
+          "length": 8,
+          "dartLiteral": "' دقيقة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.dc80b957b1761612": {
+      "en": "Nothing is saved until you confirm. You can undo a verified save while its records remain unchanged.",
+      "ar": "لن يُحفظ شيء قبل التأكيد. يمكنك التراجع عن الحفظ الموثق ما دامت سجلاته لم تتغير.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 67,
+          "column": 35,
+          "endLine": 67,
+          "offset": 4167,
+          "length": 102,
+          "dartLiteral": "'Nothing is saved until you confirm. You can undo a verified save while its records remain unchanged.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 67,
+          "column": 139,
+          "endLine": 67,
+          "offset": 4271,
+          "length": 82,
+          "dartLiteral": "'لن يُحفظ شيء قبل التأكيد. يمكنك التراجع عن الحفظ الموثق ما دامت سجلاته لم تتغير.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.dc8b62815d51b6b3": {
+      "en": "The saved fasting session could not be verified.",
+      "ar": "تعذر التحقق من جلسة الصيام المحفوظة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 120,
+          "column": 11,
+          "endLine": 120,
+          "offset": 7479,
+          "length": 50,
+          "dartLiteral": "'The saved fasting session could not be verified.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 121,
+          "column": 11,
+          "endLine": 121,
+          "offset": 7541,
+          "length": 38,
+          "dartLiteral": "'تعذر التحقق من جلسة الصيام المحفوظة.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.dd12052aea282dad": {
+      "en": "Pilates",
+      "ar": "بيلاتس",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 76,
+          "column": 25,
+          "endLine": 76,
+          "offset": 2112,
+          "length": 9,
+          "dartLiteral": "'Pilates'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 76,
+          "column": 44,
+          "endLine": 76,
+          "offset": 2131,
+          "length": 8,
+          "dartLiteral": "'بيلاتس'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.dda1a77304e438af": {
+      "en": "standard program",
+      "ar": "برنامج عام",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 240,
+          "column": 22,
+          "endLine": 240,
+          "offset": 13446,
+          "length": 18,
+          "dartLiteral": "'standard program'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 240,
+          "column": 42,
+          "endLine": 240,
+          "offset": 13466,
+          "length": 12,
+          "dartLiteral": "'برنامج عام'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.ded278739e8ae602": {
+      "en": "Tuesday",
+      "ar": "الثلاثاء",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 269,
+          "column": 7,
+          "endLine": 269,
+          "offset": 14392,
+          "length": 9,
+          "dartLiteral": "'Tuesday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 278,
+          "column": 7,
+          "endLine": 278,
+          "offset": 14537,
+          "length": 10,
+          "dartLiteral": "'الثلاثاء'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.df74c01154b2547e": {
+      "en": "No records in this period.",
+      "ar": "لا توجد سجلات في هذه الفترة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 151,
+          "column": 12,
+          "endLine": 151,
+          "offset": 9065,
+          "length": 28,
+          "dartLiteral": "'No records in this period.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 151,
+          "column": 42,
+          "endLine": 151,
+          "offset": 9095,
+          "length": 30,
+          "dartLiteral": "'لا توجد سجلات في هذه الفترة.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.e11d36f014d4ee22": {
+      "en": "Recorded data: {p1} to {p2} ({p3} days).",
+      "ar": "البيانات المسجلة: من {p1} إلى {p2} ({p3} أيام).",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 147,
+          "column": 9,
+          "endLine": 147,
+          "offset": 8820,
+          "length": 91,
+          "dartLiteral": "'Recorded data: ${result['from']} to ${result['through']} (${result['queriedDays']} days).'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['from']",
+            "p2": "result['through']",
+            "p3": "result['queriedDays']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 148,
+          "column": 9,
+          "endLine": 148,
+          "offset": 8921,
+          "length": 98,
+          "dartLiteral": "'البيانات المسجلة: من ${result['from']} إلى ${result['through']} (${result['queriedDays']} أيام).'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "result['from']",
+            "p2": "result['through']",
+            "p3": "result['queriedDays']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.eae667ddf863503a": {
+      "en": "not started",
+      "ar": "لم يبدأ",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 233,
+          "column": 24,
+          "endLine": 233,
+          "offset": 13144,
+          "length": 13,
+          "dartLiteral": "'not started'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 233,
+          "column": 39,
+          "endLine": 233,
+          "offset": 13159,
+          "length": 9,
+          "dartLiteral": "'لم يبدأ'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.eaef0fe1f5bb0ee2": {
+      "en": "Preview plan",
+      "ar": "معاينة الخطة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 18,
+          "column": 24,
+          "endLine": 18,
+          "offset": 914,
+          "length": 14,
+          "dartLiteral": "'Preview plan'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 18,
+          "column": 40,
+          "endLine": 18,
+          "offset": 930,
+          "length": 14,
+          "dartLiteral": "'معاينة الخطة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.ef0e82a5e920690b": {
+      "en": "Saturday",
+      "ar": "السبت",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 273,
+          "column": 7,
+          "endLine": 273,
+          "offset": 14462,
+          "length": 10,
+          "dartLiteral": "'Saturday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 282,
+          "column": 7,
+          "endLine": 282,
+          "offset": 14605,
+          "length": 7,
+          "dartLiteral": "'السبت'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.efb006bb0ba5f159": {
+      "en": " kcal",
+      "ar": " سعرة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 89,
+          "endLine": 288,
+          "offset": 14826,
+          "length": 7,
+          "dartLiteral": "' kcal'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 288,
+          "column": 98,
+          "endLine": 288,
+          "offset": 14835,
+          "length": 7,
+          "dartLiteral": "' سعرة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f05064bda3a97c4c": {
+      "en": "Session data is saved. Fasting reminders were cancelled on the device.",
+      "ar": "بيانات الجلسة محفوظة. أُلغيت تذكيرات الصيام على الجهاز.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 394,
+          "column": 7,
+          "endLine": 394,
+          "offset": 14515,
+          "length": 72,
+          "dartLiteral": "'Session data is saved. Fasting reminders were cancelled on the device.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 395,
+          "column": 7,
+          "endLine": 395,
+          "offset": 14595,
+          "length": 57,
+          "dartLiteral": "'بيانات الجلسة محفوظة. أُلغيت تذكيرات الصيام على الجهاز.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f090ccaae77c3a9b": {
+      "en": "Preview nutrition plan {p1}",
+      "ar": "معاينة خطة التغذية {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 278,
+          "column": 15,
+          "endLine": 278,
+          "offset": 10231,
+          "length": 35,
+          "dartLiteral": "'Preview nutrition plan $pathwayId'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "pathwayId"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 281,
+          "column": 15,
+          "endLine": 281,
+          "offset": 10346,
+          "length": 31,
+          "dartLiteral": "'معاينة خطة التغذية $pathwayId'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "pathwayId"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f0c56d46b6b0771e": {
+      "en": "Breathing recovery",
+      "ar": "تنفس للتعافي",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 79,
+          "column": 11,
+          "endLine": 79,
+          "offset": 2199,
+          "length": 20,
+          "dartLiteral": "'Breathing recovery'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 80,
+          "column": 13,
+          "endLine": 80,
+          "offset": 2233,
+          "length": 14,
+          "dartLiteral": "'تنفس للتعافي'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f2c9cdf5eccadea3": {
+      "en": "Fasting session saved: started {p1}; target {p2} hours.",
+      "ar": "حُفظت جلسة الصيام: البداية {p1}؛ المدة المستهدفة {p2} ساعة.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 92,
+          "column": 7,
+          "endLine": 92,
+          "offset": 5634,
+          "length": 100,
+          "dartLiteral": "'Fasting session saved: started ${receipt['startedAtUtc']}; target ${receipt['targetHours']} hours.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['startedAtUtc']",
+            "p2": "receipt['targetHours']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 93,
+          "column": 7,
+          "endLine": 93,
+          "offset": 5742,
+          "length": 104,
+          "dartLiteral": "'حُفظت جلسة الصيام: البداية ${receipt['startedAtUtc']}؛ المدة المستهدفة ${receipt['targetHours']} ساعة.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['startedAtUtc']",
+            "p2": "receipt['targetHours']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f4113d9187c08f47": {
+      "en": "Saved the life-context entry for {p1}. Use in insights: {p2}.",
+      "ar": "حُفظ السياق الحياتي لتاريخ {p1}. الاستخدام في الرؤى: {p2}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 88,
+          "column": 7,
+          "endLine": 88,
+          "offset": 5317,
+          "length": 125,
+          "dartLiteral": "'Saved the life-context entry for ${receipt['date']}. Use in insights: ${receipt['use_in_insights'] == true ? 'yes' : 'no'}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']",
+            "p2": "receipt['use_in_insights'] == true ? 'yes' : 'no'"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 89,
+          "column": 7,
+          "endLine": 89,
+          "offset": 5450,
+          "length": 122,
+          "dartLiteral": "'حُفظ السياق الحياتي لتاريخ ${receipt['date']}. الاستخدام في الرؤى: ${receipt['use_in_insights'] == true ? 'نعم' : 'لا'}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']",
+            "p2": "receipt['use_in_insights'] == true ? 'نعم' : 'لا'"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f50adb63ee301735": {
+      "en": "Session data is saved. Its target time has already passed.",
+      "ar": "بيانات الجلسة محفوظة. انقضى موعدها المستهدف بالفعل.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 398,
+          "column": 7,
+          "endLine": 398,
+          "offset": 14723,
+          "length": 60,
+          "dartLiteral": "'Session data is saved. Its target time has already passed.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+          "scope": "owned",
+          "line": 399,
+          "column": 7,
+          "endLine": 399,
+          "offset": 14791,
+          "length": 53,
+          "dartLiteral": "'بيانات الجلسة محفوظة. انقضى موعدها المستهدف بالفعل.'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f5172d70e7c6ea6a": {
+      "en": "Activate nutrition plan {p1}",
+      "ar": "تفعيل خطة التغذية {p1}",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 277,
+          "column": 15,
+          "endLine": 277,
+          "offset": 10180,
+          "length": 36,
+          "dartLiteral": "'Activate nutrition plan $pathwayId'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "pathwayId"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+          "scope": "owned",
+          "line": 280,
+          "column": 15,
+          "endLine": 280,
+          "offset": 10301,
+          "length": 30,
+          "dartLiteral": "'تفعيل خطة التغذية $pathwayId'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "pathwayId"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f5c8dfe20da2311d": {
+      "en": "Saved the private note for {p1}.",
+      "ar": "حُفظت الملاحظة الخاصة بيوم {p1}.",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 84,
+          "column": 7,
+          "endLine": 84,
+          "offset": 5167,
+          "length": 48,
+          "dartLiteral": "'Saved the private note for ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 85,
+          "column": 7,
+          "endLine": 85,
+          "offset": 5223,
+          "length": 48,
+          "dartLiteral": "'حُفظت الملاحظة الخاصة بيوم ${receipt['date']}.'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "receipt['date']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.f76aaa372f01c597": {
+      "en": "unavailable",
+      "ar": "غير متاح",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 234,
+          "column": 13,
+          "endLine": 234,
+          "offset": 13183,
+          "length": 13,
+          "dartLiteral": "'unavailable'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 249,
+          "column": 13,
+          "endLine": 249,
+          "offset": 13701,
+          "length": 13,
+          "dartLiteral": "'unavailable'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 234,
+          "column": 28,
+          "endLine": 234,
+          "offset": 13198,
+          "length": 10,
+          "dartLiteral": "'غير متاح'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        },
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 249,
+          "column": 28,
+          "endLine": 249,
+          "offset": 13716,
+          "length": 10,
+          "dartLiteral": "'غير متاح'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fa07e5a99902ca33": {
+      "en": "medical supervision required",
+      "ar": "تتطلب إشرافًا طبيًا",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 246,
+          "column": 7,
+          "endLine": 246,
+          "offset": 13621,
+          "length": 30,
+          "dartLiteral": "'medical supervision required'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 247,
+          "column": 7,
+          "endLine": 247,
+          "offset": 13659,
+          "length": 21,
+          "dartLiteral": "'تتطلب إشرافًا طبيًا'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fa40ff3a2e83ea49": {
+      "en": "Brisk walk",
+      "ar": "مشي سريع",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 15,
+          "column": 22,
+          "endLine": 15,
+          "offset": 580,
+          "length": 12,
+          "dartLiteral": "'Brisk walk'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+          "scope": "owned",
+          "line": 15,
+          "column": 44,
+          "endLine": 15,
+          "offset": 602,
+          "length": 10,
+          "dartLiteral": "'مشي سريع'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fad5e90622d44049": {
+      "en": "free",
+      "ar": "مجاني",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 237,
+          "column": 12,
+          "endLine": 237,
+          "offset": 13278,
+          "length": 6,
+          "dartLiteral": "'free'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 237,
+          "column": 20,
+          "endLine": 237,
+          "offset": 13286,
+          "length": 7,
+          "dartLiteral": "'مجاني'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fb58d6655418924a": {
+      "en": "low",
+      "ar": "منخفضة",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 254,
+          "column": 17,
+          "endLine": 254,
+          "offset": 13898,
+          "length": 5,
+          "dartLiteral": "'low'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 254,
+          "column": 24,
+          "endLine": 254,
+          "offset": 13905,
+          "length": 8,
+          "dartLiteral": "'منخفضة'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fca228c758a354d7": {
+      "en": "Start fasting",
+      "ar": "بدء الصيام",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 13,
+          "column": 25,
+          "endLine": 13,
+          "offset": 579,
+          "length": 15,
+          "dartLiteral": "'Start fasting'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+          "scope": "owned",
+          "line": 13,
+          "column": 42,
+          "endLine": 13,
+          "offset": 596,
+          "length": 12,
+          "dartLiteral": "'بدء الصيام'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fd874f02ddf909fe": {
+      "en": "Wednesday",
+      "ar": "الأربعاء",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 270,
+          "column": 7,
+          "endLine": 270,
+          "offset": 14409,
+          "length": 11,
+          "dartLiteral": "'Wednesday'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 279,
+          "column": 7,
+          "endLine": 279,
+          "offset": 14555,
+          "length": 10,
+          "dartLiteral": "'الأربعاء'",
+          "newOrChangedSpan": true,
+          "bindings": {}
+        }
+      ],
+      "placeholder_parity": true
+    },
+    "bil04.fe96d02d89ccc89e": {
+      "en": "Correct the active fasting session to start at {p1} with a {p2}-hour target?",
+      "ar": "تصحيح بداية جلسة الصيام الحالية إلى {p1} والمدة المستهدفة إلى {p2} ساعة؟",
+      "en_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 54,
+          "column": 9,
+          "endLine": 54,
+          "offset": 2950,
+          "length": 123,
+          "dartLiteral": "'Correct the active fasting session to start at ${resolved['startedAtUtc']} with a ${resolved['targetHours']}-hour target?'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['startedAtUtc']",
+            "p2": "resolved['targetHours']"
+          }
+        }
+      ],
+      "ar_sources": [
+        {
+          "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+          "scope": "owned",
+          "line": 55,
+          "column": 9,
+          "endLine": 55,
+          "offset": 3083,
+          "length": 119,
+          "dartLiteral": "'تصحيح بداية جلسة الصيام الحالية إلى ${resolved['startedAtUtc']} والمدة المستهدفة إلى ${resolved['targetHours']} ساعة؟'",
+          "newOrChangedSpan": true,
+          "bindings": {
+            "p1": "resolved['startedAtUtc']",
+            "p2": "resolved['targetHours']"
+          }
+        }
+      ],
+      "placeholder_parity": true
+    }
+  }
+}

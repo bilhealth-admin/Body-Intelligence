@@ -102,6 +102,11 @@ void main() {
 
     expect(find.text('Goals destination'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    // Disposing Riverpod query listeners queues one zero-duration Drift timer.
+    // Drain it in the widget-test clock before test invariants run.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1));
   });
 
   testWidgets(
@@ -198,6 +203,11 @@ void main() {
       expect(find.text('Account deletion destination'), findsOneWidget);
       expect(find.text('Community profile destination'), findsNothing);
       expect(tester.takeException(), isNull);
+      // Disposing Riverpod query listeners queues one zero-duration Drift timer.
+      // Drain it in the widget-test clock before test invariants run.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 1));
     },
   );
 }

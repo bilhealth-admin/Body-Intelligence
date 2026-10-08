@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dart",
+    "format",
+    "/workspace/scratch/ada7a97de764/validation/lib/data/repositories/meal_repository.dart",
+    "/workspace/scratch/ada7a97de764/validation/lib/data/repositories/meal_repository_copying.dart",
+    "/workspace/scratch/ada7a97de764/repository/test/parallel/bil04/closed_day_food_test.dart",
+    "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/health_query_adapter.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/repository",
+  "exit_code": 0,
+  "status": "PASS"
+}

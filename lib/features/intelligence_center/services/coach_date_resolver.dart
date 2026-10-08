@@ -9,7 +9,7 @@ class CoachDateResolver {
       final days = explicit.toSet();
       return days.length == 1 ? days.single : null;
     }
-    final local = referenceLocal.toLocal();
+    final local = referenceLocal;
     final today = DateTime(local.year, local.month, local.day);
     if (_contains(value, const ['yesterday', 'أمس', 'امس', 'مبارح'])) {
       return DateTime(today.year, today.month, today.day - 1);

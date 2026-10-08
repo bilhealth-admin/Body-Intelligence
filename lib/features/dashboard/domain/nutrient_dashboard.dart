@@ -69,12 +69,22 @@ abstract final class NutrientDashboardEvidence {
     TrackedNutrient nutrient,
   ) {
     final rows = samples.toList(growable: false);
-    if (rows.isEmpty || rows.any((row) => !row.isKnown(nutrient))) {
+    // Unknown is not zero. Keep the strictly evidenced subtotal even if one
+    // food is missing this nutrient; never call a partial sum complete.
+    final known = rows.where((row) => row.isKnown(nutrient)).toList();
+    if (known.isEmpty) {
+      return const EvidencedNutrientValue(value: null, complete: false);
+    }
+    final subtotal = known.fold<double>(
+      0,
+      (sum, row) => sum + row.values[nutrient]!,
+    );
+    if (!subtotal.isFinite) {
       return const EvidencedNutrientValue(value: null, complete: false);
     }
     return EvidencedNutrientValue(
-      value: rows.fold<double>(0, (sum, row) => sum + row.values[nutrient]!),
-      complete: true,
+      value: subtotal,
+      complete: known.length == rows.length,
     );
   }
 }

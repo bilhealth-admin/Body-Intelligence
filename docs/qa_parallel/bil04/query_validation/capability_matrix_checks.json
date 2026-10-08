@@ -1,0 +1,118 @@
+{
+  "status": "PASS_DOCUMENTATION_CONSISTENCY",
+  "capturedAtUtc": "2026-10-07T09:55:43.923995+00:00",
+  "baseSha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "finalTestedSourceDigest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87",
+  "method": "Final documentation update after reading six fresh PASS reports at48f4 and proving the exact unchanged builder addition; no new source/tool write, compiler/test invocation, Git operation or network.",
+  "finalResults": {
+    "owned": {
+      "pass": 239,
+      "files": 13,
+      "report": "final_validation/all_owned_files_final.json"
+    },
+    "nearby": {
+      "pass": 300,
+      "files": 9,
+      "report": "final_validation/nearby_regressions.json"
+    },
+    "foodJournal": {
+      "pass": 50,
+      "files": 4,
+      "report": "final_validation/food_journal_regressions.json"
+    },
+    "uniqueTotal": 589,
+    "dstRepeatedCases": 27,
+    "dstReport": "final_validation/new_york_dst_final.json",
+    "fullAnalyze": "PASS",
+    "format": {
+      "result": "PASS",
+      "files": 60,
+      "changed": 0
+    }
+  },
+  "allRequiredHealthToolIdsRepresented": [
+    "close_day",
+    "reopen_day",
+    "log_sleep",
+    "save_day_note",
+    "save_life_context",
+    "start_fasting",
+    "stop_fasting",
+    "adjust_fasting",
+    "log_exercise",
+    "activate_plan",
+    "read_health_history",
+    "read_health_progress",
+    "read_fasting",
+    "preview_plan",
+    "search_health_content"
+  ],
+  "finalSharedOwnershipReport": "query_validation/shared_ownership_audit_final.json",
+  "baseCapabilityInventorySources": 79,
+  "localization": {
+    "pairedEnArTemplates": 147,
+    "currentSourceHashes": 39,
+    "otherLocalesPending": 23,
+    "manualExclusionReport": "query_validation/health_strings_manual_review.json"
+  },
+  "independentFirstUseSourceReview": "activity_plans read-only review found no substantive issue in actual prompts, routes, preview/activation, clinical checkbox, medicalSupervision block, or proposed guide state; no compiler/test invocation.",
+  "documentSha256": {
+    "CAPABILITY_MATRIX_AR.md": "b8c0efa5ff28e6ee685daaf4d69ace044c0828d6695e39d474f94568c65aa76f",
+    "FIRST_USE_NOTES_AR.md": "7c0a46e0e00f258e07f51678f938b931b8521f2cc1535d33150e9438683ae416"
+  },
+  "limits": [
+    "Named existing Food V2 commit/card suites are inventoried, not claimed as run in these chosen gates.",
+    "The 27 DST cases repeat owned tests and are not added to 589.",
+    "Twenty-three other locales and human language/device visual review remain pending.",
+    "No connected-device Coach wiring or live-provider E2E, all-role portable integration, or production deployment is claimed."
+  ],
+  "finalSourceFileCount": 2979,
+  "previousDocumentSha256At93005": {
+    "CAPABILITY_MATRIX_AR.md": "2e925399e28e9557d30b526e57916bb91e574db1e69c30193dc3d268f9f2197e",
+    "FIRST_USE_NOTES_AR.md": "87aeb6c46b5d5ae9d2939b456be71dbd1d759d345b7173cdf3ea8b7314f366de"
+  },
+  "localizationBuilderSyncReport": "query_validation/localization_builder_source_transition.json",
+  "historicalRegistryTransitionReport": "query_validation/registry_contract_source_transition.json",
+  "freshGateSourceReports": {
+    "all_owned_files_final": {
+      "result": "PASS",
+      "passed_test_count": 239,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "nearby_regressions": {
+      "result": "PASS",
+      "passed_test_count": 300,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "food_journal_regressions": {
+      "result": "PASS",
+      "passed_test_count": 50,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "new_york_dst_final": {
+      "result": "PASS",
+      "passed_test_count": 27,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "full_analyze_final": {
+      "result": "PASS",
+      "passed_test_count": null,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    },
+    "format_final": {
+      "result": "PASS",
+      "passed_test_count": null,
+      "source_file_count": 2979,
+      "source_digest": "48f4e77f93293f0a51bcc21728b8d5db7f376c33cf61bf28eabc9255b0333e87"
+    }
+  },
+  "catalogReproductionReports": [
+    "final_validation/localization_builder_reproduction.json"
+  ],
+  "countingNote": "Fresh reruns remain 589 disjoint cases plus 27 repeated DST cases; no prior stage is counted again."
+}

@@ -1,0 +1,20 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart
+00:00 +0: log_sleep requires fresh confirmation in writeAllowed
+00:02 +1: log_exercise requires fresh confirmation in writeAllowed
+00:02 +2: cancelling model sleep and exercise proposals changes no health data
+00:03 +3: log_sleep saved in the real page can Undo after route recreation
+00:04 +4: log_exercise saved in the real page can Undo after route recreation
+00:04 +5: local plan preview reads saved draft without activation or entitlement calls
+00:05 +6: model clinical flag leaves checkbox unchecked until user reviews plan
+00:05 +7: checking clinical review cannot adopt a draft edited during the dialog
+00:06 +8: log_sleep rejects permission revoked during dialog, restored=false
+00:06 +9: log_sleep rejects delivered owner A B A during dialog
+00:07 +10: log_exercise rejects permission revoked during dialog, restored=true
+00:07 +11: log_exercise rejects delivered owner A B A during dialog
+00:07 +12: activate_plan rejects permission revoked during dialog, restored=true
+00:07 +13: activate_plan rejects delivered owner A B A during dialog
+00:08 +14: sleep read uses only requested days and never builds full context or calls model
+00:08 +15: disabled habits focus blocks sleep read before any daily query
+00:08 +16: ambiguous local sleep request clarifies without model or mutation
+00:08 +17: silent database write failure cannot show successful sleep save
+00:09 +18: All tests passed!

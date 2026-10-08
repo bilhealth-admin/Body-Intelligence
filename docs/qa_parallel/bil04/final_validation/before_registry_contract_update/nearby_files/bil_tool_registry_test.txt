@@ -1,0 +1,47 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/bil_tool_registry_test.dart
+00:00 +0: unknown tools fail closed
+00:00 +1: weight schema validates bounds, date, and extra arguments
+00:00 +2: navigation is low risk and deletion is destructive
+00:00 +3: open weight log is read-only navigation to weight history
+00:00 +4: registry is the finite model-visible allow-list
+00:00 +4 -1: registry is the finite model-visible allow-list [E]
+  Expected: an object with length of <23>
+    Actual: {
+              'close_day': Instance of 'CoachHealthToolDescriptor',
+              'reopen_day': Instance of 'CoachHealthToolDescriptor',
+              'log_sleep': Instance of 'CoachHealthToolDescriptor',
+              'save_day_note': Instance of 'CoachHealthToolDescriptor',
+              'save_life_context': Instance of 'CoachHealthToolDescriptor',
+              'start_fasting': Instance of 'CoachHealthToolDescriptor',
+              'stop_fasting': Instance of 'CoachHealthToolDescriptor',
+              'adjust_fasting': Instance of 'CoachHealthToolDescriptor',
+              'log_exercise': Instance of 'CoachHealthToolDescriptor',
+              'activate_plan': Instance of 'CoachHealthToolDescriptor',
+              'read_health_history': Instance of 'CoachHealthToolDescriptor',
+              'read_health_progress': Instance of 'CoachHealthToolDescriptor',
+              'read_fasting': Instance of 'CoachHealthToolDescriptor',
+              'preview_plan': Instance of 'CoachHealthToolDescriptor',
+              'search_health_content': Instance of 'CoachHealthToolDescriptor',
+              'navigate': Instance of 'BilToolDescriptor',
+              'read_nutrition_remaining': Instance of 'BilToolDescriptor',
+              'read_profile_identity': Instance of 'BilToolDescriptor',
+              'open_weight_log': Instance of 'BilToolDescriptor',
+              'open_meals': Instance of 'BilToolDescriptor',
+              'open_meals_yesterday': Instance of 'BilToolDescriptor',
+              'open_workouts': Instance of 'BilToolDescriptor',
+              'open_plan': Instance of 'BilToolDescriptor',
+              'open_report': Instance of 'BilToolDescriptor',
+              ...
+            }
+     Which: has length of <38>
+  
+  package:matcher                                                      expect
+  package:flutter_test/src/widget_tester.dart 473:18                   expect
+  test/features/intelligence_center/bil_tool_registry_test.dart 106:5  main.<fn>
+  
+00:00 +4 -1: navigation accepts target ids only and ambiguous meal moves fail closed
+00:00 +5 -1: meal goal and measurement writes are typed and bounded
+00:00 +6 -1: Some tests failed.
+
+Failing tests:
+  /workspace/scratch/ada7a97de764/validation/test/features/intelligence_center/bil_tool_registry_test.dart: registry is the finite model-visible allow-list

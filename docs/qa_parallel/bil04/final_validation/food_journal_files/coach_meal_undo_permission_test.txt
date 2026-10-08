@@ -1,0 +1,18 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/features/nutrition/coach_meal_undo_permission_test.dart
+00:00 +0: quick Undo revocation boundary 1 leaves rows and journal intact
+00:00 +1: quick Undo revocation boundary 2 leaves rows and journal intact
+00:00 +2: quick Undo revocation boundary 3 leaves rows and journal intact
+00:00 +3: quick Undo revocation boundary 4 leaves rows and journal intact
+00:00 +4: quantity Undo revocation boundary 1 leaves rows and journal intact
+00:00 +5: quantity Undo revocation boundary 2 leaves rows and journal intact
+00:00 +6: quantity Undo revocation boundary 3 leaves rows and journal intact
+00:00 +7: quantity Undo revocation boundary 4 leaves rows and journal intact
+00:00 +8: remove Undo revocation boundary 1 leaves rows and journal intact
+00:00 +9: remove Undo revocation boundary 2 leaves rows and journal intact
+00:00 +10: remove Undo revocation boundary 3 leaves rows and journal intact
+00:00 +11: remove Undo revocation boundary 4 leaves rows and journal intact
+00:00 +12: move Undo revocation boundary 1 leaves rows and journal intact
+00:00 +13: move Undo revocation boundary 2 leaves rows and journal intact
+00:00 +14: move Undo revocation boundary 3 leaves rows and journal intact
+00:00 +15: move Undo revocation boundary 4 leaves rows and journal intact
+00:00 +16: All tests passed!

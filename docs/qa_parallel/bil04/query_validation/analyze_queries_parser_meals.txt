@@ -1,0 +1,15 @@
+Analyzing 9 items...                                            
+
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • lib/features/intelligence_center/app_commands/coach_health_parser.dart:380:14 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • lib/features/intelligence_center/app_commands/coach_health_parser.dart:428:5 • prefer_interpolation_to_compose_strings
+   info • Use an initializing formal to assign a parameter to a field. Try using an initialing formal ('this._connectedSnapshot') to initialize the field • lib/features/intelligence_center/app_commands/health_query_adapter.dart:42:8 • prefer_initializing_formals
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/closed_day_food_test.dart:67:10 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/closed_day_food_test.dart:233:7 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/health_parser_test.dart:233:20 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/health_parser_test.dart:261:28 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/health_parser_test.dart:282:31 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/health_parser_test.dart:283:32 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/health_parser_test.dart:334:9 • prefer_interpolation_to_compose_strings
+   info • Use interpolation to compose strings and values. Try using string interpolation to build the composite string • test/parallel/bil04/health_query_connected_test.dart:231:17 • prefer_interpolation_to_compose_strings
+
+11 issues found. (ran in 9.6s)

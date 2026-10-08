@@ -1,0 +1,51 @@
+00:00 +0: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart
+00:00 +0: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: read tools map to only their required local context category
+00:00 +1: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: read guard rejects an excluded category and closes its subscription
+00:00 +2: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: a category-free read checks ownership without reading preferences
+00:00 +3: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: denied read returns before delayed cancellation and contains a later cleanup error
+00:00 +4: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: a delivered category revoke stays latched after re-enabling it
+00:00 +5: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: A to B to A during a guarded preference read cannot revive its owner visit
+00:00 +6: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: a read exception cannot hide owner cancellation after its await
+00:00 +7: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: closing a read guard removes observation and invalidates further use
+00:00 +8: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: real Drift guard close completes while another preference watcher remains active
+00:00 +9: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: an explicitly empty focus set skips every health repository read
+00:00 +10: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: habits-only brief preserves zero sleep without exposing training or nutrition
+00:00 +11: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: training-only brief preserves zero steps and excludes sleep
+00:00 +12: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: analytics reads exactly seven civil days and excludes older, future, deleted and invalid weights
+00:00 +13: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: partial nutrition keeps unknown macros absent and never derives a false remaining total
+00:00 +14: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: explicit known zero nutrition remains zero in both English and Arabic briefs
+00:00 +15: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: saved weekly targets win over conflicting defaults and gram overrides
+00:00 +16: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: valid saved percentage defaults retain the existing gram conversion
+00:00 +17: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: no saved goals or meal evidence creates neither a target nor zero intake
+00:00 +18: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: an incomplete or invalid saved goal is omitted instead of completed with invented zeros
+00:00 +19: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: brief rejects A to B to A during a repository await before any health result escapes
+00:00 +20: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: an initial witness owner mismatch rejects the brief before personal reads
+00:00 +21: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: a saved goal edit invalidates the short brief and publishes the latest target
+00:00 +22: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_read_guard_brief_test.dart: a same-day meal write refreshes the brief using only the current ledger
+00:00 +23: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart
+00:02 +23: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: Arabic sleep review has RTL and an accessible tappable Continue label
+00:05 +24: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: Arabic exercise review uses trusted Arabic name and accessible cancel
+00:05 +25: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: 320px health review at text scale 2 has no overflow and keeps Continue accessible
+00:06 +26: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: fasting save stays verified while UI reports denied device notifications
+00:07 +27: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: closing route cancels a hung fasting device deadline after durable save
+00:07 +28: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: failed postcommit readback recovers exact receipt and Undo after reopening Coach
+00:08 +29: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: approved health commit finishing after route close recovers one receipt and Undo
+00:09 +30: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_sleep requires fresh confirmation in writeAllowed
+00:10 +31: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_exercise requires fresh confirmation in writeAllowed
+00:10 +32: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: cancelling model sleep and exercise proposals changes no health data
+00:13 +33: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_sleep saved in the real page can Undo after route recreation
+00:14 +34: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_exercise saved in the real page can Undo after route recreation
+00:15 +35: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: local plan preview reads saved draft without activation or entitlement calls
+00:21 +36: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: model clinical flag leaves checkbox unchecked until user reviews plan
+00:21 +37: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: checking clinical review cannot adopt a draft edited during the dialog
+00:22 +38: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_sleep rejects permission revoked during dialog, restored=false
+00:22 +39: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_sleep rejects delivered owner A B A during dialog
+00:22 +40: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_exercise rejects permission revoked during dialog, restored=true
+00:23 +41: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: log_exercise rejects delivered owner A B A during dialog
+00:23 +42: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: activate_plan rejects permission revoked during dialog, restored=true
+00:23 +43: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: activate_plan rejects delivered owner A B A during dialog
+00:24 +44: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: sleep read uses only requested days and never builds full context or calls model
+00:31 +45: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: disabled habits focus blocks sleep read before any daily query
+00:31 +46: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: ambiguous local sleep request clarifies without model or mutation
+00:31 +47: /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/health_coach_ui_test.dart: silent database write failure cannot show successful sleep save
+00:32 +48: loading /workspace/scratch/ada7a97de764/validation/test/parallel/bil04/fasting_command_adapter_test.dart

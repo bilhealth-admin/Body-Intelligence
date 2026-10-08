@@ -21,11 +21,13 @@ class CommunityMemberProfilePage extends StatefulWidget {
   const CommunityMemberProfilePage({
     required this.userId,
     this.repository,
+    this.profileActivityDataSource,
     super.key,
   });
 
   final String userId;
   final CommunityRepository? repository;
+  final CommunityProfileActivityDataSource? profileActivityDataSource;
 
   @override
   State<CommunityMemberProfilePage> createState() =>
@@ -55,6 +57,7 @@ class _CommunityMemberProfilePageState
   final Map<String, int> _viewCounts = <String, int>{};
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
       <String, CommunityPostReferenceMetadata>{};
+  final _profileActivity = _CommunityProfileActivityState();
   late Future<void> _loading;
   DateTime? _before;
   String? _beforeId;
@@ -85,6 +88,10 @@ class _CommunityMemberProfilePageState
   void didUpdateWidget(covariant CommunityMemberProfilePage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.repository, widget.repository) ||
+        !identical(
+          oldWidget.profileActivityDataSource,
+          widget.profileActivityDataSource,
+        ) ||
         oldWidget.userId != widget.userId) {
       _endProfileVisit();
       _bindProfileOwner();
@@ -138,10 +145,6 @@ class _CommunityMemberProfilePageState
               .toList(growable: false);
           final extras = await Future.wait<Object>([
             repository.loadCommunityCreatorProfile(visit.targetId),
-            repository.loadCommunityProfileReviews(
-              userId: visit.targetId,
-              limit: _pageSize,
-            ),
             profile.isSelf
                 ? repository.listMyCommunityDrafts(limit: 50)
                 : Future<List<CommunityDraftSummary>>.value(
@@ -156,14 +159,31 @@ class _CommunityMemberProfilePageState
           ]);
           visit.check();
           creator = extras[0] as CommunityCreatorProfile;
-          reviews = extras[1] as List<CommunityProfileReview>;
-          drafts = extras[2] as List<CommunityDraftSummary>;
-          counts = extras[3] as Map<String, int>;
-          references = extras[4] as List<CommunityPostReferenceMetadata>;
+          drafts = extras[1] as List<CommunityDraftSummary>;
+          counts = extras[2] as Map<String, int>;
+          references = extras[3] as List<CommunityPostReferenceMetadata>;
           coverUrl = await repository.loadCommunityProfileCoverUrl(
             visit.targetId,
           );
           visit.check();
+          if (postsVisible) {
+            try {
+              // Reviews are a separately authorized, paginated surface. Load
+              // the first page from the owning repository; a zero-length
+              // placeholder leaves the Reviews tab permanently empty.
+              reviews = await repository.loadCommunityProfileReviews(
+                userId: visit.targetId,
+                limit: _pageSize,
+              );
+              visit.check();
+            } on CommunityOwnerOperationCancelled {
+              rethrow;
+            } on Object {
+              // An unavailable reviews endpoint must not expose private data
+              // or block the rest of an otherwise authorized profile.
+              reviews = const <CommunityProfileReview>[];
+            }
+          }
           if (profile.isSelf) {
             try {
               final rewards = await Future.wait<Object>([
@@ -229,6 +249,9 @@ class _CommunityMemberProfilePageState
     });
     try {
       await future;
+      await _reloadProfileActivityAfterRefresh();
+    } on CommunityOwnerOperationCancelled {
+      // The refreshed profile belongs to an invalidated visit.
     } on Object {
       // FutureBuilder renders the retry state.
     }
@@ -371,6 +394,8 @@ class _CommunityMemberProfilePageState
       selected: 3,
       dark: Theme.of(context).brightness == Brightness.dark,
       onSelected: (index) {
+        final visit = _captureProfileVisit();
+        if (visit == null) return;
         if (index == 2) {
           unawaited(showBilQuickAdd(context, originPath: '/community'));
         } else {
@@ -386,7 +411,7 @@ class _CommunityMemberProfilePageState
           tooltip: _gridMode
               ? communityText(context, 'List view', 'عرض القائمة')
               : communityText(context, 'Grid view', 'عرض الشبكة'),
-          onPressed: _contentTab == _CommunityProfileContentTab.moments
+          onPressed: _profileActivity.tab == _CommunityProfilePrimaryTab.posts
               ? () => setState(() => _gridMode = !_gridMode)
               : null,
           icon: Icon(
@@ -501,7 +526,7 @@ class _CommunityMemberProfilePageState
                           ),
                         ),
                       ),
-                    ..._profileContentSlivers(profile),
+                    ..._profilePrimaryContentSlivers(profile),
                     const SliverToBoxAdapter(child: SizedBox(height: 32)),
                   ],
                 ),

@@ -24,6 +24,16 @@ final class _CoachNativeReceiptReference {
       'update_goal': 'goal',
       'save_measurements': 'body_measurement',
       'save_memory': 'coach_memory',
+      'close_day': 'health_record',
+      'reopen_day': 'health_record',
+      'log_sleep': 'health_record',
+      'save_day_note': 'health_record',
+      'save_life_context': 'health_record',
+      'start_fasting': 'health_record',
+      'stop_fasting': 'health_record',
+      'adjust_fasting': 'health_record',
+      'log_exercise': 'health_record',
+      'activate_plan': 'health_record',
     };
     for (final evidence in message.evidence) {
       try {
@@ -109,6 +119,8 @@ extension _CoachNativeRecovery on _IntelligenceCenterPageState {
     List<IntelligenceMessage> restored,
   ) async {
     if (!mounted || !conversationReady) return;
+    await _restorePendingCoachHealthReceipts();
+    if (!mounted || !conversationReady) return;
     final candidates = [
       for (final message in restored.reversed)
         if (_CoachNativeReceiptReference.fromMessage(message)
@@ -188,6 +200,12 @@ extension _CoachNativeRecovery on _IntelligenceCenterPageState {
     );
     owner.scope.check(owner.database.localOwnerId, committed: true);
     _refreshCommittedCoachNative(undone.kind);
+    await _syncCoachHealthEffects(
+      result: undone,
+      preferences: owner.repository.preferences,
+      scope: owner.scope,
+    );
+    owner.scope.check(owner.database.localOwnerId, committed: true);
     if (undone.kind == CoachNativeCommandKind.memory) {
       final id = undone.command.resolved['memoryId']! as String;
       unawaited(

@@ -8,6 +8,7 @@ void main() {
         <String>[
               'intelligence_center_page.dart',
               'intelligence_conversation_voice.dart',
+              'intelligence_conversation_voice_transcript.dart',
               'intelligence_query_flow.dart',
             ]
             .map((name) {
@@ -32,15 +33,18 @@ void main() {
       'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt',
     ).readAsStringSync();
 
+    expect(page, contains('if (await _startNativeVoiceCapture('));
     expect(
       page,
-      contains('if (await _startNativeVoiceCapture(generation)) return;'),
+      contains('      generation,\n      writeTranscript: writeTranscript,'),
     );
     expect(page, contains('generation != voiceCaptureGeneration'));
     expect(page, contains('coachInBackground'));
     expect(page, contains('partialResults: true'));
     expect(page, contains('pendingVoiceTranscript = transcript'));
-    expect(page, contains('textOverride: transcript'));
+    // The atomic bridge submits only the recognized, reviewed text snapshot.
+    expect(page, contains('textOverride: submission.text'));
+    expect(page, contains('inputChannel: CoachInputChannel.voice'));
     expect(page, contains('autoDetectLanguage: true'));
     expect(page, isNot(contains('_startCloudVoiceCapture')));
     expect(page, isNot(contains('cloudVoice.start')));

@@ -59,6 +59,23 @@ class CommunityDeepLink {
   };
 
   static String? routeFor(Uri uri) {
+    // Only this verified public download-link shape can navigate to a member.
+    // Never trust lookalike hosts, login/redirect URLs or extra query fields.
+    if (uri.scheme.toLowerCase() == 'https') {
+      if (uri.host.toLowerCase() != 'www.bilhealth.com' ||
+          uri.userInfo.isNotEmpty ||
+          uri.hasPort ||
+          uri.path != '/download' ||
+          uri.fragment.isNotEmpty ||
+          uri.queryParametersAll.length != 1 ||
+          !uri.queryParametersAll.containsKey('member') ||
+          uri.queryParametersAll['member']?.length != 1) {
+        return null;
+      }
+      final code = uri.queryParametersAll['member']!.single.toLowerCase();
+      if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(code)) return null;
+      return '/community/member/$code';
+    }
     if (uri.scheme.toLowerCase() != 'bil') return null;
 
     final segments = <String>[

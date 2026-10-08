@@ -43,6 +43,7 @@ extension on _IntelligenceCenterPageState {
           : null,
       undoInProgress: undoOperations[message.id]?.running ?? false,
       animateReveal: animatedResponseIds.contains(message.id),
+      richContent: _coachFoodReceiptWidget(message),
       onAction: (action) {
         unawaited(_executeAction(action).then<void>((_) {}));
       },

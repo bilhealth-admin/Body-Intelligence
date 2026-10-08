@@ -9,6 +9,10 @@ void main() {
               'dashboard_preferences_page.dart',
               'dashboard_preferences_catalog.dart',
               'dashboard_preferences_actions.dart',
+              // The same editor is split into parts to stay inside the
+              // architecture source-file ceiling; its widget keys live here.
+              'dashboard_preferences_body.dart',
+              'dashboard_preferences_polish.dart',
             ]
             .map(
               (name) => File(

@@ -1,0 +1,644 @@
+{
+  "base_sha": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "base_tree": "8f140791e1c2adcb21122ce64a65cb168bbe90d7",
+  "observed_tree_sha": "8f140791e1c2adcb21122ce64a65cb168bbe90d7",
+  "captured_at_utc": "2026-10-07T09:12:52.515211+00:00",
+  "method": "Local Git blob SHA-1 calculation against source_tree.json; no git command, object fetch or network. These are immutable BASE sources; final overlay hash evidence belongs to the final validation manifest.",
+  "all_selected_available": true,
+  "missing_requested_paths": [],
+  "all_selected_base_blobs_match": true,
+  "base_sources": [
+    {
+      "path": "lib/app/localization/bil_locale_policy.dart",
+      "base_git_blob": "f2dad79064706e42f90e2eb030d91b5c3438a984",
+      "actual_git_blob": "f2dad79064706e42f90e2eb030d91b5c3438a984",
+      "matches_base": true,
+      "sha256": "b7c84b285de838d67a26c691e63444fa24f60ad5bb159afc1fc23668550c88f3",
+      "bytes": 2330
+    },
+    {
+      "path": "lib/app/localization/bil_locale_rollout_manifest.dart",
+      "base_git_blob": "88b64243015b8f6d93b7d57cda7e1a9cce7cedbf",
+      "actual_git_blob": "88b64243015b8f6d93b7d57cda7e1a9cce7cedbf",
+      "matches_base": true,
+      "sha256": "a2d8b12704500054b32a5064ff8b81437c232d2cec900c1c2c8776a46ff8f433",
+      "bytes": 4497
+    },
+    {
+      "path": "lib/app/router/app_router.dart",
+      "base_git_blob": "dd8e3a52c7ac5aa0439ef44e7d3bf7881f6056bd",
+      "actual_git_blob": "dd8e3a52c7ac5aa0439ef44e7d3bf7881f6056bd",
+      "matches_base": true,
+      "sha256": "cc2094b602d48f78d7b5b7c77b002d597744b169ba56e464aab6df70676d17e5",
+      "bytes": 23774
+    },
+    {
+      "path": "lib/app/router/app_wellness_routes.dart",
+      "base_git_blob": "7fbf634a7f257f3dde19a4cc915894762cfec563",
+      "actual_git_blob": "7fbf634a7f257f3dde19a4cc915894762cfec563",
+      "matches_base": true,
+      "sha256": "5a8775e51db376f73be7c467321fe1f184ddcf5e8819b7000329341ade0d6298",
+      "bytes": 2265
+    },
+    {
+      "path": "lib/data/repositories/body_measurement_repository.dart",
+      "base_git_blob": "3ec340b972e6a6ce1203a7d1a0fce73e872152a2",
+      "actual_git_blob": "3ec340b972e6a6ce1203a7d1a0fce73e872152a2",
+      "matches_base": true,
+      "sha256": "3ad2237e52253f92365497656c5b4be850c3cf25011e4352e142dbf9efdbd936",
+      "bytes": 4369
+    },
+    {
+      "path": "lib/data/repositories/daily_log_repository.dart",
+      "base_git_blob": "38f514156cfdced075a9225fb0285b1fc9394c47",
+      "actual_git_blob": "38f514156cfdced075a9225fb0285b1fc9394c47",
+      "matches_base": true,
+      "sha256": "4a614734ed9dae3a77f21a1b9b79e79e13a59bd06e188974c92d0d7f7e8b4f83",
+      "bytes": 12511
+    },
+    {
+      "path": "lib/data/repositories/goal_repository.dart",
+      "base_git_blob": "d98f5a1f8d2c3f7dcc72c148349e3ae448f4a73e",
+      "actual_git_blob": "d98f5a1f8d2c3f7dcc72c148349e3ae448f4a73e",
+      "matches_base": true,
+      "sha256": "0acc1638dab5055fb879aa65acfaf0cfd51ab975ed7cd5f4c9864b89b30c6350",
+      "bytes": 2538
+    },
+    {
+      "path": "lib/data/repositories/life_context_repository.dart",
+      "base_git_blob": "769ba47b5180c0ee315d15285c07a138596e09d4",
+      "actual_git_blob": "769ba47b5180c0ee315d15285c07a138596e09d4",
+      "matches_base": true,
+      "sha256": "ac478348a12369861e2cb000f1139acdef118f2a299b033ab0d4f03614b22f98",
+      "bytes": 2947
+    },
+    {
+      "path": "lib/data/repositories/meal_repository.dart",
+      "base_git_blob": "e18501a98cab10b0b9eb39381246738e6395fbc4",
+      "actual_git_blob": "e18501a98cab10b0b9eb39381246738e6395fbc4",
+      "matches_base": true,
+      "sha256": "e2441a31b74c52a8dfeaad5f639237a3f0f2a9eb38fb8b4ec2c2ac1e2aa9f90d",
+      "bytes": 23439
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_commands.dart",
+      "base_git_blob": "aeeb3d92db3ca1dc63398ea273ebdb5e7d8c06cd",
+      "actual_git_blob": "aeeb3d92db3ca1dc63398ea273ebdb5e7d8c06cd",
+      "matches_base": true,
+      "sha256": "b8da0b84afcc7dfc7354fa38b9ebbd9ae74685316f84aa6e901cb8c3b0d12527",
+      "bytes": 11295
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_food.dart",
+      "base_git_blob": "da064d6161e5f76888d0da81e505fa47ec8a514d",
+      "actual_git_blob": "da064d6161e5f76888d0da81e505fa47ec8a514d",
+      "matches_base": true,
+      "sha256": "dd7110915b4ba622d7235e3ca30c16f3e6b9978cd7f5d7ac1bd3199a7ad0edb5",
+      "bytes": 7641
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_models.dart",
+      "base_git_blob": "155ff14fc7931506b4e304eae9016f86189e9639",
+      "actual_git_blob": "155ff14fc7931506b4e304eae9016f86189e9639",
+      "matches_base": true,
+      "sha256": "0db177a33af91c3b9ff11d82c794a6fa3defd11698b36cb4872b8db54f99de02",
+      "bytes": 12084
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_coach_undo.dart",
+      "base_git_blob": "56b5e2cbed1a53534111195f250a81236e688dc2",
+      "actual_git_blob": "56b5e2cbed1a53534111195f250a81236e688dc2",
+      "matches_base": true,
+      "sha256": "5f5a8adcefa72d7993831b92318042f5e05aa270ac2af9ae862506726938483d",
+      "bytes": 7397
+    },
+    {
+      "path": "lib/data/repositories/meal_repository_copying.dart",
+      "base_git_blob": "6e45b9e4a6d705b249feb3552c3b889ff84fa993",
+      "actual_git_blob": "6e45b9e4a6d705b249feb3552c3b889ff84fa993",
+      "matches_base": true,
+      "sha256": "e9148b29217692be655ae0320b487f635b86519d8bd30ea08925974534aedb96",
+      "bytes": 9732
+    },
+    {
+      "path": "lib/data/repositories/nutrition_goal_schedule_repository.dart",
+      "base_git_blob": "c090872d51100d61cd3a687398c7dc833b22b8f3",
+      "actual_git_blob": "c090872d51100d61cd3a687398c7dc833b22b8f3",
+      "matches_base": true,
+      "sha256": "f2e5307992ae1f6b7ca80a8be67814f0487d9966333f4441ecde03231ed13802",
+      "bytes": 9696
+    },
+    {
+      "path": "lib/data/repositories/preferences_repository.dart",
+      "base_git_blob": "29d925200c090e1a711ff28d42c09cffa2c6507e",
+      "actual_git_blob": "29d925200c090e1a711ff28d42c09cffa2c6507e",
+      "matches_base": true,
+      "sha256": "2d4b5150dab00ea194cb643fdfdb0d1db2f4058a98e578e62656cad5f4f86913",
+      "bytes": 4787
+    },
+    {
+      "path": "lib/data/repositories/user_profile_repository.dart",
+      "base_git_blob": "b8d6b46eeabb919af6d3682e8b1476d69198c11c",
+      "actual_git_blob": "b8d6b46eeabb919af6d3682e8b1476d69198c11c",
+      "matches_base": true,
+      "sha256": "a226c718250f8baeb02b0d7999fa8434569b6ccec6716cec7d0f26ff5076d84c",
+      "bytes": 2411
+    },
+    {
+      "path": "lib/data/repositories/water_repository.dart",
+      "base_git_blob": "8b31a53a4306e26ed396c26710be9bbde4af3a9b",
+      "actual_git_blob": "8b31a53a4306e26ed396c26710be9bbde4af3a9b",
+      "matches_base": true,
+      "sha256": "53344ad022309afbedc3bc66e15ad419661b77fada135ffac62ce1894a8c5254",
+      "bytes": 2262
+    },
+    {
+      "path": "lib/data/repositories/weight_repository.dart",
+      "base_git_blob": "1480203747d06567da48817aa7b85e7e25180d45",
+      "actual_git_blob": "1480203747d06567da48817aa7b85e7e25180d45",
+      "matches_base": true,
+      "sha256": "1c4d195361b40572d87068a28fc04cfd3f0e78c98bc1dcf765af81a34183f9a9",
+      "bytes": 5968
+    },
+    {
+      "path": "lib/engine/progress_analysis.dart",
+      "base_git_blob": "f38568e78481cb8452ce136c059ce5ffd21953dc",
+      "actual_git_blob": "f38568e78481cb8452ce136c059ce5ffd21953dc",
+      "matches_base": true,
+      "sha256": "1b50174415809ffb3dcdefb7fd8bd470afdb37b35f072dbccfb2e33e9540d5be",
+      "bytes": 4341
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_daily_history.dart",
+      "base_git_blob": "7d9a91e8959b508a37be51f10aec307b7382dcba",
+      "actual_git_blob": "7d9a91e8959b508a37be51f10aec307b7382dcba",
+      "matches_base": true,
+      "sha256": "11a7c85cfcc80bc074441afb00f0818c6cfaa1de7c6a1b46cc0022391ad2dce7",
+      "bytes": 8470
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_daily_history_view.dart",
+      "base_git_blob": "582f4f9867792369fe24edca3f23c5f7b0ed29e4",
+      "actual_git_blob": "582f4f9867792369fe24edca3f23c5f7b0ed29e4",
+      "matches_base": true,
+      "sha256": "d9bc8d34dd1996c007974c5ec3a47237fe2e6e097d86a7300d5866781ec89e8a",
+      "bytes": 8604
+    },
+    {
+      "path": "lib/features/connected_health/connected_health_model.dart",
+      "base_git_blob": "9798bb47f7253e6260c497e05b8f4ec645e2e0de",
+      "actual_git_blob": "9798bb47f7253e6260c497e05b8f4ec645e2e0de",
+      "matches_base": true,
+      "sha256": "e9ea348c2835e7cc595252cf7460c7ff37bd6bf77321654b01e660bfd4d48a08",
+      "bytes": 9394
+    },
+    {
+      "path": "lib/features/connected_health/providers/connected_health_provider.dart",
+      "base_git_blob": "cc925d2d1af59bf2f686c95d0a8c88fa6e4010f3",
+      "actual_git_blob": "cc925d2d1af59bf2f686c95d0a8c88fa6e4010f3",
+      "matches_base": true,
+      "sha256": "9ae3eff107578b44e044d532c9ab9a26e56b1d9e2063b2e224376709fa006157",
+      "bytes": 22453
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+      "base_git_blob": "d7ae13f1403240e51a9ecce0ce76a523156b94de",
+      "actual_git_blob": "d7ae13f1403240e51a9ecce0ce76a523156b94de",
+      "matches_base": true,
+      "sha256": "a19e9dd85affcf06dc70cb2eeffe4506dab455c7b2a1345c1acadb2388b6a4ee",
+      "bytes": 14035
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "base_git_blob": "5eeed059b7fbf6c5b56edc517e9abb627a831c6f",
+      "actual_git_blob": "5eeed059b7fbf6c5b56edc517e9abb627a831c6f",
+      "matches_base": true,
+      "sha256": "9c92bfe155c887b24ee9f9a1658a4a14d2c4eb473223cfa74fe294765cd14b74",
+      "bytes": 8022
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_action_permission.dart",
+      "base_git_blob": "58ef55587dc2726ecec48a8f29fcc87832b345cb",
+      "actual_git_blob": "58ef55587dc2726ecec48a8f29fcc87832b345cb",
+      "matches_base": true,
+      "sha256": "31d0d5cb33cc1e4e2a35ea8a53f20e8eff0d6c5898048d374a87fa3440c56096",
+      "bytes": 892
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/food_v2/coach_food_v2.dart",
+      "base_git_blob": "0c8a3161ddd3c0cd7f3cce157c2370b11ffe252b",
+      "actual_git_blob": "0c8a3161ddd3c0cd7f3cce157c2370b11ffe252b",
+      "matches_base": true,
+      "sha256": "74c0ecce5614b77fec3fb2ff159d17d8b79b119c845409110789ea5b79dc0551",
+      "bytes": 2635
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_action.dart",
+      "base_git_blob": "5d11d960967a600f8d4c1d13645f5e4d213fc586",
+      "actual_git_blob": "5d11d960967a600f8d4c1d13645f5e4d213fc586",
+      "matches_base": true,
+      "sha256": "665b90820de77c2682495af46815d327eebca9db432b7ff060bd7efc470ff3b5",
+      "bytes": 1918
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "base_git_blob": "efb5f8352cecf269c00ba9b7e6d6e149685d1fec",
+      "actual_git_blob": "efb5f8352cecf269c00ba9b7e6d6e149685d1fec",
+      "matches_base": true,
+      "sha256": "9c0aa87046c201c0a1dbda91e5154e2bdd8cb755513240d5484199dde782b0e4",
+      "bytes": 19796
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_action_flow.dart",
+      "base_git_blob": "ce4767df299753181acd2be7c63207b4aec6bf69",
+      "actual_git_blob": "ce4767df299753181acd2be7c63207b4aec6bf69",
+      "matches_base": true,
+      "sha256": "d2149d2d5f05b073547bddd80bded6b2003ab2c24d88a1c49fa204a65b9de958",
+      "bytes": 7317
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_meal_owner.dart",
+      "base_git_blob": "19069f10c1dd7effc8df074677673e531ac59a0f",
+      "actual_git_blob": "19069f10c1dd7effc8df074677673e531ac59a0f",
+      "matches_base": true,
+      "sha256": "c86f6efa0bce8abe72831212104164dadaacefa80f9cb22b86f4b7dc9295227f",
+      "bytes": 6487
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "base_git_blob": "fee970b0a8f03d47f73595974ce27a48f548d8bd",
+      "actual_git_blob": "fee970b0a8f03d47f73595974ce27a48f548d8bd",
+      "matches_base": true,
+      "sha256": "ddae7c798851c8b673f1c1d537c121aae7ba321877dabbea332d607c5fc21483",
+      "bytes": 9229
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+      "base_git_blob": "dceff3d2d658d0b4412b66de90b87fd453c27ae9",
+      "actual_git_blob": "dceff3d2d658d0b4412b66de90b87fd453c27ae9",
+      "matches_base": true,
+      "sha256": "fb91ea7f57f4c03982f92ad09d04b2502b0a3af3dd1fa1846fb4eafd8a2701e6",
+      "bytes": 6911
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_catalog_grounding.dart",
+      "base_git_blob": "4f6d3dcd30cbed7abb3d5e69c03e72fe3dbba523",
+      "actual_git_blob": "4f6d3dcd30cbed7abb3d5e69c03e72fe3dbba523",
+      "matches_base": true,
+      "sha256": "0590b349117939c0b33e73949a067b2429d9a07b92d587c16affe31bec550bdd",
+      "bytes": 7017
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_date_resolver.dart",
+      "base_git_blob": "9cbe9e7fd90361039d1a69fd347ab41c3520fff9",
+      "actual_git_blob": "9cbe9e7fd90361039d1a69fd347ab41c3520fff9",
+      "matches_base": true,
+      "sha256": "667c519b54967944e6653c9fca8e24a278c4327b9e782325e7c562765c997ea0",
+      "bytes": 4904
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_memory_repository.dart",
+      "base_git_blob": "b6817679cfdfd9196a56a85d13a54e807d0f6413",
+      "actual_git_blob": "b6817679cfdfd9196a56a85d13a54e807d0f6413",
+      "matches_base": true,
+      "sha256": "8a1433c3b712b492f37f3b872c0009226c00e3cd704ef870c3bc4c077a1707ed",
+      "bytes": 6436
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+      "base_git_blob": "7cb2c28f8b0ce4aafd1d98cc91ceeb431b4b11c4",
+      "actual_git_blob": "7cb2c28f8b0ce4aafd1d98cc91ceeb431b4b11c4",
+      "matches_base": true,
+      "sha256": "560016bd51a62ef73a2e807f71e2bf4df2c55a94b6d69a4e16b7defe95e299f8",
+      "bytes": 5842
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_models.dart",
+      "base_git_blob": "c8ca0888f5f1e0dbbb121221449720f486015b84",
+      "actual_git_blob": "c8ca0888f5f1e0dbbb121221449720f486015b84",
+      "matches_base": true,
+      "sha256": "a17cf2a7b320cdb411f7957b06ebd5bae3d75c5bf885d8055993e4d228a9c6f0",
+      "bytes": 5499
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "base_git_blob": "38da42bb632130599b66785127fc55f5176e0d07",
+      "actual_git_blob": "38da42bb632130599b66785127fc55f5176e0d07",
+      "matches_base": true,
+      "sha256": "2ef8821981692d9a9ef50ad38884ffe1180f53e4d4c533c919888bd0725e7b8e",
+      "bytes": 8195
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_snapshot.dart",
+      "base_git_blob": "23a5a7041f2a4ab82623e1c400ec49b158f5fa85",
+      "actual_git_blob": "23a5a7041f2a4ab82623e1c400ec49b158f5fa85",
+      "matches_base": true,
+      "sha256": "e517d1383b1b4478b700c36e1fb69353f2c742a06e6da229b1fdfdf5d6e78ef6",
+      "bytes": 8167
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_undo.dart",
+      "base_git_blob": "7da68567952902e220633187de68877ce201ee10",
+      "actual_git_blob": "7da68567952902e220633187de68877ce201ee10",
+      "matches_base": true,
+      "sha256": "376787bf070b8223e9cbef1f3de56e3e48d3d4936435a8fd587e4789ed4dfe79",
+      "bytes": 7714
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_writes.dart",
+      "base_git_blob": "f82b17ce9f7b263e30fc7579730a675aa6e82153",
+      "actual_git_blob": "f82b17ce9f7b263e30fc7579730a675aa6e82153",
+      "matches_base": true,
+      "sha256": "c18a892543506a8c62b68417e397d028ea54eafa0b2e826fd61b41c535f80256",
+      "bytes": 7662
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+      "base_git_blob": "d73aeb80444bf215aee445fd0d00bdf40062b968",
+      "actual_git_blob": "d73aeb80444bf215aee445fd0d00bdf40062b968",
+      "matches_base": true,
+      "sha256": "bbfb36f10e57c5165875717f52286932916ba3c8c3ec86cef5b727229708a1be",
+      "bytes": 14479
+    },
+    {
+      "path": "lib/features/nutrition_plans/data/diet_plan_repository.dart",
+      "base_git_blob": "4a7e75fc3baddb8eaba0d5760c8410dcd67f654a",
+      "actual_git_blob": "4a7e75fc3baddb8eaba0d5760c8410dcd67f654a",
+      "matches_base": true,
+      "sha256": "1ce3de5357d0780d03aeb380700502b925bb2e3e640b61f48f366561f236c1b4",
+      "bytes": 6540
+    },
+    {
+      "path": "lib/features/nutrition_plans/domain/nutrition_pathway.dart",
+      "base_git_blob": "3d61ec76bb263b5d7c42e17bd422d5198fe16158",
+      "actual_git_blob": "3d61ec76bb263b5d7c42e17bd422d5198fe16158",
+      "matches_base": true,
+      "sha256": "dd654296c13d629c11b1011b30bd8a456360baa4d2732c7b9d5a23020fad8c36",
+      "bytes": 1535
+    },
+    {
+      "path": "lib/features/wellness/presentation/fasting_timer_actions.dart",
+      "base_git_blob": "cdc4d6d6e3390ecd3788ecb3adb2d113246a2363",
+      "actual_git_blob": "cdc4d6d6e3390ecd3788ecb3adb2d113246a2363",
+      "matches_base": true,
+      "sha256": "b1bc6fb75c54e586920e082a3aa8d6e0bc1dc82097f63341b02bec7fd7f562a4",
+      "bytes": 8130
+    },
+    {
+      "path": "lib/features/wellness/presentation/sleep_tracker_experience.dart",
+      "base_git_blob": "56e40e620fd30b1963982e6cbb512a85d1246d95",
+      "actual_git_blob": "56e40e620fd30b1963982e6cbb512a85d1246d95",
+      "matches_base": true,
+      "sha256": "9c2259883b8ecc112a48a3163c11228295ee1e5848a8e69eccb010a5f562077b",
+      "bytes": 29384
+    },
+    {
+      "path": "lib/features/wellness/presentation/workout_library_page.dart",
+      "base_git_blob": "84c8fe3d48310bb503fe1a3f887fa3d2adc5ba0d",
+      "actual_git_blob": "84c8fe3d48310bb503fe1a3f887fa3d2adc5ba0d",
+      "matches_base": true,
+      "sha256": "36d5a0d3f609776cf371d9025b932f211de3abc4a90fbfb997bfb8e8b0187f1b",
+      "bytes": 18405
+    },
+    {
+      "path": "test/authoritative_daily_ledger_test.dart",
+      "base_git_blob": "6ce75f1f25a2d0129566812d99724116ec8f83b5",
+      "actual_git_blob": "6ce75f1f25a2d0129566812d99724116ec8f83b5",
+      "matches_base": true,
+      "sha256": "46618d9550639ff9918ae2c5d316c5d060d393c6cfb65e0e17df923b06736132",
+      "bytes": 5802
+    },
+    {
+      "path": "test/features/intelligence_center/bil_tool_registry_test.dart",
+      "base_git_blob": "30bd5740c7d1da42f5c3a1fee4e9004231986f8a",
+      "actual_git_blob": "30bd5740c7d1da42f5c3a1fee4e9004231986f8a",
+      "matches_base": true,
+      "sha256": "d328739664e6396cd58a61bffb2ae590b7b52c6cac9c36f97ee0224c4c0cce17",
+      "bytes": 6609
+    },
+    {
+      "path": "test/features/intelligence_center/coach_action_admission_contract_test.dart",
+      "base_git_blob": "2396871b3dfa3ab818a6337ff9b17e74f70045cf",
+      "actual_git_blob": "2396871b3dfa3ab818a6337ff9b17e74f70045cf",
+      "matches_base": true,
+      "sha256": "e4c6b4b59ac98f5400f5d1e55e3326b50a78dca54f2472787d4671d669e2f10a",
+      "bytes": 15359
+    },
+    {
+      "path": "test/features/intelligence_center/coach_action_permission_test.dart",
+      "base_git_blob": "89a660a87fcb157b60c90f571d990d694c15a9e1",
+      "actual_git_blob": "89a660a87fcb157b60c90f571d990d694c15a9e1",
+      "matches_base": true,
+      "sha256": "a7b5c16c4ac4b1b6d03dcd118cec7b4af27d778c89bf7e04e8a1cef384d4ab71",
+      "bytes": 1375
+    },
+    {
+      "path": "test/features/intelligence_center/coach_catalog_deep_link_contract_test.dart",
+      "base_git_blob": "a07cbf0bd62990781ea113f1a27a4d82c1818392",
+      "actual_git_blob": "a07cbf0bd62990781ea113f1a27a4d82c1818392",
+      "matches_base": true,
+      "sha256": "f60d537dfd91a225b2b89d8ac6f9f2dd3efb1d34d3c8fc3c8d39a42a7a1d2f22",
+      "bytes": 2511
+    },
+    {
+      "path": "test/features/intelligence_center/coach_catalog_grounding_test.dart",
+      "base_git_blob": "59325f40f7cd23c94e99b208e88e0761a9543d14",
+      "actual_git_blob": "59325f40f7cd23c94e99b208e88e0761a9543d14",
+      "matches_base": true,
+      "sha256": "5ecf306d78584d17a64a50cdc49ee84d4340f0ed2e96ce74401dd3128d02724b",
+      "bytes": 3181
+    },
+    {
+      "path": "test/features/intelligence_center/coach_food_cards_test.dart",
+      "base_git_blob": "6c59517acac6de200a0664b38711295241ae9acb",
+      "actual_git_blob": "6c59517acac6de200a0664b38711295241ae9acb",
+      "matches_base": true,
+      "sha256": "21b07a15a772153c28e8309664fcb1a19a9c29297d7c245690e66ab6b1de31b0",
+      "bytes": 20901
+    },
+    {
+      "path": "test/features/intelligence_center/coach_meal_gram_boundary_behavior_test.dart",
+      "base_git_blob": "11726bceadf62f5d59977dc7cb44f68a4687d4be",
+      "actual_git_blob": "11726bceadf62f5d59977dc7cb44f68a4687d4be",
+      "matches_base": true,
+      "sha256": "4b90b06ab7ff90d35a6a7efb6ff3dd2e035f40a96b6a0372df6e47cd0b41680a",
+      "bytes": 8232
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_admission_behavior_test.dart",
+      "base_git_blob": "10cf7dcf91b33dc62ac3c20268acc32b837046e6",
+      "actual_git_blob": "10cf7dcf91b33dc62ac3c20268acc32b837046e6",
+      "matches_base": true,
+      "sha256": "5a5366b5007b8156db4ba72d3f4910bb237ca3b141fb8f27a942837759141d5c",
+      "bytes": 20370
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_behavior_cases.dart",
+      "base_git_blob": "69342453e298447551bf9320c56270ddd97074ad",
+      "actual_git_blob": "69342453e298447551bf9320c56270ddd97074ad",
+      "matches_base": true,
+      "sha256": "12429ea09d5ecab8049f0cf4dc12eb26a06d0c91afd0c1d1af450b6ac0424c27",
+      "bytes": 7875
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_behavior_test.dart",
+      "base_git_blob": "d7cbcaf520e5f65b85dc5519236d981aefcd883d",
+      "actual_git_blob": "d7cbcaf520e5f65b85dc5519236d981aefcd883d",
+      "matches_base": true,
+      "sha256": "d8a3cd03319010cfc4a18d47c3d568e272238c184cf6e94c4238c3ad01a39d19",
+      "bytes": 9305
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_recovery_cases.dart",
+      "base_git_blob": "5874ba044bcb1d872e920a4099af35365dd8862d",
+      "actual_git_blob": "5874ba044bcb1d872e920a4099af35365dd8862d",
+      "matches_base": true,
+      "sha256": "b5e75384145c0e2edbded57a0d74b79653efa1967f1354e98f3d81ac6f247d35",
+      "bytes": 11204
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_repository_cases.dart",
+      "base_git_blob": "468e66cd6b597d8d08c7dde3a1e99f402db7024f",
+      "actual_git_blob": "468e66cd6b597d8d08c7dde3a1e99f402db7024f",
+      "matches_base": true,
+      "sha256": "abf960a5da2ad0cb6b435b902a7940947a59b25e0b0e45311686642c180c0eb3",
+      "bytes": 14746
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_command_repository_test.dart",
+      "base_git_blob": "71123d36dc363b0b8e1d37a60a9cf7cd1abd71aa",
+      "actual_git_blob": "71123d36dc363b0b8e1d37a60a9cf7cd1abd71aa",
+      "matches_base": true,
+      "sha256": "f3dd688340b4e163f165f907bf4cc3e29849ae810d0f1e85d3c33070100bb07a",
+      "bytes": 5609
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_operation_readback_cases.dart",
+      "base_git_blob": "694faa2cfc9882c263df719d9cda93dfb07124d1",
+      "actual_git_blob": "694faa2cfc9882c263df719d9cda93dfb07124d1",
+      "matches_base": true,
+      "sha256": "7cc8fad9e9224198ee3c6fcd77fff3b2ad4d42f4845472e394ba0c3dd9725015",
+      "bytes": 7726
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_recovery_lifecycle_cases.dart",
+      "base_git_blob": "6e283a77871f32fd831fbc8d8e593c8755d3632c",
+      "actual_git_blob": "6e283a77871f32fd831fbc8d8e593c8755d3632c",
+      "matches_base": true,
+      "sha256": "1bb739527c4303415636735b5e062deb037f90a956bbf869b7830ef5794a8208",
+      "bytes": 12675
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_undo_permission_cases.dart",
+      "base_git_blob": "e7ee4f339b57ebd12375a2a99cb8f8b10ca6c861",
+      "actual_git_blob": "e7ee4f339b57ebd12375a2a99cb8f8b10ca6c861",
+      "matches_base": true,
+      "sha256": "e27cb8fd9e14059d6cac6ee25ffa497616891de8491fbdc417cdb856943ff82c",
+      "bytes": 6004
+    },
+    {
+      "path": "test/features/intelligence_center/coach_native_undo_permission_repository_cases.dart",
+      "base_git_blob": "55725276c72f93b73f6ea827b601fec8f0f5f245",
+      "actual_git_blob": "55725276c72f93b73f6ea827b601fec8f0f5f245",
+      "matches_base": true,
+      "sha256": "d450a7f50356f6b89e65fe438f8d878c4f01eca4d5c5f0c57e321c2090388173",
+      "bytes": 2767
+    },
+    {
+      "path": "test/features/intelligence_center/coach_parser_numeric_intent_regression_test.dart",
+      "base_git_blob": "10db17eb9027507fa91ded5ee47982f7ae33b8c0",
+      "actual_git_blob": "10db17eb9027507fa91ded5ee47982f7ae33b8c0",
+      "matches_base": true,
+      "sha256": "169fbfb790b43ba847d657f474ed4ec6b9c703d423d34e4aa55e5cf02558bee0",
+      "bytes": 8525
+    },
+    {
+      "path": "test/features/nutrition/coach_food_commit_test.dart",
+      "base_git_blob": "b69347697e0b799f10f9617acc9f73a733d1e1d8",
+      "actual_git_blob": "b69347697e0b799f10f9617acc9f73a733d1e1d8",
+      "matches_base": true,
+      "sha256": "13a26e827359f0df2a8356f80de1ef377fce43eb7f0369f777394c07a2d3c51b",
+      "bytes": 10477
+    },
+    {
+      "path": "test/features/nutrition/coach_food_journal_cases.dart",
+      "base_git_blob": "af60f68de182e4a929d6264798c6b0c66eaea569",
+      "actual_git_blob": "af60f68de182e4a929d6264798c6b0c66eaea569",
+      "matches_base": true,
+      "sha256": "8e5c9e89b238f0b9cd06d221aa9258f00ac502b5e9b2e01cdee61047a9e0bdcc",
+      "bytes": 6829
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_commit_boundary_test.dart",
+      "base_git_blob": "3d6fba5b1c199ca16382e99dfdecad014d5b6727",
+      "actual_git_blob": "3d6fba5b1c199ca16382e99dfdecad014d5b6727",
+      "matches_base": true,
+      "sha256": "24179da1ffea377acf4696016b7b8dc24b47831ac5ca7aa26fe6a66ded4db11e",
+      "bytes": 2938
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_compensation_readback_test.dart",
+      "base_git_blob": "1496b6fc44b269703e858fee55cee94b15cab0bb",
+      "actual_git_blob": "1496b6fc44b269703e858fee55cee94b15cab0bb",
+      "matches_base": true,
+      "sha256": "1ea550eda19c9a332ba50f31abb3dc23ec920d579d6848ed9785c0b353939109",
+      "bytes": 4425
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_journal_cases.dart",
+      "base_git_blob": "03958179095739b604ca5ef3a004eae2e60c5ec5",
+      "actual_git_blob": "03958179095739b604ca5ef3a004eae2e60c5ec5",
+      "matches_base": true,
+      "sha256": "1a0471429f556eb8cf78304415164393a293fd2159f2034e212dc82c714502a5",
+      "bytes": 15907
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_owner_atomicity_cases.dart",
+      "base_git_blob": "218561bae02584187b92c25c0b47593377431725",
+      "actual_git_blob": "218561bae02584187b92c25c0b47593377431725",
+      "matches_base": true,
+      "sha256": "8d7862479a2d8496e5f06b6936b758d6f7b47eebf2bf784306f16dd64d743ba5",
+      "bytes": 3325
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_quantity_unit_test.dart",
+      "base_git_blob": "931f981e860bdb9400e929453d03b4633490b36c",
+      "actual_git_blob": "931f981e860bdb9400e929453d03b4633490b36c",
+      "matches_base": true,
+      "sha256": "533e1a2c069f484bf9e446c7f89ba5ad2451c17a707c08f5ff805c968ec4234e",
+      "bytes": 5983
+    },
+    {
+      "path": "test/features/nutrition/coach_meal_undo_permission_test.dart",
+      "base_git_blob": "1a0e50a6b3f2484e72c2024b67b2296dd3bbca36",
+      "actual_git_blob": "1a0e50a6b3f2484e72c2024b67b2296dd3bbca36",
+      "matches_base": true,
+      "sha256": "cd5d7d9b9431a426721746a16e5d4d87f17a0ef626b05016860823cc01cbca22",
+      "bytes": 3664
+    },
+    {
+      "path": "test/features/wellness/fasting_preferences_transaction_test.dart",
+      "base_git_blob": "7f5061cf173ae4489ad39d964481eb7ff49dd664",
+      "actual_git_blob": "7f5061cf173ae4489ad39d964481eb7ff49dd664",
+      "matches_base": true,
+      "sha256": "c7f9ff1d8207e318a5422ad36d3c14ec11ed57c9a20418706a2af669959bc344",
+      "bytes": 1728
+    },
+    {
+      "path": "test/features/wellness/fasting_session_test.dart",
+      "base_git_blob": "cb3645bf5e950d7922659b9c2334d7ef52c17981",
+      "actual_git_blob": "cb3645bf5e950d7922659b9c2334d7ef52c17981",
+      "matches_base": true,
+      "sha256": "4fe08ad4445ee9e36e8a204203b676edc5f00c5d11fd531625e1c5bef6af55e5",
+      "bytes": 3109
+    },
+    {
+      "path": "test/repository_test.dart",
+      "base_git_blob": "79a4785446971bc882da3922ac20cd209246877d",
+      "actual_git_blob": "79a4785446971bc882da3922ac20cd209246877d",
+      "matches_base": true,
+      "sha256": "265b1fa9bb8c4d2058f10ba9b03d79e7ee68c8a9a539a42c508f052266da2a65",
+      "bytes": 29448
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "result": "PASS",
+  "command_argv": [
+    "python3",
+    "tool/qa_parallel/bil04/build_health_strings.py",
+    "--repository",
+    "/workspace/scratch/ada7a97de764/catalog_reproduction",
+    "--validation",
+    "/workspace/scratch/ada7a97de764/validation",
+    "--dart",
+    "/workspace/scratch/ada7a97de764/runtime/flutter-bil04/bin/cache/dart-sdk/bin/dart"
+  ],
+  "exit_code": 0,
+  "catalog_comparisons": {
+    "en": {
+      "templates": 147,
+      "all_templates_bindings_and_placeholders_match": true,
+      "source_file_count": 39,
+      "source_file_hashes_match": true
+    },
+    "ar": {
+      "templates": 147,
+      "all_templates_bindings_and_placeholders_match": true,
+      "source_file_count": 39,
+      "source_file_hashes_match": true
+    }
+  },
+  "raw_extraction_status": "REVIEW_REQUIRED",
+  "unpaired_review_required_count": 1,
+  "raw_review_note": "The one parameterized internal SQL literal is still reported for review; final manual classification is separate in translations/health_strings_manual_review.json.",
+  "log": "localization_builder_reproduction.txt",
+  "log_sha256": "fa4df6f4282b2f5ea13bd8e4b03721c1df468d2f2af96b7c4b24d1e4097309ea",
+  "application_or_test_source_changed": false
+}

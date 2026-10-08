@@ -1,0 +1,9 @@
+diff --git a/supabase/functions/_shared/account_deletion_storage.ts b/supabase/functions/_shared/account_deletion_storage.ts
+--- a/supabase/functions/_shared/account_deletion_storage.ts
++++ b/supabase/functions/_shared/account_deletion_storage.ts
+@@ -1,4 +1,5 @@
+ export const BIL_USER_STORAGE_BUCKETS = [
+   "profile-avatars",
+   "community-post-images",
++  "community-circle-media",
+ ] as const;

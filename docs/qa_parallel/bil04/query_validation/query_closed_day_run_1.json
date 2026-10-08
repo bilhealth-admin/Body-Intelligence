@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/workspace/scratch/ada7a97de764/runtime/with-flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/parallel/bil04/health_query_adapter_test.dart",
+    "test/parallel/bil04/health_query_connected_test.dart",
+    "test/parallel/bil04/closed_day_food_test.dart"
+  ],
+  "cwd": "/workspace/scratch/ada7a97de764/validation",
+  "environment": {
+    "TAR_OPTIONS": "--no-same-owner",
+    "runtime": "Flutter 3.44.6 / Dart 3.12.2 pinned wrapper"
+  },
+  "exit_code": 1,
+  "status": "FAIL",
+  "duration_seconds": 4.15020751953125,
+  "source_before": {
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart": "b60d8c627c364cc0dcb1440be580a3353725865fb76e33773b558d8396a980a8",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+    "test/parallel/bil04/health_query_adapter_test.dart": "addd54cb00331e17b4646076aa76bc169ba270ec61feb879b65110aade5460d9",
+    "test/parallel/bil04/health_query_connected_test.dart": "39efd0f4bbadad109454de666dcd58fe3c9437b192eb53a966d7036ae7011f80",
+    "test/parallel/bil04/closed_day_food_test.dart": "c798ea5a0d732661ed58324ab7308df5b8010239531b79133327bae8a1b6dd0f",
+    "lib/data/repositories/meal_repository.dart": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+    "lib/data/repositories/meal_repository_copying.dart": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de",
+    "lib/data/repositories/daily_log_repository.dart": "c1a99a5f279b3e80391506a96b3bbdb7244adb16bb5c0967407a013dd67a0393"
+  },
+  "source_after": {
+    "lib/features/intelligence_center/app_commands/health_query_adapter.dart": "b60d8c627c364cc0dcb1440be580a3353725865fb76e33773b558d8396a980a8",
+    "lib/features/intelligence_center/app_commands/health_query_projection.dart": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+    "test/parallel/bil04/health_query_adapter_test.dart": "addd54cb00331e17b4646076aa76bc169ba270ec61feb879b65110aade5460d9",
+    "test/parallel/bil04/health_query_connected_test.dart": "39efd0f4bbadad109454de666dcd58fe3c9437b192eb53a966d7036ae7011f80",
+    "test/parallel/bil04/closed_day_food_test.dart": "c798ea5a0d732661ed58324ab7308df5b8010239531b79133327bae8a1b6dd0f",
+    "lib/data/repositories/meal_repository.dart": "130d2e973445cad87f860a17316c872d9d113f97213dbe8da50f1d80b9d5b62c",
+    "lib/data/repositories/meal_repository_copying.dart": "2f70357d8e04498818faf0c10174585458bb4ceaa88717be570784d6e6ab85de",
+    "lib/data/repositories/daily_log_repository.dart": "c1a99a5f279b3e80391506a96b3bbdb7244adb16bb5c0967407a013dd67a0393"
+  },
+  "source_unchanged": true
+}

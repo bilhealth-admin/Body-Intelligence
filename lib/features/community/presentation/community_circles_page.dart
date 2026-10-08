@@ -4,12 +4,16 @@ class CommunityCirclesPage extends StatefulWidget {
   const CommunityCirclesPage({
     required this.repository,
     this.onComposeCircle,
+    this.managementGatewayFactory,
+    this.circleImagePicker,
     this.embedded = false,
     super.key,
   });
 
   final CommunityRepository repository;
   final Future<void> Function(String slug)? onComposeCircle;
+  final CircleManagementGatewayFactory? managementGatewayFactory;
+  final CommunityPostImagePickerContract? circleImagePicker;
   final bool embedded;
 
   @override
@@ -23,6 +27,12 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
   final TextEditingController _search = TextEditingController();
   bool _myCircles = false;
   int _loadGeneration = 0;
+  CircleManagementController? _management;
+  bool _serverSearch = false;
+  bool _searchStarting = false;
+  bool _searchUnavailable = false;
+  bool _openingManagement = false;
+  final Set<String> _metadataSlugs = <String>{};
 
   @override
   void initState() {
@@ -34,11 +44,21 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
   @override
   void didUpdateWidget(covariant CommunityCirclesPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.repository, widget.repository)) {
+    if (!identical(oldWidget.repository, widget.repository) ||
+        !identical(
+          oldWidget.managementGatewayFactory,
+          widget.managementGatewayFactory,
+        )) {
+      _disposeManagement();
       _owner.dispose();
       _busy.clear();
       _search.clear();
       _myCircles = false;
+      _metadataSlugs.clear();
+      _serverSearch = false;
+      _searchStarting = false;
+      _searchUnavailable = false;
+      _openingManagement = false;
       _loadGeneration++;
       _bindOwner();
       _circles = _loadCircles();
@@ -47,9 +67,92 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
 
   @override
   void dispose() {
+    _disposeManagement();
     _owner.dispose();
     _search.dispose();
     super.dispose();
+  }
+
+  void _disposeManagement() {
+    _management?.removeListener(_managementChanged);
+    _management?.dispose();
+    _management = null;
+  }
+
+  void _managementChanged() {
+    if (mounted && _owner.isCurrent) setState(() {});
+  }
+
+  CircleManagementController _managementFor(_CommunityProfileVisit visit) {
+    final existing = _management;
+    if (existing != null) return existing;
+    final controller = _newCircleManagementController(
+      visit,
+      widget.managementGatewayFactory,
+    );
+    _management = controller;
+    controller.addListener(_managementChanged);
+    return controller;
+  }
+
+  Future<void> _activateServerSearch(_CommunityProfileVisit visit) async {
+    if (!visit.isCurrent() || _searchStarting) return;
+    final controller = _managementFor(visit);
+    setState(() => _searchStarting = true);
+    try {
+      if (controller.capabilities?.canSearch != true) {
+        await controller.loadCapabilities();
+      }
+      if (!visit.isCurrent()) return;
+      if (controller.capabilities?.canSearch != true) {
+        setState(() => _searchUnavailable = true);
+        return;
+      }
+      setState(() {
+        _serverSearch = true;
+        _searchUnavailable = false;
+      });
+      controller.setSearch(_search.text, mine: _myCircles);
+      await controller.refreshSearch();
+    } finally {
+      if (visit.isCurrent()) setState(() => _searchStarting = false);
+    }
+  }
+
+  Future<void> _openManagement(_CommunityProfileVisit visit) async {
+    if (!visit.isCurrent() || _openingManagement) return;
+    final controller = _managementFor(visit);
+    setState(() => _openingManagement = true);
+    try {
+      await visit.run(() async {
+        visit.check();
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (sheetContext) => visit.guard(
+            CircleManagementPanel(
+              controller: controller,
+              isCurrent: visit.isCurrent,
+              imagePicker: widget.circleImagePicker,
+              onChanged: () async {
+                if (visit.isCurrent()) await _refresh();
+              },
+              onEnableServerSearch: () {
+                if (!visit.isCurrent()) return;
+                Navigator.of(sheetContext).pop();
+                unawaited(_activateServerSearch(visit));
+              },
+            ),
+          ),
+        );
+        visit.check();
+      });
+    } on CommunityOwnerOperationCancelled {
+      // This sheet never receives a replacement account's capability.
+    } finally {
+      if (visit.isCurrent()) setState(() => _openingManagement = false);
+    }
   }
 
   void _bindOwner() {
@@ -78,7 +181,55 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
         if (generation != _loadGeneration) {
           throw const CommunityOwnerOperationCancelled();
         }
-        return rows;
+        final hydrated = <CommunityCircle>[];
+        var metadataContractAvailable = true;
+        for (final row in rows) {
+          visit.check();
+          if (row is ManagedCommunityCircle &&
+              (row.avatar != null || row.cover != null)) {
+            hydrated.add(
+              await _managementFor(visit).gateway.hydrateCircle(row),
+            );
+          } else if (row is! ManagedCommunityCircle) {
+            final requiresMetadata =
+                row.titleCopyKey == circleNativeTitleCopyKey ||
+                _metadataSlugs.contains(row.slug);
+            if (!metadataContractAvailable) {
+              if (requiresMetadata) {
+                throw const CircleManagementUnavailable();
+              }
+              hydrated.add(row);
+            } else {
+              try {
+                final record = await _managementFor(
+                  visit,
+                ).gateway.readCircle(row.slug);
+                visit.check();
+                if (record != null) {
+                  // The legacy list remains the source of its existing
+                  // membership and counts. Server metadata supplies verified
+                  // copy/media, including pre-existing images on first visit.
+                  hydrated.add(record.onBaseCircle(row));
+                } else if (requiresMetadata) {
+                  throw const CircleManagementUnavailable();
+                } else {
+                  hydrated.add(row);
+                }
+              } on CircleManagementUnavailable {
+                if (requiresMetadata) rethrow;
+                metadataContractAvailable = false;
+                hydrated.add(row);
+              }
+            }
+          } else {
+            hydrated.add(row);
+          }
+          visit.check();
+          if (generation != _loadGeneration) {
+            throw const CommunityOwnerOperationCancelled();
+          }
+        }
+        return hydrated;
       });
     } on CommunityOwnerOperationCancelled {
       return const [];
@@ -87,6 +238,10 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
 
   Future<void> _refresh() async {
     if (!_owner.isCurrent) return;
+    if (_serverSearch && _management != null) {
+      await _management!.refreshSearch();
+      return;
+    }
     final future = _loadCircles();
     setState(() {
       _circles = future;
@@ -216,6 +371,13 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
             repository: visit.repository,
             circle: circle,
             onComposeCircle: compose,
+            managementGatewayFactory: widget.managementGatewayFactory,
+            circleImagePicker: widget.circleImagePicker,
+            onManagementChanged: () async {
+              if (!visit.isCurrent()) return;
+              _metadataSlugs.add(circle.slug);
+              await _refresh();
+            },
             ownerIsCurrent: visit.isCurrent,
             ownerChanges: visit.changes,
           ),
@@ -237,14 +399,36 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
             circles: _circles,
             search: _search,
             myCircles: _myCircles,
+            serverSearch: _serverSearch,
+            serverRows: _management?.searchRows ?? const [],
+            serverLoading: _management?.searchLoading ?? false,
+            serverError: _management?.searchError,
+            serverHasMore: _management?.searchHasMore ?? false,
+            onLoadMore: () async {
+              if (visit.isCurrent()) await _management?.loadMore();
+            },
+            searchStarting: _searchStarting,
+            searchUnavailable: _searchUnavailable,
+            onSearchMore: () => _activateServerSearch(visit),
+            onLocalSearch: () {
+              if (visit.isCurrent()) setState(() => _serverSearch = false);
+            },
+            onManage: _openingManagement ? null : () => _openManagement(visit),
             busy: Set<String>.unmodifiable(_busy),
             onSearch: (value) {
               if (!visit.isCurrent()) return;
               if (value.isEmpty && _search.text.isNotEmpty) _search.clear();
+              if (_serverSearch) {
+                _management?.setSearch(value, mine: _myCircles);
+              }
               setState(() {});
             },
             onSelect: (mine) {
-              if (visit.isCurrent()) setState(() => _myCircles = mine);
+              if (!visit.isCurrent()) return;
+              setState(() => _myCircles = mine);
+              if (_serverSearch) {
+                _management?.setSearch(_search.text, mine: mine);
+              }
             },
             onRefresh: () async {
               if (visit.isCurrent()) await _refresh();
@@ -272,31 +456,41 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
 }
 
 class _CommunityCircleCover extends StatelessWidget {
-  const _CommunityCircleCover({required this.slug});
+  const _CommunityCircleCover({required this.circle});
 
-  final String slug;
+  final CommunityCircle circle;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      key: Key('community-circle-cover-$slug'),
+    final slug = circle.slug;
+    return CircleVerifiedMedia(
+      media: circle is ManagedCommunityCircle
+          ? (circle as ManagedCommunityCircle).avatar
+          : null,
+      label: circleManagementText(context, 'Circle image', 'صورة الدائرة'),
       width: 56,
       height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [scheme.primaryContainer, scheme.secondaryContainer],
+      radius: 28,
+      fallback: Container(
+        key: Key('community-circle-cover-$slug'),
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [scheme.primaryContainer, scheme.secondaryContainer],
+          ),
+          border: Border.all(color: scheme.outlineVariant),
         ),
-        border: Border.all(color: scheme.outlineVariant),
-      ),
-      alignment: Alignment.center,
-      child: Icon(
-        _circleIcon(slug),
-        size: 26,
-        color: scheme.onPrimaryContainer,
+        alignment: Alignment.center,
+        child: Icon(
+          _circleIcon(slug),
+          size: 26,
+          color: scheme.onPrimaryContainer,
+        ),
       ),
     );
   }

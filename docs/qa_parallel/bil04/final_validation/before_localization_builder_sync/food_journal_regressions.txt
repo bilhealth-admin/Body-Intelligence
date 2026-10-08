@@ -1,0 +1,5 @@
+coach_meal_commit_boundary_test: PASS 16 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+coach_meal_compensation_readback_test: PASS 6 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+coach_meal_undo_permission_test: PASS 16 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+coach_meal_quantity_unit_test: PASS 12 tests, exit 0, source 93005f00fe40bb77bedfbea5ad43752de23ef6f526d6490ad9a82a49f978ad65
+Total: 50 passing cases across 4 independent serial file runs.

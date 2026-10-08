@@ -84,6 +84,7 @@ ENV_CAPTURE_DIRECTORIES = {
     "test/qa_next/coach_food_cards_capture_test.dart": "BIL_REFERENCE_CAPTURE_DIR",
     "test/qa_next/community_circles_reference_capture_test.dart": "BIL_CIRCLES_CAPTURE_DIR",
     "test/qa_next/community_chat_entry_capture_test.dart": "BIL_CHAT_CAPTURE_DIR",
+    "test/parallel/bil07/community_channels_capture_widget_test.dart": "BIL07_CAPTURE_DIR",
 }
 NON_VISUAL_BYTE_TESTS = {
     "test/launch_readiness/release_source_hygiene_classifier_contract_test.dart":

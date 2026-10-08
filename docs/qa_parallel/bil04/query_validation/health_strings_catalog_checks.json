@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "pairedTemplates": 147,
+  "sourceReviewStatus": "PASS_WITH_DOCUMENTED_INTERNAL_SQL_EXCLUSION",
+  "manualExclusionReport": "health_strings_manual_review.json",
+  "rawExtractorReport": "health_strings_extraction.json",
+  "rawExtractorStatusPreserved": "REVIEW_REQUIRED",
+  "sourceFiles": 39,
+  "sourceHashesStillCurrent": true,
+  "catalogNames": 18,
+  "checks": [
+    "EN/AR same IDs",
+    "placeholder parity and exact per-occurrence bindings",
+    "shared copy spans are new or changed",
+    "literal newline preservation",
+    "nested expression bindings retained",
+    "18 existing catalog names retained",
+    "23 locales explicitly pending with translated=false",
+    "restored BIL-01 file excluded from shared source manifest",
+    "all 39 selected current source hashes match",
+    "sole new SQL literal explicitly reviewed and excluded; raw finding preserved"
+  ],
+  "finalCatalogSha256": {
+    "en": "2cebc5494a6523e08a1f2bd13e20ee012680d6c6da27d3c689a99031119d219f",
+    "ar": "fe285c826fb2873f045382e1a2caee53733d45b8942fceb1b0f80e165799f638"
+  },
+  "limitations": [
+    "No human linguistic review",
+    "Widget RTL/accessibility evidence is separate and does not imply device visual acceptance",
+    "Not runtime locale installation"
+  ]
+}

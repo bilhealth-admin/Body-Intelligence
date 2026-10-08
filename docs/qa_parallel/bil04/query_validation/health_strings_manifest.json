@@ -1,0 +1,752 @@
+{
+  "base": "1744788e6bfbdffc3a168bbaf36b3abf3e2c698a",
+  "baseMethod": "Preverified local BASE files; no Git or network",
+  "files": [
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_activity_adapter.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_activity_adapter.dart",
+      "mode": "owned",
+      "sourceSha256": "db0307bc430ce7aa4de09561cbbe9643782802cd1c3dc17ae1729c937eab1e99",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_activity_catalog.dart",
+      "mode": "owned",
+      "sourceSha256": "f9ba156f64ad6295a671dac7f5b75102f18f293f6abeb80ce4a239b9fd3119c4",
+      "userCopyExpected": true,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_daily_commands.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_daily_commands.dart",
+      "mode": "owned",
+      "sourceSha256": "21524b8e28fdca55b792101a87e05f1ff7c268d1c5c9b114233e59e02ba4ad2f",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_fasting_commands.dart",
+      "mode": "owned",
+      "sourceSha256": "f278cce2cefc2867c20a8b1d9cc10bc873b5bfe9455230efd4bbb35c837eb7ee",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_fasting_notifications.dart",
+      "mode": "owned",
+      "sourceSha256": "0fd7e90315c49b92cf76bd3eda6d1330408582b21321272d4fedcec31c14ef0b",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_adapter.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_adapter.dart",
+      "mode": "owned",
+      "sourceSha256": "1ef94c735dcd1f867ad2fa155ac764d2131c93324565f871dd04a088510b18f6",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_brief_provider.dart",
+      "mode": "owned",
+      "sourceSha256": "0a3351222bce2fab610ebf5aac26eef72dcaa29bdf4e8041c79b3c4c2ccd8d32",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_copy.dart",
+      "mode": "owned",
+      "sourceSha256": "da382bb416bd37b8e92482f2454618df54f34d5dd961aea685f28244aa3a25b6",
+      "userCopyExpected": true,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_flow.dart",
+      "mode": "owned",
+      "sourceSha256": "376c25027bb531efb75e968f6cf2bcdc8cf78ac0c7bb03013387dae9656b1346",
+      "userCopyExpected": true,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_parser.dart",
+      "mode": "owned",
+      "sourceSha256": "bc666ec3ae25e1184992eedb40931db1aec755017e365442fbf2fa10e7b47e66",
+      "userCopyExpected": true,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_read_guard.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_read_guard.dart",
+      "mode": "owned",
+      "sourceSha256": "91ed3c088cacc5060b702d8a2131fe622dd5ca08d743263748e186a36677d2f7",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_receipt_recovery.dart",
+      "mode": "owned",
+      "sourceSha256": "bdeb62bb7566d1d02b103002bbbd585f4a1c726f7fb347899d9f625c4e1f4265",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_recovery.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_recovery.dart",
+      "mode": "owned",
+      "sourceSha256": "6a328d90d14036260ed919bdd24c7bdc334a8d5d0319c38a3414bc7e97d85828",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_health_tools.dart",
+      "mode": "owned",
+      "sourceSha256": "d74ff17ccb9db3793391705662bfe71b357c452d8dd505e50905ba7381df3afb",
+      "userCopyExpected": true,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_life_context_commands.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_life_context_commands.dart",
+      "mode": "owned",
+      "sourceSha256": "bd96d70af1ba7fe8bd8902d8ad9bdfa17bfeda7a0fe256d7e4455a27a11f1bca",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/coach_plan_adapter.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/coach_plan_adapter.dart",
+      "mode": "owned",
+      "sourceSha256": "551bda60a87f6ff3894f80875271273a008d3fed005799f4703e4ff897919f9a",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/health_query_adapter.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/health_query_adapter.dart",
+      "mode": "owned",
+      "sourceSha256": "d00b8dd761387dd95b3732a3c09e3ca7e45690e3a2de1d09fb8cb1579a3f37c1",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/app_commands/health_query_projection.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/repository/lib/features/intelligence_center/app_commands/health_query_projection.dart",
+      "mode": "owned",
+      "sourceSha256": "9abc586fb1813b029d17401971c7d2d47cfe852179ba9a06225ed7ce8ef3a026",
+      "userCopyExpected": false,
+      "addedRanges": []
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/domain/bil_tool_registry.dart",
+      "mode": "shared_added",
+      "sourceSha256": "b8d6a3b256a03348dd223d5e97660fef7ee71e1e073852f647e93241b16edeb6",
+      "baseSha256": "a19e9dd85affcf06dc70cb2eeffe4506dab455c7b2a1345c1acadb2388b6a4ee",
+      "addedRanges": [
+        [
+          35,
+          85
+        ],
+        [
+          6767,
+          6798
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "mode": "shared_added",
+      "sourceSha256": "ae013dc9f637ae0a51a81cc7d853651ad39323cdcbd42f3244ac4f3ed0ac491e",
+      "baseSha256": "9c92bfe155c887b24ee9f9a1658a4a14d2c4eb473223cfa74fe294765cd14b74",
+      "addedRanges": [
+        [
+          772,
+          895
+        ],
+        [
+          7161,
+          7260
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_action.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/domain/intelligence_action.dart",
+      "mode": "shared_added",
+      "sourceSha256": "dc8593b2be402f9a47fb1905e73b98231e41675bdfc17b5fc75f0ebef676df59",
+      "baseSha256": "665b90820de77c2682495af46815d327eebca9db432b7ff060bd7efc470ff3b5",
+      "addedRanges": [
+        [
+          438,
+          473
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/domain/intelligence_message.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/domain/intelligence_message.dart",
+      "mode": "shared_added",
+      "sourceSha256": "1617e3dca27cc22f4a7dd15d21d5a037383f40f5bda17a63969bff77a25a2b41",
+      "baseSha256": "6ec2f9b8beae8d13295353abc24690b1859fac9420a8f00fa78f8124b96f557a",
+      "addedRanges": [
+        [
+          13365,
+          13464
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "mode": "shared_added",
+      "sourceSha256": "c9aff8ba0ec502fc64b149a8920c5fbc6b59582d7ae487bfb881e7c72720a036",
+      "baseSha256": "9c0aa87046c201c0a1dbda91e5154e2bdd8cb755513240d5484199dde782b0e4",
+      "addedRanges": [
+        [
+          1171,
+          1686
+        ],
+        [
+          1789,
+          1857
+        ],
+        [
+          2119,
+          3305
+        ],
+        [
+          3451,
+          3505
+        ],
+        [
+          6359,
+          6533
+        ],
+        [
+          10154,
+          10328
+        ],
+        [
+          11316,
+          11541
+        ],
+        [
+          11579,
+          11699
+        ],
+        [
+          11868,
+          12267
+        ],
+        [
+          12497,
+          12529
+        ],
+        [
+          12563,
+          12773
+        ],
+        [
+          13338,
+          13377
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "mode": "shared_added",
+      "sourceSha256": "1ea2187e6b81eb301752e1aa3ddbf1b5f29ea0e7cc5508ebfeefc8231da50cfc",
+      "baseSha256": "c3c7c3ad0973f4ebfa0420e0c2e0bdf5fbe1826ac216b8134208d00507d1227c",
+      "addedRanges": [
+        [
+          22624,
+          22760
+        ],
+        [
+          23252,
+          23298
+        ],
+        [
+          23651,
+          23769
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "mode": "shared_added",
+      "sourceSha256": "309231e02d1fcadebcbc45d638e43b094e1dfe87c8de5723ffe80ebaeb06c545",
+      "baseSha256": "5e7a7876a0d8c2e94736babbbae7e941c716997810001aa3f1a7baa978837de4",
+      "addedRanges": [
+        [
+          3044,
+          3948
+        ],
+        [
+          5917,
+          6015
+        ],
+        [
+          9096,
+          9215
+        ],
+        [
+          11504,
+          11804
+        ],
+        [
+          11926,
+          11973
+        ],
+        [
+          13658,
+          13790
+        ],
+        [
+          17525,
+          17687
+        ],
+        [
+          18516,
+          18802
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_native_action_flow.dart",
+      "mode": "shared_added",
+      "sourceSha256": "815db53a68ba9bf6c0f160dded4f73df842a5ddb7e7f5205706e3e24a003c17c",
+      "baseSha256": "ddae7c798851c8b673f1c1d537c121aae7ba321877dabbea332d607c5fc21483",
+      "addedRanges": [
+        [
+          189,
+          289
+        ],
+        [
+          713,
+          897
+        ],
+        [
+          1019,
+          1131
+        ],
+        [
+          2413,
+          2778
+        ],
+        [
+          2907,
+          3439
+        ],
+        [
+          3647,
+          3936
+        ],
+        [
+          4281,
+          4327
+        ],
+        [
+          4811,
+          5161
+        ],
+        [
+          6241,
+          6300
+        ],
+        [
+          6626,
+          6682
+        ],
+        [
+          7115,
+          7244
+        ],
+        [
+          9402,
+          9569
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_owner.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_native_owner.dart",
+      "mode": "shared_added",
+      "sourceSha256": "50ce0b32672526da8f8f03ba6bad60e8a3646db0b58635fc94d3c233a89162cb",
+      "baseSha256": "903ba64725377204acba4239e3c8b1092002b38c79320f6dadb9af59269095b5",
+      "addedRanges": [
+        [
+          1605,
+          1653
+        ],
+        [
+          2896,
+          3069
+        ],
+        [
+          4113,
+          4328
+        ],
+        [
+          4873,
+          4932
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_native_recovery.dart",
+      "mode": "shared_added",
+      "sourceSha256": "1b2ad30d69753c3f2ca8da8a7ade01ae4e10cb739b2507ad18067c509a072fd7",
+      "baseSha256": "fb91ea7f57f4c03982f92ad09d04b2502b0a3af3dd1fa1846fb4eafd8a2701e6",
+      "addedRanges": [
+        [
+          745,
+          1137
+        ],
+        [
+          3922,
+          4018
+        ],
+        [
+          6990,
+          7198
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_native_recovery_owner.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_native_recovery_owner.dart",
+      "mode": "shared_added",
+      "sourceSha256": "ddc6a8a9cdc4bb4098dcc8aac270a4fcb43636ed73e3a6456576ee46d39da9c0",
+      "baseSha256": "eccd1bb986333e8bb8d789f96d3c36c4e2f6f7b1946e1298e0de7037e4949aef",
+      "addedRanges": [
+        [
+          1449,
+          1622
+        ],
+        [
+          2677,
+          2886
+        ],
+        [
+          3510,
+          3569
+        ],
+        [
+          4558,
+          4707
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+      "mode": "shared_added",
+      "sourceSha256": "6ad056a44cd17bc5c41ed6750b385cd3bee4e515b69afea58d196b9543c4d2d1",
+      "baseSha256": "84dc295c05d6d1408e167ac02dbc68dca5723112153d8a76571cae96087f2d34",
+      "addedRanges": [
+        [
+          4113,
+          4149
+        ],
+        [
+          5303,
+          5455
+        ],
+        [
+          19542,
+          19586
+        ]
+      ],
+      "userCopyExpected": true
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_journal.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/coach_native_command_journal.dart",
+      "mode": "shared_added",
+      "sourceSha256": "c38deb5107695626e9932c14a28b09b954a9d28ce99c7be74df2980674cd24ba",
+      "baseSha256": "560016bd51a62ef73a2e807f71e2bf4df2c55a94b6d69a4e16b7defe95e299f8",
+      "addedRanges": [
+        [
+          255,
+          287
+        ],
+        [
+          489,
+          544
+        ],
+        [
+          776,
+          826
+        ],
+        [
+          1156,
+          1259
+        ],
+        [
+          2165,
+          2335
+        ],
+        [
+          2415,
+          2604
+        ],
+        [
+          4406,
+          7249
+        ],
+        [
+          8348,
+          8631
+        ],
+        [
+          8895,
+          8970
+        ],
+        [
+          9513,
+          11633
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_models.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/coach_native_command_models.dart",
+      "mode": "shared_added",
+      "sourceSha256": "4ca8f1eeb19a825dfaa1b4053172bfdd238928bf8f3a4ff7a54a4bb08f6aebde",
+      "baseSha256": "a17cf2a7b320cdb411f7957b06ebd5bae3d75c5bf885d8055993e4d228a9c6f0",
+      "addedRanges": [
+        [
+          49,
+          144
+        ],
+        [
+          3481,
+          3668
+        ],
+        [
+          4488,
+          5036
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/coach_native_command_repository.dart",
+      "mode": "shared_added",
+      "sourceSha256": "dde66fe3b1c57289812f451c0b94afad3887c9f7f32066df907133ed1b84e226",
+      "baseSha256": "2ef8821981692d9a9ef50ad38884ffe1180f53e4d4c533c919888bd0725e7b8e",
+      "addedRanges": [
+        [
+          751,
+          853
+        ],
+        [
+          1099,
+          1158
+        ],
+        [
+          1613,
+          1638
+        ],
+        [
+          2259,
+          2441
+        ],
+        [
+          3661,
+          3701
+        ],
+        [
+          4204,
+          4572
+        ],
+        [
+          5975,
+          6060
+        ],
+        [
+          6073,
+          6437
+        ],
+        [
+          6505,
+          6541
+        ],
+        [
+          6687,
+          6944
+        ],
+        [
+          7220,
+          7256
+        ],
+        [
+          7512,
+          7553
+        ],
+        [
+          7647,
+          7683
+        ],
+        [
+          8212,
+          8974
+        ],
+        [
+          9920,
+          10150
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_snapshot.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/coach_native_command_snapshot.dart",
+      "mode": "shared_added",
+      "sourceSha256": "6a86dba6fa2281aa35a757d1931343402d25eb17930de070a193fb2792a4407b",
+      "baseSha256": "e517d1383b1b4478b700c36e1fb69353f2c742a06e6da229b1fdfdf5d6e78ef6",
+      "addedRanges": [
+        [
+          237,
+          419
+        ],
+        [
+          832,
+          870
+        ],
+        [
+          1285,
+          1404
+        ],
+        [
+          1606,
+          1720
+        ],
+        [
+          2522,
+          2720
+        ],
+        [
+          5862,
+          6196
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_undo.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/coach_native_command_undo.dart",
+      "mode": "shared_added",
+      "sourceSha256": "ef6df6740c7aebb2db067311eeaf4f4d9d17cda3a11b5ce7021409ac0ba2ed6c",
+      "baseSha256": "376787bf070b8223e9cbef1f3de56e3e48d3d4936435a8fd587e4789ed4dfe79",
+      "addedRanges": [
+        [
+          748,
+          1373
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/coach_native_command_writes.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/coach_native_command_writes.dart",
+      "mode": "shared_added",
+      "sourceSha256": "d1b3ee96d3f9eaf0234fabd2f922a85722a2da0e33978918af4917eab27188ac",
+      "baseSha256": "c18a892543506a8c62b68417e397d028ea54eafa0b2e826fd61b41c535f80256",
+      "addedRanges": [
+        [
+          342,
+          622
+        ],
+        [
+          5484,
+          5727
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_api.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/local_coach_api.dart",
+      "mode": "shared_added",
+      "sourceSha256": "165f983bf2a060b0842f439dbca3d2de881a1662d8ee9309f7564777ebb5fca6",
+      "baseSha256": "ff7ee164066ad1267f8af8594111ddd9360694be073f989f4f4e57cf3839b215",
+      "addedRanges": [
+        [
+          295,
+          345
+        ],
+        [
+          11321,
+          11604
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/local_coach_command_parser.dart",
+      "mode": "shared_added",
+      "sourceSha256": "44cdec5627466ef5d09dfc2ea0d03d29aa543ef70a3caf501ff09df1ec8a572e",
+      "baseSha256": "bbfb36f10e57c5165875717f52286932916ba3c8c3ec86cef5b727229708a1be",
+      "addedRanges": [
+        [
+          214,
+          265
+        ],
+        [
+          1422,
+          1746
+        ]
+      ],
+      "userCopyExpected": false
+    },
+    {
+      "path": "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+      "sourcePath": "/workspace/scratch/ada7a97de764/validation/lib/features/intelligence_center/services/local_model_gateway_io.dart",
+      "mode": "shared_added",
+      "sourceSha256": "c8a8b420eec8800b4d1861cfe10a48c058302b4206ecd0772888244c30f4f237",
+      "baseSha256": "6d04e9ddfdcb7402acc6d0531d8db6440db704170b4eea73d0c42bb4d69dd2b5",
+      "addedRanges": [
+        [
+          283,
+          362
+        ],
+        [
+          19421,
+          19518
+        ]
+      ],
+      "userCopyExpected": false
+    }
+  ]
+}
