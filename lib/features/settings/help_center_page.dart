@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 String _localized(BuildContext context, Map<String, String> values) {
   final locale = Localizations.localeOf(context);
@@ -244,7 +245,7 @@ class HelpCenterPage extends StatelessWidget {
             ),
           ),
         ];
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () =>
@@ -263,22 +264,20 @@ class HelpCenterPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final row = rows[index];
           return ListTile(
-            minTileHeight: 72,
-            leading: BilSemanticIconBadge(
-              key: Key('help-center-icon-${row.id}'),
-              kind: row.kind,
-              size: 42,
-              iconOverride: row.iconOverride,
-              appleIconOverride: row.appleIconOverride,
-              shape: BoxShape.rectangle,
-            ),
+            minTileHeight: 54,
             title: Text(row.title),
-            trailing: const Icon(Icons.chevron_right_rounded),
+            trailing: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             onTap: row.action,
           );
         },
       ),
-    );
+    ));
   }
 }
 
@@ -339,7 +338,7 @@ class HelpFaqPage extends StatelessWidget {
         ),
       ),
     ];
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         title: Text(
           t(
@@ -355,15 +354,13 @@ class HelpFaqPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           for (final question in questions)
-            Card(
-              child: ExpansionTile(
+            ExpansionTile(
                 title: Text(question.$1),
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 children: [Text(question.$2)],
-              ),
             ),
         ],
       ),
-    );
+    ));
   }
 }
