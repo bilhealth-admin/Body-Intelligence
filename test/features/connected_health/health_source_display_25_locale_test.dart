@@ -48,9 +48,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final display = tester.widget<Text>(
-        find.byKey(const Key('unknown-health-source-label')),
-      ).data!;
+      final display = tester
+          .widget<Text>(find.byKey(const Key('unknown-health-source-label')))
+          .data!;
       final tag = BilLocalePolicy.canonicalTag(locale);
       expect(display.trim(), isNotEmpty);
       if (tag != 'en') expect(display, isNot('Health source'));

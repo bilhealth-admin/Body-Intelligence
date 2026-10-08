@@ -29,11 +29,7 @@ void main() {
           home: Builder(
             builder: (context) => Scaffold(
               body: Text(
-                analyticsText(
-                  context,
-                  'Back to Home',
-                  'العودة إلى الرئيسية',
-                ),
+                analyticsText(context, 'Back to Home', 'العودة إلى الرئيسية'),
                 key: const Key('analytics-home-return-label'),
               ),
             ),
@@ -42,9 +38,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final label = tester.widget<Text>(
-        find.byKey(const Key('analytics-home-return-label')),
-      ).data!;
+      final label = tester
+          .widget<Text>(find.byKey(const Key('analytics-home-return-label')))
+          .data!;
       final tag = BilLocalePolicy.canonicalTag(locale);
       expect(label.trim(), isNotEmpty);
       if (tag != 'en') expect(label, isNot('Back to Home'));
