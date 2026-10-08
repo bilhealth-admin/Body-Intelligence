@@ -71,10 +71,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed || !mounted) return;
     boost.initialize();
-    setState(() {
-      contextFocuses = null;
-      usage = _loadUsage();
-    });
+    setState(() => usage = _loadUsage());
   }
 
   void _boostChanged() {
@@ -142,6 +139,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     if (mounted && loadVersion == _usageLoadVersion) {
       _verifiedUsageOwnerId = ownerId;
       _lastVerifiedUsage = Map<String, Object?>.unmodifiable(result);
+      if (!changingContextFocus) contextFocuses = null;
     }
     return result;
   }
@@ -185,7 +183,12 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     if (changingContextFocus) return;
     final next = <CoachContextFocus>{...current};
     included ? next.add(focus) : next.remove(focus);
-    setState(() => changingContextFocus = true);
+    // The switch follows the requested value immediately, but the
+    // repository remains authoritative: a failed save rolls this back.
+    setState(() {
+      changingContextFocus = true;
+      contextFocuses = Set.unmodifiable(next);
+    });
     try {
       await ref
           .read(preferencesRepositoryProvider)
@@ -193,11 +196,11 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
             CoachContextPreferences.storageKey,
             CoachContextPreferences(focuses: Set.unmodifiable(next)).encode(),
           );
-      if (mounted) {
-        setState(() => contextFocuses = Set.unmodifiable(next));
-      }
+      // The verified preference stream will adopt the same value after
+      // the next usage read. Keep the choice stable in the interim.
     } on Object {
       if (!mounted) return;
+      setState(() => contextFocuses = Set.unmodifiable(current));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -234,10 +237,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
   Widget build(BuildContext context) {
     ref.listen<int>(aiCoachUsageRefreshProvider, (previous, next) {
       if (previous == next || !mounted) return;
-      setState(() {
-        contextFocuses = null;
-        usage = _loadUsage();
-      });
+      setState(() => usage = _loadUsage());
     });
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
@@ -325,10 +325,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
                 child: RefreshIndicator(
                   onRefresh: () async {
                     final fresh = _loadUsage();
-                    setState(() {
-                      contextFocuses = null;
-                      usage = fresh;
-                    });
+                    setState(() => usage = fresh);
                     try {
                       await fresh;
                     } on Object {
