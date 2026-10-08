@@ -1,0 +1,41 @@
+name: BIL QUALITY temporary source formatter
+on:
+  pull_request:
+    paths:
+      - .github/workflows/bil_quality_temp_format_once.yml
+permissions:
+  contents: write
+jobs:
+  format-qa-only:
+    if: github.head_ref == 'qa/bil-stability-flicker-data-20261008'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact isolated QA head
+        uses: actions/checkout@v4
+        with:
+          ref: qa/bil-stability-flicker-data-20261008
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Install matching Flutter and Dart formatter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Format changed Dart sources and tests without changing assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin qa/coach-community-next-20261005
+          mapfile -t changed < <(git diff --name-only origin/qa/coach-community-next-20261005 HEAD -- '*.dart')
+          if [ "${#changed[@]}" -eq 0 ]; then
+            exit 0
+          fi
+          dart format "${changed[@]}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "${changed[@]}"
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(quality): apply Dart 3.12 formatter to isolated QA patch'
+            git push origin HEAD:qa/bil-stability-flicker-data-20261008
+          fi
