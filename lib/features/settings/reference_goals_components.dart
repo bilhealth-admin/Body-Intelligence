@@ -117,7 +117,7 @@ class _PremiumRow extends ConsumerWidget {
           if (entitlement.hasError || (verified != null && unverified)) {
             ref.invalidate(verifiedSubscriptionStateProvider);
           }
-          context.push(premiumGoalDestination(active, route));
+          context.push(premiumGoalDestination(route));
         },
       ),
     );

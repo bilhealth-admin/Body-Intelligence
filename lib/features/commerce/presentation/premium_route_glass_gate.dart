@@ -207,8 +207,15 @@ class _PremiumRouteGateContents extends ConsumerWidget {
         returnToDashboard: isAiCoach,
       );
     }
+    // A local Free fallback means the server has not verified this owner.
+    // Fail closed with Retry, not a paid offer that mislabels an entitled
+    // reviewer as Free after a transient auth/network read.
     final verificationUnavailable =
-        subscription.hasError || (isAiCoach && creditSnapshot.hasError);
+        subscription.hasError ||
+        (!isAiCoach &&
+            (state == null ||
+                state.authority != EntitlementAuthority.verifiedServer)) ||
+        (isAiCoach && creditSnapshot.hasError);
     if (verificationUnavailable) {
       return _PremiumRouteAccessUnavailable(
         isDark: isDark,
@@ -238,7 +245,8 @@ class _PremiumRouteGateContents extends ConsumerWidget {
         : isNutritionPrograms
         ? state?.authority == EntitlementAuthority.verifiedServer &&
               (state?.grants(CommerceEntitlement.premiumPrograms) ?? false)
-        : state != null && state.plan != CommercePlan.free;
+        : state?.authority == EntitlementAuthority.verifiedServer &&
+              state?.plan != CommercePlan.free;
     if (hasAccess) return child;
 
     final content = _contentFor(context, feature);

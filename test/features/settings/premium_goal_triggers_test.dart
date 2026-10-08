@@ -110,7 +110,7 @@ void main() {
     );
     expect(freeTile.onTap, isNotNull);
     expect(
-      premiumGoalDestination(false, '/settings/nutrition-meal-calorie-goals'),
+      premiumGoalDestination('/settings/nutrition-meal-calorie-goals'),
       '/settings/nutrition-meal-calorie-goals',
     );
     await tester.tap(find.text('Calorie Goals By Meal'));
@@ -266,7 +266,7 @@ void main() {
       );
       expect(tile.onTap, isNotNull);
       expect(
-        premiumGoalDestination(true, switch (entry.$1) {
+        premiumGoalDestination(switch (entry.$1) {
           'goals-meal-calories-entitlement-state' =>
             '/settings/nutrition-meal-calorie-goals',
           'goals-meal-macros-entitlement-state' =>

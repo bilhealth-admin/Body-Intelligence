@@ -13,6 +13,7 @@ import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../admin/services/ai_coach_admin_service.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../commerce/domain/commerce_plan.dart';
+import '../commerce/domain/subscription_state.dart';
 import '../commerce/presentation/premium_crown_emblem.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -43,7 +44,7 @@ class SettingsPage extends ConsumerWidget {
     final displayName = ref.watch(displayNameProvider).value;
     final photo = ref.watch(profilePhotoProvider).value;
     final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
-    final subscription = ref.watch(verifiedSubscriptionStateProvider);
+    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
     final adminAccess = ref.watch(aiCoachAdminAccessProvider);
     final name = displayName?.trim().isNotEmpty == true
@@ -114,12 +115,19 @@ class SettingsPage extends ConsumerWidget {
                 label: copy('Retry subscription check'),
                 onTap: () => ref.invalidate(verifiedSubscriptionStateProvider),
               ),
-              data: (value) => _PremiumMembershipCard(
-                label: value.plan == CommercePlan.free
-                    ? copy('Start 7-day free trial')
-                    : copy('Active'),
-                onTap: () => context.push('/plans'),
-              ),
+              data: (value) =>
+                  value.authority != EntitlementAuthority.verifiedServer
+                  ? _PremiumMembershipCard(
+                      label: copy('Retry subscription check'),
+                      onTap: () =>
+                          ref.invalidate(verifiedSubscriptionStateProvider),
+                    )
+                  : _PremiumMembershipCard(
+                      label: value.plan == CommercePlan.free
+                          ? copy('Start 7-day free trial')
+                          : copy('Active'),
+                      onTap: () => context.push('/plans'),
+                    ),
             ),
             const SizedBox(height: 20),
             _MoreSection(

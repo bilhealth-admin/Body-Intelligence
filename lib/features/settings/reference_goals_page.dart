@@ -8,19 +8,14 @@ import '../../data/database/app_database.dart';
 import '../../data/database/database_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
+import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../weight/providers/weight_provider.dart';
 import '../weight/domain/weight_goal_progress.dart';
-
 part 'reference_goals_components.dart';
 
 @visibleForTesting
-String premiumGoalDestination(bool _active, String featureRoute) {
-  // This helper selects a guarded destination, not entitlement authority.
-  // All three features enforce their own verified access after navigation.
-  return featureRoute;
-}
-
+String premiumGoalDestination(String featureRoute) => featureRoute;
 @visibleForTesting
 ({String? weeklyGoal, double? startingWeight, String? startingDate})
 validateStoredGoalPreferences({

@@ -25,6 +25,50 @@ SubscriptionState _paid(
 );
 
 void main() {
+  testWidgets('Guest Free snapshot reloads when verified owner signs in', (
+    tester,
+  ) async {
+    final owners = StreamController<String?>();
+    addTearDown(owners.close);
+    final now = DateTime.utc(2026, 10, 8);
+    String? ownerId;
+    var loads = 0;
+    final container = ProviderContainer(
+      overrides: [
+        verifiedEntitlementClockProvider.overrideWithValue(() => now),
+        verifiedEntitlementOwnerSeedProvider.overrideWithValue(null),
+        verifiedEntitlementOwnerProvider.overrideWith((_) => owners.stream),
+        verifiedEntitlementLoaderProvider.overrideWithValue(() async {
+          loads++;
+          return ownerId == null
+              ? FreePlan.createState()
+              : _paid(now.add(const Duration(hours: 1)));
+        }),
+      ],
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const _AccessProbe(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('free'), findsOneWidget);
+    expect(loads, 1);
+
+    ownerId = 'reviewer-fixture-owner';
+    owners.add(ownerId);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('premium'), findsOneWidget);
+    expect(loads, 2);
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await tester.pump();
+  });
+
   testWidgets('same owner auth startup does not reload a verified paid grant', (
     tester,
   ) async {

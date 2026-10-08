@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../domain/commerce_entitlement.dart';
-import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
 import '../providers/commerce_providers.dart';
 
@@ -44,12 +43,8 @@ class PremiumNutritionGlass extends ConsumerWidget {
     }
     final state = subscription.value;
     if (state?.authority != EntitlementAuthority.verifiedServer) {
-      // A known local Free state is a normal locked entitlement, not an
-      // entitlement-service failure. Free users should see only the Premium
-      // gate; Retry is reserved for an unavailable subscription check.
-      if (state?.plan == CommercePlan.free) {
-        return _lockedGlass(context);
-      }
+      // Local fallback is not proof that this account is Free; never expose
+      // a paywall until the server has actually verified that decision.
       return _PremiumNutritionStatusGlass(
         borderRadius: borderRadius,
         compact: compact,

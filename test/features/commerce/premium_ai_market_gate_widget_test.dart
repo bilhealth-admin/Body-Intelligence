@@ -29,7 +29,13 @@ void main() {
     Widget? child,
   }) async {
     final subscriptionState = subscriptionPlan == CommercePlan.free
-        ? FreePlan.createState()
+        ? SubscriptionState(
+            plan: CommercePlan.free,
+            entitlements: FreePlan.entitlements,
+            authority: EntitlementAuthority.verifiedServer,
+            isPurchasable: false,
+            canRestorePurchases: false,
+          )
         : SubscriptionState(
             plan: subscriptionPlan,
             entitlements: const {},

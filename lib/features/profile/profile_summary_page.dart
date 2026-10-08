@@ -12,6 +12,7 @@ import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../core/units/measurement_units.dart';
 import '../commerce/domain/commerce_plan.dart';
+import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../community/data/community_repository.dart';
 import '../settings/reference_settings_copy.dart';
@@ -122,7 +123,7 @@ class ProfileSummaryPage extends ConsumerWidget {
     final photo = photoState.value;
     final memberSince = ref.watch(profileMemberSinceProvider);
     final friends = friendsState.value;
-    final subscription = ref.watch(verifiedSubscriptionStateProvider);
+    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
     final name = storedName?.trim().isNotEmpty == true
         ? storedName!.trim()
         : _copy(context, 'BIL member');
@@ -291,7 +292,22 @@ class ProfileSummaryPage extends ConsumerWidget {
                 label: Text(context.strings.text('Retry subscription check')),
               ),
             ),
-            data: (value) => value.plan == CommercePlan.free
+            data: (value) =>
+                value.authority != EntitlementAuthority.verifiedServer
+                ? Container(
+                    color: colors.surface,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    alignment: Alignment.center,
+                    child: TextButton.icon(
+                      onPressed: () =>
+                          ref.invalidate(verifiedSubscriptionStateProvider),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(
+                        context.strings.text('Retry subscription check'),
+                      ),
+                    ),
+                  )
+                : value.plan == CommercePlan.free
                 ? Container(
                     color: colors.surface,
                     padding: const EdgeInsets.symmetric(vertical: 14),

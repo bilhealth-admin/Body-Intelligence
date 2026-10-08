@@ -80,7 +80,7 @@ void main() {
     },
   );
 
-  testWidgets('local Free default shows only the Premium gate', (tester) async {
+  testWidgets('local Free fallback requires retry, never a paid upsell', (tester) async {
     final localDefault = SubscriptionState(
       plan: CommercePlan.free,
       entitlements: const <CommerceEntitlement>{},
@@ -93,9 +93,9 @@ void main() {
 
     expect(
       find.byKey(const Key('premium-nutrition-entitlement-retry')),
-      findsNothing,
+      findsOneWidget,
     );
-    expect(find.byKey(const Key('premium-nutrition-glass')), findsOneWidget);
+    expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
     expect(find.text('Premium'), findsOneWidget);
   });
 }
