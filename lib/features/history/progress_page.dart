@@ -67,13 +67,13 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         actions: [
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 8),
-            child: IconButton.filledTonal(
+            child: IconButton(
               key: const Key('progress-share'),
               tooltip: copy.shareProgress,
               onPressed: shareData == null
                   ? null
                   : () => _shareProgress(copy, shareData),
-              icon: const Icon(Icons.ios_share_rounded),
+              icon: const Icon(Icons.ios_share_rounded, size: 18),
             ),
           ),
           if (metric == ProgressMetric.weight)
@@ -107,9 +107,6 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               Expanded(
                 child: _ProgressSelector(
                   key: const Key('progress-metric-selector'),
-                  kind: _metricKind(metric),
-                  iconOverride: _metricIcon(metric),
-                  appleIconOverride: _metricAppleIcon(metric),
                   eyebrow: copy.metric,
                   value: copy.metricLabel(metric),
                   onTap: _pickMetric,
@@ -119,7 +116,6 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               Expanded(
                 child: _ProgressSelector(
                   key: const Key('progress-range-selector'),
-                  kind: BilSemanticIconKind.calendar,
                   eyebrow: copy.range,
                   value: copy.rangeLabel(range),
                   onTap: _pickRange,
