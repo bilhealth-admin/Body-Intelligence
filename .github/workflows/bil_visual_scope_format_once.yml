@@ -1,0 +1,67 @@
+name: BIL UX scoped Dart format (one-shot)
+on:
+  push:
+    branches: [qa/bil-premium-visual-2026]
+    paths:
+      - .github/workflows/bil_visual_scope_format_once.yml
+permissions:
+  contents: write
+concurrency:
+  group: bil-ux-format-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  format:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/bil-premium-visual-2026'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout only working branch with write credentials
+        uses: actions/checkout@v4
+        with:
+          ref: qa/bil-premium-visual-2026
+          persist-credentials: true
+      - name: Install Flutter formatter only (NO build or release)
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Canonical format only modified BIL UX Dart files
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            lib/features/visual_2026/bil_calm_visual_scope.dart \
+            lib/features/analytics/weekly_report_page.dart \
+            lib/features/daily_log/daily_log_meal_search.dart \
+            lib/features/history/history_page.dart \
+            lib/features/history/progress_page.dart \
+            lib/features/history/progress_page_components.dart \
+            lib/features/profile/profile_summary_page.dart \
+            lib/features/settings/help_center_page.dart \
+            lib/features/settings/reference_settings_home_page.dart \
+            lib/features/settings/settings_page.dart \
+            lib/features/wellness/presentation/recipe_library_page.dart \
+            lib/features/wellness/presentation/wellness_library_page.dart \
+            test/premium_ui/bil_calm_visual_scope_test.dart
+          git diff --check
+          git add -- \
+            lib/features/visual_2026/bil_calm_visual_scope.dart \
+            lib/features/analytics/weekly_report_page.dart \
+            lib/features/daily_log/daily_log_meal_search.dart \
+            lib/features/history/history_page.dart \
+            lib/features/history/progress_page.dart \
+            lib/features/history/progress_page_components.dart \
+            lib/features/profile/profile_summary_page.dart \
+            lib/features/settings/help_center_page.dart \
+            lib/features/settings/reference_settings_home_page.dart \
+            lib/features/settings/settings_page.dart \
+            lib/features/wellness/presentation/recipe_library_page.dart \
+            lib/features/wellness/presentation/wellness_library_page.dart \
+            test/premium_ui/bil_calm_visual_scope_test.dart
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "style(ux): format scoped premium surfaces with Dart formatter"
+            git push origin HEAD:refs/heads/qa/bil-premium-visual-2026
+          fi
+          echo "Scoped formatting complete; NO app build or store release.";
