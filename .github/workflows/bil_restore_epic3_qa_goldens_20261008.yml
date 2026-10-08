@@ -1,0 +1,39 @@
+name: BIL QA-only exact Epic3 visual evidence export
+on:
+  push:
+    branches: [qa/coach-community-next-20261005]
+    paths: [.github/workflows/bil_restore_epic3_qa_goldens_20261008.yml]
+permissions:
+  contents: read
+jobs:
+  exact-visual-evidence:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/qa/coach-community-next-20261005'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Copy eight exact tracked golden PNG fixtures, no fonts and no private assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bil-goldens/test/goldens
+          for size in compact large; do
+            for locale in en ar; do
+              for mode in light dark; do
+                file="test/goldens/epic3_${size}_${locale}_${mode}.png"
+                test -s "$file"
+                cp "$file" /tmp/bil-goldens/test/goldens/
+              done
+            done
+          done
+          git rev-parse HEAD > /tmp/bil-goldens/HEAD.txt
+          printf 'QA-only original tracked PNG fixtures; not a fresh visual-parity claim.\n' > /tmp/bil-goldens/SCOPE.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-epic3-qa-goldens-${{ github.sha }}
+          path: /tmp/bil-goldens/
+          retention-days: 1
+          if-no-files-found: error
