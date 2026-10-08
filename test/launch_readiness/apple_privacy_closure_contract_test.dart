@@ -243,16 +243,17 @@ void main() {
     final voicePolicy = File(
       'lib/features/intelligence_center/services/coach_voice_turn_policy.dart',
     ).readAsStringSync();
-    final voiceUi = [
-      'intelligence_conversation_voice.dart',
-      'intelligence_conversation_voice_transcript.dart',
-    ]
-        .map(
-          (name) => File(
-            'lib/features/intelligence_center/presentation/$name',
-          ).readAsStringSync(),
-        )
-        .join('\n');
+    final voiceUi =
+        [
+              'intelligence_conversation_voice.dart',
+              'intelligence_conversation_voice_transcript.dart',
+            ]
+            .map(
+              (name) => File(
+                'lib/features/intelligence_center/presentation/$name',
+              ).readAsStringSync(),
+            )
+            .join('\n');
     final speechBridge = File(
       'ios/Runner/BILSpeechBridge.swift',
     ).readAsStringSync();

@@ -16,19 +16,14 @@ final class CoachMediaBridgeCopy {
   String _text(String english, String arabicText) =>
       intelligenceTextFor(_localeTag, english, arabicText);
 
-  String get quantityTitle => _text(
-    'What is the portion weight in grams?',
-    'ما وزن الكمية بالغرام؟',
-  );
+  String get quantityTitle =>
+      _text('What is the portion weight in grams?', 'ما وزن الكمية بالغرام؟');
   String get quantityLabel => _text('Quantity (g)', 'الكمية (غ)');
   String get reviewTranscript => _text(
     'Review your voice transcript before sending.',
     'راجع النص الصوتي قبل إرساله.',
   );
-  String get noFoodLogged => _text(
-    'No food was logged.',
-    'لم يُسجّل أي طعام.',
-  );
+  String get noFoodLogged => _text('No food was logged.', 'لم يُسجّل أي طعام.');
 
   String issue(CoachMediaFoodIssue issue) => switch (issue) {
     CoachMediaFoodIssue.invalidBarcode => _text(
