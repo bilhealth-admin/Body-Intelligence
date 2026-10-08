@@ -264,7 +264,7 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
     final pageTitle = category == null
         ? tr('Exercise', 'التمارين')
         : _categoryLabel(category!);
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !customMutationBusy && !saving,
       child: Scaffold(
         appBar: AppBar(
@@ -533,6 +533,6 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
           ),
         ),
       ),
-    );
+    ));
   }
 }

@@ -47,7 +47,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   @override
   Widget build(BuildContext context) {
     final today = recordDate;
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !saving,
       child: Scaffold(
         appBar: AppBar(
@@ -86,7 +86,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           children: [_recordTab(today), _insightsTab()],
         ),
       ),
-    );
+    ));
   }
 
   Widget _recordTab(DateTime today) {

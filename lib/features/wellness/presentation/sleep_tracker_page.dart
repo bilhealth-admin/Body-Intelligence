@@ -17,7 +17,7 @@ class _LegacySleepTrackerPageState
   @override
   Widget build(BuildContext context) {
     final today = ref.read(sleepNowProvider)();
-    return Scaffold(
+    return BilCalmVisualScope(builder: (context) => Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () =>
@@ -101,7 +101,7 @@ class _LegacySleepTrackerPageState
           ),
         ],
       ),
-    );
+    ));
   }
 
   Future<void> _save(DateTime date) async {

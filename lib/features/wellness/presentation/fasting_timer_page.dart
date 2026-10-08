@@ -170,7 +170,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
     final active = session != null;
     final progress = session?.progressAt(DateTime.now()) ?? 0.0;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    return PopScope(
+    return BilCalmVisualScope(builder: (context) => PopScope(
       canPop: !busy,
       child: Scaffold(
         appBar: AppBar(
@@ -531,6 +531,6 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                 ],
               ),
       ),
-    );
+    ));
   }
 }
