@@ -19,6 +19,9 @@ jobs:
         with:
           flutter-version: 3.44.6
           cache: false
+      - name: Resolve pinned package fixture assets
+        shell: bash
+        run: flutter pub get --enforce-lockfile
       - name: Recover exact Flutter UI test fonts and repository Arabic faces
         shell: bash
         run: |
@@ -35,6 +38,16 @@ jobs:
             cp "assets/fonts/${font}" "/tmp/bil-qa-fonts/project/${font}"
           done
           find /tmp/bil-qa-fonts -type f -printf '%P %s bytes\n'
+          icon="$(find "${PUB_CACHE:-$HOME/.pub-cache}" -path '*/cupertino_icons-*/assets/CupertinoIcons.ttf' -print -quit)"
+          test -n "$icon" && test -s "$icon"
+          mkdir -p /tmp/bil-qa-fonts/package
+          cp "$icon" /tmp/bil-qa-fonts/package/CupertinoIcons.ttf
+          for asset in assets/branding/bil_splash_motion.mp4 assets/images/professional/strength_training_cover.png assets/catalogs/bil_food_core.sqlite; do
+            test -s "$asset"
+            mkdir -p "/tmp/bil-qa-fonts/project-extra/$(dirname "$asset")"
+            cp "$asset" "/tmp/bil-qa-fonts/project-extra/$asset"
+          done
+          find /tmp/bil-qa-fonts -type f -printf '%P %s bytes\\n'
           printf 'QA-only glyph fixtures. No app build, no production, no deploy.\n' > /tmp/bil-qa-fonts/SCOPE.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
