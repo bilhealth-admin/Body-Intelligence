@@ -79,7 +79,7 @@ class _CoachMessageTextState extends State<CoachMessageText>
       // Short answers keep their conversational reveal. Very long answers
       // are already fully available, so cap the cosmetic reveal to avoid
       // keeping a multi-paragraph message in motion for minutes.
-      duration: Duration(milliseconds: (remaining * 40).clamp(320, 2400)),
+      duration: Duration(milliseconds: (remaining * 40).clamp(320, 2400).toInt()),
     );
     _revealController = controller;
     controller.addListener(() {
