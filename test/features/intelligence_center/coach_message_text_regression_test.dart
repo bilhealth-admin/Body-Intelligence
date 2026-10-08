@@ -1,5 +1,4 @@
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
