@@ -215,14 +215,14 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.symmetric(vertical: 7),
+    margin: const EdgeInsets.symmetric(vertical: 5),
     decoration: BoxDecoration(
       color: CommunitySapphire.paper(context),
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

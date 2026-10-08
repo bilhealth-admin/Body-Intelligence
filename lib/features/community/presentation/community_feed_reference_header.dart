@@ -60,12 +60,12 @@ class _CommunityFeedReferenceHeaderState
       children: [
         SizedBox(
           height:
-              108 +
+              94 +
               (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(0, 36),
           child: ListView(
             key: const Key('community-reference-stories'),
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsetsDirectional.fromSTEB(8, 13, 8, 6),
+            padding: const EdgeInsetsDirectional.fromSTEB(8, 8, 8, 3),
             children: [
               FutureBuilder<CommunityProfileOverview?>(
                 future: _profile,
@@ -100,7 +100,7 @@ class _CommunityFeedReferenceHeaderState
           ),
         ),
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(16, 13, 16, 0),
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 7, 16, 0),
           child: Material(
             color: dark
                 ? scheme.surfaceContainerHigh.withValues(alpha: .74)
@@ -113,7 +113,7 @@ class _CommunityFeedReferenceHeaderState
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 9,
+                  vertical: 6,
                 ),
                 child: Row(
                   children: [
@@ -152,7 +152,7 @@ class _CommunityFeedReferenceHeaderState
           ),
         ),
         Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(14, 7, 14, 2),
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 3, 14, 1),
           child: Row(
             children: [
               Expanded(
@@ -222,7 +222,7 @@ class _CommunityFeedReferenceHeaderState
             }
             return SizedBox(
               height:
-                  48 +
+                  42 +
                   (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(
                     0,
                     36,
@@ -230,7 +230,7 @@ class _CommunityFeedReferenceHeaderState
               child: ListView(
                 key: const Key('community-reference-topic-chips'),
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 5, 16, 6),
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 3, 16, 4),
                 children: [
                   _CommunityReferenceChip(
                     label: communityText(context, 'All', 'الكل'),
@@ -278,7 +278,7 @@ class _CommunityStoryBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 80,
+      width: 72,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(28),
@@ -296,7 +296,7 @@ class _CommunityStoryBubble extends StatelessWidget {
                       color: accent ? scheme.primary : scheme.outlineVariant,
                     ),
                   ),
-                  child: BilAccountAvatar(radius: 29, networkUrl: avatarUrl),
+                  child: BilAccountAvatar(radius: 25, networkUrl: avatarUrl),
                 ),
                 if (add)
                   PositionedDirectional(
@@ -357,7 +357,7 @@ class _CommunityComposeAction extends StatelessWidget {
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
     child: ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 48),
+      constraints: const BoxConstraints(minHeight: 44),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
         child: Row(

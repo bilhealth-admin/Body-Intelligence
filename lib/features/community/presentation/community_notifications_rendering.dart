@@ -4,6 +4,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
   Widget buildCommunityNotifications(BuildContext context) => Scaffold(
     bottomNavigationBar: BilReferenceBottomBar(
       selected: 3,
+      dark: Theme.of(context).brightness == Brightness.dark,
       onSelected: (index) {
         if (index == 2) {
           unawaited(

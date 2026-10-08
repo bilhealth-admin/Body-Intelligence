@@ -5,6 +5,13 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/community/channels/domain/community_channel_models.dart';
+import 'package:body_intelligence_log/features/community/channels/domain/community_channels_repository.dart';
+import 'package:body_intelligence_log/features/community/channels/presentation/community_channels_page.dart';
+import 'package:body_intelligence_log/features/community/circle_management/circle_management_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_circles.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_post_moderation_page.dart';
+import 'package:body_intelligence_log/features/community/services/community_post_image_picker.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
@@ -591,6 +598,291 @@ class _ReferenceVisualRepository extends _VisualRepository {
   ];
 }
 
+
+/// Synthetic readback states: no account, production write or network request.
+/// Capture success proves native rendering, not approved-reference pixel parity.
+final class _ExtendedVisualRepository extends _ReferenceVisualRepository {
+  _ExtendedVisualRepository(super.arabic);
+
+  static const pendingPostId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+  @override
+  Future<List<CommunityCircle>> loadCommunityCircles() async => [
+    ManagedCommunityCircle(
+      circle: const CommunityCircle(
+        slug: '10k-steps',
+        titleCopyKey: 'community_circle_10k_steps',
+        descriptionCopyKey: 'community_circle_10k_steps_body',
+        rulesCopyKey: 'community_circle_standard_rules',
+        access: CommunityCircleAccess.public,
+        joinPolicy: CommunityCircleJoinPolicy.open,
+        featured: true,
+        memberCount: 830,
+        postCount: 123,
+        membershipStatus: CommunityCircleMembershipStatus.active,
+        membershipRole: CommunityCircleMembershipRole.member,
+      ),
+      displayName: arabic ? '١٠ آلاف خطوة' : '10K Steps',
+      description: arabic
+          ? 'نشارك خطواتنا اليومية ونشجع بعضنا.'
+          : 'Share daily steps and encourage each other.',
+    ),
+    ManagedCommunityCircle(
+      circle: const CommunityCircle(
+        slug: 'healthy-eating',
+        titleCopyKey: 'community_circle_healthy_eating',
+        descriptionCopyKey: 'community_circle_healthy_eating_body',
+        rulesCopyKey: 'community_circle_standard_rules',
+        access: CommunityCircleAccess.public,
+        joinPolicy: CommunityCircleJoinPolicy.request,
+        featured: true,
+        memberCount: 468,
+        postCount: 69,
+      ),
+      displayName: arabic ? 'الأكل الصحي' : 'Healthy Eating',
+      description: arabic
+          ? 'شارك أفكار الوجبات والعادات المفيدة.'
+          : 'Share practical meals and sustainable habits.',
+    ),
+  ];
+
+  @override
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(String draftId, {int maxImages = 4}) async {
+    // Missing image bytes are intentionally represented as placeholders with
+    // retry. This evidence does NOT claim four-photo reference fidelity.
+    return (
+      draft: CommunityPersistentDraft(
+        draftId: draftId,
+        title: arabic ? 'مسودة إنجاز' : 'Progress draft',
+        body: arabic
+            ? 'سأكمل هذه المشاركة لاحقًا.'
+            : 'I will finish this community post later.',
+        topicSlugs: const ['nutrition'],
+        mentions: const [],
+        collaborators: const [],
+        hashtags: const ['progress'],
+        pollOptions: const [],
+        pollAllowMultiple: false,
+        createdAt: DateTime.utc(2026, 10, 3, 10),
+        updatedAt: DateTime.utc(2026, 10, 3, 11),
+        media: [
+          for (var index = 0; index < 2; index++)
+            CommunityDraftMediaMetadata(
+              position: index,
+              objectPath: 'fixture/$draftId/photo-$index.png',
+              mimeType: 'image/png',
+              bytes: 1,
+              width: 1,
+              height: 1,
+            ),
+        ],
+      ),
+      images: const <CommunityPostImagePreview?>[null, null],
+    );
+  }
+
+  @override
+  Future<bool> isCommunityModerator() async => true;
+
+  @override
+  Future<T> runForCommunityOwner<T>(
+    Future<T> Function() action, {
+    required String ownerId,
+    required bool Function() isCurrentOwner,
+  }) async {
+    if (ownerId != _VisualRepository.owner || !isCurrentOwner()) {
+      throw const AuthException('Synthetic Community owner changed');
+    }
+    return action();
+  }
+
+  @override
+  Future<List<CommunityPost>> loadPendingPostsForModeration({
+    int limit = 100,
+  }) async => [
+    CommunityPost(
+      id: pendingPostId,
+      authorId: _VisualRepository.peer,
+      authorName: name,
+      body: arabic
+          ? 'رحلة جديدة نحو عادات أفضل. شاركوني تجاربكم!'
+          : 'A new step toward better habits. Share your experience!',
+      createdAt: DateTime.utc(2026, 10, 3, 9),
+      moderationStatus: CommunityPostModerationStatus.pending,
+    ),
+  ];
+
+  @override
+  Future<List<CommunityPost>> loadHiddenPostsForModeration({
+    int limit = 100,
+  }) async => const [];
+
+  @override
+  Future<List<Map<String, dynamic>>> loadOpenModerationReports() async =>
+      const [];
+
+  @override
+  Future<List<CommunityPost>> hydrateModerationReviewContents(
+    List<CommunityPost> posts,
+  ) async => posts;
+}
+
+final class _VisualChannelsRepository implements CommunityChannelsRepository {
+  _VisualChannelsRepository(this.arabic);
+
+  static const firstChannel = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+  final bool arabic;
+
+  @override
+  String? get currentOwnerId => _VisualRepository.owner;
+
+  @override
+  Stream<String?> get ownerChanges => const Stream<String?>.empty();
+
+  @override
+  Future<CommunityChannelCapabilities> loadCapabilities(
+    ChannelRequestScope scope,
+  ) async {
+    scope.check();
+    return const CommunityChannelCapabilities();
+  }
+
+  @override
+  Future<CommunityChannelDirectory> loadDirectory(
+    ChannelRequestScope scope, {
+    String? afterId,
+    int limit = 50,
+  }) async {
+    scope.check();
+    return CommunityChannelDirectory(
+      channels: [
+        CommunityChannel(
+          id: firstChannel,
+          slug: 'daily-progress',
+          title: arabic ? 'التقدم اليومي' : 'Daily progress',
+          description: arabic
+              ? 'عادات بسيطة وتشجيع متبادل.'
+              : 'Small habits and mutual encouragement.',
+          visibility: 'public',
+          enabled: true,
+          membership: 'member',
+          canRead: true,
+          canSend: true,
+          unreadCount: 3,
+          latestSequence: 2,
+        ),
+        CommunityChannel(
+          id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+          slug: 'healthy-recipes',
+          title: arabic ? 'وصفات صحية' : 'Healthy recipes',
+          description: arabic
+              ? 'أفكار الوجبات اليومية.'
+              : 'Everyday meal ideas.',
+          visibility: 'public',
+          enabled: true,
+          membership: 'member',
+          canRead: true,
+          canSend: true,
+          unreadCount: 0,
+          latestSequence: 0,
+        ),
+      ],
+      serverTime: DateTime.utc(2026, 10, 3),
+    );
+  }
+
+  @override
+  Future<CommunityChannelMessagePage> loadMessages(
+    ChannelRequestScope scope,
+    String channelId, {
+    int? beforeSequence,
+    int? afterSequence,
+    int limit = 50,
+  }) async {
+    scope.check();
+    return CommunityChannelMessagePage(
+      messages: afterSequence != null && afterSequence >= 2
+          ? const <CommunityChannelMessage>[]
+          : [
+              CommunityChannelMessage(
+                id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+                channelId: channelId,
+                sequence: 1,
+                authorId: _VisualRepository.peer,
+                authorDisplayName: arabic ? 'عضو المجتمع' : 'Community member',
+                text: arabic
+                    ? 'صباح الخير! كيف بدأ يومكم؟'
+                    : 'Good morning! How did your day start?',
+                clientMessageId: null,
+                createdAt: DateTime.utc(2026, 10, 3, 8),
+                isRead: true,
+              ),
+              CommunityChannelMessage(
+                id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+                channelId: channelId,
+                sequence: 2,
+                authorId: _VisualRepository.owner,
+                authorDisplayName: arabic ? 'أنا' : 'Me',
+                text: arabic
+                    ? 'بدأت بنزهة قصيرة، وسأشارك تقدمي.'
+                    : 'I started with a short walk and will share my progress.',
+                clientMessageId: null,
+                createdAt: DateTime.utc(2026, 10, 3, 8, 2),
+                isRead: true,
+              ),
+            ],
+      hasMore: false,
+      serverTime: DateTime.utc(2026, 10, 3, 8, 10),
+    );
+  }
+
+  @override
+  Future<CommunityChannelMessage> send(
+    ChannelRequestScope scope,
+    CommunityChannelSendAttempt attempt,
+  ) async => throw StateError('Synthetic capture is read-only');
+
+  @override
+  Future<CommunityChannelReadback> acknowledgeVisible(
+    ChannelRequestScope scope,
+    String channelId,
+    List<String> messageIds,
+  ) async {
+    scope.check();
+    return CommunityChannelReadback(
+      confirmedIds: messageIds.toSet(),
+      unreadCount: 0,
+      serverTime: DateTime.utc(2026, 10, 3, 8, 10),
+    );
+  }
+
+  @override
+  Future<CommunityChannelPresence> loadPresence(
+    ChannelRequestScope scope,
+    String channelId, {
+    required bool heartbeat,
+    required bool Function() isForeground,
+  }) async {
+    scope.check();
+    final now = DateTime.now().toUtc();
+    return CommunityChannelPresence(
+      onlineCount: 12,
+      serverTime: now,
+      validUntil: now.add(const Duration(seconds: 90)),
+    );
+  }
+
+  @override
+  Stream<CommunityChannelChange> watchChanges(
+    ChannelRequestScope scope,
+    String? channelId,
+  ) => const Stream<CommunityChannelChange>.empty();
+}
+
 void main() {
   setUpAll(() async {
     await loadVisualEvidenceFont();
@@ -611,6 +903,8 @@ void main() {
             final repository = _VisualRepository(arabic);
             final feedRepository = _FeedReferenceVisualRepository(arabic);
             final referenceRepository = _ReferenceVisualRepository(arabic);
+            final extendedRepository = _ExtendedVisualRepository(arabic);
+            final channelsRepository = _VisualChannelsRepository(arabic);
             final controller = CommunityAttentionController(
               () async => const CommunityAttention(
                 unreadMessages: 3,
@@ -653,6 +947,18 @@ void main() {
                 userId: _VisualRepository.peer,
                 displayName: repository.name,
                 repository: repository,
+              ),
+              'drafts': CommunityDraftsPage(repository: extendedRepository),
+              'circles': CommunityCirclesPage(repository: extendedRepository),
+              'moderation': CommunityPostModerationPage(
+                repository: extendedRepository,
+              ),
+              'channels': CommunityChannelsPage(
+                repository: channelsRepository,
+              ),
+              'channel_chat': CommunityChannelMessagesPage(
+                repository: channelsRepository,
+                channelId: _VisualChannelsRepository.firstChannel,
               ),
             };
             for (final scene in scenes.entries) {
@@ -707,6 +1013,37 @@ void main() {
               await settleVisualAssetImages(tester);
               await tester.pumpAndSettle();
               expect(tester.takeException(), isNull, reason: scene.key);
+              if (scene.key == 'drafts') {
+                expect(
+                  find.byKey(const Key('community-drafts-page')),
+                  findsOneWidget,
+                );
+              }
+              if (scene.key == 'circles') {
+                expect(
+                  find.byKey(const Key('community-circles-list')),
+                  findsOneWidget,
+                );
+              }
+              if (scene.key == 'moderation') {
+                expect(
+                  find.byKey(
+                    const Key(
+                      'community-moderation-post-aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+                    ),
+                  ),
+                  findsOneWidget,
+                );
+              }
+              if (scene.key == 'channels') {
+                expect(find.byKey(const Key('bil07-directory')), findsOneWidget);
+              }
+              if (scene.key == 'channel_chat') {
+                expect(
+                  find.byKey(const Key('bil07-channels-page')),
+                  findsOneWidget,
+                );
+              }
               if (scene.key == 'updates') {
                 expect(
                   find.byKey(const Key('community-activity-filter-updates')),

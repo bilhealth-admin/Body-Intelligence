@@ -165,13 +165,13 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEAF2FF),
+                        color: const Color(0xFFFFE8BE),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
                         'Pro',
                         style: TextStyle(
-                          color: _blue,
+                          color: Color(0xFF875B14),
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),
@@ -284,7 +284,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                     children: [
                       const Icon(
                         Icons.track_changes_rounded,
-                        color: Color(0xFFFFBC6B),
+                        color: Color(0xFF31CE9A),
                         size: 31,
                       ),
                       const SizedBox(width: 10),
@@ -319,15 +319,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 17),
-              Text(
-                t('Plan Tools', 'أدوات خطتك'),
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               LayoutBuilder(
                 builder: (context, constraints) => Wrap(
                   spacing: 9,
@@ -346,14 +338,14 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                             Icons.graphic_eq_rounded,
                             t('Voice Log', 'تسجيل صوتي'),
                             t('Just talk', 'تحدث فقط'),
-                            const Color(0xFF2CAAD6),
+                            const Color(0xFF2FB88F),
                             onVoice,
                           ),
                           (
                             Icons.add_rounded,
                             t('Quick Add', 'إضافة سريعة'),
                             t('In seconds', 'خلال ثوانٍ'),
-                            const Color(0xFF448BFF),
+                            const Color(0xFF31C5DD),
                             () => onRoute('/daily-log'),
                           ),
                           (

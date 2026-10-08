@@ -61,8 +61,8 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
           foregroundColor: Colors.white,
           disabledForegroundColor: Colors.white,
           shadowColor: Colors.transparent,
-          minimumSize: const Size(0, 68),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+          minimumSize: const Size(0, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -132,7 +132,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(flex: 41, child: saveDraft),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 10),
                   Expanded(flex: 59, child: publish),
                 ],
               ),

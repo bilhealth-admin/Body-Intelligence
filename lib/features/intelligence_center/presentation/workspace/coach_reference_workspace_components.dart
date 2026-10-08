@@ -46,7 +46,7 @@ class _NutrientTile extends StatelessWidget {
     child: InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(9, 12, 9, 12),
+        padding: const EdgeInsets.fromLTRB(9, 9, 9, 9),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -70,7 +70,7 @@ class _NutrientTile extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 7),
             Text(
               '$amount / $target',
               style: const TextStyle(
@@ -80,7 +80,7 @@ class _NutrientTile extends StatelessWidget {
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 7),
             ClipRRect(
               borderRadius: BorderRadius.circular(3),
               child: LinearProgressIndicator(
@@ -111,7 +111,7 @@ class _TimelineRow extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     onTap: onTap,
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
       child: Row(
         children: [
           Container(
