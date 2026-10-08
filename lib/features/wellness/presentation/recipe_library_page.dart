@@ -235,32 +235,8 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
     final premiumTier = storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
-    void openPremium() {
-      if (!verifiedRights) {
-        // A locally inferred Free tier or delayed receipt check must never
-        // send an active member to Plans. Keep the recipe protected and retry.
-        if (!rights.isLoading) {
-          ref.invalidate(verifiedSubscriptionStateProvider);
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.strings.text(
-                rights.isLoading
-                    ? 'Checking subscription'
-                    : 'Subscription check unavailable',
-              ),
-            ),
-          ),
-        );
-        return;
-      }
-      context.push(
-        storefrontPlan == CommercePlan.premiumAiCoach
-            ? '/plans?focus=boost'
-            : '/plans?focus=subscription',
-      );
-    }
+    void openPremium() =>
+        _openRecipePremiumOffer(rights, verifiedRights, storefrontPlan);
     final availableCuisines = recipeCuisineOrder
         .where(
           (key) =>

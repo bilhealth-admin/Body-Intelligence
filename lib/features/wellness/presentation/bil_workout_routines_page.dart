@@ -511,25 +511,25 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     }
     final item = matches.first;
     final access = ref.read(verifiedSubscriptionAccessProvider);
+    final verified = access.asData?.value;
     // A paid deep link is an intent, not proof of a Free subscription. Keep
     // that intent until the real authority resolves; build observes this
     // provider and retries without opening Plans for a loading paid member.
     if (!WorkoutFreePreviewPolicy.isPreview(item) &&
         (access.isLoading ||
             access.hasError ||
-            access.asData?.value.authority !=
-                EntitlementAuthority.verifiedServer)) {
+            verified?.authority != EntitlementAuthority.verifiedServer)) {
       return;
     }
     _initialItemHandled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final currentAccess = ref.read(verifiedSubscriptionAccessProvider);
+      final latest = currentAccess.asData?.value;
       if (!WorkoutFreePreviewPolicy.isPreview(item) &&
           (currentAccess.isLoading ||
               currentAccess.hasError ||
-              currentAccess.asData?.value.authority !=
-                  EntitlementAuthority.verifiedServer)) {
+              latest?.authority != EntitlementAuthority.verifiedServer)) {
         _initialItemHandled = false;
         return;
       }

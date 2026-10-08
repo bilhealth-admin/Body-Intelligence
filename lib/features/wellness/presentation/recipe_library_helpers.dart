@@ -332,3 +332,35 @@ class _CatalogUnavailable extends StatelessWidget {
     );
   }
 }
+
+extension _RecipePremiumOffer on _RecipeLibraryPageState {
+  /// Only a server-verified Free result may start a purchase journey.
+  void _openRecipePremiumOffer(
+    AsyncValue<SubscriptionState> rights,
+    bool verifiedRights,
+    CommercePlan? storefrontPlan,
+  ) {
+    if (!verifiedRights) {
+      if (!rights.isLoading) {
+        ref.invalidate(verifiedSubscriptionStateProvider);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text(
+              rights.isLoading
+                  ? 'Checking subscription'
+                  : 'Subscription check unavailable',
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    context.push(
+      storefrontPlan == CommercePlan.premiumAiCoach
+          ? '/plans?focus=boost'
+          : '/plans?focus=subscription',
+    );
+  }
+}

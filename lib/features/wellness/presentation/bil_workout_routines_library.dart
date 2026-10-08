@@ -9,8 +9,7 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
     final subscription = _usableVerifiedSubscription(rights);
     final verified =
         subscription?.authority == EntitlementAuthority.verifiedServer;
-    final premiumUnlocked =
-        verified && subscription?.plan != CommercePlan.free;
+    final premiumUnlocked = verified && subscription?.plan != CommercePlan.free;
     final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
     const premiumTier = 'Premium';
     void openPremium() {
@@ -42,6 +41,7 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
             : '/plans?focus=subscription',
       );
     }
+
     final selectedItems = switch (_tabs.index) {
       0 => items,
       1 => items.where((item) => item.releaseBundleId != 'home-training'),

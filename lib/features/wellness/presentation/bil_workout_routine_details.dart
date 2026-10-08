@@ -75,8 +75,8 @@ class _BilWorkoutRoutineDetailsPageState
 
   Future<void> _openPlans() async {
     final rights = ref.read(verifiedSubscriptionAccessProvider);
-    if (rights.asData?.value.authority !=
-        EntitlementAuthority.verifiedServer) {
+    final verified = rights.asData?.value;
+    if (verified?.authority != EntitlementAuthority.verifiedServer) {
       if (!rights.isLoading) {
         ref.invalidate(verifiedSubscriptionStateProvider);
       }
