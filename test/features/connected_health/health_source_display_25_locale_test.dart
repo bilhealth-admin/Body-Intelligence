@@ -25,9 +25,7 @@ void main() {
   );
 
   for (final locale in AppLocalizations.supportedLocales) {
-    testWidgets('Unknown source ${locale.toLanguageTag()}', (
-      tester,
-    ) async {
+    testWidgets('Unknown source ${locale.toLanguageTag()}', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           locale: locale,

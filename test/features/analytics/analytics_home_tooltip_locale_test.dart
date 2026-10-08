@@ -15,9 +15,7 @@ void main() {
   };
 
   for (final locale in AppLocalizations.supportedLocales) {
-    testWidgets('Analytics Home ${locale.toLanguageTag()}', (
-      tester,
-    ) async {
+    testWidgets('Analytics Home ${locale.toLanguageTag()}', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           locale: locale,
