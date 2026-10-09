@@ -1,0 +1,39 @@
+name: BIL QA full-shell Dashboard capture
+on:
+  push:
+    branches: [qa/dashboard-current-screenshot-20261009]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve pinned packages
+        run: flutter pub get --enforce-lockfile
+      - name: Render Dashboard and actual five-tab app shell
+        env:
+          BIL_DASHBOARD_CAPTURE_DIR: /tmp/bil-dashboard
+        run: flutter test --no-pub --reporter expanded --timeout=3m test/qa_dashboard_full_shell_capture_test.dart
+      - name: Record exact source
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p /tmp/bil-dashboard
+          echo "$GITHUB_SHA" > /tmp/bil-dashboard/COMMIT.txt
+          printf '%s\n' 'Actual Flutter widgets with a deterministic test account, not a native device capture' > /tmp/bil-dashboard/README.txt
+      - name: Upload full-shell Flutter screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-dashboard-full-shell
+          path: /tmp/bil-dashboard
+          retention-days: 2
+          if-no-files-found: error
