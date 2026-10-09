@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   test('custom cards keep cached values instead of flashing on refresh', () {
@@ -44,6 +45,25 @@ void main() {
           addTearDown(tester.view.reset);
           final database = AppDatabase.forTesting(NativeDatabase.memory());
           final repository = _PendingSectionRepository(database, failSave);
+          final router = GoRouter(
+            initialLocation: '/dashboard/preferences',
+            routes: [
+              GoRoute(
+                path: '/dashboard/preferences',
+                builder: (context, state) => const DashboardPreferencesPage(),
+              ),
+              GoRoute(
+                path: '/dashboard',
+                builder: (context, state) => const Scaffold(
+                  body: Text(
+                    'Dashboard landing',
+                    key: Key('dashboard-preferences-returned'),
+                  ),
+                ),
+              ),
+            ],
+          );
+          addTearDown(router.dispose);
           addTearDown(() async {
             if (!repository.release.isCompleted) repository.release.complete();
             await tester.pumpWidget(const SizedBox.shrink());
@@ -60,7 +80,8 @@ void main() {
                   AsyncData(FreePlan.createState()),
                 ),
               ],
-              child: MaterialApp(
+              child: MaterialApp.router(
+                routerConfig: router,
                 locale: locale,
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: const [
@@ -70,7 +91,6 @@ void main() {
                 theme: BilFlagshipTheme.light().copyWith(
                   platform: TargetPlatform.iOS,
                 ),
-                home: const DashboardPreferencesPage(),
               ),
             ),
           );
@@ -158,12 +178,27 @@ void main() {
           repository.release.complete();
           await tester.pumpAndSettle();
           expect(find.byType(CircularProgressIndicator), findsNothing);
-          expect(tester.getRect(card), savedRect);
-          expect(scrollPosition.pixels, closeTo(savedOffset, .1));
-          expect(
-            tester.widget<SwitchListTile>(card).value,
-            failSave ? before[section] : !before[section]!,
-          );
+          if (failSave) {
+            // An unsuccessful write cannot navigate away or clear the draft.
+            expect(find.byType(DashboardPreferencesPage), findsOneWidget);
+            expect(tester.getRect(card), savedRect);
+            expect(scrollPosition.pixels, closeTo(savedOffset, .1));
+            expect(tester.widget<SwitchListTile>(card).value, before[section]);
+            expect(find.byType(SnackBar), findsOneWidget);
+            expect(
+              tester.widget<PopScope>(find.byType(PopScope)).canPop,
+              isTrue,
+            );
+          } else {
+            // Done was tapped while saving. It must navigate only after the
+            // write is confirmed, never while controls are still pending.
+            expect(find.byType(DashboardPreferencesPage), findsNothing);
+            expect(
+              find.byKey(const Key('dashboard-preferences-returned')),
+              findsOneWidget,
+            );
+            expect(find.byType(SnackBar), findsNothing);
+          }
           expect(
             await repository.get('dashboard.preset'),
             failSave ? 'calorie' : 'custom',
@@ -172,11 +207,6 @@ void main() {
             await repository.get('dashboard.section.$section'),
             failSave ? isNull : (!before[section]!).toString(),
           );
-          expect(
-            find.byType(SnackBar),
-            failSave ? findsOneWidget : findsNothing,
-          );
-          expect(tester.widget<PopScope>(find.byType(PopScope)).canPop, isTrue);
           expect(tester.takeException(), isNull);
           // Dispose streams before Flutter checks for pending timers;
           // addTearDown runs after that invariant check.

@@ -240,6 +240,9 @@ void main() {
       final initialLabel = tester.widget<FilledButton>(publish);
       expect(initialLabel.onPressed, isNotNull);
       await tester.tap(publish);
+      // Publish can enter its pending state before a frame is rendered. Pump
+      // explicitly even when the repository receives the call immediately.
+      await tester.pump();
       for (var i = 0; i < 30 && repository.textCalls == 0; i++) {
         await tester.pump(const Duration(milliseconds: 50));
       }
