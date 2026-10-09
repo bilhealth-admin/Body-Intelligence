@@ -10,8 +10,7 @@ void main() {
       testWidgets(
         'Flat ${platform.name}/${brightness.name}',
         (tester) async {
-          final spec =
-              BilSemanticIcons.spec(BilSemanticIconKind.health);
+          final spec = BilSemanticIcons.spec(BilSemanticIconKind.health);
           await tester.pumpWidget(
             MaterialApp(
               theme: ThemeData(
@@ -60,7 +59,7 @@ void main() {
 
   testWidgets(
     'Native Settings flat mode keeps the native symbol footprint',
-    (tester,) async {
+    (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -94,7 +93,7 @@ void main() {
 
   testWidgets(
     'Legacy semantic badge remains unchanged for protected pages',
-    (tester,) async {
+    (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -109,7 +108,8 @@ void main() {
         of: find.byKey(const Key('quality-legacy-badge')),
         matching: find.byType(DecoratedBox),
       );
-      final decoration = tester.widget<DecoratedBox>(decorations.first).decoration;
+      final decorated = tester.widget<DecoratedBox>(decorations.first);
+      final decoration = decorated.decoration;
       expect(decoration, isA<BoxDecoration>());
       expect(
         (decoration as BoxDecoration).gradient,
