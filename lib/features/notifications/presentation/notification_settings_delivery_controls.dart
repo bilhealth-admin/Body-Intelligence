@@ -21,9 +21,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
         key: const Key('all-daily-reminders'),
         value: _allDailyEnabled,
         onChanged: _saving ? null : _setAllDaily,
-        secondary: const BilSemanticIconBadge(
-          kind: BilSemanticIconKind.notifications,
-        ),
+        secondary: const BilFlatIcon(kind: BilSemanticIconKind.notifications),
         title: Text(
           _ui(
             'Enable all daily reminders',
@@ -109,9 +107,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
                     (_pushPreferences?.providerReady ?? false)
                 ? _setPushEnabled
                 : null,
-            secondary: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.community,
-            ),
+            secondary: const BilFlatIcon(kind: BilSemanticIconKind.community),
             title: Text(
               _ui(
                 'Private community notifications',
@@ -226,9 +222,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
               key: const Key('sensitive-lock-screen-preview'),
               value: _pushPreferences?.sensitivePreviewAllowed ?? false,
               onChanged: _pushSaving ? null : _setSensitivePreview,
-              secondary: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.privacy,
-              ),
+              secondary: const BilFlatIcon(kind: BilSemanticIconKind.privacy),
               title: Text(
                 _ui(
                   'Allow sensitive previews',
@@ -250,9 +244,7 @@ extension _NotificationDeliveryControls on _NotificationSettingsPageState {
             ),
           if (_pushPreferences != null)
             ListTile(
-              leading: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.time,
-              ),
+              leading: const BilFlatIcon(kind: BilSemanticIconKind.time),
               title: Text(_pushPreferences!.timeZone),
               subtitle: Text(
                 _ui(

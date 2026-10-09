@@ -26,7 +26,11 @@ void main() {
     expect(page, contains('wellnessSleepMeasuredByLabel(context)'));
     expect(
       page,
-      contains('connectedHealthDisplaySource(connectedSleep.signal)'),
+      contains('connectedHealthDisplayName(context, connectedSleep.signal)'),
+    );
+    expect(
+      page,
+      isNot(contains('connectedHealthDisplaySource(connectedSleep.signal)')),
     );
     expect(page, contains('wellnessSleepStageLabel(context, stage)'));
     expect(page, contains("tr('Last sync'"));

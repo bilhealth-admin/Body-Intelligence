@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:body_intelligence_log/features/startup/premium_splash_experience.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,11 +124,50 @@ void main() {
     tester.view.devicePixelRatio = 2.5;
     addTearDown(tester.view.reset);
 
+    // Flutter widget tests run in fake async. Asset decoding needs a real
+    // asynchronous zone or a stalled codec can hold this Golden indefinitely.
+    Future<ui.Image> decodeIdentity() async {
+      final data = await rootBundle.load(
+        'assets/branding/bil_splash_identity.png',
+      );
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      // Keep the original 1080px identity bitmap. Downscaling to 864px
+      // and upscaling it again creates a real 0.41% wordmark pixel drift.
+      final codec = await ui.instantiateImageCodec(bytes);
+      try {
+        return (await codec.getNextFrame()).image;
+      } finally {
+        codec.dispose();
+      }
+    }
+
+    // Both the image decoder and its timeout run in real async. A hanging
+    // decode cannot occupy Flutter's default ten-minute test timeout.
+    final decodedIdentity = await tester.runAsync<ui.Image>(
+      () => decodeIdentity().timeout(const Duration(seconds: 25)),
+    );
+    expect(decodedIdentity, isNotNull);
+    bilPredecodedLaunchWordmark = decodedIdentity;
+    addTearDown(() {
+      final image = bilPredecodedLaunchWordmark;
+      bilPredecodedLaunchWordmark = null;
+      image?.dispose();
+    });
+
     await tester.pumpWidget(
       const _SplashHarness(reducedMotion: true, showSpinner: false),
     );
     await tester.pump();
 
+    final rawWordmark = find.descendant(
+      of: find.byKey(const ValueKey('premium-splash-wordmark')),
+      matching: find.byType(RawImage),
+    );
+    expect(rawWordmark, findsOneWidget);
+    expect(tester.widget<RawImage>(rawWordmark).image, isNotNull);
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('goldens/premium_splash_native.png'),

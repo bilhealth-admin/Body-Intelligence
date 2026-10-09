@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/bil_flagship_tokens.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
+import '../../../app/theme/bil_flat_icon.dart';
 import '../../ads/presentation/safe_free_ad_anchor.dart';
 import 'wellness_copy.dart';
 
@@ -242,8 +243,9 @@ class _WellnessExperienceCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BilSemanticIconBadge(
+                        BilFlatIcon(
                           key: Key('wellness-semantic-icon-${item.kind.name}'),
+                          color: Colors.white,
                           kind: item.kind,
                           size: 42,
                           iconSize: 23,

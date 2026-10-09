@@ -91,6 +91,142 @@ void main() {
     },
   );
 
+  testWidgets(
+    'reply geometry remains fixed throughout reveal for Arabic, emoji and long text',
+    (tester) async {
+      const prefix = 'تقرير 🥗💪🏽 عربي English 👨‍👩‍👧‍👦';
+      final reply = List<String>.filled(70, prefix).join(' ');
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: SizedBox(
+                width: 340,
+                child: CoachMessageText(
+                  key: const ValueKey('coach-long-geometry'),
+                  text: reply,
+                  createdAt: DateTime(2026, 10, 8),
+                  textDirection: TextDirection.rtl,
+                  animateReveal: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final message = find.byType(CoachMessageText);
+      final initialSize = tester.getSize(message);
+      expect(initialSize.height, greaterThan(250));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        isNot(reply),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.getSize(message).height, closeTo(initialSize.height, .01));
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(tester.getSize(message).height, closeTo(initialSize.height, .01));
+      await tester.pump(const Duration(seconds: 3));
+      expect(tester.getSize(message).height, closeTo(initialSize.height, .01));
+      expect(
+        tester.widget<SelectableText>(find.byType(SelectableText)).data,
+        reply,
+      );
+      // There is only one message in the widget tree. A second invisible
+      // RichText/EditableText caused ambiguous reactions and transcript tests.
+      expect(find.text(reply), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'full reply never pushes an adjacent feedback row while animating',
+    (tester) async {
+      final reply = List<String>.filled(
+        12,
+        'Detailed evidence based answer.',
+      ).join(' ');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 300,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CoachMessageText(
+                    key: const ValueKey('coach-feedback-anchor'),
+                    text: reply,
+                    createdAt: DateTime(2026, 10, 8),
+                    textDirection: TextDirection.ltr,
+                    animateReveal: true,
+                    showTime: false,
+                  ),
+                  const SizedBox(
+                    key: ValueKey('coach-fake-reactions'),
+                    height: 48,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      final feedback = find.byKey(const ValueKey('coach-fake-reactions'));
+      final top = tester.getTopLeft(feedback).dy;
+      for (final elapsed in [
+        const Duration(milliseconds: 120),
+        const Duration(milliseconds: 400),
+        const Duration(milliseconds: 1500),
+        const Duration(seconds: 2),
+      ]) {
+        await tester.pump(elapsed);
+        expect(tester.getTopLeft(feedback).dy, closeTo(top, .01));
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('joined emoji and combining scripts never reveal split graphemes', (
+    tester,
+  ) async {
+    const reply =
+        'العائلة 👨‍👩‍👧‍👦 والرياضة 🏃🏽‍♂️ — let us review the sleep report.';
+    final completeClusters = reply.characters.toList(growable: false);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CoachMessageText(
+            text: reply,
+            createdAt: DateTime(2026, 10, 8),
+            textDirection: TextDirection.rtl,
+            animateReveal: true,
+          ),
+        ),
+      ),
+    );
+    for (var step = 0; step < 12; step++) {
+      await tester.pump(const Duration(milliseconds: 70));
+      final visible = tester
+          .widget<SelectableText>(find.byType(SelectableText))
+          .data!;
+      expect(
+        completeClusters.take(visible.characters.length).join(),
+        visible,
+        reason: 'The display must end on a complete grapheme at frame $step',
+      );
+    }
+    await tester.pump(const Duration(seconds: 3));
+    expect(
+      tester.widget<SelectableText>(find.byType(SelectableText)).data,
+      reply,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('recycled fresh reply does not restart its reveal', (
     tester,
   ) async {

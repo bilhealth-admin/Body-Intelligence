@@ -9,6 +9,11 @@ import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_engine.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
@@ -34,6 +39,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
+
+// Protected Food, More, and Progress store captures share a single
+// server-verified Free member. Without that evidence, the UI correctly
+// fails closed to Retry rather than showing the reviewed Premium preview.
+// This affects only the screenshot fixture, never production entitlements.
+final _visualVerifiedFree = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  lifecycle: SubscriptionLifecycle.inactive,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
 
 final class _StoreHealthGateway implements ConnectedHealthGateway {
   const _StoreHealthGateway();
@@ -260,6 +278,17 @@ void main() {
           connectedHealthGatewayProvider.overrideWithValue(
             const _StoreHealthGateway(),
           ),
+          if (page is DailyLogPage ||
+              page is FoodPage ||
+              page is SettingsPage ||
+              page is AnalyticsPage) ...[
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => DateTime.utc(2026, 8, 30, 9, 41, 12),
+            ),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(_visualVerifiedFree),
+            ),
+          ],
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -292,252 +321,378 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(tester.takeException(), isNull);
-    await expectLater(
-      find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/epic15_$name.png'),
-    );
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
-    await db.close();
+    try {
+      await expectLater(
+        find.byType(Scaffold).first,
+        matchesGoldenFile('goldens/epic15_$name.png'),
+      );
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await db.close();
+    }
   }
 
-  const devices = <(String, Size)>[
-    ('iphone_69', Size(1290, 2796)),
-    ('android_phone', Size(1080, 1920)),
-  ];
-
-  for (final device in devices) {
-    testWidgets('${device.$1} English flagship store screenshots', (
-      tester,
-    ) async {
-      final previousTargetPlatform = debugDefaultTargetPlatformOverride;
-      debugDefaultTargetPlatformOverride = device.$1 == 'iphone_69'
-          ? TargetPlatform.iOS
-          : TargetPlatform.android;
-      try {
-        const locale = Locale('en');
-        final strictComparator = goldenFileComparator;
-        goldenFileComparator = _OnboardingEdgeGoldenComparator(
-          Uri.file('test/epic15_store_screenshot_golden_test.dart'),
-        );
-        try {
-          await capture(
-            tester,
-            page: const OnboardingPage(),
-            name: '${device.$1}_en_00_onboarding',
-            physicalSize: device.$2,
-            locale: locale,
-          );
-        } finally {
-          goldenFileComparator = strictComparator;
-        }
-        await capture(
-          tester,
-          page: const DashboardPage(),
-          name: '${device.$1}_en_01_dashboard',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const DailyLogPage(focusMealEntry: true),
-          name: '${device.$1}_en_02_daily_log',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const FoodPage(),
-          name: '${device.$1}_en_025_food_search',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const AnalyticsPage(),
-          name: '${device.$1}_en_03_progress',
-          physicalSize: device.$2,
-          locale: locale,
-          trends: true,
-        );
-        await capture(
-          tester,
-          page: const BilStorePlansPage(connectToDeviceStore: false),
-          name: '${device.$1}_en_04_plans',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const ConnectedHealthPage(),
-          name: '${device.$1}_en_05_connected_health',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const SettingsPage(),
-          name: '${device.$1}_en_06_privacy_settings',
-          physicalSize: device.$2,
-          locale: locale,
-          brightness: Brightness.dark,
-        );
-        if (device.$1 == 'iphone_69') {
-          await capture(
-            tester,
-            page: const WeeklyReportPage(),
-            name: '${device.$1}_en_07_weekly_report',
-            physicalSize: device.$2,
-            locale: locale,
-            trends: true,
-          );
-          await capture(
-            tester,
-            page: const NutritionPathwaysPage(),
-            name: '${device.$1}_en_08_nutrition_pathways',
-            physicalSize: device.$2,
-            locale: locale,
-          );
-        }
-      } finally {
-        debugDefaultTargetPlatformOverride = previousTargetPlatform;
+  // Each image runs as an independent strict Golden test. Previously the
+  // first failure concealed subsequent captures in the same device group.
+  void registerSnapshot({
+    required String name,
+    required Widget page,
+    required Size physicalSize,
+    required Locale locale,
+    TargetPlatform? platform,
+    Brightness brightness = Brightness.light,
+    bool trends = false,
+    bool onboardingEdge = false,
+    Future<void> Function(WidgetTester tester)? afterPump,
+  }) {
+    testWidgets('store snapshot $name', (tester) async {
+      final previousPlatform = debugDefaultTargetPlatformOverride;
+      final previousComparator = goldenFileComparator;
+      if (platform != null) {
+        debugDefaultTargetPlatformOverride = platform;
       }
-    });
-
-    testWidgets('${device.$1} Arabic RTL store screenshots', (tester) async {
-      final previousTargetPlatform = debugDefaultTargetPlatformOverride;
-      debugDefaultTargetPlatformOverride = device.$1 == 'iphone_69'
-          ? TargetPlatform.iOS
-          : TargetPlatform.android;
       try {
-        const locale = Locale('ar');
-        await capture(
-          tester,
-          page: const OnboardingPage(),
-          name: '${device.$1}_ar_00_onboarding',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const DashboardPage(),
-          name: '${device.$1}_ar_01_dashboard',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const DailyLogPage(focusMealEntry: true),
-          name: '${device.$1}_ar_02_daily_log',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const FoodPage(),
-          name: '${device.$1}_ar_025_food_search',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const AnalyticsPage(),
-          name: '${device.$1}_ar_03_progress_dark',
-          physicalSize: device.$2,
-          locale: locale,
-          brightness: Brightness.dark,
-          trends: true,
-        );
-        await capture(
-          tester,
-          page: const BilStorePlansPage(connectToDeviceStore: false),
-          name: '${device.$1}_ar_04_plans',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        await capture(
-          tester,
-          page: const WeeklyReportPage(),
-          name: '${device.$1}_ar_05_weekly_report',
-          physicalSize: device.$2,
-          locale: locale,
-          trends: true,
-        );
-        await capture(
-          tester,
-          page: const ConnectedHealthPage(),
-          name: '${device.$1}_ar_06_connected_health',
-          physicalSize: device.$2,
-          locale: locale,
-        );
-        if (device.$1 == 'iphone_69') {
-          await capture(
-            tester,
-            page: const PremiumProfilePage(),
-            name: '${device.$1}_ar_07_profile',
-            physicalSize: device.$2,
-            locale: locale,
-          );
-          await capture(
-            tester,
-            page: const SettingsPage(),
-            name: '${device.$1}_ar_08_privacy_settings_dark',
-            physicalSize: device.$2,
-            locale: locale,
-            brightness: Brightness.dark,
+        if (onboardingEdge) {
+          goldenFileComparator = _OnboardingEdgeGoldenComparator(
+            Uri.file('test/epic15_store_screenshot_golden_test.dart'),
           );
         }
+        await capture(
+          tester,
+          page: page,
+          name: name,
+          physicalSize: physicalSize,
+          locale: locale,
+          brightness: brightness,
+          trends: trends,
+          afterPump: afterPump,
+        );
       } finally {
-        debugDefaultTargetPlatformOverride = previousTargetPlatform;
+        goldenFileComparator = previousComparator;
+        debugDefaultTargetPlatformOverride = previousPlatform;
       }
     });
   }
 
-  for (final languageCode in ['fr', 'es', 'tr']) {
-    testWidgets('localized $languageCode store plan screenshots', (
-      tester,
-    ) async {
-      await capture(
-        tester,
-        page: const BilStorePlansPage(connectToDeviceStore: false),
-        name: 'iphone_69_${languageCode}_plans',
-        physicalSize: const Size(1290, 2796),
-        locale: Locale(languageCode),
-      );
-      await capture(
-        tester,
-        page: const BilStorePlansPage(connectToDeviceStore: false),
-        name: 'android_phone_${languageCode}_plans',
-        physicalSize: const Size(1080, 1920),
-        locale: Locale(languageCode),
-      );
-    });
-  }
-
-  testWidgets('real recipe and workout library evidence captures', (
-    tester,
-  ) async {
-    const size = Size(1080, 1920);
-    const locale = Locale('en');
-    await capture(
-      tester,
-      page: const WellnessLibraryPage(),
-      name: 'evidence_en_recipe_library',
-      physicalSize: size,
-      locale: locale,
-    );
-    await capture(
-      tester,
-      page: const WellnessLibraryPage(),
-      name: 'evidence_en_workout_library',
-      physicalSize: size,
-      locale: locale,
-      afterPump: (tester) async {
-        await tester.drag(find.byType(PageView), const Offset(-900, 0));
-        await tester.pumpAndSettle();
-        await tester.drag(find.byType(PageView), const Offset(-900, 0));
-        await tester.pumpAndSettle();
-      },
-    );
-  });
+  registerSnapshot(
+    name: 'iphone_69_en_00_onboarding',
+    page: const OnboardingPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+    onboardingEdge: true,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_01_dashboard',
+    page: const DashboardPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_02_daily_log',
+    page: const DailyLogPage(focusMealEntry: true),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_025_food_search',
+    page: const FoodPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_03_progress',
+    page: const AnalyticsPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_04_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_05_connected_health',
+    page: const ConnectedHealthPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_06_privacy_settings',
+    page: const SettingsPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+    brightness: Brightness.dark,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_07_weekly_report',
+    page: const WeeklyReportPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'iphone_69_en_08_nutrition_pathways',
+    page: const NutritionPathwaysPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('en'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_00_onboarding',
+    page: const OnboardingPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_01_dashboard',
+    page: const DashboardPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_02_daily_log',
+    page: const DailyLogPage(focusMealEntry: true),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_025_food_search',
+    page: const FoodPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_03_progress_dark',
+    page: const AnalyticsPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+    brightness: Brightness.dark,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_04_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_05_weekly_report',
+    page: const WeeklyReportPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_06_connected_health',
+    page: const ConnectedHealthPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_07_profile',
+    page: const PremiumProfilePage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+  );
+  registerSnapshot(
+    name: 'iphone_69_ar_08_privacy_settings_dark',
+    page: const SettingsPage(),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.iOS,
+    brightness: Brightness.dark,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_00_onboarding',
+    page: const OnboardingPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+    onboardingEdge: true,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_01_dashboard',
+    page: const DashboardPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_02_daily_log',
+    page: const DailyLogPage(focusMealEntry: true),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_025_food_search',
+    page: const FoodPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_03_progress',
+    page: const AnalyticsPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_04_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_05_connected_health',
+    page: const ConnectedHealthPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_en_06_privacy_settings',
+    page: const SettingsPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    platform: TargetPlatform.android,
+    brightness: Brightness.dark,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_00_onboarding',
+    page: const OnboardingPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_01_dashboard',
+    page: const DashboardPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_02_daily_log',
+    page: const DailyLogPage(focusMealEntry: true),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_025_food_search',
+    page: const FoodPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_03_progress_dark',
+    page: const AnalyticsPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+    brightness: Brightness.dark,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_04_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_05_weekly_report',
+    page: const WeeklyReportPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+    trends: true,
+  );
+  registerSnapshot(
+    name: 'android_phone_ar_06_connected_health',
+    page: const ConnectedHealthPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('ar'),
+    platform: TargetPlatform.android,
+  );
+  registerSnapshot(
+    name: 'iphone_69_fr_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('fr'),
+  );
+  registerSnapshot(
+    name: 'android_phone_fr_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('fr'),
+  );
+  registerSnapshot(
+    name: 'iphone_69_es_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('es'),
+  );
+  registerSnapshot(
+    name: 'android_phone_es_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('es'),
+  );
+  registerSnapshot(
+    name: 'iphone_69_tr_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1290, 2796),
+    locale: const Locale('tr'),
+  );
+  registerSnapshot(
+    name: 'android_phone_tr_plans',
+    page: const BilStorePlansPage(connectToDeviceStore: false),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('tr'),
+  );
+  registerSnapshot(
+    name: 'evidence_en_recipe_library',
+    page: const WellnessLibraryPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+  );
+  registerSnapshot(
+    name: 'evidence_en_workout_library',
+    page: const WellnessLibraryPage(),
+    physicalSize: const Size(1080, 1920),
+    locale: const Locale('en'),
+    afterPump: (tester) async {
+      await tester.drag(find.byType(PageView), const Offset(-900, 0));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(PageView), const Offset(-900, 0));
+      await tester.pumpAndSettle();
+    },
+  );
 }

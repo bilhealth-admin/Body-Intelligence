@@ -18,26 +18,14 @@ class _MorePremiumIcon extends StatelessWidget {
         : healthAccent
         ? (dark ? const Color(0xFFFF8CAD) : const Color(0xFFD91E5B))
         : (dark ? const Color(0xFF8FC2FF) : const Color(0xFF0869E8));
-    final background = danger
-        ? theme.colorScheme.errorContainer.withValues(alpha: dark ? .36 : .55)
-        : healthAccent
-        ? (dark ? const Color(0xFF4D1C2D) : const Color(0xFFFFEEF4))
-        : (dark ? const Color(0xFF17375F) : const Color(0xFFEAF3FF));
-    final spec = BilSemanticIcons.spec(kind);
-    return Container(
+    return BilFlatIcon(
       key: Key('more-premium-icon-${kind.name}'),
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      alignment: Alignment.center,
-      child: Icon(
-        danger ? Icons.delete_outline_rounded : spec.iconFor(theme.platform),
-        size: 24,
-        color: foreground,
-      ),
+      kind: kind,
+      size: 44,
+      iconSize: 24,
+      color: foreground,
+      materialIcon: danger ? Icons.delete_outline_rounded : null,
+      appleIcon: danger ? Icons.delete_outline_rounded : null,
     );
   }
 }

@@ -321,6 +321,18 @@ void main() {
     }
   }
 
+  // A fixed count of microtask drains is insufficient under parallel CI.
+  // Poll the observable native handoff with a strict deadline instead.
+  Future<void> waitForNativeLaunch() async {
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (native.launches == 0) {
+      if (DateTime.now().isAfter(deadline)) {
+        fail('Native purchase launch was never requested.');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+  }
+
   test(
     'a callback locks purchase immediately before asynchronous verification',
     () async {
@@ -410,7 +422,7 @@ void main() {
           CommercePlan.premium,
           term: SubscriptionTerm.oneMonth,
         );
-        await drain();
+        await waitForNativeLaunch();
         expect(native.launches, 1);
         native.updates.add([
           _receipt(

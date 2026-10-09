@@ -99,9 +99,13 @@ void main() {
     expect(source, contains("Key('settings-connected-health-entry')"));
     expect(source, contains('Directionality.of(context) == TextDirection.rtl'));
     expect(source, isNot(contains("Key('more-devices-sync-card')")));
-    expect(source, contains('width: 44'));
-    expect(source, contains('height: 44'));
-    expect(source, contains('size: 24'));
+    // The flat semantic icon retains the old 44dp footprint and 24dp glyph.
+    final flatIcon = File(
+      'lib/features/settings/settings_page_polish.dart',
+    ).readAsStringSync().split('class _CloudSyncRow').first;
+    expect(flatIcon, contains('return BilFlatIcon('));
+    expect(flatIcon, contains('size: 44,'));
+    expect(flatIcon, contains('iconSize: 24,'));
     expect(source, contains(r"Key('more-premium-icon-${kind.name}')"));
     expect(source, contains('PremiumCrownEmblem'));
   });

@@ -33,6 +33,7 @@ import 'package:body_intelligence_log/features/nutrition/presentation/food_barco
 import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_guide_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/history/progress_page.dart';
@@ -57,6 +58,7 @@ import 'package:body_intelligence_log/features/settings/account_connection_setti
 import 'package:crypto/crypto.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,6 +70,20 @@ const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
 );
 const _captureIpad = bool.fromEnvironment('BIL_CAPTURE_IPAD');
+
+Finder _coachWelcomeMessage() {
+  return find.byWidgetPredicate((widget) {
+    if (widget is! CoachMessageText) return false;
+    return widget.text.contains('I’m ready for your next useful decision.');
+  });
+}
+
+Finder _coachOpeningSurface() {
+  // The evidence-based daily brief replaces the synthetic session welcome.
+  final dailyBrief = find.text('FOR TODAY');
+  if (dailyBrief.evaluate().isNotEmpty) return dailyBrief;
+  return _coachWelcomeMessage();
+}
 
 final _visualVerifiedFreeSubscription = SubscriptionState(
   plan: CommercePlan.free,
@@ -117,7 +133,23 @@ final class _VisualRouteStack extends StatelessWidget {
 }
 
 void main() {
-  setUpAll(loadVisualEvidenceFont);
+  const ttsChannel = MethodChannel('bil/tts');
+  setUpAll(() async {
+    await loadVisualEvidenceFont();
+    // Every screenshot shares the same engine. A Coach disposal may send
+    // stop() after the next capture starts, so mock for the full fixture suite.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(ttsChannel, (call) async {
+          if (call.method == 'stop') return null;
+          throw MissingPluginException(
+            'Unexpected TTS action in visual evidence: ${call.method}',
+          );
+        });
+  });
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(ttsChannel, null);
+  });
 
   void setExplicitLightSettings() {
     SharedPreferences.setMockInitialValues({
@@ -381,7 +413,7 @@ void main() {
     }
     if (name == 'ai_coach_conversation_phone') {
       expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
-      expect(find.text('Let’s make the first decision'), findsOneWidget);
+      expect(_coachOpeningSurface(), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
     final captureTarget = captureOverlay
@@ -629,7 +661,19 @@ void main() {
       prepare: (tester) async {
         expect(find.byType(Scaffold), findsOneWidget);
         final field = find.byKey(const Key('ai-coach-question-field'));
-        final decision = find.text('Let’s make the first decision');
+        // Wait for either permitted opening instead of requiring a synthetic
+        // welcome when the Coach renders an evidence-backed daily brief.
+        for (
+          var attempt = 0;
+          attempt < 60 && _coachOpeningSurface().evaluate().isEmpty;
+          attempt++
+        ) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 30)),
+          );
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        final decision = _coachOpeningSurface();
         expect(field, findsOneWidget);
         expect(decision, findsOneWidget);
         expect(tester.getRect(field).top, lessThan(844));
