@@ -14,6 +14,10 @@ abstract final class FirstMealCelebration {
     BuildContext context,
     PreferencesRepository preferences,
   ) async {
+    // Never consume a once-only celebration when its view cannot be painted.
+    if (!context.mounted) return false;
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    if (overlay == null) return false;
     bool claimed;
     try {
       claimed = await preferences.mutateIfUnchanged(
@@ -25,8 +29,6 @@ abstract final class FirstMealCelebration {
       return false;
     }
     if (!claimed || !context.mounted) return false;
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
-    if (overlay == null) return false;
 
     late OverlayEntry entry;
     var removed = false;

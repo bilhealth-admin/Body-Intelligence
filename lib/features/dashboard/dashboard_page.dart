@@ -214,6 +214,15 @@ class DashboardPage extends ConsumerWidget {
       children: [
         if (showFirstValue) ...[
           FirstValueHandoffCard(
+            onSkip: () async {
+              try {
+                await ref
+                    .read(preferencesRepositoryProvider)
+                    .remove('firstValueHandoffPending');
+              } on Object {
+                // A declined optional check-in must never force navigation.
+              }
+            },
             onContinue: () async {
               try {
                 await ref

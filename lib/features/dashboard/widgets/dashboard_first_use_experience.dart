@@ -46,6 +46,7 @@ class _DashboardFirstUseExperienceState
         oldWidget.ownerReady != widget.ownerReady) {
       _ready = false;
       _canGuide = false;
+      _saving = false;
       _step = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) => _load());
     }
@@ -73,16 +74,20 @@ class _DashboardFirstUseExperienceState
 
   Future<void> _finish({required bool openFood}) async {
     if (_saving) return;
+    final scope = widget.ownerScope;
+    final key = _guideKey;
+    final preferences = ref.read(preferencesRepositoryProvider);
     setState(() {
       _saving = true;
       _canGuide = false;
     });
     try {
-      await ref.read(preferencesRepositoryProvider).set(_guideKey, 'dismissed');
+      await preferences.set(key, 'dismissed');
     } catch (_) {
-      // Skip works for this session even if persistence is unavailable.
+      // Skip always works for this visit when persistence is unavailable.
     }
-    if (!mounted) return;
+    // A stale callback must never navigate a different signed-in owner.
+    if (!mounted || !widget.ownerReady || widget.ownerScope != scope) return;
     setState(() => _saving = false);
     if (openFood) context.go('/daily-log?foodLog=1&from=%2Fdashboard');
   }
