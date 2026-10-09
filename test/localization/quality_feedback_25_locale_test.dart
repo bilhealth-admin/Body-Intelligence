@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_quality_feedback.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,6 +14,13 @@ void main() {
         expect(expected, isNotNull, reason: '$tag: $source');
         expect(expected!.trim(), isNotEmpty);
         expect(RuntimeCopy.resolve(source, tag), expected);
+        if (source == QualityFeedbackRuntimeCopy.publishing) {
+          expect(
+            communityTextForLanguage(tag, source, 'جارٍ النشر…'),
+            expected,
+            reason: 'Community status must use the native $tag translation',
+          );
+        }
         if (tag != 'en') {
           expect(expected, isNot(source), reason: '$tag: $source');
         }
