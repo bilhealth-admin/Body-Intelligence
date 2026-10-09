@@ -11,6 +11,7 @@ import '../database/food_basis_evidence.dart';
 import '../database/database_scope.dart';
 import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'preferences_repository.dart';
+import 'first_meal_milestone.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/daily_nutrition_intelligence.dart';
 import '../../features/nutrition/domain/dietary_preferences.dart';
@@ -91,6 +92,18 @@ class MealRepository {
     _validateQuantity(quantity);
     await _database.transaction(() async {
       await _requireOpenMealDay(mealId);
+      // The milestone flag is committed in the SAME transaction as the
+      // first real food item. A failed write or draft cannot celebrate.
+      final milestonePrefs = PreferencesRepository(_database);
+      final priorMilestone = await milestonePrefs.get(
+        firstMealCelebrationPreferenceKey,
+      );
+      final existingFoodItem = priorMilestone == null
+          ? await (_database.select(_database.mealItems)
+                ..where((row) => row.deletedAt.isNull())
+                ..limit(1))
+              .getSingleOrNull()
+          : null;
       final food = await _activeFood(foodId);
       final values = _mealFoodPortionValues(
         food,
@@ -119,6 +132,12 @@ class MealRepository {
             ),
           );
       await _verifyAddedFoodEvidence(itemId);
+      if (priorMilestone == null) {
+        await milestonePrefs.set(
+          firstMealCelebrationPreferenceKey,
+          existingFoodItem == null ? 'ready' : 'done',
+        );
+      }
     });
   }
 
