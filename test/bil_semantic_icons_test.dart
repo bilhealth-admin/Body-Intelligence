@@ -288,7 +288,6 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_reference_progress_components.dart',
       'lib/features/dashboard/widgets/dashboard_water_card.dart',
       'lib/features/settings/settings_page.dart',
-      'lib/features/settings/reference_settings_home_page.dart',
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
       'lib/features/daily_log/presentation/quick_macro_entry_dialog.dart',
       'lib/features/wellness/presentation/wellness_library_page.dart',
@@ -333,6 +332,11 @@ void main() {
       'lib/features/settings/reference_settings_home_page.dart',
     ).readAsStringSync();
     expect(iosSettings, isNot(contains('Color(0xFF007AFF)')));
+    // Settings rows intentionally drop nonfunctional leading badges. Route
+    // actions must remain connected and the neutral chevron is directional.
+    expect(iosSettings, contains('return CupertinoListTile('));
+    expect(iosSettings, contains('onTap: () => context.push(route)'));
+    expect(iosSettings, isNot(contains('BilNativeSettingsIcon(')));
 
     final quickAdd = File(
       'lib/app/router/bil_quick_add_sheet.dart',
