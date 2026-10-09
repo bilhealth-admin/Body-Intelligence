@@ -1323,10 +1323,8 @@ void main() {
     );
   });
 
-  // This list has four reachable capture viewports at the audited 390x844
-  // surface: the initial frame plus three forward scrolls. Every drag must
-  // advance the position; asking for another "page" would only recapture the
-  // terminal viewport under a different filename.
+  // Preserve four reachable, byte-distinct viewports at 390x844 by
+  // dividing the current scrollable extent instead of using fixed drags.
   for (var page = 2; page <= 4; page++) {
     testWidgets('settings production phone capture page $page', (tester) async {
       setExplicitLightSettings();
@@ -1339,9 +1337,16 @@ void main() {
         prepare: (tester) async {
           final scrollable = find.byType(Scrollable).first;
           final position = tester.state<ScrollableState>(scrollable).position;
+          // Divide the actual scroll extent into three distinct segments.
+          final viewportStride = position.maxScrollExtent / 3;
+          expect(
+            viewportStride,
+            greaterThan(0),
+            reason: 'Settings must still have four inspectable viewports.',
+          );
           for (var step = 1; step < page; step++) {
             final before = position.pixels;
-            await tester.drag(scrollable, const Offset(0, -700));
+            await tester.drag(scrollable, Offset(0, -(viewportStride + 1)));
             await tester.pumpAndSettle();
             expect(
               position.pixels,
