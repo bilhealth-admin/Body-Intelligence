@@ -85,7 +85,9 @@ jobs:
             'lib/features/dashboard/widgets/dashboard_header.dart',
             'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
             'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
-            'lib/features/dashboard/widgets/first_meal_celebration.dart'
+            'lib/features/dashboard/widgets/first_meal_celebration.dart',
+            'test/data/repositories/first_food_milestone_commit_test.dart',
+            'test/features/dashboard/dashboard_first_use_guidance_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
@@ -95,6 +97,15 @@ jobs:
         # The source job still fails; this never bypasses any required gate.
         if: ${{ always() && !cancelled() }}
         run: flutter analyze --no-pub
+
+      - name: Verify first-food commits, optional Skip and reviewer entitlement
+        if: ${{ success() }}
+        shell: pwsh
+        run: >
+          flutter test --no-pub
+          test/data/repositories/first_food_milestone_commit_test.dart
+          test/features/dashboard/dashboard_first_use_guidance_test.dart
+          test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
 
       - name: Verify More UI behavior before Golden captures
         if: ${{ success() }}
