@@ -20,6 +20,8 @@ class _NativeStore extends Fake implements InAppPurchase {
   final updates = StreamController<List<PurchaseDetails>>.broadcast(sync: true);
   final productResponse = Completer<ProductDetailsResponse>();
   final purchaseLaunch = Completer<bool>();
+  // Observe the native checkout call rather than assuming runner timing.
+  final launchStarted = Completer<void>();
   PurchaseDetails? restoreReceipt;
   List<PurchaseDetails>? restoreBatch;
   Duration? restoreCallbackDelay;
@@ -75,12 +77,14 @@ class _NativeStore extends Fake implements InAppPurchase {
     bool autoConsume = true,
   }) {
     launches++;
+    if (!launchStarted.isCompleted) launchStarted.complete();
     return purchaseLaunch.future;
   }
 
   @override
   Future<bool> buyNonConsumable({required PurchaseParam purchaseParam}) {
     launches++;
+    if (!launchStarted.isCompleted) launchStarted.complete();
     return purchaseLaunch.future;
   }
 
@@ -410,7 +414,9 @@ void main() {
           CommercePlan.premium,
           term: SubscriptionTerm.oneMonth,
         );
-        await drain();
+        // Wait for the real fake-native method, with a bounded deadline;
+        // fixed microtask drains race on busy Windows runners.
+        await native.launchStarted.future.timeout(const Duration(seconds: 2));
         expect(native.launches, 1);
         native.updates.add([
           _receipt(
