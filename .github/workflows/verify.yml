@@ -65,6 +65,13 @@ jobs:
             dart format --output=none --set-exit-if-changed @targets
           }
 
+      - name: Diagnose exact formatter diff on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          dart format test/visual_closure/actual_production_pages_golden_test.dart
+          git diff -- test/visual_closure/actual_production_pages_golden_test.dart
+
       - name: Analyze complete source
         run: flutter analyze --no-pub
 

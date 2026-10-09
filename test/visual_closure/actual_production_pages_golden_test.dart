@@ -451,8 +451,10 @@ void main() {
         ? BilFlagshipTheme.dark(isArabic: arabic)
         : BilFlagshipTheme.light(isArabic: arabic);
     var renderedPage = page;
-    final effectiveSubscription = verifiedSubscriptionFixture ??
-        (page is RecipeLibraryPage ? _recipeGoldenVerifiedFree : null);
+    var effectiveSubscription = verifiedSubscriptionFixture;
+    if (page is RecipeLibraryPage && effectiveSubscription == null) {
+      effectiveSubscription = _recipeGoldenVerifiedFree;
+    }
     if (page is RecipeLibraryPage) {
       final repository = RecipeReleaseRepository();
       final catalog = await tester.runAsync(repository.loadIndex);
