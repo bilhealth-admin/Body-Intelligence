@@ -42,8 +42,10 @@ void main() {
     expect(source, contains('class _MorePremiumIcon'));
     expect(source, contains('const Color(0xFF0869E8)'));
     expect(source, contains('const Color(0xFFEAF3FF)'));
-    expect(source, contains('BorderRadius.circular(24)'));
-    expect(source, contains('fontWeight: FontWeight.w900'));
+    expect(source, contains('BorderRadius.circular(16)'));
+    expect(source, contains('fontWeight: FontWeight.w600'));
+    expect(source, contains('leading: protectedEntry'));
+    expect(source, contains('CommunityUnreadBadge'));
     expect(source, contains('CommunityUnreadBadge'));
   });
 

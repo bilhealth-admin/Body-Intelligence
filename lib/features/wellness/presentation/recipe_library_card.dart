@@ -120,7 +120,7 @@ class _RecipeCard extends StatelessWidget {
                               style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     height: 1.18,
-                                    fontWeight: FontWeight.w900,
+                                    fontWeight: FontWeight.w600,
                                     fontFamily:
                                         _directionForLocale(titleLocale) ==
                                             TextDirection.rtl
@@ -559,7 +559,7 @@ class _RecipeFallbackArtwork extends StatelessWidget {
                 'BIL',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: .42),
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 2.4,
                   fontSize: 11,
                 ),
@@ -591,7 +591,7 @@ class _RecipeCategoryPill extends StatelessWidget {
             _recipeCategoryLabel(context, category),
             style: Theme.of(
               context,
-            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w900),
+            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -625,7 +625,7 @@ class _RecipeLocalePill extends StatelessWidget {
             locale.toUpperCase(),
             style: const TextStyle(
               color: Colors.white,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w600,
               fontSize: 10,
               letterSpacing: .4,
             ),

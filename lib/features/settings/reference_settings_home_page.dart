@@ -6,13 +6,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../app/environment/app_environment.dart';
-import '../../app/theme/bil_semantic_icons.dart';
-import '../../shared/widgets/bil_native_settings_icon.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/profile_auth_identity_provider.dart';
 import '../cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import 'reference_settings_copy.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 /// Explicitly local sign-out: never revoke the member's other devices.
 final settingsSignOutProvider = Provider<Future<void> Function(String)>((ref) {
@@ -71,152 +70,152 @@ class _ReferenceSettingsHomePageState
           loading: () => false,
           error: (_, _) => false,
         );
-    return Scaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(
-        context,
-      ),
-      appBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.systemGroupedBackground
-            .resolveFrom(context)
-            .withValues(alpha: .92),
-        border: null,
-        middle: Text(
-          copy('Settings'),
-          style: const TextStyle(fontWeight: FontWeight.w700),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(
+          context,
         ),
-      ),
-      body: SafeArea(
-        top: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
-            _SettingsGroup(
-              title: copy('Account & profile'),
-              kind: BilSemanticIconKind.profile,
-              children: [
-                _SettingsRow(copy('Profile'), '/profile-settings'),
-                _SettingsRow(copy('App Appearance'), '/settings/appearance'),
-                _SettingsRow(copy('Language'), '/settings/language'),
-              ],
-            ),
-            _SettingsGroup(
-              title: copy('Diary & goals'),
-              kind: BilSemanticIconKind.goals,
-              children: [
-                _SettingsRow(copy('Diary Settings'), '/settings/diary'),
-              ],
-            ),
-            _SettingsGroup(
-              title: copy('Privacy & notifications'),
-              kind: BilSemanticIconKind.privacy,
-              children: [
-                _SettingsRow(
-                  copy('Sharing & Privacy'),
-                  '/settings/sharing-privacy',
-                ),
-              ],
-            ),
-            _SettingsGroup(
-              title: copy('Health preferences'),
-              kind: BilSemanticIconKind.health,
-              children: [
-                _SettingsRow(
-                  context.strings.text('Health sources & methodology'),
-                  '/health-information-sources',
-                ),
-                _SettingsRow(copy('My Exercises'), '/wellness/workouts/log'),
-                _SettingsRow(
-                  copy('Weekly Nutrition Settings'),
-                  '/settings/nutrition-goals',
-                ),
-                _SettingsRow(
-                  copy('Exercise calories'),
-                  '/settings/exercise-calories',
-                ),
-                _SettingsRow(
-                  copy('Push Notifications'),
-                  '/notification-settings',
-                ),
-              ],
-            ),
-            CupertinoListSection.insetGrouped(
-              margin: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 8),
-              backgroundColor: Colors.transparent,
-              children: [
-                CupertinoListTile(
-                  key: Key(
-                    ownerId == null ? 'settings-sign-in' : 'settings-sign-out',
+        appBar: CupertinoNavigationBar(
+          backgroundColor: CupertinoColors.systemGroupedBackground
+              .resolveFrom(context)
+              .withValues(alpha: .92),
+          border: null,
+          middle: Text(
+            copy('Settings'),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+          ),
+        ),
+        body: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            children: [
+              _SettingsGroup(
+                title: copy('Account & profile'),
+                children: [
+                  _SettingsRow(copy('Profile'), '/profile-settings'),
+                  _SettingsRow(copy('App Appearance'), '/settings/appearance'),
+                  _SettingsRow(copy('Language'), '/settings/language'),
+                ],
+              ),
+              _SettingsGroup(
+                title: copy('Diary & goals'),
+                children: [
+                  _SettingsRow(copy('Diary Settings'), '/settings/diary'),
+                ],
+              ),
+              _SettingsGroup(
+                title: copy('Privacy & notifications'),
+                children: [
+                  _SettingsRow(
+                    copy('Sharing & Privacy'),
+                    '/settings/sharing-privacy',
                   ),
-                  padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
-                  leadingSize: 24,
-                  leadingToTitle: 12,
-                  leading: _signingOut || !sessionReady
-                      ? const CupertinoActivityIndicator()
-                      : Icon(
-                          ownerId == null
-                              ? CupertinoIcons.person_crop_circle
-                              : CupertinoIcons.square_arrow_right,
+                ],
+              ),
+              _SettingsGroup(
+                title: copy('Health preferences'),
+                children: [
+                  _SettingsRow(
+                    context.strings.text('Health sources & methodology'),
+                    '/health-information-sources',
+                  ),
+                  _SettingsRow(copy('My Exercises'), '/wellness/workouts/log'),
+                  _SettingsRow(
+                    copy('Weekly Nutrition Settings'),
+                    '/settings/nutrition-goals',
+                  ),
+                  _SettingsRow(
+                    copy('Exercise calories'),
+                    '/settings/exercise-calories',
+                  ),
+                  _SettingsRow(
+                    copy('Push Notifications'),
+                    '/notification-settings',
+                  ),
+                ],
+              ),
+              CupertinoListSection.insetGrouped(
+                margin: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 8),
+                backgroundColor: Colors.transparent,
+                children: [
+                  CupertinoListTile(
+                    key: Key(
+                      ownerId == null
+                          ? 'settings-sign-in'
+                          : 'settings-sign-out',
+                    ),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
+                    leadingSize: 24,
+                    leadingToTitle: 12,
+                    leading: _signingOut || !sessionReady
+                        ? const CupertinoActivityIndicator()
+                        : Icon(
+                            ownerId == null
+                                ? CupertinoIcons.person_crop_circle
+                                : CupertinoIcons.square_arrow_right,
+                            color: ownerId == null
+                                ? CupertinoColors.activeBlue
+                                : CupertinoColors.systemRed,
+                            size: 22,
+                          ),
+                    title: Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 12),
+                      child: Text(
+                        ownerId == null
+                            ? context.strings.text('Sign in')
+                            : copy('Logout'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
                           color: ownerId == null
                               ? CupertinoColors.activeBlue
                               : CupertinoColors.systemRed,
-                          size: 22,
+                          fontWeight: FontWeight.w600,
                         ),
-                  title: Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 12),
-                    child: Text(
-                      ownerId == null
-                          ? context.strings.text('Sign in')
-                          : copy('Logout'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ownerId == null
-                            ? CupertinoColors.activeBlue
-                            : CupertinoColors.systemRed,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
+                    onTap: !sessionReady || _signingOut
+                        ? null
+                        : ownerId == null
+                        ? () => context.push('/login')
+                        : () => _logout(ownerId),
                   ),
-                  onTap: !sessionReady || _signingOut
-                      ? null
-                      : ownerId == null
-                      ? () => context.push('/login')
-                      : () => _logout(ownerId),
-                ),
-              ],
-            ),
-            if (showPremiumUpsell)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(28, 28, 28, 34),
-                child: Column(
-                  children: [
-                    Text(
-                      copy('BIL Premium'),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFC857),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 30,
-                          vertical: 13,
+                ],
+              ),
+              if (showPremiumUpsell)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 28, 28, 34),
+                  child: Column(
+                    children: [
+                      Text(
+                        copy('BIL Premium'),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      onPressed: () => context.push('/plans'),
-                      child: Text(
-                        copy('Start 7-day free trial'),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      const SizedBox(height: 10),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFC857),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 13,
+                          ),
+                        ),
+                        onPressed: () => context.push('/plans'),
+                        child: Text(
+                          copy('Start 7-day free trial'),
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -248,13 +247,8 @@ class _ReferenceSettingsHomePageState
 }
 
 class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({
-    required this.title,
-    required this.kind,
-    required this.children,
-  });
+  const _SettingsGroup({required this.title, required this.children});
   final String title;
-  final BilSemanticIconKind kind;
   final List<Widget> children;
 
   @override
@@ -291,24 +285,14 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kind = BilSemanticIcons.kindForRoute(route);
     return CupertinoListTile(
       padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
-      leadingSize: 29,
-      leadingToTitle: 12,
-      leading: kind == null
-          ? Icon(
-              CupertinoIcons.circle,
-              size: 19,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            )
-          : BilNativeSettingsIcon(kind: kind),
       title: Tooltip(
         message: label,
         child: Text(
           label,
-          maxLines: 1,
-          softWrap: false,
+          maxLines: 2,
+          softWrap: true,
           overflow: TextOverflow.ellipsis,
         ),
       ),
@@ -316,7 +300,7 @@ class _SettingsRow extends StatelessWidget {
         Directionality.of(context) == TextDirection.rtl
             ? CupertinoIcons.chevron_back
             : CupertinoIcons.chevron_forward,
-        size: 18,
+        size: 15,
         color: CupertinoColors.secondaryLabel.resolveFrom(context),
       ),
       onTap: () => context.push(route),

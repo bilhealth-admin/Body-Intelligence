@@ -53,7 +53,7 @@ class _CloudSyncRow extends ConsumerWidget {
     children: [
       ListTile(
         key: const Key('settings-cloud-sync-status-row'),
-        minTileHeight: 70,
+        minTileHeight: 62,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         horizontalTitleGap: 12,
         leading: status.isSyncing
@@ -61,10 +61,10 @@ class _CloudSyncRow extends ConsumerWidget {
                 dimension: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const _MorePremiumIcon(kind: BilSemanticIconKind.cloudSync),
+            : null,
         title: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
         subtitle: CloudSyncStatusLine(status: status),
         onTap: status.isSyncing ? null : () => _runSync(context, ref),
@@ -106,39 +106,32 @@ class _CloudSyncRow extends ConsumerWidget {
 }
 
 class _MoreActionRow extends StatelessWidget {
-  const _MoreActionRow({
-    required this.label,
-    required this.kind,
-    required this.onTap,
-    super.key,
-  });
+  const _MoreActionRow({required this.label, required this.onTap, super.key});
 
   final String label;
-  final BilSemanticIconKind kind;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => Column(
     children: [
       ListTile(
-        minTileHeight: 60,
+        minTileHeight: 54,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
         horizontalTitleGap: 12,
-        leading: _MorePremiumIcon(kind: kind),
         title: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
         trailing: Icon(
           Directionality.of(context) == TextDirection.rtl
               ? Icons.chevron_left_rounded
               : Icons.chevron_right_rounded,
-          size: 22,
-          color: const Color(0xFF61738D),
+          size: 16,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         onTap: onTap,
       ),
-      const Divider(height: 1, indent: 72, endIndent: 16),
+      const Divider(height: 1, indent: 16, endIndent: 16),
     ],
   );
 }

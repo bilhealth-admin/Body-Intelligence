@@ -5,6 +5,7 @@ import '../../../app/theme/bil_flagship_tokens.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../ads/presentation/safe_free_ad_anchor.dart';
 import 'wellness_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 class WellnessLibraryPage extends StatefulWidget {
   const WellnessLibraryPage({super.key});
@@ -26,82 +27,84 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
   @override
   Widget build(BuildContext context) {
     final items = _items(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/settings'),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        title: Text(
-          wellnessCopy(context, 'BIL wellness library', 'مكتبة BIL الصحية'),
-        ),
-        actions: [
-          IconButton(
-            tooltip: wellnessCopy(
-              context,
-              'Manage content packs',
-              'إدارة حزم المحتوى',
-            ),
-            onPressed: () => context.push('/wellness/content-packs'),
-            icon: const Icon(Icons.download_for_offline_outlined),
+    return BilCalmVisualScope(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/settings'),
+            icon: const Icon(Icons.arrow_back_rounded),
           ),
-        ],
-      ),
-      body: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-              child: Text(
-                wellnessCopy(
-                  context,
-                  'Practical tools grounded in your real logs and connections—never invented measurements.',
-                  'أدوات عملية مبنية على سجلك واتصالاتك الحقيقية—من دون افتراض قياسات غير موجودة.',
-                ),
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+          title: Text(
+            wellnessCopy(context, 'BIL wellness library', 'مكتبة BIL الصحية'),
+          ),
+          actions: [
+            IconButton(
+              tooltip: wellnessCopy(
+                context,
+                'Manage content packs',
+                'إدارة حزم المحتوى',
               ),
+              onPressed: () => context.push('/wellness/content-packs'),
+              icon: const Icon(Icons.download_for_offline_outlined),
             ),
-            Expanded(
-              child: PageView.builder(
-                controller: controller,
-                itemCount: items.length,
-                onPageChanged: (value) => setState(() => current = value),
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: _WellnessExperienceCard(item: items[index]),
-                ),
-              ),
-            ),
-            Row(
-              key: const Key('wellness-discovery-page-indicator'),
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                items.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: index == current ? 24 : 7,
-                  height: 7,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    color: index == current
-                        ? BilFlagshipTokens.cyan500
-                        : Theme.of(context).colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(99),
+          ],
+        ),
+        body: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: Text(
+                  wellnessCopy(
+                    context,
+                    'Practical tools grounded in your real logs and connections—never invented measurements.',
+                    'أدوات عملية مبنية على سجلك واتصالاتك الحقيقية—من دون افتراض قياسات غير موجودة.',
+                  ),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 14),
-            const SafeFreeAdAnchor(
-              key: Key('wellness-discovery-free-ad-slot'),
-              surface: SafeFreeAdSurface.wellnessDiscovery,
-            ),
-            const SizedBox(height: 18),
-          ],
+              Expanded(
+                child: PageView.builder(
+                  controller: controller,
+                  itemCount: items.length,
+                  onPageChanged: (value) => setState(() => current = value),
+                  itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: _WellnessExperienceCard(item: items[index]),
+                  ),
+                ),
+              ),
+              Row(
+                key: const Key('wellness-discovery-page-indicator'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  items.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: index == current ? 24 : 7,
+                    height: 7,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      color: index == current
+                          ? BilFlagshipTokens.cyan500
+                          : Theme.of(context).colorScheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              const SafeFreeAdAnchor(
+                key: Key('wellness-discovery-free-ad-slot'),
+                surface: SafeFreeAdSurface.wellnessDiscovery,
+              ),
+              const SizedBox(height: 18),
+            ],
+          ),
         ),
       ),
     );

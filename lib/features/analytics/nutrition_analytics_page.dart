@@ -20,6 +20,7 @@ import '../dashboard/domain/nutrient_dashboard.dart';
 import '../dashboard/providers/dashboard_preferences_provider.dart';
 import '../nutrition/domain/percentage_nutrition_goals.dart';
 import 'domain/food_analysis_engine.dart';
+import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'nutrition_analytics_food.dart';
 part 'nutrition_analytics_totals.dart';
@@ -171,94 +172,97 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                 fats: percentageGoals.fatGrams,
                 fiber: planTargets.fiber,
               ));
-    return DefaultTabController(
-      length: 4,
-      initialIndex: initialTab.clamp(0, 3),
-      child: Scaffold(
-        appBar: SecondaryPageAppBar(
-          title: Text(_t(context, 'Nutrition')),
-          actions: [
-            IconButton(
-              key: const Key('nutrition-health-sources'),
-              tooltip: context.strings.text('Health sources & methodology'),
-              onPressed: () => context.push(
-                '/health-information-sources?topic=nutrition-targets',
-              ),
-              icon: const Icon(Icons.menu_book_outlined),
-            ),
-            IconButton(
-              tooltip: _t(context, 'Export'),
-              onPressed: () {
-                final day = DateUtils.dateOnly(
-                  ref.read(selectedLogDateProvider),
-                );
-                final iso = day.toIso8601String().split('T').first;
-                context.push('/settings/local-export?from=$iso&to=$iso');
-              },
-              icon: const Icon(Icons.ios_share_rounded),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            TabBar(
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              dividerHeight: 1,
-              tabs: [
-                Tab(text: _t(context, 'Calories')),
-                Tab(text: _t(context, 'Nutrients')),
-                Tab(text: _t(context, 'Macros')),
-                Tab(text: _t(context, 'Food analysis')),
-              ],
-            ),
-            Expanded(
-              child: meals.when(
-                skipLoadingOnRefresh: true,
-                skipLoadingOnReload: true,
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => Center(
-                  child: FilledButton(
-                    onPressed: () => ref.invalidate(dailyMealsProvider),
-                    child: Text(_t(context, 'Try again')),
-                  ),
+    return BilCalmVisualScope(
+      builder: (context) => DefaultTabController(
+        length: 4,
+        initialIndex: initialTab.clamp(0, 3),
+        child: Scaffold(
+          appBar: SecondaryPageAppBar(
+            title: Text(_t(context, 'Nutrition')),
+            actions: [
+              IconButton(
+                key: const Key('nutrition-health-sources'),
+                tooltip: context.strings.text('Health sources & methodology'),
+                onPressed: () => context.push(
+                  '/health-information-sources?topic=nutrition-targets',
                 ),
-                data: (value) {
-                  final totals = NutritionAnalyticsTotals.fromMeals(value);
-                  final evidence = _dashboardEvidence(value);
-                  if (value.every((meal) => meal.items.isEmpty)) {
-                    return _NutritionEmptyDay(
-                      onLogFood: () => _openNutritionFoodLog(context),
-                    );
-                  }
-                  return TabBarView(
-                    children: [
-                      _CaloriesTab(
-                        meals: value,
-                        totals: totals,
-                        goal: targets.calories,
-                      ),
-                      _NutrientsTab(
-                        totals: totals,
-                        targets: targets,
-                        preset: nutrientPreset,
-                        evidence: evidence,
-                        goals: NutrientDashboardGoalSet(
-                          sodiumMg: sodiumGoal,
-                          fiberG: fiberGoal,
-                          potassiumMg: potassiumGoal,
-                          carbohydratesG: targets.carbs,
-                          sugarG: sugarGoal,
-                        ),
-                      ),
-                      _MacrosTab(totals: totals, targets: targets),
-                      _FoodAnalysisTab(meals: value),
-                    ],
-                  );
-                },
+                icon: const Icon(Icons.menu_book_outlined),
               ),
-            ),
-          ],
+              IconButton(
+                tooltip: _t(context, 'Export'),
+                onPressed: () {
+                  final day = DateUtils.dateOnly(
+                    ref.read(selectedLogDateProvider),
+                  );
+                  final iso = day.toIso8601String().split('T').first;
+                  context.push('/settings/local-export?from=$iso&to=$iso');
+                },
+                icon: const Icon(Icons.ios_share_rounded),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                dividerHeight: 1,
+                tabs: [
+                  Tab(text: _t(context, 'Calories')),
+                  Tab(text: _t(context, 'Nutrients')),
+                  Tab(text: _t(context, 'Macros')),
+                  Tab(text: _t(context, 'Food analysis')),
+                ],
+              ),
+              Expanded(
+                child: meals.when(
+                  skipLoadingOnRefresh: true,
+                  skipLoadingOnReload: true,
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, _) => Center(
+                    child: FilledButton(
+                      onPressed: () => ref.invalidate(dailyMealsProvider),
+                      child: Text(_t(context, 'Try again')),
+                    ),
+                  ),
+                  data: (value) {
+                    final totals = NutritionAnalyticsTotals.fromMeals(value);
+                    final evidence = _dashboardEvidence(value);
+                    if (value.every((meal) => meal.items.isEmpty)) {
+                      return _NutritionEmptyDay(
+                        onLogFood: () => _openNutritionFoodLog(context),
+                      );
+                    }
+                    return TabBarView(
+                      children: [
+                        _CaloriesTab(
+                          meals: value,
+                          totals: totals,
+                          goal: targets.calories,
+                        ),
+                        _NutrientsTab(
+                          totals: totals,
+                          targets: targets,
+                          preset: nutrientPreset,
+                          evidence: evidence,
+                          goals: NutrientDashboardGoalSet(
+                            sodiumMg: sodiumGoal,
+                            fiberG: fiberGoal,
+                            potassiumMg: potassiumGoal,
+                            carbohydratesG: targets.carbs,
+                            sugarG: sugarGoal,
+                          ),
+                        ),
+                        _MacrosTab(totals: totals, targets: targets),
+                        _FoodAnalysisTab(meals: value),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

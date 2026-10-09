@@ -68,6 +68,17 @@ const _captureIpad = bool.fromEnvironment('BIL_CAPTURE_IPAD');
 
 final _visualNow = DateTime(2026, 8, 14, 9, 41, 12);
 
+// This visual fixture depicts a Free account verified by the server. Without
+// explicit authority the production gate correctly fails closed with Retry,
+// which is not the state recorded in the reviewed recipe Golden baseline.
+final _recipeGoldenVerifiedFree = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
+
 final _visualAcceptedCommunityPolicy = CommunityContentPolicy.fromJson({
   'version': 'community-policy-v1',
   'locale_code': 'en',
@@ -440,6 +451,10 @@ void main() {
         ? BilFlagshipTheme.dark(isArabic: arabic)
         : BilFlagshipTheme.light(isArabic: arabic);
     var renderedPage = page;
+    var effectiveSubscription = verifiedSubscriptionFixture;
+    if (page is RecipeLibraryPage && effectiveSubscription == null) {
+      effectiveSubscription = _recipeGoldenVerifiedFree;
+    }
     if (page is RecipeLibraryPage) {
       final repository = RecipeReleaseRepository();
       final catalog = await tester.runAsync(repository.loadIndex);
@@ -476,14 +491,14 @@ void main() {
         databaseProvider.overrideWithValue(db),
         liveHealthNowProvider.overrideWithValue(() => _visualNow),
         sleepNowProvider.overrideWithValue(() => _visualNow),
-        if (verifiedSubscriptionFixture != null) ...[
+        if (effectiveSubscription != null) ...[
           // The derived expiry-aware access provider must share the same
           // root scope as its snapshot and clock, not a nested UI-only scope.
           verifiedEntitlementClockProvider.overrideWithValue(
             () => _visualNow.toUtc(),
           ),
           verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(verifiedSubscriptionFixture),
+            AsyncData(effectiveSubscription),
           ),
         ],
       ],
@@ -498,6 +513,16 @@ void main() {
         await interact(tester);
         await settleVisualAssetImages(tester);
         await tester.pumpAndSettle();
+      }
+      if (page is RecipeLibraryPage && name.startsWith('recipe_detail')) {
+        expect(
+          find.byKey(const ValueKey('premium-route-access-unavailable')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('premium-route-glass-veil')),
+          findsOneWidget,
+        );
       }
       expect(tester.takeException(), isNull);
       final captureTarget = captureOverlay
@@ -714,9 +739,20 @@ void main() {
       page: CommunityHubPage(repository: _VisualCommunityRepository()),
       name: 'community_hub_authenticated_phone',
       interact: (tester) async {
-        expect(find.text('BIL QA Partner'), findsOneWidget);
+        // The author also appears in the profile header; scope to the post.
+        final post = find.byKey(
+          const ValueKey('66666666-6666-4666-8666-666666666666'),
+        );
+        expect(post, findsOneWidget);
         expect(
-          find.textContaining('consistent movement habit'),
+          find.descendant(of: post, matching: find.text('BIL QA Partner')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: post,
+            matching: find.textContaining('consistent movement habit'),
+          ),
           findsOneWidget,
         );
       },
@@ -864,8 +900,11 @@ void main() {
       name: 'community_notifications_empty_authenticated_phone',
       captureOverlay: true,
       interact: (tester) async {
-        expect(find.text('No community updates'), findsOneWidget);
-        expect(find.text('Find people'), findsOneWidget);
+        expect(find.text('You are all caught up'), findsOneWidget);
+        expect(
+          find.text('New approvals, mentions and comments will appear here.'),
+          findsOneWidget,
+        );
       },
     );
   });

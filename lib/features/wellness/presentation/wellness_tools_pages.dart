@@ -22,6 +22,7 @@ import '../domain/sleep_schedule.dart';
 import '../domain/static_workout_artwork.dart';
 import 'wellness_copy.dart';
 import 'sleep_stage_copy.dart';
+import '../../visual_2026/bil_calm_visual_scope.dart';
 
 part 'sleep_tracker_page.dart';
 part 'sleep_tracker_experience.dart';

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:body_intelligence_log/features/startup/premium_splash_experience.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,11 +124,50 @@ void main() {
     tester.view.devicePixelRatio = 2.5;
     addTearDown(tester.view.reset);
 
+    // Mirror the production bootstrap with the shipped bitmap and exact
+    // decode size. The engine codec completes in real async time, whereas
+    // testWidgets uses FakeAsync: awaiting it outside runAsync can deadlock
+    // until the ten-minute test timeout on Windows.
+    final decodedWordmark = await tester.runAsync(() async {
+      final data = await rootBundle.load(
+        'assets/branding/bil_splash_identity.png',
+      );
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      // Golden fidelity: decode the original identity bitmap. Downscaling
+      // and re-upscaling subtly changes the wordmark's pixel edges.
+      final codec = await ui.instantiateImageCodec(bytes);
+      try {
+        return (await codec.getNextFrame()).image;
+      } finally {
+        codec.dispose();
+      }
+    });
+    expect(
+      decodedWordmark,
+      isNotNull,
+      reason: 'The shipped launch wordmark must decode before capture.',
+    );
+    bilPredecodedLaunchWordmark = decodedWordmark;
+    addTearDown(() {
+      final image = bilPredecodedLaunchWordmark;
+      bilPredecodedLaunchWordmark = null;
+      image?.dispose();
+    });
+
     await tester.pumpWidget(
       const _SplashHarness(reducedMotion: true, showSpinner: false),
     );
     await tester.pump();
 
+    final rawWordmark = find.descendant(
+      of: find.byKey(const ValueKey('premium-splash-wordmark')),
+      matching: find.byType(RawImage),
+    );
+    expect(rawWordmark, findsOneWidget);
+    expect(tester.widget<RawImage>(rawWordmark).image, isNotNull);
     await expectLater(
       find.byType(Scaffold),
       matchesGoldenFile('goldens/premium_splash_native.png'),

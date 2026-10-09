@@ -16,10 +16,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  flutter:
-    name: flutter
+  source:
+    name: source-checks
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -65,8 +65,193 @@ jobs:
             dart format --output=none --set-exit-if-changed @targets
           }
 
+      - name: Diagnose exact formatter diff on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          dart format test/visual_closure/actual_production_pages_golden_test.dart
+          git diff -- test/visual_closure/actual_production_pages_golden_test.dart
+
       - name: Analyze complete source
         run: flutter analyze --no-pub
 
-      - name: Run complete test suite including goldens
-        run: flutter test --no-pub
+  focused:
+    # Fast, mandatory failure gate. All current Golden suites and the
+    # transaction queue are exercised before the expensive complete suite.
+    # Nothing is skipped or accepted here: a red focused check keeps the
+    # aggregate required check red, while the full eight shards wait for green.
+    name: focused-regressions (${{ matrix.suite }})
+    needs: source
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - suite: store-captures
+            path: test/epic15_store_screenshot_golden_test.dart
+          - suite: production-goldens
+            path: test/visual_closure/actual_production_pages_golden_test.dart
+          - suite: data-goldens
+            path: test/visual_closure/actual_data_pages_golden_test.dart
+          - suite: splash-golden
+            path: test/premium_splash_experience_test.dart
+          - suite: transaction-queue
+            path: test/features/commerce/store_transaction_queue_test.dart
+    steps:
+      - name: Configure Git LF checkout
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out accepted source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Clean stale checked-in Golden failure images
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path test -Directory -Recurse -Filter failures |
+            ForEach-Object {
+              Remove-Item -LiteralPath $_.FullName -Recurse -Force
+            }
+
+      - name: Run focused Golden or transaction regression suite
+        shell: pwsh
+        run: |
+          if ("${{ matrix.suite }}" -eq "splash-golden") {
+            # A hanging image codec must fail promptly, never occupy the runner
+            # for the default ten-minute per-test timeout.
+            flutter test --no-pub --timeout=2m "${{ matrix.path }}"
+          } else {
+            flutter test --no-pub "${{ matrix.path }}"
+          }
+
+      # Explicit five-file review manifest. Export only images independently
+      # inspected against their existing master and isolated diff. No image
+      # comparison is relaxed and this job never alters a Golden.
+      - name: Export five visually reviewed candidates (hash guarded)
+        if: failure() && matrix.suite == 'production-goldens'
+        shell: pwsh
+        run: |
+          $approved = @{
+            'visual_closure_recipe_detail_phone' = '13ebd33c906eca6a671180e5b1482b76fd34134aed5b63e1ee1bb48a5cd43a70'
+            'visual_closure_recipe_detail_shakshuka_phone' = 'a680bf3cce0cbf4a934c66d4244a8a03cbae437e4bb20f1c6d9f582d6bc33be0'
+            'visual_closure_workout_routine_builder_phone' = '2aa3d60dd365547d01b6f225302c9538dd3674ff1edcb61df9347b2de18df94b'
+            'visual_closure_recipe_detail_chickpea_phone' = '7de322a1b3a0531e192759dd3aeba2ff940d6fd6bf29af9f7cb5f8b85800b14d'
+            'visual_closure_recipe_detail_yogurt_phone' = '4dc73c404d683e1827413864f62cfb7bcdf4d7578cd0532b101f3eb15a0f05dc'
+          }
+          foreach ($item in $approved.GetEnumerator()) {
+            $name = $item.Key
+            $file = "test/visual_closure/failures/${name}_testImage.png"
+            if (-not (Test-Path -LiteralPath $file)) {
+              throw "Reviewed image is missing: $name"
+            }
+            $digest = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($digest -ne $item.Value) {
+              throw "Visual image changed since manual review: $name $digest"
+            }
+            Write-Host "BIL_REVIEW_IMAGE_BEGIN:$name:$digest"
+            $bytes = [System.IO.File]::ReadAllBytes($file)
+            $encoded = [Convert]::ToBase64String($bytes)
+            for ($offset = 0; $offset -lt $encoded.Length; $offset += 4096) {
+              $part = [Math]::Min(4096, $encoded.Length - $offset)
+              Write-Host $encoded.Substring($offset, $part)
+            }
+            Write-Host "BIL_REVIEW_IMAGE_END:$name"
+          }
+
+      - name: Preserve failed Golden screenshots from focused suite
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: focused-golden-failures-${{ matrix.suite }}
+          path: test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+          compression-level: 0
+
+  shards:
+    name: flutter-tests (shard ${{ matrix.shard }} of 8)
+    needs: [source, focused]
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - name: Configure Git LF checkout
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out accepted source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Clean stale checked-in Golden failure images
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path test -Directory -Recurse -Filter failures |
+            ForEach-Object {
+              Remove-Item -LiteralPath $_.FullName -Recurse -Force
+            }
+
+      - name: Run complete Flutter test suite shard ${{ matrix.shard }} of 8
+        shell: pwsh
+        run: |
+          flutter test --no-pub --total-shards=8 --shard-index=${{ matrix.shard }}
+
+      - name: Preserve failed golden screenshots from this shard
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures-shard-${{ matrix.shard }}
+          path: test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+          compression-level: 0
+
+  flutter:
+    name: flutter
+    if: ${{ always() }}
+    needs: [source, focused, shards]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require analysis, formatting and all eight shards to pass
+        shell: bash
+        env:
+          SOURCE_RESULT: ${{ needs.source.result }}
+          FOCUSED_RESULT: ${{ needs.focused.result }}
+          SHARDS_RESULT: ${{ needs.shards.result }}
+        run: |
+          echo "Formatting and analysis: $SOURCE_RESULT"
+          echo "Focused Flutter regressions: $FOCUSED_RESULT"
+          echo "All eight Flutter test shards: $SHARDS_RESULT"
+          if [[ "$SOURCE_RESULT" != "success" || "$FOCUSED_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
+            echo "::error::Source checks, focused tests, and all eight full shards must pass."
+            exit 1
+          fi
+          echo "All quality gates passed."
