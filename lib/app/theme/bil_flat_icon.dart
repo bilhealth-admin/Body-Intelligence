@@ -33,8 +33,7 @@ class BilFlatIcon extends StatelessWidget {
     final theme = Theme.of(context);
     final spec = BilSemanticIcons.spec(kind);
     final glyph = switch (theme.platform) {
-      TargetPlatform.iOS || TargetPlatform.macOS =>
-        appleIcon ?? spec.appleIcon,
+      TargetPlatform.iOS || TargetPlatform.macOS => appleIcon ?? spec.appleIcon,
       _ => materialIcon ?? spec.icon,
     };
     final visual = SizedBox.square(

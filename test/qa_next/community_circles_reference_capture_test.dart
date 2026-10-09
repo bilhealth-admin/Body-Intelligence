@@ -102,10 +102,7 @@ void main() {
             expect(tester.getSize(cover), const Size(56, 56));
             expect(tester.widget<BilFlatIcon>(cover).iconSize, 28);
             expect(
-              find.descendant(
-                of: cover,
-                matching: find.byType(DecoratedBox),
-              ),
+              find.descendant(of: cover, matching: find.byType(DecoratedBox)),
               findsNothing,
               reason: 'A Circle glyph has no gradient, glow or shadow',
             );

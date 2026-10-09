@@ -197,9 +197,9 @@ class _CommunityNavigationGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final iconKind = BilSemanticIcons.kindForRoute(value);
     final child = BilFlatIcon(
-      kind: BilSemanticIcons.kindForRoute(value) ??
-          BilSemanticIconKind.community,
+      kind: iconKind ?? BilSemanticIconKind.community,
       size: 42,
       iconSize: 22,
       materialIcon: icon,

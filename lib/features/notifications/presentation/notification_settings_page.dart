@@ -277,7 +277,9 @@ class _NotificationSettingsPageState
                                         ? Icons.notifications_active_outlined
                                         : Icons.notifications_none_outlined,
                                     size: 28,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                 ),
                               ),

@@ -7,8 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     for (final brightness in Brightness.values) {
-      testWidgets('Flat semantic icon has no gradient or shadow '
-          '${platform.name} ${brightness.name}', (tester) async {
+      testWidgets('Flat ${platform.name}/${brightness.name}', (tester) async {
         final spec = BilSemanticIcons.spec(BilSemanticIconKind.health);
         await tester.pumpWidget(
           MaterialApp(
