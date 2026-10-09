@@ -71,11 +71,12 @@ const _skipVisualPixelComparison = bool.fromEnvironment(
 );
 const _captureIpad = bool.fromEnvironment('BIL_CAPTURE_IPAD');
 
-Finder _coachWelcomeMessage() => find.byWidgetPredicate(
-  (widget) =>
-      widget is CoachMessageText &&
-      widget.text.contains('I’m ready for your next useful decision.'),
-);
+Finder _coachWelcomeMessage() {
+  return find.byWidgetPredicate((widget) {
+    if (widget is! CoachMessageText) return false;
+    return widget.text.contains('I’m ready for your next useful decision.');
+  });
+}
 
 final _visualVerifiedFreeSubscription = SubscriptionState(
   plan: CommercePlan.free,
@@ -663,10 +664,12 @@ void main() {
           );
         },
       );
-      addTearDown(
-        () => tester.binding.defaultBinaryMessenger
-            .setMockMethodCallHandler(ttsChannel, null),
-      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          ttsChannel,
+          null,
+        );
+      });
       await capture(
         tester,
         page: const DashboardPage(),
