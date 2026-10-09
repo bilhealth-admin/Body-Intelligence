@@ -69,10 +69,17 @@ jobs:
         if: failure()
         shell: pwsh
         run: |
-          # Format only the file reported by the preceding strict gate.
-          # Preserve its original failure, then display the exact SDK patch.
-          dart format test/visual_closure/actual_data_pages_golden_test.dart test/epic15_store_screenshot_golden_test.dart test/premium_splash_experience_test.dart
-          git diff -- test/visual_closure/actual_data_pages_golden_test.dart test/epic15_store_screenshot_golden_test.dart test/premium_splash_experience_test.dart
+          # Diagnostic only; source-checks remains FAILED on formatting errors.
+          # Show the exact SDK patch for the known scoped sources and tests.
+          $formatTargets = @(
+            'lib/features/settings/settings_page.dart',
+            'lib/features/settings/help_center_page.dart',
+            'test/visual_closure/actual_data_pages_golden_test.dart',
+            'test/epic15_store_screenshot_golden_test.dart',
+            'test/premium_splash_experience_test.dart'
+          )
+          dart format @formatTargets
+          git diff -- @formatTargets
 
       - name: Analyze complete source
         # Report analyzer failures in the *same* run if formatting is red.

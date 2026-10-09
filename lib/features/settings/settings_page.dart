@@ -109,11 +109,10 @@ class SettingsPage extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             subscription.when(
-              loading: () =>
-                  _PremiumMembershipLink(
-                    label: copy('Checking subscription'),
-                    isChecking: true,
-                  ),
+              loading: () => _PremiumMembershipLink(
+                label: copy('Checking subscription'),
+                isChecking: true,
+              ),
               error: (_, _) => _PremiumMembershipLink(
                 label: copy('Retry subscription check'),
                 isRetry: true,
