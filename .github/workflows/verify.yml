@@ -75,9 +75,73 @@ jobs:
       - name: Analyze complete source
         run: flutter analyze --no-pub
 
+  focused:
+    # Fast, mandatory failure gate. All current Golden suites and the
+    # transaction queue are exercised before the expensive complete suite.
+    # Nothing is skipped or accepted here: a red focused check keeps the
+    # aggregate required check red, while the full eight shards wait for green.
+    name: focused-regressions (${{ matrix.suite }})
+    needs: source
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - suite: store-captures
+            path: test/epic15_store_screenshot_golden_test.dart
+          - suite: production-goldens
+            path: test/visual_closure/actual_production_pages_golden_test.dart
+          - suite: data-goldens
+            path: test/visual_closure/actual_data_pages_golden_test.dart
+          - suite: splash-golden
+            path: test/premium_splash_experience_test.dart
+          - suite: transaction-queue
+            path: test/features/commerce/store_transaction_queue_test.dart
+    steps:
+      - name: Configure Git LF checkout
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out accepted source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Run focused Golden or transaction regression suite
+        shell: pwsh
+        run: |
+          if ("${{ matrix.suite }}" -eq "splash-golden") {
+            # A hanging image codec must fail promptly, never occupy the runner
+            # for the default ten-minute per-test timeout.
+            flutter test --no-pub --timeout=2m "${{ matrix.path }}"
+          } else {
+            flutter test --no-pub "${{ matrix.path }}"
+          }
+
+      - name: Preserve failed Golden screenshots from focused suite
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: focused-golden-failures-${{ matrix.suite }}
+          path: test/**/failures/**
+          if-no-files-found: ignore
+          retention-days: 7
+          compression-level: 0
+
   shards:
     name: flutter-tests (shard ${{ matrix.shard }} of 8)
-    needs: source
+    needs: [source, focused]
     runs-on: windows-latest
     timeout-minutes: 60
     strategy:
@@ -122,7 +186,7 @@ jobs:
   flutter:
     name: flutter
     if: ${{ always() }}
-    needs: [source, shards]
+    needs: [source, focused, shards]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -130,12 +194,14 @@ jobs:
         shell: bash
         env:
           SOURCE_RESULT: ${{ needs.source.result }}
+          FOCUSED_RESULT: ${{ needs.focused.result }}
           SHARDS_RESULT: ${{ needs.shards.result }}
         run: |
           echo "Formatting and analysis: $SOURCE_RESULT"
+          echo "Focused Flutter regressions: $FOCUSED_RESULT"
           echo "All eight Flutter test shards: $SHARDS_RESULT"
-          if [[ "$SOURCE_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
-            echo "::error::Source checks or one or more Flutter test shards failed."
+          if [[ "$SOURCE_RESULT" != "success" || "$FOCUSED_RESULT" != "success" || "$SHARDS_RESULT" != "success" ]]; then
+            echo "::error::Source checks, focused tests, and all eight full shards must pass."
             exit 1
           fi
           echo "All quality gates passed."
