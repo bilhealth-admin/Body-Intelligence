@@ -484,8 +484,8 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
           child: ListTile(
             leading: const BilFlatIcon(
               kind: BilSemanticIconKind.privacy,
-              iconOverride: Icons.phonelink_lock_rounded,
-              appleIconOverride: Icons.phonelink_lock_rounded,
+              materialIcon: Icons.phonelink_lock_rounded,
+              appleIcon: Icons.phonelink_lock_rounded,
             ),
             title: Text(
               t(

@@ -403,7 +403,6 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                             ),
                                         size: 38,
                                         iconSize: 21,
-                                        shape: BoxShape.rectangle,
                                       ),
                                       title: Text(
                                         connectedHealthDataTypeText(

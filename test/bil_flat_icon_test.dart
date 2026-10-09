@@ -82,12 +82,11 @@ void main() {
         ),
       ),
     );
-    final decoration = tester.widget<DecoratedBox>(
-      find.descendant(
-        of: find.byKey(const Key('quality-legacy-badge')),
-        matching: find.byType(DecoratedBox),
-      ).first,
-    ).decoration;
+    final decorations = find.descendant(
+      of: find.byKey(const Key('quality-legacy-badge')),
+      matching: find.byType(DecoratedBox),
+    );
+    final decoration = tester.widget<DecoratedBox>(decorations.first).decoration;
     expect(decoration, isA<BoxDecoration>());
     expect((decoration as BoxDecoration).gradient, isNotNull);
     expect(tester.takeException(), isNull);

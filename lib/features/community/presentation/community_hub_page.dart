@@ -632,7 +632,6 @@ PopupMenuItem<String> _communityAction(
         kind: BilSemanticIcons.kindForRoute(route)!,
         size: 34,
         iconSize: 19,
-        shape: BoxShape.rectangle,
       ),
       const SizedBox(width: 12),
       Expanded(child: Text(communityText(context, english, arabic))),
