@@ -40,15 +40,19 @@ void main() {
       expect(source, contains(route), reason: route);
     }
     expect(source, contains('class _MorePremiumIcon'));
-    expect(source, contains('const Color(0xFF0869E8)'));
+    expect(source, isNot(contains('const Color(0xFF0869E8)')));
+    expect(source, contains('minTileHeight: protectedEntry ? 60 : 54'));
+    expect(source, contains('leading: showIcon'));
+    expect(source, contains('color: theme.colorScheme.surface'));
+    expect(source, contains('elevation: 0'));
     // Verify the approved flat treatment rather than the retired filled badge.
     final flatIcon = File(
       'lib/features/settings/settings_page_polish.dart',
     ).readAsStringSync().split('class _CloudSyncRow').first;
     expect(flatIcon, contains('return BilFlatIcon('));
     expect(flatIcon, contains('kind: kind,'));
-    expect(flatIcon, contains('size: 44,'));
-    expect(flatIcon, contains('iconSize: 24,'));
+    expect(flatIcon, contains('size: 34,'));
+    expect(flatIcon, contains('iconSize: 20,'));
     expect(flatIcon, contains('color: foreground,'));
     for (final forbidden in const [
       'BoxDecoration(',
@@ -59,7 +63,7 @@ void main() {
     ]) {
       expect(flatIcon, isNot(contains(forbidden)), reason: forbidden);
     }
-    expect(source, contains('BorderRadius.circular(24)'));
+    expect(source, contains('BorderRadius.circular(14)'));
     expect(source, isNot(contains('fontWeight: FontWeight.w900')));
     // The native font family is already supplied by the platform theme:
     // only More's weights and sizes should be locally refined.
@@ -69,6 +73,8 @@ void main() {
     expect(source, contains('fontWeight: FontWeight.w400'));
     expect(source, contains('fontWeight: FontWeight.w600'));
     expect(source, contains('CommunityUnreadBadge'));
+    expect(source, contains("'/community/messages'"));
+    expect(source, contains("'/intelligence-center'"));
   });
 
   test('More typography follows the restrained system hierarchy', () {

@@ -9,20 +9,14 @@ class _MorePremiumIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
-    final healthAccent =
-        kind == BilSemanticIconKind.health ||
-        kind == BilSemanticIconKind.heartRate;
     final foreground = danger
         ? theme.colorScheme.error
-        : healthAccent
-        ? (dark ? const Color(0xFFFF8CAD) : const Color(0xFFD91E5B))
-        : (dark ? const Color(0xFF8FC2FF) : const Color(0xFF0869E8));
+        : theme.colorScheme.onSurfaceVariant;
     return BilFlatIcon(
       key: Key('more-premium-icon-${kind.name}'),
       kind: kind,
-      size: 44,
-      iconSize: 24,
+      size: 34,
+      iconSize: 20,
       color: foreground,
       materialIcon: danger ? Icons.delete_outline_rounded : null,
       appleIcon: danger ? Icons.delete_outline_rounded : null,
@@ -43,7 +37,7 @@ class _CloudSyncRow extends ConsumerWidget {
         key: const Key('settings-cloud-sync-status-row'),
         minTileHeight: 70,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        horizontalTitleGap: 12,
+        horizontalTitleGap: 8,
         leading: status.isSyncing
             ? const SizedBox.square(
                 dimension: 18,
@@ -109,9 +103,9 @@ class _MoreActionRow extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       ListTile(
-        minTileHeight: 60,
+        minTileHeight: 54,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        horizontalTitleGap: 12,
+        horizontalTitleGap: 8,
         leading: _MorePremiumIcon(kind: kind),
         title: Text(
           label,
@@ -126,7 +120,7 @@ class _MoreActionRow extends StatelessWidget {
         ),
         onTap: onTap,
       ),
-      const Divider(height: 1, indent: 72, endIndent: 16),
+      const Divider(height: 1, indent: 58, endIndent: 16),
     ],
   );
 }

@@ -65,7 +65,6 @@ class SettingsPage extends ConsumerWidget {
     );
     final unit = copy(UnitConverter.weightUnit(system));
 
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -78,16 +77,8 @@ class SettingsPage extends ConsumerWidget {
           ),
         ),
       ),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: dark
-              ? null
-              : const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFF9FBFF), Color(0xFFF3F7FC)],
-                ),
-        ),
+      body: ColoredBox(
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 96),
           children: [
@@ -365,14 +356,13 @@ class _MoreSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(top: 18),
+      padding: const EdgeInsets.only(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 6, 9),
+            padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 6),
             child: Text(
               title,
               style: theme.textTheme.titleSmall?.copyWith(
@@ -384,19 +374,12 @@ class _MoreSection extends StatelessWidget {
             ),
           ),
           Material(
-            color: dark
-                ? theme.colorScheme.surfaceContainer
-                : const Color(0xFFFEFFFF),
-            elevation: dark ? 0 : 1.5,
-            shadowColor: dark
-                ? Colors.black.withValues(alpha: .18)
-                : const Color(0xFF315E9B).withValues(alpha: .10),
+            color: theme.colorScheme.surface,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(14),
               side: BorderSide(
-                color: dark
-                    ? Colors.white.withValues(alpha: .09)
-                    : const Color(0xFFDDE7F3),
+                color: theme.colorScheme.outlineVariant.withValues(alpha: .55),
               ),
             ),
             clipBehavior: Clip.antiAlias,
@@ -468,17 +451,17 @@ class _ProfileSummary extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
         child: Column(
           children: [
             Row(
               children: [
                 BilAccountAvatar(
-                  radius: 34,
+                  radius: 28,
                   photoBytes: photo,
                   networkUrl: photoUrl,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +494,7 @@ class _ProfileSummary extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             Row(
               children: [
                 _Metric(currentWeight, copy('Current'), unit),
@@ -567,14 +550,41 @@ class _MoreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final path = Uri.parse(route).path;
+    // Community and Coach entrances keep their established semantic icons.
+    // Other destinations show a flat glyph only when it adds wayfinding value.
+    final protectedEntry = const <String>{
+      '/intelligence-center',
+      '/community',
+      '/community/connections',
+      '/community/messages',
+    }.contains(path);
+    final showIcon = protectedEntry ||
+        const <String>{
+          '/goals',
+          '/history',
+          '/weekly-report',
+          '/challenges',
+          '/analytics/nutrition',
+          '/nutrition',
+          '/wellness/fasting',
+          '/wellness/sleep',
+          '/wellness/recipes',
+          '/wellness/workouts/routines',
+          '/connected-health',
+          '/connected-health/steps',
+          '/notification-settings',
+        }.contains(path);
     final semanticKind = BilSemanticIcons.kindForRoute(route) ?? _fallbackKind;
     return Column(
       children: [
         ListTile(
-          minTileHeight: 60,
+          minTileHeight: protectedEntry ? 60 : 54,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          horizontalTitleGap: 12,
-          leading: _MorePremiumIcon(kind: semanticKind, danger: _isDanger),
+          horizontalTitleGap: 8,
+          leading: showIcon
+              ? _MorePremiumIcon(kind: semanticKind, danger: _isDanger)
+              : null,
           title: Text(
             label,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -614,7 +624,7 @@ class _MoreRow extends StatelessWidget {
           Divider(
             height: 1,
             thickness: .7,
-            indent: 72,
+            indent: showIcon ? 58 : 16,
             endIndent: 16,
             color: Theme.of(context).dividerColor.withValues(alpha: .42),
           ),
