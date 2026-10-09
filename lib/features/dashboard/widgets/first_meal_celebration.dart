@@ -39,9 +39,7 @@ abstract final class FirstMealCelebration {
       entry.dispose();
     }
 
-    entry = OverlayEntry(
-      builder: (_) => _FirstFoodBurst(onFinished: finish),
-    );
+    entry = OverlayEntry(builder: (_) => _FirstFoodBurst(onFinished: finish));
     overlay.insert(entry);
     return true;
   }
@@ -100,7 +98,9 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
   @override
   Widget build(BuildContext context) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    final message = arabic ? 'أحسنت! تم تسجيل أول وجبة' : 'Your first meal is logged!';
+    final message = arabic
+        ? 'أحسنت! تم تسجيل أول وجبة'
+        : 'Your first meal is logged!';
     return Positioned.fill(
       child: IgnorePointer(
         child: Semantics(
@@ -126,11 +126,13 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                       if (!_reducedMotion)
                         for (var index = 0; index < 16; index++)
                           Positioned(
-                            left: 150 +
+                            left:
+                                150 +
                                 math.cos(index * math.pi / 8) *
                                     (18 + progress * 127) -
                                 15,
-                            top: 150 +
+                            top:
+                                150 +
                                 math.sin(index * math.pi / 8) *
                                     (18 + progress * 127) -
                                 15,

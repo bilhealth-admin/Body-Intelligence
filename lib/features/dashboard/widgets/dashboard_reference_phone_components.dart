@@ -289,7 +289,9 @@ class _ReferenceTrendCard extends StatelessWidget {
                                         '${(useExplicitValue ? explicitValue : values.last)?.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0) ?? '—'} $unit',
                                         textDirection: TextDirection.ltr,
                                         style: theme.textTheme.headlineSmall
-                                            ?.copyWith(fontWeight: FontWeight.w800),
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                       ),
                                     ),
                                     if (weightDelta != null) ...[
@@ -310,14 +312,17 @@ class _ReferenceTrendCard extends StatelessWidget {
                                           Flexible(
                                             child: Text(
                                               '${weightDelta > 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} $unit',
-                                              key: const Key('dashboard-weight-period-change'),
+                                              key: const Key(
+                                                'dashboard-weight-period-change',
+                                              ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               textDirection: TextDirection.ltr,
-                                              style: theme.textTheme.labelSmall?.copyWith(
-                                                color: deltaColor,
-                                                fontWeight: FontWeight.w800,
-                                              ),
+                                              style: theme.textTheme.labelSmall
+                                                  ?.copyWith(
+                                                    color: deltaColor,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
                                             ),
                                           ),
                                         ],
@@ -419,7 +424,10 @@ class _ReferenceTrendPainter extends CustomPainter {
               ..shader = LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [color.withValues(alpha: .28), color.withValues(alpha: .02)],
+                colors: [
+                  color.withValues(alpha: .28),
+                  color.withValues(alpha: .02),
+                ],
               ).createShader(Offset.zero & size),
           );
           canvas.drawPath(

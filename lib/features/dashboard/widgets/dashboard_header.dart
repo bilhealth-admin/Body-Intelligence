@@ -88,62 +88,63 @@ class _CoachConversationEntry extends StatelessWidget {
           Padding(
             padding: EdgeInsetsDirectional.only(end: compact ? 76 : 132),
             child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                padding: const EdgeInsets.all(1.5),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFC8F3FF),
-                  border: Border.all(color: Colors.white70),
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  padding: const EdgeInsets.all(1.5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFC8F3FF),
+                    border: Border.all(color: Colors.white70),
+                  ),
+                  child: ClipOval(
+                    child: const BilCoachPortrait(fit: BoxFit.cover),
+                  ),
                 ),
-                child: ClipOval(
-                  child: const BilCoachPortrait(fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'AI COACH',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: compact ? 16 : null,
-                        letterSpacing: .5,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AI COACH',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: compact ? 16 : null,
+                              letterSpacing: .5,
+                            ),
                       ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _dashboardHeaderText(locale, 'subtitle'),
-                      style: TextStyle(
-                        color: const Color(0xFFBCD0DA),
-                        fontSize: compact ? 12 : null,
-                        height: 1.35,
+                      const SizedBox(height: 3),
+                      Text(
+                        _dashboardHeaderText(locale, 'subtitle'),
+                        style: TextStyle(
+                          color: const Color(0xFFBCD0DA),
+                          fontSize: compact ? 12 : null,
+                          height: 1.35,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .09),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white12),
+                const SizedBox(width: 10),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .09),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 17,
+                    color: Color(0xFF7CE8F5),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 17,
-                  color: Color(0xFF7CE8F5),
-                ),
-              ),
-            ],
+              ],
             ),
           ),
           const SizedBox(height: 10),

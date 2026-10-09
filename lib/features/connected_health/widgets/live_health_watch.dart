@@ -380,8 +380,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                             ),
                                             onTap: widget.onHeartTap,
                                             child: _WatchMetric(
-                                              icon: Icons
-                                                  .favorite_rounded,
+                                              icon: Icons.favorite_rounded,
                                               color: const Color(0xFFFF6472),
                                               value: _value(heart),
                                               compact: widget.compact,

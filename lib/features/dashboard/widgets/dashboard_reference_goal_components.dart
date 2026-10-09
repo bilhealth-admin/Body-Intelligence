@@ -246,7 +246,9 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       valueKey: const Key(
                         'dashboard-reference-calorie-consumed-value',
                       ),
-                      value: consumedValue != null ? _formatBilCalories(consumedValue) : '—',
+                      value: consumedValue != null
+                          ? _formatBilCalories(consumedValue)
+                          : '—',
                       trailing: hasGoal
                           ? ' cal / ${_formatBilCalories(goal)}'
                           : ' cal / —',
@@ -281,7 +283,9 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       ExcludeSemantics(
                         excluding: consumed == null,
                         child: LinearProgressIndicator(
-                          key: const Key('dashboard-reference-calories-progress'),
+                          key: const Key(
+                            'dashboard-reference-calories-progress',
+                          ),
                           minHeight: 9,
                           value: progress,
                           color: remaining != null && remaining < 0

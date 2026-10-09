@@ -7,8 +7,11 @@ import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'first_meal_celebration.dart';
 
-final _firstFoodMilestoneStatusProvider = StreamProvider<String?>((ref) =>
-    ref.watch(preferencesRepositoryProvider).watch(firstMealCelebrationPreferenceKey));
+final _firstFoodMilestoneStatusProvider = StreamProvider<String?>(
+  (ref) => ref
+      .watch(preferencesRepositoryProvider)
+      .watch(firstMealCelebrationPreferenceKey),
+);
 
 /// Non-modal food walkthrough. Skip is always available and never changes data.
 class DashboardFirstUseExperience extends ConsumerStatefulWidget {
@@ -35,7 +38,8 @@ class _DashboardFirstUseExperienceState
   bool _saving = false;
   int _step = 0;
 
-  String get _guideKey => 'experience.dashboard_food_guide.v1.${widget.ownerScope}';
+  String get _guideKey =>
+      'experience.dashboard_food_guide.v1.${widget.ownerScope}';
 
   @override
   void initState() {
@@ -160,7 +164,8 @@ class _FoodGuideStep extends StatelessWidget {
   final VoidCallback onSkip;
   final VoidCallback onNext;
 
-  String _copy(BuildContext context, {
+  String _copy(
+    BuildContext context, {
     required String en,
     required String ar,
     required String fr,
@@ -180,29 +185,44 @@ class _FoodGuideStep extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final background = second
         ? const Color(0xFF193E83)
-        : dark ? const Color(0xFF172B40) : Colors.white;
+        : dark
+        ? const Color(0xFF172B40)
+        : Colors.white;
     final foreground = second || dark ? Colors.white : const Color(0xFF16233A);
     final title = second
-        ? _copy(context, en: 'Search for your food', ar: 'ابحث عن طعامك',
-            fr: 'Recherchez votre aliment', es: 'Busca tu alimento',
-            tr: 'Yemeğini ara')
-        : _copy(context, en: 'Log your first meal! 🎉', ar: 'سجّل أول وجبة! 🎉',
+        ? _copy(
+            context,
+            en: 'Search for your food',
+            ar: 'ابحث عن طعامك',
+            fr: 'Recherchez votre aliment',
+            es: 'Busca tu alimento',
+            tr: 'Yemeğini ara',
+          )
+        : _copy(
+            context,
+            en: 'Log your first meal! 🎉',
+            ar: 'سجّل أول وجبة! 🎉',
             fr: 'Enregistrez votre premier repas ! 🎉',
             es: '¡Registra tu primera comida! 🎉',
-            tr: 'İlk öğününü kaydet! 🎉');
+            tr: 'İlk öğününü kaydet! 🎉',
+          );
     final message = second
-        ? _copy(context,
+        ? _copy(
+            context,
             en: 'Search, check the amount, and confirm. Nothing is saved automatically.',
             ar: 'ابحث عن طعامك وراجع الكمية ثم أكّدها. لن يُحفظ شيء تلقائيًا.',
             fr: 'Recherchez, vérifiez la quantité, puis confirmez.',
             es: 'Busca, revisa la cantidad y confirma.',
-            tr: 'Yemeği ara, miktarı kontrol et ve onayla.')
-        : _copy(context,
+            tr: 'Yemeği ara, miktarı kontrol et ve onayla.',
+          )
+        : _copy(
+            context,
             en: 'We can guide you. Skip at any time to explore freely.',
             ar: 'يمكننا إرشادك خطوة بخطوة. تخطَّ متى أردت واستخدم التطبيق بحرية.',
             fr: 'Nous pouvons vous guider. Ignorez ces conseils à tout moment.',
             es: 'Podemos guiarte. Puedes omitir los consejos.',
-            tr: 'Size yol gösterebiliriz. İpuçlarını atlayabilirsiniz.');
+            tr: 'Size yol gösterebiliriz. İpuçlarını atlayabilirsiniz.',
+          );
     return Semantics(
       key: Key('dashboard-food-guide-step-$step'),
       container: true,
@@ -218,44 +238,88 @@ class _FoodGuideStep extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(children: [
-                Expanded(child: Text(title, style: TextStyle(
-                  color: foreground, fontWeight: FontWeight.w800, fontSize: 17,
-                ))),
-                const SizedBox(width: 10),
-                const Text('✨🎊', style: TextStyle(fontSize: 24)),
-              ]),
-              const SizedBox(height: 5),
-              Text(message, style: TextStyle(
-                color: foreground.withValues(alpha: .88),
-                fontSize: 13, height: 1.38,
-              )),
-              const SizedBox(height: 12),
-              Row(children: [
-                TextButton.icon(
-                  key: const Key('dashboard-guide-skip'),
-                  onPressed: saving ? null : onSkip,
-                  icon: Icon(Icons.close_rounded, size: 17, color: foreground),
-                  label: Text(_copy(context, en: 'Skip', ar: 'تخطي',
-                      fr: 'Ignorer', es: 'Omitir', tr: 'Atla'),
-                    style: TextStyle(color: foreground)),
-                ),
-                const Spacer(),
-                FilledButton(
-                  key: const Key('dashboard-guide-next'),
-                  onPressed: saving ? null : onNext,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: second ? Colors.white : const Color(0xFF235DDC),
-                    foregroundColor: second ? const Color(0xFF193E83) : Colors.white,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: foreground,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                      ),
+                    ),
                   ),
-                  child: Text(second
-                      ? _copy(context, en: 'Open Food Log', ar: 'فتح تسجيل الطعام',
-                          fr: 'Ouvrir le journal', es: 'Abrir el diario',
-                          tr: 'Yemek kaydını aç')
-                      : _copy(context, en: 'Next', ar: 'التالي',
-                          fr: 'Suivant', es: 'Siguiente', tr: 'İleri')),
+                  const SizedBox(width: 10),
+                  const Text('✨🎊', style: TextStyle(fontSize: 24)),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Text(
+                message,
+                style: TextStyle(
+                  color: foreground.withValues(alpha: .88),
+                  fontSize: 13,
+                  height: 1.38,
                 ),
-              ]),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  TextButton.icon(
+                    key: const Key('dashboard-guide-skip'),
+                    onPressed: saving ? null : onSkip,
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 17,
+                      color: foreground,
+                    ),
+                    label: Text(
+                      _copy(
+                        context,
+                        en: 'Skip',
+                        ar: 'تخطي',
+                        fr: 'Ignorer',
+                        es: 'Omitir',
+                        tr: 'Atla',
+                      ),
+                      style: TextStyle(color: foreground),
+                    ),
+                  ),
+                  const Spacer(),
+                  FilledButton(
+                    key: const Key('dashboard-guide-next'),
+                    onPressed: saving ? null : onNext,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: second
+                          ? Colors.white
+                          : const Color(0xFF235DDC),
+                      foregroundColor: second
+                          ? const Color(0xFF193E83)
+                          : Colors.white,
+                    ),
+                    child: Text(
+                      second
+                          ? _copy(
+                              context,
+                              en: 'Open Food Log',
+                              ar: 'فتح تسجيل الطعام',
+                              fr: 'Ouvrir le journal',
+                              es: 'Abrir el diario',
+                              tr: 'Yemek kaydını aç',
+                            )
+                          : _copy(
+                              context,
+                              en: 'Next',
+                              ar: 'التالي',
+                              fr: 'Suivant',
+                              es: 'Siguiente',
+                              tr: 'İleri',
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

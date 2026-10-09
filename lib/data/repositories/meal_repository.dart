@@ -56,9 +56,9 @@ class MealRepository {
     if (await preferences.get(firstMealCelebrationPreferenceKey) != null) {
       return null;
     }
-    final historicalItem = await (_database.select(_database.mealItems)
-          ..limit(1))
-        .getSingleOrNull();
+    final historicalItem = await (_database.select(
+      _database.mealItems,
+    )..limit(1)).getSingleOrNull();
     return historicalItem == null;
   }
 
@@ -66,10 +66,9 @@ class MealRepository {
   /// item + milestone atomic across manual, recipe, and AI Coach writes.
   Future<void> _firstFoodMilestoneAfterInsert(bool? isFirstFood) async {
     if (isFirstFood == null) return;
-    await PreferencesRepository(_database).set(
-      firstMealCelebrationPreferenceKey,
-      isFirstFood ? 'ready' : 'done',
-    );
+    await PreferencesRepository(
+      _database,
+    ).set(firstMealCelebrationPreferenceKey, isFirstFood ? 'ready' : 'done');
   }
 
   Future<int> createMeal({

@@ -631,7 +631,9 @@ class DashboardGrid extends ConsumerWidget {
                 )
                 .toList(growable: false)
                 .reversed
-                .map((entry) => UnitConverter.weightFromKg(entry.weight, system))
+                .map(
+                  (entry) => UnitConverter.weightFromKg(entry.weight, system),
+                )
                 .toList(growable: false),
             stepTrendValues: stepTrend.values,
             todaySteps: stepTrend.today,

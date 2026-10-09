@@ -214,7 +214,8 @@ class DashboardPage extends ConsumerWidget {
     final guideOwnerReady =
         identity.hasValue && guidePreferences.localOwnerId == guideOwner;
     final showFirstValue =
-        guideOwnerReady && (ref.watch(firstValueHandoffProvider).value ?? false);
+        guideOwnerReady &&
+        (ref.watch(firstValueHandoffProvider).value ?? false);
 
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -270,24 +271,24 @@ class DashboardPage extends ConsumerWidget {
         ownerScope: guideOwner ?? 'local',
         ownerReady: guideOwnerReady,
         child: DashboardShell(
-        leading: const CloudSyncConsentNotice(),
-        edgeHeader: DashboardTopBar(
-          profilePhoto: profilePhoto,
-          profilePhotoUrl: profilePhotoUrl,
-          onProfile: () => manageProfilePhoto(
-            context,
-            ref,
-            profilePhoto,
-            profilePhotoUrl,
-            locale,
+          leading: const CloudSyncConsentNotice(),
+          edgeHeader: DashboardTopBar(
+            profilePhoto: profilePhoto,
+            profilePhotoUrl: profilePhotoUrl,
+            onProfile: () => manageProfilePhoto(
+              context,
+              ref,
+              profilePhoto,
+              profilePhotoUrl,
+              locale,
+            ),
           ),
-        ),
-        child: DashboardHealthActivityRefresh(
-          child: DashboardComposition(
-            hero: hero,
-            content: const DashboardGrid(hero: DashboardHeader()),
+          child: DashboardHealthActivityRefresh(
+            child: DashboardComposition(
+              hero: hero,
+              content: const DashboardGrid(hero: DashboardHeader()),
+            ),
           ),
-        ),
         ),
       ),
     );
