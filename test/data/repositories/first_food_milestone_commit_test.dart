@@ -18,63 +18,49 @@ void main() {
       name: 'breakfast',
       type: 'breakfast',
     );
-    expect(
-      await preferences.get(firstMealCelebrationPreferenceKey),
-      isNull,
-    );
+    expect(await preferences.get(firstMealCelebrationPreferenceKey), isNull);
     expect(await database.select(database.mealItems).get(), isEmpty);
   });
 
-  test('manual food marks ready and edits or later foods cannot rearm', () async {
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    final meals = MealRepository(database);
-    final preferences = PreferencesRepository(database);
-    final foodId = await FoodRepository(database).addFood(
-      name: 'First breakfast',
-      category: 'fruit',
-      calories: 80,
-      protein: 1,
-      carbs: 18,
-      fats: 0,
-      servingSize: 100,
-      servingUnit: 'g',
-    );
-    final mealId = await meals.createMeal(
-      date: DateTime(2026, 10, 10),
-      name: 'breakfast',
-      type: 'breakfast',
-    );
+  test(
+    'manual food marks ready and edits or later foods cannot rearm',
+    () async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final meals = MealRepository(database);
+      final preferences = PreferencesRepository(database);
+      final foodId = await FoodRepository(database).addFood(
+        name: 'First breakfast',
+        category: 'fruit',
+        calories: 80,
+        protein: 1,
+        carbs: 18,
+        fats: 0,
+        servingSize: 100,
+        servingUnit: 'g',
+      );
+      final mealId = await meals.createMeal(
+        date: DateTime(2026, 10, 10),
+        name: 'breakfast',
+        type: 'breakfast',
+      );
 
-    await meals.addMealItem(
-      mealId: mealId,
-      foodId: foodId,
-      quantity: 100,
-    );
-    expect(
-      await preferences.get(firstMealCelebrationPreferenceKey),
-      'ready',
-    );
-    expect(
-      await preferences.mutateIfUnchanged(
-        expected: const {firstMealCelebrationPreferenceKey: 'ready'},
-        set: const {firstMealCelebrationPreferenceKey: 'done'},
-      ),
-      isTrue,
-    );
-    final first = await database.select(database.mealItems).getSingle();
-    await meals.updateMealItem(id: first.id, quantity: 125);
-    await meals.deleteMealItem(first.id);
-    await meals.addMealItem(
-      mealId: mealId,
-      foodId: foodId,
-      quantity: 50,
-    );
-    expect(
-      await preferences.get(firstMealCelebrationPreferenceKey),
-      'done',
-    );
-  });
+      await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 100);
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'ready');
+      expect(
+        await preferences.mutateIfUnchanged(
+          expected: const {firstMealCelebrationPreferenceKey: 'ready'},
+          set: const {firstMealCelebrationPreferenceKey: 'done'},
+        ),
+        isTrue,
+      );
+      final first = await database.select(database.mealItems).getSingle();
+      await meals.updateMealItem(id: first.id, quantity: 125);
+      await meals.deleteMealItem(first.id);
+      await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 50);
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'done');
+    },
+  );
 
   test('a failed atomic first food cannot create a celebration', () async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -91,35 +77,32 @@ void main() {
       throwsStateError,
     );
     expect(await database.select(database.mealItems).get(), isEmpty);
-    expect(
-      await preferences.get(firstMealCelebrationPreferenceKey),
-      isNull,
-    );
+    expect(await preferences.get(firstMealCelebrationPreferenceKey), isNull);
   });
 
-  test('calculated recipe first serving creates milestone atomically', () async {
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    final meals = MealRepository(database);
-    final preferences = PreferencesRepository(database);
+  test(
+    'calculated recipe first serving creates milestone atomically',
+    () async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final meals = MealRepository(database);
+      final preferences = PreferencesRepository(database);
 
-    await meals.addCalculatedRecipeServingAtomically(
-      date: DateTime(2026, 10, 10),
-      mealType: 'lunch',
-      foodUuid: 'first-recipe-snapshot',
-      recipeName: 'Test recipe serving',
-      source: 'user-reviewed-calculation',
-      calories: 320,
-      protein: 20,
-      carbohydrates: 18,
-      fat: 12,
-    );
-    expect(await database.select(database.mealItems).get(), hasLength(1));
-    expect(
-      await preferences.get(firstMealCelebrationPreferenceKey),
-      'ready',
-    );
-  });
+      await meals.addCalculatedRecipeServingAtomically(
+        date: DateTime(2026, 10, 10),
+        mealType: 'lunch',
+        foodUuid: 'first-recipe-snapshot',
+        recipeName: 'Test recipe serving',
+        source: 'user-reviewed-calculation',
+        calories: 320,
+        protein: 20,
+        carbohydrates: 18,
+        fat: 12,
+      );
+      expect(await database.select(database.mealItems).get(), hasLength(1));
+      expect(await preferences.get(firstMealCelebrationPreferenceKey), 'ready');
+    },
+  );
 
   test('legacy deleted food is not classified as a new first food', () async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -147,9 +130,6 @@ void main() {
     await preferences.remove(firstMealCelebrationPreferenceKey);
 
     await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 80);
-    expect(
-      await preferences.get(firstMealCelebrationPreferenceKey),
-      'done',
-    );
+    expect(await preferences.get(firstMealCelebrationPreferenceKey), 'done');
   });
 }
