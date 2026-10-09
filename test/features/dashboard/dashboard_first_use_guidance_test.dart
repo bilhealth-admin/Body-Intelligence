@@ -60,6 +60,11 @@ void main() {
         find.byKey(const Key('dashboard-food-guide-step-0')),
         findsOneWidget,
       );
+      expect(
+        find.byIcon(Icons.celebration_rounded),
+        findsOneWidget,
+        reason: 'Vector celebration must render without emoji fonts.',
+      );
       final guideBounds = tester.getRect(
         find.byKey(const Key('dashboard-food-guide-step-0')),
       );

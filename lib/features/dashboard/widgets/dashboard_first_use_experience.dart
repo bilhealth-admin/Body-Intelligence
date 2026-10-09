@@ -200,11 +200,11 @@ class _FoodGuideStep extends StatelessWidget {
           )
         : _copy(
             context,
-            en: 'Log your first meal! 🎉',
-            ar: 'سجّل أول وجبة! 🎉',
-            fr: 'Enregistrez votre premier repas ! 🎉',
-            es: '¡Registra tu primera comida! 🎉',
-            tr: 'İlk öğününü kaydet! 🎉',
+            en: 'Log your first meal!',
+            ar: 'سجّل أول وجبة!',
+            fr: 'Enregistrez votre premier repas !',
+            es: '¡Registra tu primera comida!',
+            tr: 'İlk öğününü kaydet!',
           );
     final message = second
         ? _copy(
@@ -251,7 +251,11 @@ class _FoodGuideStep extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text('✨🎊', style: TextStyle(fontSize: 24)),
+                  Icon(
+                    Icons.celebration_rounded,
+                    size: 24,
+                    color: foreground,
+                  ),
                 ],
               ),
               const SizedBox(height: 5),

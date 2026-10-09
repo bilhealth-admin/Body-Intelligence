@@ -219,7 +219,10 @@ jobs:
             if (-not (Test-Path $file)) { continue }
             $digest = (Get-FileHash -Algorithm SHA256 $file).Hash.ToLowerInvariant()
             if ($digest -ne $item.Value) {
-              throw "Unreviewed Golden candidate $($item.Key): $digest"
+              # A changed PNG is NOT approved. Preserve the original failing
+              # Golden verdict, and skip this optional evidence export only.
+              Write-Warning "Unreviewed Golden candidate $($item.Key): $digest"
+              continue
             }
             # Git blobs accept base64. Emit bounded lines for later independent
             # review and SHA verification; never push from this test runner.

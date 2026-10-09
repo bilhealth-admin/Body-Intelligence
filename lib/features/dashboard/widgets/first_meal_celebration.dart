@@ -140,9 +140,20 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                               opacity: fade,
                               child: Transform.rotate(
                                 angle: progress * (index.isEven ? .65 : -.65),
-                                child: Text(
-                                  const ['🎉', '🎊', '✨', '✅'][index % 4],
-                                  style: const TextStyle(fontSize: 26),
+                                child: Icon(
+                                  const [
+                                    Icons.celebration_rounded,
+                                    Icons.auto_awesome_rounded,
+                                    Icons.star_rounded,
+                                    Icons.check_circle_rounded,
+                                  ][index % 4],
+                                  size: 26,
+                                  color: const [
+                                    Color(0xFFFFD36B),
+                                    Color(0xFFACDAFF),
+                                    Color(0xFFE8BCFF),
+                                    Color(0xFF7CE8B0),
+                                  ][index % 4],
                                 ),
                               ),
                             ),
@@ -163,14 +174,27 @@ class _FirstFoodBurstState extends State<_FirstFoodBurst>
                                 horizontal: 22,
                                 vertical: 14,
                               ),
-                              child: Text(
-                                '🎉 $message',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 17,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.celebration_rounded,
+                                    color: Color(0xFFFFD36B),
+                                    size: 22,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    child: Text(
+                                      message,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
