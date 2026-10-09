@@ -10,6 +10,11 @@ import 'package:body_intelligence_log/features/analytics/weekly_report_engine.da
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
@@ -34,6 +39,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
+
+// Preserve the historically reviewed, server-confirmed Free Daily Log state
+// in screenshot fixtures. Runtime entitlement checks stay unchanged.
+final _storeGoldenVerifiedFree = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
 
 final class _StoreHealthGateway implements ConnectedHealthGateway {
   const _StoreHealthGateway();
@@ -238,6 +253,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          if (page is DailyLogPage)
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(_storeGoldenVerifiedFree),
+            ),
           dashboardClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),

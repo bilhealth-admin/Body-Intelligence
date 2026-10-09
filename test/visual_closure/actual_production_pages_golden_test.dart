@@ -68,6 +68,17 @@ const _captureIpad = bool.fromEnvironment('BIL_CAPTURE_IPAD');
 
 final _visualNow = DateTime(2026, 8, 14, 9, 41, 12);
 
+// This visual fixture depicts a Free account verified by the server. Without
+// explicit authority the production gate correctly fails closed with Retry,
+// which is not the state recorded in the reviewed recipe Golden baseline.
+final _recipeGoldenVerifiedFree = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
+
 final _visualAcceptedCommunityPolicy = CommunityContentPolicy.fromJson({
   'version': 'community-policy-v1',
   'locale_code': 'en',
@@ -440,6 +451,8 @@ void main() {
         ? BilFlagshipTheme.dark(isArabic: arabic)
         : BilFlagshipTheme.light(isArabic: arabic);
     var renderedPage = page;
+    final effectiveSubscription = verifiedSubscriptionFixture ??
+        (page is RecipeLibraryPage ? _recipeGoldenVerifiedFree : null);
     if (page is RecipeLibraryPage) {
       final repository = RecipeReleaseRepository();
       final catalog = await tester.runAsync(repository.loadIndex);
@@ -476,14 +489,14 @@ void main() {
         databaseProvider.overrideWithValue(db),
         liveHealthNowProvider.overrideWithValue(() => _visualNow),
         sleepNowProvider.overrideWithValue(() => _visualNow),
-        if (verifiedSubscriptionFixture != null) ...[
+        if (effectiveSubscription != null) ...[
           // The derived expiry-aware access provider must share the same
           // root scope as its snapshot and clock, not a nested UI-only scope.
           verifiedEntitlementClockProvider.overrideWithValue(
             () => _visualNow.toUtc(),
           ),
           verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(verifiedSubscriptionFixture),
+            AsyncData(effectiveSubscription),
           ),
         ],
       ],
@@ -498,6 +511,16 @@ void main() {
         await interact(tester);
         await settleVisualAssetImages(tester);
         await tester.pumpAndSettle();
+      }
+      if (page is RecipeLibraryPage && name.startsWith('recipe_detail')) {
+        expect(
+          find.byKey(const ValueKey('premium-route-access-unavailable')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('premium-route-glass-veil')),
+          findsOneWidget,
+        );
       }
       expect(tester.takeException(), isNull);
       final captureTarget = captureOverlay
